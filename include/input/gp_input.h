@@ -9,7 +9,7 @@
 #include <input/gp_event.h>
 #include <input/gp_keys.h>
 #include <input/gp_ev_feedback.h>
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include <input/gp_timer.h>
 #include <input/gp_time_stamp.h>
 #include <input/gp_task.h>

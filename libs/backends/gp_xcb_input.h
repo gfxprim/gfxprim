@@ -121,7 +121,7 @@ static unsigned int get_key(unsigned int xkey)
 # include <xcb/xcb_errors.h>
 #endif
 
-static void xcb_input_event_put(gp_event_queue *event_queue,
+static void xcb_input_event_put(gp_ev_queue *event_queue,
                                 xcb_generic_event_t *ev, int w, int h)
 {
 	int key = 0, press = 0;
@@ -163,12 +163,12 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 		/* Mouse wheel */
 		case 4:
 			if (press)
-				gp_event_queue_push(event_queue, GP_EV_REL,
+				gp_ev_queue_push(event_queue, GP_EV_REL,
 				                    GP_EV_REL_WHEEL, 1, 0);
 			return;
 		case 5:
 			if (press)
-				gp_event_queue_push(event_queue, GP_EV_REL,
+				gp_ev_queue_push(event_queue, GP_EV_REL,
 				                  GP_EV_REL_WHEEL, -1, 0);
 			return;
 		}
@@ -178,11 +178,11 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 			return;
 		}
 
-		gp_event_queue_push(event_queue, GP_EV_KEY, key, press, 0);
+		gp_ev_queue_push(event_queue, GP_EV_KEY, key, press, 0);
 	} break;
 	case XCB_CONFIGURE_NOTIFY: {
 		xcb_configure_notify_event_t *cev = (xcb_configure_notify_event_t *)ev;
-		gp_event_queue_push_resize(event_queue, cev->width, cev->height, 0);
+		gp_ev_queue_push_resize(event_queue, cev->width, cev->height, 0);
 	}
 	break;
 	break;
@@ -194,7 +194,7 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 		    mev->event_x > w || mev->event_y > h)
 			return;
 
-		gp_event_queue_push_rel_to(event_queue,
+		gp_ev_queue_push_rel_to(event_queue,
 		                           mev->event_x, mev->event_y, 0);
 	}
 	break;
@@ -207,13 +207,13 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 		if (key == 0)
 			return;
 
-		gp_event_queue_push_key(event_queue, key, press, 0);
+		gp_ev_queue_push_key(event_queue, key, press, 0);
 	} break;
 	/* events from WM */
 	case XCB_CLIENT_MESSAGE: {
 		xcb_client_message_event_t *cev = (xcb_client_message_event_t*)ev;
 		if (cev->data.data32[0] == x_con.wm_delete_window) {
-			gp_event_queue_push(event_queue, GP_EV_SYS,
+			gp_ev_queue_push(event_queue, GP_EV_SYS,
 			                  GP_EV_SYS_QUIT, 0, 0);
 			return;
 		}

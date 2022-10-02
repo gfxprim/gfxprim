@@ -3,13 +3,13 @@
  * Copyright (C) 2022 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include <core/gp_common.h>
 #include <core/gp_debug.h>
 #include <inttypes.h>
 #include <tusb.h>
 
-extern gp_event_queue *gp_rtos_ev_queue;
+extern gp_ev_queue *gp_rtos_ev_queue;
 
 struct kbd_feedback {
 	uint8_t dev_addr;
@@ -210,7 +210,7 @@ static void key_report(uint8_t key, int state)
 	if (!keymap[key])
 		return;
 
-	gp_event_queue_push_key(gp_rtos_ev_queue, keymap[key], state, 0);
+	gp_ev_queue_push_key(gp_rtos_ev_queue, keymap[key], state, 0);
 }
 
 static void handle_keyboard(hid_keyboard_report_t const *report)
@@ -223,9 +223,9 @@ static void handle_keyboard(hid_keyboard_report_t const *report)
 	for (i = 0; i < GP_ARRAY_SIZE(mod_keys); i++) {
 		if (mods & mod_keys[i].mask) {
 			if (report->modifier & mod_keys[i].mask)
-				gp_event_queue_push_key(gp_rtos_ev_queue, mod_keys[i].key, GP_EV_KEY_DOWN, 0);
+				gp_ev_queue_push_key(gp_rtos_ev_queue, mod_keys[i].key, GP_EV_KEY_DOWN, 0);
 			else
-				gp_event_queue_push_key(gp_rtos_ev_queue, mod_keys[i].key, GP_EV_KEY_UP, 0);
+				gp_ev_queue_push_key(gp_rtos_ev_queue, mod_keys[i].key, GP_EV_KEY_UP, 0);
 		}
 	}
 
@@ -259,9 +259,9 @@ static void mouse_btn_report(uint8_t buttons_change, uint8_t buttons_prev,
 		return;
 
 	if (button_mask & buttons_prev)
-		gp_event_queue_push_key(gp_rtos_ev_queue, button_scancode, GP_EV_KEY_UP, 0);
+		gp_ev_queue_push_key(gp_rtos_ev_queue, button_scancode, GP_EV_KEY_UP, 0);
 	else
-		gp_event_queue_push_key(gp_rtos_ev_queue, button_scancode, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(gp_rtos_ev_queue, button_scancode, GP_EV_KEY_DOWN, 0);
 }
 
 static void handle_mouse(hid_mouse_report_t const *report)
@@ -277,10 +277,10 @@ static void handle_mouse(hid_mouse_report_t const *report)
 	mouse_btn_report(buttons_change, buttons_prev, 0x10, GP_BTN_EXTRA);
 
 	if (report->x || report->y)
-		gp_event_queue_push_rel(gp_rtos_ev_queue, report->x, report->y, 0);
+		gp_ev_queue_push_rel(gp_rtos_ev_queue, report->x, report->y, 0);
 
 	if (report->wheel)
-		gp_event_queue_push_wheel(gp_rtos_ev_queue, report->wheel, 0);
+		gp_ev_queue_push_wheel(gp_rtos_ev_queue, report->wheel, 0);
 
 	buttons_prev = report->buttons;
 }

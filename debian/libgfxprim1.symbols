@@ -146,22 +146,22 @@ libgfxprim.so.1 libgfxprim1 #MINVER#
  gp_ellipse_raw@Base 1.0.0-rc0-1
  gp_event_dump@Base 1.0.0-rc0-1
  gp_event_key_name@Base 1.0.0-rc0-1
- gp_event_queue_alloc@Base 1.0.0-rc0-1
- gp_event_queue_events@Base 1.0.0-rc0-1
- gp_event_queue_free@Base 1.0.0-rc0-1
- gp_event_queue_get@Base 1.0.0-rc0-1
- gp_event_queue_init@Base 1.0.0-rc0-1
- gp_event_queue_peek@Base 1.0.0-rc0-1
- gp_event_queue_push@Base 1.0.0-rc0-1
- gp_event_queue_push_abs@Base 1.0.0-rc0-1
- gp_event_queue_push_key@Base 1.0.0-rc0-1
- gp_event_queue_push_rel@Base 1.0.0-rc0-1
- gp_event_queue_push_rel_to@Base 1.0.0-rc0-1
- gp_event_queue_push_resize@Base 1.0.0-rc0-1
- gp_event_queue_put@Base 1.0.0-rc0-1
- gp_event_queue_put_back@Base 1.0.0-rc0-1
- gp_event_queue_set_cursor_pos@Base 1.0.0-rc0-1
- gp_event_queue_set_screen_size@Base 1.0.0-rc0-1
+ gp_ev_queue_alloc@Base 1.0.0-rc0-1
+ gp_ev_queue_events@Base 1.0.0-rc0-1
+ gp_ev_queue_free@Base 1.0.0-rc0-1
+ gp_ev_queue_get@Base 1.0.0-rc0-1
+ gp_ev_queue_init@Base 1.0.0-rc0-1
+ gp_ev_queue_peek@Base 1.0.0-rc0-1
+ gp_ev_queue_push@Base 1.0.0-rc0-1
+ gp_ev_queue_push_abs@Base 1.0.0-rc0-1
+ gp_ev_queue_push_key@Base 1.0.0-rc0-1
+ gp_ev_queue_push_rel@Base 1.0.0-rc0-1
+ gp_ev_queue_push_rel_to@Base 1.0.0-rc0-1
+ gp_ev_queue_push_resize@Base 1.0.0-rc0-1
+ gp_ev_queue_put@Base 1.0.0-rc0-1
+ gp_ev_queue_put_back@Base 1.0.0-rc0-1
+ gp_ev_queue_set_cursor_pos@Base 1.0.0-rc0-1
+ gp_ev_queue_set_screen_size@Base 1.0.0-rc0-1
  gp_fill@Base 1.0.0-rc0-1
  gp_fill_circle@Base 1.0.0-rc0-1
  gp_fill_circle_raw@Base 1.0.0-rc0-1

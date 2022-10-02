@@ -238,7 +238,7 @@ static int x_resize_ack(struct gp_backend *self)
 	win->resized = 0;
 
 	if (!ret) {
-		gp_event_queue_set_screen_size(&self->event_queue,
+		gp_ev_queue_set_screen_size(&self->event_queue,
 		                               win->new_w, win->new_h);
 	}
 
@@ -309,7 +309,7 @@ static void x_poll(gp_backend *self)
 {
 	xcb_generic_event_t *ev;
 
-	while ((ev = xcb_poll_for_event(x_con.c)) && !gp_event_queue_full(&self->event_queue)) {
+	while ((ev = xcb_poll_for_event(x_con.c)) && !gp_ev_queue_full(&self->event_queue)) {
 		x_ev(self, ev);
 		free(ev);
 	}
@@ -534,7 +534,7 @@ static int create_window(struct gp_backend *self, struct win *win,
 	set_title(c, win->win, caption);
 
 	//TODO: XCB key handling!!!
-	gp_event_queue_init(&self->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+	gp_ev_queue_init(&self->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	/* Get pixel format */
 	int depth;

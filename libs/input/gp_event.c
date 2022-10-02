@@ -12,7 +12,7 @@
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
 
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include <input/gp_timer.h>
 #include <input/gp_event.h>
 

@@ -89,7 +89,7 @@ static void visible(gp_backend *self)
 
 	priv->visible = 1;
 
-	gp_event_queue_push_resize(&self->event_queue, self->pixmap->w, self->pixmap->h, 0);
+	gp_ev_queue_push_resize(&self->event_queue, self->pixmap->w, self->pixmap->h, 0);
 }
 
 static void hidden(gp_backend *self)
@@ -134,7 +134,7 @@ static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
 
 	//TODO: check that the buffer is large enough!
 
-	gp_event_queue_set_screen_size(&self->event_queue, msg->pix.pix.w, msg->pix.pix.h);
+	gp_ev_queue_set_screen_size(&self->event_queue, msg->pix.pix.w, msg->pix.pix.h);
 }
 
 static void proxy_poll(gp_backend *self)
@@ -150,7 +150,7 @@ static void proxy_poll(gp_backend *self)
 				priv->dummy.pixel_type = msg->ptype.ptype;
 			break;
 			case GP_PROXY_EVENT:
-				gp_event_queue_put(&self->event_queue, &msg->ev.ev);
+				gp_ev_queue_put(&self->event_queue, &msg->ev.ev);
 			break;
 			case GP_PROXY_MAP:
 				map_buffer(self, msg);
@@ -168,12 +168,12 @@ static void proxy_poll(gp_backend *self)
 				hidden(self);
 			break;
 			case GP_PROXY_CURSOR_POS:
-				gp_event_queue_set_cursor_pos(&self->event_queue,
+				gp_ev_queue_set_cursor_pos(&self->event_queue,
 				                              msg->cursor.pos.x,
 				                              msg->cursor.pos.y);
 			break;
 			case GP_PROXY_EXIT:
-				gp_event_queue_push(&self->event_queue, GP_EV_SYS,
+				gp_ev_queue_push(&self->event_queue, GP_EV_SYS,
 				                    GP_EV_SYS_QUIT, 0, 0);
 			break;
 			}
@@ -182,7 +182,7 @@ static void proxy_poll(gp_backend *self)
 
 	if (ret == 0) {
 		GP_WARN("Connection closed");
-		gp_event_queue_push(&self->event_queue, GP_EV_SYS, GP_EV_SYS_QUIT, 0, 0);
+		gp_ev_queue_push(&self->event_queue, GP_EV_SYS, GP_EV_SYS_QUIT, 0, 0);
 	}
 }
 
@@ -255,7 +255,7 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 
 	gp_proxy_buf_init(&priv->buf);
 
-	gp_event_queue_init(&ret->event_queue, 1, 1, 0, 0);
+	gp_ev_queue_init(&ret->event_queue, 1, 1, 0, 0);
 
 	ret->pixmap = &priv->dummy;
 	ret->pixmap->pixel_type = 0;

@@ -11,7 +11,7 @@
 #include "core/gp_pixmap.h"
 #include <core/gp_debug.h>
 
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include <input/gp_time_stamp.h>
 
 #include <backends/gp_backend.h>
@@ -97,7 +97,7 @@ static uint32_t pushevent_callback(gp_timer *self)
 	ev.time = gp_time_stamp();
 	ev.tmr = self;
 
-	gp_event_queue_put(self->_priv, &ev);
+	gp_ev_queue_put(self->_priv, &ev);
 
 	return 0;
 }

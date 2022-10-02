@@ -11,7 +11,7 @@
 
 #include <input/gp_types.h>
 
-void gp_key_repeat_timer_init(gp_event_queue *ev_queue, gp_timer **tmr_queue);
+void gp_key_repeat_timer_init(gp_ev_queue *ev_queue, gp_timer **tmr_queue);
 
 void gp_handle_key_repeat_timer(gp_event *ev);
 

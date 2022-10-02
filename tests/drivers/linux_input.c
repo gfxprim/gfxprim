@@ -16,9 +16,9 @@
 int main(int argc, char *argv[])
 {
 	gp_input_linux *drv;
-	gp_event_queue event_queue;
+	gp_ev_queue event_queue;
 
-	gp_event_queue_init(&event_queue, 640, 480, 0);
+	gp_ev_queue_init(&event_queue, 640, 480, 0);
 
 	gp_set_debug_level(2);
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
 		gp_event *ev;
 
-		while ((ev = gp_event_queue_get(&event_queue)))
+		while ((ev = gp_ev_queue_get(&event_queue)))
 			gp_event_dump(ev);
 
 		usleep(1000);

@@ -17,16 +17,16 @@
 
 #include <stddef.h>
 #include <input/gp_timer.h>
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include <input/gp_time_stamp.h>
 #include <widgets/gp_widget_timer.h>
 
-static struct gp_event_queue *event_queue;
+static struct gp_ev_queue *event_queue;
 static gp_timer **timer_queue;
 static uint32_t repeat_delay = 1000;
 static uint32_t repeat_period = 100;
 
-void gp_key_repeat_timer_init(gp_event_queue *ev_queue, gp_timer **tmr_queue)
+void gp_key_repeat_timer_init(gp_ev_queue *ev_queue, gp_timer **tmr_queue)
 {
 	event_queue = ev_queue;
 	timer_queue = tmr_queue;
@@ -36,7 +36,7 @@ static uint32_t btn_repeat_callback(gp_timer *self)
 {
 	long key = (long)self->priv;
 
-	gp_event_queue_push_key(event_queue, key, GP_EV_KEY_REPEAT, 0);
+	gp_ev_queue_push_key(event_queue, key, GP_EV_KEY_REPEAT, 0);
 	return repeat_period;
 }
 

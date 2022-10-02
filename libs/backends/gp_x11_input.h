@@ -154,7 +154,7 @@ static unsigned int get_key(unsigned int xkey)
 	return key;
 }
 
-static void x11_input_event_put(gp_event_queue *event_queue,
+static void x11_input_event_put(gp_ev_queue *event_queue,
                                 XEvent *ev, struct x11_win *win, int w, int h)
 {
 	int key = 0, press = 0;
@@ -181,12 +181,12 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 		/* Mouse wheel */
 		case 4:
 			if (press)
-				gp_event_queue_push(event_queue, GP_EV_REL,
+				gp_ev_queue_push(event_queue, GP_EV_REL,
 				                    GP_EV_REL_WHEEL, 1, 0);
 			return;
 		case 5:
 			if (press)
-				gp_event_queue_push(event_queue, GP_EV_REL,
+				gp_ev_queue_push(event_queue, GP_EV_REL,
 				                    GP_EV_REL_WHEEL, -1, 0);
 			return;
 		}
@@ -197,10 +197,10 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 			return;
 		}
 
-		gp_event_queue_push(event_queue, GP_EV_KEY, key, press, 0);
+		gp_ev_queue_push(event_queue, GP_EV_KEY, key, press, 0);
 	break;
 	case ConfigureNotify:
-		gp_event_queue_push_resize(event_queue, ev->xconfigure.width,
+		gp_ev_queue_push_resize(event_queue, ev->xconfigure.width,
 		                           ev->xconfigure.height, 0);
 	break;
 	case MotionNotify:
@@ -209,7 +209,7 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 		    ev->xmotion.x > w || ev->xmotion.y > h)
 			return;
 
-		gp_event_queue_push_rel_to(event_queue,
+		gp_ev_queue_push_rel_to(event_queue,
 		                           ev->xmotion.x, ev->xmotion.y, 0);
 	break;
 	case KeyPress:
@@ -225,7 +225,7 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 
 				/* strip controll characters */
 				if (unicode >= 0x20 && unicode != 0x7f)
-					gp_event_queue_push_utf(event_queue, unicode, 0);
+					gp_ev_queue_push_utf(event_queue, unicode, 0);
 			}
 		}
 	/* fallthrough */
@@ -235,12 +235,12 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 		if (key == 0)
 			return;
 
-		gp_event_queue_push_key(event_queue, key, press, 0);
+		gp_ev_queue_push_key(event_queue, key, press, 0);
 	break;
 	/* events from WM */
 	case ClientMessage:
 		if ((Atom)ev->xclient.data.l[0] == x11_conn.A_WM_DELETE_WINDOW) {
-			gp_event_queue_push(event_queue, GP_EV_SYS,
+			gp_ev_queue_push(event_queue, GP_EV_SYS,
 			                  GP_EV_SYS_QUIT, 0, 0);
 			return;
 		}

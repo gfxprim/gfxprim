@@ -17,7 +17,7 @@ static void rtos_poll(gp_backend *self)
 static void rtos_wait(gp_backend *self)
 {
 	for (;;) {
-		if (gp_event_queue_events(&self->event_queue))
+		if (gp_ev_queue_events(&self->event_queue))
 			return;
 
 		rtos_poll(self);
@@ -45,12 +45,12 @@ static gp_backend rtos_backend = {
 	.update_rect = rtos_update_rect,
 };
 
-gp_event_queue *gp_rtos_ev_queue;
+gp_ev_queue *gp_rtos_ev_queue;
 
 gp_backend *gp_backend_rtos_init(gp_size w, gp_size h, gp_pixel pixel_type, void *fb)
 {
 	gp_pixmap_init(&rtos_pixmap, w, h, pixel_type, fb, 0);
-	gp_event_queue_init(&rtos_backend.event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+	gp_ev_queue_init(&rtos_backend.event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	gp_rtos_ev_queue = &rtos_backend.event_queue;
 

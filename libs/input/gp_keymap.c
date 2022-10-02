@@ -10,11 +10,11 @@
 #include <utils/gp_utf.h>
 #include <input/gp_event.h>
 #include <input/gp_keys.h>
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include <input/gp_keymap.h>
 
 struct gp_keymap_us {
-	int (*event_key)(gp_keymap *self, gp_event_queue *queue, gp_event *ev);
+	int (*event_key)(gp_keymap *self, gp_ev_queue *queue, gp_event *ev);
 	uint8_t lshift_state:1;
 	uint8_t rshift_state:1;
 	uint8_t caps_state:1;
@@ -46,7 +46,7 @@ static char keys_to_ascii_shift[] = {
 	    '2',  '3',  '0',  '.'
 };
 
-static int event_key_us(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
+static int event_key_us(gp_keymap *self, gp_ev_queue *queue, gp_event *ev)
 {
 	unsigned int key = ev->key.key;
 	struct gp_keymap_us *keymap_us = (void*)self;
@@ -96,7 +96,7 @@ static int event_key_us(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
 		utf = keys_to_ascii[key];
 
 	if (utf >= 0x20)
-		gp_event_queue_push_utf(queue, utf, ev->time);
+		gp_ev_queue_push_utf(queue, utf, ev->time);
 
 	return 0;
 }
@@ -504,7 +504,7 @@ static int load_keymap(gp_json_reader *json, struct map **rmaps, struct mods **r
 	return 0;
 }
 
-static int map_key(struct map *map, struct mods *mods, gp_event_queue *queue, gp_event *ev)
+static int map_key(struct map *map, struct mods *mods, gp_ev_queue *queue, gp_event *ev)
 {
 	unsigned int i;
 	uint32_t utf;
@@ -516,7 +516,7 @@ static int map_key(struct map *map, struct mods *mods, gp_event_queue *queue, gp
 		if (map->mods.states[i] == mods->state) {
 			utf = map->map[ev->key.key - map->min_key];
 			if (utf) {
-				gp_event_queue_push_utf(queue, utf, ev->time);
+				gp_ev_queue_push_utf(queue, utf, ev->time);
 				GP_DEBUG(5, "Mapping %i to %u", ev->key.key,
 				         map->map[ev->key.key - map->min_key]);
 				return 0;
@@ -570,7 +570,7 @@ static void process_mods(struct mods *mods, gp_event *ev)
 	GP_DEBUG(5, "Mod mask 0x%04x", mods->state);
 }
 
-static int keymap_key(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
+static int keymap_key(gp_keymap *self, gp_ev_queue *queue, gp_event *ev)
 {
 	struct map *i;
 	struct mods *mods = self->priv2;

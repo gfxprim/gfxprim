@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <input/gp_event.h>
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include <input/gp_keymap.h>
 
 #include "tst_test.h"
@@ -61,9 +61,9 @@
 	       " }\n"\
 	       "}\n"
 
-static int expect_char(gp_event_queue *queue, uint32_t ch)
+static int expect_char(gp_ev_queue *queue, uint32_t ch)
 {
-	gp_event *ev = gp_event_queue_get(queue);
+	gp_event *ev = gp_ev_queue_get(queue);
 	if (!ev) {
 		tst_msg("No event queued");
 		return TST_FAILED;
@@ -86,9 +86,9 @@ static int expect_char(gp_event_queue *queue, uint32_t ch)
 static int test_keymap_shift_caps(void)
 {
 	gp_keymap *keymap;
-	gp_event_queue queue;
+	gp_ev_queue queue;
 
-	gp_event_queue_init(&queue, 10, 10, GP_EVENT_QUEUE_SIZE, 0);
+	gp_ev_queue_init(&queue, 10, 10, GP_EVENT_QUEUE_SIZE, 0);
 
 	keymap = gp_keymap_json_load(KEYMAP);
 	if (!keymap) {
@@ -153,9 +153,9 @@ static int test_keymap_shift_caps(void)
 static int test_keymap_dead(void)
 {
 	gp_keymap *keymap;
-	gp_event_queue queue;
+	gp_ev_queue queue;
 
-	gp_event_queue_init(&queue, 10, 10, GP_EVENT_QUEUE_SIZE, 0);
+	gp_ev_queue_init(&queue, 10, 10, GP_EVENT_QUEUE_SIZE, 0);
 
 	keymap = gp_keymap_json_load(KEYMAP);
 	if (!keymap) {

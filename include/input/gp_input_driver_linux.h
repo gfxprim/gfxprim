@@ -98,6 +98,6 @@ void gp_input_linux_close(gp_input_linux *self);
  * Returns 0 on succes -1 on error and errno is set.
  */
 int gp_input_linux_read(gp_input_linux *self,
-                        gp_event_queue *event_queue);
+                        gp_ev_queue *event_queue);
 
 #endif /* INPUT_GP_INPUT_DRIVER_LINUX_H */

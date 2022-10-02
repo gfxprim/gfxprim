@@ -21,12 +21,12 @@ struct gp_keymap {
 	 * @ev A key event
 	 * @return non-zero if event was dead-key zero otherwise.
 	 */
-	int (*event_key)(gp_keymap *self, gp_event_queue *queue, gp_event *ev);
+	int (*event_key)(gp_keymap *self, gp_ev_queue *queue, gp_event *ev);
 	void *priv;
 	void *priv2;
 };
 
-static inline int gp_keymap_event_key(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
+static inline int gp_keymap_event_key(gp_keymap *self, gp_ev_queue *queue, gp_event *ev)
 {
 	return self->event_key(self, queue, ev);
 }

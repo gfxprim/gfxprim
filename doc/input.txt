@@ -166,7 +166,7 @@ The 'st' pointer points to a global accumulated event queue state, i.e. bitmap
 of currently pressed keys and overall cursor position.
 
 WARNING: The values in the global state are valid only for the last event removed
-         from the queue by 'gp_event_queue_get()'.
+         from the queue by 'gp_ev_queue_get()'.
 
 Event API
 ~~~~~~~~~

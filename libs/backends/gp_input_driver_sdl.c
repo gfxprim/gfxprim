@@ -16,7 +16,7 @@
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
 
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include "gp_input_driver_sdl.h"
 
 /* SDL ascii mapped keys */
@@ -75,14 +75,14 @@ static uint16_t keysym_table2[] = {
  GP_KEY_SYSRQ,       0,                 0,                  GP_KEY_COMPOSE,
 };
 
-void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
+void gp_input_driver_sdl_event_put(gp_ev_queue *event_queue, SDL_Event *ev)
 {
 	uint16_t keysym;
 	uint32_t key = 0;
 
 	switch (ev->type) {
 	case SDL_MOUSEMOTION:
-		gp_event_queue_push_rel(event_queue, ev->motion.xrel,
+		gp_ev_queue_push_rel(event_queue, ev->motion.xrel,
 		                        ev->motion.yrel, 0);
 	break;
 	case SDL_MOUSEBUTTONDOWN:
@@ -100,12 +100,12 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 		/* Mouse wheel */
 		case 4:
 			if (ev->type == SDL_MOUSEBUTTONDOWN)
-				gp_event_queue_push(event_queue, GP_EV_REL,
+				gp_ev_queue_push(event_queue, GP_EV_REL,
 				                    GP_EV_REL_WHEEL, 1, 0);
 			return;
 		case 5:
 			if (ev->type == SDL_MOUSEBUTTONDOWN)
-				gp_event_queue_push(event_queue, GP_EV_REL,
+				gp_ev_queue_push(event_queue, GP_EV_REL,
 				                    GP_EV_REL_WHEEL, -1, 0);
 			return;
 		default:
@@ -114,7 +114,7 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 			return;
 		}
 
-		gp_event_queue_push(event_queue, GP_EV_KEY,
+		gp_ev_queue_push(event_queue, GP_EV_KEY,
 		                  key, ev->button.state, 0);
 	break;
 	case SDL_KEYDOWN:
@@ -132,29 +132,29 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 			return;
 		}
 
-		gp_event_queue_push_key(event_queue, key, ev->key.state, 0);
+		gp_ev_queue_push_key(event_queue, key, ev->key.state, 0);
 
 #if LIBSDL_VERSION == 1
 		if (ev->key.keysym.unicode >= 0x20)
-			gp_event_queue_push_utf(event_queue, ev->key.keysym.unicode, 0);
+			gp_ev_queue_push_utf(event_queue, ev->key.keysym.unicode, 0);
 #endif
 	break;
 #if LIBSDL_VERSION == 1
 	case SDL_VIDEORESIZE:
-		gp_event_queue_push_resize(event_queue, ev->resize.w,
+		gp_ev_queue_push_resize(event_queue, ev->resize.w,
 		                           ev->resize.h, 0);
 	break;
 #elif LIBSDL_VERSION == 2
 	case SDL_WINDOWEVENT:
 		if (ev->window.event == SDL_WINDOWEVENT_SIZE_CHANGED ||
 		    ev->window.event == SDL_WINDOWEVENT_RESIZED) {
-			gp_event_queue_push_resize(event_queue, ev->window.data1,
+			gp_ev_queue_push_resize(event_queue, ev->window.data1,
 			                           ev->window.data2, 0);
 		}
 	break;
 #endif
 	case SDL_QUIT:
-		gp_event_queue_push(event_queue, GP_EV_SYS,
+		gp_ev_queue_push(event_queue, GP_EV_SYS,
 		                  GP_EV_SYS_QUIT, 0, 0);
 	break;
 	}

@@ -12,14 +12,14 @@
 static int get_pointer_preserved(void)
 {
 	unsigned int i;
-	gp_event_queue queue;
+	gp_ev_queue queue;
 	gp_event *ev;
 
-	gp_event_queue_init(&queue, 1, 1, 0, 0);
+	gp_ev_queue_init(&queue, 1, 1, 0, 0);
 
-	gp_event_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
 
-	ev = gp_event_queue_get(&queue);
+	ev = gp_ev_queue_get(&queue);
 
 	if (!ev) {
 		tst_msg("No event returned");
@@ -32,7 +32,7 @@ static int get_pointer_preserved(void)
 	}
 
 	for (i = 0; i < GP_EVENT_QUEUE_SIZE; i++)
-		gp_event_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
 
 	if (ev->key.key != GP_KEY_ENTER) {
 		tst_msg("Event rewritten");
@@ -45,25 +45,25 @@ static int get_pointer_preserved(void)
 static int peek_test(void)
 {
 	unsigned int i;
-	gp_event_queue queue;
+	gp_ev_queue queue;
 	gp_event *ev;
 
-	gp_event_queue_init(&queue, 1, 1, 0, 0);
+	gp_ev_queue_init(&queue, 1, 1, 0, 0);
 
-	gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
-	gp_event_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
 
 	for (i = 0; i < GP_EVENT_QUEUE_SIZE-2; i++)
-		gp_event_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
 
 	if (gp_events_state_pressed(&queue.state, GP_KEY_ENTER)) {
 		tst_msg("Key enter is pressed");
 		return TST_FAILED;
 	}
 
-	gp_event_queue_get(&queue);
+	gp_ev_queue_get(&queue);
 
-	ev = gp_event_queue_peek(&queue);
+	ev = gp_ev_queue_peek(&queue);
 
 	if (!ev) {
 		tst_msg("No event returned");
@@ -85,21 +85,21 @@ static int peek_test(void)
 
 static int key_state_test(void)
 {
-	gp_event_queue queue;
+	gp_ev_queue queue;
 	gp_event *ev;
 	int fail = 0;
 
-	gp_event_queue_init(&queue, 1, 1, 0, 0);
+	gp_ev_queue_init(&queue, 1, 1, 0, 0);
 
-	gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
-	gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_UP, 0);
-	gp_event_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
-	gp_event_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
-	gp_event_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_UP, 0);
-	gp_event_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_REPEAT, 0);
-	gp_event_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_UP, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_UP, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_UP, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_REPEAT, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_UP, 0);
 
-	while ((ev = gp_event_queue_get(&queue))) {
+	while ((ev = gp_ev_queue_get(&queue))) {
 		switch (ev->code) {
 		case GP_EV_KEY_UP:
 			if (gp_events_state_pressed(&queue.state, ev->key.key)) {
@@ -126,11 +126,11 @@ static int key_state_test(void)
 
 static int cursor_state_test(void)
 {
-	gp_event_queue queue;
+	gp_ev_queue queue;
 	int fail = 0;
 	gp_event *ev;
 
-	gp_event_queue_init(&queue, 10, 10, 0, 0);
+	gp_ev_queue_init(&queue, 10, 10, 0, 0);
 
 	if (queue.state.cursor_x != 5 || queue.state.cursor_y != 5) {
 		tst_msg("Wrong cursor after init %ux%u expected 5x5",
@@ -138,7 +138,7 @@ static int cursor_state_test(void)
 		fail++;
 	}
 
-	gp_event_queue_push_rel(&queue, -10, 1, 0);
+	gp_ev_queue_push_rel(&queue, -10, 1, 0);
 
 	if (queue.state.cursor_x != 5 || queue.state.cursor_y != 5) {
 		tst_msg("Wrong cursor after push_rel() %ux%u expected 5x5",
@@ -146,7 +146,7 @@ static int cursor_state_test(void)
 		fail++;
 	}
 
-	ev = gp_event_queue_get(&queue);
+	ev = gp_ev_queue_get(&queue);
 
 	if (ev->st->cursor_x != 0 || ev->st->cursor_y != 6) {
 		tst_msg("Wrong cursor after push_rel() in ev->st %ux%u expected 0x6",
@@ -154,7 +154,7 @@ static int cursor_state_test(void)
 		fail++;
 	}
 
-	gp_event_queue_push_abs(&queue, 5, 0, 0, 10, 10, 10, 0);
+	gp_ev_queue_push_abs(&queue, 5, 0, 0, 10, 10, 10, 0);
 
 	if (queue.state.cursor_x != 0 || queue.state.cursor_y != 6) {
 		tst_msg("Wrong cursor after push_abs() %ux%u expected 0x6",
@@ -162,7 +162,7 @@ static int cursor_state_test(void)
 		fail++;
 	}
 
-	ev = gp_event_queue_get(&queue);
+	ev = gp_ev_queue_get(&queue);
 
 	if (ev->st->cursor_x != 4 || ev->st->cursor_y != 0) {
 		tst_msg("Wrong cursor after push_abs() in ev->st %ux%u expected 4x0",
@@ -179,16 +179,16 @@ static int cursor_state_test(void)
 static int queue_init_test(void)
 {
 	unsigned int i;
-	gp_event_queue queue;
+	gp_ev_queue queue;
 
-	gp_event_queue_init(&queue, 1, 1, 0, 0);
+	gp_ev_queue_init(&queue, 1, 1, 0, 0);
 
-	if (gp_event_queue_events(&queue)) {
+	if (gp_ev_queue_events(&queue)) {
 		tst_msg("Events queued after init");
 		return TST_FAILED;
 	}
 
-	if (gp_event_queue_get(&queue)) {
+	if (gp_ev_queue_get(&queue)) {
 		tst_msg("Event get returned event after init");
 		return TST_FAILED;
 	}
@@ -206,43 +206,43 @@ static int queue_init_test(void)
 static int queue_events_test(void)
 {
 	unsigned int i;
-	gp_event_queue queue;
+	gp_ev_queue queue;
 
-	gp_event_queue_init(&queue, 1, 1, 0, 0);
+	gp_ev_queue_init(&queue, 1, 1, 0, 0);
 
 	for (i = 0; i < 2 * queue.queue_size; i++) {
-		if (gp_event_queue_events(&queue) != 0) {
+		if (gp_ev_queue_events(&queue) != 0) {
 			tst_msg("Wrong number of events!");
 			return TST_FAILED;
 		}
 
-		gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
-		gp_event_queue_get(&queue);
+		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_get(&queue);
 	}
 
-	gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
 
 	for (i = 0; i < 2 * queue.queue_size; i++) {
-		if (gp_event_queue_events(&queue) != 1) {
+		if (gp_ev_queue_events(&queue) != 1) {
 			tst_msg("Wrong number of events!");
 			return TST_FAILED;
 		}
 
-		gp_event_queue_get(&queue);
-		gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_get(&queue);
+		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
 	}
 
 	for (i = 0; i < queue.queue_size-1; i++)
-		gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
 
 	for (i = 0; i < 2 * queue.queue_size; i++) {
-		if (gp_event_queue_events(&queue) != queue.queue_size-1) {
+		if (gp_ev_queue_events(&queue) != queue.queue_size-1) {
 			tst_msg("Wrong number of events!");
 			return TST_FAILED;
 		}
 
-		gp_event_queue_get(&queue);
-		gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_get(&queue);
+		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
 	}
 
 	return TST_SUCCESS;

@@ -97,7 +97,7 @@ static void sdl_poll(struct gp_backend *self __attribute__((unused)))
 
 	SDL_mutexP(mutex);
 
-	while (SDL_PollEvent(&ev) && !gp_event_queue_full(&backend.event_queue))
+	while (SDL_PollEvent(&ev) && !gp_ev_queue_full(&backend.event_queue))
 		sdl_put_event(&ev);
 
 	SDL_mutexV(mutex);
@@ -108,7 +108,7 @@ static void sdl_wait(struct gp_backend *self __attribute__((unused)))
 	SDL_Event ev;
 
 	for (;;) {
-		if (gp_event_queue_events(&self->event_queue))
+		if (gp_ev_queue_events(&self->event_queue))
 			return;
 
 		SDL_mutexP(mutex);
@@ -138,7 +138,7 @@ static int sdl_set_attr(struct gp_backend *self, enum gp_backend_attrs attr,
 	case GP_BACKEND_SIZE: {
 		const int *size = vals;
 		/* Send only resize event, the actual resize is done in resize_ack */
-		gp_event_queue_push_resize(&self->event_queue, size[0], size[1], 0);
+		gp_ev_queue_push_resize(&self->event_queue, size[0], size[1], 0);
 	}
 	break;
 	default:
@@ -166,7 +166,7 @@ static int sdl_resize_ack(struct gp_backend *self __attribute__((unused)))
 
 	gp_pixmap_from_sdl_surface(backend.pixmap, sdl_surface);
 
-	gp_event_queue_set_screen_size(&backend.event_queue,
+	gp_ev_queue_set_screen_size(&backend.event_queue,
 	                               backend.pixmap->w, backend.pixmap->h);
 
 	SDL_mutexV(mutex);
@@ -302,7 +302,7 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
 	                    SDL_DEFAULT_REPEAT_INTERVAL);
 #endif
 
-	gp_event_queue_init(&backend.event_queue, w, h, 0,
+	gp_ev_queue_init(&backend.event_queue, w, h, 0,
 #if LIBSDL_VERSION == 1
 			0
 #else

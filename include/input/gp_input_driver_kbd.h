@@ -17,7 +17,7 @@
 /*
  * Converts KBD event to GFXprim event and puts it into the queue.
  */
-void gp_input_driver_kbd_event_put(gp_event_queue *event_queue,
+void gp_input_driver_kbd_event_put(gp_ev_queue *event_queue,
                                    unsigned char ev);
 
 #endif /* INPUT_GP_INPUT_DRIVER_KBD_H */

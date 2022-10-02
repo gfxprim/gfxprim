@@ -14,7 +14,7 @@
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
 
-#include <input/gp_event_queue.h>
+#include <input/gp_ev_queue.h>
 #include <input/gp_input_driver_linux.h>
 
 static int get_version(int fd)
@@ -325,7 +325,7 @@ static void input_abs(gp_input_linux *self, struct input_event *ev)
 }
 
 static void input_key(gp_input_linux *self,
-                      gp_event_queue *event_queue,
+                      gp_ev_queue *event_queue,
                       struct input_event *ev)
 {
 	GP_DEBUG(4, "Key event");
@@ -341,15 +341,15 @@ static void input_key(gp_input_linux *self,
 			return;
 	}
 
-	gp_event_queue_push_key(event_queue, ev->code, ev->value, 0);
+	gp_ev_queue_push_key(event_queue, ev->code, ev->value, 0);
 }
 
 static void do_sync(gp_input_linux *self,
-                    gp_event_queue *event_queue)
+                    gp_ev_queue *event_queue)
 {
 	if (self->rel_flag) {
 		self->rel_flag = 0;
-		gp_event_queue_push_rel(event_queue, self->rel_x,
+		gp_ev_queue_push_rel(event_queue, self->rel_x,
 		                        self->rel_y, 0);
 		self->rel_x = 0;
 		self->rel_y = 0;
@@ -397,20 +397,20 @@ static void do_sync(gp_input_linux *self,
 		if (self->abs_mirror_y)
 			y = y_max - y;
 
-		gp_event_queue_push_abs(event_queue, x, y, self->abs_press,
+		gp_ev_queue_push_abs(event_queue, x, y, self->abs_press,
 		                        x_max, y_max, self->abs_press_max, 0);
 
 		self->abs_press = 0;
 
 		if (self->abs_pen_flag) {
-			gp_event_queue_push_key(event_queue, BTN_TOUCH, 1, 0);
+			gp_ev_queue_push_key(event_queue, BTN_TOUCH, 1, 0);
 			self->abs_pen_flag = 0;
 		}
 	}
 }
 
 static void input_syn(gp_input_linux *self,
-                      gp_event_queue *event_queue,
+                      gp_ev_queue *event_queue,
                       struct input_event *ev)
 {
 	GP_DEBUG(4, "Sync event");
@@ -425,7 +425,7 @@ static void input_syn(gp_input_linux *self,
 }
 
 int gp_input_linux_read(gp_input_linux *self,
-                               gp_event_queue *event_queue)
+                               gp_ev_queue *event_queue)
 {
 	struct input_event ev;
 	int ret;
