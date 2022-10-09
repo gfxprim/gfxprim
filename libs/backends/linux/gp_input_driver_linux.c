@@ -290,11 +290,15 @@ static void input_rel(gp_input_linux *self, struct input_event *ev)
 	switch (ev->code) {
 	case REL_X:
 		self->rel_x = ev->value;
-		self->rel_flag = 1;
+		self->rel_flag |= 1;
 	break;
 	case REL_Y:
 		self->rel_y = ev->value;
-		self->rel_flag = 1;
+		self->rel_flag |= 1;
+	break;
+	case REL_WHEEL:
+		self->rel_wheel = ev->value;
+		self->rel_flag |= 2;
 	break;
 	default:
 		GP_DEBUG(3, "Unhandled code %i", ev->code);
@@ -344,15 +348,19 @@ static void input_key(gp_input_linux *self,
 	gp_ev_queue_push_key(event_queue, ev->code, ev->value, 0);
 }
 
-static void do_sync(gp_input_linux *self,
-                    gp_ev_queue *event_queue)
+static void do_sync(gp_input_linux *self, gp_ev_queue *ev_queue)
 {
 	if (self->rel_flag) {
-		self->rel_flag = 0;
-		gp_ev_queue_push_rel(event_queue, self->rel_x,
-		                        self->rel_y, 0);
+		if (self->rel_flag & 1)
+			gp_ev_queue_push_rel(ev_queue, self->rel_x, self->rel_y, 0);
+
+
+		if (self->rel_flag & 2)
+			gp_ev_queue_push_wheel(ev_queue, self->rel_wheel, 0);
+
 		self->rel_x = 0;
 		self->rel_y = 0;
+		self->rel_flag = 0;
 	}
 
 	if (self->abs_flag_x || self->abs_flag_y) {
@@ -397,13 +405,13 @@ static void do_sync(gp_input_linux *self,
 		if (self->abs_mirror_y)
 			y = y_max - y;
 
-		gp_ev_queue_push_abs(event_queue, x, y, self->abs_press,
-		                        x_max, y_max, self->abs_press_max, 0);
+		gp_ev_queue_push_abs(ev_queue, x, y, self->abs_press,
+		                     x_max, y_max, self->abs_press_max, 0);
 
 		self->abs_press = 0;
 
 		if (self->abs_pen_flag) {
-			gp_ev_queue_push_key(event_queue, BTN_TOUCH, 1, 0);
+			gp_ev_queue_push_key(ev_queue, BTN_TOUCH, 1, 0);
 			self->abs_pen_flag = 0;
 		}
 	}

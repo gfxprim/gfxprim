@@ -25,6 +25,7 @@ struct gp_input_linux {
 	/* to store rel coordinates */
 	int rel_x;
 	int rel_y;
+	int rel_wheel;
 
 	uint8_t rel_flag;
 
