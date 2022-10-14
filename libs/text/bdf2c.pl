@@ -352,7 +352,7 @@ sub utf_to_utf
 }
 
 my $greek = $ENV{'GREEK'};
-my $cyrilic = $ENV{'GREEK'};
+my $cyrilic = $ENV{'CYRILIC'};
 my $katakana = $ENV{'KATAKANA'};
 my $hiragana = $ENV{'HIRAGANA'};
 
