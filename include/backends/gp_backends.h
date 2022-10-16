@@ -22,6 +22,7 @@
  * Backends.
  */
 #include <backends/gp_linux_fb.h>
+#include <backends/gp_linux_drm.h>
 #include <backends/gp_sdl.h>
 #include <backends/gp_x11.h>
 #include "backends/gp_xcb.h"
