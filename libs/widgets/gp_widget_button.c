@@ -272,12 +272,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 		          GP_TRIANGLE_LEFT, ctx->text_color);
 	break;
 	case GP_BUTTON_RANDOMIZE:
-		gp_fill_rrect_xywh(ctx->buf, cx-sym_r, cy-sym_r, 2*sym_r+1, 2*sym_r+1, ctx->bg_color, ctx->text_color, ctx->text_color);
-		i = sym_r/2;
-		gp_fill_circle(ctx->buf, cx-i, cy-i, sym_r/5, ctx->fg_color);
-		gp_fill_circle(ctx->buf, cx+i, cy+i, sym_r/5, ctx->fg_color);
-		gp_fill_circle(ctx->buf, cx-i, cy+i, sym_r/5, ctx->fg_color);
-		gp_fill_circle(ctx->buf, cx+i, cy-i, sym_r/5, ctx->fg_color);
+		gp_fill_rrect_xywh(ctx->buf, cx-sym_r, cy-sym_r, 2*sym_r+1, 2*sym_r+1, ctx->fg_color, ctx->bg_color, ctx->text_color);
+		i = (sym_r+1)/3;
+		gp_fill_circle(ctx->buf, cx-i, cy-i, sym_r/5, ctx->text_color);
+		gp_fill_circle(ctx->buf, cx+i, cy+i, sym_r/5, ctx->text_color);
+		gp_fill_circle(ctx->buf, cx-i, cy+i, sym_r/5, ctx->text_color);
+		gp_fill_circle(ctx->buf, cx+i, cy-i, sym_r/5, ctx->text_color);
 	break;
 	case GP_BUTTON_UP:
 		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_UP,
