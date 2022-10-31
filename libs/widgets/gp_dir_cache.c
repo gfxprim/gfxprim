@@ -236,6 +236,8 @@ gp_dir_cache *gp_dir_cache_new(const char *path)
 {
 	(void) path;
 
+	GP_WARN("Stub called");
+
 	errno = ENOSYS;
 	return NULL;
 }
