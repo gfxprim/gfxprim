@@ -139,6 +139,9 @@ static int files_seek_row(gp_widget *self, int op, unsigned int pos)
 	if (!cache)
 		cache = self->tbl->priv = load_dir_cache(self->priv);
 
+	if (!cache)
+		return 0;
+
 	switch (op) {
 	case GP_TABLE_ROW_RESET:
 		self->tbl->row_idx = 0;
@@ -225,6 +228,9 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 	gp_widget *table = dialog->file_table;
 	gp_widget *path = dialog->dir_path;
+
+	if (!cache)
+		retval = GP_WIDGET_DIALOG_CANCEL;
 
 	if (retval == GP_WIDGET_DIALOG_CANCEL)
 		goto exit;
@@ -317,8 +323,12 @@ static void table_event(gp_widget *self)
 {
 	struct gp_widget_table *tbl = self->tbl;
 	struct file_dialog *dialog = self->priv;
+	gp_dir_cache *cache = tbl->priv;
 
-	gp_dir_entry *entry = gp_dir_cache_get_filtered(tbl->priv, tbl->selected_row);
+	if (!cache)
+		return;
+
+	gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, tbl->selected_row);
 
 	if (!entry) {
 		GP_BUG("Empty entry!");
@@ -355,7 +365,7 @@ static void set_filename(struct file_dialog *dialog, gp_widget_event *ev)
 {
 	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 
-	if (!dialog->filename)
+	if (!cache || !dialog->filename)
 		return;
 
 	gp_dir_entry *ent = gp_dir_cache_get_filtered(cache, ev->val);
