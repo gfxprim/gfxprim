@@ -7,14 +7,22 @@
 #include <string.h>
 #include <errno.h>
 
+#include "../../config.h"
+
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <drm/drm.h>
+#ifdef HAVE_DRM_DRM_H
+# include <drm/drm.h>
+#elif HAVE_LIBDRM_DRM_H
+# include <libdrm/drm.h>
+#endif
 
 #include <backends/gp_backend.h>
 #include <backends/gp_linux_drm.h>
 #include <core/gp_debug.h>
 #include <core/gp_pixmap.h>
+
+#if defined(HAVE_DRM_DRM_H) || defined(HAVE_LIBDRM_DRM_H)
 
 static int drm_open(const char *drm_path)
 {
@@ -370,3 +378,17 @@ err0:
 	free(ret);
 	return NULL;
 }
+
+#else
+
+gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
+{
+	(void) drm_path;
+	(void) flags;
+
+	GP_WARN("DRM not compiled in");
+
+	return NULL;
+}
+
+#endif /* defined(HAVE_DRM_DRM_H) || defined(HAVE_LIBDRM_DRM_H) */
