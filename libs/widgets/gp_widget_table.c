@@ -120,6 +120,9 @@ static unsigned int display_rows(gp_widget *self, const gp_widget_render_ctx *ct
 	unsigned int text_a = gp_text_ascent(ctx->font);
 	unsigned int header = header_h(self, ctx);
 
+	if (header > self->h)
+		return 0;
+
 	return (self->h - header) / (text_a + ctx->padd);
 }
 
