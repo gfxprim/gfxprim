@@ -124,7 +124,12 @@ static gp_dir_cache *load_dir_cache(struct file_dialog *dialog)
 
 static void free_dir_cache(gp_dir_cache *self)
 {
-	int notify_fd = gp_dir_cache_notify_fd(self);
+	int notify_fd;
+
+	if (!self)
+		return;
+
+	notify_fd = gp_dir_cache_notify_fd(self);
 	if (notify_fd > 0)
 		gp_fds_rem(gp_widgets_fds, notify_fd);
 
@@ -279,20 +284,26 @@ exit:
 	wd->retval = retval;
 }
 
+static void try_open(struct file_dialog *dialog)
+{
+	if (dialog->file_table->tbl->row_selected)
+		exit_dialog(dialog, GP_WIDGET_DIALOG_PATH);
+}
+
 static int open_on_event(gp_widget_event *ev)
 {
-	struct file_dialog *dialog = ev->self->priv;
-
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	//TODO: Disable the open button?
-	if (!dialog->file_table->tbl->row_selected)
-		return 0;
-
-	exit_dialog(ev->self->priv, GP_WIDGET_DIALOG_PATH);
+	try_open(ev->self->priv);
 
 	return 0;
+}
+
+static void try_save(struct file_dialog *dialog)
+{
+	if (!gp_widget_tbox_is_empty(dialog->filename))
+		exit_dialog(dialog, GP_WIDGET_DIALOG_PATH);
 }
 
 static int save_on_event(gp_widget_event *ev)
@@ -303,8 +314,7 @@ static int save_on_event(gp_widget_event *ev)
 	if (ev->sub_type)
 		return 0;
 
-	//TODO: Disable the save button when filename is empty?
-	exit_dialog(ev->self->priv, GP_WIDGET_DIALOG_PATH);
+	try_save(ev->self->priv);
 
 	return 0;
 }
@@ -434,21 +444,44 @@ const gp_widget_table_col_ops gp_dialog_files_col_ops = {
 	}
 };
 
-static int file_open_input_event(gp_dialog *self, gp_event *ev)
+
+static int file_dialog_input_event(gp_dialog *self, gp_event *ev, int is_open)
 {
 	struct file_dialog *dialog = (void*)self->payload;
 
-	if (ev->type == GP_EV_KEY &&
-	    ev->val == GP_KEY_ESC &&
-	    ev->code == GP_EV_KEY_DOWN) {
-		exit_dialog(dialog, GP_WIDGET_DIALOG_CANCEL);
-		return 1;
+	if (ev->type == GP_EV_KEY && ev->code == GP_EV_KEY_DOWN) {
+		if (ev->val == GP_KEY_ESC && ev->code == GP_EV_KEY_DOWN) {
+			exit_dialog(dialog, GP_WIDGET_DIALOG_CANCEL);
+			return 1;
+		}
+
+		int ctrl_pressed = gp_event_any_key_pressed(ev, GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL);
+
+		if (is_open && ctrl_pressed && ev->val == GP_KEY_O) {
+			try_open(dialog);
+			return 1;
+		}
+
+		if (!is_open && ctrl_pressed && ev->val == GP_KEY_S) {
+			try_save(dialog);
+			return 1;
+		}
 	}
 
 	if (ev->type == GP_EV_UTF)
 		return gp_widget_ops_event(dialog->filter, gp_widgets_render_ctx(), ev);
 
 	return 0;
+}
+
+static int file_open_input_event(gp_dialog *self, gp_event *ev)
+{
+	return file_dialog_input_event(self, ev, 1);
+}
+
+static int file_save_input_event(gp_dialog *self, gp_event *ev)
+{
+	return file_dialog_input_event(self, ev, 0);
 }
 
 static int new_dir_on_event(gp_widget_event *ev)
@@ -523,7 +556,7 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 		goto err0;
 
 	ret->layout = layout;
-	ret->input_event = file_open_input_event;
+	ret->input_event = file_save_input_event;
 
 	dialog->show_hidden = gp_widget_by_uid(uids, "hidden", GP_WIDGET_CHECKBOX);
 	dialog->filename = gp_widget_by_uid(uids, "filename", GP_WIDGET_TBOX);
