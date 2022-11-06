@@ -20,5 +20,7 @@
 #include <utils/gp_app_cfg.h>
 #include <utils/gp_utf.h>
 #include <utils/gp_utf_pos.h>
+#include <utils/gp_avl_tree.h>
+#include <utils/gp_trie.h>
 
 #endif /* GP_UTILS_H */
