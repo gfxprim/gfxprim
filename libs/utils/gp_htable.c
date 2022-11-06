@@ -52,28 +52,44 @@ size_t gp_htable_tsize(size_t used)
 	return primes[order];
 }
 
-gp_htable *gp_htable_new(unsigned int order, int flags)
+int gp_htable_init(gp_htable *self, unsigned int order, int flags)
 {
 	order = GP_MIN(order, GP_ARRAY_SIZE(primes)-1);
 
 	size_t size = primes[order] * sizeof(struct gp_htable_rec);
 	struct gp_htable_rec *recs = malloc(size);
+
+	if (!recs) {
+		GP_WARN("Malloc failed :-(");
+		return 1;
+	}
+
+	memset(recs, 0, size);
+	self->size = primes[order];
+	self->used = 0;
+	self->flags = flags;
+	self->recs = recs;
+
+	return 0;
+}
+
+gp_htable *gp_htable_new(unsigned int order, int flags)
+{
 	gp_htable *table = malloc(sizeof(gp_htable));
 
 	GP_DEBUG(1, "Allocating hash table order %u", order);
 
-	if (!table || !recs) {
-		free(table);
-		free(recs);
+	if (!table) {
 		GP_WARN("Malloc failed :-(");
 		return NULL;
 	}
 
-	memset(recs, 0, size);
-	table->size = primes[order];
-	table->used = 0;
-	table->flags = flags;
-	table->recs = recs;
+	if (gp_htable_init(table, order, flags)) {
+		free(table);
+		return NULL;
+	}
+
+	table->flags |= GP_HTABLE_FREE_SELF;
 
 	return table;
 }
@@ -92,7 +108,9 @@ void gp_htable_free(gp_htable *self)
 	}
 
 	free(self->recs);
-	free(self);
+
+	if (self->flags & GP_HTABLE_FREE_SELF)
+		free(self);
 }
 
 void gp_htable_put(gp_htable *self, void *val, char *key)

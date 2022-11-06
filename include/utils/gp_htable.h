@@ -18,6 +18,7 @@
 enum gp_htable_flags {
 	GP_HTABLE_COPY_KEY = 0x01,
 	GP_HTABLE_FREE_KEY = 0x02,
+	GP_HTABLE_FREE_SELF = 0x04,
 };
 
 struct gp_htable_rec {
@@ -42,9 +43,35 @@ struct gp_htable {
  * @order Hint of log2(size) for expected number of hash elements, if unsure pass 0.
  * @flags See enum gp_htable_flags.
  *
+ * Note that GP_HTABLE_FREE_SELF is added automatically to the flags so that
+ * the resulting table is freed on gp_htable_free().
+ *
  * @return Newly allocated hash table or NULL in a case of a malloc failure.
  */
 gp_htable *gp_htable_new(unsigned int order, int flags);
+
+/**
+ * @brief Initializes an hash table embedded in a different structure.
+ *
+ * @self A pointer to an hash table to be initialized.
+ * @order Hint of log2(size) for expected number of hash elements, if unsure pass 0.
+ * @flags See enum gp_htable_flags.
+ *
+ * @return Zero on success, non-zero on allocation failure.
+ */
+int gp_htable_init(gp_htable *self, unsigned int order, int flags);
+
+/**
+ * @brief Returns the number of keys in hash table.
+ *
+ * @self A hash table.
+ *
+ * @return The number of keys in hash table.
+ */
+static inline size_t gp_htable_keys(gp_htable *self)
+{
+	return self->used;
+}
 
 /**
  * @brief Frees a hash table.
