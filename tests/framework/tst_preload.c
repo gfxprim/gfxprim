@@ -107,7 +107,7 @@ void tst_malloc_check_report(struct malloc_stats *stats)
 	stats->lost_chunks = cur_chunks;
 }
 
-#define MAX_CHUNKS 1000
+#define MAX_CHUNKS 4096
 
 struct chunk {
 	void *ptr;
