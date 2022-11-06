@@ -1,0 +1,17 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "type": "hbox",
+  "align": "hfill",
+  "widgets": [
+   [0, 0],
+   {"type": "label", "text": "text:"},
+   [1, 0],
+   {"type": "tbox", "len": 10, "align": "fill"},
+   [1, 1],
+   {"type": "button", "label": "Button"},
+   [0, 0]
+  ],
+  "fill": "0, 1, 0"
+ }
+}

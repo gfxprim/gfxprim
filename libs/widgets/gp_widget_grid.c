@@ -1443,3 +1443,168 @@ void gp_widget_grid_vborder_set(gp_widget *self, unsigned int padd, unsigned int
 	set_vborder_padd(self, padd);
 	set_vborder_fill(self, fill);
 }
+
+
+/*
+
+ This part implements hbox and vbox which are JSON shortcuts for a grid with single col/row.
+
+ */
+
+static int get_padd_fill(gp_json_reader *json, gp_json_val *val,
+                         unsigned int *padd, unsigned int *fill)
+{
+	int cnt = 0;
+
+	GP_JSON_ARR_FOREACH(json, val) {
+		switch (val->type) {
+		case GP_JSON_INT:
+			switch (cnt) {
+			case 0:
+				*padd = val->val_int;
+				cnt++;
+			break;
+			case 1:
+				*fill = val->val_int;
+				cnt++;
+			break;
+			default:
+				goto err;
+			}
+		break;
+		default:
+			goto err;
+		}
+	}
+
+	if (cnt == 2)
+		return 1;
+
+err:
+	gp_json_warn(json, "Invalid [padd, fill] tupple");
+	return 0;
+}
+
+static gp_widget *get_widgets(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx, int horiz)
+{
+	unsigned int cnt = 0;
+	gp_widget *ret, *tmp;
+
+	gp_json_state arr_start = gp_json_state_start(json);
+
+	GP_JSON_ARR_FOREACH(json, val) {
+		switch (val->type) {
+		case GP_JSON_OBJ:
+			cnt++;
+			gp_json_obj_skip(json);
+		break;
+		case GP_JSON_ARR:
+			gp_json_arr_skip(json);
+		break;
+		default:
+			gp_json_warn(json, "Invalid hbox element");
+		}
+	}
+
+	uint32_t cols = horiz ? cnt : 1;
+	uint32_t rows = horiz ? 1 : cnt;
+
+	ret = gp_widget_grid_new(cols, rows, 0);
+	if (!ret)
+		return NULL;
+
+	gp_json_state_load(json, arr_start);
+	cnt = 0;
+	unsigned int padd, fill;
+
+	struct gp_widget_grid_border *border = horiz ? ret->grid->col_b : ret->grid->row_b;
+
+	GP_JSON_ARR_FOREACH(json, val) {
+		switch (val->type) {
+		case GP_JSON_OBJ:
+			tmp = gp_widget_from_json(json, val, ctx);
+
+			if (horiz)
+				gp_widget_grid_put(ret, cnt, 0, tmp);
+			else
+				gp_widget_grid_put(ret, 0, cnt, tmp);
+
+			cnt++;
+		break;
+		case GP_JSON_ARR:
+			if (get_padd_fill(json, val, &padd, &fill)) {
+				border[cnt].padd = padd;
+				border[cnt].fill = fill;
+			}
+		break;
+		default:
+		break;
+		}
+	}
+
+	return ret;
+}
+
+enum box_keys {
+	BOX_FILL,
+	BOX_UNIFORM,
+	BOX_WIDGETS,
+};
+
+static const gp_json_obj_attr box_attrs[] = {
+	GP_JSON_OBJ_ATTR("fill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("uniform", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
+};
+
+static const gp_json_obj box_obj_filter = {
+	.attrs = box_attrs,
+	.attr_cnt = GP_ARRAY_SIZE(box_attrs),
+};
+
+static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx, int horiz)
+{
+	int uniform = 0;
+	gp_widget *ret = NULL;
+
+	GP_JSON_OBJ_FILTER(json, val, &box_obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case BOX_FILL:
+			if (!ret) {
+				gp_json_warn(json, "fill before widgets array!");
+				continue;
+			}
+			if (horiz)
+				parse_strarray(val->val_str, ret->grid->col_s, ret->grid->cols, put_grid_cell_fill, "Grid cfill");
+			else
+				parse_strarray(val->val_str, ret->grid->row_s, ret->grid->rows, put_grid_cell_fill, "Grid rfill");
+		break;
+		case BOX_UNIFORM:
+			uniform = 1;
+		break;
+		case BOX_WIDGETS:
+			ret = get_widgets(json, val, ctx, horiz);
+		break;
+		}
+	}
+
+	if (!ret)
+		return NULL;
+
+	if (uniform)
+		ret->grid->uniform = 1;
+
+	return ret;
+}
+
+__attribute__((visibility ("hidden")))
+gp_widget *hbox_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+{
+	return box_from_json(json, val, ctx, 1);
+}
+
+__attribute__((visibility ("hidden")))
+gp_widget *vbox_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+{
+	return box_from_json(json, val, ctx, 0);
+}

@@ -31,6 +31,9 @@ static gp_widget *color_scheme_switch_from_json(gp_json_reader *json, gp_json_va
 	return gp_widget_color_scheme_switch();
 }
 
+gp_widget *hbox_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx);
+gp_widget *vbox_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx);
+
 /*
  * This implements loading widgets that are build on top of existing widgets
  * and hence does not have widget ops registered. Which allows us to construct
@@ -41,7 +44,9 @@ static struct from_json {
 	const char *type;
 	gp_widget *(*from_json)(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx);
 } json_loaders[] = {
-	{"color_scheme_switch", color_scheme_switch_from_json}
+	{"color_scheme_switch", color_scheme_switch_from_json},
+	{"hbox", hbox_from_json},
+	{"vbox", vbox_from_json},
 };
 
 static void *json_loader_by_type(const char *type)
