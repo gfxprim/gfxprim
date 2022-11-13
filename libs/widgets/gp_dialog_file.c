@@ -508,7 +508,7 @@ static int file_dialog_input_event(gp_dialog *self, gp_event *ev, int is_open)
 		}
 	}
 
-	if (ev->type == GP_EV_UTF)
+	if (ev->type == GP_EV_UTF || (ev->type == GP_EV_KEY && ev->val == GP_KEY_BACKSPACE))
 		return gp_widget_ops_event(dialog->filter, gp_widgets_render_ctx(), ev);
 
 	return 0;
