@@ -591,7 +591,7 @@ static int filter_on_event(gp_widget_event *ev)
 		return 0;
 
 	switch (ev->sub_type) {
-	case GP_WIDGET_TBOX_FILTER:
+	case GP_WIDGET_TBOX_POST_FILTER:
 		//dir cache lookup!
 	break;
 	case GP_WIDGET_TBOX_EDIT:

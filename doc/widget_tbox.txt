@@ -185,12 +185,14 @@ NOTE: If textbox contains URL or Path the delimiters should be set by setting
 
 .Tbox widget events
 [cols=",3",options="header"]
-|===================================================
-|   Widget event value   | Description
-| GP_WIDGET_TBOX_TRIGGER | Emitted on pressing enter.
-| GP_WIDGET_TBOX_FILTER  | Emitted before text is modified.
-| GP_WIDGET_TBOX_EDIT    | Emitted after text is modified.
-|===================================================
+|=============================================================
+|   Widget event value       | Description
+| GP_WIDGET_TBOX_TRIGGER     | Emitted on pressing enter.
+| GP_WIDGET_TBOX_PRE_FILTER  | Filter before text is modified.
+| GP_WIDGET_TBOX_POST_FILTER | Filter after text is modified.
+| GP_WIDGET_TBOX_EDIT        | Emitted after text is modified.
+|=============================================================
 
-In the case of the `GP_WIDGET_TBOX_FILTER` non-zero output from the event
-handler will filter out the change, e.g. a character will will not be appended.
+In the case of the `GP_WIDGET_TBOX_PRE_FILTER` and
+`GP_WIDGET_TBOX_POST_FILTER` non-zero output from the event handler will
+filter out the change, e.g. a character will will not be inserted.

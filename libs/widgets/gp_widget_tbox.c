@@ -381,6 +381,7 @@ static int sel_left(gp_widget *self)
 
 static void utf_key(gp_widget *self, uint32_t ch)
 {
+	int ret;
 	sel_del(self);
 
 	if (self->tbox->max_size &&
@@ -389,9 +390,13 @@ static void utf_key(gp_widget *self, uint32_t ch)
 		return;
 	}
 
-	int ret = gp_widget_send_widget_event(self, GP_WIDGET_TBOX_FILTER, (long)ch);
+	if (filter(self->tbox->filter, ch)) {
+		schedule_alert(self);
+		return;
+	}
 
-	if (ret || filter(self->tbox->filter, ch)) {
+	ret = gp_widget_send_widget_event(self, GP_WIDGET_TBOX_PRE_FILTER, (long)ch);
+	if (ret) {
 		schedule_alert(self);
 		return;
 	}
@@ -401,10 +406,17 @@ static void utf_key(gp_widget *self, uint32_t ch)
 		return;
 
 	self->tbox->buf = tmp;
+
+	ret = gp_widget_send_widget_event(self, GP_WIDGET_TBOX_POST_FILTER, (long)ch);
+	if (ret) {
+		self->tbox->buf = gp_vec_del(self->tbox->buf, self->tbox->cur_pos.bytes, gp_utf8_bytes(ch));
+		schedule_alert(self);
+		return;
+	}
+
 	gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, 1);
 
 	send_edit_event(self);
-
 	gp_widget_redraw(self);
 }
 

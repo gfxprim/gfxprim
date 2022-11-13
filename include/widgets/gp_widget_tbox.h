@@ -81,8 +81,10 @@ struct gp_widget_tbox {
 enum gp_widget_tbox_event_type {
 	/** Emitted when enter is presseed */
 	GP_WIDGET_TBOX_TRIGGER,
-	/** Emitted before text is entered into the textbox */
-	GP_WIDGET_TBOX_FILTER,
+	/** Emitted to filter the text before it was been modified */
+	GP_WIDGET_TBOX_PRE_FILTER,
+	/** Emitted to filter the text after it was been modified */
+	GP_WIDGET_TBOX_POST_FILTER,
 	/** Emitted after text is entered */
 	GP_WIDGET_TBOX_EDIT,
 };
