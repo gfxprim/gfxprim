@@ -35,10 +35,10 @@ static const char *dialog_file_open = "\
       \"cpadf\": \"0, 0, 1, 1, 0, 0\", \n\
       \"widgets\": [ \n\
         {\"type\": \"label\", \"text\": \"Filter:\"}, \n\
-        {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filter\", \"halign\": \"fill\"}, \n\
+        {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filter\", \"halign\": \"fill\", \"on_event\": \"filter\"}, \n\
         {\"type\": \"checkbox\", \"label\": \"Show Hidden\", \"uid\": \"hidden\"}, \n\
         {\"type\": \"button\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"on_event\": \"cancel\"}, \n\
-        {\"type\": \"button\", \"label\": \"Open\", \"btype\": \"open\", \"on_event\": \"open\"} \n\
+        {\"type\": \"button\", \"label\": \"Open\", \"btype\": \"open\", \"uid\": \"open\", \"on_event\": \"open\"} \n\
       ] \n\
     } \n\
   ] \n\

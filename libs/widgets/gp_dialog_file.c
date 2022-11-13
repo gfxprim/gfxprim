@@ -31,6 +31,9 @@ struct file_dialog {
 	gp_widget *dir_path;
 	gp_widget *filename;
 	gp_widget *file_table;
+	gp_widget *open_save_btn;
+
+	const gp_dialog_file_opts *opts;
 };
 
 static int redraw_table(gp_widget_event *ev)
@@ -284,10 +287,33 @@ exit:
 	wd->retval = retval;
 }
 
+static int cannot_open(struct file_dialog *dialog)
+{
+	gp_dir_cache *cache = dialog->file_table->tbl->priv;
+	gp_widget *table = dialog->file_table;
+
+	if (!table->tbl->row_selected)
+		return 1;
+
+	if (dialog->opts) {
+		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, table->tbl->selected_row);
+
+		if (entry->is_dir && !(dialog->opts->flags & GP_DIALOG_OPEN_DIR))
+			return 1;
+
+		if (!entry->is_dir && !(dialog->opts->flags & GP_DIALOG_OPEN_FILE))
+			return 1;
+	}
+
+	return 0;
+}
+
 static void try_open(struct file_dialog *dialog)
 {
-	if (dialog->file_table->tbl->row_selected)
-		exit_dialog(dialog, GP_WIDGET_DIALOG_PATH);
+	if (cannot_open(dialog))
+		return;
+
+	exit_dialog(dialog, GP_WIDGET_DIALOG_PATH);
 }
 
 static int open_on_event(gp_widget_event *ev)
@@ -371,11 +397,16 @@ static void table_event(gp_widget *self)
 	gp_widget_table_off_set(dialog->file_table, 0);
 }
 
+static inline int is_file_open(struct file_dialog *dialog)
+{
+	return !dialog->filename;
+}
+
 static void set_filename(struct file_dialog *dialog, gp_widget_event *ev)
 {
 	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 
-	if (!cache || !dialog->filename)
+	if (!cache)
 		return;
 
 	gp_dir_entry *ent = gp_dir_cache_get_filtered(cache, ev->val);
@@ -384,6 +415,11 @@ static void set_filename(struct file_dialog *dialog, gp_widget_event *ev)
 		return;
 
 	gp_widget_tbox_set(dialog->filename, ent->name);
+}
+
+static void enable_disable_open_btn(struct file_dialog *dialog)
+{
+	gp_widget_disable_set(dialog->open_save_btn, cannot_open(dialog));
 }
 
 static int table_on_event(gp_widget_event *ev)
@@ -397,7 +433,10 @@ static int table_on_event(gp_widget_event *ev)
 			table_event(ev->self);
 		break;
 		case GP_WIDGET_TABLE_SELECT:
-			set_filename(dialog, ev);
+			if (is_file_open(dialog))
+				enable_disable_open_btn(dialog);
+			else
+				set_filename(dialog, ev);
 		break;
 		}
 		return 0;
@@ -443,7 +482,6 @@ const gp_widget_table_col_ops gp_dialog_files_col_ops = {
 		{}
 	}
 };
-
 
 static int file_dialog_input_event(gp_dialog *self, gp_event *ev, int is_open)
 {
@@ -523,9 +561,52 @@ ret0:
 	return 0;
 }
 
+static int filename_on_event(gp_widget_event *ev)
+{
+	struct file_dialog *dialog = ev->self->priv;
+
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	switch (ev->sub_type) {
+	case GP_WIDGET_TBOX_TRIGGER:
+		try_save(dialog);
+	break;
+	case GP_WIDGET_TBOX_EDIT:
+		gp_widget_disable_set(dialog->open_save_btn,
+		                      gp_widget_tbox_is_empty(ev->self));
+	break;
+	}
+
+	return 0;
+}
+
+static int filter_on_event(gp_widget_event *ev)
+{
+	struct file_dialog *dialog = ev->self->priv;
+
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	switch (ev->sub_type) {
+	case GP_WIDGET_TBOX_FILTER:
+		//dir cache lookup!
+	break;
+	case GP_WIDGET_TBOX_EDIT:
+		gp_widget_redraw(dialog->file_table);
+		//TODO: We need stable selected row!!
+		//enable_disable_open_btn(dialog);
+	break;
+	}
+
+	return 0;
+}
+
 static const gp_widget_json_addr addrs[] = {
 	{.id = "cancel", .on_event = cancel_on_event},
 	{.id = "file_table", .table_col_ops = &gp_dialog_files_col_ops},
+	{.id = "filename", .on_event = filename_on_event},
+	{.id = "filter", .on_event = filter_on_event},
 	{.id = "new_dir", .on_event = new_dir_on_event},
 	{.id = "open", .on_event = open_on_event},
 	{.id = "save", .on_event = save_on_event},
@@ -533,7 +614,7 @@ static const gp_widget_json_addr addrs[] = {
 };
 
 gp_dialog *gp_dialog_file_save_new(const char *path,
-                                   const char *const ext_hints[])
+                                   const gp_dialog_file_opts *opts)
 {
 	gp_htable *uids = NULL;
 	gp_widget *layout;
@@ -545,6 +626,8 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 		return NULL;
 
 	dialog = (void*)ret->payload;
+
+	dialog->opts = opts;
 
 	gp_widget_json_callbacks callbacks = {
 		.default_priv = dialog,
@@ -562,12 +645,15 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 	dialog->filename = gp_widget_by_uid(uids, "filename", GP_WIDGET_TBOX);
 	dialog->dir_path = gp_widget_by_uid(uids, "path", GP_WIDGET_TBOX);
 	dialog->file_table = gp_widget_by_uid(uids, "files", GP_WIDGET_TABLE);
+	dialog->open_save_btn = gp_widget_by_uid(uids, "save", GP_WIDGET_BUTTON);
 
-	if (dialog->dir_path)
-		gp_widget_tbox_sel_delim_set(dialog->dir_path, "/");
+	if (!dialog->file_table) {
+		GP_WARN("No file table defined!");
+		goto err1;
+	}
 
-	if (dialog->filename)
-		gp_widget_tbox_sel_delim_set(dialog->filename, ".");
+	if (dialog->open_save_btn)
+		gp_widget_disable(dialog->open_save_btn);
 
 	gp_widget_on_event_set(dialog->file_table, table_on_event, dialog);
 	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
@@ -582,9 +668,6 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 	if (dialog->show_hidden)
 		gp_widget_on_event_set(dialog->show_hidden, redraw_table, dialog);
 
-	if (dialog->filename)
-		gp_widget_on_event_set(dialog->filename, save_on_event, dialog);
-
 	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
 
 	return ret;
@@ -595,7 +678,8 @@ err0:
 	return NULL;
 }
 
-gp_dialog *gp_dialog_file_open_new(const char *path)
+gp_dialog *gp_dialog_file_open_new(const char *path,
+                                   const gp_dialog_file_opts *opts)
 {
 	gp_htable *uids = NULL;
 	gp_widget *layout;
@@ -607,6 +691,8 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 		return NULL;
 
 	dialog = (void*)ret->payload;
+
+	dialog->opts = opts;
 
 	gp_widget_json_callbacks callbacks = {
 		.default_priv = dialog,
@@ -624,14 +710,15 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 	dialog->filter = gp_widget_by_uid(uids, "filter", GP_WIDGET_TBOX);
 	dialog->dir_path = gp_widget_by_uid(uids, "path", GP_WIDGET_TBOX);
 	dialog->file_table = gp_widget_by_uid(uids, "files", GP_WIDGET_TABLE);
-
-	if (dialog->dir_path)
-		gp_widget_tbox_sel_delim_set(dialog->dir_path, "/");
+	dialog->open_save_btn = gp_widget_by_uid(uids, "open", GP_WIDGET_BUTTON);
 
 	if (!dialog->file_table) {
 		GP_WARN("No file table defined!");
 		goto err1;
 	}
+
+	if (dialog->open_save_btn)
+		gp_widget_disable(dialog->open_save_btn);
 
 	gp_widget_on_event_set(dialog->file_table, table_on_event, dialog);
 	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
@@ -645,9 +732,6 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 
 	if (dialog->show_hidden)
 		gp_widget_on_event_set(dialog->show_hidden, redraw_table, dialog);
-
-	if (dialog->filter)
-		gp_widget_on_event_set(dialog->filter, redraw_table, dialog);
 
 	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
 

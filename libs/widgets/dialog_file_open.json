@@ -34,10 +34,10 @@
       "cpadf": "0, 0, 1, 1, 0, 0",
       "widgets": [
         {"type": "label", "text": "Filter:"},
-        {"type": "tbox", "len": 20, "uid": "filter", "halign": "fill"},
+        {"type": "tbox", "len": 20, "uid": "filter", "halign": "fill", "on_event": "filter"},
         {"type": "checkbox", "label": "Show Hidden", "uid": "hidden"},
         {"type": "button", "label": "Cancel", "btype": "cancel", "on_event": "cancel"},
-        {"type": "button", "label": "Open", "btype": "open", "on_event": "open"}
+        {"type": "button", "label": "Open", "btype": "open", "uid": "open", "on_event": "open"}
       ]
     }
   ]

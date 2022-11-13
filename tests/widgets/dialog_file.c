@@ -27,7 +27,7 @@ static int file_open_new_free(void)
 {
 	gp_dialog *file_open;
 
-	file_open = gp_dialog_file_open_new(NULL);
+	file_open = gp_dialog_file_open_new(NULL, NULL);
 	if (!file_open) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -42,7 +42,7 @@ static int file_open(void)
 {
 	gp_dialog *file_open;
 
-	file_open = gp_dialog_file_open_new(".");
+	file_open = gp_dialog_file_open_new(".", NULL);
 	if (!file_open) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;

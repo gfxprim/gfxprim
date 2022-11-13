@@ -31,10 +31,10 @@ static const char *dialog_file_save = "\
       \"cpadf\": \"0, 0, 1, 1, 0, 0\", \n\
       \"widgets\": [ \n\
         {\"type\": \"label\", \"text\": \"Filename:\"}, \n\
-        {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filename\", \"halign\": \"fill\", \"focused\": true, \"ttype\": \"filename\"}, \n\
+        {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filename\", \"halign\": \"fill\", \"focused\": true, \"ttype\": \"filename\", \"on_event\": \"filename\"}, \n\
 	{\"type\": \"checkbox\", \"label\": \"Show Hidden\", \"uid\": \"hidden\"}, \n\
 	{\"type\": \"button\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"on_event\": \"cancel\"}, \n\
-        {\"type\": \"button\", \"label\": \"Save\", \"btype\": \"save\", \"on_event\": \"save\"} \n\
+        {\"type\": \"button\", \"label\": \"Save\", \"btype\": \"save\", \"uid\": \"save\", \"on_event\": \"save\"} \n\
       ] \n\
     } \n\
   ] \n\
