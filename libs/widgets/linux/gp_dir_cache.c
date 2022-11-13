@@ -29,12 +29,20 @@ typedef struct gp_dir_cache_linux {
 	int inotify_fd;
 } gp_dir_cache_linux;
 
-static void add_entry(gp_dir_cache_linux *self, const char *name)
+static void add_entry(gp_dir_cache_linux *self, const char *name, int mode)
 {
 	struct stat buf;
 
 	if (fstatat(self->dirfd, name, &buf, 0)) {
-		GP_DEBUG(3, "stat(%s): %s", name, strerror(errno));
+		/*
+		 * If file was deleted right after it was created, add a dummy
+		 * entry so that we delete it on next inotify event
+		 */
+		if (errno == ENOENT && mode)
+			gp_dir_cache_add_entry(&self->dir_cache, 0, name, mode, 0);
+		else
+			GP_DEBUG(3, "stat(%s): %s", name, strerror(errno));
+
 		return;
 	}
 
@@ -54,7 +62,7 @@ static void populate(gp_dir_cache_linux *self)
 		if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
 			continue;
 
-		add_entry(self, ent->d_name);
+		add_entry(self, ent->d_name, 0);
 	}
 }
 
@@ -67,7 +75,7 @@ static void open_inotify(gp_dir_cache_linux *self, const char *path)
 		return;
 	}
 
-	int watch = inotify_add_watch(self->inotify_fd, path, IN_CREATE | IN_DELETE);
+	int watch = inotify_add_watch(self->inotify_fd, path, IN_CREATE | IN_DELETE | IN_MOVE);
 
 	if (watch < 0) {
 		GP_DEBUG(1, "inotify_add_watch(): %s", strerror(errno));
@@ -97,47 +105,71 @@ static void append_slash(struct inotify_event *ev)
 	ev->name[len+1] = 0;
 }
 
+static int parse_inotify_event(gp_dir_cache_linux *self, const char *new_dir, struct inotify_event *ev)
+{
+	GP_DEBUG(3, "EV MASK %x NAME '%s'", ev->mask, ev->name);
+
+	switch (ev->mask) {
+	case IN_MOVED_FROM:
+	case IN_DELETE:
+		if (!gp_dir_cache_rem_entry_by_name(&self->dir_cache, ev->name)) {
+			GP_DEBUG(1, "Deleted '%s'", ev->name);
+			return 1;
+			break;
+		}
+	/*
+	 * We have to try both since symlink to directory does not
+	 * contain IN_ISDIR but appears to be directory for us.
+	 */
+	/* fallthrough */
+	case IN_MOVED_FROM | IN_ISDIR:
+	case IN_DELETE | IN_ISDIR:
+		append_slash(ev);
+
+		GP_DEBUG(1, "Deleted dir '%s'", ev->name);
+
+		if (gp_dir_cache_rem_entry_by_name(&self->dir_cache, ev->name))
+			GP_WARN("Failed to remove '%s'", ev->name);
+
+		return 1;
+	break;
+	case IN_MOVED_TO | IN_ISDIR:
+	case IN_CREATE | IN_ISDIR:
+		if (new_dir && !strcmp(new_dir, ev->name))
+			return 2;
+
+		GP_DEBUG(1, "Created dir '%s'", ev->name);
+		add_entry(self, ev->name, S_IFDIR);
+	break;
+	case IN_MOVED_TO:
+	case IN_CREATE:
+		GP_DEBUG(1, "Created '%s'", ev->name);
+		add_entry(self, ev->name, S_IFREG);
+		return 1;
+	break;
+	}
+
+	return 0;
+}
+
 static int dir_cache_inotify(gp_dir_cache_linux *self, const char *new_dir)
 {
-	long buf[1024];
-	struct inotify_event *ev = (void*)buf;
+	char buf[2048];
 	int sort = 0;
+	ssize_t len;
 
 	if (self->inotify_fd <= 0)
 		return 0;
 
-	while (read(self->inotify_fd, &buf, sizeof(buf)) > 0) {
-		switch (ev->mask) {
-		case IN_DELETE:
-			if (!gp_dir_cache_rem_entry_by_name(&self->dir_cache, ev->name)) {
-				GP_DEBUG(1, "Deleted '%s'", ev->name);
-				sort |= 1;
-				break;
-			}
-		/*
-		 * We have to try both since symlink to directory does not
-		 * contain IN_ISDIR but appears to be directory for us.
-		 */
-		/* fallthrough */
-		case IN_DELETE | IN_ISDIR:
-			append_slash(ev);
+	while ((len = read(self->inotify_fd, &buf, sizeof(buf))) > 0) {
+		ssize_t i = 0;
 
-			GP_DEBUG(1, "Deleted '%s'", ev->name);
+		while (i < len) {
+			struct inotify_event *ev = (void*)(buf+i);
 
-			if (gp_dir_cache_rem_entry_by_name(&self->dir_cache, ev->name))
-				GP_WARN("Failed to remove '%s'", ev->name);
+			sort |= parse_inotify_event(self, new_dir, ev);
 
-			sort |= 1;
-		break;
-		case IN_CREATE | IN_ISDIR:
-			if (new_dir && !strcmp(new_dir, ev->name))
-				sort |= 2;
-		/* fallthrough */
-		case IN_CREATE:
-			GP_DEBUG(1, "Created '%s'", ev->name);
-			add_entry(self, ev->name);
-			sort |= 1;
-		break;
+			i += sizeof(struct inotify_event) + ev->len;
 		}
 	}
 
@@ -173,7 +205,7 @@ int gp_dir_cache_mkdir(gp_dir_cache *cache, const char *dirname)
 		return 0;
 
 	/* Fallback when inotify is not enabled */
-	add_entry(self, dirname);
+	add_entry(self, dirname, 0);
 
 	return 0;
 }
@@ -208,7 +240,7 @@ gp_dir_cache *gp_dir_cache_new(const char *path)
 
 	//TODO: handle correctly all variants that resolve to "/"
 	if (strcmp(path, "/"))
-		add_entry(cache, "..");
+		add_entry(cache, "..", 0);
 
 	populate(cache);
 
