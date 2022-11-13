@@ -466,7 +466,7 @@ static const char *get_path(const char *path)
 	if (path)
 		return path;
 
-	path = getenv("HOME");
+	path = getenv("PWD");
 	if (path)
 		return path;
 
