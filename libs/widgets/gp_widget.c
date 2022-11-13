@@ -112,3 +112,11 @@ void gp_widget_enable(gp_widget *self)
 	gp_widget_redraw(self);
 	gp_widget_redraw_children(self);
 }
+
+void gp_widget_disable_set(gp_widget *self, bool disable)
+{
+	if (disable)
+		gp_widget_disable(self);
+	else
+		gp_widget_enable(self);
+}

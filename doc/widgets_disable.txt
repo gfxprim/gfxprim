@@ -13,7 +13,19 @@ image:widgets_disable.png[Disabled widget]
 void gp_widget_enable(gp_widget *self);
 
 void gp_widget_disable(gp_widget *self);
+
+void gp_widget_disable_set(gp_widget *self, bool disable);
 -------------------------------------------------------------------------------
+
+.Function to return widget disabled state
+[source,c]
+-------------------------------------------------------------------------------
+bool gp_widget_disabled(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Note that this function returns true only if particular widget is disabled
+explicitly. It will return false for child widgets that are disabled because
+of parent widgets have been disabled.
 
 .Example
 [source,c]

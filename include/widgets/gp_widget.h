@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <utils/gp_types.h>
 #include <widgets/gp_common.h>
 #include <widgets/gp_widget_types.h>
@@ -270,6 +271,31 @@ void gp_widget_disable(gp_widget *self);
  * @self A widget to enable.
  */
 void gp_widget_enable(gp_widget *self);
+
+/**
+ * @brief Sets disabled/enabled widget state.
+ *
+ * A disabled widget does not process any input events and is "grayed out".
+ *
+ * @self A widget.
+ * @disable True to disable widget false to enable it.
+ */
+void gp_widget_disable_set(gp_widget *self, bool disable);
+
+/**
+ * @brief Returns true if widget is disabled.
+ *
+ * Note that this function returns true only if particular widget is disabled
+ * explicitly. It will return false for child widgets that are disabled because
+ * of parent widgets have been disabled.
+ *
+ * @self A widget.
+ * @return True if widget is disabled.
+ */
+static inline bool gp_widget_disabled(gp_widget *self)
+{
+	return self->disabled;
+}
 
 /**
  * @brief Sets widget event handler.
