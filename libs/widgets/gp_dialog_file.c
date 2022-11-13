@@ -53,7 +53,7 @@ static int dialog_show_hidden(struct file_dialog *dialog)
 	if (!dialog->show_hidden)
 		return 0;
 
-	return dialog->show_hidden->checkbox->val;
+	return gp_widget_bool_get(dialog->show_hidden);
 }
 
 static char *dialog_filter(struct file_dialog *dialog)
@@ -74,27 +74,26 @@ static int find_next(gp_widget *self)
 	gp_dir_entry *entry;
 
 	for (;;) {
+		int filter = 0;
+
 		if (tbl->row_idx >= cache->used)
 			return 0;
 
 		entry = gp_dir_cache_get(cache, tbl->row_idx);
 
-		if (str_len) {
-			if (strstr(entry->name, str)) {
-				gp_dir_cache_set_filter(cache, tbl->row_idx, 0);
-				return 1;
-			} else {
-				goto next;
-			}
-		}
+		if ((str_len) && !strstr(entry->name, str))
+			filter = 1;
 
-		if (show_hidden || (entry->name[0] != '.' || entry->name[1] == '.')) {
+		if (!show_hidden && (entry->name[0] == '.' && entry->name[1] != '.'))
+			filter = 1;
+
+		if (filter) {
+			gp_dir_cache_set_filter(cache, tbl->row_idx, 1);
+			tbl->row_idx++;
+		} else {
 			gp_dir_cache_set_filter(cache, tbl->row_idx, 0);
 			return 1;
 		}
-next:
-		gp_dir_cache_set_filter(cache, tbl->row_idx, 1);
-		tbl->row_idx++;
 	}
 }
 
@@ -297,6 +296,9 @@ static int cannot_open(struct file_dialog *dialog)
 
 	if (dialog->opts) {
 		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, table->tbl->selected_row);
+
+		if (!entry)
+			return 1;
 
 		if (entry->is_dir && !(dialog->opts->flags & GP_DIALOG_OPEN_DIR))
 			return 1;
