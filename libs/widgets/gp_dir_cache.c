@@ -205,6 +205,19 @@ unsigned int gp_dir_cache_pos_by_name_filtered(gp_dir_cache *self, const char *n
 	return (unsigned int)-1;
 }
 
+int gp_dir_cache_entry_name_contains(gp_dir_cache *self, const char *needle)
+{
+	unsigned int n;
+
+	//TODO: Optimize?
+	for (n = 0; n < self->used; n++) {
+		if (strstr(self->entries[n]->name, needle))
+			return 1;
+	}
+
+	return 0;
+}
+
 __attribute__((weak))
 int gp_dir_cache_notify(gp_dir_cache *self)
 {

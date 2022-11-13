@@ -586,13 +586,14 @@ static int filename_on_event(gp_widget_event *ev)
 static int filter_on_event(gp_widget_event *ev)
 {
 	struct file_dialog *dialog = ev->self->priv;
+	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	switch (ev->sub_type) {
 	case GP_WIDGET_TBOX_POST_FILTER:
-		//dir cache lookup!
+		return !gp_dir_cache_entry_name_contains(cache, ev->self->tbox->buf);
 	break;
 	case GP_WIDGET_TBOX_EDIT:
 		gp_widget_redraw(dialog->file_table);

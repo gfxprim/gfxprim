@@ -79,6 +79,13 @@ int gp_dir_cache_rem_entry_by_name(gp_dir_cache *self, const char *name);
 gp_dir_entry *gp_dir_cache_entry_lookup(gp_dir_cache *self, const char *name);
 
 /**
+ * @brief Returns true if there is at least one entry with needle in the name
+ *
+ * @return Non-zero if entry with needle in name exists zero otherwise.
+ */
+int gp_dir_cache_entry_name_contains(gp_dir_cache *self, const char *needle);
+
+/**
  * @brief Frees all entries from directory cache.
  *
  * This function is called by the platform code.
