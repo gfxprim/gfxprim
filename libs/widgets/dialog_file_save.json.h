@@ -11,7 +11,7 @@ static const char *dialog_file_save = "\
       \"cfill\": \"0, 1, 0\", \n\
       \"widgets\": [ \n\
 	{\"type\": \"label\", \"text\": \"Directory:\"}, \n\
-	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\"}, \n\
+	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\", \"on_event\": \"path\"}, \n\
 	{\"type\": \"button\", \"btype\": \"new_dir\", \"label\": \"New dir\", \"on_event\": \"new_dir\"} \n\
       ] \n\
     }, \n\

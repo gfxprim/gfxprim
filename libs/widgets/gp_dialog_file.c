@@ -124,9 +124,10 @@ static gp_dir_cache *load_dir_cache(struct file_dialog *dialog)
 	return cache;
 }
 
-static void free_dir_cache(gp_dir_cache *self)
+static void free_dir_cache(struct file_dialog *dialog)
 {
 	int notify_fd;
+	gp_dir_cache *self = dialog->file_table->tbl->priv;
 
 	if (!self)
 		return;
@@ -136,6 +137,8 @@ static void free_dir_cache(gp_dir_cache *self)
 		gp_fds_rem(gp_widgets_fds, notify_fd);
 
 	gp_dir_cache_destroy(self);
+
+	dialog->file_table->tbl->priv = NULL;
 }
 
 static int files_seek_row(gp_widget *self, int op, unsigned int pos)
@@ -282,7 +285,7 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 	}
 
 exit:
-	free_dir_cache(cache);
+	free_dir_cache(dialog);
 	wd->retval = retval;
 }
 
@@ -392,7 +395,7 @@ static void table_event(gp_widget *self)
 
 	free(dir);
 
-	free_dir_cache(dialog->file_table->tbl->priv);
+	free_dir_cache(dialog);
 	dialog->file_table->tbl->priv = load_dir_cache(self->priv);
 	if (dialog->filter)
 		gp_widget_tbox_clear(dialog->filter);
@@ -605,6 +608,23 @@ static int filter_on_event(gp_widget_event *ev)
 	return 0;
 }
 
+static int path_on_event(gp_widget_event *ev)
+{
+	struct file_dialog *dialog = ev->self->priv;
+
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	switch (ev->sub_type) {
+	case GP_WIDGET_TBOX_TRIGGER:
+		free_dir_cache(dialog);
+		gp_widget_redraw(dialog->file_table);
+	break;
+	}
+
+	return 0;
+}
+
 static const gp_widget_json_addr addrs[] = {
 	{.id = "cancel", .on_event = cancel_on_event},
 	{.id = "file_table", .table_col_ops = &gp_dialog_files_col_ops},
@@ -612,6 +632,7 @@ static const gp_widget_json_addr addrs[] = {
 	{.id = "filter", .on_event = filter_on_event},
 	{.id = "new_dir", .on_event = new_dir_on_event},
 	{.id = "open", .on_event = open_on_event},
+	{.id = "path", .on_event = path_on_event},
 	{.id = "save", .on_event = save_on_event},
 	{}
 };
