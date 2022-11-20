@@ -64,6 +64,26 @@ static inline int gp_utf8_pos_ge(gp_utf8_pos a, gp_utf8_pos b)
 	return a.bytes >= b.bytes;
 }
 
+static inline gp_utf8_pos gp_utf8_pos_sub(gp_utf8_pos a, gp_utf8_pos b)
+{
+	gp_utf8_pos res = {
+		.bytes = a.bytes - b.bytes,
+		.chars = a.chars - b.chars,
+	};
+
+	return res;
+}
+
+static inline gp_utf8_pos gp_utf8_pos_add(gp_utf8_pos a, gp_utf8_pos b)
+{
+	gp_utf8_pos res = {
+		.bytes = a.bytes + b.bytes,
+		.chars = a.chars + b.chars,
+	};
+
+	return res;
+}
+
 static inline gp_utf8_pos gp_utf8_pos_min(gp_utf8_pos a, gp_utf8_pos b)
 {
 	if (a.bytes < b.bytes)

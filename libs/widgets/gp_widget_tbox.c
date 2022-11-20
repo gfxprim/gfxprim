@@ -1084,11 +1084,11 @@ const char *gp_widget_tbox_text(gp_widget *self)
 	return self->tbox->buf;
 }
 
-size_t gp_widget_tbox_cursor_get(gp_widget *self)
+gp_utf8_pos gp_widget_tbox_cursor_get(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, 0);
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
 
-	return self->tbox->cur_pos.chars;
+	return self->tbox->cur_pos;
 }
 
 void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
@@ -1253,18 +1253,18 @@ void gp_widget_tbox_sel_del(gp_widget *self)
 		gp_widget_redraw(self);
 }
 
-size_t gp_widget_tbox_sel_len(gp_widget *self)
+gp_utf8_pos gp_widget_tbox_sel_len(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, 0);
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
 
-	return self->tbox->sel_right.chars - self->tbox->sel_left.chars;
+	return gp_utf8_pos_sub(self->tbox->sel_right, self->tbox->sel_left);
 }
 
-size_t gp_widget_tbox_sel_off(gp_widget *self)
+gp_utf8_pos gp_widget_tbox_sel_off(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, 0);
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
 
-	return self->tbox->sel_left.chars;
+	return self->tbox->sel_left;
 }
 
 void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim)

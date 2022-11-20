@@ -170,7 +170,7 @@ static inline int gp_widget_tbox_is_empty(gp_widget *self)
  * @self A tbox widget.
  * @return Current cursor position.
  */
-size_t gp_widget_tbox_cursor_get(gp_widget *self);
+gp_utf8_pos gp_widget_tbox_cursor_get(gp_widget *self);
 
 /**
  * @brief Moves a cursor to a defined position.
@@ -273,7 +273,7 @@ void gp_widget_tbox_sel_del(gp_widget *self);
  * @self A tbox widget.
  * @return A selection length.
  */
-size_t gp_widget_tbox_sel_len(gp_widget *self);
+gp_utf8_pos gp_widget_tbox_sel_len(gp_widget *self);
 
 /**
  * @brief Returns selection offset, i.e. first character.
@@ -283,7 +283,7 @@ size_t gp_widget_tbox_sel_len(gp_widget *self);
  * @self A tbox widget.
  * @return A selection offset.
  */
-size_t gp_widget_tbox_sel_off(gp_widget *self);
+gp_utf8_pos gp_widget_tbox_sel_off(gp_widget *self);
 
 /**
  * @brief Returns if text is selected.
@@ -292,7 +292,7 @@ size_t gp_widget_tbox_sel_off(gp_widget *self);
  */
 static inline int gp_widget_tbox_sel(gp_widget *self)
 {
-	return !!gp_widget_tbox_sel_len(self);
+	return !!gp_widget_tbox_sel_len(self).bytes;
 }
 
 /**

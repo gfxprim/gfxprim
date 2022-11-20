@@ -110,7 +110,7 @@ void gp_widget_tbox_del(gp_widget *self, ssize_t off,
 .Cursor tbox functions
 [source,c]
 -------------------------------------------------------------------------------
-size_t gp_widget_tbox_cursor_get(gp_widget *self);
+gp_utf8_pos gp_widget_tbox_cursor_get(gp_widget *self);
 
 void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
                                enum gp_seek_whence whence);
@@ -142,8 +142,8 @@ void gp_widget_tbox_sel_del(gp_widget *self);
 /*
  * Returns selection offset and length.
  */
-size_t gp_widget_tbox_sel_len(gp_widget *self);
-size_t gp_widget_tbox_sel_off(gp_widget *self);
+gp_utf8_pos gp_widget_tbox_sel_len(gp_widget *self);
+gp_utf8_pos gp_widget_tbox_sel_off(gp_widget *self);
 
 /*
  * Returns non-zero when text is selected.

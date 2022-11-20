@@ -11,7 +11,7 @@
 static int tbox_new(void)
 {
 	gp_widget *tbox;
-	size_t cur_pos;
+	gp_utf8_pos cur_pos;
 
 	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -20,8 +20,9 @@ static int tbox_new(void)
 	}
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 0) {
-		tst_msg("Wrong cursor position %zu expected 0", cur_pos);
+	if (cur_pos.chars || cur_pos.bytes) {
+		tst_msg("Wrong cursor position %zu %zu expected 0",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -137,7 +138,7 @@ static int tbox_cursor(void)
 {
 	gp_widget *tbox;
 	const char *str;
-	size_t cur_pos;
+	gp_utf8_pos cur_pos;
 
 	tbox = gp_widget_tbox_new("world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -146,24 +147,27 @@ static int tbox_cursor(void)
 	}
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 5) {
-		tst_msg("Wrong cursor position %zu expected 5", cur_pos);
+	if (cur_pos.chars != 5 || cur_pos.bytes != 5) {
+		tst_msg("Wrong cursor position %zu %zu expected 5",
+			cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
 	gp_widget_tbox_cursor_set(tbox, -5, GP_SEEK_CUR);
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 0) {
-		tst_msg("Wrong cursor position %zu expected 0", cur_pos);
+	if (cur_pos.chars || cur_pos.bytes) {
+		tst_msg("Wrong cursor position %zu %zu expected 0",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
 	type_string(tbox, "hello ");
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 6) {
-		tst_msg("Wrong cursor position %zu expected 6", cur_pos);
+	if (cur_pos.chars != 6 || cur_pos.bytes != 6) {
+		tst_msg("Wrong cursor position %zu %zu expected 6",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -185,7 +189,7 @@ static int tbox_ins(void)
 {
 	gp_widget *tbox;
 	const char *str;
-	size_t cur_pos;
+	gp_utf8_pos cur_pos;
 
 	tbox = gp_widget_tbox_new("world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -195,8 +199,9 @@ static int tbox_ins(void)
 
 	gp_widget_tbox_ins(tbox, 0, GP_SEEK_SET, "hello ");
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 11) {
-		tst_msg("Wrong cursor position %zu expected 11", cur_pos);
+	if (cur_pos.chars != 11 || cur_pos.bytes != 11) {
+		tst_msg("Wrong cursor position %zu %zu expected 11",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -208,8 +213,9 @@ static int tbox_ins(void)
 
 	gp_widget_tbox_ins(tbox, 0, GP_SEEK_END, "s");
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 12) {
-		tst_msg("Wrong cursor position %zu expected 12", cur_pos);
+	if (cur_pos.chars != 12 || cur_pos.bytes != 12) {
+		tst_msg("Wrong cursor position %zu %zu expected 12",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -223,8 +229,9 @@ static int tbox_ins(void)
 	gp_widget_tbox_ins(tbox, 0, GP_SEEK_END, " ");
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 11) {
-		tst_msg("Wrong cursor position %zu expected 11", cur_pos);
+	if (cur_pos.chars != 11 || cur_pos.bytes != 11) {
+		tst_msg("Wrong cursor position %zu %zu expected 11",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -240,7 +247,7 @@ static int tbox_del(void)
 {
 	gp_widget *tbox;
 	const char *str;
-	size_t cur_pos;
+	gp_utf8_pos cur_pos;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -250,8 +257,9 @@ static int tbox_del(void)
 
 	gp_widget_tbox_del(tbox, 0, GP_SEEK_SET, 6);
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 5) {
-		tst_msg("Wrong cursor position %zu expected 5 '%s'", cur_pos, tbox->tbox->buf);
+	if (cur_pos.chars != 5 || cur_pos.bytes != 5) {
+		tst_msg("Wrong cursor position %zu %zu expected 5 '%s'",
+		        cur_pos.chars, cur_pos.bytes, tbox->tbox->buf);
 		return TST_FAILED;
 	}
 
@@ -265,8 +273,9 @@ static int tbox_del(void)
 	gp_widget_tbox_del(tbox, 0, GP_SEEK_SET, 100);
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 0) {
-		tst_msg("Wrong cursor position %zu expected 0", cur_pos);
+	if (cur_pos.chars || cur_pos.bytes) {
+		tst_msg("Wrong cursor position %zu %zu expected 0",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -288,7 +297,7 @@ static int tbox_printf(void)
 {
 	gp_widget *tbox;
 	const char *str;
-	size_t cur_pos;
+	gp_utf8_pos cur_pos;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -299,8 +308,9 @@ static int tbox_printf(void)
 	gp_widget_tbox_printf(tbox, "%i", 666);
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 3) {
-		tst_msg("Wrong cursor position %zu expected 3", cur_pos);
+	if (cur_pos.chars != 3 || cur_pos.bytes != 3) {
+		tst_msg("Wrong cursor position %zu %zu expected 3",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -319,7 +329,7 @@ static int tbox_set(void)
 {
 	gp_widget *tbox;
 	const char *str;
-	size_t cur_pos;
+	gp_utf8_pos cur_pos;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -330,8 +340,9 @@ static int tbox_set(void)
 	gp_widget_tbox_set(tbox, "666");
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 3) {
-		tst_msg("Wrong cursor position %zu expected 3", cur_pos);
+	if (cur_pos.chars != 3 || cur_pos.bytes != 3) {
+		tst_msg("Wrong cursor position %zu %zu expected 3",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -349,7 +360,7 @@ static int tbox_set(void)
 static int tbox_sel_all(void)
 {
 	gp_widget *tbox;
-	size_t val;
+	gp_utf8_pos cur_pos;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -359,21 +370,24 @@ static int tbox_sel_all(void)
 
 	gp_widget_tbox_sel_all(tbox);
 
-	val = gp_widget_tbox_sel_off(tbox);
-	if (val) {
-		tst_msg("Wrong offset %zu after select all", val);
+	cur_pos = gp_widget_tbox_sel_off(tbox);
+	if (cur_pos.chars || cur_pos.bytes) {
+		tst_msg("Wrong offset %zu %zu after select all",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
-	val = gp_widget_tbox_sel_len(tbox);
-	if (val != 11) {
-		tst_msg("Wrong lenght %zu after select all", val);
+	cur_pos = gp_widget_tbox_sel_len(tbox);
+	if (cur_pos.chars != 11 || cur_pos.bytes != 11) {
+		tst_msg("Wrong lenght %zu %zu after select all",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
-	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 11) {
-		tst_msg("Wrong cursor %zu after select all", val);
+	cur_pos = gp_widget_tbox_cursor_get(tbox);
+	if (cur_pos.chars != 11 || cur_pos.bytes != 11) {
+		tst_msg("Wrong cursor %zu %zu after select all",
+		        cur_pos.chars, cur_pos.bytes);
 		return TST_FAILED;
 	}
 
@@ -383,7 +397,7 @@ static int tbox_sel_all(void)
 static int tbox_sel_set(void)
 {
 	gp_widget *tbox;
-	size_t val;
+	gp_utf8_pos val;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -394,20 +408,23 @@ static int tbox_sel_set(void)
 	gp_widget_tbox_sel_set(tbox, -2, GP_SEEK_END, 2);
 
 	val = gp_widget_tbox_sel_off(tbox);
-	if (val != 9) {
-		tst_msg("Wrong offset %zu after select all", val);
+	if (val.chars != 9 || val.bytes != 9) {
+		tst_msg("Wrong offset %zu %zu after selection",
+			val.chars, val.bytes);
 		return TST_FAILED;
 	}
 
 	val = gp_widget_tbox_sel_len(tbox);
-	if (val != 2) {
-		tst_msg("Wrong lenght %zu after select all", val);
+	if (val.chars != 2 || val.bytes != 2) {
+		tst_msg("Wrong lenght %zu %zu after selection",
+			val.chars, val.bytes);
 		return TST_FAILED;
 	}
 
 	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 11) {
-		tst_msg("Wrong cursor %zu after select all", val);
+	if (val.chars != 11 || val.bytes != 11) {
+		tst_msg("Wrong cursor %zu %zu after selection",
+			val.chars, val.bytes);
 		return TST_FAILED;
 	}
 
@@ -420,7 +437,7 @@ static int tbox_sel_set(void)
 static int tbox_sel_del(void)
 {
 	gp_widget *tbox;
-	size_t val;
+	gp_utf8_pos val;
 	const char *str;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
@@ -450,8 +467,9 @@ static int tbox_sel_del(void)
 	}
 
 	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 9) {
-		tst_msg("Cursor (%zu) not updated after selection delete!", val);
+	if (val.chars != 9 || val.bytes != 9) {
+		tst_msg("Cursor (%zu %zu) not updated after selection delete!",
+			val.chars, val.bytes);
 		return TST_FAILED;
 	}
 
@@ -464,7 +482,7 @@ static int tbox_sel_del(void)
 static int tbox_sel_keys_ascii(void)
 {
 	gp_widget *tbox;
-	size_t val;
+	gp_utf8_pos val;
 	const char *str;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
@@ -489,8 +507,9 @@ static int tbox_sel_keys_ascii(void)
 	}
 
 	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 7) {
-		tst_msg("Wrong cursor position %zu after text input!", val);
+	if (val.chars != 7 || val.bytes != 7) {
+		tst_msg("Wrong cursor position %zu %zu after text input!",
+			val.chars, val.bytes);
 		return TST_FAILED;
 	}
 
@@ -535,7 +554,7 @@ static int sel_whole_right(gp_widget *tbox)
 
 static int check_cleared(gp_widget *tbox, const char *op, size_t cur_pos)
 {
-	size_t val;
+	gp_utf8_pos val;
 
 	if (gp_widget_tbox_sel(tbox)) {
 		tst_msg("Selection not cleared by %s!", op);
@@ -543,8 +562,9 @@ static int check_cleared(gp_widget *tbox, const char *op, size_t cur_pos)
 	}
 
 	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != cur_pos) {
-		tst_msg("Wrong cursor %zu ater %s expected %zu!", val, op, cur_pos);
+	if (val.chars != cur_pos) {
+		tst_msg("Wrong cursor %zu ater %s expected %zu!",
+		        val.chars, op, cur_pos);
 		return TST_FAILED;
 	}
 
@@ -553,19 +573,19 @@ static int check_cleared(gp_widget *tbox, const char *op, size_t cur_pos)
 
 static int check_selected(gp_widget *tbox, const char *op, size_t sel_off, size_t sel_len)
 {
-	size_t val;
+	gp_utf8_pos val;
 
 	val = gp_widget_tbox_sel_off(tbox);
-	if (val != sel_off) {
+	if (val.chars != sel_off) {
 		tst_msg("Wrong selection after %s offset %zu expected %zu",
-		        op, val, sel_off);
+		        op, val.chars, sel_off);
 		return TST_FAILED;
 	}
 
 	val = gp_widget_tbox_sel_len(tbox);
-	if (val != sel_len) {
+	if (val.chars != sel_len) {
 		tst_msg("Wrong selection after %s lenght %zu expected %zu",
-		        op, val, sel_len);
+		        op, val.chars, sel_len);
 		return TST_FAILED;
 	}
 
@@ -735,7 +755,7 @@ static int tbox_sel_key_del_backspace(int key)
 {
 	gp_widget *tbox;
 	const char *str;
-	size_t val;
+	gp_utf8_pos val;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -753,8 +773,9 @@ static int tbox_sel_key_del_backspace(int key)
 	}
 
 	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 2) {
-		tst_msg("Wrong cursor position %zu after deleted selection!", val);
+	if (val.chars != 2 || val.bytes != 2) {
+		tst_msg("Wrong cursor position %zu %zu after deleted selection!",
+		        val.chars, val.bytes);
 		return TST_FAILED;
 	}
 
