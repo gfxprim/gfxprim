@@ -73,14 +73,14 @@ static void backspace(gp_pixmap *pix, gp_coord cx, gp_coord cy,
                       gp_size sym_r, gp_pixel fg, gp_pixel bg)
 {
 	gp_coord poly[] = {
-		cx + sym_r, cy-sym_r/2-sym_r/4,
-		cx + sym_r, cy+sym_r/2+sym_r/4,
-		cx - sym_r/2+sym_r/8, cy+sym_r/2+sym_r/4,
-		cx - sym_r, cy,
-		cx - sym_r/2+sym_r/8, cy-sym_r/2-sym_r/4,
+		sym_r, -sym_r/2-sym_r/4,
+		sym_r, sym_r/2+sym_r/4,
+		-sym_r/2+sym_r/8, sym_r/2+sym_r/4,
+		-sym_r, 0,
+		-sym_r/2+sym_r/8, -sym_r/2-sym_r/4,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, fg);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, fg);
 	cross(pix, cx+sym_r/4, cy, sym_r/3, sym_r/7, bg);
 }
 

@@ -113,7 +113,7 @@ static void render_stock_speaker(gp_pixmap *pix,
 		cx-edge, cy-rx-ry,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, col);
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, col);
 
 	/* space between speaker and symbol */
 	gp_size sp = GP_MAX(1u, rx/2);
@@ -312,7 +312,7 @@ static void render_stock_settings(gp_pixmap *pix,
 		ROT_3_PI_8(cx, -tw, cy, ci),
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
 
 	gp_fill_circle(pix, cx, cy, cc, ctx->fg_color);
 }
@@ -333,31 +333,31 @@ static void render_stock_save(gp_pixmap *pix,
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_coord poly[] = {
-		cx - sh, cy - sh,
-		cx - sh + th, cy - sh,
+		-sh, -sh,
+		-sh + th, -sh,
 		/* inner polygon starts here */
-		cx - sh + th, cy + sh - th,
-		cx + sh - th, cy + sh - th,
-		cx + sh - th, cy - sh + th + cs,
-		cx + sh - th - cs, cy - sh + th,
+		-sh + th,  sh - th,
+		 sh - th,  sh - th,
+		 sh - th, -sh + th + cs,
+		 sh - th - cs, -sh + th,
 		/* cover start */
-		cx + cvr_s, cy - sh + th,
-		cx + cvr_s, cy - sh + th + cvr_d,
-		cx - cvr_s, cy - sh + th + cvr_d,
-		cx - cvr_s, cy - sh + th,
+		 cvr_s, -sh + th,
+		 cvr_s, -sh + th + cvr_d,
+		-cvr_s, -sh + th + cvr_d,
+		-cvr_s, -sh + th,
 		/* cover end */
-		cx - sh + th, cy - sh + th,
+		-sh + th, -sh + th,
 		/* inner polygon ends here */
-		cx - sh + th, cy - sh,
-		cx + sh - cs - th/2, cy - sh,
-		cx + sh, cy - sh + cs + th/2,
-		cx + sh, cy + sh,
-		cx - sh, cy + sh,
-		cx - sh, cy - sh,
+		-sh + th, -sh,
+		 sh - cs - th/2, -sh,
+		 sh, -sh + cs + th/2,
+		 sh,  sh,
+		-sh,  sh,
+		-sh, -sh,
 	};
 
 	/* fills inner part of floppy */
-	gp_fill_polygon(pix, 9, poly + 2, ctx->warn_color);
+	gp_fill_polygon(pix, cx, cy, 9, poly + 2, ctx->warn_color);
 
 	/* label */
 	gp_coord lx0 = cx - sh + th + sh/3+1;
@@ -370,7 +370,7 @@ static void render_stock_save(gp_pixmap *pix,
 	render_text_lines(pix, lx0, ly0, lx1, ly1, ctx->text_color);
 
 	/* draws border and cover */
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
 	/* window in the cover */
 	gp_fill_rect_xyxy(pix, cx+cvr_s-1-cvr_s/4, cy - sh + th+1 + cvr_d/5,
 			       cx+cvr_s-1-2*(cvr_s/4), cy - sh + th+cvr_d-1 - cvr_d/5,
@@ -392,40 +392,40 @@ static void render_stock_file(gp_pixmap *pix,
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_coord poly[] = {
-		cx - sw, cy - sh,
-		cx - sw + th, cy - sh,
+		-sw, -sh,
+		-sw + th, -sh,
 		/* inner polygon starts here */
-		cx - sw + th, cy + sh - th,
-		cx + sw - th, cy + sh - th,
+		-sw + th, sh - th,
+		 sw - th, sh - th,
 		/* corner start */
-		cx + sw - th, cy - sh + 2*th + cs,
-		cx + sw - cs - 2*th, cy - sh + 2*th + cs,
-		cx + sw - cs - 2*th, cy - sh + th,
-		cx + sw - cs - th, cy - sh + th,
-		cx + sw - cs - th, cy - sh + th + cs,
-		cx + sw - th, cy - sh + th + cs,
+		 sw - th, -sh + 2*th + cs,
+		 sw - cs - 2*th, -sh + 2*th + cs,
+		 sw - cs - 2*th, -sh + th,
+		 sw - cs - th, -sh + th,
+		 sw - cs - th, -sh + th + cs,
+		 sw - th, -sh + th + cs,
 		/* corner end */
-		cx + sw - th - cs, cy - sh + th,
-		cx - sw + th, cy - sh + th,
+		 sw - th - cs, -sh + th,
+		-sw + th, -sh + th,
 		/* inner polygon ends here */
-		cx - sw + th, cy - sh,
-		cx + sw - cs - th/2, cy - sh,
-		cx + sw, cy - sh + cs + th/2,
-		cx + sw, cy + sh,
-		cx - sw, cy + sh,
-		cx - sw, cy - sh,
+		-sw + th, -sh,
+		 sw - cs - th/2, -sh,
+		 sw, -sh + cs + th/2,
+		 sw, sh,
+		-sw, sh,
+		-sw, -sh,
 	};
 
 	gp_coord in_poly[] = {
-		cx - sw + th, cy + sh - th,
-		cx + sw - th, cy + sh - th,
-		cx + sw - th, cy - sh + th + cs,
-		cx + sw - th - cs, cy - sh + th,
-		cx - sw + th, cy - sh + th,
+		-sw + th,  sh - th,
+		 sw - th,  sh - th,
+		 sw - th, -sh + th + cs,
+		 sw - th - cs, -sh + th,
+		-sw + th, -sh + th,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(in_poly)/2, in_poly, ctx->fg_color);
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(in_poly)/2, in_poly, ctx->fg_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
 
 	/* text */
 	gp_coord lx0 = cx - sw + th + sh/3;
@@ -455,51 +455,50 @@ static void render_stock_dir(gp_pixmap *pix, int new,
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_coord poly[] = {
-		cx - w2, cy - h2 + r,
-		cx - w2 + th, cy - h2,
-		cx - w2 + th, cy - h2 + th + cs,
-		cx - w2 + th, cy - h2 + th + cs,
+		-w2, -h2 + r,
+		-w2 + th, -h2,
+		-w2 + th, -h2 + th + cs,
+		-w2 + th, -h2 + th + cs,
 
-		cx - w2 + th, cy + h2 - th,
+		-w2 + th, h2 - th,
 
-		cx + w2 - fw - th, cy + h2 - th,
-		cx + w2 - th, cy + h2 - th,
+		 w2 - fw - th, h2 - th,
+		 w2 - th, h2 - th,
 
-		cx + w2 - th, cy - h2 + cs + 2*th+fw,
+		 w2 - th, -h2 + cs + 2*th+fw,
 		/* inner part starts here */
-		cx + w2 - th, cy - h2 + cs + fw + th,
-		cx + w2 - th, cy - h2 + cs + th,
-		cx - w2 + th + cw, cy - h2 + th + cs,
-		cx - w2 + th + cw, cy - h2 + th,
-		cx - w2 + th, cy - h2 + th,
+		 w2 - th, -h2 + cs + fw + th,
+		 w2 - th, -h2 + cs + th,
+		-w2 + th + cw, -h2 + th + cs,
+		-w2 + th + cw, -h2 + th,
+		-w2 + th, -h2 + th,
 		/* inner part ends here */
-		cx - w2 + th, cy - h2,
-		cx - w2 + 2*th + cw-r, cy - h2,
-		cx - w2 + 2*th + cw, cy - h2 + r,
-		cx - w2 + 2*th + cw, cy - h2 + cs,
+		-w2 + th, -h2,
+		-w2 + 2*th + cw-r, -h2,
+		-w2 + 2*th + cw, -h2 + r,
+		-w2 + 2*th + cw, -h2 + cs,
 
-		cx + w2 - r, cy - h2 + cs,
-		cx + w2, cy - h2 + cs+r,
+		 w2 - r, -h2 + cs,
+		 w2, -h2 + cs+r,
 
-
-		cx + w2, cy + h2,
-		cx - w2, cy + h2,
-		cx - w2, cy - h2 + cs,
+		 w2, h2,
+		-w2, h2,
+		-w2, -h2 + cs,
 	};
 
 	gp_coord in_poly[] = {
-		cx + w2 - th, cy - h2 + cs + fw + th,
-		cx + w2 - th, cy - h2 + cs + th,
-		cx - w2 + th + cw, cy - h2 + th + cs,
-		cx - w2 + th + cw, cy - h2 + th,
-		cx - w2 + th, cy - h2 + th,
-		cx - w2 + th, cy - h2 + cs + fw + th,
+		 w2 - th, -h2 + cs + fw + th,
+		 w2 - th, -h2 + cs + th,
+		-w2 + th + cw, -h2 + th + cs,
+		-w2 + th + cw, -h2 + th,
+		-w2 + th, -h2 + th,
+		-w2 + th, -h2 + cs + fw + th,
 	};
 
 	/* fill the innter parts */
 	gp_fill_rect_xyxy(pix, cx - w2 + th, cy - h2 + cs + th + fw,
 	                       cx + w2 - th, cy + h2 - th, ctx->sel_color);
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(in_poly)/2, in_poly, ctx->fg_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(in_poly)/2, in_poly, ctx->fg_color);
 
 	if (new) {
 		gp_size ps = w/5;
@@ -508,26 +507,26 @@ static void render_stock_dir(gp_pixmap *pix, int new,
 		gp_coord py = cy + cs;
 
 		gp_coord plus_poly[] = {
-			px + ps, py + pt,
-			px + pt, py + pt,
-			px + pt, py + ps,
-			px - pt, py + ps,
-			px - pt, py + pt,
-			px - ps, py + pt,
-			px - ps, py - pt,
-			px - pt, py - pt,
-			px - pt, py - ps,
-			px + pt, py - ps,
-			px + pt, py - pt,
-			px + ps, py - pt,
+			 ps,  pt,
+			 pt,  pt,
+			 pt,  ps,
+			-pt,  ps,
+			-pt,  pt,
+			-ps,  pt,
+			-ps, -pt,
+			-pt, -pt,
+			-pt, -ps,
+			 pt, -ps,
+			 pt, -pt,
+			 ps, -pt,
 		};
 
-		gp_fill_polygon(pix, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, ctx->accept_color);
-		gp_polygon(pix, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, ctx->text_color);
+		gp_fill_polygon(pix, px, py, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, ctx->accept_color);
+		gp_polygon(pix, px, py, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, ctx->text_color);
 	}
 
 	/* draw the lines */
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
 	gp_hline_xxy(pix, cx-w2+th+1, cx+w2-th-1, cy-h2+cs+fw+th, ctx->text_color);
 
 	/* final touch for low res */
@@ -551,29 +550,29 @@ static void render_stock_close(gp_pixmap *pix,
 	gp_size bh = (h-2*a)/2;
 
 	gp_coord poly[] = {
-		x, y,
-		x + a, y,
-		x + w/2, y + bh,
-		x + w/2 + w%2, y + bh,
-		x + w - a, y,
-		x + w, y,
-		x + w, y + a,
-		x + w - bw, y + h/2,
-		x + w - bw, y + h/2 + h%2,
-		x + w, y + h - a,
-		x + w, y + h,
-		x + w - a, y + h,
-		x + w/2 + w%2, y + h - bh,
-		x + w/2, y + h - bh,
-		x + a, y + h,
-		x, y + h,
-		x, y + h - a,
-		x + bw, y + h/2 + h%2,
-		x + bw, y + h/2,
-		x, y + a,
+		0, 0,
+		a, 0,
+		w/2, bh,
+		w/2 + w%2, bh,
+		w - a, 0,
+		w, 0,
+		w, a,
+		w - bw, h/2,
+		w - bw, h/2 + h%2,
+		w, h - a,
+		w, h,
+		w - a, h,
+		w/2 + w%2, h - bh,
+		w/2, h - bh,
+		a, h,
+		0, h,
+		0, h - a,
+		0 + bw, h/2 + h%2,
+		0 + bw, h/2,
+		0, a,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->alert_color);
+	gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(poly)/2, poly, ctx->alert_color);
 }
 
 static void render_stock_arrow(gp_pixmap *pix,
@@ -588,69 +587,69 @@ static void render_stock_arrow(gp_pixmap *pix,
 	w--;
 
 	gp_coord up_poly[] = {
-		x + w/2, y,
-		x + (w+1)/2, y,
-		x+w, y+h/2,
-		x+w, y+(h+1)/2,
-		x+w-3*w/8, y+(h+1)/2,
-		x+w-3*w/8, y+h,
-		x+3*w/8, y+h,
-		x+3*w/8, y+(h+1)/2,
-		x, y+(h+1)/2,
-		x, y+h/2,
+		w/2, 0,
+		(w+1)/2, 0,
+		w, h/2,
+		w, (h+1)/2,
+		w-3*w/8, (h+1)/2,
+		w-3*w/8, h,
+		3*w/8, h,
+		3*w/8, (h+1)/2,
+		0, (h+1)/2,
+		0, h/2,
 	};
 
 	gp_coord down_poly[] = {
-		x + w/2, y+h,
-		x + (w+1)/2, y+h,
-		x+w, y+(h+1)/2,
-		x+w, y+h/2,
-		x+w-3*w/8, y+h/2,
-		x+w-3*w/8, y,
-		x+3*w/8, y,
-		x+3*w/8, y+h/2,
-		x, y+h/2,
-		x, y+(h+1)/2,
+		w/2, h,
+		(w+1)/2, h,
+		w, (h+1)/2,
+		w, h/2,
+		w-3*w/8, h/2,
+		w-3*w/8, 0,
+		3*w/8, 0,
+		3*w/8, h/2,
+		0, h/2,
+		0, (h+1)/2,
 	};
 
 	gp_coord left_poly[] = {
-		x, y + h/2,
-		x, y + (h+1)/2,
-		x + w/2, y + h,
-		x + (w+1)/2, y + h,
-		x + (w+1)/2, y + h - 3*h/8,
-		x + w, y + h - 3*h/8,
-		x + w, y + 3*h/8,
-		x + (w+1)/2, y + 3*h/8,
-		x + (w+1)/2, y,
-		x + w/2, y,
+		0, h/2,
+		0, (h+1)/2,
+		w/2, h,
+		(w+1)/2, h,
+		(w+1)/2, h - 3*h/8,
+		w, h - 3*h/8,
+		w, 3*h/8,
+		(w+1)/2, 3*h/8,
+		(w+1)/2, 0,
+		w/2, 0,
 	};
 
 	gp_coord right_poly[] = {
-		x + w, y + h/2,
-		x + w, y + (h+1)/2,
-		x + (w+1)/2, y + h,
-		x + w/2, y + h,
-		x + w/2, y + h - 3*h/8,
-		x, y + h - 3*h/8,
-		x, y + 3*h/8,
-		x + w/2, y + 3*h/8,
-		x + w/2, y,
-		x + (w+1)/2, y,
+		w, h/2,
+		w, (h+1)/2,
+		(w+1)/2, h,
+		w/2, h,
+		w/2, h - 3*h/8,
+		0, h - 3*h/8,
+		0, 3*h/8,
+		w/2, 3*h/8,
+		w/2, 0,
+		(w+1)/2, 0,
 	};
 
 	switch (GP_WIDGET_STOCK_TYPE(type)) {
 	case GP_WIDGET_STOCK_ARROW_UP:
-		gp_fill_polygon(pix, GP_ARRAY_SIZE(up_poly)/2, up_poly, ctx->text_color);
+		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(up_poly)/2, up_poly, ctx->text_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_DOWN:
-		gp_fill_polygon(pix, GP_ARRAY_SIZE(down_poly)/2, down_poly, ctx->text_color);
+		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(down_poly)/2, down_poly, ctx->text_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_LEFT:
-		gp_fill_polygon(pix, GP_ARRAY_SIZE(left_poly)/2, left_poly, ctx->text_color);
+		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(left_poly)/2, left_poly, ctx->text_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_RIGHT:
-		gp_fill_polygon(pix, GP_ARRAY_SIZE(right_poly)/2, right_poly, ctx->text_color);
+		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(right_poly)/2, right_poly, ctx->text_color);
 	break;
 	}
 }
@@ -673,25 +672,25 @@ static void render_stock_rotate_cw(gp_pixmap *pix,
 	gp_size lr = th/3;
 
 	gp_coord poly_1[] = {
-		cx+th-sr, cy-r-s,
-		cx+th, cy-r-s,
-		cx+th+s, cy-r,
-		cx+th, cy-r+s,
-		cx+th-sr, cy-r+s,
+		 th-sr, -r-s,
+		 th, -r-s,
+		 th+s, -r,
+		 th, -r+s,
+		 th-sr, -r+s,
 
-		cx+th-sr, cy-r+lr,
-		cx-th, cy-r+lr,
+		 th-sr, -r+lr,
+		-th, -r+lr,
 
-		cx-th, cy+r+s,
+		-th, r+s,
 
-		cx-th-2*lr, cy+r+s,
-		cx-th-2*lr, cy-r+lr,
+		-th-2*lr, r+s,
+		-th-2*lr, -r+lr,
 
-		cx-th, cy-r-lr,
-		cx+th-sr, cy-r-lr,
+		-th, -r-lr,
+		 th-sr, -r-lr,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
 }
 
 static void render_stock_rotate_ccw(gp_pixmap *pix,
@@ -712,25 +711,25 @@ static void render_stock_rotate_ccw(gp_pixmap *pix,
 	gp_size lr = th/3;
 
 	gp_coord poly_1[] = {
-		cx-th+sr, cy-r-s,
-		cx-th, cy-r-s,
-		cx-th-s, cy-r,
-		cx-th, cy-r+s,
-		cx-th+sr, cy-r+s,
+		-th+sr, -r-s,
+		-th, -r-s,
+		-th-s, -r,
+		-th, -r+s,
+		-th+sr, -r+s,
 
-		cx-th+sr, cy-r+lr,
-		cx+th, cy-r+lr,
+		-th+sr, -r+lr,
+		th, -r+lr,
 
-		cx+th, cy+r+s,
+		th, r+s,
 
-		cx+th+2*lr, cy+r+s,
-		cx+th+2*lr, cy-r+lr,
+		th+2*lr, r+s,
+		th+2*lr, -r+lr,
 
-		cx+th, cy-r-lr,
-		cx-th+sr, cy-r-lr,
+		th, -r-lr,
+		-th+sr, -r-lr,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
 }
 
 
@@ -755,14 +754,14 @@ static void render_stock_refresh(gp_pixmap *pix,
 	gp_size sr = GP_MAX(s/3, 1u);
 
 	gp_coord poly_1[] = {
-		cx+th-sr, cy-r-s,
-		cx+th, cy-r-s,
-		cx+th+s, cy-r,
-		cx+th, cy-r+s,
-		cx+th-sr, cy-r+s,
+		th-sr, -r-s,
+		th, -r-s,
+		th+s, -r,
+		th, -r+s,
+		th-sr, -r+s,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
 }
 
 static void render_stock_shuffle_off(gp_pixmap *pix,
@@ -782,32 +781,32 @@ static void render_stock_shuffle_off(gp_pixmap *pix,
 	gp_size yd = h/4;
 
 	gp_coord poly_1[] = {
-		cx-wh-3*th, cy+yd+th,
-		cx-wh-3*th, cy+yd-th,
-		cx+wh-th, cy+yd-th,
-		cx+wh-th, cy+yd-3*th,
-		cx+wh, cy+yd-3*th,
-		cx+wh+3*th, cy+yd,
-		cx+wh, cy+yd+3*th,
-		cx+wh-th, cy+yd+3*th,
-		cx+wh-th, cy+yd+th,
+		-wh-3*th, yd+th,
+		-wh-3*th, yd-th,
+		 wh-th, yd-th,
+		 wh-th, yd-3*th,
+		 wh, yd-3*th,
+		 wh+3*th, yd,
+		 wh, yd+3*th,
+		 wh-th, yd+3*th,
+		 wh-th, yd+th,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
 
 	gp_coord poly_2[] = {
-		cx-wh-3*th, cy-yd+th,
-		cx-wh-3*th, cy-yd-th,
-		cx+wh-th, cy-yd-th,
-		cx+wh-th, cy-yd-3*th,
-		cx+wh, cy-yd-3*th,
-		cx+wh+3*th, cy-yd,
-		cx+wh, cy-yd+3*th,
-		cx+wh-th, cy-yd+3*th,
-		cx+wh-th, cy-yd+th,
+		-wh-3*th, -yd+th,
+		-wh-3*th, -yd-th,
+		 wh-th, -yd-th,
+		 wh-th, -yd-3*th,
+		 wh, -yd-3*th,
+		 wh+3*th, -yd,
+		 wh, -yd+3*th,
+		 wh-th, -yd+3*th,
+		 wh-th, -yd+th,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
 }
 
 static void render_stock_shuffle_on(gp_pixmap *pix,
@@ -830,44 +829,44 @@ static void render_stock_shuffle_on(gp_pixmap *pix,
 	gp_size xs = yd/2;
 
 	gp_coord poly_1[] = {
-		cx-wh-th, cy-yd-th,
-		cx-wh-th, cy-yd+th,
-		cx-wh+xs, cy-yd+th,
-		cx+wh-xs, cy+yd+th,
-		cx+wh+th, cy+yd+th,
+		-wh-th, -yd-th,
+		-wh-th, -yd+th,
+		-wh+xs, -yd+th,
+		 wh-xs,  yd+th,
+		 wh+th,  yd+th,
 
-		cx+wh+th, cy+yd+3*th,
-		cx+wh+2*th, cy+yd+3*th,
-		cx+wh+5*th, cy+yd,
-		cx+wh+2*th, cy+yd-3*th,
-		cx+wh+th, cy+yd-3*th,
+		 wh+th,   yd+3*th,
+		 wh+2*th, yd+3*th,
+		 wh+5*th, yd,
+		 wh+2*th, yd-3*th,
+		 wh+th,   yd-3*th,
 
-		cx+wh+th, cy+yd-th,
-		cx+wh-xs+th, cy+yd-th,
-		cx-wh+xs+th, cy-yd-th,
+		 wh+th,    yd-th,
+		 wh-xs+th, yd-th,
+		-wh+xs+th, -yd-th,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
 
 	gp_coord poly_2[] = {
-		cx-wh-th, cy+yd+th,
-		cx-wh-th, cy+yd-th,
-		cx-wh+xs, cy+yd-th,
-		cx+wh-xs, cy-yd-th,
-		cx+wh+th, cy-yd-th,
+		-wh-th,  yd+th,
+		-wh-th,  yd-th,
+		-wh+xs,  yd-th,
+		 wh-xs, -yd-th,
+		 wh+th, -yd-th,
 
-		cx+wh+th, cy-yd-3*th,
-		cx+wh+2*th, cy-yd-3*th,
-		cx+wh+5*th, cy-yd,
-		cx+wh+2*th, cy-yd+3*th,
-		cx+wh+th, cy-yd+3*th,
+		 wh+th,   -yd-3*th,
+		 wh+2*th, -yd-3*th,
+		 wh+5*th, -yd,
+		 wh+2*th, -yd+3*th,
+		 wh+th,   -yd+3*th,
 
-		cx+wh+th, cy-yd+th,
-		cx+wh-xs+th, cy-yd+th,
-		cx-wh+xs+th, cy+yd+th,
+		 wh+th,    -yd+th,
+		 wh-xs+th, -yd+th,
+		-wh+xs+th,  yd+th,
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
 }
 
 static void render_stock_day(gp_pixmap *pix,
@@ -964,7 +963,7 @@ static void render_stock_star(gp_pixmap *pix,
 		ROTATE(-0.588, 0.809, cx, 0, cy, -ci),
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->warn_color);
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, ctx->warn_color);
 }
 
 static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,

@@ -252,16 +252,16 @@ Polygons
 
 [source,c]
 --------------------------------------------------------------------------------
-void gp_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
-                const gp_coord *xy, gp_pixel pixel);
+void gp_polygon(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                unsigned int vertex_count, const gp_coord *xy, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws a polygon.
+Draws a polygon at a defined offset.
 
 [source,c]
 --------------------------------------------------------------------------------
-void gp_fill_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
-                     const gp_coord *xy, gp_pixel pixel);
+void gp_fill_polygon(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                     unsigned int vertex_count, const gp_coord *xy, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled polygon.

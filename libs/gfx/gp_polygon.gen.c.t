@@ -90,6 +90,11 @@ struct hline {
 	gp_coord rx;
 };
 
+static inline gp_coord round_coord(float f)
+{
+	return f < 0 ? f - 0.5 : f + 0.5;
+}
+
 /*
  * Algorithm to find intersections for a given Y and a set of lines.
  *
@@ -126,15 +131,15 @@ static unsigned int find_intersections(const struct gp_line *lines, unsigned int
 		 * so that it does not overshoot out of the polygon.
 		 */
 		if (y == lines[i].y1) {
-			gp_coord mx = lines[i].x1 + 1.00 * lines[i].dx * ry / lines[i].dy + 0.5;
+			gp_coord mx = round_coord(lines[i].x1 + 1.00 * lines[i].dx * ry / lines[i].dy);
 			hlines[c].lx = mx;
 			hlines[c].rx = mx;
 			c++;
 			continue;
 		}
 
-		gp_coord lx = lines[i].x1 + 1.00 * lines[i].dx * (ry - 0.49999) / lines[i].dy + 0.5;
-		gp_coord rx = lines[i].x1 + 1.00 * lines[i].dx * (ry + 0.49999) / lines[i].dy + 0.5;
+		gp_coord lx = lines[i].x1 + round_coord(1.00 * lines[i].dx * (ry - 0.49999) / lines[i].dy);
+		gp_coord rx = lines[i].x1 + round_coord(1.00 * lines[i].dx * (ry + 0.49999) / lines[i].dy);
 
 		if (lx < rx) {
 			hlines[c].lx = lx;
@@ -212,8 +217,8 @@ static gp_coord find_edge(gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1)
  * - Horizontal lines are removed from the list of edges
  * - We shorten the edges on each side of the Y axis
  */
-static void draw_edges_hlines(gp_pixmap *pixmap, const gp_coord *points,
-                              unsigned int nvert, gp_pixel pixel)
+static void draw_edges_hlines(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                              const gp_coord *points, unsigned int nvert, gp_pixel pixel)
 {
 	gp_coord lx = get_x(points, nvert-1);
 	gp_coord ly = get_y(points, nvert-1);
@@ -224,15 +229,15 @@ static void draw_edges_hlines(gp_pixmap *pixmap, const gp_coord *points,
 		gp_coord cy = get_y(points, i);
 
 		if (cy == ly) {
-			gp_hline_raw(pixmap, cx, lx, cy, pixel);
+			gp_hline_raw(pixmap, cx + x_off, lx + x_off, cy + y_off, pixel);
 		} else {
 			gp_coord ex;
 
 			ex = find_edge(cx, cy, lx, ly);
-			gp_hline(pixmap, cx, ex, cy, pixel);
+			gp_hline(pixmap, cx + x_off, ex + x_off, cy + y_off, pixel);
 
 			ex = find_edge(lx, ly, cx, cy);
-			gp_hline(pixmap, lx, ex, ly, pixel);
+			gp_hline(pixmap, lx + x_off, ex + x_off, ly + y_off, pixel);
 		}
 
 		lx = cx;
@@ -241,14 +246,15 @@ static void draw_edges_hlines(gp_pixmap *pixmap, const gp_coord *points,
 }
 
 @ for ps in pixelsizes:
-static void fill_inner_polygon_{{ ps.suffix }}(gp_pixmap *pixmap, unsigned int nvert,
-                         const gp_coord *xy, gp_pixel pixel)
+static void fill_inner_polygon_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+				unsigned int nvert, const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
 	struct gp_line lines[nvert];
 	gp_coord y;
 
-	gp_coord ymin = INT_MAX, ymax = -INT_MAX;
+	gp_coord ymin, ymax;
+	ymin = ymax = get_y(xy, 0);
 	for (i = 0; i < nvert; i++) {
 		ymax = GP_MAX(ymax, get_y(xy, i));
 		ymin = GP_MIN(ymin, get_y(xy, i));
@@ -263,35 +269,35 @@ static void fill_inner_polygon_{{ ps.suffix }}(gp_pixmap *pixmap, unsigned int n
 		cnt = compute_scanlines(lines, nlines, y, scanlines);
 
 		for (i = 0; i < cnt; i++)
-			gp_hline_raw_{{ ps.suffix }}(pixmap, scanlines[i].lx, scanlines[i].rx, y, pixel);
+			gp_hline_raw_{{ ps.suffix }}(pixmap, scanlines[i].lx+x_off, scanlines[i].rx+x_off, y+y_off, pixel);
 	}
 }
 
 @ end
 @
-void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
-                         const gp_coord *xy, gp_pixel pixel)
+void gp_fill_polygon_raw(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                         unsigned int nvert, const gp_coord *xy, gp_pixel pixel)
 {
 
 	switch (nvert) {
 	case 1:
-		gp_putpixel(pixmap, xy[0], xy[1], pixel);
+		gp_putpixel(pixmap, xy[0]+x_off, xy[1]+y_off, pixel);
 		return;
 	case 2:
-		gp_line(pixmap, xy[0], xy[1], xy[2], xy[3], pixel);
+		gp_line(pixmap, xy[0]+x_off, xy[1]+y_off, xy[2]+x_off, xy[3]+y_off, pixel);
 		return;
 	default:
 	break;
 	}
 
 	GP_FN_PER_BPP_PIXMAP(fill_inner_polygon, pixmap, pixmap,
-                             nvert, xy, pixel);
+                             x_off, y_off, nvert, xy, pixel);
 
-	draw_edges_hlines(pixmap, xy, nvert, pixel);
+	draw_edges_hlines(pixmap, x_off, y_off, xy, nvert, pixel);
 }
 
-void gp_fill_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
-                     const gp_coord *xy, gp_pixel pixel)
+void gp_fill_polygon(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                     unsigned int vertex_count, const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
 	gp_coord xy_copy[2 * vertex_count];
@@ -305,20 +311,22 @@ void gp_fill_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
 		GP_TRANSFORM_POINT(pixmap, xy_copy[x], xy_copy[y]);
 	}
 
-	gp_fill_polygon_raw(pixmap, vertex_count, xy_copy, pixel);
+	GP_TRANSFORM_POINT(pixmap, x_off, y_off);
+
+	gp_fill_polygon_raw(pixmap, x_off, y_off, vertex_count, xy_copy, pixel);
 }
 
-void gp_polygon_raw(gp_pixmap *pixmap, unsigned int vertex_count,
-                    const gp_coord *xy, gp_pixel pixel)
+void gp_polygon_raw(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                    unsigned int vertex_count, const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
 
-	gp_coord prev_x = xy[2 * vertex_count - 2];
-	gp_coord prev_y = xy[2 * vertex_count - 1];
+	gp_coord prev_x = xy[2 * vertex_count - 2] + x_off;
+	gp_coord prev_y = xy[2 * vertex_count - 1] + y_off;
 
 	for (i = 0; i < vertex_count; i++) {
-		gp_coord x = xy[2 * i];
-		gp_coord y = xy[2 * i + 1];
+		gp_coord x = xy[2 * i] + x_off;
+		gp_coord y = xy[2 * i + 1] + y_off;
 
 		gp_line_raw(pixmap, prev_x, prev_y, x, y, pixel);
 
@@ -328,19 +336,19 @@ void gp_polygon_raw(gp_pixmap *pixmap, unsigned int vertex_count,
 }
 
 
-void gp_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
-                const gp_coord *xy, gp_pixel pixel)
+void gp_polygon(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                unsigned int vertex_count, const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
 
-	gp_coord prev_x = xy[2 * vertex_count - 2];
-	gp_coord prev_y = xy[2 * vertex_count - 1];
+	gp_coord prev_x = xy[2 * vertex_count - 2] + x_off;
+	gp_coord prev_y = xy[2 * vertex_count - 1] + y_off;
 
 	GP_TRANSFORM_POINT(pixmap, prev_x, prev_y);
 
 	for (i = 0; i < vertex_count; i++) {
-		gp_coord x = xy[2 * i];
-		gp_coord y = xy[2 * i + 1];
+		gp_coord x = xy[2 * i] + x_off;
+		gp_coord y = xy[2 * i + 1] + y_off;
 
 		GP_TRANSFORM_POINT(pixmap, x, y);
 

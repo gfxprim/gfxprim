@@ -112,7 +112,7 @@ static int bench_fill_polygon_4(gp_pixel_type type)
 			i, 0,
 			0, i,
 		};
-		gp_fill_polygon(img, 4, poly, i%0xff);
+		gp_fill_polygon(img, 0, 0, 4, poly, i%0xff);
 	}
 
 	return TST_SUCCESS;
@@ -142,7 +142,7 @@ static int bench_fill_polygon_9(gp_pixel_type type)
 			7*s, i,
 			8*s, 0,
 		};
-		gp_fill_polygon(img, 9, poly, i%0xff);
+		gp_fill_polygon(img, 0, 0, 9, poly, i%0xff);
 	}
 
 	return TST_SUCCESS;
@@ -180,7 +180,7 @@ static int bench_fill_polygon_17(gp_pixel_type type)
 			15*s, i,
 			16*s, 0
 		};
-		gp_fill_polygon(img, 17, poly, i%0xff);
+		gp_fill_polygon(img, 0, 0, 17, poly, i%0xff);
 	}
 
 	return TST_SUCCESS;

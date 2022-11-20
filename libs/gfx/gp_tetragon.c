@@ -45,7 +45,7 @@ void gp_fill_tetragon_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
 {
 	const gp_coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
 
-	gp_fill_polygon_raw(pixmap, 4, xy, pixel);
+	gp_fill_polygon_raw(pixmap, 0, 0, 4, xy, pixel);
 }
 
 void gp_fill_tetragon(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
@@ -61,5 +61,5 @@ void gp_fill_tetragon(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
 
 	const gp_coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
 
-	gp_fill_polygon_raw(pixmap, 4, xy, pixel);
+	gp_fill_polygon_raw(pixmap, 0, 0, 4, xy, pixel);
 }

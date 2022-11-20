@@ -41,7 +41,7 @@ static int test_polygon(struct testcase *t)
 	/* zero the pixels buffer */
 	memset(c->pixels, 0, c->w * c->h);
 
-	gp_fill_polygon(c, t->edge_count, t->edges, 1);
+	gp_fill_polygon(c, 0, 0, t->edge_count, t->edges, 1);
 /*
 	int lx = t->edges[2*t->edge_count-2];
 	int ly = t->edges[2*t->edge_count-1];

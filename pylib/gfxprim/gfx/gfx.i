@@ -45,14 +45,14 @@ static gp_coord *gp_polygon_unpack_coordinates(PyObject *coords)
 void gp_polygon_wrap(gp_pixmap *pixmap, PyObject *coords, gp_pixel pixel)
 {
   gp_coord *cs = gp_polygon_unpack_coordinates(coords);
-  gp_polygon(pixmap, PyTuple_Size(coords) / 2, cs, pixel);
+  gp_polygon(pixmap, 0, 0, PyTuple_Size(coords) / 2, cs, pixel);
   free(cs);
 }
 
 void gp_fill_polygon_wrap(gp_pixmap *pixmap, PyObject *coords, gp_pixel pixel)
 {
   gp_coord *cs = gp_polygon_unpack_coordinates(coords);
-  gp_fill_polygon(pixmap, PyTuple_Size(coords) / 2, cs, pixel);
+  gp_fill_polygon(pixmap, 0, 0, PyTuple_Size(coords) / 2, cs, pixel);
   free(cs);
 }
 %}

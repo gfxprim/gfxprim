@@ -134,7 +134,7 @@ void draw_random_polygon(gp_pixel pixel)
 		random_point(win->pixmap, xy + 2*i, xy + 2*i + 1);
 	}
 
-	gp_fill_polygon_raw(win->pixmap, 5, xy, pixel);
+	gp_fill_polygon(win->pixmap, 0, 0, 5, xy, pixel);
 }
 
 void clear_screen(void)

@@ -244,35 +244,35 @@ void draw_testing_polygon(int x, int y, int xradius, int yradius)
 	gp_coord xy[14];
 	unsigned int edges = 7;
 
-	xy[0] = x + xradius;
-	xy[1] = y;
+	xy[0] = xradius;
+	xy[1] = 0;
 
-	xy[2] = x + 3 * xradius / 4;
-	xy[3] = y + yradius / 4;
+	xy[2] = 3 * xradius / 4;
+	xy[3] = yradius / 4;
 
-	xy[4] = x + 3 * xradius / 4;
-	xy[5] = y + 3 * yradius / 4;
+	xy[4] = 3 * xradius / 4;
+	xy[5] = 3 * yradius / 4;
 
-	xy[6] = x + xradius / 4;
-	xy[7] = y + 3 * yradius / 4;
+	xy[6] = xradius / 4;
+	xy[7] = 3 * yradius / 4;
 
-	xy[8] = x;
-	xy[9] = y;
+	xy[8] = 0;
+	xy[9] = 0;
 
-	xy[10] = x - xradius;
-	xy[11] = y;
+	xy[10] = -xradius;
+	xy[11] = 0;
 
-	xy[12] = x - 3 * xradius / 4;
-	xy[13] = y - yradius / 4;
+	xy[12] = -3 * xradius / 4;
+	xy[13] = -yradius / 4;
 
 	if (outline == 1)
-		gp_polygon(win, edges, xy, yellow);
+		gp_polygon(win, x, y, edges, xy, yellow);
 
 	if (fill)
-		gp_fill_polygon(win, edges, xy, red);
+		gp_fill_polygon(win, x, y, edges, xy, red);
 
 	if (outline == 2)
-		gp_polygon(win, edges, xy, white);
+		gp_polygon(win, x, y, edges, xy, white);
 }
 
 void redraw_screen(void)
