@@ -148,7 +148,7 @@ static inline void gp_events_state_release_all(gp_events_state *self)
 	memset(self->keys_pressed, 0, sizeof(self->keys_pressed));
 }
 
-static inline int gp_event_key_pressed(gp_event *ev, uint32_t key)
+static inline int gp_ev_key_pressed(gp_event *ev, uint32_t key)
 {
 	if (!ev->st)
 		return 0;
@@ -156,22 +156,22 @@ static inline int gp_event_key_pressed(gp_event *ev, uint32_t key)
 	return gp_events_state_pressed(ev->st, key);
 }
 
-#define gp_event_any_key_pressed(ev, ...) gp_event_any_key_pressed_(ev, __VA_ARGS__, 0)
-#define gp_event_all_keys_pressed(ev, ...) gp_event_all_keys_pressed_(ev, __VA_ARGS__, 0)
+#define gp_ev_any_key_pressed(ev, ...) gp_ev_any_key_pressed_(ev, __VA_ARGS__, 0)
+#define gp_ev_all_keys_pressed(ev, ...) gp_ev_all_keys_pressed_(ev, __VA_ARGS__, 0)
 
 /**
  * Returns non-zero if any key from a list is pressed.
  */
-int gp_event_any_key_pressed_(gp_event *ev, ...);
+int gp_ev_any_key_pressed_(gp_event *ev, ...);
 
 /**
  * Returns non-zero if all keys from a list are pressed.
  */
-int gp_event_all_keys_pressed_(gp_event *ev, ...);
+int gp_ev_all_keys_pressed_(gp_event *ev, ...);
 
 /*
  * Dumps event into stdout.
  */
-void gp_event_dump(gp_event *ev);
+void gp_ev_dump(gp_event *ev);
 
 #endif /* INPUT_GP_EVENT_H */

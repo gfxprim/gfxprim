@@ -66,7 +66,7 @@ int main(void)
 	for (;;) {
 		gp_event *ev = gp_backend_wait_event(backend);
 
-		gp_event_dump(ev);
+		gp_ev_dump(ev);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

@@ -19,7 +19,7 @@
  */
 static inline int gp_widget_key_mod_pressed(gp_event *ev)
 {
-	return gp_event_any_key_pressed(ev, GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT,
+	return gp_ev_any_key_pressed(ev, GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT,
 	                                    GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL,
 	                                    GP_KEY_LEFT_META, GP_KEY_RIGHT_META);
 }

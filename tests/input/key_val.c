@@ -22,7 +22,7 @@ struct tcase {
 
 static int test_key_val(struct tcase *t)
 {
-	int key_val = gp_event_key_val(t->name);
+	int key_val = gp_ev_key_val(t->name);
 
 	if (key_val != t->val) {
 		tst_msg("Expected %i got %i\n", t->val, key_val);

@@ -104,14 +104,14 @@ static int key_state_test(void)
 		case GP_EV_KEY_UP:
 			if (gp_events_state_pressed(&queue.state, ev->key.key)) {
 				tst_msg("Key %s pressed after keyup",
-				        gp_event_key_name(ev->key.key));
+				        gp_ev_key_name(ev->key.key));
 				fail++;
 			}
 		break;
 		case GP_EV_KEY_DOWN:
 			if (!gp_events_state_pressed(&queue.state, ev->key.key)) {
 				tst_msg("Key %s released after keydown",
-				        gp_event_key_name(ev->key.key));
+				        gp_ev_key_name(ev->key.key));
 				fail++;
 			}
 		break;

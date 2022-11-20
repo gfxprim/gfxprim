@@ -183,7 +183,7 @@ static int get_key_char(gp_json_reader *json, gp_json_val *val,
 			return 1;
 		}
 
-		*key = gp_event_key_val(val->id);
+		*key = gp_ev_key_val(val->id);
 		if (*key < 0) {
 			gp_json_err(json, "Invalid key name!");
 			return 1;
@@ -286,7 +286,7 @@ static uint32_t parse_mod_state(gp_json_reader *json, gp_json_val *val, struct m
 			return 0;
 		}
 
-		key = gp_event_key_val(val->val_str);
+		key = gp_ev_key_val(val->val_str);
 		if (key < 0) {
 			gp_json_err(json, "Invalid key name!");
 			return 0;
@@ -389,7 +389,7 @@ static struct mods *load_mods(gp_json_reader *json, gp_json_val *val)
 		case MODS_DEAD:
 		case MODS_MOD:
 		case MODS_LOCK:
-			if (gp_event_key_val(val->val_str) < 0) {
+			if (gp_ev_key_val(val->val_str) < 0) {
 				gp_json_err(json, "Invalid key name!");
 				return NULL;
 			}
@@ -422,7 +422,7 @@ static struct mods *load_mods(gp_json_reader *json, gp_json_val *val)
 
 	GP_JSON_OBJ_FILTER(json, val, &mods_obj_filter, NULL) {
 		ret->mods[i].type = val->idx;
-		ret->mods[i].key = gp_event_key_val(val->val_str);
+		ret->mods[i].key = gp_ev_key_val(val->val_str);
 
 		GP_DEBUG(3, "Mod type %s key %s", val->id, val->val_str);
 

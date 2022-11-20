@@ -35,7 +35,7 @@ static int ev_loop(struct gp_backend *backend, const char *name)
 
 		printf("-------------------------- %s\n", name);
 
-		gp_event_dump(ev);
+		gp_ev_dump(ev);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

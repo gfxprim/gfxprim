@@ -15,7 +15,7 @@ static gp_pixel bg_rgb;
 
 static void draw(gp_widget *pixmap, gp_event *ev)
 {
-	gp_event_dump(ev);
+	gp_ev_dump(ev);
 	if (ev->type != GP_EV_KEY ||
 	    (ev->key.key != GP_BTN_LEFT &&
 	     ev->key.key != GP_BTN_TOUCH))

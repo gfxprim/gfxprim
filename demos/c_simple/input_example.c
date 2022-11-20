@@ -30,7 +30,7 @@ static void draw_event(gp_event *ev)
 		gp_text_clear(win, NULL, 20, 20, align, black, ksize);
 		ksize = gp_print(win, NULL, 20, 20, align,
 		                 white, black, "Key=%s",
-				 gp_event_key_name(ev->key.key));
+				 gp_ev_key_name(ev->key.key));
 	break;
 	case GP_EV_UTF:
 		gp_text_clear(win, NULL, 20, 40, align, black, usize);
@@ -59,7 +59,7 @@ static void event_loop(void)
 		while (gp_backend_events(backend)) {
 			gp_event *ev = gp_backend_get_event(backend);
 
-			gp_event_dump(ev);
+			gp_ev_dump(ev);
 
 			switch (ev->type) {
 			case GP_EV_UTF:
@@ -89,7 +89,7 @@ static void event_loop(void)
 			case GP_EV_REL:
 				switch (ev->code) {
 				case GP_EV_REL_POS:
-					if (gp_event_key_pressed(ev, GP_BTN_LEFT)) {
+					if (gp_ev_key_pressed(ev, GP_BTN_LEFT)) {
 						gp_putpixel(win, ev->st->cursor_x, ev->st->cursor_y,
 							    green);
 					}

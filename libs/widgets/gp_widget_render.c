@@ -468,19 +468,19 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 	switch (ev->type) {
 	case GP_EV_KEY:
 		if (ev->code == GP_EV_KEY_DOWN) {
-			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_COLOR_SCHEME) &&
+			if (gp_ev_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_COLOR_SCHEME) &&
 			    ev->val == GP_WIDGET_KEY_COLOR_SCHEME) {
 				gp_widgets_color_scheme_toggle();
 				handled = 1;
 			}
 
-			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_ABOUT) &&
+			if (gp_ev_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_ABOUT) &&
 			    ev->val == GP_WIDGET_KEY_ABOUT) {
 				gp_app_info_dialog_run();
 				handled = 1;
 			}
 
-			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_ZOOM)) {
+			if (gp_ev_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_ZOOM)) {
 				switch (ev->val) {
 				case GP_WIDGET_KEY_ZOOM_IN:
 					gp_widget_render_zoom(1);
@@ -493,7 +493,7 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 				}
 			}
 
-			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_QUIT) &&
+			if (gp_ev_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_QUIT) &&
 			    ev->val == GP_WIDGET_KEY_QUIT) {
 				return 1;
 			}

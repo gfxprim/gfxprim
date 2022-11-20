@@ -381,9 +381,9 @@ void event_loop(void)
 	for (;;) {
 		gp_event *ev = gp_backend_wait_event(backend);
 
-		shift_pressed = gp_event_any_key_pressed(ev,
-		                                         GP_KEY_LEFT_SHIFT,
-		                                         GP_KEY_RIGHT_SHIFT);
+		shift_pressed = gp_ev_any_key_pressed(ev,
+		                                      GP_KEY_LEFT_SHIFT,
+		                                      GP_KEY_RIGHT_SHIFT);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

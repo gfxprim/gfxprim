@@ -177,10 +177,10 @@ Event API
 /* or */
 #include <input/gp_event.h>
 
-void gp_event_dump(struct gp_event *ev);
+void gp_ev_dump(struct gp_event *ev);
 -------------------------------------------------------------------------------
 
-The 'gp_event_dump' dumps event in human-readable format into the stdout.
+The 'gp_ev_dump' dumps event in human-readable format into the stdout.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -188,10 +188,12 @@ The 'gp_event_dump' dumps event in human-readable format into the stdout.
 /* or */
 #include <input/gp_event.h>
 
-const char *gp_event_key_name(enum gp_event_key_value key);
+const char *gp_ev_key_name(unsigned int key);
+
+int gp_ev_key_val(const char *name);
 -------------------------------------------------------------------------------
 
-Returns human-readable key name.
+Converts key id into human readable name and human readable name into an id.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -199,7 +201,7 @@ Returns human-readable key name.
 /* or */
 #include <input/gp_event.h>
 
-int gp_event_key_pressed(gp_event *ev, uint32_t key);
+int gp_ev_key_pressed(gp_event *ev, uint32_t key);
 -------------------------------------------------------------------------------
 
 A shortcut for 'gp_events_state_pressed(ev->st, GP_KEY_FOO)' that also returns
@@ -211,14 +213,14 @@ A shortcut for 'gp_events_state_pressed(ev->st, GP_KEY_FOO)' that also returns
 /* or */
 #include <input/gp_event.h>
 
-int gp_event_any_key_pressed(gp_event *ev, ...);
+int gp_ev_any_key_pressed(gp_event *ev, ...);
 
-int gp_event_all_keys_pressed(gp_event *ev, ...);
+int gp_ev_all_keys_pressed(gp_event *ev, ...);
 -------------------------------------------------------------------------------
 
 These functions do logical or/and on the list of keys passed as arguments.
 
-Use it as: 'gp_event_any_key_pressed(ev, GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT)'
+Use it as: 'gp_ev_any_key_pressed(ev, GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT)'
 
 [[Timers]]
 Timers

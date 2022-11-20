@@ -79,7 +79,7 @@ void event_loop(void)
 	gp_event *ev;
 
 	while ((ev = gp_backend_get_event(win))) {
-		gp_event_dump(ev);
+		gp_ev_dump(ev);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

@@ -61,7 +61,7 @@ void gp_widget_event_dump(gp_widget_event *ev)
 
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_INPUT:
-		gp_event_dump(ev->input_ev);
+		gp_ev_dump(ev->input_ev);
 	break;
 	default:
 	break;

@@ -8,7 +8,7 @@
 #include <input/gp_keys.h>
 #include "keys.h"
 
-int gp_event_key_val(const char *name)
+int gp_ev_key_val(const char *name)
 {
 	int left  = 0;
 	int right = GP_ARRAY_SIZE(keys);
@@ -32,7 +32,7 @@ int gp_event_key_val(const char *name)
 	return -1;
 }
 
-const char *gp_event_key_name(unsigned int key)
+const char *gp_ev_key_name(unsigned int key)
 {
 	if (key >= GP_ARRAY_SIZE(key_names))
 		return "Unknown";

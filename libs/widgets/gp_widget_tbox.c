@@ -683,8 +683,8 @@ static void clear_on_input(gp_widget *self)
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	(void)ctx;
-	int shift = gp_event_any_key_pressed(ev, GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT);
-	int ctrl = gp_event_any_key_pressed(ev, GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL);
+	int shift = gp_ev_any_key_pressed(ev, GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT);
+	int ctrl = gp_ev_any_key_pressed(ev, GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL);
 
 	switch (ev->type) {
 	case GP_EV_KEY:
@@ -777,7 +777,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	break;
 	case GP_EV_REL:
 	case GP_EV_ABS:
-		if (!gp_event_any_key_pressed(ev, GP_BTN_TOUCH, GP_BTN_LEFT))
+		if (!gp_ev_any_key_pressed(ev, GP_BTN_TOUCH, GP_BTN_LEFT))
 			return 0;
 		return mouse_drag(self, ctx, ev);
 	break;

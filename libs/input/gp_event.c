@@ -18,7 +18,7 @@
 
 #include <input/gp_keys.h>
 
-int gp_event_any_key_pressed_(gp_event *ev, ...)
+int gp_ev_any_key_pressed_(gp_event *ev, ...)
 {
 	va_list ap;
 	uint32_t key;
@@ -33,14 +33,14 @@ int gp_event_any_key_pressed_(gp_event *ev, ...)
 			return 0;
 		}
 
-		if (gp_event_key_pressed(ev, key)) {
+		if (gp_ev_key_pressed(ev, key)) {
 			va_end(ap);
 			return 1;
 		}
 	}
 }
 
-int gp_event_all_keys_pressed_(gp_event *ev, ...)
+int gp_ev_all_keys_pressed_(gp_event *ev, ...)
 {
 	va_list ap;
 	uint32_t key;
@@ -55,7 +55,7 @@ int gp_event_all_keys_pressed_(gp_event *ev, ...)
 			return 1;
 		}
 
-		if (!gp_event_key_pressed(ev, key)) {
+		if (!gp_ev_key_pressed(ev, key)) {
 			va_end(ap);
 			return 0;
 		}
@@ -80,7 +80,7 @@ static void dump_rel(gp_event *ev)
 
 static void dump_key(gp_event *ev)
 {
-	const char *name = gp_event_key_name(ev->key.key);
+	const char *name = gp_ev_key_name(ev->key.key);
 
 	printf("Key %i (Key%s) %s\n",
 	       ev->key.key, name, ev->code ? "down" : "up");
@@ -111,7 +111,7 @@ static void dump_sys(gp_event *ev)
 	}
 }
 
-void gp_event_dump(gp_event *ev)
+void gp_ev_dump(gp_event *ev)
 {
 	printf("Event (%"PRIu64") ", ev->time);
 

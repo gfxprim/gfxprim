@@ -326,7 +326,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	struct gp_widget_scroll_area *area = self->scroll;
 
 	if (is_in_scrollbar_y(self, ctx, ev->st->cursor_y)) {
-		if (gp_event_key_pressed(ev, GP_BTN_LEFT) ||
+		if (gp_ev_key_pressed(ev, GP_BTN_LEFT) ||
 		    ev->type == GP_EV_ABS) {
 			scrollbar_event_x(self, ctx, ev);
 			return 1;
@@ -334,7 +334,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	}
 
 	if (is_in_scrollbar_x(self, ctx, ev->st->cursor_x)) {
-		if (gp_event_key_pressed(ev, GP_BTN_LEFT) ||
+		if (gp_ev_key_pressed(ev, GP_BTN_LEFT) ||
 		    ev->type == GP_EV_ABS) {
 			scrollbar_event_y(self, ctx, ev);
 			return 1;

@@ -120,20 +120,20 @@ static void x11_input_init(void)
 		}
 
 		GP_DEBUG(3, "Mapping Key '%s' KeySym '%s' (%u) to KeyCode %u",
-		         gp_event_key_name(sym_to_key[i].key),
+		         gp_ev_key_name(sym_to_key[i].key),
 			 XKeysymToString(sym_to_key[i].x_keysym),
 			 sym_to_key[i].x_keysym, keycode);
 
 		if (keycode - 9 >= GP_ARRAY_SIZE(keycode_table)) {
 			GP_WARN("Key '%s' keycode %u out of table",
-			        gp_event_key_name(sym_to_key[i].key), keycode);
+			        gp_ev_key_name(sym_to_key[i].key), keycode);
 			continue;
 		}
 
 		if (keycode_table[keycode - 9]) {
 			GP_WARN("Key '%s' keycode %u collides with key '%s'",
-			        gp_event_key_name(sym_to_key[i].key), keycode,
-				gp_event_key_name(keycode_table[keycode - 9]));
+			        gp_ev_key_name(sym_to_key[i].key), keycode,
+				gp_ev_key_name(keycode_table[keycode - 9]));
 			continue;
 		}
 

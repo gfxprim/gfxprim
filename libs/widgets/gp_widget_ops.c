@@ -567,7 +567,7 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 
 		switch (ev->val) {
 		case GP_WIDGET_KEY_FOCUS_NEXT:
-			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_FOCUS_PREV))
+			if (gp_ev_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_FOCUS_PREV))
 				gp_widget_ops_render_focus(self, GP_FOCUS_PREV);
 			else
 				gp_widget_ops_render_focus(self, GP_FOCUS_NEXT);
@@ -580,7 +580,7 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 		}
 
 #ifdef GP_WIDGET_KEYS_MOD_FOCUS
-		if (!gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_FOCUS))
+		if (!gp_ev_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_FOCUS))
 			return 0;
 
 		switch (ev->val) {

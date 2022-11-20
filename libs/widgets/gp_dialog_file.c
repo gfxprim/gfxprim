@@ -498,7 +498,7 @@ static int file_dialog_input_event(gp_dialog *self, gp_event *ev, int is_open)
 			return 1;
 		}
 
-		int ctrl_pressed = gp_event_any_key_pressed(ev, GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL);
+		int ctrl_pressed = gp_ev_any_key_pressed(ev, GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL);
 
 		if (is_open && ctrl_pressed && ev->val == GP_KEY_O) {
 			try_open(dialog);

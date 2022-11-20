@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 		gp_backend_poll(backend);
 
 		while ((ev = gp_backend_get_event(backend))) {
-			gp_event_dump(ev);
+			gp_ev_dump(ev);
 
 			switch (ev->type) {
 			case GP_EV_KEY:

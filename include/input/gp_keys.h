@@ -17,7 +17,7 @@
  * @name A key name such as "KeyEnter" or "KeyA"
  * @return A key code or -1 when match was not found.
  */
-int gp_event_key_val(const char *name);
+int gp_ev_key_val(const char *name);
 
 /**
  * @brief Returns a key name.
@@ -25,6 +25,6 @@ int gp_event_key_val(const char *name);
  * @val A key value.
  * @return A key name.
  */
-const char *gp_event_key_name(unsigned int val);
+const char *gp_ev_key_name(unsigned int val);
 
 #endif /* INPUT_GP_KEYS_H */
