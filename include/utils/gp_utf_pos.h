@@ -139,4 +139,39 @@ static inline ssize_t gp_utf8_pos_move(const char *str, gp_utf8_pos *cur_pos, ss
 	return 0;
 }
 
+static inline uint32_t gp_utf8_pos_prev(const char *str, gp_utf8_pos *pos)
+{
+	int8_t chsz;
+
+	if (!pos->bytes)
+		return 0;
+
+	chsz = gp_utf8_prev_chsz(str, pos->bytes);
+	if (chsz <= 0)
+		return 0;
+
+	pos->bytes -= chsz;
+	pos->chars--;
+
+	str += pos->bytes;
+
+	return gp_utf8_next(&str);
+}
+
+static inline uint32_t gp_utf8_pos_next(const char *str, gp_utf8_pos *pos)
+{
+	int8_t chsz;
+
+	chsz = gp_utf8_next_chsz(str, pos->bytes);
+	if (chsz <= 0)
+		return 0;
+
+	str += pos->bytes;
+
+	pos->bytes += chsz;
+	pos->chars++;
+
+	return gp_utf8_next(&str);
+}
+
 #endif /* UTILS_GP_UTF_POS_H */
