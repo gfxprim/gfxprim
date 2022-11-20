@@ -155,41 +155,6 @@ static unsigned int find_intersections(const struct gp_line *lines, unsigned int
 	return c;
 }
 
-struct scanline {
-	gp_coord lx;
-	gp_coord rx;
-};
-
-static unsigned int compute_scanlines(const struct gp_line *lines, unsigned int nvert,
-                                      gp_coord y, struct scanline *scanlines)
-{
-	struct hline hlines[nvert];
-	unsigned int i, j, cnt = find_intersections(lines, nvert, y, hlines);
-
-	/* Bubble sort */
-	for (i = 0; i < cnt; i++) {
-		for (j = i+1; j < cnt; j++) {
-			if (hlines[i].lx > hlines[j].lx ||
-			    ((hlines[i].lx == hlines[j].lx) &&
-			     (hlines[i].rx > hlines[j].rx))) {
-				struct hline l = hlines[i];
-				hlines[i] = hlines[j];
-				hlines[j] = l;
-			}
-		}
-	}
-
-	unsigned int c = 0;
-
-	for (i = 0; i < cnt-1; i+=2) {
-		scanlines[c].lx = hlines[i].lx;
-		scanlines[c].rx = hlines[i+1].rx;
-		c++;
-	}
-
-	return c;
-}
-
 /*
  * This is more or less Bresenham that only draws line segment on a single
  * scanline y0.
@@ -245,7 +210,47 @@ static void draw_edges_hlines(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
 	}
 }
 
+static int comp_hlines(const void *a, const void *b)
+{
+	const struct hline *ha = a;
+	const struct hline *hb = b;
+
+	return ha->lx <= hb->lx || ((ha->lx == hb->lx) && ha->rx <= hb->rx);
+}
+
 @ for ps in pixelsizes:
+static void draw_scanlines_{{ ps.suffix }}(const struct gp_line *lines, unsigned int nvert,
+                           gp_coord y,
+                           gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off, gp_pixel pixel)
+{
+	struct hline hlines[nvert];
+	unsigned int i, j, cnt = find_intersections(lines, nvert, y, hlines);
+
+	if (cnt < 50) {
+		/* Bubble sort */
+		for (i = 0; i < cnt; i++) {
+			for (j = i+1; j < cnt; j++) {
+				if (hlines[i].lx > hlines[j].lx ||
+				    ((hlines[i].lx == hlines[j].lx) &&
+				    (hlines[i].rx > hlines[j].rx))) {
+					struct hline l = hlines[i];
+					hlines[i] = hlines[j];
+					hlines[j] = l;
+				}
+			}
+		}
+	} else {
+		qsort(hlines, cnt, sizeof(struct hline), comp_hlines);
+	}
+
+	for (i = 0; i < cnt-1; i+=2) {
+		gp_coord lx = hlines[i].lx;
+		gp_coord rx = hlines[i+1].rx;
+
+		gp_hline_raw_{{ ps.suffix }}(pixmap, lx+x_off, rx+x_off, y+y_off, pixel);
+	}
+}
+
 static void fill_inner_polygon_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
 				unsigned int nvert, const gp_coord *xy, gp_pixel pixel)
 {
@@ -262,15 +267,8 @@ static void fill_inner_polygon_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x_off
 
 	unsigned int nlines = init_lines(xy, nvert, lines);
 
-	for (y = ymin+1; y < ymax; y++) {
-		struct scanline scanlines[nlines];
-		unsigned int cnt;
-
-		cnt = compute_scanlines(lines, nlines, y, scanlines);
-
-		for (i = 0; i < cnt; i++)
-			gp_hline_raw_{{ ps.suffix }}(pixmap, scanlines[i].lx+x_off, scanlines[i].rx+x_off, y+y_off, pixel);
-	}
+	for (y = ymin+1; y < ymax; y++)
+		draw_scanlines_{{ ps.suffix }}(lines, nlines, y, pixmap, x_off, y_off, pixel);
 }
 
 @ end
