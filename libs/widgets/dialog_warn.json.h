@@ -14,7 +14,7 @@ static const char *dialog_warn = "\
         {\"type\": \"label\", \"uid\": \"text\"} \n\
        ] \n\
       }, \n\
-      {\"type\": \"button\", \"label\": \"OK\", \"on_event\": \"ok\"} \n\
+      {\"type\": \"button\", \"label\": \"OK\", \"on_event\": \"ok\", \"focused\": true} \n\
      ] \n\
     } \n\
    } \n\

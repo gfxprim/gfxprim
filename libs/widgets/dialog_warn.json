@@ -13,7 +13,7 @@
         {"type": "label", "uid": "text"}
        ]
       },
-      {"type": "button", "label": "OK", "on_event": "ok"}
+      {"type": "button", "label": "OK", "on_event": "ok", "focused": true}
      ]
     }
    }
