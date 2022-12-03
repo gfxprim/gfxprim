@@ -276,6 +276,25 @@ static gp_markup_elem *get_var_by_id(gp_widget *self, unsigned int var_id)
 	return NULL;
 }
 
+int gp_widget_markup_set(gp_widget *self, const char *markup_str)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_MARKUP, 1);
+
+	gp_markup *markup = gp_markup_parse(markup_str);
+
+	if (!markup)
+		return 1;
+
+	gp_markup_free(self->markup->markup);
+
+	self->markup->markup = markup;
+
+	gp_widget_resize(self);
+	gp_widget_redraw(self);
+
+	return 0;
+}
+
 void gp_widget_markup_set_var(gp_widget *self, unsigned int var_id, const char *fmt, ...)
 {
 	gp_markup_elem *var;

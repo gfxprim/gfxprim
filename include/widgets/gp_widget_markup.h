@@ -43,6 +43,15 @@ struct gp_widget_markup {
 gp_widget *gp_widget_markup_new(const char *markup,
                                 char *(*get)(unsigned int var_id, char *old_val));
 
+/**
+ * @brief Sets new markup string.
+ *
+ * @self A markup widget.
+ * @markup_str New markup string.
+ *
+ * @return Zero on success non-zero on a failure.
+ */
+int gp_widget_markup_set(gp_widget *self, const char *markup_str);
 
 /**
  * @brief Update a markup variable.
