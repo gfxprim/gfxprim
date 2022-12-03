@@ -38,7 +38,7 @@ jobs:
       - name: install-backend-libs
         run: sudo apt-get install libx11-dev libxext-dev libsdl2-dev libaa1-dev libxcb1-dev libxcb-keysyms1-dev libxcb-shm0-dev
       - name: install-swig
-        run: sudo apt-get install swig python-dev
+        run: sudo apt-get install swig python2-dev
       - name: configure
         run: ./configure
       - name: make
@@ -59,7 +59,7 @@ jobs:
       - name: update-apt-db
         run: sudo apt-get update
       - name: install-sdl-1-2
-        run: sudo apt-get install libsdl-dev
+        run: sudo apt-get install libsdl1.2-dev
       - name: configure
         run: ./configure
       - name: make
