@@ -468,7 +468,7 @@ static gp_widget *gp_widgets_from_json(gp_json_reader *json,
 {
 	gp_widget_json_ctx ctx = {.uids = uids, .callbacks = callbacks};
 	gp_widget *ret;
-	char buf[128];
+	char buf[1024];
 	gp_json_val val = {.buf = buf, .buf_size = sizeof(buf)};
 
 	check_callback_addrs_sorted(callbacks);
