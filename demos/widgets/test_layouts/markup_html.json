@@ -1,0 +1,9 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "widgets": [
+   {"type": "markup", "fmt": "html", "text":
+"<big>BIG</big><br>Some other text <b>Bit of bold</b> \n\n\n\tand more text<br>&lt;&plusmn;30&deg;C&gt;<foo></foo><hr>footer &copy; Nobody"}
+  ]
+ }
+}

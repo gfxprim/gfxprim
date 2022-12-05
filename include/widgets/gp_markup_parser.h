@@ -29,6 +29,8 @@ enum gp_markup_elem_type {
 	GP_MARKUP_STR,
 	GP_MARKUP_VAR,
 	GP_MARKUP_NEWLINE,
+	/* Horizontal line */
+	GP_MARKUP_HLINE,
 };
 
 enum gp_markup_elem_attr {
@@ -82,7 +84,16 @@ static inline const char *gp_markup_elem_str(const gp_markup_elem *elem)
 	}
 }
 
-gp_markup *gp_markup_parse(const char *markup);
+enum gp_markup_fmt {
+	GP_MARKUP_GFXPRIM,
+	GP_MARKUP_HTML,
+};
+
+gp_markup *gp_markup_parse(enum gp_markup_fmt fmt, const char *markup);
+
+gp_markup *gp_markup_gfxprim_parse(const char *markup);
+
+gp_markup *gp_markup_html_parse(const char *markup);
 
 static inline gp_markup_elem *gp_markup_next_line(gp_markup_elem *elem)
 {

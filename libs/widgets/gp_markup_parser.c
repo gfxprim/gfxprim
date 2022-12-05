@@ -206,7 +206,7 @@ void gp_markup_dump(gp_markup *self)
 	}
 }
 
-gp_markup *gp_markup_parse(const char *markup)
+gp_markup *gp_markup_gfxprim_parse(const char *markup)
 {
 	int elem_cnt = parse_markup(markup, NULL, NULL);
 	struct gp_markup *ret;
@@ -230,6 +230,19 @@ gp_markup *gp_markup_parse(const char *markup)
 	ret->elems[elem_cnt].type = GP_MARKUP_END;
 
 	return ret;
+}
+
+gp_markup *gp_markup_parse(enum gp_markup_fmt fmt, const char *markup_str)
+{
+	switch (fmt) {
+	case GP_MARKUP_GFXPRIM:
+		return gp_markup_gfxprim_parse(markup_str);
+	case GP_MARKUP_HTML:
+		return gp_markup_html_parse(markup_str);
+	}
+
+	GP_BUG("Invalid markup format %i\n", fmt);
+	return NULL;
 }
 
 void gp_markup_free(gp_markup *self)

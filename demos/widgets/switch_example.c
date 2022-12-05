@@ -63,7 +63,7 @@ static int keypress_handler(gp_widget_event *ev)
 int main(int argc, char *argv[])
 {
 	gp_widget *layout = gp_widget_switch_new(3);
-	gp_widget *markup = gp_widget_markup_new("#Layout \\#2#\n\nThere is nothing on the next one.\nUse arrow keys to move.", NULL);
+	gp_widget *markup = gp_widget_markup_new("#Layout \\#2#\n\nThere is nothing on the next one.\nUse arrow keys to move.", GP_MARKUP_GFXPRIM, NULL);
 	gp_widget *markup_grid = gp_widget_grid_new(1, 2, 0);
 
 	gp_widget *btn_grid = gp_widget_grid_new(2, 1, 0);

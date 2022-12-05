@@ -43,7 +43,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 		if (str)
 			width += gp_text_wbbox(font, str);
 
-		if (e->type == GP_MARKUP_NEWLINE) {
+		if (e->type == GP_MARKUP_NEWLINE || e->type == GP_MARKUP_HLINE) {
 			max_width = GP_MAX(max_width, width);
 			width = 0;
 		}
@@ -66,8 +66,10 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 		case GP_MARKUP_VAR:
 			max_h = GP_MAX(max_h, gp_text_ascent(font));
 		break;
+		case GP_MARKUP_HLINE:
+			height += ctx->padd;
+		/* fallthrough */
 		case GP_MARKUP_NEWLINE:
-			//max_h = GP_MAX(max_h, gp_text_ascent(font));
 			height += max_h + ctx->padd;
 			max_h = 0;
 		break;
@@ -124,7 +126,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		line_bbox(e, ctx, &w, &h);
 
-		while (e->type != GP_MARKUP_NEWLINE) {
+		while (e->type != GP_MARKUP_NEWLINE && e->type != GP_MARKUP_HLINE) {
 			const gp_text_style *font = get_font(ctx, e->attrs);
 			const char *str = gp_markup_elem_str(e);
 			unsigned int cur_y = y + h + ctx->padd;
@@ -160,6 +162,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 		}
 
 		y += ctx->padd + h;
+
+		if (e->type == GP_MARKUP_HLINE) {
+			y += ctx->padd;
+			gp_hline_xyw(ctx->buf, x, y + ctx->padd/2, self->w, ctx->text_color);
+		}
+
 		e++;
 	}
 }
@@ -184,11 +192,13 @@ void gp_widget_markup_refresh(gp_widget *self)
 }
 
 enum keys {
+	FMT,
 	GET,
 	TEXT,
 };
 
 static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("fmt", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("get", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
 };
@@ -202,6 +212,7 @@ static gp_widget *json_to_markup(gp_json_reader *json, gp_json_val *val, gp_widg
 {
 	char *(*get)(unsigned int var_id, char *old_val) = NULL;
 	gp_widget *ret = NULL;
+	enum gp_markup_fmt fmt = GP_MARKUP_GFXPRIM;
 
 	(void)ctx;
 
@@ -211,7 +222,18 @@ static gp_widget *json_to_markup(gp_json_reader *json, gp_json_val *val, gp_widg
 			get = gp_widget_callback_addr(val->val_str, ctx);
 		break;
 		case TEXT:
-			ret = gp_widget_markup_new(val->val_str, NULL);
+			ret = gp_widget_markup_new(val->val_str, fmt, NULL);
+		break;
+		case FMT:
+			if (ret)
+				gp_json_warn(json, "Markup fmt must be defined before text");
+
+			if (!strcmp(val->val_str, "gfxprim"))
+				fmt = GP_MARKUP_GFXPRIM;
+			else if (!strcmp(val->val_str, "html"))
+				fmt = GP_MARKUP_HTML;
+			else
+				gp_json_warn(json, "Invalid markup fmt");
 		break;
 		}
 	}
@@ -234,13 +256,13 @@ struct gp_widget_ops gp_widget_markup_ops = {
 	.id = "markup",
 };
 
-gp_widget *gp_widget_markup_new(const char *markup_str,
+gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt,
                                 char *(*get)(unsigned int var_id, char *old_val))
 {
 	size_t payload_size = sizeof(struct gp_widget_markup);
 	gp_widget *ret;
-	gp_markup *markup = gp_markup_parse(markup_str);
 
+	gp_markup *markup = gp_markup_parse(fmt, markup_str);
 	if (!markup)
 		return NULL;
 
@@ -276,12 +298,11 @@ static gp_markup_elem *get_var_by_id(gp_widget *self, unsigned int var_id)
 	return NULL;
 }
 
-int gp_widget_markup_set(gp_widget *self, const char *markup_str)
+int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt, const char *markup_str)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_MARKUP, 1);
 
-	gp_markup *markup = gp_markup_parse(markup_str);
-
+	gp_markup *markup = gp_markup_parse(fmt, markup_str);
 	if (!markup)
 		return 1;
 

@@ -24,7 +24,7 @@
 #ifndef GP_WIDGET_MARKUP_H
 #define GP_WIDGET_MARKUP_H
 
-struct gp_markup;
+#include <widgets/gp_markup_parser.h>
 
 struct gp_widget_markup {
 	char *text;
@@ -40,7 +40,7 @@ struct gp_widget_markup {
  *
  * @return A markup widget.
  */
-gp_widget *gp_widget_markup_new(const char *markup,
+gp_widget *gp_widget_markup_new(const char *markup, enum gp_markup_fmt fmt,
                                 char *(*get)(unsigned int var_id, char *old_val));
 
 /**
@@ -51,7 +51,7 @@ gp_widget *gp_widget_markup_new(const char *markup,
  *
  * @return Zero on success non-zero on a failure.
  */
-int gp_widget_markup_set(gp_widget *self, const char *markup_str);
+int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt, const char *markup_str);
 
 /**
  * @brief Update a markup variable.
