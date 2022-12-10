@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -10,18 +10,27 @@
 
 #include <utils/gp_vec_str.h>
 
+#include <utils/gp_markup.h>
+#include <utils/gp_markup_justify.h>
+
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
-#include <widgets/gp_markup_parser.h>
 
-static gp_text_style *get_font(const gp_widget_render_ctx *ctx, int attrs)
+static const gp_text_style *get_font(const gp_widget_render_ctx *ctx, int attrs)
 {
-	if (attrs & GP_MARKUP_BIG) {
+	if (attrs & GP_MARKUP_LARGE) {
 		if (attrs & GP_MARKUP_BOLD)
 			return ctx->font_big_bold;
 		else
 			return ctx->font_big;
+	}
+
+	if (attrs & GP_MARKUP_MONO) {
+		if (attrs & GP_MARKUP_BOLD)
+			return ctx->font_mono_bold;
+		else
+			return ctx->font_mono;
 	}
 
 	if (attrs & GP_MARKUP_BOLD)
@@ -32,73 +41,150 @@ static gp_text_style *get_font(const gp_widget_render_ctx *ctx, int attrs)
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int max_width = 0;
-	unsigned int width = 0;
-	gp_markup_elem *e;
+	unsigned int res = GP_MAX(self->markup->min_size_em, 20);
 
-	for (e = gp_markup_first(self->markup->markup); e; e = gp_markup_next(e)) {
-		const gp_text_style *font = get_font(ctx, e->attrs);
-		const char *str = gp_markup_elem_str(e);
+	return gp_text_avg_width(ctx->font, res);
+}
 
-		if (str)
-			width += gp_text_wbbox(font, str);
+#define FONT_MASK (GP_MARKUP_LARGE | GP_MARKUP_BOLD | GP_MARKUP_MONO)
 
-		if (e->type == GP_MARKUP_NEWLINE || e->type == GP_MARKUP_HLINE) {
-			max_width = GP_MAX(max_width, width);
-			width = 0;
+static unsigned int markup_width_cb(gp_markup_glyph *first, size_t len, void *priv)
+{
+	size_t i, start = 0;
+	unsigned int ret = 0;
+	int fmt = first->fmt;
+
+	for (i = 0; i < len; i++) {
+		if ((fmt & FONT_MASK) != (first[i].fmt & FONT_MASK)) {
+			const gp_text_style *font = get_font(priv, fmt);
+
+			while (start < i) {
+				ret += gp_glyph_advance_x(font, first[start].glyph);
+				start++;
+			}
+
+			fmt = first[i].fmt;
 		}
 	}
 
-	return GP_MAX(max_width, width);
+	const gp_text_style *font = get_font(priv, fmt);
+
+	while (start < i) {
+		ret += gp_glyph_advance_x(font, first[start].glyph);
+		start++;
+	}
+
+	return ret;
+}
+
+static unsigned int line_height(const gp_markup_line *line, const gp_widget_render_ctx *ctx)
+{
+	const gp_markup_glyph *i;
+	const gp_text_style *prev = NULL, *cur;
+	unsigned int height = 0;
+
+	if (!line->first) {
+		if (line->last->fmt & GP_MARKUP_STRIKE)
+			return 2 * ctx->padd;
+
+		return ctx->padd;
+	}
+
+	for (i = line->first; i <= line->last; i++) {
+		cur = get_font(ctx, i->fmt);
+
+		if (cur != prev) {
+			height = GP_MAX(height, gp_text_ascent(cur));
+			cur = prev;
+		}
+	}
+
+	return height + ctx->padd;
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int height = 0;
-	unsigned int max_h = 0;
-	gp_markup_elem *e;
+	unsigned int i, height = 0;
 
-	for (e = gp_markup_first(self->markup->markup); e; e = gp_markup_next(e)) {
-		const gp_text_style *font = get_font(ctx, e->attrs);
+	free(self->markup->lines);
 
-		switch (e->type) {
-		case GP_MARKUP_STR:
-		case GP_MARKUP_VAR:
-			max_h = GP_MAX(max_h, gp_text_ascent(font));
-		break;
-		case GP_MARKUP_HLINE:
-			height += ctx->padd;
-		/* fallthrough */
-		case GP_MARKUP_NEWLINE:
-			height += max_h + ctx->padd;
-			max_h = 0;
-		break;
-		}
-	}
+	self->markup->lines = gp_markup_justify(self->markup->markup, self->w, markup_width_cb, ctx);
+	if (!self->markup->lines)
+		return height;
 
-	return ctx->padd + height + max_h + (max_h ? ctx->padd : 0);
+	for (i = 0; i < self->markup->lines->lines_cnt; i++)
+		height += line_height(&(self->markup->lines->lines[i]), ctx);
+
+	return height;
 }
 
-static void line_bbox(const gp_markup_elem *e, const gp_widget_render_ctx *ctx,
-                      gp_size *w, gp_size *h)
+static inline gp_pixel glyph_color(const gp_widget_render_ctx *ctx, const gp_markup_glyph *g)
 {
-	gp_size width = 0;
-	gp_size height = 0;
+	if (!g->fg_color)
+		return ctx->text_color;
 
-	while (e->type != GP_MARKUP_END && e->type != GP_MARKUP_NEWLINE) {
-		const gp_text_style *font = get_font(ctx, e->attrs);
-		const char *str = gp_markup_elem_str(e);
+	return gp_widgets_color(ctx, GP_WIDGETS_THEME_COLORS + g->fg_color);
+}
 
-		if (str)
-			width += gp_text_wbbox(font, str);
+//TODO: cache
+static gp_size max_line_ascend(const gp_widget_render_ctx *ctx, const gp_markup_line *line)
+{
+	gp_size ret = 0;
+	const gp_markup_glyph *i;
 
-		height = GP_MAX(height, gp_text_ascent(font));
-
-		e++;
+	for (i = line->first; i && i <= line->last; i++) {
+		const gp_text_style *font = get_font(ctx, i->fmt);
+		ret = GP_MAX(ret, gp_text_ascent(font));
 	}
 
-	*w = width;
-	*h = height;
+	return ret;
+}
+
+static gp_size render_line(const gp_markup_line *line, gp_widget *self,
+                           const gp_widget_render_ctx *ctx,
+                           gp_size cur_x, gp_size cur_y)
+{
+	const gp_markup_glyph *i;
+	const gp_text_style *font;
+	int flags = GP_VALIGN_BASELINE;
+	gp_size max_ascend = max_line_ascend(ctx, line);
+
+	for (i = line->first; i && i <= line->last; i++) {
+		font = get_font(ctx, i->fmt);
+		gp_size y = cur_y + max_ascend;
+		gp_pixel fg = glyph_color(ctx, i);
+
+		if (i->fmt & GP_MARKUP_SUB)
+			y += gp_text_descent(font);
+
+		if (i->fmt & GP_MARKUP_SUP)
+			y -= gp_text_descent(font);
+
+		gp_size x = cur_x;
+
+		gp_size glyph_advance = gp_glyph_draw(ctx->buf, font, x, y, flags,
+				                      fg, ctx->bg_color, i->glyph);
+
+		if (i->fmt & GP_MARKUP_UNDERLINE) {
+			unsigned int uy = y + gp_text_descent(font)/3 + 1;
+			unsigned int line_h = gp_text_height(font)/25 + 1;
+
+			gp_fill_rect_xywh(ctx->buf, cur_x, uy, gp_glyph_advance_x(font, i->glyph), line_h, fg);
+		}
+
+		if (i->fmt & GP_MARKUP_STRIKE) {
+			unsigned int sy = y - gp_text_ascent(font)/3;
+			unsigned int line_h = gp_text_height(font)/25 + 1;
+
+			gp_fill_rect_xywh(ctx->buf, cur_x, sy, gp_glyph_advance_x(font, i->glyph), line_h, fg);
+		}
+
+		cur_x += glyph_advance;
+
+		flags |= GP_TEXT_BEARING;
+	}
+
+	return max_ascend + ctx->padd;
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
@@ -110,96 +196,35 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	gp_pixel text_color = ctx->text_color;
-
-	if (gp_widget_is_disabled(self, flags))
-		text_color = ctx->col_disabled;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 	gp_fill_rect_xywh(ctx->buf, x, y, w, h, ctx->bg_color);
 
-	gp_markup_elem *e = gp_markup_first(self->markup->markup);
+	unsigned int i;
+	gp_coord cur_y = y;
+	const gp_markup_lines *lines = self->markup->lines;
 
-	for (;;) {
-		gp_coord cur_x = x;
-		gp_size w, h;
+	for (i = 0; i < lines->lines_cnt; i++) {
+		cur_y += render_line(&lines->lines[i], self, ctx, x, cur_y);
 
-		line_bbox(e, ctx, &w, &h);
 
-		while (e->type != GP_MARKUP_NEWLINE && e->type != GP_MARKUP_HLINE) {
-			const gp_text_style *font = get_font(ctx, e->attrs);
-			const char *str = gp_markup_elem_str(e);
-			unsigned int cur_y = y + h + ctx->padd;
+		if (!lines->lines[i].first && lines->lines[i].last->fmt & GP_MARKUP_STRIKE) {
+			unsigned int line_h = gp_text_height(ctx->font)/25 + 1;
 
-			if (e->type == GP_MARKUP_END)
-				return;
+			gp_fill_rect_xywh(ctx->buf, x, cur_y, w, line_h, ctx->text_color);
 
-			gp_pixel fg = text_color;
-			gp_pixel bg = ctx->bg_color;
-
-			if (e->attrs & GP_MARKUP_SUBSCRIPT)
-				cur_y += ctx->padd - gp_text_descent(font);
-
-			if (e->attrs & GP_MARKUP_SUPERSCRIPT)
-				cur_y -= gp_text_descent(font);
-
-			if (e->attrs & GP_MARKUP_INVERSE) {
-				unsigned int str_h = gp_text_ascent(font) + ctx->padd;
-				unsigned int str_w = gp_text_wbbox(font, str);
-				unsigned int str_y = cur_y + ctx->padd - str_h;
-
-				GP_SWAP(fg, bg);
-
-				gp_fill_rect_xywh(ctx->buf, cur_x, str_y,
-				                  str_w, gp_text_height(font), bg);
-			}
-
-			cur_x += gp_text(ctx->buf, font, cur_x, cur_y,
-			                 GP_ALIGN_RIGHT | GP_VALIGN_BASELINE,
-			                 fg, bg, str);
-
-			e++;
+			cur_y += ctx->padd;
 		}
-
-		y += ctx->padd + h;
-
-		if (e->type == GP_MARKUP_HLINE) {
-			y += ctx->padd;
-			gp_hline_xyw(ctx->buf, x, y + ctx->padd/2, self->w, ctx->text_color);
-		}
-
-		e++;
 	}
-}
-
-void gp_widget_markup_refresh(gp_widget *self)
-{
-	unsigned int var_id = 0;
-	gp_markup_elem *e;
-
-	if (!self->markup->get)
-		return;
-
-	for (e = gp_markup_first(self->markup->markup); e; e = gp_markup_next(e)) {
-		if (e->type != GP_MARKUP_VAR)
-			continue;
-
-		e->var = self->markup->get(var_id++, e->var);
-	}
-
-	gp_widget_resize(self);
-	gp_widget_redraw(self);
 }
 
 enum keys {
 	FMT,
-	GET,
 	TEXT,
 };
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("fmt", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("get", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
 };
 
@@ -210,7 +235,6 @@ static const gp_json_obj obj_filter = {
 
 static gp_widget *json_to_markup(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	char *(*get)(unsigned int var_id, char *old_val) = NULL;
 	gp_widget *ret = NULL;
 	enum gp_markup_fmt fmt = GP_MARKUP_GFXPRIM;
 
@@ -218,17 +242,16 @@ static gp_widget *json_to_markup(gp_json_reader *json, gp_json_val *val, gp_widg
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
-		case GET:
-			get = gp_widget_callback_addr(val->val_str, ctx);
-		break;
 		case TEXT:
-			ret = gp_widget_markup_new(val->val_str, fmt, NULL);
+			ret = gp_widget_markup_new(val->val_str, fmt);
 		break;
 		case FMT:
 			if (ret)
 				gp_json_warn(json, "Markup fmt must be defined before text");
 
-			if (!strcmp(val->val_str, "gfxprim"))
+			if (!strcmp(val->val_str, "plaintext"))
+				fmt = GP_MARKUP_PLAINTEXT;
+			else if (!strcmp(val->val_str, "gfxprim"))
 				fmt = GP_MARKUP_GFXPRIM;
 			else if (!strcmp(val->val_str, "html"))
 				fmt = GP_MARKUP_HTML;
@@ -243,8 +266,6 @@ static gp_widget *json_to_markup(gp_json_reader *json, gp_json_val *val, gp_widg
 		return NULL;
 	}
 
-	ret->markup->get = get;
-
 	return ret;
 }
 
@@ -256,13 +277,12 @@ struct gp_widget_ops gp_widget_markup_ops = {
 	.id = "markup",
 };
 
-gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt,
-                                char *(*get)(unsigned int var_id, char *old_val))
+gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt)
 {
 	size_t payload_size = sizeof(struct gp_widget_markup);
 	gp_widget *ret;
 
-	gp_markup *markup = gp_markup_parse(fmt, markup_str);
+	gp_markup *markup = gp_markup_parse(fmt, markup_str, 0);
 	if (!markup)
 		return NULL;
 
@@ -272,37 +292,17 @@ gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt,
 		return NULL;
 	}
 
-	ret->markup->get = get;
 	ret->markup->markup = markup;
-
-	ret->no_shrink = 1;
 
 	return ret;
 }
 
-static gp_markup_elem *get_var_by_id(gp_widget *self, unsigned int var_id)
-{
-	unsigned int cur_id = 0;
-	gp_markup_elem *e;
-
-	for (e = gp_markup_first(self->markup->markup); e; e = gp_markup_next(e)) {
-		if (e->type != GP_MARKUP_VAR)
-			continue;
-
-		if (cur_id == var_id)
-			return e;
-
-		cur_id++;
-	}
-
-	return NULL;
-}
-
-int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt, const char *markup_str)
+int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt,
+                         const char *markup_str)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_MARKUP, 1);
 
-	gp_markup *markup = gp_markup_parse(fmt, markup_str);
+	gp_markup *markup = gp_markup_parse(fmt, markup_str, 0);
 	if (!markup)
 		return 1;
 
@@ -314,25 +314,4 @@ int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt, const char *ma
 	gp_widget_redraw(self);
 
 	return 0;
-}
-
-void gp_widget_markup_set_var(gp_widget *self, unsigned int var_id, const char *fmt, ...)
-{
-	gp_markup_elem *var;
-	va_list va;
-
-	GP_WIDGET_ASSERT(self, GP_WIDGET_MARKUP, );
-
-	var = get_var_by_id(self, var_id);
-	if (!var) {
-		GP_WARN("Markup %p invalid variable id %u", self, var_id);
-		return;
-	}
-
-	va_start(va, fmt);
-	var->var = gp_vec_vprintf(var->var, fmt, va);
-	va_end(va);
-
-	gp_widget_resize(self);
-	gp_widget_redraw(self);
 }

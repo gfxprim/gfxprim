@@ -20,7 +20,7 @@ static int button_add_callback(gp_widget_event *ev)
 
 	snprintf(buf, sizeof(buf), "#New Tab %u#\nThis is dynamically craeted tab!", counter++);
 
-	gp_widget_tabs_tab_append(tabs, "Label", gp_widget_markup_new(buf, GP_MARKUP_GFXPRIM, NULL));
+	gp_widget_tabs_tab_append(tabs, "Label", gp_widget_markup_new(buf, GP_MARKUP_GFXPRIM));
 
 	return 0;
 }

@@ -1,9 +1,10 @@
 {
  "info": {"version": 1, "license": "GPL-2.0-or-later"},
  "layout": {
+  "halign": "fill",
   "widgets": [
-   {"type": "markup", "fmt": "html", "text":
-"<big>BIG</big><br>Some other text <b>Bit of bold</b> \n\n\n\tand more text<br>&lt;&plusmn;30&deg;C&gt;<foo></foo><hr>footer &copy; Nobody"}
+   {"type": "markup", "fmt": "html", "halign": "fill", "text":
+    "<big>Big text</big><br><u>Underlined <span foreground=blue>text</span> gypq</u> <tt>monospace</tt> <b>bit of bold</b> \n\n\n\t<s>Crossed text</s><br>Escapes: &lt;&plusmn;30&deg;C&gt;<foo></foo><hr>footer &copy; <span foreground=red font_weight=\"bold\">Nobody</span>"}
   ]
  }
 }

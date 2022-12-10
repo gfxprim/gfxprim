@@ -48,9 +48,12 @@ static int event_handler(gp_widget_event *ev)
 int main(int argc, char *argv[])
 {
 	gp_widget *layout = gp_widget_overlay_new(2);
-	gp_widget *markup = gp_widget_markup_new("#Bottom widget#\n\nThis widget is on the bottom", GP_MARKUP_GFXPRIM, NULL);
+	gp_widget *markup = gp_widget_markup_new("#Bottom widget#\n\nThis widget is on the bottom", GP_MARKUP_GFXPRIM);
 	gp_widget *btn_grid = gp_widget_grid_new(2, 1, 0);
 	gp_widget *markup_grid = gp_widget_grid_new(1, 1, 0);
+
+	markup->align = GP_HFILL;
+	markup_grid->align = GP_HFILL;
 
 	//gp_widget_grid_border_set(btn_grid, 0, 0);
 	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new("prev", GP_BUTTON_PREV, NULL, NULL));

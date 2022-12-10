@@ -13,10 +13,11 @@ Data Structures
 * link:hash_table.html[Hash table]
 * link:linked_list.html[Linked list]
 
-Strings
-~~~~~~~
+Text
+~~~~
 
 * link:utf.html[Unicode]
+* link:markup.html[Markup]
 
 Allocators
 ~~~~~~~~~~

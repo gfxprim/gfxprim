@@ -1,0 +1,125 @@
+Markup
+------
+
+Markup is an abstraction for formatted text as well as parsers for a few
+formats.
+
+.Markup
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_markup_fmt_flags {
+        GP_MARKUP_BOLD = 0x01,
+        GP_MARKUP_LARGE = 0x02,
+        GP_MARKUP_MONO = 0x04,
+        GP_MARKUP_SUB = 0x08,
+        GP_MARKUP_SUP = 0x10,
+        GP_MARKUP_UNDERLINE = 0x20,
+        GP_MARKUP_STRIKE = 0x40,
+};
+
+typedef struct gp_markup_glyph {
+        /* unicode glyph */
+        uint32_t glyph;
+        /* text format, bold, monospace, .... */
+        uint16_t fmt;
+} gp_markup_glyph;
+
+typedef struct gp_markup {
+        uint32_t glyph_cnt;
+        gp_markup_glyph glyphs[];
+} gp_markup;
+
+void gp_markup_dump(gp_markup *self);
+-------------------------------------------------------------------------------
+
+.Markup parsers
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_markup_fmt {
+        GP_MARKUP_PLAINTEXT,
+        GP_MARKUP_GFXPRIM,
+        GP_MARKUP_HTML,
+};
+
+gp_markup *gp_markup_parse(enum gp_markup_fmt fmt, const char *markup,
+                           enum gp_markup_flags flags);
+-------------------------------------------------------------------------------
+
+Plaintext Markup
+~~~~~~~~~~~~~~~~
+
+Plaintext markup is simple utf8 text with newlines. Any of '\r', '\n', '\r\n'
+and '\n\r' are considered to be newlines and any sequence of whitespaces such
+as ' ' or '\t' are considered to be a single space.
+
+Gfxprim Markup
+~~~~~~~~~~~~~~
+
+Gfxprim markup is similar to markdown or asciidoc text format. Special
+characters are escaped with \ as \*.
+
+.Supported format attributes
+|==================================================================
+|  \{init_val}   | A variable, value is set by the +get()+ function
+|    \*bold*     | Bold text
+|  \`monospace`  | Monospace text
+|  \_subcript_   | Subscript
+| \^superscript^ | Superscript
+| \~underline~   | Underline
+|   \#large#     | Large text
+|==================================================================
+
+HTML Markup
+~~~~~~~~~~~
+
+HTML markup is able to parse basic tags. Unsupported tags are ignored.
+
+.Supported tags
+|==================================================================
+| <b>            | Bold text
+| <br> or <br /> | Line break
+| <big>          | Large text
+| <hr> or <hr /> | Horizontal line
+| <s>            | Strike through
+| <sub>          | Subscript
+| <sup>          | Superscript
+| <span>         | See below the supported span attributes.
+| <tt>           | Monospace font
+| <u>            | Underline
+|==================================================================
+
+WARN: Only one level of sub and sup is supported.
+
+.Supported span attributes
+|==================================================================
+| font_weight   | bold or normal
+| strikethrough | true or false
+| color         |
+| fg_color      | See colors table.
+| foreground    |
+|==================================================================
+
+.Colors
+|==================================================================
+| *text* (Default text color) |
+| [maroon]*red*     | [red]*bright-red*
+| [green]*green*    | [lime]*bright-green*
+| [olive]*yellow*   | [yellow]*bright-yellow*
+| [navy]*blue*      | [blue]*bright-blue*
+| [purple]*magenta* | [fuchsia]*bright-magenta*
+| [teal]*cyan*      | [aqua]*bright-cyan*
+| [gray]*gray*      | [white black-background]*white*
+|==================================================================
+
+.Supported escapes
+|==================================================================
+| \&amp;    | &
+| \&lt;     | <
+| \&gt;     | >
+| \&nbsp;   | Non breakable space
+| \&copy;   | (C)
+| \&reg;    | (R)
+| \&deg;    | &deg;
+| \&plusmn; | &plusmn;
+| \&micro;  | &micro;
+|==================================================================

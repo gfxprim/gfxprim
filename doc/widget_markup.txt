@@ -1,0 +1,28 @@
+Markup widget
+-------------
+
+Markup widget is a page of a text with possible additional formatting. The
+widget is build on the top of the link:markup.html[text markup].
+
+.A markup widget
+image:markup_widget.png[Markup widget]
+
+.Markup widget constructor
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_markup_new(const char *markup, enum gp_markup_fmt fmt,
+                                enum gp_markup_flags flags,
+                                char *(*get)(unsigned int var_id, char *old_val));
+-------------------------------------------------------------------------------
+
+[source,c]
+-------------------------------------------------------------------------------
+int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt,
+                         const char *markup_str, enum gp_markup_flags flags);
+-------------------------------------------------------------------------------
+
+.Markup widget events
+[cols=",3",options="header"]
+|===================================================
+| Widget event value | Description
+|===================================================

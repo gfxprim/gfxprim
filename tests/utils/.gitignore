@@ -10,3 +10,7 @@ json_reader
 json_writer
 trie
 avl_tree
+markup_plaintext
+markup_gfxprim
+markup_html
+markup_justify

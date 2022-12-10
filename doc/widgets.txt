@@ -50,6 +50,7 @@ Individual widgets documentation
 * link:widget_table.html[Table widget]
 * link:widget_tabs.html[Tabs widget]
 * link:widget_frame.html[Frame widget]
+* link:widget_markup.html[Markup widget]
 
 Dialog documentation
 --------------------

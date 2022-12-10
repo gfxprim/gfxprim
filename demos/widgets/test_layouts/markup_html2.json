@@ -1,0 +1,10 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "halign": "fill",
+  "widgets": [
+   {"type": "markup", "fmt": "html", "halign": "fill", "text":
+    "<big>Lorem ipsum</big><br><br><b>L</b>orem ipsum dolor sit amet, <span color=green>consectetur</span> adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat.<br><br><br>Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur<sup>1</sup> sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.<hr><sup>1</sup> Lorem ipsum dolor sit amet."}
+  ]
+ }
+}
