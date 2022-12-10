@@ -107,9 +107,13 @@ struct gp_widget_ops {
 	 * @ctx    Render configuration.
 	 * @new_wh Force distribute size on layout size change.
 	 */
-	void (*distribute_size)(gp_widget *self,
-	                        const gp_widget_render_ctx *ctx,
-	                        int new_wh);
+	void (*distribute_w)(gp_widget *self,
+	                     const gp_widget_render_ctx *ctx,
+	                     int new_wh);
+
+	void (*distribute_h)(gp_widget *self,
+	                     const gp_widget_render_ctx *ctx,
+	                     int new_wh);
 
 	/**
 	 * @brief A callback to iterate over all widget children.
@@ -209,8 +213,8 @@ int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *c
  */
 int gp_widget_ops_focus_widget(gp_widget *self);
 
-void gp_widget_ops_distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx,
-                                   unsigned int w, unsigned int h, int new_wh);
+void gp_widget_ops_distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int w, int new_wh);
+void gp_widget_ops_distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int h, int new_wh);
 
 /**
  * @brief Calls a callback on each child widget.

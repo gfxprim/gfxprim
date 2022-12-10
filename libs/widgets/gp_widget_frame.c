@@ -61,13 +61,20 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	return frame_h(self, ctx) + gp_widget_min_h(self->frame->child, ctx);
 }
 
-static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
+static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
 	unsigned int w = self->w - frame_w(ctx);
+
+	if (self->frame->child)
+		gp_widget_ops_distribute_w(self->frame->child, ctx, w, new_wh);
+}
+
+static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
+{
 	unsigned int h = self->h - frame_h(self, ctx);
 
 	if (self->frame->child)
-		gp_widget_ops_distribute_size(self->frame->child, ctx, w, h, new_wh);
+		gp_widget_ops_distribute_h(self->frame->child, ctx, h, new_wh);
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
@@ -230,7 +237,8 @@ struct gp_widget_ops gp_widget_frame_ops = {
 	.focus = focus,
 	.focus_child = focus_child,
 	.for_each_child = for_each_child,
-	.distribute_size = distribute_size,
+	.distribute_w = distribute_w,
+	.distribute_h = distribute_h,
 	.from_json = json_to_frame,
 	.id = "frame",
 };

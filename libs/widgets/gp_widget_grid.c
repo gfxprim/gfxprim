@@ -176,13 +176,10 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	return min_h_(self, ctx);
 }
 
-static void compute_cols_rows_min_wh(struct gp_widget_grid *grid,
-                                     const gp_widget_render_ctx *ctx)
+static void compute_cols_min_w(struct gp_widget_grid *grid,
+                               const gp_widget_render_ctx *ctx)
 {
 	unsigned int x, y;
-
-	for (y = 0; y < grid->rows; y++)
-		grid->row_s[y].size = 0;
 
 	for (x = 0; x < grid->cols; x++)
 		grid->col_s[x].size = 0;
@@ -192,75 +189,92 @@ static void compute_cols_rows_min_wh(struct gp_widget_grid *grid,
 			gp_widget *widget = widget_grid_grid_get(grid, x, y);
 
 			grid->col_s[x].size = GP_MAX(grid->col_s[x].size, gp_widget_min_w(widget, ctx));
+		}
+	}
+}
+
+static void compute_rows_min_h(struct gp_widget_grid *grid,
+                               const gp_widget_render_ctx *ctx)
+{
+	unsigned int x, y;
+
+	for (y = 0; y < grid->rows; y++)
+		grid->row_s[y].size = 0;
+
+	for (y = 0; y < grid->rows; y++) {
+		for (x = 0; x < grid->cols; x++) {
+			gp_widget *widget = widget_grid_grid_get(grid, x, y);
+
 			grid->row_s[y].size = GP_MAX(grid->row_s[y].size, gp_widget_min_h(widget, ctx));
 		}
 	}
 }
 
-static void compute_cols_rows_min_uniform_wh(struct gp_widget_grid *grid,
-                                             const gp_widget_render_ctx *ctx)
+static void compute_cols_min_uniform_w(struct gp_widget_grid *grid,
+                                       const gp_widget_render_ctx *ctx)
 {
 	unsigned int x, y;
-	unsigned int min_cols_w = 0, min_rows_h = 0;
+	unsigned int min_cols_w = 0;
 
 	for (y = 0; y < grid->rows; y++) {
 		for (x = 0; x < grid->cols; x++) {
 			struct gp_widget *widget = widget_grid_grid_get(grid, x, y);
 
 			min_cols_w = GP_MAX(min_cols_w, gp_widget_min_w(widget, ctx));
-			min_rows_h = GP_MAX(min_rows_h, gp_widget_min_h(widget, ctx));
 		}
 	}
 
 	for (x = 0; x < grid->cols; x++)
 		grid->col_s[x].size = min_cols_w;
+}
+
+static void compute_rows_min_uniform_h(struct gp_widget_grid *grid,
+                                       const gp_widget_render_ctx *ctx)
+{
+	unsigned int x, y;
+	unsigned int min_rows_h = 0;
+
+	for (y = 0; y < grid->rows; y++) {
+		for (x = 0; x < grid->cols; x++) {
+			struct gp_widget *widget = widget_grid_grid_get(grid, x, y);
+
+			min_rows_h = GP_MAX(min_rows_h, gp_widget_min_h(widget, ctx));
+		}
+	}
 
 	for (y = 0; y < grid->rows; y++)
 		grid->row_s[y].size = min_rows_h;
 }
 
-static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
+static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
 	struct gp_widget_grid *grid = self->grid;
 	unsigned int x, y;
 
 	if (grid->uniform)
-		compute_cols_rows_min_uniform_wh(grid, ctx);
+		compute_cols_min_uniform_w(grid, ctx);
 	else
-		compute_cols_rows_min_wh(grid, ctx);
+		compute_cols_min_w(grid, ctx);
 
-	unsigned int sum_row_fills = 0;
 	unsigned int sum_col_fills = 0;
 
 	/* cell fills */
-	for (y = 0; y < grid->rows; y++)
-		sum_row_fills += grid->row_s[y].fill;
-
 	for (x = 0; x < grid->cols; x++)
 		sum_col_fills += grid->col_s[x].fill;
 
 	/* padding fills */
-	for (y = 0; y <= grid->rows; y++)
-		sum_row_fills += grid->row_b[y].fill;
-
 	for (x = 0; x <= grid->cols; x++)
 		sum_col_fills += grid->col_b[x].fill;
 
 	/* size to be distributed */
 	unsigned int dx = self->w - self->min_w;
-	unsigned int dy = self->h - self->min_h;
 
 	if (sum_col_fills) {
 		for (x = 0; x < grid->cols; x++)
 			grid->col_s[x].size += dx * grid->col_s[x].fill / sum_col_fills;
 	}
 
-	if (sum_row_fills) {
-		for (y = 0; y < grid->rows; y++)
-			grid->row_s[y].size += dy * grid->row_s[y].fill / sum_row_fills;
-	}
-
-	/* Compute colum/row offsets */
+	/* Compute colum offsets */
 	unsigned int cur_x = self->x + padd_size(ctx, grid->col_b[0].padd);
 	if (sum_col_fills)
 		cur_x += dx * grid->col_b[0].fill / sum_col_fills;
@@ -272,6 +286,50 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 			cur_x += dx * grid->col_b[x+1].fill / sum_col_fills;
 	}
 
+	/* Place the widgets */
+	for (y = 0; y < grid->rows; y++) {
+		for (x = 0; x < grid->cols; x++) {
+			gp_widget *widget = widget_grid_get(self, x, y);
+
+			if (widget) {
+				gp_widget_ops_distribute_w(widget, ctx,
+				                           grid->col_s[x].size,
+				                           new_wh);
+			}
+		}
+	}
+}
+
+static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
+{
+	struct gp_widget_grid *grid = self->grid;
+	unsigned int x, y;
+
+	if (grid->uniform)
+		compute_rows_min_uniform_h(grid, ctx);
+	else
+		compute_rows_min_h(grid, ctx);
+
+	unsigned int sum_row_fills = 0;
+
+	/* cell fills */
+	for (y = 0; y < grid->rows; y++)
+		sum_row_fills += grid->row_s[y].fill;
+
+	/* padding fills */
+	for (y = 0; y <= grid->rows; y++)
+		sum_row_fills += grid->row_b[y].fill;
+
+	/* size to be distributed */
+	unsigned int dy = self->h - self->min_h;
+
+	/* Compute row offsets */
+	if (sum_row_fills) {
+		for (y = 0; y < grid->rows; y++)
+			grid->row_s[y].size += dy * grid->row_s[y].fill / sum_row_fills;
+	}
+
+	/* Compute colum/row offsets */
 	unsigned int cur_y = self->y + padd_size(ctx, grid->row_b[0].padd);
 	if (sum_row_fills)
 		cur_y += dy * grid->row_b[0].fill / sum_row_fills;
@@ -289,10 +347,9 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 			gp_widget *widget = widget_grid_get(self, x, y);
 
 			if (widget) {
-				gp_widget_ops_distribute_size(widget, ctx,
-				                              grid->col_s[x].size,
-				                              grid->row_s[y].size,
-				                              new_wh);
+				gp_widget_ops_distribute_h(widget, ctx,
+				                           grid->row_s[y].size,
+				                           new_wh);
 			}
 		}
 	}
@@ -1131,7 +1188,8 @@ struct gp_widget_ops gp_widget_grid_ops = {
 	.focus = focus,
 	.focus_xy = focus_xy,
 	.focus_child = focus_child,
-	.distribute_size = distribute_size,
+	.distribute_w = distribute_w,
+	.distribute_h = distribute_h,
 	.for_each_child = for_each_child,
 	.from_json = json_to_grid,
 	.id = "grid",

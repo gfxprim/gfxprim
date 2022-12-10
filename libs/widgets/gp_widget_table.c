@@ -126,7 +126,7 @@ static unsigned int display_rows(gp_widget *self, const gp_widget_render_ctx *ct
 	return (self->h - header) / (text_a + ctx->padd);
 }
 
-static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
+static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
 	gp_widget_table *tbl = self->tbl;
 	unsigned int i, sum_cols_w = 0, sum_fills = 0;
@@ -865,7 +865,7 @@ static void free_(gp_widget *self)
 struct gp_widget_ops gp_widget_table_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
-	.distribute_size = distribute_size,
+	.distribute_w = distribute_w,
 	.render = render,
 	.event = event,
 	.from_json = json_to_table,

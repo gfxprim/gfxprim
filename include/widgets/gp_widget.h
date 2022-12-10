@@ -56,7 +56,6 @@ struct gp_widget {
 	 * By default this is set to 0.
 	 */
 	unsigned int no_shrink:1;
-
 	unsigned int no_resize:1;
 	/*
 	 * If set the widget_ops_render() is called next time layout is repainted.
@@ -72,6 +71,9 @@ struct gp_widget {
 	 */
 	unsigned int redraw_children:1;
 	unsigned int focused:1;
+
+	/* Set by resize w and h functions cleared after event was emitted */
+	unsigned int resized:1;
 
 	/*
 	 * If set the widget cannot get focused and get events even if

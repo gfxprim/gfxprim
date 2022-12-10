@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -199,11 +199,9 @@ static const char *valign_to_str(int align)
 	}
 }
 
-static void widget_resize(gp_widget *self,
-                          unsigned int w, unsigned int h)
+static void widget_resize_w(gp_widget *self, unsigned int w)
 {
 	unsigned int dw = w - self->min_w;
-	unsigned int dh = h - self->min_h;
 
 	self->redraw = 1;
 
@@ -225,6 +223,18 @@ static void widget_resize(gp_widget *self,
 	else
 		self->w = self->min_w;
 
+	GP_DEBUG(4, "Placing widget %p (%s) min w %u %s to %u = %u-%u",
+		 self, gp_widget_type_id(self),
+	         self->min_w, halign_to_str(self->align),
+		 w, self->x, self->w);
+}
+
+static void widget_resize_h(gp_widget *self, unsigned int h)
+{
+	unsigned int dh = h - self->min_h;
+
+	self->redraw = 1;
+
 	switch (GP_VALIGN_MASK & self->align) {
 	case GP_VCENTER_WEAK:
 	case GP_VCENTER:
@@ -243,24 +253,19 @@ static void widget_resize(gp_widget *self,
 	else
 		self->h = self->min_h;
 
-	GP_DEBUG(4,
-	         "Placing widget %p (%s) min size %ux%u %s|%s to %ux%u = %ux%u-%ux%u",
+	GP_DEBUG(4, "Placing widget %p (%s) min h %u %s to %u = %u-%u",
 		 self, gp_widget_type_id(self),
-	         self->min_w, self->min_h,
-		 halign_to_str(self->align), valign_to_str(self->align),
-		 w, h, self->x, self->y, self->w, self->h);
+	         self->min_h, valign_to_str(self->align),
+		 h, self->y, self->h);
 }
 
-void gp_widget_ops_distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx,
-                                   unsigned int w, unsigned int h,
-                                   int new_wh)
+void gp_widget_ops_distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                unsigned int w, int new_wh)
 {
 	const struct gp_widget_ops *ops = gp_widget_ops(self);
 
 	if (self->no_resize && !new_wh)
 		return;
-
-	self->no_resize = 1;
 
 	if (self->min_w > w) {
 		GP_WARN("%p (%s) min_w=%u > w=%u",
@@ -269,6 +274,27 @@ void gp_widget_ops_distribute_size(gp_widget *self, const gp_widget_render_ctx *
 		w = self->min_w;
 	}
 
+	unsigned int old_w = self->w;
+
+	widget_resize_w(self, w);
+
+	if (self->w != old_w)
+		self->resized = 1;
+
+	if (ops->distribute_w)
+		ops->distribute_w(self, ctx, 1);
+}
+
+void gp_widget_ops_distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                unsigned int h, int new_wh)
+{
+	const struct gp_widget_ops *ops = gp_widget_ops(self);
+
+	if (self->no_resize && !new_wh)
+		return;
+
+	self->no_resize = 1;
+
 	if (self->min_h > h) {
 		GP_WARN("%p (%s) min_h=%u > h=%u",
 			self, gp_widget_type_id(self),
@@ -276,16 +302,20 @@ void gp_widget_ops_distribute_size(gp_widget *self, const gp_widget_render_ctx *
 		h = self->min_h;
 	}
 
-	unsigned int old_w = self->w;
 	unsigned int old_h = self->h;
 
-	widget_resize(self, w, h);
+	widget_resize_h(self, h);
 
-	if (self->w != old_w || self->h != old_h)
+	if (self->h != old_h)
+		self->resized = 1;
+
+	if (ops->distribute_h)
+		ops->distribute_h(self, ctx, 1);
+
+	if (self->resized) {
 		gp_widget_send_event(self, GP_WIDGET_EVENT_RESIZE, ctx);
-
-	if (ops->distribute_size)
-		ops->distribute_size(self, ctx, 1);
+		self->resized = 0;
+	}
 }
 
 void gp_widget_ops_for_each_child(gp_widget *self, void (*func)(gp_widget *child))
@@ -316,19 +346,21 @@ void gp_widget_calc_size(gp_widget *self, const gp_widget_render_ctx *ctx,
 	         self, self->w, self->h, w, h);
 
 	gp_widget_min_w(self, ctx);
+	w = GP_MAX(self->min_w, w);
+	/* Avoid crashes on empty layout */
+	w = GP_MAX(w, 1u);
+
+	gp_widget_ops_distribute_w(self, ctx, w, new_wh);
+
 	gp_widget_min_h(self, ctx);
+	h = GP_MAX(self->min_h, h);
+	/* Avoid crashes on empty layout */
+	h = GP_MAX(h, 1u);
+
+	gp_widget_ops_distribute_h(self, ctx, h, new_wh);
 
 	GP_DEBUG(1, "Recalculated layout %p to %ux%u",
 	         self, self->min_w, self->min_h);
-
-	w = GP_MAX(self->min_w, w);
-	h = GP_MAX(self->min_h, h);
-
-	/* Avoid crashes on empty layout */
-	w = GP_MAX(w, 1u);
-	h = GP_MAX(h, 1u);
-
-	gp_widget_ops_distribute_size(self, ctx, w, h, new_wh);
 }
 
 void gp_widget_ops_render(gp_widget *self, const gp_offset *offset,
@@ -727,7 +759,7 @@ static inline int has_children(gp_widget *self)
 {
 	const struct gp_widget_ops *ops = gp_widget_ops(self);
 
-	return ops->distribute_size != NULL;
+	return ops->distribute_w != NULL;
 }
 
 void gp_widget_resize(gp_widget *self)

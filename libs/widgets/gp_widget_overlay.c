@@ -36,8 +36,8 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	return max_h;
 }
 
-static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx,
-                            int new_wh)
+static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx,
+                         int new_wh)
 {
 	unsigned int i;
 	struct gp_widget_overlay *o = self->overlay;
@@ -48,7 +48,23 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx,
 		if (!widget)
 			continue;
 
-		gp_widget_ops_distribute_size(widget, ctx, self->w, self->h, new_wh);
+		gp_widget_ops_distribute_w(widget, ctx, self->w, new_wh);
+	}
+}
+
+static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx,
+                         int new_wh)
+{
+	unsigned int i;
+	struct gp_widget_overlay *o = self->overlay;
+
+	for (i = 0; i < gp_widget_overlay_stack_size(self); i++) {
+		gp_widget *widget = o->stack[i].widget;
+
+		if (!widget)
+			continue;
+
+		gp_widget_ops_distribute_h(widget, ctx, self->h, new_wh);
 	}
 }
 
@@ -247,7 +263,8 @@ static int focus_child(gp_widget *self, gp_widget *child)
 struct gp_widget_ops gp_widget_overlay_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
-	.distribute_size = distribute_size,
+	.distribute_w = distribute_w,
+	.distribute_h = distribute_h,
 	.for_each_child = for_each_child,
 	.event = event,
 	.focus = focus,

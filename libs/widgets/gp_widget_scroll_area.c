@@ -444,26 +444,19 @@ static int focus_child(gp_widget *self, gp_widget *child)
 	return 1;
 }
 
-static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
+static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
 	struct gp_widget_scroll_area *area = self->scroll;
 
 	gp_size child_min_w = gp_widget_min_w(area->child, ctx);
-	gp_size child_min_h = gp_widget_min_h(area->child, ctx);
 	gp_size w = self->w;
-	gp_size h = self->h;
 
 	if (area->scrollbar_x)
 		w -= scrollbar_size(ctx);
 
-	if (area->scrollbar_y)
-		h -= scrollbar_size(ctx);
-
 	gp_size child_w = GP_MAX(child_min_w, w);
-	gp_size child_h = GP_MAX(child_min_h, h);
 
 	gp_coord x_off = max_x_off(self);
-	gp_coord y_off = max_y_off(self);
 
 	if (area->x_off > x_off)
 		area->x_off = x_off;
@@ -473,6 +466,23 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 	else
 		area->scrollbar_y = 1;
 
+	gp_widget_ops_distribute_w(area->child, ctx, child_w, new_wh);
+}
+
+static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
+{
+	struct gp_widget_scroll_area *area = self->scroll;
+
+	gp_size child_min_h = gp_widget_min_h(area->child, ctx);
+	gp_size h = self->h;
+
+	if (area->scrollbar_y)
+		h -= scrollbar_size(ctx);
+
+	gp_size child_h = GP_MAX(child_min_h, h);
+
+	gp_coord y_off = max_y_off(self);
+
 	if (area->y_off > y_off)
 		area->y_off = y_off;
 
@@ -481,7 +491,7 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 	else
 		area->scrollbar_x = 1;
 
-	gp_widget_ops_distribute_size(area->child, ctx, child_w, child_h, new_wh);
+	gp_widget_ops_distribute_h(area->child, ctx, child_h, new_wh);
 }
 
 enum keys {
@@ -551,7 +561,8 @@ struct gp_widget_ops gp_widget_scroll_area_ops = {
 	.focus_xy = focus_xy,
 	.focus = focus,
 	.focus_child = focus_child,
-	.distribute_size = distribute_size,
+	.distribute_w = distribute_w,
+	.distribute_h = distribute_h,
 	.from_json = json_to_scroll,
 	.id = "scroll area",
 };
