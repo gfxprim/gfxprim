@@ -1,0 +1,109 @@
+Unicode
+-------
+
+[source,c]
+-------------------------------------------------------------------------------
+uint32_t gp_utf8_next(const char **str);
+
+/* Typical usage */
+uint32_t glyph;
+
+while ((glyph = gp_utf8_next(&string)) {
+	/* do something with glyph */
+}
+-------------------------------------------------------------------------------
+
+Allows to loop over characters in an UTF8 string.
+
+[source,c]
+-------------------------------------------------------------------------------
+int8_t gp_utf8_next_chsz(const char *str, size_t off);
+int8_t gp_utf8_prev_chsz(const char *str, size_t off);
+-------------------------------------------------------------------------------
+
+Returns how many bytes are occupied by next or previous unicode character in a
+string at given offset. These function allows you to jump between characters
+in an UTF8 string.
+
+Returns 0 if end of string was reached.
+
+Returns -1 on invalid byte sequence.
+
+[source,c]
+-------------------------------------------------------------------------------
+unsigned int gp_utf8_bytes(uint32_t unicode)
+-------------------------------------------------------------------------------
+
+Returns how may bytes are required to encode an unicode glyph into UTF8
+string.
+
+UTF8 position
+~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+typedef struct gp_utf8_pos {
+        size_t bytes;
+        size_t chars;
+} gp_utf8_pos;
+-------------------------------------------------------------------------------
+
+Encodes a position in an UTF8 string, 'bytes' stores number of actual bytes
+and 'chars' stores number of unicode glyphs.
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_utf8_pos gp_utf8_pos_first(void);
+-------------------------------------------------------------------------------
+
+Returs position at the start of the string, i.e. '{0, 0}'.
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_utf8_pos gp_utf8_pos_last(const char *str);
+-------------------------------------------------------------------------------
+
+Returns position at the end of the string, the 'bytes' contains the number of
+bytes in the string and chars number of unicode glyphs in the string.
+
+[source,c]
+-------------------------------------------------------------------------------
+int gp_utf8_pos_eq(gp_utf8_pos a, gp_utf8_pos b);
+
+int gp_utf8_pos_gt(gp_utf8_pos a, gp_utf8_pos b);
+
+int gp_utf8_pos_ge(gp_utf8_pos a, gp_utf8_pos b);
+
+gp_utf8_pos gp_utf8_pos_sub(gp_utf8_pos a, gp_utf8_pos b);
+
+gp_utf8_pos gp_utf8_pos_add(gp_utf8_pos a, gp_utf8_pos b);
+
+gp_utf8_pos gp_utf8_pos_min(gp_utf8_pos a, gp_utf8_pos b);
+
+gp_utf8_pos gp_utf8_pos_max(gp_utf8_pos a, gp_utf8_pos b);
+-------------------------------------------------------------------------------
+
+Comparsions and arithmetical functions for the UTF8 position, both the
+position 'a' and 'b' are supposed to be a position inside the same UTF8
+string.
+
+[source,c]
+-------------------------------------------------------------------------------
+uint32_t gp_utf8_pos_prev(const char *str, gp_utf8_pos *pos);
+
+uint32_t gp_utf8_pos_next(const char *str, gp_utf8_pos *pos);
+-------------------------------------------------------------------------------
+
+Moves the UTF8 position by a one character and returns a glyph value at the
+new position.
+
+Returns 0 if end of beginning of the string was reached.
+
+[source,c]
+-------------------------------------------------------------------------------
+ssize_t gp_utf8_pos_move(const char *str, gp_utf8_pos *cur_pos, ssize_t dir);
+-------------------------------------------------------------------------------
+
+Tries to move the UTF8 position by 'dir' glyphs, stops and the string
+beginning or end and returns how many glyphs it was able to move the postion
+by.
