@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 #ifndef TEXT_GP_TEXT_H
@@ -68,6 +68,33 @@ gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
 gp_size gp_text(gp_pixmap *pixmap, const gp_text_style *style,
                 gp_coord x, gp_coord y, int align,
                 gp_pixel fg_color, gp_pixel bg_color, const char *str);
+
+/**
+ * @brief Renders a single glyph.
+ *
+ * The x, y coordinates are the upper left corner of the glyph box. If you want
+ * to render on baseline, you have to add the ascend. The if GP_TEXT_BEARING is
+ * passed in the flags, bearing is applied before the glyph is rendered.
+ * Usually first letter in a line is rendered without bearing and the rest of
+ * them is rendered with bearing.
+ *
+ * @pixmap A pixmap to draw the glyph into.
+ * @style A text font and style.
+ * @x An x coordinate inside the pixmap.
+ * @y An y coordinate inside the pixmap.
+ * @flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG and
+ *         GP_VALIGN_*
+ * @fg_color Text color.
+ * @bg_color Background color.
+ * @glyph And unicode glypth to draw.
+ *
+ * @return Returns glyhp advance plus any style extra spacing, i.e. how much
+ *         should x move for the next glyph.
+ */
+gp_size gp_glyph_draw(gp_pixmap *pixmap, const gp_text_style *style,
+                      gp_coord x, gp_coord y, int flags,
+                      gp_pixel fg_color, gp_pixel bg_color,
+                      uint32_t glyph);
 
 /*
  * Aligns a string between x1 and x2 based ond horizontal aligment flags. The

@@ -28,6 +28,29 @@ enum gp_text_len_type {
 };
 
 /**
+ * @brief Returns a letter advance in horizontal direction.
+ *
+ * @style A text style + font formatting
+ * @ch An unicode letter.
+ *
+ * @return Horizontal advance in pixels.
+ */
+gp_size gp_glyph_advance_x(const gp_text_style *style, uint32_t ch);
+
+/**
+ * @brief Returns horizontal bearing.
+ *
+ * Bearing is a distance to be added to the x coordinate before we start
+ * drawing a glyph bitmap. Bearing may be negative in some cases, typically for
+ * letter 'J' and 'j'.
+ *
+ * @style A text style + font formatting @ch An unicode letter.
+ *
+ * @return Horizontal bearing in pixels.
+ */
+gp_ssize gp_glyph_bearing_x(const gp_text_style *style, uint32_t ch);
+
+/**
  * @brief Calculates the width of the string drawn in the given style.
  *
  * @style A text style + font formatting.

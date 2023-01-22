@@ -308,3 +308,106 @@ gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
 
 	return gp_text_width_len(style, GP_TEXT_LEN_BBOX, str, max_chars);
 }
+
+static void glyph_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
+                       gp_coord x, gp_coord y, uint8_t bearing,
+                       gp_pixel fg, const gp_glyph *glyph)
+{
+	int nomul = style->pixel_xmul == 1 && style->pixel_ymul == 1 &&
+                    style->pixel_xspace == 0 && style->pixel_yspace == 0;
+
+	switch (pixmap->pixel_type) {
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
+	case GP_PIXEL_{{ pt.name }}:
+		if (nomul)
+			draw_1BPP_glyph_nomul_{{ pt.name }}(pixmap, style, x, y, fg, glyph);
+		else
+			draw_1BPP_glyph_{{ pt.name }}(pixmap, style, x, y, fg, glyph);
+	break;
+@ end
+	default:
+		GP_ABORT("Invalid pixmap->pixel_type");
+	}
+}
+
+static void glyph_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
+                       gp_coord x, gp_coord y, uint8_t bearing,
+                       gp_pixel fg, gp_pixel bg, const gp_glyph *glyph)
+{
+	switch (pixmap->pixel_type) {
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
+	case GP_PIXEL_{{ pt.name }}:
+		draw_8BPP_glyph_{{ pt.name }}(pixmap, style, x, y, fg, bg, glyph);
+	break;
+@ end
+	default:
+		GP_ABORT("Invalid pixmap->pixel_type");
+	}
+}
+
+static void glyph_8BPP_bg(gp_pixmap *pixmap, const gp_text_style *style,
+                          gp_coord x, gp_coord y, uint8_t bearing,
+                          gp_pixel fg, gp_pixel bg, const gp_glyph *glyph)
+{
+	switch (pixmap->pixel_type) {
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
+	case GP_PIXEL_{{ pt.name }}:
+		draw_8BPP_glyph_bg_{{ pt.name }}(pixmap, style, x, y, fg, bg, glyph);
+	break;
+@ end
+	default:
+		GP_ABORT("Invalid pixmap->pixel_type");
+	}
+}
+
+gp_size gp_glyph_draw(gp_pixmap *pixmap, const gp_text_style *style,
+                      gp_coord x, gp_coord y, int flags,
+                      gp_pixel fg_color, gp_pixel bg_color,
+                      uint32_t glyph)
+{
+	uint8_t bearing = flags & GP_TEXT_BEARING;
+
+	const gp_glyph *g = gp_get_glyph(style->font, glyph);
+
+	gp_coord gx = x;
+	gp_coord bearing_x = 0;
+
+	switch (flags & 0x70) {
+	case GP_VALIGN_ABOVE:
+		y = y - gp_text_height(style) + 1;
+	break;
+	case GP_VALIGN_CENTER:
+		y = y - gp_text_height(style)/2;
+	break;
+	case GP_VALIGN_BASELINE:
+		y = y - gp_text_ascent(style) + 1;
+	break;
+	case GP_VALIGN_BELOW:
+	break;
+	}
+
+	if (!bearing) {
+		unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
+		bearing_x = g->bearing_x * x_mul;
+		gx -= bearing_x;
+	}
+
+	switch (style->font->glyph_bitmap_format) {
+	case GP_FONT_BITMAP_1BPP:
+		glyph_1BPP(pixmap, style, gx, y, bearing, fg_color, g);
+	break;
+	case GP_FONT_BITMAP_8BPP:
+		if (flags & GP_TEXT_NOBG)
+			glyph_8BPP(pixmap, style, gx, y, bearing, fg_color, bg_color, g);
+		else
+			glyph_8BPP_bg(pixmap, style, gx, y, bearing, fg_color, bg_color, g);
+	break;
+	default:
+		GP_ABORT("Invalid font glyph bitmap format");
+	}
+
+	return gp_glyph_advance_x(style, glyph) + style->char_xspace - (!bearing ? bearing_x : 0);
+}

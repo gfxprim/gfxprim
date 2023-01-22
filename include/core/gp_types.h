@@ -14,6 +14,8 @@ typedef int gp_coord;
 /* Integer type for sizes i.e. w, h, ... */
 typedef unsigned int gp_size;
 
+typedef int gp_ssize;
+
 /* Pixel integer value packed accordingly to gp_pixel_type */
 typedef uint32_t gp_pixel;
 

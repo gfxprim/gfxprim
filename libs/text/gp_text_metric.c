@@ -18,20 +18,19 @@ static unsigned int multiply_width(const gp_text_style *style, unsigned int w)
 	return w * style->pixel_xmul + (w - 1) * style->pixel_xspace;
 }
 
-/*
- * Returns glyph advance.
- */
-static unsigned int glyph_advance_x(const gp_text_style *style, uint32_t ch)
+static gp_size glyph_advance_x(const gp_text_style *style, uint32_t ch)
 {
 	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
 	return multiply_width(style, glyph->advance_x);
 }
 
-/*
- * Returns glyph bearing.
- */
-static unsigned int glyph_bearing_x(const gp_text_style *style, uint32_t ch)
+gp_size gp_glyph_advance_x(const gp_text_style *style, uint32_t ch)
+{
+	return glyph_advance_x(style, ch) + style->char_xspace;
+}
+
+gp_ssize gp_glyph_bearing_x(const gp_text_style *style, uint32_t ch)
 {
 	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
@@ -157,7 +156,7 @@ gp_size gp_text_width_len(const gp_text_style *style, enum gp_text_len_type type
 
 		if (*str) {
 			ch = gp_utf8_next(&str);
-			ret += glyph_bearing_x(style, ch);
+			ret += gp_glyph_bearing_x(style, ch);
 		}
 	break;
 	}
