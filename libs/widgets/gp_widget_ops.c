@@ -148,7 +148,7 @@ unsigned int gp_widget_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	if (!self)
 		return 0;
 
-	if (self->no_resize)
+	if (self->no_resize && !self->resized)
 		return self->min_h;
 
 	new_min_h = widget_min_h(self, ctx);
