@@ -45,7 +45,7 @@ typedef struct gp_markup_glyph {
 	uint16_t fmt;
 	union {
 		uint16_t fg_color;
-		int16_t space_pad;
+		int16_t space_padd;
 	};
 } gp_markup_glyph;
 

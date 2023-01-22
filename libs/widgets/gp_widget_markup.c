@@ -120,7 +120,7 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static inline gp_pixel glyph_color(const gp_widget_render_ctx *ctx, const gp_markup_glyph *g)
 {
-	if (!g->fg_color)
+	if (!g->fg_color || g->glyph == ' ')
 		return ctx->text_color;
 
 	return gp_widgets_color(ctx, GP_WIDGETS_THEME_COLORS + g->fg_color);

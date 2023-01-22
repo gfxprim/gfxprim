@@ -41,6 +41,7 @@ static inline void gp_markup_builder_space(gp_markup_builder *self, uint8_t fmt)
 
 	self->glyphs[self->glyph_cnt].glyph = ' ';
 	self->glyphs[self->glyph_cnt].fmt = fmt;
+	self->glyphs[self->glyph_cnt].space_padd = 0;
 
 ret:
 	self->glyph_cnt++;
