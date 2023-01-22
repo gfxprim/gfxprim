@@ -78,9 +78,6 @@ static void draw_1BPP_glyph_nomul_{{ pt.name }}(gp_pixmap *pixmap, const gp_text
 	x += glyph->bearing_x;
 	y -= (glyph->bearing_y - style->font->ascend);
 
-	gp_coord xdir = pixmap->x_swap ? -1 : 1;
-	gp_coord ydir = pixmap->y_swap ? -1 : 1;
-
 	for (j = 0; j < glyph->height; j++) {
 		for (i = 0; i < glyph->width; i++) {
 			uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & bit_lookup[i%8];
@@ -88,16 +85,15 @@ static void draw_1BPP_glyph_nomul_{{ pt.name }}(gp_pixmap *pixmap, const gp_text
 			if (!bit)
 				continue;
 
-			gp_coord px = x + xdir * i;
+			gp_coord px = x+i;
 			gp_coord py = y;
 
-			if (pixmap->axes_swap)
-				GP_SWAP(px, py);
+			GP_TRANSFORM_POINT(pixmap, px, py);
 
 			if (!GP_PIXEL_IS_CLIPPED(pixmap, px, py))
 				gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, px, py, fg);
 		}
-		y += ydir;
+		y++;
 	}
 }
 
