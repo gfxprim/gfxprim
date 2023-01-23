@@ -92,7 +92,7 @@ static unsigned int header_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	//TODO: Proper font handling!
 	unsigned int text_a = gp_text_ascent(ctx->font);
 
-	if (!self->tbl->header)
+	if (!self->tbl->needs_header)
 		return 0;
 
 	return text_a + 2 * ctx->padd;
@@ -158,21 +158,7 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 	unsigned int cy = y + ctx->padd;
 	unsigned int i;
 
-	int render_header = 0;
-
-	for (i = 0; i < tbl->cols; i++) {
-		if (tbl->header[i].label) {
-			render_header = 1;
-			break;
-		}
-
-		if (col_is_sortable(tbl, i)) {
-			render_header = 1;
-			break;
-		}
-	}
-
-	if (!render_header)
+	if (!self->tbl->needs_header)
 		return 0;
 
 	for (i = 0; i < tbl->cols; i++) {
@@ -873,6 +859,25 @@ struct gp_widget_ops gp_widget_table_ops = {
 	.id = "table",
 };
 
+static void set_header_flag(gp_widget *self)
+{
+	unsigned int i;
+
+	self->tbl->needs_header = 0;
+
+	for (i = 0; i < self->tbl->cols; i++) {
+		if (self->tbl->header[i].label) {
+			self->tbl->needs_header = 1;
+			break;
+		}
+
+		if (col_is_sortable(self->tbl, i)) {
+			self->tbl->needs_header = 1;
+			break;
+		}
+	}
+}
+
 gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 			       const gp_widget_table_col_ops *col_ops,
                                const gp_widget_table_header *header)
@@ -895,6 +900,8 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	ret->tbl->col_ops.sort = col_ops->sort;
 	ret->tbl->col_ops.get_cell = col_ops->get_cell;
 	ret->tbl->col_ops.seek_row = col_ops->seek_row;
+
+	set_header_flag(ret);
 
 	return ret;
 }

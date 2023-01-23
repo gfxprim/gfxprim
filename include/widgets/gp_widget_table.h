@@ -85,6 +85,7 @@ typedef struct gp_widget_table {
 	unsigned int sorted_by_col;
 	int row_selected:1;
 	int sorted_desc:1;
+	int needs_header:1;
 
 	uint64_t last_click;
 
