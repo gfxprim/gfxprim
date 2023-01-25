@@ -195,14 +195,19 @@ enum html_tag {
 	HTML_BR,
 	HTML_BIG,
 	HTML_HR,
+	HTML_P,
 //	HTML_I,
 	HTML_S,
+	HTML_SCRIPT,
 //	HTML_SMALL,
 	HTML_SPAN,
+	HTML_STYLE,
 	HTML_SUB,
 	HTML_SUP,
+	HTML_TITLE,
 	HTML_TT,
 	HTML_U,
+	HTML_XML,
 };
 
 static struct html_tags {
@@ -217,13 +222,18 @@ static struct html_tags {
 	{"hr", HTML_HR, 0},
 	{"hr /", HTML_HR, 0},
 	//{"i", HTML_I},
+	{"p", HTML_P, 0},
 	{"s", HTML_S, 0},
 	//{"small", HTML_SMALL},
+	{"script", HTML_SCRIPT, 6},
 	{"span", HTML_SPAN, 4},
+	{"style", HTML_STYLE, 0},
 	{"sub", HTML_SUB, 0},
 	{"sup", HTML_SUP, 0},
+	{"title", HTML_TITLE, 0},
 	{"tt", HTML_TT, 0},
 	{"u", HTML_U, 0},
+	{"xml", HTML_XML, 0},
 };
 
 struct html_tag_res {
@@ -415,6 +425,29 @@ static void parse_attrs(struct html_tag_res *tag, struct attr_stack *attrs)
 	attr_stack_push(attrs, attrs_on, attrs_off, color);
 }
 
+static void eat_until_tag(struct sub_str *markup, const char *tag)
+{
+	const char *tag_last, *tag_first;
+
+	do {
+		while (sub_str_nempty(markup) && *markup->first != '<')
+			markup->first++;
+
+		tag_first = ++markup->first;
+
+		while (sub_str_nempty(markup) && *markup->first != '>')
+			markup->first++;
+
+		tag_last = markup->first;
+
+		if (sub_str_empty(markup))
+			return;
+	} while (strncasecmp(tag, tag_first, tag_last - tag_first));
+
+	if (sub_str_nempty(markup))
+		markup->first++;
+}
+
 static void html_tag(gp_markup_builder *builder, struct sub_str *markup,
                      struct attr_stack *attrs)
 {
@@ -453,14 +486,24 @@ static void html_tag(gp_markup_builder *builder, struct sub_str *markup,
 	case HTML_HR:
 		gp_markup_builder_hline(builder);
 	break;
+	case HTML_P:
+		if (is_closing)
+			gp_markup_builder_newline(builder);
+	break;
 	case HTML_S:
 		attr_bit(attrs, is_closing, GP_MARKUP_STRIKE);
+	break;
+	case HTML_SCRIPT:
+		eat_until_tag(markup, "/script");
 	break;
 	case HTML_SPAN:
 		if (is_closing)
 			attr_stack_pop(attrs);
 		else
 			parse_attrs(&res, attrs);
+	break;
+	case HTML_STYLE:
+		eat_until_tag(markup, "/style");
 	break;
 	case HTML_SUB:
 		if (!(attr_stack_fmt(attrs) & GP_MARKUP_SUP))
@@ -473,8 +516,15 @@ static void html_tag(gp_markup_builder *builder, struct sub_str *markup,
 	case HTML_U:
 		attr_bit(attrs, is_closing, GP_MARKUP_UNDERLINE);
 	break;
+	case HTML_TITLE:
+		if (is_closing)
+			gp_markup_builder_newline(builder);
+	break;
 	case HTML_TT:
 		attr_bit(attrs, is_closing, GP_MARKUP_MONO);
+	break;
+	case HTML_XML:
+		eat_until_tag(markup, "/xml");
 	break;
 	case HTML_UNKNOWN:
 	break;

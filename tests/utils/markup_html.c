@@ -221,6 +221,25 @@ static struct markup_tcase html_u = {
 	}
 };
 
+static struct markup_tcase html_strip_tags = {
+	.markup_str = "hel<script>foo</script>lo<style>bar</style><xml><data>bar</data></xml>",
+	.markup_glyphs = {
+		{.glyph = 'h'}, {.glyph = 'e'}, {.glyph = 'l'}, {.glyph = 'l'}, {.glyph = 'o'},
+		{}
+	}
+};
+
+static struct markup_tcase html_p = {
+	.markup_str = "<p>hello</p><p>world</p>",
+	.markup_glyphs = {
+		{.glyph = 'h'}, {.glyph = 'e'}, {.glyph = 'l'}, {.glyph = 'l'}, {.glyph = 'o'},
+		{.glyph = '\n'},
+		{.glyph = 'w'}, {.glyph = 'o'}, {.glyph = 'r'}, {.glyph = 'l'}, {.glyph = 'd'},
+		{.glyph = '\n'},
+		{}
+	}
+};
+
 const struct tst_suite tst_suite = {
 	.suite_name = "markup parser testsuite",
 	.tests = {
@@ -298,6 +317,16 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = markup_parse_html,
 		 .flags = TST_CHECK_MALLOC,
 		 .data = &html_u},
+
+		{.name = "markup strip <script> <style> <xml>",
+		 .tst_fn = markup_parse_html,
+		 .flags = TST_CHECK_MALLOC,
+		 .data = &html_strip_tags},
+
+		{.name = "markup html <p>",
+		 .tst_fn = markup_parse_html,
+		 .flags = TST_CHECK_MALLOC,
+		 .data = &html_p},
 
 		{.name = NULL},
 	}
