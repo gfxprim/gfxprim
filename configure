@@ -92,7 +92,7 @@ def python_version(cfg):
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     res = str(cmd.communicate())
     res = res[res.find('/python')+7:]
-    res = res[:3]
+    res = res.split(' ')[0]
 
     sys.stderr.write("%s\n" % res)
     return res
