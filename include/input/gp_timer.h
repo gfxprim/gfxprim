@@ -37,6 +37,8 @@ struct gp_timer {
 	uint32_t period;
 	/* Set if timer is inserted into a queue */
 	uint32_t running:1;
+	/* Used to signal that ins or rem was called from callback */
+	uint32_t in_callback:1;
 
 	/* Do not touch */
 	void *_priv;
