@@ -70,7 +70,7 @@ static void cross(gp_pixmap *buf, gp_coord cx, gp_coord cy,
 }
 
 static void backspace(gp_pixmap *pix, gp_coord cx, gp_coord cy,
-                      gp_size sym_r, gp_pixel fg, gp_pixel bg)
+                      gp_coord sym_r, gp_pixel fg, gp_pixel bg)
 {
 	gp_coord poly[] = {
 		sym_r, -sym_r/2-sym_r/4,
