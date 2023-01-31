@@ -339,6 +339,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ROTATE_CCW,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
+	case GP_BUTTON_SETTINGS:
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_SETTINGS,
+		                       sx-1, sy, sw+2, sh+2, bg_color, ctx);
+	break;
 	}
 
 	if (self->b->val)
@@ -441,6 +445,7 @@ static struct btn_type_names {
 	{"zoom_normal", GP_BUTTON_ZOOM_NORMAL | GP_BUTTON_TEXT_RIGHT},
 	{"rotate_cw", GP_BUTTON_ROTATE_CW | GP_BUTTON_TEXT_RIGHT},
 	{"rotate_ccw", GP_BUTTON_ROTATE_CCW | GP_BUTTON_TEXT_RIGHT},
+	{"settings", GP_BUTTON_SETTINGS | GP_BUTTON_TEXT_RIGHT},
 };
 
 static enum gp_widget_button_type type_from_str(const char *string)
