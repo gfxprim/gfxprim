@@ -12,7 +12,7 @@ static int button_new_free(void)
 {
 	gp_widget *button;
 
-	button = gp_widget_button_new("Button", 0, NULL, NULL);
+	button = gp_widget_button_new("Button", 0);
 	if (!button) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -41,7 +41,7 @@ static int button_event_key(void)
 	int flag = 0;
 	gp_widget *button;
 
-	button = gp_widget_button_new("Button", 0, ev_handler, &flag);
+	button = gp_widget_button_new2("Button", 0, ev_handler, &flag);
 
 	send_keypress(button, GP_KEY_ENTER);
 

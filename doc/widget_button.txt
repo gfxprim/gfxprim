@@ -13,9 +13,12 @@ Button attributes can be accessed as `widget->button`.
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_button_new(const char *label,
-                                enum gp_widget_button_type btype,
-                                int (*on_event)(gp_widget_event *ev),
-                                void *priv);
+                                enum gp_widget_button_type btype);
+
+gp_widget *gp_widget_button_new2(const char *label,
+                                 enum gp_widget_button_type btype,
+                                 int (*on_event)(gp_widget_event *ev),
+                                 void *priv)
 -------------------------------------------------------------------------------
 
 Creates a button widget, at least one of the 'label' or 'btype' has to be set.

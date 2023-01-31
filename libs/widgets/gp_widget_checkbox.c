@@ -164,7 +164,7 @@ static gp_widget *json_to_checkbox(gp_json_reader *json, gp_json_val *val, gp_wi
 		}
 	}
 
-	ret = gp_widget_checkbox_new(label, set, NULL, NULL);
+	ret = gp_widget_checkbox_new(label, set);
 
 	free(label);
 
@@ -206,9 +206,7 @@ int gp_widget_checkbox_get(gp_widget *self)
 	return self->checkbox->val;
 }
 
-gp_widget *gp_widget_checkbox_new(const char *label, int val,
-                                  int on_event(gp_widget_event *ev),
-                                  void *priv)
+gp_widget *gp_widget_checkbox_new(const char *label, int val)
 {
 	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_bool);
@@ -225,8 +223,6 @@ gp_widget *gp_widget_checkbox_new(const char *label, int val,
 	}
 
 	ret->b->val = !!val;
-
-	gp_widget_on_event_set(ret, on_event, priv);
 
 	return ret;
 }

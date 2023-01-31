@@ -65,10 +65,10 @@ static int question_dialog(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *btn1 = gp_widget_button_new("Error", 0, err_dialog, NULL);
-	gp_widget *btn2 = gp_widget_button_new("Info", 0, info_dialog, NULL);
-	gp_widget *btn3 = gp_widget_button_new("Warning", 0, warn_dialog, NULL);
-	gp_widget *btn4 = gp_widget_button_new("Question", 0, question_dialog, NULL);
+	gp_widget *btn1 = gp_widget_button_new2("Error", 0, err_dialog, NULL);
+	gp_widget *btn2 = gp_widget_button_new2("Info", 0, info_dialog, NULL);
+	gp_widget *btn3 = gp_widget_button_new2("Warning", 0, warn_dialog, NULL);
+	gp_widget *btn4 = gp_widget_button_new2("Question", 0, question_dialog, NULL);
 	gp_widget *grid = gp_widget_grid_new(4, 1, 0);
 
 	gp_widget_grid_put(grid, 0, 0, btn1);

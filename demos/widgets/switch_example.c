@@ -68,13 +68,13 @@ int main(int argc, char *argv[])
 
 	gp_widget *btn_grid = gp_widget_grid_new(2, 1, 0);
 	gp_widget_grid_border_set(btn_grid, 0, 0);
-	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new("Prev", GP_BUTTON_PREV, set_layout0, layout));
-	gp_widget_grid_put(btn_grid, 1, 0, gp_widget_button_new("Next", GP_BUTTON_NEXT, set_layout2, layout));
+	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new2("Prev", GP_BUTTON_PREV, set_layout0, layout));
+	gp_widget_grid_put(btn_grid, 1, 0, gp_widget_button_new2("Next", GP_BUTTON_NEXT, set_layout2, layout));
 
 	gp_widget_grid_put(markup_grid, 0, 0, markup);
 	gp_widget_grid_put(markup_grid, 0, 1, btn_grid);
 
-	gp_widget_switch_put(layout, 0, gp_widget_button_new("Switch layout", 0, set_layout1, layout));
+	gp_widget_switch_put(layout, 0, gp_widget_button_new2("Switch layout", 0, set_layout1, layout));
         gp_widget_switch_put(layout, 1, markup_grid);
 
 	gp_widget_on_event_set(layout, keypress_handler, layout);

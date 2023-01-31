@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -72,14 +72,33 @@ enum gp_widget_button_type {
  *
  * @label A button label.
  * @type A button type.
+ *
+ * @return A button widget.
+ */
+gp_widget *gp_widget_button_new(const char *label,
+                                enum gp_widget_button_type type);
+
+
+/**
+ * @brief Allocates a initialize new button widget.
+ *
+ * @label A button label.
+ * @type A button type.
  * @on_event An widget event handler.
  * @priv User private data.
  *
  * @return A button widget.
  */
-gp_widget *gp_widget_button_new(const char *label,
-                                enum gp_widget_button_type type,
-                                int (*on_event)(gp_widget_event *ev),
-                                void *priv);
+static inline gp_widget *gp_widget_button_new2(const char *label,
+                                               enum gp_widget_button_type type,
+                                               int (*on_event)(gp_widget_event *ev),
+                                               void *priv)
+{
+	gp_widget *ret = gp_widget_button_new(label, type);
+
+	gp_widget_on_event_set(ret, on_event, priv);
+
+	return ret;
+}
 
 #endif /* GP_WIDGET_BUTTON_H */

@@ -30,8 +30,10 @@ int main(int argc, char *argv[])
 
 	layout->align = GP_FILL;
 
+	gp_widget* button_ok = gp_widget_button_new2("OK", 0, button_callback, layout);
+
 	gp_widget_grid_put(layout, 0, 0, gp_widget_label_new("Text Label", 0, 0));
-	gp_widget_grid_put(layout, 0, 1, gp_widget_button_new("OK", 0, button_callback, layout));
+	gp_widget_grid_put(layout, 0, 1, button_ok);
 
 	gp_widgets_main_loop(layout, "t3", NULL, argc, argv);
 

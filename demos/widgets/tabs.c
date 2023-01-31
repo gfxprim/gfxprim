@@ -47,9 +47,9 @@ int main(int argc, char *argv[])
 	gp_widget_grid_put(layout, 0, 0, tabs);
 	gp_widget_grid_put(layout, 0, 1, buttons);
 	gp_widget_grid_put(buttons, 0, 0,
-	                   gp_widget_button_new("tab", GP_BUTTON_ADD, button_add_callback, NULL));
+	                   gp_widget_button_new2("tab", GP_BUTTON_ADD, button_add_callback, NULL));
 	gp_widget_grid_put(buttons, 1, 0,
-	                   gp_widget_button_new("tab", GP_BUTTON_REM, button_rem_callback, NULL));
+	                   gp_widget_button_new2("tab", GP_BUTTON_REM, button_rem_callback, NULL));
 
 	gp_widgets_main_loop(layout, "tabs", NULL, argc, argv);
 

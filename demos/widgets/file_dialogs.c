@@ -56,14 +56,14 @@ int do_exit(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *btn1 = gp_widget_button_new("Load File", 0, open_file, NULL);
-	gp_widget *btn2 = gp_widget_button_new("Save File", 0, save_file, NULL);
-	gp_widget *btn3 = gp_widget_button_new("Exit", 0, do_exit, NULL);
+	gp_widget *btn_open = gp_widget_button_new2("Load File", 0, open_file, NULL);
+	gp_widget *btn_save = gp_widget_button_new2("Save File", 0, save_file, NULL);
+	gp_widget *btn_exit = gp_widget_button_new2("Exit", 0, do_exit, NULL);
 	gp_widget *grid = gp_widget_grid_new(3, 1, 0);
 
-	gp_widget_grid_put(grid, 0, 0, btn1);
-	gp_widget_grid_put(grid, 1, 0, btn2);
-	gp_widget_grid_put(grid, 2, 0, btn3);
+	gp_widget_grid_put(grid, 0, 0, btn_open);
+	gp_widget_grid_put(grid, 1, 0, btn_save);
+	gp_widget_grid_put(grid, 2, 0, btn_exit);
 
 	gp_widgets_main_loop(grid, "File Open Save", NULL, argc, argv);
 

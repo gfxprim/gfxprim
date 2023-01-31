@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -19,9 +19,28 @@
  *
  * @return A checkbox widget.
  */
-gp_widget *gp_widget_checkbox_new(const char *label, int val,
-                                  int on_event(gp_widget_event *ev),
-                                  void *priv);
+gp_widget *gp_widget_checkbox_new(const char *label, int val);
+
+/**
+ * @brief Allocate and initialize new checkbox widget.
+ *
+ * @label A checkbox label.
+ * @val Initial checkbox value.
+ * @on_event An widget event handler.
+ * @priv User private data.
+ *
+ * @return A checkbox widget.
+ */
+static inline gp_widget *gp_widget_checkbox_new2(const char *label, int val,
+                                                 int (*on_event)(gp_widget_event *ev),
+                                                 void *priv)
+{
+	gp_widget *ret = gp_widget_checkbox_new(label, val);
+
+	gp_widget_on_event_set(ret, on_event, priv);
+
+	return ret;
+}
 
 /**
  * @brief Sets a checkbox value.

@@ -30,8 +30,8 @@ static int enable(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *btn_disable = gp_widget_button_new("Disable", 0, NULL, NULL);
-	gp_widget *btn_enable = gp_widget_button_new("Enable", 0, NULL, NULL);
+	gp_widget *btn_disable = gp_widget_button_new("Disable", 0);
+	gp_widget *btn_enable = gp_widget_button_new("Enable", 0);
 	gp_widget *buttons = gp_widget_grid_new(2, 1, 0);
 	gp_widget *grid = gp_widget_grid_new(1, 2, 0);
 	const char *choices[] = {

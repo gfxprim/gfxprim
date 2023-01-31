@@ -527,7 +527,7 @@ static gp_widget *json_to_button(gp_json_reader *json, gp_json_val *val, gp_widg
 		return NULL;
 	}
 
-	gp_widget *ret = gp_widget_button_new(label, t, NULL, NULL);
+	gp_widget *ret = gp_widget_button_new(label, t);
 	free(label);
 	return ret;
 }
@@ -542,9 +542,7 @@ struct gp_widget_ops gp_widget_button_ops = {
 };
 
 gp_widget *gp_widget_button_new(const char *label,
-                                enum gp_widget_button_type type,
-                                int (*on_event)(gp_widget_event *ev),
-                                void *priv)
+                                enum gp_widget_button_type type)
 {
 	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_bool);
@@ -562,8 +560,6 @@ gp_widget *gp_widget_button_new(const char *label,
 	}
 
 	ret->button->type = align_for_type(type);
-
-	gp_widget_on_event_set(ret, on_event, priv);
 
 	return ret;
 }

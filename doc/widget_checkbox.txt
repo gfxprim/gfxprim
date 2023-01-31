@@ -9,9 +9,11 @@ Checkbox attributes can be accessed as `widget->checkbox`.
 .Checkbox widget constructor
 [source,c]
 -------------------------------------------------------------------------------
-gp_widget *gp_widget_checkbox_new(const char *label, int val,
-                                  int on_event(gp_widget_event *ev),
-                                  void *priv);
+gp_widget *gp_widget_checkbox_new(const char *label, int val);
+
+gp_widget *gp_widget_checkbox_new2(const char *label, int val,
+                                   int (*on_event)(gp_widget_event *ev),
+                                   void *priv)
 -------------------------------------------------------------------------------
 
 Creates a checkbox widget, label can be NULL.

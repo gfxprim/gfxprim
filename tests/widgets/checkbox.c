@@ -12,7 +12,7 @@ static int checkbox_new_free(void)
 {
 	gp_widget *chbox;
 
-	chbox = gp_widget_checkbox_new("Checkbox", 0, NULL, NULL);
+	chbox = gp_widget_checkbox_new("Checkbox", 0);
 	if (!chbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -41,7 +41,7 @@ static int checkbox_event_set(void)
 	int flag = 0;
 	gp_widget *chbox;
 
-	chbox = gp_widget_checkbox_new(NULL, 0, ev_handler, &flag);
+	chbox = gp_widget_checkbox_new2(NULL, 0, ev_handler, &flag);
 
 	if (chbox->checkbox->val != 0) {
 		tst_msg("Wrong checkbox value");
@@ -68,7 +68,7 @@ static int checkbox_event_toggle(void)
 	int flag = 0;
 	gp_widget *chbox;
 
-	chbox = gp_widget_checkbox_new(NULL, 1, ev_handler, &flag);
+	chbox = gp_widget_checkbox_new2(NULL, 1, ev_handler, &flag);
 
 	if (chbox->checkbox->val != 1) {
 		tst_msg("Wrong checkbox value");
@@ -108,7 +108,7 @@ static int checkbox_event_key(void)
 	int flag = 0;
 	gp_widget *chbox;
 
-	chbox = gp_widget_checkbox_new(NULL, 0, ev_handler, &flag);
+	chbox = gp_widget_checkbox_new2(NULL, 0, ev_handler, &flag);
 
 	send_keypress(chbox, GP_KEY_ENTER);
 

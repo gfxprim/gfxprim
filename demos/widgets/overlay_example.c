@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
 	markup_grid->align = GP_HFILL;
 
 	//gp_widget_grid_border_set(btn_grid, 0, 0);
-	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new("prev", GP_BUTTON_PREV, NULL, NULL));
-	gp_widget_grid_put(btn_grid, 1, 0, gp_widget_button_new("next", GP_BUTTON_NEXT, NULL, NULL));
+	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new("prev", GP_BUTTON_PREV));
+	gp_widget_grid_put(btn_grid, 1, 0, gp_widget_button_new("next", GP_BUTTON_NEXT));
 	btn_grid->align = GP_BOTTOM;
 
 	gp_widget_grid_put(markup_grid, 0, 0, markup);
