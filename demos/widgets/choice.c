@@ -46,12 +46,9 @@ static size_t choices_get(gp_widget *self, enum gp_widget_choice_op op)
 	return 0;
 }
 
-static void choices_set(gp_widget *self, enum gp_widget_choice_op op, size_t val)
+static void choices_set(gp_widget *self, size_t val)
 {
 	(void) self;
-
-	if (op != GP_WIDGET_CHOICE_OP_SEL)
-		return;
 
 	choice_sel = val;
 }

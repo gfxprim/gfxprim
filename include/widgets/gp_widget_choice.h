@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -17,7 +17,7 @@ enum gp_widget_choice_op {
 struct gp_widget_choice_ops {
 	const char *(*get_choice)(gp_widget *self, size_t idx);
 	size_t (*get)(gp_widget *self, enum gp_widget_choice_op op);
-	void (*set)(gp_widget *self, enum gp_widget_choice_op op, size_t val);
+	void (*set)(gp_widget *self, size_t val);
 };
 
 struct gp_widget_choice {

@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -35,11 +35,8 @@ static size_t get(gp_widget *self, enum gp_widget_choice_op op)
 	return 0;
 }
 
-static void set(gp_widget *self, enum gp_widget_choice_op op, size_t val)
+static void set(gp_widget *self, size_t val)
 {
-	if (op != GP_WIDGET_CHOICE_OP_SEL)
-		return;
-
 	self->choice->sel = val;
 }
 
@@ -219,7 +216,7 @@ static inline void call_set_sel(gp_widget *self, size_t sel)
 {
 	struct gp_widget_choice *choice = self->choice;
 
-	choice->ops->set(self, GP_WIDGET_CHOICE_OP_SEL, sel);
+	choice->ops->set(self, sel);
 }
 
 static inline size_t call_get_sel(gp_widget *self)

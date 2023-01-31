@@ -82,11 +82,8 @@ static const char *get_choice(gp_widget *self, size_t idx)
 	}
 }
 
-static void set(gp_widget *self, enum gp_widget_choice_op op, size_t val)
+static void set(gp_widget *self, size_t val)
 {
-	if (op != GP_WIDGET_CHOICE_OP_SEL)
-		return;
-
 	self->choice->sel = val;
 }
 
