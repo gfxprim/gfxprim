@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	gp_widget *markup_grid = gp_widget_grid_new(1, 2, 0);
 
 	gp_widget *btn_grid = gp_widget_grid_new(2, 1, 0);
-	gp_widget_grid_border_set(btn_grid, 0, 0);
+	gp_widget_grid_no_border(btn_grid);
 	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new2("Prev", GP_BUTTON_PREV, set_layout0, layout));
 	gp_widget_grid_put(btn_grid, 1, 0, gp_widget_button_new2("Next", GP_BUTTON_NEXT, set_layout2, layout));
 

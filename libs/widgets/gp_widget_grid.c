@@ -488,8 +488,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_rrect_xywh(ctx->buf, self->x + offset->x, self->y + offset->y,
 			      self->w, self->h, ctx->text_color);
 	}
-
-	/*
+/*
 	gp_pixel col = random();
 
 	unsigned int sx = grid->col_s[0].off + offset->x;
@@ -507,7 +506,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_vline_xyy(ctx->buf, grid->col_s[x].off + offset->x, sy, ey, col);
 		gp_vline_xyy(ctx->buf, grid->col_s[x].off + grid->col_s[x].size + offset->x, sy, ey, col);
 	}
-	*/
+*/
 }
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
@@ -739,40 +738,66 @@ static int focus_child(gp_widget *self, gp_widget *child)
 	return 1;
 }
 
-static void set_hborder_padd(gp_widget *self, uint8_t border)
+static void set_border_padd(gp_widget *self, enum gp_widget_border border, uint8_t padd)
 {
-	self->grid->col_b[0].padd = border;
-	self->grid->col_b[self->grid->cols].padd = border;
+	if (border & GP_WIDGET_BORDER_LEFT)
+		self->grid->col_b[0].padd = padd;
+
+	if (border & GP_WIDGET_BORDER_RIGHT)
+		self->grid->col_b[self->grid->cols].padd = padd;
+
+	if (border & GP_WIDGET_BORDER_TOP)
+		self->grid->row_b[0].padd = padd;
+
+	if (border & GP_WIDGET_BORDER_BOTTOM)
+		self->grid->row_b[self->grid->rows].padd = padd;
+
+	if (!(border & GP_WIDGET_BORDER_CLEAR))
+		return;
+
+	border = ~border;
+
+	if (border & GP_WIDGET_BORDER_LEFT)
+		self->grid->col_b[0].padd = 0;
+
+	if (border & GP_WIDGET_BORDER_RIGHT)
+		self->grid->col_b[self->grid->cols].padd = 0;
+
+	if (border & GP_WIDGET_BORDER_TOP)
+		self->grid->row_b[0].padd = 0;
+
+	if (border & GP_WIDGET_BORDER_BOTTOM)
+		self->grid->row_b[self->grid->rows].padd = 0;
 }
 
-static void set_vborder_padd(gp_widget *self, uint8_t border)
+static void set_border_fill(gp_widget *self, enum gp_widget_border border, uint8_t fill)
 {
-	self->grid->row_b[0].padd = border;
-	self->grid->row_b[self->grid->rows].padd = border;
-}
+	if (border & GP_WIDGET_BORDER_LEFT)
+		self->grid->col_b[0].fill = fill;
 
-static void set_border_padd(gp_widget *self, uint8_t border)
-{
-	set_vborder_padd(self, border);
-	set_hborder_padd(self, border);
-}
+	if (border & GP_WIDGET_BORDER_RIGHT)
+		self->grid->col_b[self->grid->cols].fill = fill;
 
-static void set_hborder_fill(gp_widget *self, uint8_t border)
-{
-	self->grid->col_b[0].fill = border;
-	self->grid->col_b[self->grid->cols].fill = border;
-}
+	if (border & GP_WIDGET_BORDER_TOP)
+		self->grid->row_b[0].fill = fill;
 
-static void set_vborder_fill(gp_widget *self, uint8_t border)
-{
-	self->grid->row_b[0].fill = border;
-	self->grid->row_b[self->grid->rows].fill = border;
-}
+	if (border & GP_WIDGET_BORDER_BOTTOM)
+		self->grid->row_b[self->grid->rows].fill = fill;
 
-static void set_border_fill(gp_widget *self, uint8_t border)
-{
-	set_vborder_fill(self, border);
-	set_hborder_fill(self, border);
+	if (!(border & GP_WIDGET_BORDER_CLEAR))
+		return;
+
+	if ((~border) & GP_WIDGET_BORDER_LEFT)
+		self->grid->col_b[0].fill = 0;
+
+	if ((~border) & GP_WIDGET_BORDER_RIGHT)
+		self->grid->col_b[self->grid->cols].fill = 0;
+
+	if ((~border) & GP_WIDGET_BORDER_TOP)
+		self->grid->row_b[0].fill = 0;
+
+	if ((~border) & GP_WIDGET_BORDER_BOTTOM)
+		self->grid->row_b[self->grid->rows].fill = 0;
 }
 
 static void set_rpad(gp_widget *self, uint8_t pad)
@@ -947,13 +972,22 @@ static int alloc_grid(gp_widget **grid, unsigned int cols, unsigned int rows)
 	return 0;
 }
 
-static void set_border(gp_json_reader *json, gp_widget *grid, gp_json_val *val)
+struct border {
+	enum gp_widget_border border;
+	int val;
+};
+
+static void parse_border(gp_json_reader *json, gp_json_val *val, struct border *border)
 {
 	if (val->type == GP_JSON_INT) {
-		if (val->val_int < 0)
+		if (val->val_int < 0) {
 			gp_json_warn(json, "Border must be >= 0!");
-		else
-			set_border_padd(grid, val->val_int);
+			return;
+		}
+
+		if (border->border == GP_WIDGET_BORDER_NONE)
+			border->border = GP_WIDGET_BORDER_ALL;
+		border->val = val->val_int;
 		return;
 	}
 
@@ -963,13 +997,36 @@ static void set_border(gp_json_reader *json, gp_widget *grid, gp_json_val *val)
 	}
 
 	if (!strcmp(val->val_str, "horiz")) {
-		set_vborder_padd(grid, 0);
+		border->border = GP_WIDGET_BORDER_HORIZ | GP_WIDGET_BORDER_CLEAR;
+		if (border->val == -1)
+			border->val = 1;
 	} else if (!strcmp(val->val_str, "vert")) {
-		set_hborder_padd(grid, 0);
+		border->border = GP_WIDGET_BORDER_VERT | GP_WIDGET_BORDER_CLEAR;
+		if (border->val == -1)
+			border->val = 1;
 	} else if (!strcmp(val->val_str, "none")) {
-		set_border_padd(grid, 0);
+		border->border = GP_WIDGET_BORDER_ALL;
+		border->val = 0;
 	} else if (!strcmp(val->val_str, "all")) {
-		//default
+		border->border = GP_WIDGET_BORDER_ALL;
+		if (border->val == -1)
+			border->val = 1;
+	} else if (!strcmp(val->val_str, "top")) {
+		border->border = GP_WIDGET_BORDER_TOP | GP_WIDGET_BORDER_CLEAR;
+		if (border->val == -1)
+			border->val = 1;
+	} else if (!strcmp(val->val_str, "bottom")) {
+		border->border = GP_WIDGET_BORDER_BOTTOM | GP_WIDGET_BORDER_CLEAR;
+		if (border->val == -1)
+			border->val = 1;
+	} else if (!strcmp(val->val_str, "left")) {
+		border->border = GP_WIDGET_BORDER_LEFT | GP_WIDGET_BORDER_CLEAR;
+		if (border->val == -1)
+			border->val = 1;
+	} else if (!strcmp(val->val_str, "right")) {
+		border->border = GP_WIDGET_BORDER_RIGHT | GP_WIDGET_BORDER_CLEAR;
+		if (border->val == -1)
+			border->val = 1;
 	} else {
 		gp_json_warn(json, "Invalid border value!");
 	}
@@ -1017,16 +1074,14 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 	int cols = 1, rows = 1;
 	int frame = 0, uniform = 0;
 	gp_widget *grid = NULL;
+	struct border border = {.border = GP_WIDGET_BORDER_NONE, .val = -1};
 
 	gp_json_state obj_start = gp_json_state_start(json);
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case BORDER:
-			if (alloc_grid(&grid, cols, rows))
-				goto skip;
-
-			set_border(json, grid, val);
+			parse_border(json, val, &border);
 		break;
 		case CFILL:
 			if (alloc_grid(&grid, cols, rows))
@@ -1143,6 +1198,8 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 
 	grid->grid->uniform = uniform;
 	grid->grid->frame = frame;
+
+	gp_widget_grid_border_set(grid, border.border, border.val, -1);
 
 	return grid;
 free_skip:
@@ -1478,30 +1535,20 @@ gp_widget *gp_widget_grid_get(gp_widget *self, unsigned int col, unsigned int ro
 	return widget_grid_get(self, col, row);
 }
 
-void gp_widget_grid_border_set(gp_widget *self, unsigned int padd, unsigned int fill)
+void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
+                               int padd, int fill)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
 
-	set_border_padd(self, padd);
-	set_border_fill(self, fill);
+	padd = GP_MIN(padd, (int)UINT8_MAX);
+	fill = GP_MIN(fill, (int)UINT8_MAX);
+
+	if (padd >= 0)
+		set_border_padd(self, border, padd);
+
+	if (fill >= 0)
+		set_border_fill(self, border, fill);
 }
-
-void gp_widget_grid_hborder_set(gp_widget *self, unsigned int padd, unsigned int fill)
-{
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
-
-	set_hborder_padd(self, padd);
-	set_hborder_fill(self, fill);
-}
-
-void gp_widget_grid_vborder_set(gp_widget *self, unsigned int padd, unsigned int fill)
-{
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
-
-	set_vborder_padd(self, padd);
-	set_vborder_fill(self, fill);
-}
-
 
 /*
 
@@ -1604,13 +1651,17 @@ static gp_widget *get_widgets(gp_json_reader *json, gp_json_val *val, gp_widget_
 }
 
 enum box_keys {
+	BOX_BORDER,
 	BOX_FILL,
+	BOX_FRAME,
 	BOX_UNIFORM,
 	BOX_WIDGETS,
 };
 
 static const gp_json_obj_attr box_attrs[] = {
+	GP_JSON_OBJ_ATTR("border", GP_JSON_VOID),
 	GP_JSON_OBJ_ATTR("fill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("uniform", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
 };
@@ -1623,10 +1674,16 @@ static const gp_json_obj box_obj_filter = {
 static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx, int horiz)
 {
 	int uniform = 0;
+	int frame = 0;
+	struct border border = {.border = GP_WIDGET_BORDER_NONE, .val = -1};
+
 	gp_widget *ret = NULL;
 
 	GP_JSON_OBJ_FILTER(json, val, &box_obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
+		case BOX_BORDER:
+			parse_border(json, val, &border);
+		break;
 		case BOX_FILL:
 			if (!ret) {
 				gp_json_warn(json, "fill before widgets array!");
@@ -1636,6 +1693,9 @@ static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widge
 				parse_strarray(val->val_str, ret->grid->col_s, ret->grid->cols, put_grid_cell_fill, "Grid cfill");
 			else
 				parse_strarray(val->val_str, ret->grid->row_s, ret->grid->rows, put_grid_cell_fill, "Grid rfill");
+		break;
+		case BOX_FRAME:
+			frame = val->val_bool;
 		break;
 		case BOX_UNIFORM:
 			uniform = 1;
@@ -1651,6 +1711,10 @@ static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widge
 
 	if (uniform)
 		ret->grid->uniform = 1;
+
+	ret->grid->frame = frame;
+
+	gp_widget_grid_border_set(ret, border.border, border.val, -1);
 
 	return ret;
 }

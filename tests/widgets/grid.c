@@ -295,7 +295,7 @@ static int grid_put_get_rem_del(void)
 
 static int check_hborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 {
-	struct gp_widget_grid_border *b = grid->grid->col_b;
+	struct gp_widget_grid_border *b = grid->grid->row_b;
 
 	if (b[0].fill != exp_fill || b[2].fill != exp_fill) {
 		tst_msg("Wrong column border fill %u %u expected %u %u",
@@ -314,7 +314,7 @@ static int check_hborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 
 static int check_vborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 {
-	struct gp_widget_grid_border *b = grid->grid->row_b;
+	struct gp_widget_grid_border *b = grid->grid->col_b;
 
 	if (b[0].fill != exp_fill || b[2].fill != exp_fill) {
 		tst_msg("Wrong row border fill %u %u expected %u %u",
@@ -356,12 +356,12 @@ static int grid_border_check_set(void)
 	if (check_border(grid, 1, 0))
 		return TST_FAILED;
 
-	gp_widget_grid_border_set(grid, 10, 20);
+	gp_widget_grid_border_set(grid, GP_WIDGET_BORDER_ALL, 10, 20);
 
 	if (check_border(grid, 10, 20))
 		return TST_FAILED;
 
-	gp_widget_grid_hborder_set(grid, 1, 2);
+	gp_widget_grid_border_set(grid, GP_WIDGET_BORDER_HORIZ, 1, 2);
 
 	if (check_hborder(grid, 1, 2))
 		return TST_FAILED;
@@ -369,12 +369,28 @@ static int grid_border_check_set(void)
 	if (check_vborder(grid, 10, 20))
 		return TST_FAILED;
 
-	gp_widget_grid_vborder_set(grid, 3, 4);
+	gp_widget_grid_border_set(grid, GP_WIDGET_BORDER_VERT | GP_WIDGET_BORDER_CLEAR, 3, 4);
 
 	if (check_vborder(grid, 3, 4))
 		return TST_FAILED;
 
-	if (check_hborder(grid, 1, 2))
+	if (check_hborder(grid, 0, 0))
+		return TST_FAILED;
+
+	gp_widget_grid_border_set(grid, GP_WIDGET_BORDER_ALL, 2, -1);
+
+	if (check_vborder(grid, 2, 4))
+		return TST_FAILED;
+
+	if (check_hborder(grid, 2, 0))
+		return TST_FAILED;
+
+	gp_widget_grid_border_set(grid, GP_WIDGET_BORDER_ALL, -1, 1);
+
+	if (check_vborder(grid, 2, 1))
+		return TST_FAILED;
+
+	if (check_hborder(grid, 2, 1))
 		return TST_FAILED;
 
 	return TST_SUCCESS;

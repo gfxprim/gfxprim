@@ -18,6 +18,10 @@ struct tcase {
 	unsigned int rows;
 	int frame;
 	int uniform;
+	int border_padd_top;
+	int border_padd_bottom;
+	int border_padd_left;
+	int border_padd_right;
 	struct child children[];
 };
 
@@ -84,6 +88,32 @@ static int grid_json_load(struct tcase *t)
 		}
 	}
 
+	tst_msg("padd top %i bottom %i left %i right %i",
+		(int)grid->grid->row_b[0].padd,
+		(int)grid->grid->row_b[grid->grid->rows].padd,
+		(int)grid->grid->col_b[0].padd,
+		(int)grid->grid->col_b[grid->grid->cols].padd);
+
+	if (grid->grid->row_b[0].padd != t->border_padd_top) {
+		tst_msg("Wrong border top padd expected %i", t->border_padd_top);
+		return TST_FAILED;
+	}
+
+	if (grid->grid->row_b[grid->grid->rows].padd != t->border_padd_bottom) {
+		tst_msg("Wrong border bottom padd expected %i", t->border_padd_bottom);
+		return TST_FAILED;
+	}
+
+	if (grid->grid->col_b[0].padd != t->border_padd_left) {
+		tst_msg("Wrong border left padd expected %i", t->border_padd_left);
+		return TST_FAILED;
+	}
+
+	if (grid->grid->col_b[grid->grid->cols].padd != t->border_padd_right) {
+		tst_msg("Wrong border right padd expected %i", t->border_padd_right);
+		return TST_FAILED;
+	}
+
 	gp_widget_free(grid);
 
 	return TST_SUCCESS;
@@ -94,6 +124,8 @@ static struct tcase grid_0x0 = {
 	        " \"layout\": {\"cols\": 0, \"rows\": 0}}",
 	.cols = 0,
 	.rows = 0,
+	.border_padd_top = 1, .border_padd_bottom = 1,
+	.border_padd_left = 1, .border_padd_right = 1,
 };
 
 static struct tcase grid_1x1_empty = {
@@ -101,6 +133,8 @@ static struct tcase grid_1x1_empty = {
 	        " \"layout\": {\"widgets\": [{}]}}",
 	.cols = 1,
 	.rows = 1,
+	.border_padd_top = 1, .border_padd_bottom = 1,
+	.border_padd_left = 1, .border_padd_right = 1,
 	.children = {
 		{.type = -1},
 	}
@@ -111,6 +145,8 @@ static struct tcase grid_1x1_grid = {
 	        " \"layout\": {\"widgets\": [{\"widgets\":[null]}]}}",
 	.cols = 1,
 	.rows = 1,
+	.border_padd_top = 1, .border_padd_bottom = 1,
+	.border_padd_left = 1, .border_padd_right = 1,
 	.children = {
 		{.type = GP_WIDGET_GRID},
 	}
@@ -121,6 +157,8 @@ static struct tcase grid_1x1_2_children = {
 	        " \"layout\": {\"widgets\": [{\"widgets\":[null]}]}}",
 	.cols = 1,
 	.rows = 1,
+	.border_padd_top = 1, .border_padd_bottom = 1,
+	.border_padd_left = 1, .border_padd_right = 1,
 	.children = {
 		{.type = GP_WIDGET_GRID},
 	}
@@ -136,6 +174,8 @@ static struct tcase grid_2x2 = {
                 "]}}\n",
 	.cols = 2,
 	.rows = 2,
+	.border_padd_top = 1, .border_padd_bottom = 1,
+	.border_padd_left = 1, .border_padd_right = 1,
 	.children = {
 		{.type = GP_WIDGET_GRID},
 		{.type = GP_WIDGET_BUTTON},
@@ -149,6 +189,8 @@ static struct tcase grid_3x1 = {
 	        " \"layout\": {\"cols\": 3, \"rows\": 1, \"widgets\": [{}, {}, {}]}}",
 	.cols = 3,
 	.rows = 1,
+	.border_padd_top = 1, .border_padd_bottom = 1,
+	.border_padd_left = 1, .border_padd_right = 1,
 	.children = {
 		{.type = -1},
 		{.type = -1},
@@ -161,6 +203,8 @@ static struct tcase grid_uniform = {
 	        " \"layout\": {\"cols\": 1, \"rows\": 1, \"uniform\": true, \"widgets\": [{}]}}",
 	.cols = 1,
 	.rows = 1,
+	.border_padd_top = 1, .border_padd_bottom = 1,
+	.border_padd_left = 1, .border_padd_right = 1,
 	.uniform = 1,
 	.children = {
 		{.type = -1},
@@ -172,7 +216,93 @@ static struct tcase grid_frame = {
 	        " \"layout\": {\"cols\": 1, \"rows\": 1, \"frame\": true, \"widgets\": [{}]}}",
 	.cols = 1,
 	.rows = 1,
+	.border_padd_top = 1, .border_padd_bottom = 1,
+	.border_padd_left = 1, .border_padd_right = 1,
 	.frame = 1,
+	.children = {
+		{.type = -1},
+	}
+};
+
+static struct tcase grid_border_padd_none = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"border\": \"none\", \"widgets\": [null]}}",
+	.cols = 1,
+	.rows = 1,
+	.border_padd_top = 0, .border_padd_bottom = 0,
+	.border_padd_left = 0, .border_padd_right = 0,
+	.children = {
+		{.type = -1},
+	}
+};
+
+static struct tcase grid_border_padd_2 = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"border\": 2, \"widgets\": [null]}}",
+	.cols = 1,
+	.rows = 1,
+	.border_padd_top = 2, .border_padd_bottom = 2,
+	.border_padd_left = 2, .border_padd_right = 2,
+	.children = {
+		{.type = -1},
+	}
+};
+
+static struct tcase grid_border_padd_2_left = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"border\": 2, \"border\": \"left\", \"widgets\": [null]}}",
+	.cols = 1,
+	.rows = 1,
+	.border_padd_top = 0, .border_padd_bottom = 0,
+	.border_padd_left = 2, .border_padd_right = 0,
+	.children = {
+		{.type = -1},
+	}
+};
+
+static struct tcase grid_border_padd_right_2 = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"border\": \"right\", \"border\": 2, \"border\": \"left\", \"widgets\": [null]}}",
+	.cols = 1,
+	.rows = 1,
+	.border_padd_top = 0, .border_padd_bottom = 0,
+	.border_padd_left = 2, .border_padd_right = 0,
+	.children = {
+		{.type = -1},
+	}
+};
+
+static struct tcase grid_border_padd_top = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"border\": \"top\", \"widgets\": [null]}}",
+	.cols = 1,
+	.rows = 1,
+	.border_padd_top = 1, .border_padd_bottom = 0,
+	.border_padd_left = 0, .border_padd_right = 0,
+	.children = {
+		{.type = -1},
+	}
+};
+
+static struct tcase grid_border_padd_bottom = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"border\": \"bottom\", \"widgets\": [null]}}",
+	.cols = 1,
+	.rows = 1,
+	.border_padd_top = 0, .border_padd_bottom = 1,
+	.border_padd_left = 0, .border_padd_right = 0,
+	.children = {
+		{.type = -1},
+	}
+};
+
+static struct tcase grid_border_padd_clamp = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"border\": 999, \"widgets\": [null]}}",
+	.cols = 1,
+	.rows = 1,
+	.border_padd_top = 255, .border_padd_bottom = 255,
+	.border_padd_left = 255, .border_padd_right = 255,
 	.children = {
 		{.type = -1},
 	}
@@ -219,6 +349,41 @@ const struct tst_suite tst_suite = {
 		{.name = "grid frame",
 		 .tst_fn = grid_json_load,
 		 .data = &grid_frame,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid border padd none",
+		 .tst_fn = grid_json_load,
+		 .data = &grid_border_padd_none,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid border padd 2",
+		 .tst_fn = grid_json_load,
+		 .data = &grid_border_padd_2,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid border padd 2 left",
+		 .tst_fn = grid_json_load,
+		 .data = &grid_border_padd_2_left,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid border padd right 2",
+		 .tst_fn = grid_json_load,
+		 .data = &grid_border_padd_right_2,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid border padd top",
+		 .tst_fn = grid_json_load,
+		 .data = &grid_border_padd_top,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid border padd bottom",
+		 .tst_fn = grid_json_load,
+		 .data = &grid_border_padd_bottom,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid border padd clamp",
+		 .tst_fn = grid_json_load,
+		 .data = &grid_border_padd_clamp,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},

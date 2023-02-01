@@ -105,7 +105,7 @@ static gp_widget *authors(gp_app_info_author *authors)
 		gp_widget_grid_put(ret, 0, i, author);
 	}
 
-	gp_widget_grid_border_set(ret, 0, 0);
+	gp_widget_grid_border_set(ret, GP_WIDGET_BORDER_ALL, 0, 0);
 
 	return ret;
 }

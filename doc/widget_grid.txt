@@ -172,15 +172,38 @@ Border padding and fill
 
 [source,c]
 -------------------------------------------------------------------------------
-void gp_widget_grid_border_set(gp_widget *self, unsigned int padd, unsigned int fill);
+enum gp_widget_border {
+	GP_WIDGET_BORDER_NONE = 0x00,
 
-void gp_widget_grid_hborder_set(gp_widget *self, unsigned int padd, unsigned int fill);
+        GP_WIDGET_BORDER_LEFT = 0x01,
+        GP_WIDGET_BORDER_RIGHT = 0x2,
+        GP_WIDGET_BORDER_TOP = 0x10,
+        GP_WIDGET_BORDER_BOTTOM = 0x20,
 
-void gp_widget_grid_vborder_set(gp_widget *self, unsigned int padd, unsigned int fill);
+        GP_WIDGET_BORDER_HORIZ = GP_WIDGET_BORDER_TOP | GP_WIDGET_BORDER_BOTTOM,
+        GP_WIDGET_BORDER_VERT = GP_WIDGET_BORDER_LEFT | GP_WIDGET_BORDER_RIGHT,
+
+        GP_WIDGET_BORDER_ALL = GP_WIDGET_BORDER_HORIZ | GP_WIDGET_BORDER_VERT,
+
+        /* clears all borders missing from the bitflags */
+        GP_WIDGET_BORDER_CLEAR = 0x80
+};
+
+void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
+                               int padd, int fill);
+
+void gp_widget_grid_no_border(gp_widget *self);
 -------------------------------------------------------------------------------
 
 Sets a grid border padding and fill coeficients, most common usage is to make
 the grid borderless with passing 0 for both `padd` and `fill`.
+
+The call `gp_widget_grid_no_boder(self)` is shortcut for
+`gp_widget_grid_border_set(self, GP_WIDGET_BORDER_ALL, 0, 0)`.
+
+If `padd` is -1 no changes to border padding are done.
+
+If `fill` is -1 no changes to border fills are done.
 
 See the detailed description below on padding and fill.
 
@@ -200,7 +223,7 @@ include::../demos/widgets/test_layouts/test_align.json[]
 | Attribute |  Type  | Default  | Description
 |  +cols+   |  uint  |   +1+    | Number of columns
 |  +rows+   |  uint  |   +1+    | Number of rows
-|  +border+ | string |  +all+   | Border one of +horiz+, +vert+, +none+, +all+.
+|  +border+ | string | +all 1+  | See below
 |  +cpad+   | string | all +1+  | Horizontal border and padding size multiples.
 |  +rpad+   | string | all +1+  | Vertical border and padding size multiples.
 |  +cpadf+  | string | all +0+  | Horizontal border and padding fill coeficients.
@@ -214,6 +237,20 @@ include::../demos/widgets/test_layouts/test_align.json[]
 |==============================================================================
 
 The +pad+ attribute is set before the +cpad+ and +rpad+.
+
+Border
+~~~~~~
+
+The boder can be one of 'none', 'all', 'horiz', 'vert', 'top', 'bottom',
+'left', 'right' and can be combined with 'border=int'.
+
+.Examples
+|==============================================================================
+| "border": "none" | Sets all border padds to 0
+| "border": 4      | Sets all border padds to 4
+| "border": "vert" | Sets vertical border to 1 and clears horizontal border
+| "border": top, "border": 4 | Sets top border to 4 clears rest of the borders
+|==============================================================================
 
 Padding and fill string
 ~~~~~~~~~~~~~~~~~~~~~~~

@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	gp_widget_on_event_set(btn_disable, disable, frame);
 	gp_widget_on_event_set(btn_enable, enable, frame);
 
-	gp_widget_grid_border_set(buttons, 0, 0);
+	gp_widget_grid_no_border(buttons);
 
 	gp_widget_grid_put(buttons, 0, 0, btn_disable);
 	gp_widget_grid_put(buttons, 1, 0, btn_enable);

@@ -289,31 +289,28 @@ static inline void gp_widget_grid_col_del(gp_widget *self, unsigned int col)
 	gp_widget_grid_cols_del(self, col, 1);
 }
 
-/**
- * @brief Sets both horizontal and vertical border padding and filling coeficients.
- *
- * @self A grid widget.
- * @padd Paddin coeficient.
- * @fill A filling coeficient.
- */
-void gp_widget_grid_border_set(gp_widget *self, unsigned int padd, unsigned int fill);
 
 /**
- * @brief Sets horizontal border padding and filling coeficients.
+ * @brief Sets border padd or fill coeficients.
  *
  * @self A grid widget.
- * @padd Paddin coeficient.
- * @fill A filling coeficient.
+ * @border Which border(s) are set.
+ * @padd Paddin coeficient no change on -1 clamped to 255.
+ * @fill A filling coeficient no change on -1 clamped to 255.
  */
-void gp_widget_grid_hborder_set(gp_widget *self, unsigned int padd, unsigned int fill);
+void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
+                               int padd, int fill);
 
 /**
- * @brief Sets vertical border padding and filling coeficients.
+ * @brief Disables grid padd and fill.
+ *
+ * Shortcut for gp_widget_grid_border_set(self, GP_WIDGET_BORDER_ALL, 0, 0)
  *
  * @self A grid widget.
- * @padd Paddin coeficient.
- * @fill A filling coeficient.
  */
-void gp_widget_grid_vborder_set(gp_widget *self, unsigned int padd, unsigned int fill);
+static inline void gp_widget_grid_no_border(gp_widget *self)
+{
+	gp_widget_grid_border_set(self, GP_WIDGET_BORDER_ALL, 0, 0);
+}
 
 #endif /* GP_WIDGET_GRID_H */

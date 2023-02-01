@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	gp_widget *layout = gp_widget_grid_new(1, 2, 0);
 	gp_widget *buttons = gp_widget_grid_new(2, 1, 0);
 
-	gp_widget_grid_border_set(buttons, 0, 0);
+	gp_widget_grid_no_border(buttons);
 
 	tabs = gp_widget_tabs_new(0, 0, NULL, 0);
 
