@@ -38,6 +38,14 @@ struct gp_widget_render_ctx {
 			gp_pixel accept_color;
 			gp_pixel fill_color;
 			gp_pixel col_disabled;
+			/* 16 colors */
+			gp_pixel black;
+			gp_pixel red;
+			gp_pixel yellow;
+			gp_pixel green;
+			gp_pixel blue;
+			gp_pixel magenta;
+			gp_pixel cyan;
 		};
 	};
 
@@ -65,6 +73,9 @@ struct gp_widget_render_ctx {
 
 	/* maximal delay between two clicks for a double click */
 	unsigned int dclick_ms;
+
+	/* draws rectangles around container widgets */
+	int debug_layout:1;
 };
 
 static inline int gp_widgets_is_dclick(uint64_t time_now, uint64_t time_prev,

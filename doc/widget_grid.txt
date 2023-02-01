@@ -217,6 +217,9 @@ image:grid.png[Grid widget]
 include::../demos/widgets/test_layouts/test_align.json[]
 ------------------------------------------------------------------
 
+TIP: Pass '-d layout' on application commandline to highlight grid columns and
+     rows.
+
 .Grid JSON attributes
 [cols=",,,3",options="header"]
 |==============================================================================

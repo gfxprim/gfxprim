@@ -458,7 +458,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 				if (gp_widget_should_redraw(self, flags)) {
 					gp_fill_rect_xywh(ctx->buf, cur_x, cur_y,
 							  grid->col_s[x].size, grid->row_s[y].size,
-							  ctx->bg_color);
+							  ctx->debug_layout ? gp_widgets_color(ctx, GP_WIDGETS_COL_BLACK) : ctx->bg_color);
 				}
 				continue;
 			}
@@ -488,8 +488,19 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_rrect_xywh(ctx->buf, self->x + offset->x, self->y + offset->y,
 			      self->w, self->h, ctx->text_color);
 	}
-/*
-	gp_pixel col = random();
+
+	if (!ctx->debug_layout)
+		return;
+
+	static unsigned int depth = 0;
+
+	int colors[] = {
+		GP_WIDGETS_COL_BLACK,
+		GP_WIDGETS_COL_CYAN,
+		GP_WIDGETS_COL_MAGENTA,
+	};
+
+	gp_pixel col = gp_widgets_color(ctx, colors[depth++ % GP_ARRAY_SIZE(colors)]);
 
 	unsigned int sx = grid->col_s[0].off + offset->x;
 	unsigned int ex = grid->col_s[grid->cols-1].off + grid->col_s[grid->cols-1].size + offset->x;
@@ -506,7 +517,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_vline_xyy(ctx->buf, grid->col_s[x].off + offset->x, sy, ey, col);
 		gp_vline_xyy(ctx->buf, grid->col_s[x].off + grid->col_s[x].size + offset->x, sy, ey, col);
 	}
-*/
 }
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)

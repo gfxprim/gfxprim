@@ -564,6 +564,7 @@ static void print_options(int exit_val)
 
 	printf("Options:\n--------\n");
 	printf("\t-b backend init string (pass -b help for options)\n");
+	printf("\t-d layout\n\t\tenables layout debug\n");
 	printf("\t-f uint\n\t\tsets the true-type font size\n");
 	printf("\t-F font\n\t\tsets compiled-in font\n");
 	printf("\t\tAvailable fonts:\n");
@@ -581,7 +582,7 @@ void gp_widgets_getopt(int *argc, char **argv[])
 {
 	int opt;
 
-	while ((opt = getopt(*argc, *argv, "b:f:F:hiI:s:")) != -1) {
+	while ((opt = getopt(*argc, *argv, "b:d:f:F:hiI:s:")) != -1) {
 		switch (opt) {
 		case 'i':
 			gp_app_info_print();
@@ -589,6 +590,14 @@ void gp_widgets_getopt(int *argc, char **argv[])
 		break;
 		case 'b':
 			backend_init_str = optarg;
+		break;
+		case 'd':
+			if (!strcmp(optarg, "layout")) {
+				ctx.debug_layout = 1;
+			} else {
+				printf("Invalid debug option '%s'\n", optarg);
+				print_options(1);
+			}
 		break;
 		case 'h':
 			print_options(0);
@@ -608,7 +617,6 @@ void gp_widgets_getopt(int *argc, char **argv[])
 				printf("Invalid color scheme '%s'!\n\n", optarg);
 				print_options(1);
 			}
-
 		break;
 		case 'I':
 			input_str = optarg;
