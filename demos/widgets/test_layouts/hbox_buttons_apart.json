@@ -1,0 +1,12 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "type": "hbox", "border": "none", "uniform": true, "align": "hfill", "widgets": [
+   {"type": "button", "label": "Ok", "align": "hfill", "on_event": "do_ok"},
+   {"type": "button", "label": "Cancel", "align": "hfill", "on_event": "do_cancel"}
+  ],
+  "cell-fill": "0, 0",
+  "padd-fill": "0, 1, 0"
+ }
+}
+

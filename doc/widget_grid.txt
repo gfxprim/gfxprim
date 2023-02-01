@@ -11,6 +11,9 @@ padding consists of a constant part called padd and resizable part called fill.
 The constant padding is accounted for in the grid widget minimal size, while
 the resizable fill is accounted for when leftover space is being distributed.
 
+TIP: See link:widget_hbox_vbox.html[Hbox and Vbox] for one dimensional
+     variants.
+
 .Grid widget constructor
 [source,c]
 -------------------------------------------------------------------------------

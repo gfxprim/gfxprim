@@ -1662,16 +1662,20 @@ static gp_widget *get_widgets(gp_json_reader *json, gp_json_val *val, gp_widget_
 
 enum box_keys {
 	BOX_BORDER,
-	BOX_FILL,
+	BOX_CELL_FILL,
 	BOX_FRAME,
+	BOX_PADD,
+	BOX_PADD_FILL,
 	BOX_UNIFORM,
 	BOX_WIDGETS,
 };
 
 static const gp_json_obj_attr box_attrs[] = {
 	GP_JSON_OBJ_ATTR("border", GP_JSON_VOID),
-	GP_JSON_OBJ_ATTR("fill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("cell-fill", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("padd", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("padd-fill", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("uniform", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
 };
@@ -1694,18 +1698,38 @@ static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widge
 		case BOX_BORDER:
 			parse_border(json, val, &border);
 		break;
-		case BOX_FILL:
+		case BOX_CELL_FILL:
 			if (!ret) {
 				gp_json_warn(json, "fill before widgets array!");
 				continue;
 			}
 			if (horiz)
-				parse_strarray(val->val_str, ret->grid->col_s, ret->grid->cols, put_grid_cell_fill, "Grid cfill");
+				parse_strarray(val->val_str, ret->grid->col_s, ret->grid->cols, put_grid_cell_fill, "Cell fill");
 			else
-				parse_strarray(val->val_str, ret->grid->row_s, ret->grid->rows, put_grid_cell_fill, "Grid rfill");
+				parse_strarray(val->val_str, ret->grid->row_s, ret->grid->rows, put_grid_cell_fill, "Cell fill");
 		break;
 		case BOX_FRAME:
 			frame = val->val_bool;
+		break;
+		case BOX_PADD:
+			if (!ret) {
+				gp_json_warn(json, "fill before widgets array!");
+				continue;
+			}
+			if (horiz)
+				parse_strarray(val->val_str, ret->grid->col_b, ret->grid->cols+1, put_grid_border_padd, "Padd");
+			else
+				parse_strarray(val->val_str, ret->grid->row_b, ret->grid->rows+1, put_grid_border_padd, "Padd");
+		break;
+		case BOX_PADD_FILL:
+			if (!ret) {
+				gp_json_warn(json, "fill before widgets array!");
+				continue;
+			}
+			if (horiz)
+				parse_strarray(val->val_str, ret->grid->col_b, ret->grid->cols+1, put_grid_border_fill, "Padd fill");
+			else
+				parse_strarray(val->val_str, ret->grid->row_b, ret->grid->rows+1, put_grid_border_fill, "Padd fill");
 		break;
 		case BOX_UNIFORM:
 			uniform = 1;

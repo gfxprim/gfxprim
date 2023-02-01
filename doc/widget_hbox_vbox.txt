@@ -1,0 +1,63 @@
+Hbox and Vbox widgets
+---------------------
+
+Hbox and Vbox widgets are one-dimensional link:widget_grid.html[grid] widgets
+with rows=1, cols=1 respectively, and with a simplified JSON attribute list.
+
+These widgets does not have a C API only a JSON loader which is a shortcut to
+a one-dimensional grid and the resulting widget is a Grid widget.
+
+.Hbox example buttons apart
+[source,json]
+-------------------------------------------------------------------------------
+include::../demos/widgets/test_layouts/hbox_buttons_apart.json[]
+-------------------------------------------------------------------------------
+
+image::widgets_buttons_apart.png[Buttons apart]
+
+The vbox is uniform, that means that both buttons have the same width,
+otherwise the button OK would be smaller as the button label is shorter.
+
+The padd between the buttons is the only element that can grow, so it fills
+awailable space as the hbox grows.
+
+.Hbox example buttons right
+[source,json]
+-------------------------------------------------------------------------------
+include::../demos/widgets/test_layouts/hbox_buttons_right.json[]
+-------------------------------------------------------------------------------
+
+image::widgets_buttons_right.png[Buttons right]
+
+The vbox is uniform, that means that both buttons have the same width,
+otherwise the button OK would be smaller as the button label is shorter.
+
+The padd on the left is the only element that can grow, so it fills the
+available space as the hbox grows.
+
+.Hbox example buttons fill
+[source,json]
+-------------------------------------------------------------------------------
+include::../demos/widgets/test_layouts/hbox_buttons_fill.json[]
+-------------------------------------------------------------------------------
+
+image::widgets_buttons_fill.png[Buttons fill]
+
+The vbox is uniform, that means that both buttons have the same width,
+otherwise the button OK would be smaller as the button label is shorter.
+
+Both buttons have fill coeficient 4 and the space between them has fill
+coeficient 1. Available space is divided by 4:1:4.
+
+.Hbox and Vbox JSON attributes
+[cols=",,,3",options="header"]
+|==============================================================================
+|  Attribute  |  Type  |    Default    | Description
+| +border+    | string |     all +1+   | See link:widget_grid.html#[grid]
+| +cell-fill+ | string |  cnt x +1+    | Cell fill coeficients.
+| +padd-fill+ | string | (cnt+1) x +0+ | Padding fill coeficients.
+| +padd+      | string | (cnt+1) x +1+ | Padding sizes between cells.
+| +frame+     |  bool  |     false     | Draws frame around grid.
+| +uniform+   |  bool  |     false     | The minimal cell sizes are distributed uniformly.
+| +widgets+   |  array |               | Array of widgets
+|==============================================================================

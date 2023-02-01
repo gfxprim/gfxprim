@@ -20,7 +20,7 @@ SOURCES+=widget_grid.txt widget_table.txt widget_button.txt widget_label.txt wid
 	 widgets_alignment.txt widget_tabs.txt widget_frame.txt widget_pixmap.txt \
 	 widgets_render_context.txt widgets_free.txt widget_pbar.txt widgets_dialog.txt \
 	 dialog_msg.txt widget_classes.txt widgets_color_scheme.txt widgets_colors.txt \
-	 widgets_disable.txt widget_markup.txt
+	 widgets_disable.txt widget_markup.txt widget_hbox_vbox.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 

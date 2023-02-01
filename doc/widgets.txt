@@ -47,6 +47,8 @@ Individual widgets documentation
 * link:widget_pbar.html[Progressbar widget]
 * link:widget_pixmap.html[Pixmap widget]
 * link:widget_grid.html[Grid widget]
+* link:widget_hbox_vbox.html[Hbox widget]
+* link:widget_hbox_vbox.html[Vbox widget]
 * link:widget_table.html[Table widget]
 * link:widget_tabs.html[Tabs widget]
 * link:widget_frame.html[Frame widget]
