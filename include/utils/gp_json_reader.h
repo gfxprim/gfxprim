@@ -17,8 +17,6 @@
 	.len = buf_len, \
 }
 
-typedef struct gp_json_reader gp_json_reader;
-
 struct gp_json_reader {
 	/** Pointer to a null terminated JSON string */
 	const char *json;
@@ -168,8 +166,8 @@ int gp_json_obj_next(gp_json_reader *self, struct gp_json_val *res);
  *
  * @return An array index or (size_t)-1 if key wasn't found.
  */
-size_t gp_json_arr_lookup(const void *list, size_t memb_size, size_t list_len,
-                          const char *key);
+size_t gp_json_lookup(const void *arr, size_t memb_size, size_t list_len,
+                      const char *key);
 
 /** An object attribute description i.e. key and type */
 typedef struct gp_json_obj_attr {
@@ -186,7 +184,7 @@ typedef struct gp_json_obj {
 
 static inline size_t gp_json_obj_lookup(const gp_json_obj *obj, const char *key)
 {
-	return gp_json_arr_lookup(obj->attrs, sizeof(*obj->attrs), obj->attr_cnt, key);
+	return gp_json_lookup(obj->attrs, sizeof(*obj->attrs), obj->attr_cnt, key);
 }
 
 #define GP_JSON_OBJ_ATTR(keyv, typev) \

@@ -35,4 +35,7 @@ enum gp_json_type {
  */
 void gp_json_err_handler(void *print_priv, const char *line);
 
+typedef struct gp_json_reader gp_json_reader;
+typedef struct gp_json_writer gp_json_writer;
+
 #endif /* GP_JSON_COMMON_H */

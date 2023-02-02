@@ -8,6 +8,7 @@ cfg
 json
 json_reader
 json_writer
+json_serdes
 trie
 avl_tree
 markup_plaintext

@@ -8,7 +8,7 @@
 
 #include <utils/gp_json_common.h>
 
-typedef struct gp_json_writer {
+struct gp_json_writer {
 	unsigned int depth;
 	char depth_type[GP_JSON_RECURSION_MAX/8];
 	char depth_first[GP_JSON_RECURSION_MAX/8];
@@ -21,7 +21,7 @@ typedef struct gp_json_writer {
 	/** Handler to produce JSON output */
 	int (*out)(struct gp_json_writer *self, const char *buf, size_t buf_size);
 	void *out_priv;
-} gp_json_writer;
+};
 
 #define GP_JSON_WRITER_INIT(out_, out_priv_) { \
 	.err_print = GP_JSON_ERR_PRINT, \

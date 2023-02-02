@@ -634,13 +634,13 @@ static int check_end(gp_json_reader *buf, struct gp_json_val *res, char b)
  *      // Returns a pointer to the key string in a second structure in bar[].
  *	const char *key = list_elem(bar, sizeof(struct foo), 1);
  */
-static inline const char *list_elem(const void *list, size_t memb_size, size_t idx)
+static inline const char *list_elem(const void *arr, size_t memb_size, size_t idx)
 {
-	return *(const char**)(list + idx * memb_size);
+	return *(const char**)(arr + idx * memb_size);
 }
 
-size_t gp_json_arr_lookup(const void *list, size_t memb_size, size_t list_len,
-                          const char *key)
+size_t gp_json_lookup(const void *arr, size_t memb_size, size_t list_len,
+                      const char *key)
 {
 	size_t l = 0;
 	size_t r = list_len-1;
@@ -649,7 +649,7 @@ size_t gp_json_arr_lookup(const void *list, size_t memb_size, size_t list_len,
 	while (r - l > 1) {
 		mid = (l+r)/2;
 
-		int ret = strcmp(list_elem(list, memb_size, mid), key);
+		int ret = strcmp(list_elem(arr, memb_size, mid), key);
 		if (!ret)
 			return mid;
 
@@ -659,10 +659,10 @@ size_t gp_json_arr_lookup(const void *list, size_t memb_size, size_t list_len,
 			r = mid;
 	}
 
-	if (r != mid && !strcmp(list_elem(list, memb_size, r), key))
+	if (r != mid && !strcmp(list_elem(arr, memb_size, r), key))
 		return r;
 
-	if (l != mid && !strcmp(list_elem(list, memb_size, l), key))
+	if (l != mid && !strcmp(list_elem(arr, memb_size, l), key))
 		return l;
 
 	return -1;
