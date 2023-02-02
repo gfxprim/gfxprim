@@ -31,6 +31,10 @@ typedef struct gp_widget_table_col_ops {
 	int (*get_cell)(gp_widget *self, gp_widget_table_cell *cell, unsigned int col_idx);
 	void (*sort)(gp_widget *self, int desc, unsigned int col_idx);
 
+	/** Optional on_event handler */
+	int (*on_event)(gp_widget_event *ev);
+	void *on_event_priv;
+
 	/** NULL id terminated column map array */
 	gp_widget_table_col_dsc col_map[];
 } gp_widget_table_col_ops;
@@ -39,6 +43,9 @@ typedef struct gp_widget_table_col_ops {
 The 'gp_widget_table_col_dsc' structure describes a column and the
 'gp_widget_table_col_ops' describes all possible columns along with callbacks
 to get table cells and possibly sort table by a column.
+
+If the optional 'on_event()' handle is not NULL the widget handler is
+initialized with the values from the structure when the widget is created.
 
 What user sees on the screen is described by an array of
 'gp_widget_table_header' structures which is usually loaded from a JSON

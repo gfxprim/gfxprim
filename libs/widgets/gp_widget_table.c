@@ -901,6 +901,9 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	ret->tbl->col_ops.get_cell = col_ops->get_cell;
 	ret->tbl->col_ops.seek_row = col_ops->seek_row;
 
+	if (col_ops->on_event)
+		gp_widget_on_event_set(ret, col_ops->on_event, col_ops->on_event_priv);
+
 	set_header_flag(ret);
 
 	return ret;

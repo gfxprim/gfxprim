@@ -50,6 +50,10 @@ typedef struct gp_widget_table_col_ops {
 	int (*get_cell)(gp_widget *self, gp_widget_table_cell *cell, unsigned int col_idx);
 	void (*sort)(gp_widget *self, int desc, unsigned int col_idx);
 
+	/** Optional on_event handler */
+	int (*on_event)(gp_widget_event *ev);
+	void *on_event_priv;
+
 	/** NULL id terminated column map array */
 	gp_widget_table_col_dsc col_map[];
 } gp_widget_table_col_ops;
