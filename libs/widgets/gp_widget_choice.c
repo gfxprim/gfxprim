@@ -245,7 +245,7 @@ gp_widget *gp_widget_choice_new2(unsigned int widget_type,
 	ret->choice->cnt = call_get_cnt(ret);
 	ret->choice->sel = call_get_sel(ret);
 
-	if (ret->choice->sel >= ret->choice->cnt) {
+	if (ret->choice->cnt && ret->choice->sel >= ret->choice->cnt) {
 		GP_WARN("Invalid selected choice %zu cnt %zu",
 			ret->choice->sel, ret->choice->cnt);
 	}
