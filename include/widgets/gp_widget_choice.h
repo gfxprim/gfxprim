@@ -25,12 +25,8 @@ struct gp_widget_choice {
 	const struct gp_widget_choice_ops *ops;
 
 	/*
-	 * Cached choices count and selected choice
-	 *
-	 * These values does not change unless:
-	 *
-	 * - are explicitly set
-	 * - refresh has been called
+	 * Optional storage for cnt and sel, can be utilized by the
+	 * setters/getters from ops.
 	 */
 	size_t cnt;
 	size_t sel;

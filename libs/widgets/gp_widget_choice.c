@@ -73,10 +73,10 @@ static gp_widget *alloc_choice(unsigned int widget_type,
 	if (!ret)
 		return NULL;
 
-	ret->choice->cnt = choice_cnt;
 	ret->choice->choices = (void*)ret->choice->payload;
-	ret->choice->sel = 0;
 	ret->choice->ops = &choice_ops;
+	ret->choice->cnt = choice_cnt;
+	ret->choice->sel = 0;
 
 	return ret;
 }
@@ -219,20 +219,6 @@ static inline void call_set_sel(gp_widget *self, size_t sel)
 	choice->ops->set(self, sel);
 }
 
-static inline size_t call_get_sel(gp_widget *self)
-{
-	struct gp_widget_choice *choice = self->choice;
-
-	return choice->ops->get(self, GP_WIDGET_CHOICE_OP_SEL);
-}
-
-static inline size_t call_get_cnt(gp_widget *self)
-{
-	struct gp_widget_choice *choice = self->choice;
-
-	return choice->ops->get(self, GP_WIDGET_CHOICE_OP_CNT);
-}
-
 gp_widget *gp_widget_choice_new2(unsigned int widget_type,
                                  const struct gp_widget_choice_ops *ops)
 {
@@ -242,32 +228,23 @@ gp_widget *gp_widget_choice_new2(unsigned int widget_type,
 		return NULL;
 
 	ret->choice->ops = ops;
-	ret->choice->cnt = call_get_cnt(ret);
-	ret->choice->sel = call_get_sel(ret);
 
-	if (ret->choice->cnt && ret->choice->sel >= ret->choice->cnt) {
-		GP_WARN("Invalid selected choice %zu cnt %zu",
-			ret->choice->sel, ret->choice->cnt);
-	}
+	size_t cnt = call_get_cnt(ret);
+	size_t sel = call_get_sel(ret);
+
+	if (cnt && sel >= cnt)
+		GP_WARN("Invalid selected choice %zu cnt %zu", sel, cnt);
 
 	return ret;
 }
 
 void gp_widget_choice_refresh(gp_widget *self)
 {
-	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_CHOICE, );
+	size_t cnt = call_get_cnt(self);
+	size_t sel = call_get_sel(self);
 
-	struct gp_widget_choice *choice = self->choice;
-
-	choice->sel = call_get_sel(self);
-	choice->cnt = call_get_cnt(self);
-
-	if (choice->sel >= choice->cnt) {
-		size_t sel = choice->cnt ? choice->cnt - 1 : 0;
-
-		call_set_sel(self, sel);
-		choice->sel = call_get_sel(self);
-	}
+	if (sel >= cnt)
+		call_set_sel(self, cnt-1);
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);
@@ -277,31 +254,30 @@ size_t gp_widget_choice_cnt_get(gp_widget *self)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_CHOICE, 0);
 
-	return self->choice->cnt;
+	return call_get_cnt(self);
 }
 
 const char *gp_widget_choice_name_get(gp_widget *self, size_t idx)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_CHOICE, NULL);
 
-	return self->choice->ops->get_choice(self, idx);
+	return call_get_choice(self, idx);
 }
 
 __attribute__((visibility ("hidden")))
 void gp_widget_choice_sel_set_(gp_widget *self, size_t sel)
 {
-	struct gp_widget_choice *choice = self->choice;
+	size_t cnt = call_get_cnt(self);
 
-	if (sel >= choice->cnt) {
-		GP_WARN("Selected choice %zu >= cnt %zu!", sel, choice->cnt);
+	if (sel >= cnt) {
+		GP_WARN("Selected choice %zu >= cnt %zu!", sel, cnt);
 		return;
 	}
 
-	if (choice->sel == sel)
+	if (call_get_sel(self) == sel)
 		return;
 
 	call_set_sel(self, sel);
-	choice->sel = call_get_sel(self);
 }
 
 void gp_widget_choice_sel_set(gp_widget *self, size_t sel)
@@ -317,5 +293,5 @@ size_t gp_widget_choice_sel_get(gp_widget *self)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_CHOICE, 0);
 
-	return self->choice->sel;
+	return call_get_sel(self);
 }

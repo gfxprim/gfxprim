@@ -21,7 +21,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	unsigned int i, w;
 
 	for (i = 0; i < gp_widget_choice_cnt_get(self); i++) {
-		w = gp_text_wbbox(ctx->font, self->choice->ops->get_choice(self, i));
+		w = gp_text_wbbox(ctx->font, call_get_choice(self, i));
 		text_w = GP_MAX(text_w, w);
 	}
 
@@ -54,7 +54,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	y += ctx->padd;
 
-	for (i = 0; i < gp_widget_choice_cnt_get(self); i++) {
+	size_t sel = call_get_sel(self);
+	size_t cnt = call_get_cnt(self);
+
+	for (i = 0; i < cnt; i++) {
 		unsigned int r = text_a/2;
 		unsigned int cy = y + r;
 		unsigned int cx = x + r;
@@ -63,15 +66,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_pixel color = self->focused ? ctx->sel_color : text_color;
 		gp_circle(ctx->buf, cx, cy, r, color);
 
-		if (i == self->choice->sel) {
+		if (i == sel)
 			gp_fill_circle(ctx->buf, cx, cy, r - 3, text_color);
-		}
 
 		gp_text(ctx->buf, ctx->font,
 			x + ctx->padd + text_a, y,
 		        GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
                         text_color, ctx->bg_color,
-			self->choice->ops->get_choice(self, i));
+			call_get_choice(self, i));
 
 		y += text_a + ctx->padd;
 	}
@@ -86,18 +88,23 @@ static void select_choice(gp_widget *self, unsigned int sel)
 
 static void key_up(gp_widget *self)
 {
-	if (self->choice->sel > 0)
-		select_choice(self, self->choice->sel - 1);
+	size_t sel = call_get_sel(self);
+
+	if (sel > 0)
+		select_choice(self, sel - 1);
 	else
-		select_choice(self, gp_widget_choice_cnt_get(self) - 1);
+		select_choice(self, call_get_cnt(self) - 1);
 }
 
 static void key_down(gp_widget *self)
 {
-	if (self->choice->sel + 1 >= gp_widget_choice_cnt_get(self))
+	size_t sel = call_get_sel(self);
+	size_t cnt = call_get_cnt(self);
+
+	if (sel + 1 >= cnt)
 		select_choice(self, 0);
 	else
-		select_choice(self, self->choice->sel + 1);
+		select_choice(self, sel + 1);
 }
 
 static void radio_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
@@ -144,7 +151,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			select_choice(self, 0);
 			return 1;
 		case GP_KEY_END:
-			select_choice(self, gp_widget_choice_cnt_get(self) - 1);
+			select_choice(self, call_get_cnt(self) - 1);
 			return 1;
 		}
 	break;
