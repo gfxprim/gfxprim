@@ -253,15 +253,16 @@ static int uint_store(gp_json_reader *json, gp_json_struct *desc,
 static int int_check(gp_json_reader *json, gp_json_struct *desc,
                      gp_json_val *val)
 {
+
 	if (val->val_int < desc->lim_int.min) {
 		gp_json_warn(json, "Int value out of range %li < %lli",
 		             val->val_int, (long long int) desc->lim_int.min);
 		return 1;
 	}
 
-	if ((uint64_t)val->val_int > desc->lim_int.max) {
-		gp_json_warn(json, "Int value out of range %li < %lli",
-		             val->val_int, (long long int) desc->lim_int.min);
+	if (val->val_int > 0 && (uint64_t)val->val_int > desc->lim_int.max) {
+		gp_json_warn(json, "Int value out of range %li > %lli",
+		             val->val_int, (long long int) desc->lim_int.max);
 		return 1;
 	}
 

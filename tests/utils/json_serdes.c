@@ -14,19 +14,55 @@ struct test_struct {
 	char *str1;
 	char str2[10];
 	int val;
+	uint64_t u64;
+	uint32_t u32;
+	uint16_t u16;
+	uint8_t u8;
+	int64_t i64;
+	int32_t i32;
+	int16_t i16;
+	int8_t i8;
 };
 
 static gp_json_struct test_struct_desc[] = {
-	GP_JSON_SERDES_STR_DUP(struct test_struct, str1, 1024),
-	GP_JSON_SERDES_STR_CPY(struct test_struct, str2, 10),
-	GP_JSON_SERDES_INT(struct test_struct, val, -100, 100),
+	GP_JSON_SERDES_STR_DUP(struct test_struct, str1, GP_JSON_SERDES_OPTIONAL, 1024, "greeting"),
+	GP_JSON_SERDES_INT16(struct test_struct, i16, 0, -100, 100),
+	GP_JSON_SERDES_INT32(struct test_struct, i32, 0, -100, 100),
+	GP_JSON_SERDES_INT64(struct test_struct, i64, 0, -100, 100),
+	GP_JSON_SERDES_INT8(struct test_struct, i8, 0, -100, 100),
+	GP_JSON_SERDES_STR_CPY(struct test_struct, str2, 0, 10),
+	GP_JSON_SERDES_UINT16(struct test_struct, u16, 0, -100, 100),
+	GP_JSON_SERDES_UINT32(struct test_struct, u32, 0, -100, 100),
+	GP_JSON_SERDES_UINT64(struct test_struct, u64, 0, -100, 100),
+	GP_JSON_SERDES_UINT8(struct test_struct, u8, 0, -100, 100),
+	GP_JSON_SERDES_INT(struct test_struct, val, 0, -100, 100),
 	{}
 };
+
+#define COMPARE_INT(val1, val2, name) \
+	if (val1 != val2) { \
+		tst_msg("Wrong " name "int value %lli expected %lli", \
+			(long long int)val1, (long long int)val2); \
+		return TST_FAILED; \
+	} \
+	tst_msg("Value " name " read back as %lli", (long long int) val2);
 
 static int json_write_read_struct(void)
 {
 	gp_json_writer *writer = gp_json_writer_vec_new();
-	struct test_struct ser = {.str1 = "hello", .str2 = "world", .val = 42};
+	struct test_struct ser = {
+		.str1 = "hello",
+		.str2 = "world",
+		.val = 42,
+		.u64 = 64,
+		.i64 = -64,
+		.u32 = 32,
+		.i32 = -32,
+		.u16 = 16,
+		.i16 = -16,
+		.u8 = 8,
+		.i8 = -8,
+	};
 	struct test_struct des = {};
 	int ret;
 
@@ -43,6 +79,8 @@ static int json_write_read_struct(void)
 
 	char *vec = gp_json_writer_vec(writer);
 
+//	tst_msg("%s", vec);
+
 	gp_json_reader reader = GP_JSON_READER_INIT(vec, gp_vec_len(vec));
 
 	char buf[1024];
@@ -53,8 +91,6 @@ static int json_write_read_struct(void)
 		tst_msg("Failed to read struct");
 		return TST_FAILED;
 	}
-
-	//tst_msg("%s", vec);
 
 	gp_json_writer_vec_free(writer);
 
@@ -72,12 +108,15 @@ static int json_write_read_struct(void)
 
 	tst_msg("str2 read as %s", des.str2);
 
-	if (ser.val != des.val) {
-		tst_msg("Wrong int value %i expected %i", des.val, ser.val);
-		return TST_FAILED;
-	}
-
-	tst_msg("val read as %i", des.val);
+	COMPARE_INT(ser.val, des.val, "val");
+	COMPARE_INT(ser.i8, des.i8, "i8");
+	COMPARE_INT(ser.u8, des.u8, "u8");
+	COMPARE_INT(ser.i16, des.i16, "i16");
+	COMPARE_INT(ser.u16, des.u16, "u16");
+	COMPARE_INT(ser.i32, des.i32, "i32");
+	COMPARE_INT(ser.u32, des.u32, "u32");
+	COMPARE_INT(ser.i64, des.i64, "i64");
+	COMPARE_INT(ser.u64, des.u64, "u64");
 
 	return TST_SUCCESS;
 }

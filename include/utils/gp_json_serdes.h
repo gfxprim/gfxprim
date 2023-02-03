@@ -42,61 +42,116 @@ typedef struct gp_json_struct {
 	};
 } gp_json_struct;
 
-#define GP_JSON_SERDES_STR_CPY(struct, memb, size) \
-	{.id = #memb, .offset = offsetof(struct, memb),\
-	 .type = GP_JSON_SERDES_STR, .type_size = size}
+#define GP_2(P1, P2, ...) P2
 
-#define GP_JSON_SERDES_STR_DUP(struct, memb, max_size) \
-	{.id = #memb, .offset = offsetof(struct, memb),\
-	 .type = GP_JSON_SERDES_STR, .str_max_size = max_size}
+#define GP_JSON_SERDES_STR_CPY(struct, memb, flags, size, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_STR | flags, \
+	 .type_size = size}
 
-#define GP_JSON_SERDES_INT(struct, memb, min, max) \
-	{.id = #memb, .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_INT, .type_size = sizeof(int), .lim_int = {min, max}}
+#define GP_JSON_SERDES_STR_DUP(struct, memb, flags, max_size, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_STR | flags, \
+	 .str_max_size = max_size}
 
-#define GP_JSON_SERDES_UINT(id, struct, memb, min, max) \
-	{.id = #memb, .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_UINT, .type_size = sizeof(unsigned int), .lim_int = {min, max{}
+#define GP_JSON_SERDES_INT(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_INT | flags, \
+	 .type_size = sizeof(int), \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_LONG(struct, memb, min, max) \
-	{.id = #memb, .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_INT, .type_size = sizeof(long), .lim_int = {min, max}}
+#define GP_JSON_SERDES_UINT(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_UINT | flags, \
+	 .type_size = sizeof(unsigned int), \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_ULONG(id, struct, memb, min, max) \
-	{.id = #memb, .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_UINT, .type_size = sizeof(unsigned long), .lim_int = {min, max{}
+#define GP_JSON_SERDES_LINT(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_INT | flags, \
+	 .type_size = sizeof(long), \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_UINT8(id, struct, memb, min, max) \
-	{.id = (sid), .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_UINT, .type_size = 1, .lim_int = {min, max}}
+#define GP_JSON_SERDES_ULINT(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_UINT | flags, \
+	 .type_size = sizeof(unsigned long), \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_INT8(id, struct, memb, min, max) \
-	{.id = (sid), .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_INT, .type_size = 1, .lim_int = {min, max{}
+#define GP_JSON_SERDES_LLINT(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_INT | flags, \
+	 .type_size = sizeof(long long), \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_UINT16(id, struct, memb, min, max) \
-	{.id = (sid), .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_UINT, .type_size = 2, .lim_int = {min, max}}
+#define GP_JSON_SERDES_ULLINT(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_UINT | flags, \
+	 .type_size = sizeof(unsigned long long), \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_INT16(id, struct, memb, min, max) \
-	{.id = (sid), .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_INT, .type_size = 2, .lim_int = {min, max{}
+#define GP_JSON_SERDES_UINT8(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_UINT | flags, \
+	 .type_size = 1, \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_UINT32(id, struct, memb, min, max) \
-	{.id = (sid), .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_UINT, .type_size = 4, .lim_int = {min, max}}
+#define GP_JSON_SERDES_INT8(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_INT | flags, \
+	 .type_size = 1, \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_INT32(id, struct, memb, min, max) \
-	{.id = (sid), .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_INT, .type_size = 4, .lim_int = {min, max{}
+#define GP_JSON_SERDES_UINT16(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_UINT | flags, \
+	 .type_size = 2, \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_UINT64(id, struct, memb, min, max) \
-	{.id = (sid), .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_UINT, .type_size = 8, .lim_int = {min, max}}
+#define GP_JSON_SERDES_INT16(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_INT | flags, \
+	 .type_size = 2, \
+	 .lim_int = {min, max}}
 
-#define GP_JSON_SERDES_INT64(id, struct, memb, min, max) \
-	{.id = (sid), .offset = offsetof(struct, memb), \
-	 .type = GP_JSON_SERDES_INT, .type_size = 8, .lim_int = {min, max}}
+#define GP_JSON_SERDES_UINT32(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_UINT | flags, \
+	 .type_size = 4, \
+	 .lim_int = {min, max}}
+
+#define GP_JSON_SERDES_INT32(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_INT | flags, \
+	 .type_size = 4, .lim_int = {min, max}}
+
+#define GP_JSON_SERDES_UINT64(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_UINT | flags, \
+	 .type_size = 8, \
+	 .lim_int = {min, max}}
+
+#define GP_JSON_SERDES_INT64(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_INT | flags, \
+	 .type_size = 8, \
+	 .lim_int = {min, max}}
 
 /**
  * @brief Deserializes a JSON object into a C structure
