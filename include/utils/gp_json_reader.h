@@ -300,6 +300,18 @@ gp_json_reader *gp_json_reader_load(const char *path);
  */
 void gp_json_reader_free(gp_json_reader *self);
 
+/**
+ * @brief Prints errors and warnings at the end of parsing.
+ *
+ * Checks if self->err is set and prints the error with gp_json_reader_err()
+ *
+ * Checks if there is any text left after the parser has finished and prints
+ * a warning if so.
+ *
+ * @self A gp_json_reader
+ */
+void gp_json_reader_finish(gp_json_reader *self);
+
 /*
  * @brief Returns non-zero if whole buffer has been consumed.
  *

@@ -535,12 +535,8 @@ gp_widget *gp_widget_layout_json(const char *path,
 	}
 
 	ret = gp_widgets_from_json(json, callbacks, uids);
-	if (gp_json_reader_err(json))
-		gp_json_err_print(json);
-	else if (!gp_json_empty(json))
-		gp_json_warn(json, "Garbage after JSON string!");
 
-
+	gp_json_reader_finish(json);
 
 	gp_json_reader_free(json);
 
@@ -559,10 +555,7 @@ gp_widget *gp_widget_from_json_str(const char *str,
 
 	ret = gp_widgets_from_json(&json, callbacks, uids);
 
-	if (gp_json_reader_err(&json))
-		gp_json_err_print(&json);
-	else if (!gp_json_empty(&json))
-		gp_json_warn(&json, "Garbage after JSON string!");
+	gp_json_reader_finish(&json);
 
 	return ret;
 }

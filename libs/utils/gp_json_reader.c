@@ -1048,6 +1048,14 @@ err0:
 	return NULL;
 }
 
+void gp_json_reader_finish(gp_json_reader *self)
+{
+	if (gp_json_reader_err(self))
+		gp_json_err_print(self);
+	else if (!gp_json_empty(self))
+		gp_json_warn(self, "Garbage after JSON string!");
+}
+
 void gp_json_reader_free(gp_json_reader *buf)
 {
 	free(buf);

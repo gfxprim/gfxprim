@@ -456,7 +456,6 @@ static int load_keymap(gp_json_reader *json, struct map **rmaps, struct mods **r
 	};
 	struct map *maps = NULL, *tmp;
 	struct mods *mods = NULL;
-	int err;
 
 	GP_JSON_OBJ_FILTER(json, &val, &keymap_obj_filter, NULL) {
 		switch (val.idx) {
@@ -486,13 +485,9 @@ static int load_keymap(gp_json_reader *json, struct map **rmaps, struct mods **r
 		}
 	}
 
-	err = gp_json_reader_err(json);
-	if (err)
-		gp_json_err_print(json);
-	else if (!gp_json_empty(json))
-		gp_json_warn(json, "Garbage after JSON string!");
+	gp_json_reader_finish(json);
 
-	if (err) {
+	if (gp_json_reader_err(json)) {
 		free_maps(maps);
 		free(mods);
 		return 1;
