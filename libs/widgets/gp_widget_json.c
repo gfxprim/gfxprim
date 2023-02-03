@@ -375,8 +375,11 @@ gp_widget *gp_widget_from_json(gp_json_reader *json, gp_json_val *val, gp_widget
 	}
 ret:
 	wid->align = halign | valign;
-	if (on_event.on_event)
+	if (on_event.on_event) {
+		GP_DEBUG(3, "Setting widget %p (%s) on event %p priv %p",
+			 wid, gp_widget_type_id(wid), on_event.on_event, on_event.priv);
 		gp_widget_on_event_set(wid, on_event.on_event, on_event.priv);
+	}
 
 	if (shrink != -1)
 		wid->no_shrink = !shrink;
