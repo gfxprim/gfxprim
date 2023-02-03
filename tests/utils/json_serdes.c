@@ -121,11 +121,64 @@ static int json_write_read_struct(void)
 	return TST_SUCCESS;
 }
 
+
+static gp_json_struct opt_i16_desc[] = {
+	GP_JSON_SERDES_INT16(struct test_struct, i16, GP_JSON_SERDES_OPTIONAL, -100, 100),
+	GP_JSON_SERDES_INT32(struct test_struct, i32, 0, -100, 100),
+	{}
+};
+
+#define JSON_MISSING_INT32 "{\"i16\": 42}"
+
+static int json_read_missing_struct(void)
+{
+	char buf[1024];
+	gp_json_val val = {.buf = buf, .buf_size = sizeof(buf)};
+	struct test_struct des = {};
+	gp_json_reader reader = GP_JSON_READER_INIT(JSON_MISSING_INT32,
+	                                            sizeof(JSON_MISSING_INT32));
+
+	int ret = gp_json_read_struct(&reader, &val, opt_i16_desc, &des);
+	if (ret) {
+		tst_msg("Failed to read strucure as expected");
+		return TST_SUCCESS;
+	}
+
+	return TST_FAILED;
+}
+
+#define JSON_MISSING_INT16 "{\"i32\": 42}"
+
+static int json_read_opt_struct(void)
+{
+	char buf[1024];
+	gp_json_val val = {.buf = buf, .buf_size = sizeof(buf)};
+	struct test_struct des = {};
+	gp_json_reader reader = GP_JSON_READER_INIT(JSON_MISSING_INT16,
+	                                            sizeof(JSON_MISSING_INT16));
+
+	int ret = gp_json_read_struct(&reader, &val, opt_i16_desc, &des);
+	if (ret) {
+		tst_msg("Failed to read strucure");
+		return TST_FAILED;
+	}
+
+	COMPARE_INT(42, des.i32, "i32");
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "JSON serdes testsuite",
 	.tests = {
 		{.name = "JSON write read struct",
 		 .tst_fn = json_write_read_struct},
+
+		{.name = "JSON read missing struct",
+		 .tst_fn = json_read_missing_struct},
+
+		{.name = "JSON read opt struct",
+		 .tst_fn = json_read_opt_struct},
 
 		{}
 	}

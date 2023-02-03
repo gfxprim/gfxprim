@@ -296,7 +296,7 @@ static size_t memb_lookup(const char *id, gp_json_struct *desc, size_t desc_cnt)
 int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
                         gp_json_struct *desc, void *baseptr)
 {
-	size_t desc_cnt;
+	size_t desc_cnt, i;
 	int err = 0;
 
 	if (gp_json_next_type(json) != GP_JSON_OBJ) {
@@ -322,7 +322,19 @@ int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
 			continue;
 		}
 
+		if (loaded[idx])
+			gp_json_warn(json, "Parameter %s redefined", val->id);
+
 		err |= memb_store(json, desc + idx, val, baseptr);
+
+		loaded[idx] = 1;
+	}
+
+	for (i = 0; i < desc_cnt; i++) {
+		if (!loaded[i] && !(desc[i].type & GP_JSON_SERDES_OPTIONAL)) {
+			gp_json_warn(json, "Missing %s attribute", desc[i].id);
+			err = 1;
+		}
 	}
 
 	return err;
