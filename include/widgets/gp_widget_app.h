@@ -24,18 +24,36 @@
 gp_widget *gp_app_layout_load(const char *app_name, gp_htable **uids);
 
 /**
+ * @brief Loads a widget layout given application name.
+ *
+ * Looks for the layout in /etc/ and $HOME/.config/
+ *
+ * @app_name An application name, usually the same as the binary name.
+ * @callbacks Optional callbacks description, NULL if not used.
+ * @uids An pointer to store the hash table of UIDs to.
+ *
+ * @return An application widget layout or NULL in a case of failure.
+ */
+gp_widget *gp_app_layout_load2(const char *app_name,
+                               const gp_widget_json_callbacks *const callbacks,
+                               gp_htable **uids);
+
+/**
  * @brief Loads an application fragment given application name and fragment name.
  *
  * Looks for the layout fragment in /etc/ and $HOME/.config/
  *
  * @app_name An application name, usually the same as the binary name.
- * @fragment_name A fragment name.
+ * @layout_name A layout name.
+ * @callbacks Optional callbacks description, NULL if not used.
  * @uids An pointer to store the hash table of UIDs to.
  *
  * @return An application widget layout or NULL in a case of failure.
  */
-gp_widget *gp_app_layout_fragment_load(const char *app_name,
-                                       const char *fragment_name, void *uids);
+gp_widget *gp_app_named_layout_load(const char *app_name, const char *layout_name,
+                                    const gp_widget_json_callbacks *const callbacks,
+                                    gp_htable **uids);
+
 
 /**
  * @brief Sets an application event hanlder.

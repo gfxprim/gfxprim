@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -12,7 +12,9 @@
 #include <widgets/gp_widget_json.h>
 #include <widgets/gp_widget_app.h>
 
-static gp_widget *try_load_layout(const char *pathname, gp_htable **uids)
+static gp_widget *try_load_layout(const char *pathname,
+                                  const gp_widget_json_callbacks *const callbacks,
+                                  gp_htable **uids)
 {
 	if (access(pathname, R_OK)) {
 		GP_DEBUG(3, "File '%s' does not exists or is not readable", pathname);
@@ -21,10 +23,12 @@ static gp_widget *try_load_layout(const char *pathname, gp_htable **uids)
 
 	GP_DEBUG(3, "Trying '%s'", pathname);
 
-	return gp_widget_layout_json(pathname, NULL, uids);
+	return gp_widget_layout_json(pathname, callbacks, uids);
 }
 
-static gp_widget *layout_load(const char *app_name, const char *json_name, gp_htable **uids)
+static gp_widget *layout_load(const char *app_name, const char *json_name,
+                              const gp_widget_json_callbacks *const callbacks,
+                              gp_htable **uids)
 {
 	gp_widget *layout;
 	char *pathname;
@@ -34,7 +38,7 @@ static gp_widget *layout_load(const char *app_name, const char *json_name, gp_ht
 	if (!pathname)
 		return NULL;
 
-	layout = try_load_layout(pathname, uids);
+	layout = try_load_layout(pathname, callbacks, uids);
 	if (layout)
 		goto ret;
 
@@ -46,7 +50,7 @@ static gp_widget *layout_load(const char *app_name, const char *json_name, gp_ht
 		if (!pathname)
 			return NULL;
 
-		layout = try_load_layout(pathname, uids);
+		layout = try_load_layout(pathname, callbacks, uids);
 		if (layout)
 			goto ret;
 	}
@@ -57,7 +61,7 @@ static gp_widget *layout_load(const char *app_name, const char *json_name, gp_ht
 	if (!pathname)
 		return NULL;
 
-	layout = try_load_layout(pathname, uids);
+	layout = try_load_layout(pathname, callbacks, uids);
 	if (layout)
 		goto ret;
 
@@ -71,13 +75,21 @@ ret:
 
 gp_widget *gp_app_layout_load(const char *app_name, gp_htable **uids)
 {
-	return layout_load(app_name, "layout", uids);
+	return layout_load(app_name, "layout", NULL, uids);
 }
 
-gp_widget *gp_app_layout_fragment_load(const char *app_name,
-                                       const char *fragment_name, void *uids)
+gp_widget *gp_app_layout_load2(const char *app_name,
+                               const gp_widget_json_callbacks *const callbacks,
+                               gp_htable **uids)
 {
-	return layout_load(app_name, fragment_name, uids);
+	return layout_load(app_name, "layout", callbacks, uids);
+}
+
+gp_widget *gp_app_named_layout_load(const char *app_name, const char *layout_name,
+                                    const gp_widget_json_callbacks *const callbacks,
+                                    gp_htable **uids)
+{
+	return layout_load(app_name, layout_name, callbacks, uids);
 }
 
 static struct gp_app app = {
