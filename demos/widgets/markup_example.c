@@ -21,13 +21,13 @@
 int main(int argc, char *argv[])
 {
 	gp_widget *layout = gp_widget_grid_new(1, 2, 0);
-	gp_widget *markup = gp_widget_markup_new(MARKUP_STRING, GP_MARKUP_GFXPRIM);
+	gp_widget *markup = gp_widget_markup_new(MARKUP_STRING, GP_MARKUP_GFXPRIM, 0);
 
 	layout->align = GP_HFILL;
 	markup->align = GP_HFILL;
 
 	gp_widget_grid_put(layout, 0, 0, markup);
-	gp_widget_grid_put(layout, 0, 1, gp_widget_markup_new("#Markup \\#2#", GP_MARKUP_GFXPRIM));
+	gp_widget_grid_put(layout, 0, 1, gp_widget_markup_new("#Markup \\#2#", GP_MARKUP_GFXPRIM, 0));
 
 	gp_widgets_main_loop(layout, "Markup test", NULL, argc, argv);
 

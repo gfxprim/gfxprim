@@ -243,7 +243,7 @@ static gp_widget *json_to_markup(gp_json_reader *json, gp_json_val *val, gp_widg
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case TEXT:
-			ret = gp_widget_markup_new(val->val_str, fmt);
+			ret = gp_widget_markup_new(val->val_str, fmt, 0);
 		break;
 		case FMT:
 			if (ret)
@@ -277,12 +277,12 @@ struct gp_widget_ops gp_widget_markup_ops = {
 	.id = "markup",
 };
 
-gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt)
+gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt, int flags)
 {
 	size_t payload_size = sizeof(struct gp_widget_markup);
 	gp_widget *ret;
 
-	gp_markup *markup = gp_markup_parse(fmt, markup_str, 0);
+	gp_markup *markup = gp_markup_parse(fmt, markup_str, flags);
 	if (!markup)
 		return NULL;
 
@@ -298,11 +298,11 @@ gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt)
 }
 
 int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt,
-                         const char *markup_str)
+                         int flags, const char *markup_str)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_MARKUP, 1);
 
-	gp_markup *markup = gp_markup_parse(fmt, markup_str, 0);
+	gp_markup *markup = gp_markup_parse(fmt, markup_str, flags);
 	if (!markup)
 		return 1;
 
