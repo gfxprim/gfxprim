@@ -48,6 +48,16 @@ gp_markup *gp_markup_plaintext_parse(const char *markup,
 gp_markup *gp_markup_gfxprim_parse(const char *markup,
                                    enum gp_markup_flags flags);
 
+enum gp_markup_html_flags {
+	/**
+	 * Keep whitespaces
+	 *
+	 * Some HTML like markup languages only use tags for text size/color
+	 * and expect whitespaces to be kept, such as Pango markup or XDXF.
+	 */
+	GP_MARKUP_HTML_KEEP_WS = 0x01,
+};
+
 /**
  * @brief Parses a html markup.
  *

@@ -544,17 +544,49 @@ ret:
 	parse_markup_string(builder, str_start, markup->first, attrs);
 }
 
-static void parse_markup(gp_markup_builder *builder, struct sub_str *sub_markup)
+static void html_parse_ws(struct sub_str *substr, gp_markup_builder *builder,
+                          struct attr_stack *attrs, int flags)
+{
+	int add_space = 0;
+
+	while (sub_str_nempty(substr)) {
+		if (!is_space(*substr->first))
+			break;
+
+		if ((flags & GP_MARKUP_HTML_KEEP_WS)) {
+			switch (*substr->first) {
+			case '\n':
+				gp_markup_builder_newline(builder);
+			break;
+			case ' ':
+				gp_markup_builder_space(builder, attr_stack_fmt(attrs));
+			break;
+			case '\t':
+				gp_markup_builder_space(builder, attr_stack_fmt(attrs));
+				gp_markup_builder_space(builder, attr_stack_fmt(attrs));
+				gp_markup_builder_space(builder, attr_stack_fmt(attrs));
+				gp_markup_builder_space(builder, attr_stack_fmt(attrs));
+			break;
+			}
+		}
+
+		substr->first++;
+		add_space = 1;
+	}
+
+	if (!(flags & GP_MARKUP_HTML_KEEP_WS) && add_space)
+		gp_markup_builder_space(builder, attr_stack_fmt(attrs));
+}
+
+static void parse_markup(gp_markup_builder *builder, struct sub_str *sub_markup, int flags)
 {
 	struct sub_str markup = *sub_markup;
 	struct attr_stack attrs = {};
 
 	while (sub_str_nempty(&markup)) {
 
-		if (is_space(*markup.first)) {
-			html_eat_ws(&markup);
-			gp_markup_builder_space(builder, attr_stack_fmt(&attrs));
-		}
+		if (is_space(*markup.first))
+			html_parse_ws(&markup, builder, &attrs, flags);
 
 		switch (*markup.first) {
 		case '<':
@@ -598,20 +630,20 @@ gp_markup *gp_markup_html_parse(const char *markup, enum gp_markup_flags flags)
 	struct sub_str sub_markup;
 	struct gp_markup *ret;
 
-	if (flags) {
+	if (flags & ~(GP_MARKUP_HTML_KEEP_WS)) {
 		GP_WARN("Invalid flags");
 		return NULL;
 	}
 
 	trim_whitespaces(markup, &sub_markup);
 
-	parse_markup(&builder, &sub_markup);
+	parse_markup(&builder, &sub_markup, flags);
 
 	ret = gp_markup_builder_alloc(&builder);
 	if (!ret)
 		return NULL;
 
-	parse_markup(&builder, &sub_markup);
+	parse_markup(&builder, &sub_markup, flags);
 
 	gp_markup_builder_finish(&builder);
 
