@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2022-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -17,71 +17,38 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 
+#include <utils/gp_path.h>
 #include <utils/gp_app_cfg.h>
 
 char *gp_app_cfg_path(const char *app_name, const char *cfg_filename)
 {
-	char *home_path, *full_path = NULL, *sep;
-	size_t home_len;
+	char *home_path = gp_user_home();
 
-	home_path = getenv("HOME");
-	if (!home_path) {
-		errno = ENOENT;
+	if (!home_path)
 		return NULL;
-	}
 
-	if (home_path[0] != '/') {
-		errno = EINVAL;
-		return NULL;
-	}
-
-	home_len = strlen(home_path);
-
-	sep = home_path[home_len-1] == '/' ? "" : "/";
-
-	if (asprintf(&full_path, "%s%s.config/%s/%s", home_path, sep, app_name, cfg_filename) < 0) {
-		errno = ENOMEM;
-		return NULL;
-	}
-
-	return full_path;
+	return gp_compose_path(home_path, ".config", app_name, cfg_filename);
 }
 
 int gp_app_cfg_mkpath(const char *app_name)
 {
-	char *home_path;
-	int home_fd, conf_fd, err;
+	char *home_path = gp_user_home();
+	char *app_path;
 
-	home_path = getenv("HOME");
-	if (!home_path) {
-		errno = ENOENT;
+	if (!home_path)
+		return -1;
+
+	app_path = gp_compose_path(".config", app_name);
+	if (!app_path) {
+		errno = ENOMEM;
 		return -1;
 	}
 
-	home_fd = open(home_path, O_DIRECTORY);
-	if (home_fd < 0)
-		return -1;
+	int ret = gp_mkpath(home_path, app_path, 0, 0700);
 
-	if (mkdirat(home_fd, ".config", 0700)) {
-		if (errno != EEXIST)
-			return 1;
-	}
+	free(app_path);
 
-	conf_fd = openat(home_fd, ".config", O_DIRECTORY);
-	err = errno;
-	close(home_fd);
-
-	if (conf_fd < 0) {
-		errno = err;
-		return -1;
-	}
-
-	if (mkdirat(conf_fd, app_name, 0700)) {
-		if (errno != EEXIST)
-			return -1;
-	}
-
-	return 0;
+	return ret;
 }
 
 int gp_app_cfg_scanf(const char *app_name, const char *cfg_filename,

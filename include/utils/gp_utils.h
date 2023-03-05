@@ -17,10 +17,13 @@
 #include <utils/gp_bbox.h>
 #include <utils/gp_list.h>
 #include <utils/gp_json.h>
-#include <utils/gp_app_cfg.h>
 #include <utils/gp_utf.h>
 #include <utils/gp_utf_pos.h>
 #include <utils/gp_avl_tree.h>
 #include <utils/gp_trie.h>
+
+#include <utils/gp_path.h>
+#include <utils/gp_user_path.h>
+#include <utils/gp_app_cfg.h>
 
 #endif /* GP_UTILS_H */

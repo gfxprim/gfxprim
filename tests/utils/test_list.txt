@@ -6,6 +6,7 @@ list
 htable
 utf
 cfg
+path
 json
 json_reader
 json_writer
