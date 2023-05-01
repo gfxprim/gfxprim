@@ -46,13 +46,15 @@ Boolean class implements three functions for manipulating the boolean value.
 -------------------------------------------------------------------------------
 int gp_widget_int_val_get(gp_widget *self);
 
-void gp_widget_int_set(gp_widget *self, int min, int max, int val);
+void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val);
 
-void gp_widget_int_val_set(gp_widget *self, int val);
+void gp_widget_int_val_set(gp_widget *self, int64_t val);
 
-void gp_widget_int_max_set(gp_widget *self, int max);
+void gp_widget_int_max_set(gp_widget *self, int64_t max);
 
-void gp_widget_int_min_set(gp_widget *self, int min);
+void gp_widget_int_min_set(gp_widget *self, int64_t min);
+
+void gp_widget_int_range_set(gp_widget *self, int64_t min, int64_t max);
 -------------------------------------------------------------------------------
 
 Integer class functions to manipulate the value and bounds.
