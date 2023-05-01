@@ -91,6 +91,8 @@ enum gp_widget_tbox_event_type {
 	GP_WIDGET_TBOX_POST_FILTER,
 	/** Emitted after text is entered */
 	GP_WIDGET_TBOX_EDIT,
+	/** Emitted before text is pasted */
+	GP_WIDGET_TBOX_PASTE,
 };
 
 #define GP_TBOX_FILTER_INT "0123456789"

@@ -197,8 +197,13 @@ NOTE: If textbox contains URL or Path the delimiters should be set by setting
 | GP_WIDGET_TBOX_PRE_FILTER  | Filter before text is modified.
 | GP_WIDGET_TBOX_POST_FILTER | Filter after text is modified.
 | GP_WIDGET_TBOX_EDIT        | Emitted after text is modified.
+| GP_WIDGET_TBOX_PASTE       | Emitted before text is pasted.
 |=============================================================
 
 In the case of the `GP_WIDGET_TBOX_PRE_FILTER` and
 `GP_WIDGET_TBOX_POST_FILTER` non-zero output from the event handler will
 filter out the change, e.g. a character will will not be inserted.
+
+When text is pasted into a textbox event hanlder will get the
+`GP_WIDGET_TBOX_PASTE` event, followed by sequence of the filter events and
+edit event for each pasted letter.

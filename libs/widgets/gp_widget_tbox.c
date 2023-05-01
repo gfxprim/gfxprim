@@ -571,6 +571,8 @@ static void clipboard_event(gp_widget *self)
 	clear_on_input(self);
 	sel_del(self);
 
+	gp_widget_send_widget_event(self, GP_WIDGET_TBOX_PASTE);
+
 	clip = gp_widgets_clipboard_get();
 	if (!clip)
 		return;
