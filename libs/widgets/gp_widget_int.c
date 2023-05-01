@@ -154,7 +154,7 @@ static const gp_json_obj obj_filter = {
 static gp_widget *json_to_int(enum gp_widget_type type, gp_json_reader *json,
                               gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	int min = 0, max = 0, ival = 0, dir = 0, val_set = 0;
+	int min = 0, max = 0, ival = 0, dir = 0, val_set = 0, min_set = 0, max_set = 0;
 	gp_widget *ret;
 
 	(void)ctx;
@@ -171,19 +171,27 @@ static gp_widget *json_to_int(enum gp_widget_type type, gp_json_reader *json,
 		break;
 		case MAX:
 			max = val->val_int;
+			max_set = 1;
 		break;
 		case MIN:
 			min = val->val_int;
+			min_set = 1;
 		break;
 		case VAL:
 			val_set = 1;
 			ival = val->val_int;
+
+			if (!max_set)
+				max = ival;
+
+			if (!min_set)
+				min = ival;
 		break;
 		}
 	}
 
 	if (!val_set)
-		ival = min;
+		ival = (max + min)/2;
 
 	if (check_min_max(min, max))
 		return NULL;
