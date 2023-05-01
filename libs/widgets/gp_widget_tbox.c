@@ -379,7 +379,7 @@ static int sel_left(gp_widget *self)
 	return 1;
 }
 
-static void utf_key(gp_widget *self, uint32_t ch)
+static int utf_key(gp_widget *self, uint32_t ch)
 {
 	int ret;
 	sel_del(self);
@@ -387,23 +387,23 @@ static void utf_key(gp_widget *self, uint32_t ch)
 	if (self->tbox->max_size &&
 	    gp_utf8_strlen(self->tbox->buf) >= self->tbox->max_size) {
 		schedule_alert(self);
-		return;
+		return 1;
 	}
 
 	if (filter(self->tbox->filter, ch)) {
 		schedule_alert(self);
-		return;
+		return 1;
 	}
 
 	ret = gp_widget_send_widget_event(self, GP_WIDGET_TBOX_PRE_FILTER, (long)ch);
 	if (ret) {
 		schedule_alert(self);
-		return;
+		return 1;
 	}
 
 	char *tmp = gp_vec_ins_utf8(self->tbox->buf, self->tbox->cur_pos.bytes, ch);
 	if (!tmp)
-		return;
+		return 1;
 
 	self->tbox->buf = tmp;
 
@@ -411,13 +411,15 @@ static void utf_key(gp_widget *self, uint32_t ch)
 	if (ret) {
 		self->tbox->buf = gp_vec_del(self->tbox->buf, self->tbox->cur_pos.bytes, gp_utf8_bytes(ch));
 		schedule_alert(self);
-		return;
+		return 1;
 	}
 
 	gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, 1);
 
 	send_edit_event(self);
 	gp_widget_redraw(self);
+
+	return 0;
 }
 
 static void key_backspace(gp_widget *self)
@@ -545,6 +547,7 @@ static void selection_to_clipboard(gp_widget *self)
 static void clipboard_event(gp_widget *self)
 {
 	char *clip;
+	uint32_t ch;
 
 	sel_del(self);
 
@@ -552,7 +555,13 @@ static void clipboard_event(gp_widget *self)
 	if (!clip)
 		return;
 
-	gp_widget_tbox_ins(self, 0, GP_SEEK_CUR, clip);
+	const char *pos = clip;
+
+	while ((ch = gp_utf8_next(&pos))) {
+		if (utf_key(self, ch))
+			break;
+	}
+
 	free(clip);
 }
 
