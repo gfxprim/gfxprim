@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -737,6 +737,12 @@ void gp_widgets_main_loop(gp_widget *layout, const char *label,
 		}
 		gp_widgets_redraw(win_layout);
 	}
+}
+
+void gp_widgets_backend_set(gp_backend *new_backend)
+{
+	if (!backend)
+		backend = new_backend;
 }
 
 void gp_widgets_exit(int exit_value)

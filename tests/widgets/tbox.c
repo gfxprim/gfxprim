@@ -1097,6 +1097,102 @@ static int tbox_utf_backspace_key(void)
 	return TST_SUCCESS;
 }
 
+static int clip_handler(gp_backend *self, gp_clipboard *op)
+{
+	(void) self;
+
+	switch (op->op) {
+	case GP_CLIPBOARD_GET:
+		op->ret = strdup("world");
+	break;
+	default:
+	break;
+	}
+
+	return 0;
+}
+
+static gp_backend paste_backend = {
+	.name = "Paste backend",
+	.clipboard = clip_handler,
+};
+
+static int tbox_paste(void)
+{
+	gp_widget *tbox;
+
+	gp_widgets_backend_set(&paste_backend);
+
+	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL,
+	                          0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	paste_event(tbox);
+
+	if (strcmp(gp_widget_tbox_text(tbox), "hello world")) {
+		tst_msg("Wrong tbox text after pasting 'world' '%s'",
+		        gp_widget_tbox_text(tbox));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int tbox_sel_paste(void)
+{
+	gp_widget *tbox;
+
+	gp_widgets_backend_set(&paste_backend);
+
+	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL,
+	                          0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_sel_set(tbox, -2, GP_SEEK_END, 2);
+
+	paste_event(tbox);
+
+	if (strcmp(gp_widget_tbox_text(tbox), "hellworld")) {
+		tst_msg("Wrong tbox text after pasting 'world' '%s'",
+		        gp_widget_tbox_text(tbox));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int tbox_clear_on_input_paste(void)
+{
+	gp_widget *tbox;
+
+	gp_widgets_backend_set(&paste_backend);
+
+	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL,
+	                          0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_clear_on_input(tbox);
+
+	paste_event(tbox);
+
+	if (strcmp(gp_widget_tbox_text(tbox), "world")) {
+		tst_msg("Wrong tbox text after pasting 'world' '%s'",
+		        gp_widget_tbox_text(tbox));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "tbox testsuite",
 	.tests = {
@@ -1181,6 +1277,15 @@ const struct tst_suite tst_suite = {
 
 		{.name = "tbox utf backspace key",
 		 .tst_fn = tbox_utf_backspace_key},
+
+		{.name = "tbox paste",
+		 .tst_fn = tbox_paste},
+
+		{.name = "tbox sel paste",
+		 .tst_fn = tbox_sel_paste},
+
+		{.name = "tbox clear on input paste",
+		 .tst_fn = tbox_clear_on_input_paste},
 
 		{.name = NULL},
 	}

@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2020-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2020-2023 Cyril Hrubis <metan@ucw.cz>
  */
+
+#ifndef TESTS_COMMON_H__
+#define TESTS_COMMON_H__
+
+#include <backends/gp_backend.h>
+#include <backends/gp_clipboard.h>
 
 static gp_events_state events_state = {};
 
@@ -87,3 +93,26 @@ static inline void type_string(gp_widget *widget, const char *ch)
 		ch++;
 	}
 }
+
+static inline void paste_event(gp_widget *widget)
+{
+	gp_event ev_paste = {
+		.type = GP_EV_SYS,
+		.code = GP_EV_SYS_CLIPBOARD,
+		.st = &events_state,
+	};
+
+	gp_widget_ops_event(widget, &dummy_ctx, &ev_paste);
+}
+
+/**
+ * @brief Sets backend for widget rendering.
+ *
+ * Allows to set widget backend. Does work only before backend was initialized
+ * by a call to gp_widgets_main_loop(). This function is useful only for testing.
+ *
+ * @backend A new backend.
+ */
+void gp_widgets_backend_set(gp_backend *backend);
+
+#endif /* TESTS_COMMON_H__ */
