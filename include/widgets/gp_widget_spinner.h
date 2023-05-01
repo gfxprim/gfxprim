@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_SLIDER_H
-#define GP_WIDGET_SLIDER_H
+#ifndef GP_WIDGET_SPINNER_H
+#define GP_WIDGET_SPINNER_H
 
 /**
  * @brief Allocate and initialize a slider widget.
@@ -15,10 +15,9 @@
  * @min Slider minimum.
  * @max Slider maximum.
  * @val Initial slider value.
- * @dir Slider direction.
  *
- * @return A slider widget.
+ * @return A spinner widget.
  */
-gp_widget *gp_widget_slider_new(int64_t min, int64_t max, int64_t val, int dir);
+gp_widget *gp_widget_spinner_new(int64_t min, int64_t max, int64_t val);
 
-#endif /* GP_WIDGET_SLIDER_H */
+#endif /* GP_WIDGET_SPINNER_H */

@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -15,24 +15,29 @@ enum gp_widget_int_flags {
 };
 
 struct gp_widget_int {
-	int min, max, val;
+	int64_t min;
+	int64_t max;
+	int64_t val;
+
 	int alert:1;
 	int dir:2;
 
 	char payload[];
 };
 
-static inline int gp_widget_int_val_get(gp_widget *self)
+static inline int64_t gp_widget_int_val_get(gp_widget *self)
 {
 	return self->i->val;
 }
 
-void gp_widget_int_set(gp_widget *self, int min, int max, int val);
+void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val);
 
-void gp_widget_int_val_set(gp_widget *self, int val);
+void gp_widget_int_val_set(gp_widget *self, int64_t val);
 
-void gp_widget_int_max_set(gp_widget *self, int max);
+void gp_widget_int_max_set(gp_widget *self, int64_t max);
 
-void gp_widget_int_min_set(gp_widget *self, int min);
+void gp_widget_int_min_set(gp_widget *self, int64_t min);
+
+void gp_widget_int_set_range(gp_widget *self, int64_t min, int64_t max);
 
 #endif /* GP_WIDGET_INT_H */

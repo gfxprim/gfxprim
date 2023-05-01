@@ -2,45 +2,46 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
+#include <inttypes.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
-static int check_val(int min, int max, int val)
-{
-	if (val < min || val > max) {
-		GP_WARN("Val %i outside of Min %i Max %i", val, min, max);
-		return 1;
-	}
+#define CHECK_VAL(self, type, min, max, val) ({ \
+		int gp_ret__ = (val) < (min) || (val) > (max); \
+		if (gp_ret__) { \
+			GP_WARN("Widget %s (%p) val %"PRIi64" outside of [%"PRIi64", %"PRIi64"]", \
+				type > 0 ? gp_widget_type_name(type) : "none", \
+				self, val, min, max); \
+		} \
+		gp_ret__; \
+})
 
-	return 0;
-}
-
-static int check_min_max(int min, int max)
-{
-	if (min > max) {
-		GP_WARN("Min %i > Max %i", min, max);
-		return 1;
-	}
-
-	return 0;
-}
+#define CHECK_RANGE(self, type, min, max) ({ \
+		int gp_ret__ = (min) > (max); \
+		if (gp_ret__) { \
+			GP_WARN("Widget %s (%p) min %"PRIi64" > max %"PRIi64, \
+				type > 0 ? gp_widget_type_name(type) : "none", \
+				self, min, max); \
+		} \
+		gp_ret__; \
+})
 
 static gp_widget *widget_int_new(enum gp_widget_type type,
-                                 int min, int max, int val)
+                                 int64_t min, int64_t max, int64_t val)
 {
 	gp_widget *ret;
 
-	if (check_min_max(min, max))
+	if (CHECK_RANGE(NULL, type, min, max))
 		return NULL;
 
-	if (check_val(min, max, val))
+	if (CHECK_VAL(NULL, type, min, max, val))
 		return NULL;
 
 	ret = gp_widget_new(type, GP_WIDGET_CLASS_INT, sizeof(struct gp_widget_int));
@@ -54,22 +55,17 @@ static gp_widget *widget_int_new(enum gp_widget_type type,
 	return ret;
 }
 
-void gp_widget_int_set(gp_widget *self, int min, int max, int val)
+void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
 
-	if (min > max) {
-		GP_WARN("Widget %s (%p) new min %i > new max %i",
-			gp_widget_type_name(self->type), self, min, max);
-		return;
-	}
-
-	if (val < min || val > max) {
-		GP_WARN("Widget %s (%p) val %i outside of min %i, max %i",
-			gp_widget_type_name(self->type), self, val, min, max);
-	}
-
 	if (self->i->min == min && self->i->max == max && self->i->val == val)
+		return;
+
+	if (CHECK_RANGE(self, self->type, min, max))
+		return;
+
+	if (CHECK_VAL(self, self->type, min, max, val))
 		return;
 
 	self->i->min = min;
@@ -80,11 +76,14 @@ void gp_widget_int_set(gp_widget *self, int min, int max, int val)
 	gp_widget_redraw(self);
 }
 
-void gp_widget_int_val_set(gp_widget *self, int val)
+void gp_widget_int_val_set(gp_widget *self, int64_t val)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
 
-	if (check_val(self->i->min, self->i->max, val))
+	if (self->i->val == val)
+		return;
+
+	if (CHECK_VAL(self, self->type, self->i->min, self->i->max, val))
 		return;
 
 	self->i->val = val;
@@ -94,42 +93,61 @@ void gp_widget_int_val_set(gp_widget *self, int val)
 }
 
 
-void gp_widget_int_max_set(gp_widget *self, int max)
+void gp_widget_int_max_set(gp_widget *self, int64_t max)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
 
-	if (max < self->i->min) {
-		GP_WARN("Widget %s (%p) max (%i) < min (%i)",
-			gp_widget_type_name(self->type), self,
-			max, self->i->min);
+	if (self->i->max == max)
 		return;
-	}
+
+	if (CHECK_RANGE(self, self->type, self->i->min, max))
+		return;
 
 	self->i->max = max;
 
 	if (self->i->val > max)
 		self->i->val = max;
 
+	//TODO: Event?
+
 	gp_widget_redraw(self);
 }
 
-void gp_widget_int_min_set(gp_widget *self, int min)
+void gp_widget_int_min_set(gp_widget *self, int64_t min)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
 
-	if (min > self->i->max) {
-		GP_WARN("Widget %s (%p) min (%i) > max (%i)",
-			gp_widget_type_name(self->type), self,
-			min, self->i->max);
+	if (self->i->min == min)
 		return;
-	}
+
+	if (CHECK_RANGE(self, self->type, min, self->i->max))
+		return;
 
 	self->i->min = min;
 
 	if (self->i->val < min)
 		self->i->val = min;
 
+	//TODO: Event?
+
 	gp_widget_redraw(self);
+}
+
+void gp_widget_int_range_set(gp_widget *self, int64_t min, int64_t max)
+{
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
+
+	if (self->i->min == min && self->i->max == max)
+		return;
+
+	if (CHECK_RANGE(self, self->type, min, max))
+		return;
+
+	self->i->min = min;
+	self->i->max = max;
+
+	self->i->val = GP_MIN(self->i->val, min);
+	self->i->val = GP_MAX(self->i->val, max);
 }
 
 enum keys {
@@ -154,7 +172,8 @@ static const gp_json_obj obj_filter = {
 static gp_widget *json_to_int(enum gp_widget_type type, gp_json_reader *json,
                               gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	int min = 0, max = 0, ival = 0, dir = 0, val_set = 0, min_set = 0, max_set = 0;
+	int64_t min = 0, max = 0, ival = 0;
+	int dir = 0, val_set = 0, min_set = 0, max_set = 0;
 	gp_widget *ret;
 
 	(void)ctx;
@@ -193,10 +212,10 @@ static gp_widget *json_to_int(enum gp_widget_type type, gp_json_reader *json,
 	if (!val_set)
 		ival = (max + min)/2;
 
-	if (check_min_max(min, max))
+	if (CHECK_RANGE(NULL, type, min, max))
 		return NULL;
 
-	if (check_val(min, max, ival))
+	if (CHECK_VAL(NULL, type, min, max, ival))
 		return NULL;
 
 	ret = gp_widget_new(type, GP_WIDGET_CLASS_INT, sizeof(struct gp_widget_int));
@@ -218,8 +237,8 @@ static unsigned int spin_buttons_width(const gp_widget_render_ctx *ctx)
 
 static unsigned int spin_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int min_digits = snprintf(NULL, 0, "%i", self->spin->min);
-	unsigned int max_digits = snprintf(NULL, 0, "%i", self->spin->max);
+	unsigned int min_digits = snprintf(NULL, 0, "%"PRIi64, self->spin->min);
+	unsigned int max_digits = snprintf(NULL, 0, "%"PRIi64, self->spin->max);
 
 	unsigned int ret = 2 * ctx->padd;
 
@@ -266,7 +285,7 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 
 	gp_print(ctx->buf, ctx->font, x + w - s - ctx->padd, y + ctx->padd,
 		 GP_ALIGN_LEFT | GP_VALIGN_BELOW,
-		 ctx->text_color, ctx->bg_color, "%i", spin->val);
+		 ctx->text_color, ctx->bg_color, "%"PRIi64, spin->val);
 
 
 	gp_coord rx = x + w - s;
@@ -418,7 +437,7 @@ struct gp_widget_ops gp_widget_spinner_ops = {
 	.id = "spinner",
 };
 
-gp_widget *gp_widget_spinner_new(int min, int max, int val)
+gp_widget *gp_widget_spinner_new(int64_t min, int64_t max, int64_t val)
 {
 	return widget_int_new(GP_WIDGET_SPINNER, min, max, val);
 }
@@ -612,7 +631,7 @@ struct gp_widget_ops gp_widget_slider_ops = {
 	.id = "slider",
 };
 
-gp_widget *gp_widget_slider_new(int min, int max, int val, int dir)
+gp_widget *gp_widget_slider_new(int64_t min, int64_t max, int64_t val, int dir)
 {
 	gp_widget *ret;
 

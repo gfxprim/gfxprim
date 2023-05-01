@@ -62,7 +62,7 @@ int slider_event(gp_widget_event *ev)
 	if (ev->type == GP_WIDGET_EVENT_NEW)
 		return 0;
 
-	printf("Slider value=%i\n", ev->self->slider->val);
+	printf("Slider value=%"PRIi64"\n", ev->self->slider->val);
 
 	return 0;
 }
