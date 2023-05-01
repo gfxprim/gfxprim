@@ -186,7 +186,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		.x = -area->x_off,
 		.y = -area->y_off,
 	};
-	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
+	gp_pixel text_color = ctx->text_color;
 
 	if (gp_widget_is_disabled(self, flags))
 		text_color = ctx->col_disabled;

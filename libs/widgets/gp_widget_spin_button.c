@@ -48,7 +48,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int s = buttons_width(ctx);
 	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
 	unsigned int sx = 2*sy;
-	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
+	gp_pixel text_color = ctx->text_color;
 
 	size_t sel = call_get_sel(self);
 	size_t cnt = call_get_cnt(self);
