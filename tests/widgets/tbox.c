@@ -1193,6 +1193,53 @@ static int tbox_clear_on_input_paste(void)
 	return TST_SUCCESS;
 }
 
+static int del_ev_handler(gp_widget_event *ev)
+{
+	int *flag = ev->self->priv;
+
+	if (ev->type == GP_WIDGET_EVENT_WIDGET &&
+	    ev->sub_type == GP_WIDGET_TBOX_EDIT) {
+		tst_msg("Got delete event");
+		*flag = 1;
+	}
+
+	return 0;
+}
+
+static int tbox_sel_cut(void)
+{
+	gp_widget *tbox;
+	int flag = 0;
+
+	gp_widgets_backend_set(&paste_backend);
+
+	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL,
+	                          0, del_ev_handler, &flag);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_sel_set(tbox, -2, GP_SEEK_END, 2);
+
+	state_press(GP_KEY_LEFT_CTRL);
+	send_keypress(tbox, GP_KEY_X);
+	state_release(GP_KEY_LEFT_CTRL);
+
+	if (!flag) {
+		tst_msg("Edit event not generated!");
+		return TST_FAILED;
+	}
+
+	if (strcmp(gp_widget_tbox_text(tbox), "hell")) {
+		tst_msg("Wrong tbox text after pasting 'world' '%s'",
+		        gp_widget_tbox_text(tbox));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "tbox testsuite",
 	.tests = {
@@ -1286,6 +1333,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "tbox clear on input paste",
 		 .tst_fn = tbox_clear_on_input_paste},
+
+		{.name = "tbox sel cut",
+		 .tst_fn = tbox_sel_cut},
 
 		{.name = NULL},
 	}

@@ -725,6 +725,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			case GP_KEY_X:
 				selection_to_clipboard(self);
 				if (sel_del(self)) {
+					send_edit_event(self);
 					gp_widget_redraw(self);
 					return 1;
 				}
