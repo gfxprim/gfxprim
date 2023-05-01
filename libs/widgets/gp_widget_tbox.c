@@ -75,7 +75,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	const char *str = tbox_visible_str(tbox);
 	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
 
 	if (gp_widget_is_disabled(self, flags))
@@ -91,6 +90,18 @@ static void render(gp_widget *self, const gp_offset *offset,
 	}
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, color);
+
+	if (!(*self->tbox->buf) && !self->focused) {
+		if (!self->tbox->help)
+			return;
+
+		gp_text_fit(ctx->buf, font, x + ctx->padd, y + ctx->padd,
+		            w - 2 * ctx->padd, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
+		            ctx->col_disabled, ctx->bg_color, self->tbox->help);
+		return;
+	}
+
+	const char *str = tbox_visible_str(tbox);
 
 	//TODO: Make this faster?
 	gp_utf8_pos left = gp_utf8_pos_min(tbox->off_left, tbox->cur_pos);
@@ -825,6 +836,7 @@ static enum gp_widget_tbox_type type_by_name(const char *type_name)
 }
 
 enum keys {
+	HELP,
 	LEN,
 	MAX_LEN,
 	SEL_DELIM,
@@ -834,6 +846,7 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("help", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("len", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("max_len", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("sel_delim", GP_JSON_STR),
@@ -849,7 +862,7 @@ static const gp_json_obj obj_filter = {
 
 static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	char *text = NULL, *sel_delim = NULL;
+	char *text = NULL, *sel_delim = NULL, *help = NULL;
 	int len = 0;
 	int max_len = 0;
 	gp_widget_tattr attr = 0;
@@ -860,6 +873,9 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
+		case HELP:
+			help = strdup(val->val_str);
+		break;
 		case LEN:
 			if (val->val_int <= 0)
 				gp_json_warn(json, "Invalid lenght!");
@@ -907,6 +923,8 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 			free(sel_delim);
 	}
 
+	ret->tbox->help = help;
+
 	free(text);
 
 	return ret;
@@ -915,6 +933,8 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 static void free_(gp_widget *self)
 {
 	gp_widgets_clipboard_request_cancel(self);
+
+	free(self->tbox->help);
 
 	gp_vec_free(self->tbox->buf);
 }
@@ -1289,6 +1309,15 @@ void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type)
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
 
 	set_type(self, type);
+}
+
+void gp_widget_tbox_help_set(gp_widget *self, const char *help)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	free(self->tbox->help);
+
+	self->tbox->help = help ? strdup(help) : NULL;
 }
 
 void gp_widget_tbox_clear_on_input(gp_widget *self)

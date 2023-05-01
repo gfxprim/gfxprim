@@ -28,6 +28,13 @@ enum gp_widget_tbox_type {
 };
 
 struct gp_widget_tbox {
+	/* Text buffer */
+	char *buf;
+	size_t size;
+
+	/* Help text shown when tbox is empty */
+	char *help;
+
 	/*
 	 * If not NULL the tbox can contain only characters from this
 	 * string, this is used as a hint when minimal tbox size is
@@ -57,9 +64,6 @@ struct gp_widget_tbox {
 	gp_utf8_pos cur_pos_saved;
 	/* Offset on left size, part of a string that is not shown */
 	gp_utf8_pos off_left;
-
-	size_t size;
-	char *buf;
 
 	/* Selection */
 	gp_utf8_pos sel_left;
@@ -320,6 +324,16 @@ void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim);
  * @type A tbox type.
  */
 void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type);
+
+/**
+ * @brief Sets textbox help text.
+ *
+ * Passing NULL as text will clear the help text.
+ *
+ * @self A tbox widget.
+ * @help An utf8 help text.
+ */
+void gp_widget_tbox_help_set(gp_widget *self, const char *help);
 
 /**
  * @brief Sets one time flag that clears the text on next input event.

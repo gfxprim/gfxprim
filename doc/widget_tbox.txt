@@ -64,6 +64,11 @@ link:widgets_events.html[widgets event].
 void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type);
 
 /*
+ * Sets textbox help text.
+ */
+void gp_widget_tbox_help_set(gp_widget *self, const char *help);
+
+/*
  * Returns textbox text.
  */
 const char *gp_widget_tbox_text(gp_widget *self);
@@ -174,6 +179,7 @@ NOTE: If textbox contains URL or Path the delimiters should be set by setting
 |===================================================
 | Attribute     |  Type  |   Default   | Description
 | text          | string |     ""      | Initial textbox text.
+| help          | string |     ""      | Help text shown when text is empty.
 | ttype         | string |    "none"   | A textbox type valid are:
                                          {"none", "hidden", "URL", "path", "filename"}
 | len           |  uint  |             | Number of characters the texbox should fit.
