@@ -544,11 +544,20 @@ static void selection_to_clipboard(gp_widget *self)
 	                         tbox->sel_right.bytes - tbox->sel_left.bytes);
 }
 
+static void clear_on_input(gp_widget *self)
+{
+	if (self->tbox->clear_on_input) {
+		self->tbox->clear_on_input = 0;
+		gp_widget_tbox_clear(self);
+	}
+}
+
 static void clipboard_event(gp_widget *self)
 {
 	char *clip;
 	uint32_t ch;
 
+	clear_on_input(self);
 	sel_del(self);
 
 	clip = gp_widgets_clipboard_get();
@@ -679,14 +688,6 @@ static int mouse_drag(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 	gp_widget_redraw(self);
 
 	return 1;
-}
-
-static void clear_on_input(gp_widget *self)
-{
-	if (self->tbox->clear_on_input) {
-		self->tbox->clear_on_input = 0;
-		gp_widget_tbox_clear(self);
-	}
 }
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
