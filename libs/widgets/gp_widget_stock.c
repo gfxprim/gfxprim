@@ -317,6 +317,37 @@ static void render_stock_settings(gp_pixmap *pix,
 	gp_fill_circle(pix, cx, cy, cc, ctx->fg_color);
 }
 
+static void render_stock_home(gp_pixmap *pix,
+                              gp_coord x, gp_coord y,
+                              gp_size w, gp_size h, gp_pixel bg_col,
+                              const gp_widget_render_ctx *ctx)
+{
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2 + h/2 - h/3;
+	gp_coord hh = h/2;
+	gp_coord hw = h/2;
+	gp_coord tw = w/3;
+	gp_coord th = h/3;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_coord poly[] = {
+		tw, -th/2,
+		hw, -th/2,
+		0, -hh-(hh-th),
+		-hw, -th/2,
+		-tw, -th/2,
+		-tw, th,
+		-tw/3, th,
+		-tw/3, th/3,
+		tw/3, th/3,
+		tw/3, th,
+		tw, th,
+	};
+
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+}
+
 static void render_stock_save(gp_pixmap *pix,
                               gp_coord x, gp_coord y,
                               gp_size w, gp_size h, gp_pixel bg_col,
@@ -1000,6 +1031,9 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	case GP_WIDGET_STOCK_SETTINGS:
 		render_stock_settings(pix, x, y, w, h, bg_col, ctx);
 	break;
+	case GP_WIDGET_STOCK_HOME:
+		render_stock_home(pix, x, y, w, h, bg_col, ctx);
+	break;
 	case GP_WIDGET_STOCK_SAVE:
 		render_stock_save(pix, x, y, w, h, bg_col, ctx);
 	break;
@@ -1113,6 +1147,7 @@ static struct stock_types {
 	{"hardware", GP_WIDGET_STOCK_HARDWARE},
 	{"software", GP_WIDGET_STOCK_SOFTWARE},
 	{"settings", GP_WIDGET_STOCK_SETTINGS},
+	{"home", GP_WIDGET_STOCK_HOME},
 	{"save", GP_WIDGET_STOCK_SAVE},
 	{"file", GP_WIDGET_STOCK_FILE},
 	{"dir", GP_WIDGET_STOCK_DIR},

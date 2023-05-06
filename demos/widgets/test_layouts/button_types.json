@@ -72,14 +72,14 @@
    {"type": "label", "text": "CANCEL"},
    {"type": "label", "text": "OPEN"},
    {"type": "label", "text": "SAVE"},
-   {"type": "label", "text": ""},
-   {"type": "label", "text": ""},
+   {"type": "label", "text": "RANDOMIZE"},
+   {"type": "label", "text": "HOME"},
    {"type": "button","btype": "ok", "align": "fill"},
    {"type": "button", "btype": "cancel", "align": "fill"},
    {"type": "button", "btype": "open", "align": "fill"},
    {"type": "button", "btype": "save", "align": "fill"},
    {"type": "button", "btype": "randomize", "align": "fill"},
-   {}
+   {"type": "button", "btype": "home", "align": "fill"}
   ]
  }
 }
