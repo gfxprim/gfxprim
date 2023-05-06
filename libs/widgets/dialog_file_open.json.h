@@ -5,13 +5,14 @@ static const char *dialog_file_open = "\
   \"rows\": 3, \n\
   \"widgets\": [ \n\
     { \n\
-      \"cols\": 2, \n\
+      \"cols\": 3, \n\
       \"halign\": \"fill\", \n\
       \"border\": \"none\", \n\
-      \"cfill\": \"0, 1\", \n\
+      \"cfill\": \"0, 1, 0\", \n\
       \"widgets\": [ \n\
         {\"type\": \"label\", \"text\": \"Directory:\"}, \n\
-        {\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"on_event\": \"path\", \"ttype\": \"path\"} \n\
+        {\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"on_event\": \"path\", \"ttype\": \"path\"}, \n\
+	{\"type\": \"button\", \"btype\": \"home\", \"on_event\": \"home\"} \n\
       ] \n\
     }, \n\
     { \n\

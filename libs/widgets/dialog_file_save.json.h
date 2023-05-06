@@ -5,14 +5,15 @@ static const char *dialog_file_save = "\
   \"rows\": 3, \n\
   \"widgets\": [ \n\
     { \n\
-      \"cols\": 3, \n\
+      \"cols\": 4, \n\
       \"halign\": \"fill\", \n\
       \"border\": \"none\", \n\
-      \"cfill\": \"0, 1, 0\", \n\
+      \"cfill\": \"0, 1, 0, 0\", \n\
       \"widgets\": [ \n\
 	{\"type\": \"label\", \"text\": \"Directory:\"}, \n\
 	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\", \"on_event\": \"path\"}, \n\
-	{\"type\": \"button\", \"btype\": \"new_dir\", \"label\": \"New dir\", \"on_event\": \"new_dir\"} \n\
+	{\"type\": \"button\", \"btype\": \"home\", \"on_event\": \"home\"}, \n\
+	{\"type\": \"button\", \"btype\": \"new_dir\", \"on_event\": \"new_dir\"} \n\
       ] \n\
     }, \n\
     {\"type\": \"table\", \"align\": \"fill\", \"min_rows\": 25, \"uid\": \"files\", \n\

@@ -4,14 +4,15 @@
   "rows": 3,
   "widgets": [
     {
-      "cols": 3,
+      "cols": 4,
       "halign": "fill",
       "border": "none",
-      "cfill": "0, 1, 0",
+      "cfill": "0, 1, 0, 0",
       "widgets": [
 	{"type": "label", "text": "Directory:"},
 	{"type": "tbox", "len": 75, "halign": "fill", "uid": "path", "ttype": "path", "on_event": "path"},
-	{"type": "button", "btype": "new_dir", "label": "New dir", "on_event": "new_dir"}
+	{"type": "button", "btype": "home", "on_event": "home"},
+	{"type": "button", "btype": "new_dir", "on_event": "new_dir"}
       ]
     },
     {"type": "table", "align": "fill", "min_rows": 25, "uid": "files",

@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -360,6 +360,20 @@ static int cancel_on_event(gp_widget_event *ev)
 	return 0;
 }
 
+static void set_path(struct file_dialog *dialog, const char *path)
+{
+	if (access(path, X_OK))
+		return;
+
+	gp_widget_tbox_printf(dialog->dir_path, "%s", path);
+
+	free_dir_cache(dialog);
+	dialog->file_table->tbl->priv = load_dir_cache(dialog);
+	if (dialog->filter)
+		gp_widget_tbox_clear(dialog->filter);
+	gp_widget_table_off_set(dialog->file_table, 0);
+}
+
 static void table_event(gp_widget *self)
 {
 	struct gp_widget_table *tbl = self->tbl;
@@ -386,20 +400,9 @@ static void table_event(gp_widget *self)
 
 	free(dpath);
 
-	if (access(dir, X_OK)) {
-		free(dir);
-		return;
-	}
-
-	gp_widget_tbox_printf(dialog->dir_path, "%s", dir);
+	set_path(dialog, dir);
 
 	free(dir);
-
-	free_dir_cache(dialog);
-	dialog->file_table->tbl->priv = load_dir_cache(self->priv);
-	if (dialog->filter)
-		gp_widget_tbox_clear(dialog->filter);
-	gp_widget_table_off_set(dialog->file_table, 0);
 }
 
 static inline int is_file_open(struct file_dialog *dialog)
@@ -625,11 +628,27 @@ static int path_on_event(gp_widget_event *ev)
 	return 0;
 }
 
+static int home_on_event(gp_widget_event *ev)
+{
+	struct file_dialog *dialog = ev->self->priv;
+
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	const char *home = getenv("HOME");
+
+	if (home)
+		set_path(dialog, home);
+
+	return 0;
+}
+
 static const gp_widget_json_addr addrs[] = {
 	{.id = "cancel", .on_event = cancel_on_event},
 	{.id = "file_table", .table_col_ops = &gp_dialog_files_col_ops},
 	{.id = "filename", .on_event = filename_on_event},
 	{.id = "filter", .on_event = filter_on_event},
+	{.id = "home", .on_event = home_on_event},
 	{.id = "new_dir", .on_event = new_dir_on_event},
 	{.id = "open", .on_event = open_on_event},
 	{.id = "path", .on_event = path_on_event},
