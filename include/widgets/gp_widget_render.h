@@ -26,7 +26,7 @@ struct gp_widget_render_ctx {
 
 	/* colors */
 	union {
-		gp_pixel colors[GP_WIDGETS_THEME_COLORS];
+		gp_pixel colors[GP_WIDGETS_THEME_COLORS + 16];
 		struct {
 			gp_pixel text_color;
 			gp_pixel fg_color;
@@ -41,12 +41,21 @@ struct gp_widget_render_ctx {
 			/* 16 colors */
 			gp_pixel black;
 			gp_pixel red;
-			gp_pixel yellow;
 			gp_pixel green;
+			gp_pixel yellow;
 			gp_pixel blue;
 			gp_pixel magenta;
 			gp_pixel cyan;
-		};
+			gp_pixel gray;
+			gp_pixel br_black;
+			gp_pixel br_red;
+			gp_pixel br_green;
+			gp_pixel br_yellow;
+			gp_pixel br_blue;
+			gp_pixel br_magenta;
+			gp_pixel br_cyan;
+			gp_pixel white;
+		} __attribute__((packed));
 	};
 
 	/* fonts */

@@ -88,15 +88,13 @@ static const char *color_names[] = {
 	[GP_WIDGETS_COL_WHITE] = "white",
 };
 
-static gp_pixel colors_16[16];
-
 #define RGB_TO_PIXEL(ctx, scheme, color_name, color_index) \
 	ctx.colors[color_index] = gp_rgb_to_pixmap_pixel((scheme)->color_name.r, \
 	                                                  (scheme)->color_name.g, \
 	                                                  (scheme)->color_name.b, (ctx).buf)
 
-#define RGB_TO_PIXEL2(ctx, pixels, color_index, r, g, b) \
-	pixels[color_index - GP_WIDGETS_THEME_COLORS] = gp_rgb_to_pixmap_pixel(r, g, b, (ctx).buf)
+#define RGB_TO_PIXEL2(ctx, color_index, r, g, b) \
+	ctx.colors[color_index] = gp_rgb_to_pixmap_pixel(r, g, b, (ctx).buf)
 
 enum gp_widgets_color gp_widgets_color_name_idx(const char *name)
 {
@@ -120,10 +118,7 @@ gp_pixel gp_widgets_color(const gp_widget_render_ctx *ctx, enum gp_widgets_color
 		return 0;
 	}
 
-	if (color < GP_WIDGETS_THEME_COLORS)
-		return ctx->colors[color];
-
-	return colors_16[color-GP_WIDGETS_THEME_COLORS];
+	return ctx->colors[color];
 }
 
 void __attribute__((visibility ("hidden"))) widgets_color_scheme_load(void)
@@ -157,22 +152,22 @@ void __attribute__((visibility ("hidden"))) widgets_color_scheme_load(void)
 	RGB_TO_PIXEL(ctx, scheme, disabled_color, GP_WIDGETS_COL_DISABLED);
 
 	/* 16 colors */
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BLACK, 0x00, 0x00, 0x00);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_RED, 0xcd, 0x00, 0x00);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_GREEN, 0x00, 0xcd, 0x00);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_YELLOW, 0xcd, 0xcd, 0x00);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BLUE, 0x00, 0x00, 0xee);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_MAGENTA, 0xcd, 0x00, 0xcd);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_CYAN, 0x00, 0xcd, 0xcd);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_GRAY, 0xe5, 0xe5, 0xe5);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BR_BLACK, 0x7f, 0x7f, 0x7f);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BR_RED, 0xff, 0x00, 0x00);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BR_GREEN, 0x00, 0xff, 0x00);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BR_YELLOW, 0xff, 0xff, 0x00);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BR_BLUE, 0x5c, 0x5c, 0xff);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BR_MAGENTA, 0xff, 0x00, 0xff);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BR_CYAN, 0x00, 0xff, 0xff);
-	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_WHITE, 0xff, 0xff, 0xff);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BLACK, 0x00, 0x00, 0x00);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_RED, 0xcd, 0x00, 0x00);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_GREEN, 0x00, 0xcd, 0x00);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_YELLOW, 0xcd, 0xcd, 0x00);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BLUE, 0x00, 0x00, 0xee);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_MAGENTA, 0xcd, 0x00, 0xcd);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_CYAN, 0x00, 0xcd, 0xcd);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_GRAY, 0xe5, 0xe5, 0xe5);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BR_BLACK, 0x7f, 0x7f, 0x7f);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BR_RED, 0xff, 0x00, 0x00);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BR_GREEN, 0x00, 0xff, 0x00);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BR_YELLOW, 0xff, 0xff, 0x00);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BR_BLUE, 0x5c, 0x5c, 0xff);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BR_MAGENTA, 0xff, 0x00, 0xff);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BR_CYAN, 0x00, 0xff, 0xff);
+	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_WHITE, 0xff, 0xff, 0xff);
 }
 
 static enum gp_widget_stock_type scheme_to_type(void)
