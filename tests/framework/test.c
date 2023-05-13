@@ -18,7 +18,7 @@ int success_fn(void)
 	tst_msg("This test does nothing");
 	tst_msg("But successfully");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 int sigsegv_fn(void)
@@ -42,7 +42,7 @@ int timeout_fn(void)
 {
 	tst_msg("Sleeping for ten seconds");
 	sleep(10);
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 int temp_dir_fn(void)
@@ -53,7 +53,7 @@ int temp_dir_fn(void)
 	res = getcwd(buf, sizeof(buf));
 	tst_msg("CWD is '%s'", res);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 int malloc_leak_fn(void)
@@ -71,7 +71,7 @@ int malloc_leak_fn(void)
 
 	tst_msg("Leaking 1 chunks 4 bytes total");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 int malloc_ok_fn(void)
@@ -90,7 +90,7 @@ int malloc_ok_fn(void)
 	for (i = 0; i < 20; i++)
 		free(p[perm[i]]);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 int double_free(void)
@@ -100,7 +100,7 @@ int double_free(void)
 	free(p);
 	free(p);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 int canary_allocation(void)
@@ -118,7 +118,7 @@ int canary_allocation(void)
 
 	tst_msg("This is not printed at all");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 int fail_FILE(void)
@@ -166,7 +166,7 @@ int fail_FILE(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int messages_test_fn(void)
@@ -179,7 +179,7 @@ static int messages_test_fn(void)
 	tst_warn("This is a warning");
 	tst_err("This is an error");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -206,7 +206,7 @@ static int res_fn(void)
 	if (access("test.c", R_OK) == 0)
 		tst_msg("File correctly copied");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int fpe_fn(void)
@@ -228,7 +228,7 @@ static int benchmark_fn(void)
 	for (i = 0; i < 4000000; i++)
 		memset(buf, i%100, sizeof(buf));
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

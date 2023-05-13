@@ -34,7 +34,7 @@ static int test_load_gif(const char *path)
 
 	gp_pixmap_free(img);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

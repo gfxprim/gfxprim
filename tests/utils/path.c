@@ -26,7 +26,7 @@ static int compose_path_01(void)
 
 	free(res);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int compose_path_02(void)
@@ -46,7 +46,7 @@ static int compose_path_02(void)
 
 	free(res);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int compose_path_03(void)
@@ -66,7 +66,7 @@ static int compose_path_03(void)
 
 	free(res);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int compose_path_04(void)
@@ -86,7 +86,7 @@ static int compose_path_04(void)
 
 	free(res);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int mkpath_01(void)
@@ -107,7 +107,7 @@ static int mkpath_01(void)
 
 	close(fd);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int mkpath_02(void)
@@ -128,7 +128,7 @@ static int mkpath_02(void)
 
 	close(fd);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int mkpath_03(void)
@@ -155,7 +155,7 @@ static int mkpath_03(void)
 
 	close(fd);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

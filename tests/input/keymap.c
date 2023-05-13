@@ -80,7 +80,7 @@ static int expect_char(gp_ev_queue *queue, uint32_t ch)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_keymap_shift_caps(void)
@@ -147,7 +147,7 @@ static int test_keymap_shift_caps(void)
 
 	gp_keymap_free(keymap);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_keymap_dead(void)
@@ -185,7 +185,7 @@ static int test_keymap_dead(void)
 
 	gp_keymap_free(keymap);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

@@ -110,7 +110,7 @@ static int save_load(enum fmt fmt, gp_size w, gp_size h)
 	gp_pixmap_free(img);
 	gp_pixmap_free(res);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_png_Save_Load(void)
@@ -164,7 +164,7 @@ static int load_enoent(enum fmt fmt)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_png_Load_ENOENT(void)
@@ -226,7 +226,7 @@ static int load_eacces(enum fmt fmt)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_png_Load_EACCES(void)
@@ -283,7 +283,7 @@ static int load_eio(enum fmt fmt)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_png_Load_EIO(void)
@@ -341,7 +341,7 @@ static int test_png_Save_abort(void)
 
 	gp_pixmap_free(img);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_png_Load_abort(void)
@@ -380,7 +380,7 @@ static int test_png_Load_abort(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 
@@ -533,7 +533,7 @@ static int test_Load(void)
 		return TST_FAILED;
 
 	if (success)
-		return TST_SUCCESS;
+		return TST_PASSED;
 
 	return TST_SKIPPED;
 }
@@ -561,7 +561,7 @@ static int test_load_bmp(const char *path)
 
 	gp_pixmap_free(img);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /* Basic loading tests */
@@ -628,7 +628,7 @@ static int test_load_JPEG(const char *path)
 	 */
 	gp_pixmap_free(img);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_load_JPEG_100x100(void)

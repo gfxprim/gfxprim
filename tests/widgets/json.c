@@ -26,7 +26,7 @@ static int invalid_empty(struct tcase *t)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int ev_type;
@@ -97,7 +97,7 @@ static int load_json(struct tcase *t)
 	gp_widget_free(ret);
 	gp_htable_free(uids);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct tcase missing_info = {

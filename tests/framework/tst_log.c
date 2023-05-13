@@ -16,7 +16,7 @@
 static const char *ret_to_str(enum tst_ret ret)
 {
 	switch (ret) {
-	case TST_SUCCESS:
+	case TST_PASSED:
 		return "Success";
 	case TST_SKIPPED:
 		return "Skipped";

@@ -32,7 +32,7 @@ static int json_finalize_err_obj(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int json_finalize_err_arr(void)
@@ -49,7 +49,7 @@ static int json_finalize_err_arr(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int json_obj_add_without_id(void)
@@ -71,7 +71,7 @@ static int json_obj_add_without_id(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int json_arr_add_with_id(void)
@@ -93,7 +93,7 @@ static int json_arr_add_with_id(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int json_add_without_obj_arr(void)
@@ -110,7 +110,7 @@ static int json_add_without_obj_arr(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

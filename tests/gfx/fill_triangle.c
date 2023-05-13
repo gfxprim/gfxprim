@@ -54,7 +54,7 @@ static int test_fill_triangle(const struct testcase *t)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct testcase triangle_point = {

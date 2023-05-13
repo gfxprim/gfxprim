@@ -45,7 +45,7 @@ static int test_rect(const struct testcase *t)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 struct testcase testcase_rect_1 = {

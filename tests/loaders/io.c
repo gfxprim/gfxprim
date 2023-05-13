@@ -207,7 +207,7 @@ static int do_test(gp_io *io, off_t io_size, int is_file)
 	if (failed)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_IOMem(void)
@@ -238,7 +238,7 @@ static int test_IOMem(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 #define TFILE "test.io"
@@ -292,7 +292,7 @@ static int test_IOFile(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_IOSubIO(void)
@@ -359,7 +359,7 @@ static int test_IOSubIO(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 failed:
 	gp_io_close(io);
 	gp_io_close(pio);
@@ -405,7 +405,7 @@ static int try_IOFill_and_check(gp_io *io, unsigned int size)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_IOFill(void)
@@ -421,7 +421,7 @@ static int test_IOFill(void)
 	if (ret)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static size_t counter;
@@ -467,7 +467,7 @@ static int test_IOFlush(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static ssize_t wbuf_write(gp_io GP_UNUSED(*io), const void *buf, size_t size)
@@ -528,7 +528,7 @@ static int test_IOWBuffer(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

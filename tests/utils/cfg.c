@@ -28,7 +28,7 @@ static int cfg_path(void)
 
 	free(cfg_path);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int cfg_mkpath(void)
@@ -51,7 +51,7 @@ static int cfg_mkpath(void)
 
 	close(fd);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

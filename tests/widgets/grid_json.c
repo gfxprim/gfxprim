@@ -116,7 +116,7 @@ static int grid_json_load(struct tcase *t)
 
 	gp_widget_free(grid);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct tcase grid_0x0 = {

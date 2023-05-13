@@ -118,7 +118,7 @@ static int json_write_read_struct(void)
 	COMPARE_INT(ser.i64, des.i64, "i64");
 	COMPARE_INT(ser.u64, des.u64, "u64");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 
@@ -141,7 +141,7 @@ static int json_read_missing_struct(void)
 	int ret = gp_json_read_struct(&reader, &val, opt_i16_desc, &des);
 	if (ret) {
 		tst_msg("Failed to read strucure as expected");
-		return TST_SUCCESS;
+		return TST_PASSED;
 	}
 
 	return TST_FAILED;
@@ -165,7 +165,7 @@ static int json_read_opt_struct(void)
 
 	COMPARE_INT(42, des.i32, "i32");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

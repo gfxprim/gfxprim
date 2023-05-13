@@ -37,7 +37,7 @@ struct clipped_test {
 
 static int clipped_test(struct clipped_test *test)
 {
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 	gp_pixmap *src, *dst;
 
 	src = gp_pixmap_alloc(test->src_w, test->src_h, GP_PIXEL_G8);

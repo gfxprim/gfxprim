@@ -26,7 +26,7 @@ static int grid_new_free(void)
 
 	gp_widget_free(grid);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int grid_free_children(void)
@@ -47,7 +47,7 @@ static int grid_free_children(void)
 
 	gp_widget_free(grid);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int grid_ins_rem_rows(void)
@@ -135,7 +135,7 @@ static int grid_ins_rem_rows(void)
 
 	gp_widget_free(grid);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int grid_ins_rem_cols(void)
@@ -223,7 +223,7 @@ static int grid_ins_rem_cols(void)
 
 	gp_widget_free(grid);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int grid_put_get_rem_del(void)
@@ -290,7 +290,7 @@ static int grid_put_get_rem_del(void)
 
 	gp_widget_free(grid);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int check_hborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
@@ -309,7 +309,7 @@ static int check_hborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int check_vborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
@@ -328,7 +328,7 @@ static int check_vborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int check_border(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
@@ -339,7 +339,7 @@ static int check_border(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 	if (check_hborder(grid, exp_padd, exp_fill))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int grid_border_check_set(void)
@@ -393,7 +393,7 @@ static int grid_border_check_set(void)
 	if (check_hborder(grid, 2, 1))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

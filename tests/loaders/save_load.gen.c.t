@@ -24,7 +24,7 @@ static int test(Save Saver, Load Loader, gp_pixel_type pixel_type)
 	gp_pixmap *src;
 	gp_pixmap *res;
 	unsigned int x, y;
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	src = gp_pixmap_alloc(100, 100, pixel_type);
 

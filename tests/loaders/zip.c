@@ -21,7 +21,7 @@ static int test_load(struct test *test)
 {
 	gp_container *zip = gp_open_zip(test->path);
 	gp_pixmap *img;
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	if (!zip) {
 		if (errno == ENOSYS) {
@@ -82,7 +82,7 @@ static int no_images(const char *path)
 {
 	gp_container *zip = gp_open_zip(path);
 	gp_pixmap *img;
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	if (!zip) {
 		if (errno == ENOSYS) {

@@ -40,7 +40,7 @@ static int time_stamp_monotonicity(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

@@ -58,7 +58,7 @@ static int test_mirror_h(struct testcase *t)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 struct testcase testcase_1x1 = {
@@ -202,7 +202,7 @@ static int test_abort(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int all_pixels(void)
@@ -225,7 +225,7 @@ static int all_pixels(void)
 		gp_pixmap_free(c);
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

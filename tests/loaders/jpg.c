@@ -38,7 +38,7 @@ static int test_load_jpg(const char *path)
 
 	gp_pixmap_free(img);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_save_jpg(gp_pixel_type pixel_type)
@@ -60,7 +60,7 @@ static int test_save_jpg(gp_pixel_type pixel_type)
 	if (ret == 0) {
 		tst_msg("Saved successfully");
 		gp_pixmap_free(pixmap);
-		return TST_SUCCESS;
+		return TST_PASSED;
 	}
 
 	switch (errno) {

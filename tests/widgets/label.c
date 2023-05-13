@@ -38,7 +38,7 @@ static int label_new_free(void)
 
 	gp_widget_free(label);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int label_printf_new_free(void)
@@ -71,7 +71,7 @@ static int label_printf_new_free(void)
 
 	gp_widget_free(label);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int label_append_set_printf(void)
@@ -121,7 +121,7 @@ static int label_append_set_printf(void)
 
 	gp_widget_free(label);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int label_tattr_set(void)
@@ -152,7 +152,7 @@ static int label_tattr_set(void)
 
 	gp_widget_free(label);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

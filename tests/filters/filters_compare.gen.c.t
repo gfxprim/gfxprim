@@ -188,7 +188,7 @@ static int compare_{{ fs[0] }}(gp_pixel_type pt)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 @ end

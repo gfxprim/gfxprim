@@ -224,11 +224,11 @@ static int filter_{{ fn[0] }}_{{ fn[1] }}(gp_pixel_type pt)
 		switch (errno) {
 		case ENOSYS:
 			tst_msg("Not Implemented");
-			return TST_SUCCESS;
+			return TST_PASSED;
 		break;
 		case EINVAL:
 			tst_msg("Not suitable pixel type");
-			return TST_SUCCESS;
+			return TST_PASSED;
 		break;
 		default:
 			tst_msg("Unexpected errno %s", strerror(errno));
@@ -236,7 +236,7 @@ static int filter_{{ fn[0] }}_{{ fn[1] }}(gp_pixel_type pt)
 		}
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 @ end
 @

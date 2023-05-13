@@ -20,7 +20,7 @@ static int button_new_free(void)
 
 	gp_widget_free(button);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int ev_handler(gp_widget_event *ev)
@@ -50,7 +50,7 @@ static int button_event_key(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

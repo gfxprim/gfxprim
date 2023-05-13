@@ -47,7 +47,7 @@ static int DEBUG_preserves_errno(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

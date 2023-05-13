@@ -77,7 +77,7 @@ static int Pixmap_Alloc_Free(void)
 
 	gp_pixmap_free(c);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -161,7 +161,7 @@ static int SubPixmap_Alloc_Free(void)
 	gp_pixmap_free(c);
 	gp_pixmap_free(sc);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int SubPixmap_Create(void)
@@ -185,7 +185,7 @@ static int SubPixmap_Create(void)
 
 	gp_pixmap_free(c);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int pixmap_zero_w(void)
@@ -204,7 +204,7 @@ static int pixmap_zero_w(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int pixmap_zero_h(void)
@@ -223,7 +223,7 @@ static int pixmap_zero_h(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int pixmap_invalid_pixeltype1(void)
@@ -242,7 +242,7 @@ static int pixmap_invalid_pixeltype1(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int pixmap_invalid_pixeltype2(void)
@@ -261,7 +261,7 @@ static int pixmap_invalid_pixeltype2(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int pixmap_from_data(void)
@@ -288,7 +288,7 @@ static int pixmap_from_data(void)
 	}
 
 	gp_pixmap_free(p);
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int pixmap_from_static_data(void)
@@ -306,7 +306,7 @@ static int pixmap_from_static_data(void)
 	}
 
 	gp_pixmap_free(p);
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

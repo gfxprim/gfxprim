@@ -94,7 +94,7 @@ static int test_load_ico(struct testcase *test)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct testcase ico_png_8x8 = {

@@ -20,7 +20,7 @@ static int file_save_new_free(void)
 
 	gp_dialog_free(file_save);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int file_open_new_free(void)
@@ -35,7 +35,7 @@ static int file_open_new_free(void)
 
 	gp_dialog_free(file_open);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int file_open(void)
@@ -74,7 +74,7 @@ static int file_open(void)
 
 	gp_dialog_free(file_open);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int file_save(void)
@@ -112,7 +112,7 @@ static int file_save(void)
 
 	gp_dialog_free(file_save);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

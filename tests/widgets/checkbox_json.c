@@ -48,7 +48,7 @@ static int checkbox_json_load(struct tcase *t)
 
 	gp_widget_free(checkbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct tcase checkbox = {

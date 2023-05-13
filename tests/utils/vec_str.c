@@ -30,7 +30,7 @@ static int test_printf(void)
 
 	gp_vec_free(str);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

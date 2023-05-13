@@ -7,7 +7,7 @@
 #define TST_TEST_H
 
 enum tst_ret {
-	TST_SUCCESS,  /* Test succedded                                    */
+	TST_PASSED,   /* Test succedded                                    */
 	TST_SKIPPED,  /* Test skipped due to not enough memory, ENOSYS ... */
 	TST_UNTESTED, /* Test not finished because of failure              */
 	TST_INTERR,   /* Test framework error, do not use                  */

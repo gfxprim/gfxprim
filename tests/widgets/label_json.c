@@ -53,7 +53,7 @@ static int label_json_load(struct tcase *t)
 
 	gp_widget_free(label);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct tcase label = {

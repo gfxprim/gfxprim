@@ -27,7 +27,7 @@ static int test(Save Saver, gp_pixel_type pixel_type)
 {
 	gp_pixmap *src;
 	gp_progress_cb callback ={.callback = progress_callback};
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	src = gp_pixmap_alloc(100, 100, pixel_type);
 

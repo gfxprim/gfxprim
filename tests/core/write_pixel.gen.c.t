@@ -48,7 +48,7 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
 			return TST_FAILED;                    \
 		}                                             \
 	                                                      \
-	return TST_SUCCESS;                                   \
+	return TST_PASSED;                                   \
 } while (0)
 
 @ for pixelsize in [8, 16, 24, 32]:

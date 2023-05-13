@@ -65,7 +65,7 @@ static int check_convert_{{ i }}_{{ j }}(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 @ endfor

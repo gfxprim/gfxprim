@@ -89,7 +89,7 @@ static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 	if (check_filled(dst, pix_dst))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 @ def blit_color(name, r, g, b):

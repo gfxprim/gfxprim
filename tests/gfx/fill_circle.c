@@ -44,7 +44,7 @@ static int test_circle(const struct testcase *t)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 struct testcase testcase_circle_r_0 = {

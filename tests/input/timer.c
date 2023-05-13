@@ -55,7 +55,7 @@ static int callback_is_called(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 #define MAX 2048
@@ -99,7 +99,7 @@ static int expirations_sorted(void)
 	if (monotonicity_failed)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int process_with_NULL_head(void)
@@ -111,7 +111,7 @@ static int process_with_NULL_head(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -171,7 +171,7 @@ static int periodic_timers(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -196,7 +196,7 @@ static int rem_regression(void)
 
 	tst_msg("Timer removed correctly");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

@@ -28,7 +28,7 @@ static int frame_new_free(void)
 
 	gp_widget_free(frame);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

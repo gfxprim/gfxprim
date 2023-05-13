@@ -28,7 +28,7 @@ static int tbox_new(void)
 
 	gp_widget_free(tbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int ev_handler(gp_widget_event *ev)
@@ -61,7 +61,7 @@ static int tbox_event_action(void)
 	send_keypress(tbox, GP_KEY_ENTER);
 
 	if (flag)
-		return TST_SUCCESS;
+		return TST_PASSED;
 
 	return TST_FAILED;
 }
@@ -128,7 +128,7 @@ static int tbox_typing(void)
 
 	gp_widget_free(tbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -179,7 +179,7 @@ static int tbox_cursor(void)
 
 	gp_widget_free(tbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -237,7 +237,7 @@ static int tbox_ins(void)
 
 	gp_widget_free(tbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -287,7 +287,7 @@ static int tbox_del(void)
 
 	gp_widget_free(tbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -322,7 +322,7 @@ static int tbox_printf(void)
 
 	gp_widget_free(tbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_set(void)
@@ -354,7 +354,7 @@ static int tbox_set(void)
 
 	gp_widget_free(tbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_sel_all(void)
@@ -391,7 +391,7 @@ static int tbox_sel_all(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_sel_set(void)
@@ -428,7 +428,7 @@ static int tbox_sel_set(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -473,7 +473,7 @@ static int tbox_sel_del(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -513,7 +513,7 @@ static int tbox_sel_keys_ascii(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int sel_whole_left(gp_widget *tbox)
@@ -531,7 +531,7 @@ static int sel_whole_left(gp_widget *tbox)
 
 	tst_msg("Selecting whole buffer from left");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int sel_whole_right(gp_widget *tbox)
@@ -549,7 +549,7 @@ static int sel_whole_right(gp_widget *tbox)
 
 	tst_msg("Selecting whole buffer from right");
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int check_cleared(gp_widget *tbox, const char *op, size_t cur_pos)
@@ -568,7 +568,7 @@ static int check_cleared(gp_widget *tbox, const char *op, size_t cur_pos)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int check_selected(gp_widget *tbox, const char *op, size_t sel_off, size_t sel_len)
@@ -589,7 +589,7 @@ static int check_selected(gp_widget *tbox, const char *op, size_t sel_off, size_
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -630,7 +630,7 @@ static int tbox_sel_keys_clear(void)
 	if (check_cleared(tbox, "gp_widget_tbox_cursor_set()", 5))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -666,7 +666,7 @@ static int tbox_sel_change_clear(void)
 	if (check_cleared(tbox, "gp_widget_tbox_clear()", 0))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -745,7 +745,7 @@ static int tbox_sel_keys_clear_end(void)
 	if (check_cleared(tbox, "KEY_END", 11))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -779,7 +779,7 @@ static int tbox_sel_key_del_backspace(int key)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_sel_key_del(void)
@@ -826,7 +826,7 @@ static int tbox_sel_key_forth_back(void)
 	if (check_cleared(tbox, "KEY_LEFT", cursor))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -855,7 +855,7 @@ static int tbox_sel_key_left_end(void)
 	if (check_selected(tbox, "KEY_END", cursor, 6))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -883,7 +883,7 @@ static int tbox_sel_key_left_home(void)
 	if (check_selected(tbox, "KEY_HOME", 0, cursor))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -912,7 +912,7 @@ static int tbox_sel_key_right_home(void)
 	if (check_selected(tbox, "KEY_HOME", 0, 5))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -940,7 +940,7 @@ static int tbox_sel_key_right_end(void)
 	if (check_selected(tbox, "KEY_END", cursor, 6))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -968,7 +968,7 @@ static int tbox_sel_ctrl_a_esc(void)
 	if (check_cleared(tbox, "KEY_ESC", 11))
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /*
@@ -1025,7 +1025,7 @@ static int tbox_hidden_no_sel(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_utf_del(void)
@@ -1047,7 +1047,7 @@ static int tbox_utf_del(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_utf_del_key(void)
@@ -1071,7 +1071,7 @@ static int tbox_utf_del_key(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_utf_backspace_key(void)
@@ -1094,7 +1094,7 @@ static int tbox_utf_backspace_key(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int clip_handler(gp_backend *self, gp_clipboard *op)
@@ -1138,7 +1138,7 @@ static int tbox_paste(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_sel_paste(void)
@@ -1164,7 +1164,7 @@ static int tbox_sel_paste(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int tbox_clear_on_input_paste(void)
@@ -1190,7 +1190,7 @@ static int tbox_clear_on_input_paste(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int del_ev_handler(gp_widget_event *ev)
@@ -1237,7 +1237,7 @@ static int tbox_sel_cut(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

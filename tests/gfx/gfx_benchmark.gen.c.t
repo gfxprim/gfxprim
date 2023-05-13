@@ -21,7 +21,7 @@ static int bench_line(gp_pixel_type type)
 		        800 - i%200, 600 + i%200, i % 0xff);
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int bench_line_th(gp_pixel_type type)
@@ -40,7 +40,7 @@ static int bench_line_th(gp_pixel_type type)
 		        800 - i%200, 600 + i%200, i%5, i % 0xff);
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int bench_circle(gp_pixel_type type)
@@ -57,7 +57,7 @@ static int bench_circle(gp_pixel_type type)
 	for (i = 0; i < 10000; i++)
 		gp_circle(img, img->w/2, img->h/2, i % 1000, i%0xff);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int bench_circle_seg(gp_pixel_type type)
@@ -74,7 +74,7 @@ static int bench_circle_seg(gp_pixel_type type)
 	for (i = 0; i < 10000; i++)
 		gp_circle_seg(img, img->w/2, img->h/2, i % 1000, 0xff, i%0xff);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int bench_fill_circle(gp_pixel_type type)
@@ -91,7 +91,7 @@ static int bench_fill_circle(gp_pixel_type type)
 	for (i = 0; i < 1000; i++)
 		gp_fill_circle(img, img->w/2, img->h/2, i/2, i%0xff);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int bench_fill_polygon_4(gp_pixel_type type)
@@ -115,7 +115,7 @@ static int bench_fill_polygon_4(gp_pixel_type type)
 		gp_fill_polygon(img, 0, 0, 4, poly, i%0xff);
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int bench_fill_polygon_9(gp_pixel_type type)
@@ -145,7 +145,7 @@ static int bench_fill_polygon_9(gp_pixel_type type)
 		gp_fill_polygon(img, 0, 0, 9, poly, i%0xff);
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int bench_fill_polygon_17(gp_pixel_type type)
@@ -183,7 +183,7 @@ static int bench_fill_polygon_17(gp_pixel_type type)
 		gp_fill_polygon(img, 0, 0, 17, poly, i%0xff);
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 @ bpps = [["1BPP", "GP_PIXEL_G1"],

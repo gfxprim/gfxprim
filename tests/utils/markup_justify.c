@@ -53,7 +53,7 @@ static int markup_justify(struct markup_tcase *tcase)
 	if (failed)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct gp_markup single_newline_markup = {

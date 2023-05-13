@@ -20,7 +20,7 @@ static int checkbox_new_free(void)
 
 	gp_widget_free(chbox);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int ev_handler(gp_widget_event *ev)
@@ -60,7 +60,7 @@ static int checkbox_event_set(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int checkbox_event_toggle(void)
@@ -100,7 +100,7 @@ static int checkbox_event_toggle(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int checkbox_event_key(void)
@@ -122,7 +122,7 @@ static int checkbox_event_key(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

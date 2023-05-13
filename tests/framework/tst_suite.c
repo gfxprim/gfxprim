@@ -27,14 +27,14 @@ static void test_job_report(const struct tst_job *job)
 	int sec, nsec;
 	const char *result = "";
 
-	if ((job->result == TST_SUCCESS || job->result == TST_SKIPPED)
+	if ((job->result == TST_PASSED || job->result == TST_SKIPPED)
 	    && !tst_suite_verbose)
 		return;
 
 	timespec_diff(&sec, &nsec, &job->start_time, &job->stop_time);
 
 	switch (job->result) {
-	case TST_SUCCESS:
+	case TST_PASSED:
 		result = "[    \e[1;32mSUCCESS\e[0m     ]";
 	break;
 	case TST_SKIPPED:

@@ -24,7 +24,7 @@ static int render_text(gp_text_style *style)
 
 	gp_pixmap_free(buf);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int render_text_1bpp(void)

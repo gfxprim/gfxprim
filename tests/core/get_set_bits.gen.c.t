@@ -42,7 +42,7 @@ static int getbits_{{ off }}_{{ len }}(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 @ end
@@ -78,7 +78,7 @@ static int setbits_{{ off }}_{{ len }}(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 @ end

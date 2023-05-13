@@ -91,7 +91,7 @@ static inline int compare_pixmaps(gp_pixmap *p1, gp_pixmap *p2)
 		}
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 #endif /* COMPARE_H__ */

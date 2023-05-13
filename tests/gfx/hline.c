@@ -53,7 +53,7 @@ static int test_hline(struct testcase *t)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct testcase testcase_1_px = {

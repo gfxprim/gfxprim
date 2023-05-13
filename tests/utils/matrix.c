@@ -52,7 +52,7 @@ static int test_matrix(void)
 
 	gp_matrix_free(matrix);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 struct insert_test {
@@ -129,7 +129,7 @@ static int test_matrix_insert(struct insert_test *tst)
 	}
 
 	if (tst->fail)
-		return TST_SUCCESS;
+		return TST_PASSED;
 
 	if (gp_vec_len(matrix) != rows * cols) {
 		tst_msg("Invalid matrix lenght after insert %zu expected %zu",
@@ -203,7 +203,7 @@ static int test_matrix_insert(struct insert_test *tst)
 
 	gp_matrix_free(matrix);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct insert_test test_start = {

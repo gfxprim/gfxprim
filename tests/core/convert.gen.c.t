@@ -139,7 +139,7 @@ static int convert_and_check_{{ test_name }}_{{ in_name }}_to_{{ out_name }}(voi
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 @ end

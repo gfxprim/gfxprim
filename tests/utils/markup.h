@@ -25,7 +25,7 @@ static int markup_cmp(gp_markup_glyph *g1, gp_markup_glyph *g2)
 		}
 
 		if (!g1[i].glyph)
-			return TST_SUCCESS;
+			return TST_PASSED;
 
 		if (g1[i].fmt != g2[i].fmt) {
 			tst_msg("%03zu: Text format mismatch %02x != %02x",
@@ -58,5 +58,5 @@ static int markup_parse(enum gp_markup_fmt fmt, struct markup_tcase *tcase)
 
 	gp_markup_free(markup);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }

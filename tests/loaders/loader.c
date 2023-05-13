@@ -51,7 +51,7 @@ static int register_max_loaders(void)
 	for (i = 0; i < cnt; i++)
 		gp_loader_unregister(&dummy_loaders[cnt - i - 1]);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int register_loader_twice(void)
@@ -73,7 +73,7 @@ static int register_loader_twice(void)
 		}
 
 		tst_msg("Second attempt to register loader fails with EEXIST");
-		ret = TST_SUCCESS;
+		ret = TST_PASSED;
 		goto exit;
 	}
 
@@ -123,7 +123,7 @@ static int loader_by_extension(void)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

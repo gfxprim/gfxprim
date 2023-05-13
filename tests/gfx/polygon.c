@@ -62,7 +62,7 @@ static int test_polygon(struct testcase *t)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 struct testcase testcase_1_edge = {

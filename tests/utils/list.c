@@ -203,7 +203,7 @@ int list_test(void)
 	}
 
 	tst_msg("List test passed");
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 struct dlist_item {
@@ -362,7 +362,7 @@ int dlist_test(void)
 	}
 
 	tst_msg("List test passed");
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

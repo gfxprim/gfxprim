@@ -143,7 +143,7 @@ static int json_read_write_test(const char *fname)
 	gp_json_reader_free(reader);
 	gp_json_writer_vec_free(writer);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

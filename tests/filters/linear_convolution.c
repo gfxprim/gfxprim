@@ -24,7 +24,7 @@ static int load_resources(const char *path1, const char *path2,
 		return TST_UNTESTED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_lin_conv_box_3x3(void)
@@ -34,7 +34,7 @@ static int test_lin_conv_box_3x3(void)
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);
 
-	if (ret != TST_SUCCESS)
+	if (ret != TST_PASSED)
 		return ret;
 
 	/* Apply the convolution */
@@ -59,7 +59,7 @@ static int test_lin_conv_box_3x3(void)
 	/* Check result */
 	//TODO
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_h_lin_conv_box_3_raw(void)
@@ -69,7 +69,7 @@ static int test_h_lin_conv_box_3_raw(void)
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);
 
-	if (ret != TST_SUCCESS)
+	if (ret != TST_PASSED)
 		return ret;
 
 	/* Apply the convolution */
@@ -84,7 +84,7 @@ static int test_h_lin_conv_box_3_raw(void)
 	/* Check result */
 	//TODO
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_v_lin_conv_box_3_raw(void)
@@ -94,7 +94,7 @@ static int test_v_lin_conv_box_3_raw(void)
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);
 
-	if (ret != TST_SUCCESS)
+	if (ret != TST_PASSED)
 		return ret;
 
 	/* Apply the convolution */
@@ -109,7 +109,7 @@ static int test_v_lin_conv_box_3_raw(void)
 	/* Check result */
 	//TODO
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

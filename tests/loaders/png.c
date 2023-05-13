@@ -38,7 +38,7 @@ static int test_load_PNG(const char *path)
 
 	gp_pixmap_free(img);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 struct check_color_test {
@@ -88,7 +88,7 @@ static int test_load_PNG_check_color(struct check_color_test *test)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct check_color_test white_adam7 = {
@@ -125,7 +125,7 @@ static int test_save_PNG(gp_pixel_type pixel_type)
 	if (ret == 0) {
 		tst_msg("Saved successfully");
 		gp_pixmap_free(pixmap);
-		return TST_SUCCESS;
+		return TST_PASSED;
 	}
 
 	switch (errno) {

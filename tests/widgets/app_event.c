@@ -27,7 +27,7 @@ static int app_no_on_event(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int app_event_free(void)
@@ -42,7 +42,7 @@ static int app_event_free(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int app_event_free_masked(void)
@@ -58,7 +58,7 @@ static int app_event_free_masked(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int app_event_input(void)
@@ -73,7 +73,7 @@ static int app_event_input(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int app_event_input_unmasked(void)
@@ -89,7 +89,7 @@ static int app_event_input_unmasked(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

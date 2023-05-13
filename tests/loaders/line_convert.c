@@ -34,7 +34,7 @@ static int xRGB_to_BGR_jpg(void)
 {
 	gp_pixmap *src, *res;
 	unsigned int x;
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	src = gp_pixmap_alloc(GP_ARRAY_SIZE(colors)*MUL, 1, GP_PIXEL_xRGB8888);
 

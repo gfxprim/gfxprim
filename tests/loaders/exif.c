@@ -19,7 +19,7 @@ static int test_load_Exif(struct testcase *test)
 {
 	gp_storage *data = gp_storage_create();
 	gp_io *io;
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	if (!data) {
 		tst_msg("Failed to create DataStorage");

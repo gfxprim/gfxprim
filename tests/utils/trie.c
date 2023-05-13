@@ -63,7 +63,7 @@ static int trie_lookup(void)
 
 	gp_trie_free(root, NULL);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int trie_inner_del(void)
@@ -89,7 +89,7 @@ static int trie_inner_del(void)
 
 	gp_trie_free(root, NULL);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int trie_outer_del(void)
@@ -121,7 +121,7 @@ static int trie_outer_del(void)
 
 	gp_trie_free(root, NULL);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int trie_nonexist_del(void)
@@ -136,7 +136,7 @@ static int trie_nonexist_del(void)
 
 	gp_trie_free(root, NULL);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int trie_del_all(void)
@@ -178,7 +178,7 @@ static int trie_del_all(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

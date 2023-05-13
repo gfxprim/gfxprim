@@ -52,7 +52,7 @@ static int radiobutton_json_load(struct tcase *t)
 
 	gp_widget_free(radiobutton);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int radiobutton_json_fail(struct tcase *t)
@@ -65,7 +65,7 @@ static int radiobutton_json_fail(struct tcase *t)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static const char *get_choice(gp_widget *self, size_t idx)

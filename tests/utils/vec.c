@@ -54,14 +54,14 @@ static int test_vec(void)
 
 	gp_vec_free(vec);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_vec_free(void)
 {
 	gp_vec_free(NULL);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_vec_zero_size(void)
@@ -75,7 +75,7 @@ static int test_vec_zero_size(void)
 
 	gp_vec_free(vec);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 struct insert_test {
@@ -114,7 +114,7 @@ static int test_vec_insert(struct insert_test *tst)
 		}
 
 		gp_vec_free(vec);
-		return TST_SUCCESS;
+		return TST_PASSED;
 	}
 
 	if (!new_vec) {
@@ -161,7 +161,7 @@ static int test_vec_insert(struct insert_test *tst)
 
 	gp_vec_free(vec);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_vec_resize(struct insert_test *tst)
@@ -181,7 +181,7 @@ static int test_vec_resize(struct insert_test *tst)
 
 	gp_vec_free(vec);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_vec_shrink(void)
@@ -210,7 +210,7 @@ static int test_vec_shrink(void)
 
 	gp_vec_free(vec);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_vec_dup(void)
@@ -252,7 +252,7 @@ static int test_vec_dup(void)
 	gp_vec_free(vec);
 	gp_vec_free(copy);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct insert_test test1 = {

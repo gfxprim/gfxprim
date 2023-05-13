@@ -81,7 +81,7 @@ static int GetPutPixel_{{ pt.name }}(void)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 @ end
 
@@ -125,7 +125,7 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 @ end
 

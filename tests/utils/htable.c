@@ -63,7 +63,7 @@ static int htable_test(void)
 
 	gp_htable_free(table);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 /* Stupid hash function to ensure collisions */
@@ -91,7 +91,7 @@ static int lookup_success(gp_htable *table, const char *key, const char *val)
 
 	tst_msg("Got correct value for '%s' = %s", key, val);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int lookup_failure(gp_htable *table, const char *key)
@@ -106,7 +106,7 @@ static int lookup_failure(gp_htable *table, const char *key)
 
 	tst_msg("Key '%s' not found", key);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int collision_test(void)
@@ -175,7 +175,7 @@ static int collision_test(void)
 
 	gp_htable_free(table);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int double_collision_test(void)
@@ -201,7 +201,7 @@ static int double_collision_test(void)
 
 	gp_htable_free(table);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int check_size(gp_htable *table, size_t exp_size)
@@ -214,7 +214,7 @@ static int check_size(gp_htable *table, size_t exp_size)
 
 	tst_msg("Table size %zu records %zu", table->size, table->used);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int size_test(void)
@@ -265,7 +265,7 @@ static int size_test(void)
 
 	gp_htable_free(table);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int foreach_test(void)
@@ -288,7 +288,7 @@ static int foreach_test(void)
 
 	gp_htable_free(table);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

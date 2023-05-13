@@ -16,7 +16,7 @@ static int load_json(const char *path)
 
 	gp_widget_free(layout);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

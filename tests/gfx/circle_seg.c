@@ -165,7 +165,7 @@ static int test_circle(const char *pattern, gp_size w, gp_size h,
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_circle_r_0_s_1(void)

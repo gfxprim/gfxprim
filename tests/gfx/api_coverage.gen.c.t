@@ -99,7 +99,7 @@ static int gfx_{{ fn[0]}}_{{ pt.name }}(void)
 	{@ check_canary(param) @}
 @             end
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 @ end

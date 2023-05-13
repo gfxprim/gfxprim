@@ -29,7 +29,7 @@ static int test_seek(enum gp_seek_whence whence, ssize_t off, size_t cur_pos,
 
 static int seek_cur(void)
 {
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	if (test_seek(GP_SEEK_CUR, -1, 1, 1, 0, 0))
 		ret = TST_FAILED;
@@ -45,7 +45,7 @@ static int seek_cur(void)
 
 static int seek_set(void)
 {
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	if (test_seek(GP_SEEK_SET, -1, 0, 1, -1, 0))
 		ret = TST_FAILED;
@@ -61,7 +61,7 @@ static int seek_set(void)
 
 static int seek_end(void)
 {
-	int ret = TST_SUCCESS;
+	int ret = TST_PASSED;
 
 	if (test_seek(GP_SEEK_END, -2, 0, 1, -1, 0))
 		ret = TST_FAILED;

@@ -29,7 +29,7 @@ static int test_key_val(struct tcase *t)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct tcase t01 = {

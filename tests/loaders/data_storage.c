@@ -21,7 +21,7 @@ static int create_destroy(void)
 
 	gp_storage_destroy(storage);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int create_get_destroy(void)
@@ -41,7 +41,7 @@ static int create_get_destroy(void)
 
 	gp_storage_destroy(storage);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int records_are_equal(const gp_data_node *a, const gp_data_node *b)
@@ -116,7 +116,7 @@ static int create_add_get_destroy(void)
 
 	gp_storage_destroy(storage);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int duplicit_id_add(void)
@@ -151,7 +151,7 @@ static int duplicit_id_add(void)
 	}
 
 	gp_storage_destroy(storage);
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int wrong_type_add(void)
@@ -180,7 +180,7 @@ static int wrong_type_add(void)
 	}
 
 	gp_storage_destroy(storage);
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int get_by_path(void)
@@ -261,7 +261,7 @@ static int get_by_path(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

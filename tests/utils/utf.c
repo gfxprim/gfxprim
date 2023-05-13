@@ -32,7 +32,7 @@ static int test_utf8_next_01(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_utf8_next_03(void)
@@ -52,7 +52,7 @@ static int test_utf8_next_03(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_utf8_next_02(void)
@@ -72,7 +72,7 @@ static int test_utf8_next_02(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_utf_fallback(void)
@@ -91,7 +91,7 @@ static int test_utf_fallback(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_utf8_strlen_01(void)
@@ -103,7 +103,7 @@ static int test_utf8_strlen_01(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_utf8_strlen_02(void)
@@ -118,7 +118,7 @@ static int test_utf8_strlen_02(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 

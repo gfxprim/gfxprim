@@ -39,7 +39,7 @@ static int get_pointer_preserved(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int peek_test(void)
@@ -80,7 +80,7 @@ static int peek_test(void)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int key_state_test(void)
@@ -121,7 +121,7 @@ static int key_state_test(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int cursor_state_test(void)
@@ -173,7 +173,7 @@ static int cursor_state_test(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int queue_init_test(void)
@@ -200,7 +200,7 @@ static int queue_init_test(void)
 		}
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int queue_events_test(void)
@@ -245,7 +245,7 @@ static int queue_events_test(void)
 		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

@@ -45,7 +45,7 @@ static int test_line(const struct testcase *t)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct testcase testcase_line_1px = {

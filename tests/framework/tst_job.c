@@ -323,7 +323,7 @@ static int tst_job_benchmark(struct tst_job *job)
 	write_timespec(job, 'M', &sum);
 	write_timespec(job, 'V', &dev);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 void tst_job_run(struct tst_job *job)
@@ -421,7 +421,7 @@ void tst_job_run(struct tst_job *job)
 		child_write(job, 's', &job->malloc_stats,
                             sizeof(job->malloc_stats));
 
-		if (job->malloc_stats.lost_chunks != 0 && ret == TST_SUCCESS)
+		if (job->malloc_stats.lost_chunks != 0 && ret == TST_PASSED)
 			ret = TST_MEMLEAK;
 	}
 

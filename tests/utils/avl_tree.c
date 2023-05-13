@@ -91,7 +91,7 @@ static int avl_tree_lookup(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int avl_tree_del_min(void)
@@ -134,7 +134,7 @@ static int avl_tree_del_min(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int avl_tree_del_max(void)
@@ -177,7 +177,7 @@ static int avl_tree_del_max(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static gp_avl_node *del_entry(gp_avl_node *root, unsigned int key)
@@ -250,7 +250,7 @@ static int avl_tree_del(void)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

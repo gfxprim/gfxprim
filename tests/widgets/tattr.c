@@ -32,7 +32,7 @@ static int test_tattr(struct tcase *a)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct tcase bold = {

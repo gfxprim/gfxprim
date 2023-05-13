@@ -45,7 +45,7 @@ static int test_ellipse(const struct testcase *t)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct testcase testcase_ellipse_a0_b0 = {

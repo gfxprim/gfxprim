@@ -92,7 +92,7 @@ static int json_recursion_limit(const char *str)
 		return TST_FAILED;
 	}
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 const struct tst_suite tst_suite = {

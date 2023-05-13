@@ -77,7 +77,7 @@ static int test_load_pcx(struct testcase *test)
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static struct testcase v3_0_1bpp_10x10_white = {

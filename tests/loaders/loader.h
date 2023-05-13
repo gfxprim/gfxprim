@@ -46,7 +46,7 @@ static int test_check(struct testcase *test, gp_pixmap *img)
 	if (err)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 static int test_read(struct testcase *test)
@@ -138,7 +138,7 @@ static int test_load_fail(const char *path)
 		return TST_FAILED;
 	default:
 		tst_msg("Got %s", strerror(errno));
-		return TST_SUCCESS;
+		return TST_PASSED;
 	}
 }
 
@@ -230,7 +230,7 @@ static int test_save_load(struct testcase_save_load *test)
 	gp_pixmap_free(img);
 	gp_pixmap_free(img2);
 
-	return TST_SUCCESS;
+	return TST_PASSED;
 }
 
 # endif /* SAVE && LOAD */
