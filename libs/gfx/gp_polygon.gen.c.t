@@ -333,7 +333,6 @@ void gp_polygon_raw(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
 	}
 }
 
-
 void gp_polygon(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
                 unsigned int vertex_count, const gp_coord *xy, gp_pixel pixel)
 {
@@ -351,6 +350,50 @@ void gp_polygon(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
 		GP_TRANSFORM_POINT(pixmap, x, y);
 
 		gp_line_raw(pixmap, prev_x, prev_y, x, y, pixel);
+
+		prev_x = x;
+		prev_y = y;
+	}
+}
+
+void gp_polygon_th_raw(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                       unsigned int vertex_count, const gp_coord *xy,
+		       gp_size r, gp_pixel pixel)
+{
+	unsigned int i;
+
+	gp_coord prev_x = xy[2 * vertex_count - 2] + x_off;
+	gp_coord prev_y = xy[2 * vertex_count - 1] + y_off;
+
+	for (i = 0; i < vertex_count; i++) {
+		gp_coord x = xy[2 * i] + x_off;
+		gp_coord y = xy[2 * i + 1] + y_off;
+
+		gp_line_th_raw(pixmap, prev_x, prev_y, x, y, r, pixel);
+
+		prev_x = x;
+		prev_y = y;
+	}
+}
+
+void gp_polygon_th(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
+                   unsigned int vertex_count, const gp_coord *xy,
+                   gp_size r, gp_pixel pixel)
+{
+	unsigned int i;
+
+	gp_coord prev_x = xy[2 * vertex_count - 2] + x_off;
+	gp_coord prev_y = xy[2 * vertex_count - 1] + y_off;
+
+	GP_TRANSFORM_POINT(pixmap, prev_x, prev_y);
+
+	for (i = 0; i < vertex_count; i++) {
+		gp_coord x = xy[2 * i] + x_off;
+		gp_coord y = xy[2 * i + 1] + y_off;
+
+		GP_TRANSFORM_POINT(pixmap, x, y);
+
+		gp_line_th_raw(pixmap, prev_x, prev_y, x, y, r, pixel);
 
 		prev_x = x;
 		prev_y = y;
