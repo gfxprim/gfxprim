@@ -1,5 +1,5 @@
 /*
- * WritePixel tests.
+ * write_pixel tests.
  *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
@@ -56,7 +56,7 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
 @         for len in range(0, 6):
 @             for aligment in [0, 4]:
 @                 if (pixelsize != 16 and pixelsize != 32) or aligment == 0:
-static int WritePixel{{ "_%i_%i_%i_%i" % (pixelsize, offset, len, aligment) }}(void)
+static int write_pixel{{ "_%i_%i_%i_%i" % (pixelsize, offset, len, aligment) }}(void)
 {
 	char write_buf[{{ 25 * pixelsize//8 }}] = {};
 	char gen_buf[{{ 25 * pixelsize//8 }}] = {};
@@ -74,7 +74,7 @@ static int WritePixel{{ "_%i_%i_%i_%i" % (pixelsize, offset, len, aligment) }}(v
 	COMPARE_BUFFERS({{'"p=%i o=%i l=%i a=%i"' % (pixelsize, offset, len, aligment)}}, write_buf, gen_buf);
 }
 
-static int WritePixel{{ "_%i_%i_%i_%i_alloc" % (pixelsize, offset, len, aligment) }}(void)
+static int write_pixel{{ "_%i_%i_%i_%i_alloc" % (pixelsize, offset, len, aligment) }}(void)
 {
 	char gen_buf[{{ 25 * pixelsize//8 }}] = {};
 	char *write_buf = malloc({{ 25 * pixelsize//8 }});
@@ -87,11 +87,6 @@ static int WritePixel{{ "_%i_%i_%i_%i_alloc" % (pixelsize, offset, len, aligment
 	gen_buf[{{aligment + offset * pixelsize//8 + i * pixelsize//8 + j}}] = 0xff;
 @                     end
 
-	if (gen_buf == NULL) {
-		tst_msg("Malloc failed :(");
-		return TST_UNTESTED;
-	}
-
 	memset(write_buf, 0, {{ 25 * pixelsize//8 }});
 
 	gp_write_pixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
@@ -101,17 +96,17 @@ static int WritePixel{{ "_%i_%i_%i_%i_alloc" % (pixelsize, offset, len, aligment
 @ end
 
 const struct tst_suite tst_suite = {
-	.suite_name = "WritePixel Testsuite",
+	.suite_name = "write_pixel Testsuite",
 	.tests = {
 @ for pixelsize in [8, 16, 24, 32]:
 @     for offset in range(0, 4):
 @         for len in range(0, 6):
 @             for aligment in [0, 4]:
 @                 if (pixelsize != 16 and pixelsize != 32) or aligment == 0:
-		{.name = "WritePixel {{ pixelsize }} {{ offset }} {{ len }} {{ aligment }} stack",
-		 .tst_fn = WritePixel{{ "_%i_%i_%i_%i" % (pixelsize, offset, len, aligment) }}},
-		{.name = "WritePixel {{ pixelsize }} {{ offset }} {{ len }} {{ aligment }} alloc",
-		 .tst_fn = WritePixel{{ "_%i_%i_%i_%i_alloc" % (pixelsize, offset, len, aligment) }}},
+		{.name = "write_pixel {{ pixelsize }} {{ offset }} {{ len }} {{ aligment }} stack",
+		 .tst_fn = write_pixel{{ "_%i_%i_%i_%i" % (pixelsize, offset, len, aligment) }}},
+		{.name = "write_pixel {{ pixelsize }} {{ offset }} {{ len }} {{ aligment }} alloc",
+		 .tst_fn = write_pixel{{ "_%i_%i_%i_%i_alloc" % (pixelsize, offset, len, aligment) }}},
 @ end
 		{.name = NULL}
 	}
