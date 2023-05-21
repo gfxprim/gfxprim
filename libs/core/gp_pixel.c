@@ -188,3 +188,8 @@ gp_pixel gp_pixel_chan_mask(gp_pixel_type pixel_type, const char *chan_name)
 
 	return 0;
 }
+
+gp_pixel gp_pixel_chans_add(gp_pixel_type pixel_type, gp_pixel pixel, int add)
+{
+	GP_FN_RET_PER_PIXELTYPE(GP_PIXEL_CHANS_ADD, pixel_type, pixel, add);
+}

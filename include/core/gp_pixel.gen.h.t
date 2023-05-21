@@ -4,8 +4,10 @@
  * Do not include directly, use gp_pixel.h
  *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
- * Copyright (C) 2013-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2013-2023 Cyril Hrubis <metan@ucw.cz>
  */
+
+#include <core/gp_clamp.h>
 
 /*
  * List of all known pixel types
@@ -60,7 +62,7 @@ typedef enum gp_pixel_type {
 @ end
 
 /*
- * macros for branching on PixelType (similar to GP_FnPerBpp.h macros)
+ * macros for branching on pixel_type (similar to gp_fn_per_bpp.h macros)
  */
 
 @ for r in [('', ''), ('return ', 'RET_')]:
@@ -77,3 +79,24 @@ typedef enum gp_pixel_type {
 		default: GP_ABORT("Invalid PixelType %d", type);\
 	}
 
+@ end
+
+/*
+ * macros to do per-channel operations on a pixel.
+ */
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
+#define GP_PIXEL_CHANS_ADD_{{ pt.name }}(pixel, perc) \
+	GP_PIXEL_CREATE_{{ pt.name }}( \
+@         params = []
+@         for c in pt.chanslist:
+@             if c.is_alpha:
+@                 params.append("GP_PIXEL_GET_" + c.name + "_" + pt.name + "(pixel)")
+@             else:
+@                 params.append("GP_SAT_ADD(GP_PIXEL_GET_" + c.name + "_" + pt.name + "(pixel), " + c.C_max + " * perc / 100, " + c.C_max + ")")
+@         end
+		{{ ', \\\n\t\t'.join(params) }} \
+	)
+
+@     end
+@ end

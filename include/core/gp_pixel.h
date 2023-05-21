@@ -204,4 +204,17 @@ int gp_pixel_has_flags(gp_pixel_type pixel_type, gp_pixel_flags flags);
  */
 gp_pixel gp_pixel_chan_mask(gp_pixel_type pixel_type, const char *chan_name);
 
+/**
+ * @brief Does per-channel saturated addition.
+ *
+ * The alpha channel is left untouched.
+ *
+ * @pixel_type A pixel type.
+ * @pixel A pixel value.
+ * @add An addition in percets of the maximal channel value.
+ *
+ * @return A pixel value after addition.
+ */
+gp_pixel gp_pixel_chans_add(gp_pixel_type pixel_type, gp_pixel pixel, int add);
+
 #endif /* CORE_GP_PIXEL_H */

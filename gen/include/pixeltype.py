@@ -31,6 +31,8 @@ class PixelChannel(list):
     self.mask = self.max * (2 ** offset)
     # Channel bitmas as hex string
     self.C_mask = hex(self.mask)
+    # True if this channel is alpha channel
+    self.is_alpha = name is 'A'
 
 class PixelType(object):
   """Representation of one gp_pixel_type"""
