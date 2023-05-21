@@ -67,7 +67,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_circle(ctx->buf, cx, cy, r, color);
 
 		if (i == sel)
-			gp_fill_circle(ctx->buf, cx, cy, r - 3, text_color);
+			gp_fill_circle(ctx->buf, cx, cy, GP_MAX((gp_size)1, r/2), text_color);
 
 		gp_text(ctx->buf, ctx->font,
 			x + ctx->padd + text_a, y,
