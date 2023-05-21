@@ -995,6 +995,7 @@ static void render_stock_star(gp_pixmap *pix,
 	};
 
 	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, ctx->warn_color);
+	gp_polygon_th(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, 1, gp_pixel_chans_add(ctx->pixel_type, ctx->warn_color, -5));
 }
 
 static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
