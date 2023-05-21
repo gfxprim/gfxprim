@@ -136,10 +136,10 @@ static uint32_t backend_task_dispatch(gp_timer *self)
 {
 	gp_backend *backend = self->priv;
 
-	gp_task_queue_process(&backend->task_queue);
+	gp_task_queue_process(backend->task_queue);
 
-	if (gp_task_queue_tasks(&backend->task_queue))
-		return gp_task_queue_head_prio(&backend->task_queue) * 10 + 10;
+	if (gp_task_queue_tasks(backend->task_queue))
+		return gp_task_queue_head_prio(backend->task_queue) * 10 + 10;
 
 	return 0;
 }
@@ -149,24 +149,42 @@ static gp_timer backend_task_timer = {
 	.callback = backend_task_dispatch,
 };
 
+static void start_task_timer(gp_backend *self)
+{
+	backend_task_timer.priv = self;
+	backend_task_timer.expires = gp_task_queue_head_prio(self->task_queue) * 100 + 100;
+	gp_backend_add_timer(self, &backend_task_timer);
+}
+
+void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue)
+{
+	size_t task_cnt = gp_task_queue_tasks(task_queue);
+
+	self->task_queue = task_queue;
+
+	if (!task_cnt)
+		return;
+
+	start_task_timer(self);
+}
+
 void gp_backend_task_ins(gp_backend *self, gp_task *task)
 {
-	size_t task_cnt = gp_task_queue_tasks(&self->task_queue);
+	size_t task_cnt = gp_task_queue_tasks(self->task_queue);
 
-	gp_task_queue_ins(&self->task_queue, task);
+	gp_task_queue_ins(self->task_queue, task);
 
-	if (!task_cnt) {
-		backend_task_timer.priv = self;
-		backend_task_timer.expires = task->prio * 100 + 100;
-		gp_backend_add_timer(self, &backend_task_timer);
-	}
+	if (task_cnt)
+		return;
+
+	start_task_timer(self);
 }
 
 void gp_backend_task_rem(gp_backend *self, gp_task *task)
 {
-	gp_task_queue_rem(&self->task_queue, task);
+	gp_task_queue_rem(self->task_queue, task);
 
-	if (!gp_task_queue_tasks(&self->task_queue))
+	if (!gp_task_queue_tasks(self->task_queue))
 		gp_backend_rem_timer(self, &backend_task_timer);
 }
 

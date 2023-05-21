@@ -354,6 +354,24 @@ static char *backend_init_str = "x11";
 
 void gp_widget_timer_queue_switch(gp_timer **);
 
+static gp_task_queue task_queue = {};
+
+void gp_widgets_task_ins(gp_task *task)
+{
+	if (backend)
+		gp_backend_task_ins(backend, task);
+	else
+		gp_task_queue_ins(&task_queue, task);
+}
+
+void gp_widgets_task_rem(gp_task *task)
+{
+	if (backend)
+		gp_backend_task_rem(backend, task);
+	else
+		gp_task_queue_rem(&task_queue, task);
+}
+
 void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 {
 	gp_widget_render_ctx_init();
@@ -363,6 +381,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 		exit(1);
 
 	gp_widget_timer_queue_switch(&backend->timers);
+	gp_backend_task_queue_set(backend, &task_queue);
 
 	gp_key_repeat_timer_init(&backend->event_queue, &backend->timers);
 
@@ -396,18 +415,6 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 
 	gp_widget_render(layout, &ctx, flag);
 	gp_backend_flip(backend);
-}
-
-void gp_widgets_task_ins(gp_task *task)
-{
-	if (backend)
-		gp_backend_task_ins(backend, task);
-}
-
-void gp_widgets_task_rem(gp_task *task)
-{
-	if (backend)
-		gp_backend_task_rem(backend, task);
 }
 
 const gp_widget_render_ctx *gp_widgets_render_ctx(void)

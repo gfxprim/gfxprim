@@ -133,7 +133,7 @@ struct gp_backend {
 	gp_timer *timers;
 
 	/* Task queue */
-	gp_task_queue task_queue;
+	gp_task_queue *task_queue;
 
 	void *clipboard_data;
 
@@ -273,12 +273,36 @@ static inline int gp_backend_fullscreen(gp_backend *backend, int val)
  */
 int gp_backend_resize_ack(gp_backend *self);
 
-/*
- * Task API.
+/**
+ * @brief Inserts a task into the task queue.
+ *
+ * Tasks are executed sequentionally and input processing is blocked during
+ * task execution.
+ *
+ * @self A backend.
+ * @task A task to be inserted into the task queue.
  */
 void gp_backend_task_ins(gp_backend *self, gp_task *task);
 
+/**
+ * @brief Removes a task from the task queue.
+ *
+ * @self A backend.
+ * @task A task to be removed from the task queue.
+ */
 void gp_backend_task_rem(gp_backend *self, gp_task *task);
+
+/**
+ * @brief Sets the backend task_queue and starts task processing.
+ *
+ * By default backends does not have a task queue populated. Applications that
+ * require a task queue have to allocate and initialize the queue then pass it
+ * to the backend with this function.
+ *
+ * @self A backend.
+ * @task_queue A pointer to initialized task_queue.
+ */
+void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue);
 
 /*
  * Event Queue functions.
