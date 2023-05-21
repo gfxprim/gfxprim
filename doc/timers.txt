@@ -1,0 +1,150 @@
+Timers
+------
+
+Timers are implemented as a priority queue in a link:priority_heap.html[heap].
+Timers are used in link:backends.html[backends] or
+link:widgets_timer.html[widgets] where you can simply add timer which gets
+processed automatically in the program main loop.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <utils/gp_timer.h>
+
+typedef struct gp_timer {
+	/* Heap pointers and number of sons */
+	gp_heap_head heap;
+
+	/* Expiration time */
+	uint64_t expires;
+	/*
+	 * If not zero return value from Callback is ignored and
+	 * timer is rescheduled each time it expires.
+	 */
+	uint32_t period;
+
+	/* Timer id, showed in debug messages */
+	const char *id;
+
+	/*
+	 * Timer Callback
+	 *
+	 * If non-zero is returned, the timer is rescheduled to expire
+	 * return value from now.
+	 */
+	uint32_t (*callback)(struct gp_timer *self);
+	void *priv;
+} gp_timer;
+
+#define GP_TIMER_DECLARE(name, expires, period, id, callback, priv) \
+        ...
+-------------------------------------------------------------------------------
+
+Timers are implemented as a simple structure with a callback, expiration, id
+string and internal heap pointers. The priority queue is described simply by
+the pointer to the top timer i.e. soonest to expire.
+
+The 'priv' pointer is used to pass a user pointer to the callback function.
+
+The number of timers in the queue is the number of sons of the top timer plus
+one.
+
+The 'GP_TIMER_DECLARE()' creates and initializes timer on the program stack.
+The 'name' is the name of the declared timer structure and the rest of the
+variables corresponds to the structure members.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <utils/gp_timer.h>
+
+int gp_timer_running(gp_timer *timer);
+-------------------------------------------------------------------------------
+
+Returns non-zero if a timer is running, i.e. if it's inserted into a queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <utils/gp_timer.h>
+
+void gp_timer_queue_dump(gp_timer *queue);
+-------------------------------------------------------------------------------
+
+Prints the structure of binary heap into stdout, only for debugging.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <utils/gp_timer.h>
+
+void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer);
+-------------------------------------------------------------------------------
+
+Inserts timer into the timer priority queue. The timer is scheduled to expire
+at `now + timer->expire`.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <utils/gp_timer.h>
+
+void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer);
+-------------------------------------------------------------------------------
+
+Removes timer from the queue.
+
+If timer is not found in the queue nothing is done but warning is printed.
+
+Runs in 'O(n)' time (the insert and process runs in 'O(nlog(n))').
+
+It's safe to remove a timer form the timer callback.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <utils/gp_timer.h>
+
+int gp_timer_queue_process(gp_timer **queue, uint64_t now);
+-------------------------------------------------------------------------------
+
+Processes all expired timers (all timers with `timer->expires <= now` are processed).
+
+Recurrent timers and timers that returned non-zero from callback are reinserted
+into the queue with new expiration time.
+
+Returns number of timers processed.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <utils/gp_timer.h>
+
+unsigned int gp_timer_queue_size(gp_timer *queue);
+-------------------------------------------------------------------------------
+
+Returns number of timers in the queue.
+
+[[TimeStamp]]
+Time Stamp
+~~~~~~~~~~
+
+Timestamp provides fast monotonously increasing timestamps in milliseconds.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <input/gp_time_stamp.h>
+
+uint64_t gp_time_stamp(void);
+-------------------------------------------------------------------------------
+
+Returns timestamp (i.e. time elapsed since some point) in milliseconds.

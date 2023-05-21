@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <inttypes.h>
@@ -8,7 +8,7 @@
 
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
-#include <input/gp_timer.h>
+#include <utils/gp_timer.h>
 #include <utils/gp_heap.h>
 
 static void dump_level(gp_heap_head *heap, unsigned int level, unsigned int cur)
@@ -48,7 +48,7 @@ static int timer_cmp(gp_heap_head *h1, gp_heap_head *h2)
 	return t1->expires > t2->expires;
 }
 
-void gp_timer_queue_insert(gp_timer **queue, uint64_t now, gp_timer *timer)
+void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer)
 {
 	uint32_t after = timer->period ? timer->period : timer->expires;
 	uint64_t expires = now + after;
@@ -74,7 +74,7 @@ void gp_timer_queue_insert(gp_timer **queue, uint64_t now, gp_timer *timer)
 	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
 }
 
-void gp_timer_queue_remove(gp_timer **queue, gp_timer *timer)
+void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
 {
 	GP_DEBUG(3, "Removing timer %s from queue", timer->id);
 

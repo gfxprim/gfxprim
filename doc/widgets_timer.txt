@@ -1,0 +1,21 @@
+Widgets timers
+--------------
+
+[source,c]
+-------------------------------------------------------------------------------
+/* Inserts a timer into the widget main event loop */
+void gp_widgets_timer_ins(gp_timer *timer);
+
+/* Removes a timer from the widget main event loop */
+void gp_widgets_timer_rem(gp_timer *timer);
+-------------------------------------------------------------------------------
+
+Inserts or removes a link:timers.html[timer] to or from the widgets main
+event loop.
+
+.Example
+[source,c]
+-------------------------------------------------------------------------------
+include::../demos/widgets/clock.c[]
+-------------------------------------------------------------------------------
+

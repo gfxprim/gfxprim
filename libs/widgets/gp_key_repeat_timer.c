@@ -16,7 +16,7 @@
  */
 
 #include <stddef.h>
-#include <input/gp_timer.h>
+#include <utils/gp_timer.h>
 #include <input/gp_ev_queue.h>
 #include <input/gp_time_stamp.h>
 #include <widgets/gp_widget_timer.h>
@@ -78,7 +78,7 @@ static void start_timer(int key)
 
 	timers[i].expires = repeat_delay;
 
-	gp_timer_queue_insert(timer_queue, gp_time_stamp(), &timers[i]);
+	gp_timer_queue_ins(timer_queue, gp_time_stamp(), &timers[i]);
 
 	timer_state[i] = 1;
 }
@@ -90,7 +90,7 @@ static void stop_timer(int key)
 	if (!timer_state[i])
 		return;
 
-	gp_timer_queue_remove(timer_queue, &timers[i]);
+	gp_timer_queue_rem(timer_queue, &timers[i]);
 
 	timer_state[i] = 0;
 }

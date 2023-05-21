@@ -27,8 +27,9 @@
 
 #include <core/gp_types.h>
 
+#include <utils/gp_timer.h>
+
 #include <input/gp_ev_queue.h>
-#include <input/gp_timer.h>
 #include <input/gp_task.h>
 
 #include <backends/gp_types.h>

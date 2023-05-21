@@ -36,9 +36,9 @@ int main(void)
 
 	gp_set_debug_level(10);
 
-	gp_timer_queue_insert(&queue, 0, &oneshot);
-	gp_timer_queue_insert(&queue, 0, &recurrent);
-	gp_timer_queue_insert(&queue, 0, &random);
+	gp_timer_queue_ins(&queue, 0, &oneshot);
+	gp_timer_queue_ins(&queue, 0, &recurrent);
+	gp_timer_queue_ins(&queue, 0, &random);
 
 	for (i = 0; i < MAX; i++) {
 		timers[i].expires = MAX - i;
@@ -47,12 +47,12 @@ int main(void)
 		timers[i].priv = NULL;
 		sprintf(ids[i], "Timer%i", MAX - i);
 		timers[i].id = ids[i];
-		gp_timer_queue_insert(&queue, 0, &timers[i]);
+		gp_timer_queue_ins(&queue, 0, &timers[i]);
 	}
 
 	gp_timer_queue_dump(queue);
 
-	gp_timer_queue_remove(&queue, &timers[MAX-1]);
+	gp_timer_queue_rem(&queue, &timers[MAX-1]);
 
 	gp_timer_queue_dump(queue);
 

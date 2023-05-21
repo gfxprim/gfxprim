@@ -13,7 +13,7 @@
 #include <core/gp_common.h>
 
 #include <input/gp_ev_queue.h>
-#include <input/gp_timer.h>
+#include <utils/gp_timer.h>
 #include <input/gp_event.h>
 
 #include <input/gp_keys.h>

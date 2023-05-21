@@ -12,7 +12,7 @@
 #include <core/gp_core.h>
 #include <gfx/gp_gfx.h>
 #include <text/gp_text.h>
-#include <input/gp_timer.h>
+#include <utils/gp_timer.h>
 #include <utils/gp_bbox.h>
 #include <utils/gp_fds.h>
 

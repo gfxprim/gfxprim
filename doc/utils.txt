@@ -12,6 +12,8 @@ Data Structures
 * link:matrix.html[Matrix]
 * link:hash_table.html[Hash table]
 * link:linked_list.html[Linked list]
+* link:priority_heap.html[Priority heap]
+* link:timers.html[Timers]
 
 Text
 ~~~~

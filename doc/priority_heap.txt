@@ -1,0 +1,51 @@
+Heap
+-----
+
+Generic priority heap which is used to implement link:timers.html[timers].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <utils/gp_heap.h>
+
+typedef struct gp_heap_head gp_heap_head;
+
+gp_heap_head *gp_heap_ins(gp_heap_head *heap, gp_heap_head *elem,
+                          int (*cmp)(gp_heap_head *e1, gp_heap_head *e2));
+
+gp_heap_head *gp_heap_pop(gp_heap_head *heap,
+                          int (*cmp)(gp_heap_head *e1, gp_heap_head *e2));
+
+gp_heap_head *gp_heap_rem(gp_heap_head *heap, gp_heap_head *elem,
+                          int (*cmp)(gp_heap_head *e1, gp_heap_head *e2));
+
+unsigned int gp_heap_size(gp_heap_head *heap);
+-------------------------------------------------------------------------------
+
+.Example
+[source,c]
+-------------------------------------------------------------------------------
+struct foo {
+	gp_heap_head heap;
+	int prio;
+};
+
+static int foo_cmp(gp_heap_head *e1, gp_heap_head *e2)
+{
+	struct foo *f1 = GP_HEAP_ENTRY(e1);
+	struct foo *f2 = GP_HEAP_ENTRY(e2);
+
+	return f1->prio > f2->prio;
+}
+
+static void foo_insert(struct foo **queue, int prio, struct foo *foo)
+{
+	gp_heap_head *queue_head;
+
+	foo->prio = prio;
+
+	queue_head = gp_heap_ins(&(*queue)->heap, &foo->heap, foo_cmp);
+	*queue = GP_HEAP_ENTRY(queue_head, struct foo, heap);
+}
+-------------------------------------------------------------------------------

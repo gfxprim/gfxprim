@@ -9,7 +9,7 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	event_queue.txt compilation.txt filters_resize.txt \
 	filters_dithering.txt filters_python.txt spiv.txt core_common.txt \
 	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt widgets.txt \
-	packages.txt bbox.txt utils.txt
+	packages.txt bbox.txt utils.txt timers.txt priority_heap.txt
 
 SOURCES+=hash_table.txt linked_list.txt vector.txt matrix.txt block_alloc.txt utf.txt markup.txt
 
@@ -20,7 +20,7 @@ SOURCES+=widget_grid.txt widget_table.txt widget_button.txt widget_label.txt wid
 	 widgets_alignment.txt widget_tabs.txt widget_frame.txt widget_pixmap.txt \
 	 widgets_render_context.txt widgets_free.txt widget_pbar.txt widgets_dialog.txt \
 	 dialog_msg.txt widget_classes.txt widgets_color_scheme.txt widgets_colors.txt \
-	 widgets_disable.txt widget_markup.txt widget_hbox_vbox.txt
+	 widgets_disable.txt widget_markup.txt widget_hbox_vbox.txt widgets_timer.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 

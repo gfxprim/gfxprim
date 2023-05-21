@@ -109,12 +109,12 @@ void gp_backend_add_timer(gp_backend *self, gp_timer *timer)
 		timer->_priv = &self->event_queue;
 	}
 
-	gp_timer_queue_insert(&self->timers, gp_time_stamp(), timer);
+	gp_timer_queue_ins(&self->timers, gp_time_stamp(), timer);
 }
 
 void gp_backend_rem_timer(gp_backend *self, gp_timer *timer)
 {
-	gp_timer_queue_remove(&self->timers, timer);
+	gp_timer_queue_rem(&self->timers, timer);
 }
 
 int gp_backend_timer_timeout(gp_backend *self)

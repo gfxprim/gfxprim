@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -9,8 +9,8 @@
 
  */
 
-#ifndef INPUT_GP_TIMER_H
-#define INPUT_GP_TIMER_H
+#ifndef UTILS_GP_TIMER_H
+#define UTILS_GP_TIMER_H
 
 #include <stdint.h>
 #include <utils/gp_types.h>
@@ -31,7 +31,7 @@ struct gp_timer {
 	const char *id;
 
 	/*
-	 * If not zero return value from callback is ignored and
+	 * If non zero return value from callback is ignored and
 	 * timer is rescheduled each time it expires.
 	 */
 	uint32_t period;
@@ -86,14 +86,14 @@ void gp_timer_queue_dump(gp_timer *queue);
  * @now A timestamp, usually obtained by calling gp_time_stamp().
  * @timer A timer to insert.
  */
-void gp_timer_queue_insert(gp_timer **queue, uint64_t now, gp_timer *timer);
+void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer);
 
 /*
  * Removes timer from timer queue.
  *
  * This operation (in contrast with insert and process) runs in O(n) time.
  */
-void gp_timer_queue_remove(gp_timer **queue, gp_timer *timer);
+void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer);
 
 /*
  * Processes queue, all timers with expires <= now are processed.
@@ -110,4 +110,4 @@ static inline unsigned int gp_timer_queue_size(gp_timer *queue)
 	return queue ? queue->heap.children + 1 : 0;
 }
 
-#endif /* INPUT_GP_TIMER_H */
+#endif /* UTILS_GP_TIMER_H */

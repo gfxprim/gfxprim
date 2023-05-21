@@ -11,7 +11,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <input/gp_timer.h>
+#include <utils/gp_timer.h>
 
 #include "tst_test.h"
 
@@ -28,7 +28,7 @@ static int callback_is_called(void)
 	gp_timer *head = NULL;
 	int fail = 0;
 
-	gp_timer_queue_insert(&head, 10, &timer);
+	gp_timer_queue_ins(&head, 10, &timer);
 
 	/* Now call process before the timer expiration */
 	if (gp_timer_queue_process(&head, 10)) {
@@ -88,7 +88,7 @@ static int expirations_sorted(void)
 		timers[i].callback = callback_check_monotonicity;
 		timers[i].priv = &expires;
 		timers[i].id = "Timer";
-		gp_timer_queue_insert(&head, 0, &timers[i]);
+		gp_timer_queue_ins(&head, 0, &timers[i]);
 	}
 
 	prev_expires = head->expires;
@@ -124,8 +124,8 @@ static int periodic_timers(void)
 	gp_timer *head = NULL;
 	int fail = 0;
 
-	gp_timer_queue_insert(&head, 10, &timer1);
-	gp_timer_queue_insert(&head, 10, &timer2);
+	gp_timer_queue_ins(&head, 10, &timer1);
+	gp_timer_queue_ins(&head, 10, &timer2);
 
 	/* Make timer1 expire */
 	if (gp_timer_queue_process(&head, 20) != 1) {
@@ -184,10 +184,10 @@ static int rem_regression(void)
 	GP_TIMER_DECLARE(timer2, 0, 20, "Timer2", NULL, NULL);
 	gp_timer *head = NULL;
 
-	gp_timer_queue_insert(&head, 10, &timer1);
-	gp_timer_queue_insert(&head, 10, &timer2);
+	gp_timer_queue_ins(&head, 10, &timer1);
+	gp_timer_queue_ins(&head, 10, &timer2);
 
-	gp_timer_queue_remove(&head, &timer2);
+	gp_timer_queue_rem(&head, &timer2);
 
 	if (head->heap.children) {
 		tst_msg("Failed to remove timer");

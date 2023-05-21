@@ -1,6 +1,7 @@
 # Utils testsuite
 vec
 vec_str
+timer
 matrix
 list
 htable

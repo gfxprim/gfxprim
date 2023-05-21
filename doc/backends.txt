@@ -444,7 +444,7 @@ gp_backend_add_timer
 void gp_backend_add_timer(gp_backend *self, gp_timer *timer);
 -------------------------------------------------------------------------------
 
-Adds a link:input.html#Timers[timer] to the backend timer queue.
+Adds a link:timers.html[timer] to the backend timer queue.
 
 Timers added to the backend are processed automatically while you call any of
 backend 'Poll' or 'Wait' functions.
@@ -467,7 +467,7 @@ gp_backend_rem_timer
 void gp_backend_rem_timer(gp_backend *self, gp_timer *timer);
 -------------------------------------------------------------------------------
 
-Removes a link:input.html#Timers[timer] from the backend timer queue.
+Removes a link:timers.html[timer] from the backend timer queue.
 
 gp_backend_timers_in_queue
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
