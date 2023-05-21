@@ -19,7 +19,7 @@
 struct testcase {
 	/* polygon description */
 	unsigned int edge_count;
-	gp_coord edges[20];
+	gp_coord edges[64];
 
 	/* expected result */
 	gp_size w, h;
@@ -379,6 +379,82 @@ struct testcase testcase_square_45_cut = {
 	}
 };
 
+struct testcase testcase_cross_5 = {
+	.edge_count = 20,
+	.edges = {
+		1, 1,
+		2, 1,
+		3, 2,
+		3, 2,
+		4, 1,
+		5, 1,
+		5, 2,
+		4, 3,
+		4, 3,
+		5, 4,
+		5, 5,
+		4, 5,
+		3, 4,
+		3, 4,
+		2, 5,
+		1, 5,
+		1, 4,
+		2, 3,
+		2, 3,
+		1, 2,
+	},
+	.w = 7,
+	.h = 7,
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0,
+		0, 1, 1, 0, 1, 1, 0,
+		0, 1, 1, 1, 1, 1, 0,
+		0, 0, 1, 1, 1, 0, 0,
+		0, 1, 1, 1, 1, 1, 0,
+		0, 1, 1, 0, 1, 1, 0,
+		0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_cross_6 = {
+	.edge_count = 20,
+	.edges = {
+		1, 1,
+		2, 1,
+		3, 2,
+		4, 2,
+		5, 1,
+		6, 1,
+		6, 2,
+		5, 3,
+		5, 4,
+		6, 5,
+		6, 6,
+		5, 6,
+		4, 5,
+		3, 5,
+		2, 6,
+		1, 6,
+		1, 5,
+		2, 4,
+		2, 3,
+		1, 2,
+	},
+	.w = 8,
+	.h = 8,
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 1, 1, 0, 0, 1, 1, 0,
+		0, 1, 1, 1, 1, 1, 1, 0,
+		0, 0, 1, 1, 1, 1, 0, 0,
+		0, 0, 1, 1, 1, 1, 0, 0,
+		0, 1, 1, 1, 1, 1, 1, 0,
+		0, 1, 1, 0, 0, 1, 1, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Polygon Testsuite",
 	.tests = {
@@ -449,6 +525,14 @@ const struct tst_suite tst_suite = {
 		{.name = "Square rotated by 45 cut",
 		 .tst_fn = test_polygon,
 		 .data = &testcase_square_45_cut},
+
+		{.name = "Cross 5x5",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_cross_5},
+
+		{.name = "Cross 6x6",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_cross_6},
 
 		{.name = NULL}
 	}
