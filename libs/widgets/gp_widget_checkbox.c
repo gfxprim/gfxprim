@@ -33,8 +33,47 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 static void cross(gp_pixmap *buf, unsigned int x, unsigned int y,
 		  unsigned int w, unsigned int h, gp_pixel col)
 {
-	gp_line(buf, x + 3, y + 3, x + w - 4, y + h - 4, col);
-	gp_line(buf, x + 3, y + h - 4, x + w - 4, y + 3, col);
+	if (GP_MIN(w, h) < 10) {
+		gp_line(buf, x + 3, y + 3, x + w - 4, y + h - 4, col);
+		gp_line(buf, x + 3, y + h - 4, x + w - 4, y + 3, col);
+		return;
+	}
+
+	gp_size sp = GP_MAX((gp_size)1, GP_MIN(w/4, h/4));
+	gp_size th = GP_MAX((gp_size)1, GP_MIN(w/8, h/8));
+
+	x+=sp;
+	y+=sp;
+	w-=2*sp+1;
+	h-=2*sp+1;
+
+	gp_size bw = (w-2*th)/2;
+	gp_size bh = (h-2*th)/2;
+
+	gp_coord poly[] = {
+		0, 0,
+		th, 0,
+		w/2, bh,
+		w/2 + w%2, bh,
+		w - th, 0,
+		w, 0,
+		w, th,
+		w - bw, h/2,
+		w - bw, h/2 + h%2,
+		w, h - th,
+		w, h,
+		w - th, h,
+		w/2 + w%2, h - bh,
+		w/2, h - bh,
+		th, h,
+		0, h,
+		0, h - th,
+		0 + bw, h/2 + h%2,
+		0 + bw, h/2,
+		0, th,
+	};
+
+	gp_fill_polygon(buf, x, y, GP_ARRAY_SIZE(poly)/2, poly, col);
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
