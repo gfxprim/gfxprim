@@ -417,6 +417,14 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 	gp_backend_flip(backend);
 }
 
+const gp_pixmap *gp_widget_render_buffer(void)
+{
+	if (!backend)
+		return NULL;
+
+	return backend->pixmap;
+}
+
 const gp_widget_render_ctx *gp_widgets_render_ctx(void)
 {
 	return &ctx;

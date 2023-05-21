@@ -104,6 +104,13 @@ static inline int gp_widgets_is_dclick(uint64_t time_now, uint64_t time_prev,
  */
 void gp_widget_render_ctx_init(void);
 
+/**
+ * @brief Returns a pointer to a render pixmap.
+ *
+ * @return Pointer to a render pixmap or NULL if not available.
+ */
+const gp_pixmap *gp_widget_render_buffer(void);
+
 typedef struct gp_widget_timer {
 	uint32_t (*callback)(void *priv);
 	void *priv;

@@ -13,6 +13,7 @@ APPS=show_layout clock todo pixmap_example example grid_move_widget tabs_example
 
 clock: LDLIBS+=-lm
 showimage: LDLIBS+=-lgfxprim-loaders
+show_layout: LDLIBS+=-lgfxprim-loaders
 
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk
