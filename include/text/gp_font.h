@@ -87,8 +87,8 @@ typedef enum gp_font_style {
 
 #define GP_FONT_STYLE(x) ((x) & GP_FONT_STYLE_MASK)
 
-typedef uint16_t gp_glyph_offset;
-#define GP_NOGLYPH UINT16_MAX
+typedef uint32_t gp_glyph_offset;
+#define GP_NOGLYPH UINT32_MAX
 
 typedef struct gp_glyphs {
 	/* Pointer to glyph bitmap buffer */
