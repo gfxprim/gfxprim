@@ -143,6 +143,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	}
 
 	gp_widget *widget = active_tab_widget(self);
+
 	if (!widget) {
 		gp_fill_rect_xywh(ctx->buf, x, y,
 				  self->w, self->h, ctx->bg_color);
@@ -167,10 +168,11 @@ static void render(gp_widget *self, const gp_offset *offset,
 		}
 
 		if (is_active && self->tabs->title_focused) {
-			gp_hline_xyw(ctx->buf,
+			gp_fill_rect_xywh(ctx->buf,
 				    cur_x + ctx->padd/2,
-				    y + tab_h - ctx->padd,
-				    w - ctx->padd, ctx->sel_color);
+				    y + tab_h - ctx->padd + 1,
+				    w - ctx->padd, ctx->fr_thick+1,
+			            ctx->sel_color);
 		}
 
 		gp_text(ctx->buf, font, cur_x + w/2, y + ctx->padd,
@@ -180,29 +182,31 @@ static void render(gp_widget *self, const gp_offset *offset,
 		cur_x += w;
 
 		if (cur_x < x + self->w)
-			gp_vline_xyh(ctx->buf, cur_x-1, y+1, tab_h-1, text_color);
+			gp_fill_rect_xywh(ctx->buf, cur_x-(ctx->fr_thick+1)/2, y+1, ctx->fr_thick, tab_h-1, text_color);
 	}
 
-	if (!active_first(self))
-		gp_hline_xxy(ctx->buf, x, act_x-1, y + tab_h, text_color);
+	gp_size fr_th_20 = ctx->fr_thick/2;
+	gp_size fr_th_21 = (ctx->fr_thick+1)/2;
 
-	gp_hline_xxy(ctx->buf, act_x + act_w - 1, x + self->w-1, y + tab_h, text_color);
+	if (!active_first(self))
+		gp_fill_rect_xyxy(ctx->buf, x, y + tab_h, act_x+fr_th_20-1, y + tab_h + ctx->fr_thick-1, text_color);
+
+	gp_fill_rect_xyxy(ctx->buf, act_x + act_w - fr_th_21, y + tab_h, x + self->w-1, y + tab_h + ctx->fr_thick-1, text_color);
+
+	if (widget) {
+		gp_coord spy = y + tab_h + ctx->padd;
+
+		gp_fill_rect_xyxy(ctx->buf, x, spy + widget->y + widget->h,
+		                  x + self->w - 1, y + self->h - 1, ctx->bg_color);
+
+		gp_fill_rect_xywh(ctx->buf, x + widget->x + widget->w + ctx->padd, spy + widget->y,
+		                  self->w - widget->x - widget->w - ctx->padd - 1, widget->h, ctx->bg_color);
+
+		gp_fill_rect_xywh(ctx->buf, x + 1, spy + widget->y,
+		                  widget->x + ctx->padd - 1, widget->h, ctx->bg_color);
+	}
 
 	gp_rrect_xywh(ctx->buf, x, y, self->w, self->h, text_color);
-
-	if (!widget)
-		return;
-
-	int spy = y + tab_h + ctx->padd;
-
-	gp_fill_rect_xyxy(ctx->buf, x + 1, spy + widget->y + widget->h,
-	                  x + self->w - 2, y + self->h-2, ctx->bg_color);
-
-	gp_fill_rect_xywh(ctx->buf, x + widget->x + widget->w + ctx->padd, spy + widget->y,
-	                  self->w - widget->x - widget->w - ctx->padd - 1, widget->h, ctx->bg_color);
-
-	gp_fill_rect_xywh(ctx->buf, x + 1, spy + widget->y,
-	                  widget->x + ctx->padd - 1, widget->h, ctx->bg_color);
 
 	gp_coord px = payload_x(self, ctx) + offset->x;
 	gp_coord py = payload_y(self, ctx) + offset->y;

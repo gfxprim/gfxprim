@@ -146,8 +146,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 		cursor_x += gp_text_wbbox_len(font, str + left.bytes,
 		                              tbox->cur_pos.chars - left.chars);
 
-		gp_vline_xyh(ctx->buf, cursor_x, y + ctx->padd,
-			     gp_text_ascent(font), text_color);
+		gp_fill_rect_xywh(ctx->buf, cursor_x - (ctx->cur_thick+1)/2, y + ctx->padd,
+			          ctx->cur_thick, gp_text_ascent(font), text_color);
 	}
 
 	str += left.bytes;

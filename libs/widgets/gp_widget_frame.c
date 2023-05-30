@@ -105,7 +105,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 		if (frame->title) {
 			unsigned int sw = gp_text_wbbox(font, self->frame->title) + ctx->padd;
 
-			gp_hline_xyw(ctx->buf, x + ctx->padd + ctx->padd/2, y + payload_off_y(self, ctx)/2, sw, fg_color);
+			gp_fill_rect_xywh(ctx->buf, x + ctx->padd + ctx->padd/2, y,
+			                  sw, gp_text_height(font), fg_color);
 
 			gp_text(ctx->buf, font, x + 2 * ctx->padd, y, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 				text_color, ctx->bg_color, self->frame->title);

@@ -297,12 +297,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 		cx = x + ctx->padd;
 		gp_pixel bg_col = ctx->fg_color;
 
+		gp_coord ix = x+ctx->fr_thick;
+		gp_coord iw = self->w - 2*ctx->fr_thick;
+
 		if (tbl->row_selected && cur_row == tbl->selected_row) {
 			bg_col = self->focused ? ctx->sel_color : ctx->bg_color;
 
-			gp_fill_rect_xywh(ctx->buf, x+1, cy - ctx->padd/2+1,
-					self->w - 2,
-					text_a + ctx->padd-1, bg_col);
+			gp_fill_rect_xywh(ctx->buf, ix, cy - ctx->padd/2+1,
+			                  iw, text_a + ctx->padd-1, bg_col);
 		}
 
 		if (cur_row < tbl->last_rows) {
@@ -330,7 +332,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		seek_row(self, GP_TABLE_ROW_ADVANCE, 1);
 		cur_row++;
 
-		gp_hline_xyw(ctx->buf, x+1, cy - ctx->padd/2, w-2, ctx->bg_color);
+		gp_hline_xyw(ctx->buf, ix, cy - ctx->padd/2, iw, ctx->bg_color);
 	}
 }
 

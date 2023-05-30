@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -72,16 +72,23 @@ struct gp_widget_render_ctx {
 	gp_pixel_type pixel_type;
 
 	/* padding between widgets */
-	unsigned int padd;
+	uint8_t padd;
+	/* frame thickness 0 == 1px */
+	uint8_t fr_thick;
+	/* frame roundness */
+	uint8_t fr_round;
+	/* cursor thickness 0 == 1px */
+	uint8_t cur_thick;
+	/* font size */
+	uint8_t font_size;
+	/* maximal delay between two clicks for a double click */
+	uint16_t dclick_ms;
 
 	/* area to update on a screen after a call to gp_widget_render() */
 	gp_bbox *flip;
 
 	/* passed down if only part of the layout has to be rendered */
 	gp_bbox *bbox;
-
-	/* maximal delay between two clicks for a double click */
-	unsigned int dclick_ms;
 
 	/* draws rectangles around container widgets */
 	int debug_layout:1;

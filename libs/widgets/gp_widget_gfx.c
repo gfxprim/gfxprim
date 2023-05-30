@@ -2,12 +2,14 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
 #include <widgets/gp_widget_gfx.h>
+#include <widgets/gp_widget_render.h>
+#include "gp_widgets_internal.h"
 
 static gp_size text_size(gp_size add_size, const gp_text_style *style,
                          const char *str, size_t len)
@@ -61,28 +63,30 @@ void gp_text_fit(gp_pixmap *pix, const gp_text_style *style,
 void gp_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y,
                    gp_size w, gp_size h, gp_pixel color)
 {
-	unsigned int rs = 3;
+	unsigned int rs = ctx.fr_round;
+	unsigned int th = ctx.fr_thick - 1;
 
 	gp_coord lx = x + rs;
 	gp_coord rx = x + w - rs - 1;
 	gp_coord uy = y + rs;
 	gp_coord dy = y + h - rs - 1;
 
-	gp_circle_seg(pix, lx, uy, rs, GP_CIRCLE_SEG2, color);
-	gp_circle_seg(pix, rx, uy, rs, GP_CIRCLE_SEG1, color);
-	gp_circle_seg(pix, lx, dy, rs, GP_CIRCLE_SEG3, color);
-	gp_circle_seg(pix, rx, dy, rs, GP_CIRCLE_SEG4, color);
+	gp_fill_ring_seg(pix, lx, uy, rs-th, rs, GP_CIRCLE_SEG2, color);
+	gp_fill_ring_seg(pix, rx, uy, rs-th, rs, GP_CIRCLE_SEG1, color);
+	gp_fill_ring_seg(pix, lx, dy, rs-th, rs, GP_CIRCLE_SEG3, color);
+	gp_fill_ring_seg(pix, rx, dy, rs-th, rs, GP_CIRCLE_SEG4, color);
 
-	gp_hline_xxy(pix, lx, rx, y, color);
-	gp_hline_xxy(pix, lx, rx, y+h-1, color);
-	gp_vline_xyy(pix, x, uy, dy, color);
-	gp_vline_xyy(pix, x+w-1, uy, dy, color);
+	gp_fill_rect_xyxy(pix, lx, y, rx, y+th, color);
+	gp_fill_rect_xyxy(pix, lx, y+h-1-th, rx, y+h-1, color);
+	gp_fill_rect_xyxy(pix, x, uy, x+th, dy, color);
+	gp_fill_rect_xyxy(pix, x+w-1, uy, x+w-1-th, dy, color);
 }
 
 void gp_fill_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_size h,
                         gp_pixel bg_color, gp_pixel fg_color, gp_pixel fr_color)
 {
-	unsigned int rs = 3;
+	unsigned int rs = ctx.fr_round;
+	unsigned int th = ctx.fr_thick - 1;
 
 	gp_coord lx = x + rs;
 	gp_coord rx = x + w - rs - 1;
@@ -103,13 +107,13 @@ void gp_fill_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_si
 	gp_fill_rect_xyxy(pix, x+1, uy, lx-1, dy, fg_color);
 	gp_fill_rect_xyxy(pix, rx+1, uy, x+w-2, dy, fg_color);
 
-	gp_circle_seg(pix, lx, uy, rs, GP_CIRCLE_SEG2, fr_color);
-	gp_circle_seg(pix, rx, uy, rs, GP_CIRCLE_SEG1, fr_color);
-	gp_circle_seg(pix, lx, dy, rs, GP_CIRCLE_SEG3, fr_color);
-	gp_circle_seg(pix, rx, dy, rs, GP_CIRCLE_SEG4, fr_color);
+	gp_fill_ring_seg(pix, lx, uy, rs-th, rs, GP_CIRCLE_SEG2, fr_color);
+	gp_fill_ring_seg(pix, rx, uy, rs-th, rs, GP_CIRCLE_SEG1, fr_color);
+	gp_fill_ring_seg(pix, lx, dy, rs-th, rs, GP_CIRCLE_SEG3, fr_color);
+	gp_fill_ring_seg(pix, rx, dy, rs-th, rs, GP_CIRCLE_SEG4, fr_color);
 
-	gp_hline_xxy(pix, lx, rx, y, fr_color);
-	gp_hline_xxy(pix, lx, rx, y+h-1, fr_color);
-	gp_vline_xyy(pix, x, uy, dy, fr_color);
-	gp_vline_xyy(pix, x+w-1, uy, dy, fr_color);
+	gp_fill_rect_xyxy(pix, lx, y, rx, y+th, fr_color);
+	gp_fill_rect_xyxy(pix, lx, y+h-1-th, rx, y+h-1, fr_color);
+	gp_fill_rect_xyxy(pix, x, uy, x+th, dy, fr_color);
+	gp_fill_rect_xyxy(pix, x+w-1, uy, x+w-1-th, dy, fr_color);
 }

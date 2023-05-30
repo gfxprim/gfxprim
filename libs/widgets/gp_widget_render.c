@@ -12,6 +12,7 @@
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
 #include <utils/gp_fds.h>
+#include <utils/gp_user_path.h>
 #include <backends/gp_backends.h>
 #include <input/gp_input_driver_linux.h>
 #include <widgets/gp_widget_render.h>
@@ -74,12 +75,15 @@ struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.font_big_bold = &font_big_bold,
 	.font_mono = &font_mono,
 	.font_mono_bold = &font_mono_bold,
-	.padd = 4,
+	.padd = 10,
+	.fr_thick = 1,
+	.cur_thick = 1,
+	.fr_round = 3,
 	.dclick_ms = 500,
+	.font_size = 16,
 	.color_scheme = GP_WIDGET_COLOR_SCHEME_DEFAULT,
 };
 
-static int font_size = 16;
 static gp_font_face *render_font;
 static gp_font_face *render_font_bold;
 static gp_font_face *render_font_big;
@@ -142,12 +146,12 @@ static void init_fonts(void)
 	if (str_font_size) {
 		size = atoi(str_font_size);
 
-		if (size <= 0 || size > 200) {
+		if (size <= 0 || size > 100) {
 			GP_WARN("Inavlid font size '%s'!", str_font_size);
 			return;
 		}
 
-		font_size = size;
+		ctx.font_size = size;
 	}
 
 	if (font_family) {
@@ -156,12 +160,12 @@ static void init_fonts(void)
 		return;
 	}
 
-	gp_font_face *ffont = gp_font_face_fc_load("DroidSans", 0, font_size);
-	gp_font_face *ffont_bold = gp_font_face_fc_load("DroidSans:Bold", 0, font_size);
-	gp_font_face *ffont_big = gp_font_face_fc_load("DroidSans", 0, 1.8 * font_size);
-	gp_font_face *ffont_big_bold = gp_font_face_fc_load("DroidSans:Bold", 0, 1.8 * font_size);
-	gp_font_face *ffont_mono = gp_font_face_fc_load("Monospace", 0, font_size);
-	gp_font_face *ffont_mono_bold = gp_font_face_fc_load("Monospace:Bold", 0, font_size);
+	gp_font_face *ffont = gp_font_face_fc_load("DroidSans", 0, ctx.font_size);
+	gp_font_face *ffont_bold = gp_font_face_fc_load("DroidSans:Bold", 0, ctx.font_size);
+	gp_font_face *ffont_big = gp_font_face_fc_load("DroidSans", 0, 1.8 * ctx.font_size);
+	gp_font_face *ffont_big_bold = gp_font_face_fc_load("DroidSans:Bold", 0, 1.8 * ctx.font_size);
+	gp_font_face *ffont_mono = gp_font_face_fc_load("Monospace", 0, ctx.font_size);
+	gp_font_face *ffont_mono_bold = gp_font_face_fc_load("Monospace:Bold", 0, ctx.font_size);
 
 	if (!ffont || !ffont_bold || !ffont_big || !ffont_big_bold || !ffont_mono || !ffont_mono_bold) {
 		gp_font_face_free(ffont);
@@ -194,12 +198,43 @@ static void init_fonts(void)
 	gp_text_style_normal(ctx.font_big_bold, ffont_big_bold, 1);
 	gp_text_style_normal(ctx.font_mono, ffont_mono, 1);
 	gp_text_style_normal(ctx.font_mono_bold, ffont_mono_bold, 1);
+
+	ctx.padd = 2 * gp_text_descent(ctx.font);
+	ctx.fr_thick = ctx.font_size / 25 + 1;
+	ctx.fr_round = ctx.font_size / 15 + 3;
+	ctx.cur_thick = ctx.font_size / 25 + 1;
 }
+
+struct gp_json_struct render_ctx_desc[] = {
+	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, cur_thick, GP_JSON_SERDES_OPTIONAL, 1, 255, "cursor_thickness"),
+	GP_JSON_SERDES_UINT16(struct gp_widget_render_ctx, dclick_ms, GP_JSON_SERDES_OPTIONAL, 100, 10000, "double_click_ms"),
+	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, font_size, GP_JSON_SERDES_OPTIONAL, 10, 100, "font_size"),
+	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, fr_round, GP_JSON_SERDES_OPTIONAL, 0, 255, "frame_roundness"),
+	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, fr_thick, GP_JSON_SERDES_OPTIONAL, 1, 255, "frame_thickness"),
+	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, padd, GP_JSON_SERDES_OPTIONAL, 2, 255, "padding"),
+	{}
+};
 
 static void render_ctx_init(void)
 {
+	char *path = gp_user_path(".config", "gfxprim.json");
+
+	char buf[1024];
+	gp_json_val val = {.buf = buf, .buf_size = sizeof(buf)};
+
+	gp_json_reader *json = gp_json_reader_load(path);
+	if (json)
+		gp_json_read_struct(json, &val, render_ctx_desc, &ctx);
+
 	init_fonts();
-	ctx.padd = 2 * gp_text_descent(ctx.font);
+
+	if (!json)
+		return;
+
+	gp_json_reset(json);
+	gp_json_read_struct(json, &val, render_ctx_desc, &ctx);
+	gp_json_reader_finish(json);
+	gp_json_reader_free(json);
 }
 
 void gp_widget_render_ctx_init(void)
@@ -247,10 +282,10 @@ void __attribute__ ((visibility ("hidden"))) widget_render_refresh(void)
 
 void gp_widget_render_zoom(int zoom_inc)
 {
-	if (font_size + zoom_inc < 5)
+	if (ctx.font_size + zoom_inc < 5)
 		return;
 
-	font_size += zoom_inc;
+	ctx.font_size += zoom_inc;
 	render_ctx_init();
 	//TODO: Broken!
 	gp_widget_render(app_layout, &ctx, GP_WIDGET_RESIZE);
