@@ -26,6 +26,7 @@
 %ignore gp_backend::fd_list;
 %immutable gp_backend::name;
 %ignore gp_backend_fd;
+%ignore gp_backend::task_queue;
 
 ERROR_ON_NONZERO(gp_backend_set_caption);
 ERROR_ON_NONZERO(gp_backend_resize);
