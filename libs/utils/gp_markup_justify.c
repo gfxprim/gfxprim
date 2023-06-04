@@ -153,7 +153,10 @@ void gp_markup_justify_dump(gp_markup_lines *self)
 			if (g == self->lines[i].last)
 				break;
 
-			g++;
+			if (g)
+				g++;
+			else
+				g = self->lines[i].last;
 		}
 
 		printf("|\n");
