@@ -289,11 +289,13 @@ class TestSuite:
     def retval(self):
         res_dict = self.results()
 
-        succ = res_dict['Success']
-        skip = res_dict['Skipped']
-        untested = res_dict['Untested']
-        fail = res_dict['Failed']
-        if fail > 0:
+        test_ok  = res_dict['Success']
+        test_ok += res_dict['Skipped']
+        test_ok += res_dict['Untested']
+
+        test_all = len(self.test_results)
+
+        if (test_ok < test_all):
             return 1;
 
         return 0;
