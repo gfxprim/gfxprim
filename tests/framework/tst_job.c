@@ -387,6 +387,8 @@ void tst_job_run(struct tst_job *job)
 	 */
 	if (job->test->timeout)
 		alarm(job->test->timeout);
+	else
+		alarm(300);
 
 	/* Send process cpu time to parent */
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &job->cpu_time);
