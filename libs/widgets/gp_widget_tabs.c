@@ -117,6 +117,9 @@ static int active_first(gp_widget *self)
 
 static gp_widget *active_tab_widget(gp_widget *self)
 {
+	if (!gp_vec_len(self->tabs->tabs))
+		return NULL;
+
 	return self->tabs->tabs[self->tabs->active_tab].widget;
 }
 
