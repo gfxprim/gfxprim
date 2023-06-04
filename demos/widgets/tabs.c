@@ -18,7 +18,7 @@ static int button_add_callback(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	snprintf(buf, sizeof(buf), "#New Tab %u#\nThis is dynamically craeted tab!", counter++);
+	snprintf(buf, sizeof(buf), "#New Tab %u#\nThis is dynamically created tab!", counter++);
 
 	gp_widget_tabs_tab_append(tabs, "Label", gp_widget_markup_new(buf, GP_MARKUP_GFXPRIM, 0));
 
