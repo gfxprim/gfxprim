@@ -255,7 +255,7 @@ gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned
 	return ret;
 }
 
-static char *vasprintf(const char *fmt, va_list ap)
+static char *valloc_printf(const char *fmt, va_list ap)
 {
 	va_list ac;
 	size_t len;
@@ -281,7 +281,7 @@ gp_widget *gp_widget_label_printf_new(gp_widget_tattr tattr, const char *fmt, ..
 	char *buf;
 
 	va_start(ap, fmt);
-	buf = vasprintf(fmt, ap);
+	buf = valloc_printf(fmt, ap);
 	va_end(ap);
 
 	gp_widget *ret = gp_widget_label_new(buf, tattr, 0);
