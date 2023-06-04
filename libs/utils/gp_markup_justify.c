@@ -64,6 +64,9 @@ static unsigned int justify_greedy(gp_markup *self, unsigned int line_width,
 				for (l = 0; l < len; l++) {
 					width += width_callback(i+l, 1, priv);
 					if (width > line_width) {
+						/* Can't fit a single character */
+						if (l == 0)
+							return 0;
 						linebreak(&cnt, res, first, i + l - 1);
 						first = i + l;
 						width = 0;
@@ -120,6 +123,9 @@ gp_markup_lines *gp_markup_justify(gp_markup *self, unsigned int line_width,
 	unsigned int lines_cnt;
 
 	lines_cnt = justify_greedy(self, line_width, width_callback, priv, NULL);
+
+	if (!lines_cnt)
+		return NULL;
 
 	gp_markup_lines *ret = malloc(sizeof(gp_markup_lines) + sizeof(gp_markup_line) * lines_cnt);
 	if (!ret)

@@ -22,11 +22,16 @@ static unsigned int width_cb(gp_markup_glyph *first, size_t len, void *priv)
 	return len;
 }
 
+static unsigned int double_width_cb(gp_markup_glyph *first, size_t len, void *priv)
+{
+	(void) first;
+	(void) priv;
+	return 2 * len;
+}
+
 static int markup_justify(struct markup_tcase *tcase)
 {
 	gp_markup_lines *lines;
-	unsigned int i;
-	int failed = 0;
 
 	lines = gp_markup_justify(tcase->markup, tcase->width, width_cb, NULL);
 	if (!lines) {
@@ -44,14 +49,7 @@ static int markup_justify(struct markup_tcase *tcase)
 		return TST_FAILED;
 	}
 
-	for (i = 0; i < lines->lines_cnt; i++) {
-
-	}
-
 	gp_markup_justify_free(lines);
-
-	if (failed)
-		return TST_FAILED;
 
 	return TST_PASSED;
 }
@@ -174,8 +172,40 @@ static struct markup_tcase long_words = {
 	.markup = &long_words_markup,
 };
 
+static int markup_regression_zero_width(void)
+{
+	gp_markup_lines *lines;
+
+	lines = gp_markup_justify(&short_text_markup, 0, width_cb, NULL);
+	if (lines) {
+		printf("---\n");
+		gp_markup_justify_dump(lines);
+		printf("---\n");
+		tst_msg("Failed to fail");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+static int markup_regression_small_width(void)
+{
+	gp_markup_lines *lines;
+
+	lines = gp_markup_justify(&short_text_markup, 1, double_width_cb, NULL);
+	if (lines) {
+		printf("---\n");
+		gp_markup_justify_dump(lines);
+		printf("---\n");
+		tst_msg("Failed to fail");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
-	.suite_name = "gfxprim markup testsuite",
+	.suite_name = "markup justify testsuite",
 	.tests = {
 		{.name = "single newline",
 		 .tst_fn = markup_justify,
@@ -211,6 +241,12 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = markup_justify,
 		 .flags = TST_CHECK_MALLOC,
 		 .data = &long_words},
+
+		{.name = "regression zero width",
+		 .tst_fn = markup_regression_zero_width},
+
+		{.name = "regression small width",
+		 .tst_fn = markup_regression_small_width},
 
 		{.name = NULL},
 	}
