@@ -916,7 +916,7 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 		return NULL;
 	}
 
-	ret = gp_widget_tbox_new(text, attr, len, max_len, NULL, type, NULL, NULL);
+	ret = gp_widget_tbox_new(text, attr, len, max_len, NULL, type);
 
 	//TODO: leak on tbox free
 	if (sel_delim) {
@@ -1001,9 +1001,7 @@ static void set_type(gp_widget *self, enum gp_widget_tbox_type type)
 
 gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
                               unsigned int len, unsigned int max_len,
-                              const char *filter, enum gp_widget_tbox_type type,
-                              int (*on_event)(gp_widget_event *),
-                              void *priv)
+                              const char *filter, enum gp_widget_tbox_type type)
 {
 	gp_widget *ret = gp_widget_new(GP_WIDGET_TBOX, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_tbox));
 	if (!ret)
@@ -1012,8 +1010,6 @@ gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
 	if (text && max_len)
 		max_len = GP_MAX(max_len, strlen(text));
 
-	ret->on_event = on_event;
-	ret->priv = priv;
 	ret->tbox->max_size = max_len;
 	ret->tbox->size = len ? len : strlen(text);
 	ret->tbox->filter = filter;

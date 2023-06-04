@@ -26,9 +26,7 @@ enum gp_widget_tbox_type {
 
 gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
                               unsigned int len, unsigned int max_len,
-			      const char *filter, enum gp_widget_tbox_type type,
-                              int (*on_event)(gp_widget_event *),
-                              void *priv);
+                              const char *filter, enum gp_widget_tbox_type type);
 -------------------------------------------------------------------------------
 
 The `text` is the initial textbox text, could be NULL if textbox starts empty.

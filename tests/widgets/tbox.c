@@ -13,7 +13,7 @@ static int tbox_new(void)
 	gp_widget *tbox;
 	gp_utf8_pos cur_pos;
 
-	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -52,11 +52,13 @@ static int tbox_event_action(void)
 	gp_widget *tbox;
 	int flag = 0;
 
-	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0, ev_handler, &flag);
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
 	}
+
+	gp_widget_on_event_set(tbox, ev_handler, &flag);
 
 	send_keypress(tbox, GP_KEY_ENTER);
 
@@ -74,7 +76,7 @@ static int tbox_typing(void)
 	gp_widget *tbox;
 	const char *str;
 
-	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -140,7 +142,7 @@ static int tbox_cursor(void)
 	const char *str;
 	gp_utf8_pos cur_pos;
 
-	tbox = gp_widget_tbox_new("world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -191,7 +193,7 @@ static int tbox_ins(void)
 	const char *str;
 	gp_utf8_pos cur_pos;
 
-	tbox = gp_widget_tbox_new("world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -249,7 +251,7 @@ static int tbox_del(void)
 	const char *str;
 	gp_utf8_pos cur_pos;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -299,7 +301,7 @@ static int tbox_printf(void)
 	const char *str;
 	gp_utf8_pos cur_pos;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -331,7 +333,7 @@ static int tbox_set(void)
 	const char *str;
 	gp_utf8_pos cur_pos;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -362,7 +364,7 @@ static int tbox_sel_all(void)
 	gp_widget *tbox;
 	gp_utf8_pos cur_pos;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -399,7 +401,7 @@ static int tbox_sel_set(void)
 	gp_widget *tbox;
 	gp_utf8_pos val;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -440,7 +442,7 @@ static int tbox_sel_del(void)
 	gp_utf8_pos val;
 	const char *str;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -485,7 +487,7 @@ static int tbox_sel_keys_ascii(void)
 	gp_utf8_pos val;
 	const char *str;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -599,7 +601,7 @@ static int tbox_sel_keys_clear(void)
 {
 	gp_widget *tbox;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -640,7 +642,7 @@ static int tbox_sel_change_clear(void)
 {
 	gp_widget *tbox;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -679,7 +681,7 @@ static int tbox_sel_keys_clear_end(void)
 {
 	gp_widget *tbox;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -757,7 +759,7 @@ static int tbox_sel_key_del_backspace(int key)
 	const char *str;
 	gp_utf8_pos val;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -801,7 +803,7 @@ static int tbox_sel_key_forth_back(void)
 	gp_widget *tbox;
 	size_t cursor = 5;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -838,7 +840,7 @@ static int tbox_sel_key_left_end(void)
 	gp_widget *tbox;
 	size_t cursor = 5;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -866,7 +868,7 @@ static int tbox_sel_key_left_home(void)
 	gp_widget *tbox;
 	size_t cursor = 5;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -895,7 +897,7 @@ static int tbox_sel_key_right_home(void)
 	gp_widget *tbox;
 	size_t cursor = 5;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -923,7 +925,7 @@ static int tbox_sel_key_right_end(void)
 	gp_widget *tbox;
 	size_t cursor = 5;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -950,7 +952,7 @@ static int tbox_sel_ctrl_a_esc(void)
 {
 	gp_widget *tbox;
 
-	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -979,7 +981,7 @@ static int tbox_hidden_no_sel(void)
 	gp_widget *tbox;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL,
-	                          GP_WIDGET_TBOX_HIDDEN, NULL, NULL);
+	                          GP_WIDGET_TBOX_HIDDEN);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -1032,8 +1034,7 @@ static int tbox_utf_del(void)
 {
 	gp_widget *tbox;
 
-	tbox = gp_widget_tbox_new("hello \u00d7", 0, 10, 0, NULL,
-	                          0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello \u00d7", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -1054,8 +1055,7 @@ static int tbox_utf_del_key(void)
 {
 	gp_widget *tbox;
 
-	tbox = gp_widget_tbox_new("hello \u00d7!", 0, 10, 0, NULL,
-	                          0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello \u00d7!", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -1078,8 +1078,7 @@ static int tbox_utf_backspace_key(void)
 {
 	gp_widget *tbox;
 
-	tbox = gp_widget_tbox_new("hello \u00d7!", 0, 10, 0, NULL,
-	                          0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello \u00d7!", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -1123,8 +1122,7 @@ static int tbox_paste(void)
 
 	gp_widgets_backend_set(&paste_backend);
 
-	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL,
-	                          0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -1147,8 +1145,7 @@ static int tbox_sel_paste(void)
 
 	gp_widgets_backend_set(&paste_backend);
 
-	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL,
-	                          0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -1173,8 +1170,7 @@ static int tbox_clear_on_input_paste(void)
 
 	gp_widgets_backend_set(&paste_backend);
 
-	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL,
-	                          0, NULL, NULL);
+	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -1213,12 +1209,13 @@ static int tbox_sel_cut(void)
 
 	gp_widgets_backend_set(&paste_backend);
 
-	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL,
-	                          0, del_ev_handler, &flag);
+	tbox = gp_widget_tbox_new("hello ", 0, 10, 0, NULL, 0);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
 	}
+
+	gp_widget_on_event_set(tbox, del_ev_handler, &flag);
 
 	gp_widget_tbox_sel_set(tbox, -2, GP_SEEK_END, 2);
 
