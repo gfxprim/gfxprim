@@ -19,10 +19,12 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	unsigned int max_width;
 	const gp_text_style *font = gp_widget_tattr_font(self->label->tattr, ctx);
 
-	if (self->label->width)
+	if (self->label->width) {
 		max_width = gp_text_max_width_chars(font, self->label->set, self->label->width);
-	else
-		max_width = gp_text_wbbox(font, self->label->text);
+	} else {
+		max_width = GP_MAX(gp_text_wbbox(font, self->label->text_fmt),
+		                   gp_text_wbbox(font, self->label->text));
+	}
 
 	if (self->label->frame && !self->label->padd)
 		max_width += 2 * ctx->padd;
@@ -86,6 +88,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 enum keys {
 	BG_COLOR,
+	FMT,
 	FRAME,
 	PADD,
 	REVERSE_COLORS,
@@ -97,6 +100,7 @@ enum keys {
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("bg_color", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("fmt", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("padd", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("reverse_colors", GP_JSON_BOOL),
@@ -113,7 +117,7 @@ static const gp_json_obj obj_filter = {
 
 static gp_widget *json_to_label(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	char *label = NULL;
+	char *label = NULL, *fmt = NULL;
 	int width = 0;
 	int frame = 0;
 	int bg_color = GP_WIDGETS_COL_BG;
@@ -132,6 +136,9 @@ static gp_widget *json_to_label(gp_json_reader *json, gp_json_val *val, gp_widge
 				gp_json_warn(json, "Invalid background color name '%s'", val->val_str);
 				bg_color = GP_WIDGETS_COL_BG;
 			}
+		break;
+		case FMT:
+			fmt = strdup(val->val_str);
 		break;
 		case FRAME:
 			frame = val->val_bool;
@@ -174,6 +181,7 @@ static gp_widget *json_to_label(gp_json_reader *json, gp_json_val *val, gp_widge
 	ret->label->padd = padd;
 	ret->label->bg_color = bg_color;
 	ret->label->text_color = text_color;
+	ret->label->text_fmt = fmt;
 
 	free(label);
 
@@ -183,6 +191,7 @@ static gp_widget *json_to_label(gp_json_reader *json, gp_json_val *val, gp_widge
 static void free_(gp_widget *self)
 {
 	gp_vec_free(self->label->text);
+	free(self->label->text_fmt);
 }
 
 struct gp_widget_ops gp_widget_label_ops = {
@@ -212,6 +221,63 @@ void gp_widget_label_set(gp_widget *self, const char *text)
 		 self, self->label->text, text);
 
 	self->label->text = gp_vec_printf(self->label->text, "%s", text);
+
+	redraw_resize(self);
+}
+
+void gp_widget_label_fmt_set(gp_widget *self, const char *text_fmt)
+{
+	free(self->label->text_fmt);
+	self->label->text_fmt = strdup(text_fmt);
+}
+
+void gp_widget_label_fmt_var_set(gp_widget *self, const char *fmt, ...)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_LABEL, );
+
+	if (!self->label->text_fmt) {
+		GP_WARN("Label (%p) format not set1", self);
+		return;
+	}
+
+	GP_DEBUG(3, "Setting widget label (%p) from format '%s'",
+		 self, self->label->text_fmt);
+
+	va_list va, vac;
+	size_t len = strlen(self->label->text_fmt);
+
+	va_start(va, fmt);
+	va_copy(vac, va);
+	len += vsnprintf(NULL, 0, fmt, va);
+	va_end(va);
+
+	char *text = gp_vec_resize(self->label->text, len);
+	if (!text)
+		return;
+
+	self->label->text = text;
+
+	char *src = self->label->text_fmt;
+	char *dst = self->label->text;
+	char prev = 0;
+
+	while (*src) {
+		if (*src == '{' && prev != '\\') {
+			dst += vsprintf(dst, fmt, vac);
+
+			while (*src && (*src != '}' && prev != '\\'))
+				prev = *(src++);
+
+			if (*src)
+				src++;
+		}
+
+		prev = *(dst++) = *(src++);
+	}
+
+	*dst = 0;
+
+	va_end(vac);
 
 	redraw_resize(self);
 }

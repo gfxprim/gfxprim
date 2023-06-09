@@ -13,6 +13,8 @@
 struct gp_widget_label {
 	/* Text buffer */
 	char *text;
+	/* Text format */
+	char *text_fmt;
 	/* widget size hints */
 	const char *set;
 	uint8_t width;
@@ -33,6 +35,26 @@ struct gp_widget_label {
  * @param text New widget label text.
  */
 void gp_widget_label_set(gp_widget *self, const char *text);
+
+/**
+ * @brief Sets the label text format.
+ *
+ * The text format may include a variable that can be then set.
+ *
+ * @self A label widget.
+ * @text_fmt A text format.
+ */
+void gp_widget_labe_fmt_set(gp_widget *self, const char *text_fmt);
+
+/**
+ * @brief Sets label accordingly to text format string.
+ *
+ * @self A label widget.
+ * @fmt Printf-like format
+ * @... Printf-like parameters.
+ */
+void gp_widget_label_fmt_var_set(gp_widget *self, const char *fmt, ...)
+                                 __attribute__ ((format (printf, 2, 3)));
 
 /**
  * @brief Appends text to the label.
