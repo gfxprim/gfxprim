@@ -20,6 +20,7 @@ message_dialog
 table_example
 focus
 choice
+choice2
 log
 disable
 nested_dialogs

@@ -23,6 +23,21 @@ static const char *get_choice(gp_widget *self, size_t idx)
 	return self->choice->choices[idx];
 }
 
+static const char *get_arr_choice(gp_widget *self, size_t idx)
+{
+	struct gp_widget_choice *choice = self->choice;
+	const char *const *res;
+
+	if (idx >= choice->cnt) {
+		GP_WARN("Choice idx %zu out of %zu", idx, choice->cnt);
+		return NULL;
+	}
+
+	res = choice->arr->ptr + choice->arr->memb_size * idx + choice->arr->memb_off;
+
+	return *res;
+}
+
 static size_t get(gp_widget *self, enum gp_widget_choice_op op)
 {
 	switch (op) {
@@ -44,6 +59,12 @@ static struct gp_widget_choice_ops choice_ops = {
 	.get_choice = get_choice,
 	.get = get,
 	.set = set
+};
+
+static struct gp_widget_choice_ops choice_arr_ops = {
+	.get_choice = get_arr_choice,
+	.get = get,
+	.set = set,
 };
 
 enum keys {
@@ -157,7 +178,7 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 				continue;
 			}
 
-			ret = gp_widget_choice_new2(widget_type, ops);
+			ret = gp_widget_choice_ops_new(widget_type, ops);
 		break;
 		case SELECTED:
 			if (val->val_int < 0)
@@ -212,6 +233,41 @@ gp_widget *gp_widget_choice_new(unsigned int widget_type,
 	return ret;
 }
 
+gp_widget *gp_widget_choice_arr_new(unsigned int widget_type, const void *array,
+                                    size_t memb_cnt, uint16_t memb_size,
+                                    uint16_t memb_off, size_t sel, int flags)
+{
+	gp_widget *ret;
+
+	if (flags & ~GP_WIDGET_CHOICE_COPY) {
+		GP_WARN("Invalid choice flags!");
+		return NULL;
+	}
+
+	ret = gp_widget_new(widget_type, GP_WIDGET_CLASS_CHOICE,
+	                    sizeof(struct gp_widget_choice) +
+	                    sizeof(struct gp_widget_choice_arr));
+	if (!ret)
+		return NULL;
+
+	ret->choice->arr = (void*)ret->choice->payload;
+
+	ret->choice->arr->memb_size = memb_size;
+	ret->choice->arr->memb_off = memb_off;
+	ret->choice->arr->ptr = array;
+
+	ret->choice->cnt = memb_cnt;
+
+	if (sel >= memb_cnt)
+		GP_WARN("Invalid selected choice %zu, max=%zu", sel, memb_cnt);
+	else
+		ret->choice->sel = sel;
+
+	ret->choice->ops = &choice_arr_ops;
+
+	return ret;
+}
+
 static inline void call_set_sel(gp_widget *self, size_t sel)
 {
 	struct gp_widget_choice *choice = self->choice;
@@ -219,8 +275,8 @@ static inline void call_set_sel(gp_widget *self, size_t sel)
 	choice->ops->set(self, sel);
 }
 
-gp_widget *gp_widget_choice_new2(unsigned int widget_type,
-                                 const struct gp_widget_choice_ops *ops)
+gp_widget *gp_widget_choice_ops_new(unsigned int widget_type,
+                                    const struct gp_widget_choice_ops *ops)
 {
 	gp_widget *ret = gp_widget_new(widget_type, GP_WIDGET_CLASS_CHOICE, sizeof(struct gp_widget_choice));
 

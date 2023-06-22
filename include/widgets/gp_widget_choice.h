@@ -20,6 +20,16 @@ struct gp_widget_choice_ops {
 	void (*set)(gp_widget *self, size_t val);
 };
 
+struct gp_widget_choice_arr {
+	const void *ptr;
+	uint16_t memb_size;
+	uint16_t memb_off;
+};
+
+enum gp_widget_choice_flags {
+	GP_WIDGET_CHOICE_COPY = 1,
+};
+
 struct gp_widget_choice {
 	/* The actual widget data getters/setters */
 	const struct gp_widget_choice_ops *ops;
@@ -35,6 +45,7 @@ struct gp_widget_choice {
 	union {
 		void *ops_priv;
 		char **choices;
+		struct gp_widget_choice_arr *arr;
 	};
 
 	char payload[];
@@ -55,17 +66,35 @@ gp_widget *gp_widget_choice_new(unsigned int widget_type,
                                 size_t cnt, size_t sel);
 
 /**
- * @brief Allocated and initializes new choice widget.
+ * @brief Creates a choice widget based on widget ops.
  *
  * @widget_type A widget type.
- * @get_choice An iterator over the choices.
- * @cnt A number of choices.
- * @sel A selected choice.
+ * @ops A pointer to the widget ops.
  *
  * @return A choice widget.
  */
-gp_widget *gp_widget_choice_new2(unsigned int widget_type,
-                                 const struct gp_widget_choice_ops *ops);
+gp_widget *gp_widget_choice_ops_new(unsigned int widget_type,
+                                    const struct gp_widget_choice_ops *ops);
+
+
+/**
+ * @brief Creates a choice widget based on a static array.
+ *
+ * @array A pointer an array.
+ * @memb_cnt An array size, i.e. number of elements.
+ * @memb_size An array member size, e.g. sizeof(struct foo)
+ * @memb_off An offset of the string for the choice in the array, e.g.
+ *           offsetof(struct foo, str_elem)
+ * @sel A selected choice.
+ * @flags If GP_WIDGET_CHOICE_COPY is set the choices are copied into a
+ *        separate array, otherwise the original array pointer is stored and used each
+ *        time widget is rendered.
+ *
+ * @return A choice widget.
+ */
+gp_widget *gp_widget_choice_arr_new(unsigned int widget_type, const void *array,
+                                    size_t memb_cnt, uint16_t memb_size,
+                                    uint16_t memb_off, size_t sel, int flags);
 
 /**
  * @brief Request update after the choices has been changed.
