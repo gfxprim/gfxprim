@@ -50,7 +50,7 @@ gp_dir_entry *gp_dir_cache_add_entry(gp_dir_cache *self, size_t size,
 
 	entry_size = sizeof(gp_dir_entry) + name_len + is_dir + 1;
 
-	entry = gp_block_alloc(&self->allocator, entry_size);
+	entry = gp_balloc(&self->allocator, entry_size);
 	if (!entry)
 		return NULL;
 
@@ -83,7 +83,7 @@ int gp_dir_cache_rem_entry_by_name(gp_dir_cache *self, const char *name)
 
 void gp_dir_cache_free_entries(gp_dir_cache *self)
 {
-	gp_block_free(&self->allocator);
+	gp_bfree(&self->allocator);
 	free(self->entries);
 }
 

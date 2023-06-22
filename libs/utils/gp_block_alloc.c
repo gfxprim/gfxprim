@@ -14,6 +14,11 @@
 #include <core/gp_debug.h>
 #include <utils/gp_block_alloc.h>
 
+struct gp_balloc_pool {
+	struct gp_balloc_pool *next;
+	size_t free;
+};
+
 static size_t block_size;
 
 static size_t align(size_t size)
@@ -42,9 +47,9 @@ static void free_block(void *addr)
 #endif
 }
 
-static gp_block *new_block(void)
+static gp_balloc_pool *new_block(void)
 {
-	gp_block *block;
+	gp_balloc_pool *block;
 
 	if (!block_size)
 		block_size = getpagesize();
@@ -56,14 +61,14 @@ static gp_block *new_block(void)
 		return NULL;
 
 	block->next = NULL;
-	block->free = block_size - sizeof(gp_block);
+	block->free = block_size - sizeof(gp_balloc_pool *);
 
 	return block;
 }
 
-void gp_block_free(gp_block **self)
+void gp_bfree(gp_balloc_pool **self)
 {
-	gp_block *i, *j;
+	gp_balloc_pool *i, *j;
 
 	for (i = *self; i;) {
 		j = i->next;
@@ -74,7 +79,7 @@ void gp_block_free(gp_block **self)
 	*self = NULL;
 }
 
-static void *do_alloc(gp_block *self, size_t size)
+static void *do_alloc(gp_balloc_pool *self, size_t size)
 {
 	size_t pos = block_size - self->free;
 
@@ -83,9 +88,9 @@ static void *do_alloc(gp_block *self, size_t size)
 	return (char*)self + pos;
 }
 
-void *gp_block_alloc(gp_block **self, size_t size)
+void *gp_balloc(gp_balloc_pool **self, size_t size)
 {
-	gp_block *block;
+	gp_balloc_pool *block;
 
 	if (!*self) {
 		GP_DEBUG(1, "Initializing empty block allocator");

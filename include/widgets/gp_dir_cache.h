@@ -22,7 +22,7 @@ typedef struct gp_dir_entry {
 
 typedef struct gp_dir_cache {
 	int sort_type;
-	struct gp_block *allocator;
+	struct gp_balloc_pool *allocator;
 	size_t filtered;
 	size_t size;
 	size_t used;
