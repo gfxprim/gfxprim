@@ -99,10 +99,12 @@ static size_t get(gp_widget *self, enum gp_widget_choice_op op)
 	return 0;
 }
 
-struct gp_widget_choice_ops choice_ops = {
-	.get_choice = get_choice,
-	.get = get,
-	.set = set
+const gp_widget_choice_desc choice_desc = {
+	.ops = &(gp_widget_choice_ops) {
+		.get_choice = get_choice,
+		.get = get,
+		.set = set
+	}
 };
 
 static struct tcase spinbutton = {
@@ -128,7 +130,7 @@ static struct tcase sel_spinbutton = {
 
 static struct tcase ops_spinbutton = {
 	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
-	        " \"layout\": {\"type\": \"spinbutton\", \"ops\": \"choice_ops\"}}",
+	        " \"layout\": {\"type\": \"spinbutton\", \"desc\": \"choice_desc\"}}",
 	.cnt = 2,
 	.sel = 0,
 	.choices = (const char *const []) {

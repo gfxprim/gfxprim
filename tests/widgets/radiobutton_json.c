@@ -99,10 +99,12 @@ static size_t get(gp_widget *self, enum gp_widget_choice_op op)
 	return 0;
 }
 
-struct gp_widget_choice_ops choice_ops = {
-	.get_choice = get_choice,
-	.get = get,
-	.set = set
+const gp_widget_choice_desc choice_desc = {
+	.ops = &(gp_widget_choice_ops) {
+		.get_choice = get_choice,
+		.get = get,
+		.set = set
+	}
 };
 
 static struct tcase radiobutton = {
@@ -128,7 +130,7 @@ static struct tcase sel_radiobutton = {
 
 static struct tcase ops_radiobutton = {
 	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
-	        " \"layout\": {\"type\": \"radiobutton\", \"ops\": \"choice_ops\"}}",
+	        " \"layout\": {\"type\": \"radiobutton\", \"desc\": \"choice_desc\"}}",
 	.cnt = 2,
 	.sel = 0,
 	.choices = (const char *const []) {

@@ -20,7 +20,8 @@ message_dialog
 table_example
 focus
 choice
-choice2
+choice_arr
+choice_json_arr
 log
 disable
 nested_dialogs

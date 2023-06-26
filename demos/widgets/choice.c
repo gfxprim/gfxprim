@@ -68,10 +68,12 @@ int spinner_on_event(gp_widget_event *ev)
 	return 0;
 }
 
-struct gp_widget_choice_ops choices_ops = {
-	.get_choice = choices_get_choice,
-	.get = choices_get,
-	.set = choices_set,
+const gp_widget_choice_desc choice_desc = {
+	.ops = &(gp_widget_choice_ops) {
+		.get_choice = choices_get_choice,
+		.get = choices_get,
+		.set = choices_set,
+	}
 };
 
 int main(int argc, char *argv[])

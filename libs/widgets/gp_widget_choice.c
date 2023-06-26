@@ -28,7 +28,7 @@ static const char *get_arr_choice(gp_widget *self, size_t idx)
 	struct gp_widget_choice *choice = self->choice;
 	const char *const *res;
 
-	if (idx >= choice->cnt) {
+	if (idx >= choice->arr->memb_cnt) {
 		GP_WARN("Choice idx %zu out of %zu", idx, choice->cnt);
 		return NULL;
 	}
@@ -50,32 +50,47 @@ static size_t get(gp_widget *self, enum gp_widget_choice_op op)
 	return 0;
 }
 
+static size_t get_arr(gp_widget *self, enum gp_widget_choice_op op)
+{
+	if (!self->choice->arr)
+		return 0;
+
+	switch (op) {
+	case GP_WIDGET_CHOICE_OP_SEL:
+		return self->choice->sel;
+	case GP_WIDGET_CHOICE_OP_CNT:
+		return self->choice->arr->memb_cnt;
+	}
+
+	return 0;
+}
+
 static void set(gp_widget *self, size_t val)
 {
 	self->choice->sel = val;
 }
 
-static struct gp_widget_choice_ops choice_ops = {
+static const struct gp_widget_choice_ops choice_ops = {
 	.get_choice = get_choice,
 	.get = get,
 	.set = set
 };
 
-static struct gp_widget_choice_ops choice_arr_ops = {
+const struct gp_widget_choice_ops gp_widget_choice_arr_ops = {
 	.get_choice = get_arr_choice,
-	.get = get,
+	.get = get_arr,
 	.set = set,
 };
 
 enum keys {
 	CHOICES,
-	OPS,
+	DESC,
 	SELECTED,
 };
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("choices", GP_JSON_ARR),
-	GP_JSON_OBJ_ATTR("ops", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("desc", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("selected", GP_JSON_INT),
 };
 
@@ -152,7 +167,7 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 	size_t sel = 0;
 	int sel_set = 0;
 	gp_widget *ret = NULL;
-	const void *ops = NULL;
+	gp_widget_choice_desc *desc = NULL;
 
 	(void)ctx;
 
@@ -166,19 +181,20 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 
 			ret = parse_choices(widget_type, json, val);
 		break;
-		case OPS:
+		case DESC:
 			if (ret) {
 				gp_json_warn(json, "Only one of 'choices' and 'ops' can be set!");
 				continue;
 			}
 
-			ops = gp_widget_struct_addr(val->val_str, ctx);
-                        if (!ops) {
-	                        gp_json_warn(json, "No ops structure '%s' defined", val->val_str);
+			desc = gp_widget_struct_addr(val->val_str, ctx);
+                        if (!desc) {
+	                        gp_json_warn(json, "No desc structure '%s' defined", val->val_str);
 				continue;
 			}
 
-			ret = gp_widget_choice_ops_new(widget_type, ops);
+			ret = gp_widget_choice_ops_new(widget_type, desc->ops);
+			ret->choice->ops_priv = desc->ops_priv;
 		break;
 		case SELECTED:
 			if (val->val_int < 0)
@@ -192,15 +208,15 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 	}
 
 	if (!ret) {
-		gp_json_warn(json, "Neither of 'choices' nor 'ops' defined");
+		gp_json_warn(json, "Neither of 'choices' nor 'desc' defined");
 		return NULL;
 	}
 
 	if (!sel_set)
 		return ret;
 
-	if (ops && sel_set) {
-		gp_json_warn(json, "Cannot set 'selected' with 'ops'");
+	if (desc && sel_set) {
+		gp_json_warn(json, "Cannot set 'selected' with 'desc'");
 		return ret;
 	}
 
@@ -252,18 +268,17 @@ gp_widget *gp_widget_choice_arr_new(unsigned int widget_type, const void *array,
 
 	ret->choice->arr = (void*)ret->choice->payload;
 
+	ret->choice->arr->memb_cnt = memb_cnt;
 	ret->choice->arr->memb_size = memb_size;
 	ret->choice->arr->memb_off = memb_off;
 	ret->choice->arr->ptr = array;
-
-	ret->choice->cnt = memb_cnt;
 
 	if (sel >= memb_cnt)
 		GP_WARN("Invalid selected choice %zu, max=%zu", sel, memb_cnt);
 	else
 		ret->choice->sel = sel;
 
-	ret->choice->ops = &choice_arr_ops;
+	ret->choice->ops = &gp_widget_choice_arr_ops;
 
 	return ret;
 }

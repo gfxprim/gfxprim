@@ -1,0 +1,21 @@
+Choice widget array
+-------------------
+
+This example shows how to use the choice array api.
+
+.Choice from array C API
+[source,c]
+------------------------------------------------------------------
+include::../demos/widgets/choice_arr.c[]
+------------------------------------------------------------------
+
+.Choice from array JSON API
+[source,c]
+------------------------------------------------------------------
+include::../demos/widgets/choice_json_arr.c[]
+------------------------------------------------------------------
+
+[source,json]
+------------------------------------------------------------------
+include::../demos/widgets/choice_json_arr.json[]
+------------------------------------------------------------------

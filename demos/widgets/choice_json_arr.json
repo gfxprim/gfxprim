@@ -1,0 +1,9 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "rows": 1,
+  "widgets": [
+   {"type": "radiobutton", "desc": "choice_desc", "uid": "choice", "on_event": "choice_on_event"}
+  ]
+ }
+}

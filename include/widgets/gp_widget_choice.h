@@ -14,17 +14,36 @@ enum gp_widget_choice_op {
 	GP_WIDGET_CHOICE_OP_CNT,
 };
 
-struct gp_widget_choice_ops {
+typedef struct gp_widget_choice_ops {
 	const char *(*get_choice)(gp_widget *self, size_t idx);
 	size_t (*get)(gp_widget *self, enum gp_widget_choice_op op);
 	void (*set)(gp_widget *self, size_t val);
-};
+} gp_widget_choice_ops;
 
-struct gp_widget_choice_arr {
+/**
+ * An array description to take the choices from along with ops to operate on
+ * the description.
+ */
+typedef struct gp_widget_choice_arr {
 	const void *ptr;
+	size_t memb_cnt;
 	uint16_t memb_size;
 	uint16_t memb_off;
-};
+} gp_widget_choice_arr;
+
+extern const gp_widget_choice_ops gp_widget_choice_arr_ops;
+
+/**
+ * Choice description which could be passed to the JSON loader.
+ */
+typedef struct gp_widget_choice_desc {
+	const gp_widget_choice_ops *ops;
+	union {
+		void *ops_priv;
+		const char *const *choices;
+		gp_widget_choice_arr *arr;
+	};
+} gp_widget_choice_desc;
 
 enum gp_widget_choice_flags {
 	GP_WIDGET_CHOICE_COPY = 1,
