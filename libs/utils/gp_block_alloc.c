@@ -61,7 +61,7 @@ static gp_balloc_pool *new_block(void)
 		return NULL;
 
 	block->next = NULL;
-	block->free = block_size - sizeof(gp_balloc_pool *);
+	block->free = block_size - sizeof(gp_balloc_pool);
 
 	return block;
 }
