@@ -91,6 +91,16 @@ enum gp_widget_tbox_event_type {
 	GP_WIDGET_TBOX_POST_FILTER,
 	/** Emitted after text is entered */
 	GP_WIDGET_TBOX_EDIT,
+	/**
+	 * Emitted after text is set by:
+	 *
+	 * gp_widget_tbox_{set,printf,clear}()
+	 *
+	 * or modified by:
+	 *
+	 * gp_widget_tbox_{ins,append,del}()
+	 */
+	GP_WIDGET_TBOX_SET,
 	/** Emitted before text is pasted */
 	GP_WIDGET_TBOX_PASTE,
 };

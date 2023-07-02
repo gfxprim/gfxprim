@@ -201,6 +201,12 @@ static void send_edit_event(gp_widget *self)
 	gp_widget_send_widget_event(self, GP_WIDGET_TBOX_EDIT);
 }
 
+static void send_set_event(gp_widget *self)
+{
+	clear_alert(self);
+	gp_widget_send_widget_event(self, GP_WIDGET_TBOX_SET);
+}
+
 static int filter(const char *filter, char ch)
 {
 	if (!filter)
@@ -1070,7 +1076,7 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 
 	self->tbox->cur_pos = gp_utf8_pos_last(self->tbox->buf);
 
-	send_edit_event(self);
+	send_set_event(self);
 	gp_widget_redraw(self);
 
 	return len;
@@ -1089,7 +1095,7 @@ void gp_widget_tbox_set(gp_widget *self, const char *str)
 
 	self->tbox->cur_pos = gp_utf8_pos_last(self->tbox->buf);
 
-	send_edit_event(self);
+	send_set_event(self);
 	gp_widget_redraw(self);
 }
 
@@ -1102,7 +1108,7 @@ void gp_widget_tbox_clear(gp_widget *self)
 	self->tbox->buf = gp_vec_strclr(self->tbox->buf);
 	self->tbox->cur_pos = gp_utf8_pos_first();
 
-	send_edit_event(self);
+	send_set_event(self);
 	gp_widget_redraw(self);
 }
 
@@ -1173,6 +1179,7 @@ void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
 	if (ins_pos <= self->tbox->cur_pos.chars)
 		gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, gp_utf8_strlen(str));
 
+	send_set_event(self);
 	gp_widget_redraw(self);
 }
 
@@ -1218,6 +1225,7 @@ void gp_widget_tbox_del(gp_widget *self, ssize_t off,
 	self->tbox->buf = new_buf;
 	self->tbox->cur_pos = cur_pos;
 
+	send_set_event(self);
 	gp_widget_redraw(self);
 }
 
