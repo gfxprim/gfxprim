@@ -29,7 +29,7 @@ static const char *get_arr_choice(gp_widget *self, size_t idx)
 	const char *const *res;
 
 	if (idx >= choice->arr->memb_cnt) {
-		GP_WARN("Choice idx %zu out of %zu", idx, choice->cnt);
+		GP_WARN("Choice idx %zu out of %zu", idx, choice->arr->memb_cnt);
 		return NULL;
 	}
 
@@ -115,6 +115,13 @@ static gp_widget *alloc_choice(unsigned int widget_type,
 	ret->choice->sel = 0;
 
 	return ret;
+}
+
+static inline void call_set_sel(gp_widget *self, size_t sel)
+{
+	struct gp_widget_choice *choice = self->choice;
+
+	choice->ops->set(self, sel);
 }
 
 static gp_widget *parse_choices(unsigned int widget_type,
@@ -212,18 +219,15 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 		return NULL;
 	}
 
-	if (!sel_set)
-		return ret;
+	if (sel_set) {
+		size_t cnt = call_get_cnt(ret);
 
-	if (desc && sel_set) {
-		gp_json_warn(json, "Cannot set 'selected' with 'desc'");
-		return ret;
+		if (sel < cnt) {
+			call_set_sel(ret, sel);
+		} else {
+			gp_json_warn(json, "Invalid selected item %zu >= cnt %zu", sel, cnt);
+		}
 	}
-
-	if (sel >= ret->choice->cnt)
-		gp_json_warn(json, "Invalid selected choice %zu", sel);
-	else
-		ret->choice->sel = sel;
 
 	return ret;
 }
@@ -281,13 +285,6 @@ gp_widget *gp_widget_choice_arr_new(unsigned int widget_type, const void *array,
 	ret->choice->ops = &gp_widget_choice_arr_ops;
 
 	return ret;
-}
-
-static inline void call_set_sel(gp_widget *self, size_t sel)
-{
-	struct gp_widget_choice *choice = self->choice;
-
-	choice->ops->set(self, sel);
 }
 
 gp_widget *gp_widget_choice_ops_new(unsigned int widget_type,
