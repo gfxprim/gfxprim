@@ -123,10 +123,10 @@ image:radiobutton.png[Radiobutton]
 .Choice class JSON attributes
 [cols=",,,3",options="header"]
 |===================================================
-|  Attribute  |     Type     | Default | Description
-|  +choices+  | string array |         | List of choices
-|  +ops+      |    string    |         | The ops structure id
-|  +selected+ |     uint     |    0    | Currently selected choice
+|  Attribute  |     Type      | Default | Description
+|  +choices+  | string array  |         | List of choices
+|  +ops+      |    string     |         | The ops structure id
+|  +selected+ | uint | string |    0    | Currently selected choice
 |===================================================
 
 .Choice class widget events

@@ -91,7 +91,7 @@ enum keys {
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("choices", GP_JSON_ARR),
 	GP_JSON_OBJ_ATTR("desc", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("selected", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("selected", GP_JSON_VOID),
 };
 
 static const gp_json_obj obj_filter = {
@@ -167,11 +167,28 @@ static gp_widget *parse_choices(unsigned int widget_type,
 	return ret;
 }
 
+static size_t sel_by_str(gp_json_reader *json, gp_widget *choice, const char *sel)
+{
+	size_t i, cnt = call_get_cnt(choice);
+
+	for (i = 0; i < cnt; i++) {
+		const char *ch = call_get_choice(choice, i);
+
+		if (!strcmp(ch, sel))
+			return i;
+	}
+
+	gp_json_warn(json, "Invalid selected choice '%s' (does not exists)", sel);
+
+	return 0;
+}
+
 gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
                                       gp_json_reader *json, gp_json_val *val,
                                       gp_widget_json_ctx *ctx)
 {
 	size_t sel = 0;
+	char *sel_str = NULL;
 	int sel_set = 0;
 	gp_widget *ret = NULL;
 	gp_widget_choice_desc *desc = NULL;
@@ -204,12 +221,23 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 			ret->choice->ops_priv = desc->ops_priv;
 		break;
 		case SELECTED:
-			if (val->val_int < 0)
-				gp_json_warn(json, "Invalid value!");
-			else
-				sel = val->val_int;
+			if (sel_set) {
+				gp_json_warn(json, "Duplicate selected value");
+				continue;
+			}
 
-			sel_set = 1;
+			if (val->type == GP_JSON_INT) {
+				if (val->val_int < 0)
+					gp_json_warn(json, "Invalid value!");
+				else
+					sel = val->val_int;
+				sel_set = 1;
+			} else if (val->type == GP_JSON_STR) {
+				sel_str = strdup(val->val_str);
+				sel_set = 1;
+			} else {
+				gp_json_warn(json, "Invalid value type, expected int or string!");
+			}
 		break;
 		}
 	}
@@ -221,6 +249,11 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 
 	if (sel_set) {
 		size_t cnt = call_get_cnt(ret);
+
+		if (sel_str) {
+			sel = sel_by_str(json, ret, sel_str);
+			free(sel_str);
+		}
 
 		if (sel < cnt) {
 			call_set_sel(ret, sel);
