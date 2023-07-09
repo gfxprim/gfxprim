@@ -120,3 +120,16 @@ void gp_widget_disable_set(gp_widget *self, bool disable)
 	else
 		gp_widget_enable(self);
 }
+
+void gp_widget_on_event_set(gp_widget *self,
+                            int (*on_event)(gp_widget_event *), void *priv)
+{
+	if (!self) {
+		GP_WARN("Setting on_event for NULL widget");
+		return;
+	}
+
+	self->on_event = on_event;
+	self->priv = priv;
+	self->no_events = 0;
+}

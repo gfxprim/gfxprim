@@ -310,14 +310,8 @@ static inline bool gp_widget_disabled(gp_widget *self)
  * @on_event An widget event handler.
  * @priv An user pointer stored in the widget.
  */
-static inline void gp_widget_on_event_set(gp_widget *self,
-                                          int (*on_event)(gp_widget_event *),
-                                          void *priv)
-{
-	self->on_event = on_event;
-	self->priv = priv;
-	self->no_events = 0;
-}
+void gp_widget_on_event_set(gp_widget *self,
+                            int (*on_event)(gp_widget_event *), void *priv);
 
 #include <widgets/gp_widget_event.h>
 
