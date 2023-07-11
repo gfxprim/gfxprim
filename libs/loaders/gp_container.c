@@ -100,6 +100,11 @@ gp_container *gp_container_open(const char *path)
 	gp_io *io = gp_io_file(path, GP_IO_RDONLY);
 	gp_container *ret;
 
+	if (!io) {
+		errno = ENOENT;
+		return NULL;
+	}
+
 	ret = gp_container_init(io);
 	if (!ret) {
 		gp_io_close(io);
