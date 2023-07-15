@@ -11,13 +11,24 @@
 
 #include <gfxprim.h>
 
-uint32_t callback1()
+uint32_t callback_oneshot(gp_timer *self)
 {
+	(void) self;
+
+	return GP_TIMER_STOP;
+}
+
+static uint32_t callback_periodic(gp_timer *self)
+{
+	(void) self;
+
 	return 0;
 }
 
-uint32_t callback3()
+uint32_t callback_random(gp_timer *self)
 {
+	(void) self;
+
 	return random() % 30 + 1;
 }
 
@@ -25,9 +36,9 @@ uint32_t callback3()
 
 int main(void)
 {
-	GP_TIMER_DECLARE(oneshot, 30, 0, "Oneshot", callback1, NULL);
-	GP_TIMER_DECLARE(recurrent, 0, 4, "Recurrent", callback1, NULL);
-	GP_TIMER_DECLARE(random, 10, 0, "Random", callback3, NULL);
+	GP_TIMER_DECLARE(oneshot, 30, 0, "Oneshot", callback_oneshot, NULL);
+	GP_TIMER_DECLARE(recurrent, 0, 4, "Recurrent", callback_periodic, NULL);
+	GP_TIMER_DECLARE(random, 10, 0, "Random", callback_random, NULL);
 	gp_timer timers[MAX];
 	gp_timer *queue = NULL;
 	uint64_t now;
@@ -43,7 +54,7 @@ int main(void)
 	for (i = 0; i < MAX; i++) {
 		timers[i].expires = MAX - i;
 		timers[i].period = 0;
-		timers[i].callback = callback1;
+		timers[i].callback = callback_oneshot;
 		timers[i].priv = NULL;
 		sprintf(ids[i], "Timer%i", MAX - i);
 		timers[i].id = ids[i];

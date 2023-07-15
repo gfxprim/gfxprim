@@ -54,13 +54,11 @@ static int key_to_idx(int key)
 
 static gp_timer timers[] = {
 	{
-		.period = 0,
 		.callback = btn_repeat_callback,
 		.id = "BTN_LEFT repeat timer",
 		.priv = (void*)((long)GP_BTN_LEFT)
         },
 	{
-		.period = 0,
 		.callback = btn_repeat_callback,
 		.id = "BTN_TOUCH repeat timer",
 		.priv = (void*)((long)GP_BTN_TOUCH)

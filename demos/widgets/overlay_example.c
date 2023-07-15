@@ -14,12 +14,11 @@ static uint32_t menu_callback(gp_timer *self)
 
 	gp_widget_overlay_hide(overlay, 1);
 
-	return 0;
+	return GP_TIMER_STOP;
 }
 
 static gp_timer tmr = {
 	.expires = 1000,
-	.period = 0,
 	.callback = menu_callback,
 	.id = "Menu callback"
 };

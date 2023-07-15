@@ -91,7 +91,6 @@ static uint32_t timer_callback(gp_timer *self)
 
 static gp_timer tmr = {
 	.expires = 1000,
-	.period = 0,
 	.callback = timer_callback,
 	.id = "Clock redraw"
 };

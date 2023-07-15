@@ -99,7 +99,7 @@ static uint32_t pushevent_callback(gp_timer *self)
 
 	gp_ev_queue_put(self->_priv, &ev);
 
-	return 0;
+	return GP_TIMER_STOP;
 }
 
 void gp_backend_add_timer(gp_backend *self, gp_timer *timer)
