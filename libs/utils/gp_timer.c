@@ -146,6 +146,7 @@ int gp_timer_queue_process(gp_timer **queue, uint64_t now)
 {
 	int ret = 0;
 	gp_timer *reschedulle = NULL, *tmp;
+	gp_heap_head *heap;
 
 	for (;;) {
 		if (!*queue)
@@ -159,7 +160,7 @@ int gp_timer_queue_process(gp_timer **queue, uint64_t now)
 		}
 	}
 ret:
-	gp_heap_head *heap = &(*queue)->heap;
+	heap = &(*queue)->heap;
 
 	while (reschedulle) {
 		tmp = reschedulle->next;
