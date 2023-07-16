@@ -93,6 +93,7 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
 	}
 
 	timer->running = 0;
+	timer->expires = 0;
 
 	if (!*queue) {
 		GP_WARN("Attempt to remove timer %s from empty queue",
@@ -129,6 +130,7 @@ static gp_timer *process_top(gp_timer *queue, gp_timer **reschedulle, uint64_t n
 
 	if (ret == GP_TIMER_STOP) {
 		timer->running = 0;
+		timer->expires = 0;
 	} else {
 		timer->expires = ret + now;
 		GP_DEBUG(3, "Rescheduling timer '%s' expires at %"PRIu64,

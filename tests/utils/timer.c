@@ -357,6 +357,40 @@ static uint32_t callback_call_rem_rem(gp_timer *self)
 	return 0;
 }
 
+static uint32_t callback_stop(gp_timer *self)
+{
+	(void) self;
+
+	return GP_TIMER_STOP;
+}
+
+static int rem_clears_expires(void)
+{
+	gp_timer *head = NULL;
+
+	GP_TIMER_DECLARE(timer, 10, 10, "Test", callback_stop, NULL);
+
+	gp_timer_queue_ins(&head, 0, &timer);
+
+	gp_timer_queue_rem(&head, &timer);
+
+	if (timer.expires) {
+		tst_msg("rem haven't cleared expires");
+		return TST_FAILED;
+	}
+
+	gp_timer_queue_ins(&head, 0, &timer);
+
+	gp_timer_queue_process(&head, 20);
+
+	if (timer.expires) {
+		tst_msg("GP_TIMER_STOP from callback haven't cleared expires");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Timer Testsuite",
 	.tests = {
@@ -370,6 +404,8 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = periodic_timers},
 		{.name = "Removal regression",
 		 .tst_fn = rem_regression},
+		{.name = "Removal clears expires",
+		 .tst_fn = rem_clears_expires},
 		{.name = "Zero reschedulle time from cb",
 		 .tst_fn = reschedulle_now},
 		{.name = "Call rem from cb",
