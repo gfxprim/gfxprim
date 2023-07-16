@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <utils/gp_timer.h>
 
 #include "tst_test.h"
@@ -157,9 +158,19 @@ static int periodic_timers(void)
 		fail++;
 	}
 
+	if (timer2.priv) {
+		tst_msg("Timer2 callback was called");
+		fail++;
+	}
+
 	/* check that there are two timers in the queue */
-	if (head->heap.children != 1) {
-		tst_msg("Queue head has wrong number of children %lu", head->heap.children);
+	if (gp_timer_queue_size(head) != 2) {
+		tst_msg("Queue head has wrong number of children %u", gp_timer_queue_size(head));
+		fail++;
+	}
+
+	if (timer1.expires != 30) {
+		tst_msg("Timer1 reschedulled at wrong time %"PRIu64" expected 30", timer1.expires);
 		fail++;
 	}
 
@@ -177,8 +188,18 @@ static int periodic_timers(void)
 		fail++;
 	}
 
+	if (timer1.expires != 40) {
+		tst_msg("Timer1 reschedulled at wrong time %"PRIu64" expected 40", timer1.expires);
+		fail++;
+	}
+
 	if (!timer2.priv) {
 		tst_msg("Timer2 callback was not called");
+		fail++;
+	}
+
+	if (timer2.expires != 50) {
+		tst_msg("Timer2 reschedulled at wrong time %"PRIu64" expected 50", timer2.expires);
 		fail++;
 	}
 

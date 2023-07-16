@@ -130,7 +130,7 @@ static gp_timer *process_top(gp_timer *queue, gp_timer **reschedulle, uint64_t n
 	if (ret == GP_TIMER_STOP) {
 		timer->running = 0;
 	} else {
-		timer->expires = ret;
+		timer->expires = ret + now;
 		GP_DEBUG(3, "Rescheduling timer '%s' expires at %"PRIu64,
 		         timer->id, timer->expires);
 		timer->next = *reschedulle;
