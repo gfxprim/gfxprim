@@ -116,6 +116,14 @@ struct gp_event {
 	struct gp_events_state *st;
 };
 
+/**
+ * Returns true if ch is a control character (non-printable)
+ */
+static inline int gp_ev_utf_is_ctrl(gp_event *ev)
+{
+	return ev->utf.ch < 0x20 && ev->utf.ch != 0x7f;
+}
+
 /*
  * Helpers for setting/getting key bits.
  */

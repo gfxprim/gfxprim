@@ -223,9 +223,7 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 				const char *s = str;
 				unicode = gp_utf8_next(&s);
 
-				/* strip controll characters */
-				if (unicode >= 0x20 && unicode != 0x7f)
-					gp_ev_queue_push_utf(event_queue, unicode, 0);
+				gp_ev_queue_push_utf(event_queue, unicode, 0);
 			}
 		}
 	/* fallthrough */

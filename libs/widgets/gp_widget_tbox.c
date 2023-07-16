@@ -815,6 +815,9 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		if (gp_widget_key_mod_pressed(ev))
 			return 0;
 
+		if (gp_ev_utf_is_ctrl(ev))
+			return 0;
+
 		clear_on_input(self);
 		utf_key(self, ev->utf.ch);
 		return 1;

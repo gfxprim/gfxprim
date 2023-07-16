@@ -135,8 +135,7 @@ void gp_input_driver_sdl_event_put(gp_ev_queue *event_queue, SDL_Event *ev)
 		gp_ev_queue_push_key(event_queue, key, ev->key.state, 0);
 
 #if LIBSDL_VERSION == 1
-		if (ev->key.keysym.unicode >= 0x20)
-			gp_ev_queue_push_utf(event_queue, ev->key.keysym.unicode, 0);
+		gp_ev_queue_push_utf(event_queue, ev->key.keysym.unicode, 0);
 #endif
 	break;
 #if LIBSDL_VERSION == 1

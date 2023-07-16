@@ -95,8 +95,7 @@ static int event_key_us(gp_keymap *self, gp_ev_queue *queue, gp_event *ev)
 	else
 		utf = keys_to_ascii[key];
 
-	if (utf >= 0x20)
-		gp_ev_queue_push_utf(queue, utf, ev->time);
+	gp_ev_queue_push_utf(queue, utf, ev->time);
 
 	return 0;
 }
