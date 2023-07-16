@@ -55,6 +55,7 @@ static uint16_t keysym_table1[] = {
  0,                  0,                 GP_KEY_DELETE,
 };
 
+#if LIBSDL_VERSION == 1
 /* keypad and function keys starting at 256 */
 static uint16_t keysym_table2[] = {
  GP_KEY_KP_0,        GP_KEY_KP_1,       GP_KEY_KP_2,        GP_KEY_KP_3,
@@ -64,8 +65,8 @@ static uint16_t keysym_table2[] = {
  GP_KEY_KP_EQUAL,    GP_KEY_UP,         GP_KEY_DOWN,        GP_KEY_RIGHT,
  GP_KEY_LEFT,        GP_KEY_INSERT,     GP_KEY_HOME,        GP_KEY_END,
  GP_KEY_PAGE_UP,     GP_KEY_PAGE_DOWN,  GP_KEY_F1,          GP_KEY_F2,
- GP_KEY_F3,          GP_KEY_F4,         GP_KEY_F5,          GP_KEY_F6, 
- GP_KEY_F7,          GP_KEY_F8,         GP_KEY_F9,          GP_KEY_F10, 
+ GP_KEY_F3,          GP_KEY_F4,         GP_KEY_F5,          GP_KEY_F6,
+ GP_KEY_F7,          GP_KEY_F8,         GP_KEY_F9,          GP_KEY_F10,
  GP_KEY_F11,         GP_KEY_F12,        GP_KEY_F13,         GP_KEY_F14,
  GP_KEY_F15,         0,                 0,                  0,
  GP_KEY_NUM_LOCK,    GP_KEY_CAPS_LOCK,  GP_KEY_SCROLL_LOCK, GP_KEY_RIGHT_SHIFT,
@@ -74,10 +75,48 @@ static uint16_t keysym_table2[] = {
  GP_KEY_RIGHT_META,  0,                 0,                  0,
  GP_KEY_SYSRQ,       0,                 0,                  GP_KEY_COMPOSE,
 };
+#else
+/* SDL2 has scancodes instead */
+static uint16_t keysym_scancodes[] = {
+	[57] = GP_KEY_CAPS_LOCK,
+	[58] = GP_KEY_F1,
+	[59] = GP_KEY_F2,
+	[60] = GP_KEY_F3,
+	[61] = GP_KEY_F4,
+	[62] = GP_KEY_F5,
+	[63] = GP_KEY_F6,
+	[64] = GP_KEY_F7,
+	[65] = GP_KEY_F8,
+	[66] = GP_KEY_F9,
+	[67] = GP_KEY_F10,
+	[68] = GP_KEY_F11,
+	[69] = GP_KEY_F12,
+	[70] = GP_KEY_SYSRQ,
+
+	[73] = GP_KEY_INSERT,
+	[74] = GP_KEY_HOME,
+	[75] = GP_KEY_PAGE_UP,
+
+	[77] = GP_KEY_END,
+	[78] = GP_KEY_PAGE_DOWN,
+	[79] = GP_KEY_RIGHT,
+	[80] = GP_KEY_LEFT,
+	[81] = GP_KEY_DOWN,
+	[82] = GP_KEY_UP,
+
+	[224] = GP_KEY_LEFT_CTRL,
+	[225] = GP_KEY_LEFT_SHIFT,
+	[226] = GP_KEY_LEFT_ALT,
+	[227] = GP_KEY_LEFT_META,
+	[228] = GP_KEY_RIGHT_CTRL,
+	[229] = GP_KEY_RIGHT_SHIFT,
+	[230] = GP_KEY_RIGHT_ALT,
+};
+#endif
 
 void gp_input_driver_sdl_event_put(gp_ev_queue *event_queue, SDL_Event *ev)
 {
-	uint16_t keysym;
+	uint32_t keysym;
 	uint32_t key = 0;
 
 	switch (ev->type) {
@@ -121,6 +160,7 @@ void gp_input_driver_sdl_event_put(gp_ev_queue *event_queue, SDL_Event *ev)
 	case SDL_KEYUP:
 		keysym = ev->key.keysym.sym;
 
+#if LIBSDL_VERSION == 1
 		if (keysym > 0 && keysym <= GP_ARRAY_SIZE(keysym_table1))
 			key = keysym_table1[keysym - 1];
 
@@ -132,10 +172,34 @@ void gp_input_driver_sdl_event_put(gp_ev_queue *event_queue, SDL_Event *ev)
 			return;
 		}
 
+#else
+		if (keysym & SDLK_SCANCODE_MASK) {
+			keysym &= ~SDLK_SCANCODE_MASK;
+
+			if (keysym < GP_ARRAY_SIZE(keysym_scancodes))
+				key = keysym_scancodes[keysym];
+
+			if (!key) {
+				GP_WARN("Unmapped SDL2 scancode %u", keysym);
+				return;
+			}
+		} else {
+			if (key < GP_ARRAY_SIZE(keysym_table1))
+				key = keysym_table1[keysym - 1];
+
+			if (!key) {
+				GP_WARN("Unmapped SDL2 keycode %u", keysym);
+				return;
+			}
+		}
+#endif
+
 		gp_ev_queue_push_key(event_queue, key, ev->key.state, 0);
 
 #if LIBSDL_VERSION == 1
-		gp_ev_queue_push_utf(event_queue, ev->key.keysym.unicode, 0);
+		//KEYMAP CTRL
+		if (ev->key.keysym.unicode)
+			gp_ev_queue_push_utf(event_queue, ev->key.keysym.unicode, 0);
 #endif
 	break;
 #if LIBSDL_VERSION == 1
