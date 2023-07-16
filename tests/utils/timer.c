@@ -63,7 +63,7 @@ static int callback_is_called(void)
 	return TST_PASSED;
 }
 
-#define MAX 2048
+#define MAX 1000000
 
 static int monotonicity_failed = 0;
 static uint64_t prev_expires;
@@ -81,12 +81,10 @@ static uint32_t callback_check_monotonicity(gp_timer *self)
 	return GP_TIMER_STOP;
 }
 
-#include <stdio.h>
-
 static int expirations_sorted(void)
 {
 	gp_timer *head = NULL;
-	gp_timer timers[MAX] = {};
+	gp_timer *timers = malloc(sizeof(gp_timer) * MAX);
 	int i;
 	uint64_t expires;
 
@@ -161,7 +159,7 @@ static int periodic_timers(void)
 
 	/* check that there are two timers in the queue */
 	if (head->heap.children != 1) {
-		tst_msg("Queue head has wrong number of children %u", head->heap.children);
+		tst_msg("Queue head has wrong number of children %lu", head->heap.children);
 		fail++;
 	}
 
@@ -186,7 +184,7 @@ static int periodic_timers(void)
 
 	/* check that there are two timers in the queue */
 	if (head->heap.children != 1) {
-		tst_msg("Queue head has wrong number of children %u", head->heap.children);
+		tst_msg("Queue head has wrong number of children %lu", head->heap.children);
 		fail++;
 	}
 
@@ -347,7 +345,7 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = process_with_NULL_head},
 		{.name = "Expirations are sorted",
 		 .tst_fn = expirations_sorted},
-		{.name = "Periodic timers",
+		{.name = "Expirations are sorted + reschedulle",
 		 .tst_fn = periodic_timers},
 		{.name = "Removal regression",
 		 .tst_fn = rem_regression},

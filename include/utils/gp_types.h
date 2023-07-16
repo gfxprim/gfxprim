@@ -15,7 +15,8 @@ typedef struct gp_heap_head gp_heap_head;
 struct gp_heap_head {
 	gp_heap_head *left;
 	gp_heap_head *right;
-	unsigned int children;
+	gp_heap_head *up;
+	unsigned long children;
 };
 
 #endif /* UTILS_GP_TYPES_H */

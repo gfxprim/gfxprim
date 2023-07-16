@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -12,15 +12,45 @@
 #ifndef UTILS_GP_HEAP_H
 #define UTILS_GP_HEAP_H
 
+#include <string.h>
+#include <core/gp_debug.h>
 #include <core/gp_common.h>
 #include <utils/gp_types.h>
 
 #define GP_HEAP_ENTRY(ptr, structure, member) \
 	GP_CONTAINER_OF(ptr, structure, member)
 
-static inline unsigned int gp_heap_size(gp_heap_head *heap)
+static inline unsigned long gp_heap_size(gp_heap_head *heap)
 {
 	return heap ? heap->children + 1 : 0;
+}
+
+/*
+ * If needed fixes up->left or up->right
+ */
+static inline void gp_heap_fix_up(gp_heap_head *up, gp_heap_head *old, gp_heap_head *rep)
+{
+	if (!up)
+		return;
+
+	if (old == up->left)
+		up->left = rep;
+	else if (old == up->right)
+		up->right = rep;
+	else
+		GP_BUG("Invalid heap state");
+}
+
+/*
+ * If needed fixes elem->left->up and elem->right->up
+ */
+static inline void gp_heap_fix_up_lr(gp_heap_head *elem, gp_heap_head *up)
+{
+	if (elem->left)
+		elem->left->up = up;
+
+	if (elem->right)
+		elem->right->up = up;
 }
 
 /*
@@ -30,8 +60,21 @@ static inline gp_heap_head *gp_heap_swap_left(gp_heap_head *heap)
 {
 	gp_heap_head *left = heap->left;
 
+	gp_heap_fix_up(heap->up, heap, left);
+
+	left->up = heap->up;
+	heap->up = left;
+
+	if (heap->right)
+		heap->right->up = left;
+
+	gp_heap_fix_up_lr(left, heap);
+
 	heap->left = left->left;
-	left->left = heap;
+
+	if (left)
+		left->left = heap;
+
 	GP_SWAP(heap->right, left->right);
 	GP_SWAP(heap->children, left->children);
 
@@ -44,9 +87,19 @@ static inline gp_heap_head *gp_heap_swap_left(gp_heap_head *heap)
 static inline gp_heap_head *gp_heap_swap_right(gp_heap_head *heap)
 {
 	gp_heap_head *right = heap->right;
+	gp_heap_fix_up(heap->up, heap, right);
+
+	right->up = heap->up;
+	heap->up = right;
+
+	if (heap->left)
+		heap->left->up = right;
+
+	gp_heap_fix_up_lr(right, heap);
 
 	heap->right = right->right;
 	right->right = heap;
+
 	GP_SWAP(heap->left, right->left);
 	GP_SWAP(heap->children, right->children);
 
@@ -65,11 +118,12 @@ static int gp_heap_well_balanced(unsigned int children)
  * Inserts an element into a heap.
  */
 __attribute__((warn_unused_result))
-gp_heap_head *gp_heap_ins(gp_heap_head *heap, gp_heap_head *elem,
-                          int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
+gp_heap_head *gp_heap_ins_(gp_heap_head *heap, gp_heap_head *parent, gp_heap_head *elem,
+                           int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
 {
 	if (!heap) {
 		memset(elem, 0, sizeof(*elem));
+		elem->up = parent;
 		return elem;
 	}
 
@@ -78,19 +132,26 @@ gp_heap_head *gp_heap_ins(gp_heap_head *heap, gp_heap_head *elem,
 	if (!heap->left || !gp_heap_well_balanced(heap->left->children) ||
 	     (heap->right && heap->left->children == heap->right->children)) {
 
-		heap->left = gp_heap_ins(heap->left, elem, cmp);
+		heap->left = gp_heap_ins_(heap->left, heap, elem, cmp);
 
 		if (cmp(heap, heap->left))
 			return gp_heap_swap_left(heap);
 	} else {
 
-		heap->right = gp_heap_ins(heap->right, elem, cmp);
+		heap->right = gp_heap_ins_(heap->right, heap, elem, cmp);
 
 		if (cmp(heap, heap->right))
 			return gp_heap_swap_right(heap);
 	}
 
 	return heap;
+}
+
+__attribute__((warn_unused_result))
+gp_heap_head *gp_heap_ins(gp_heap_head *heap, gp_heap_head *elem,
+                          int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
+{
+	return gp_heap_ins_(heap, NULL, elem, cmp);
 }
 
 /*
@@ -111,10 +172,11 @@ static inline gp_heap_head *gp_heap_rem_last(gp_heap_head *heap,
 	}
 
 	if (!gp_heap_well_balanced(heap->left->children) ||
-	    !heap->right || (heap->right->children < heap->left->children/2))
+	    !heap->right || (heap->right->children < heap->left->children/2)) {
 		heap->left = gp_heap_rem_last(heap->left, last);
-	else
+	} else {
 		heap->right = gp_heap_rem_last(heap->right, last);
+	}
 
 	heap->children--;
 
@@ -168,46 +230,50 @@ static inline gp_heap_head *gp_heap_pop(gp_heap_head *heap,
 	last->left = heap->left;
 	last->right = heap->right;
 	last->children = heap->children;
+	last->up = NULL;
+
+	gp_heap_fix_up_lr(last, last);
 
 	return gp_heap_bubble_down(last, cmp);
 }
 
-__attribute__((warn_unused_result))
-static inline gp_heap_head *gp_heap_rem_(gp_heap_head *heap,
-	gp_heap_head *elem, gp_heap_head *last,
-	int (*cmp)(gp_heap_head *e1, gp_heap_head *e2), int *flag)
-{
-	if (!heap)
-		return NULL;
-
-	if (heap == elem) {
-		*flag = 1;
-
-		last->left = heap->left;
-		last->right = heap->right;
-		last->children = heap->children;
-
-		return gp_heap_bubble_down(last, cmp);
-	}
-
-	heap->left = gp_heap_rem_(heap->left, elem, last, cmp, flag);
-	heap->right = gp_heap_rem_(heap->right, elem, last, cmp, flag);
-
-	return heap;
-}
+#include <assert.h>
 
 /*
+ * Moves replacement element up if needed.
+ */
+static inline gp_heap_head *gp_heap_bubble_up(gp_heap_head *heap,
+	int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
+{
+	if (!heap || !heap->up)
+		return heap;
+
+	if (cmp(heap, heap->up))
+		return heap;
+
+	gp_heap_head *up = heap->up;
+
+	if (up->left == heap)
+		up = gp_heap_swap_left(up);
+	else if (up->right == heap)
+		up = gp_heap_swap_right(up);
+	else
+		GP_BUG("Invalid heap state");
+
+	return gp_heap_bubble_up(up, cmp);
+}
+
+/**
  * Removes element from a heap.
  *
- * This operation (in contrast with insert and process) runs in O(n) time since
- * we travel the whole heap while searching for it.
+ * Does a buble down on a (sub) heap starting at the removed element and fixes
+ * the links afterwards.
  */
 __attribute__((warn_unused_result))
 static inline gp_heap_head *gp_heap_rem(gp_heap_head *heap, gp_heap_head *elem,
 	int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
 {
 	gp_heap_head *last;
-	int flag = 0;
 
 	/* Heap is empty */
 	if (!heap)
@@ -219,13 +285,22 @@ static inline gp_heap_head *gp_heap_rem(gp_heap_head *heap, gp_heap_head *elem,
 	if (elem == last)
 		return heap;
 
-	heap = gp_heap_rem_(heap, elem, last, cmp, &flag);
+	/* Replace removed element with last */
+	last->left = elem->left;
+	last->right = elem->right;
+	last->children = elem->children;
+	last->up = elem->up;
 
-	/* Insert back the last element */
-	if (!flag)
-		return gp_heap_ins(heap, last, cmp);
+	gp_heap_fix_up(elem->up, elem, last);
+	gp_heap_fix_up_lr(last, last);
 
-	return heap;
+	last = gp_heap_bubble_up(last, cmp);
+	last = gp_heap_bubble_down(last, cmp);
+
+	while (last->up)
+		last = last->up;
+
+	return last;
 }
 
 #endif /* UTILS_GP_HEAP_H */

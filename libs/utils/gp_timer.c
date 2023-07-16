@@ -45,7 +45,7 @@ static int timer_cmp(gp_heap_head *h1, gp_heap_head *h2)
 	gp_timer *t1 = GP_HEAP_ENTRY(h1, struct gp_timer, heap);
 	gp_timer *t2 = GP_HEAP_ENTRY(h2, struct gp_timer, heap);
 
-	return t1->expires > t2->expires;
+	return t1->expires >= t2->expires;
 }
 
 void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer)
