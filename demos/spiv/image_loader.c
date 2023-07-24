@@ -43,7 +43,7 @@ gp_pixmap *image_loader_get_image(gp_progress_cb *callback, int elevate)
 {
 	struct cpu_timer timer;
 	const char *path;
-	gp_pixmap *img;
+	gp_pixmap *img = NULL;
 	int err, ret;
 
 	if (cur_img)
