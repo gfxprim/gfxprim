@@ -437,6 +437,28 @@ def freetype_cflags(cfg):
 
     die_screaming("Cannot get Freetype CFLAGS")
 
+def wayland_cflags(cfg):
+    cmds = [
+        'pkg-config --cflags wayland-client 2> /dev/null'
+    ]
+
+    flags = cmd_output(cmds);
+    if flags is None:
+        die_screaming("Cannot get Wayland CFLAGS")
+
+    return flags
+
+def wayland_libs(cfg):
+    cmds = [
+        'pkg-config --libs wayland-client 2> /dev/null'
+    ]
+
+    flags = cmd_output(cmds);
+    if flags is None:
+        die_screaming("Cannot get Wayland LDFLAGS")
+
+    return flags
+
 def sdl_exists(cfg):
     if (cfg['LIBSDL_VERSION'][0] == '' or cfg['LIBSDL_VERSION'][0] == '2'):
         if (header_exists(cfg, "SDL2/SDL.h")):
@@ -455,6 +477,15 @@ def sdl_libs(cfg):
         return '`sdl2-config --libs`'
 
     return '`sdl-config --libs`'
+
+def wayland_exists(cfg):
+    if (header_exists(cfg, "wayland-client.h")):
+        return True;
+
+    if (header_exists(cfg, "wayland/wayland-client.h")):
+        return True;
+
+    return False;
 
 if __name__ ==  '__main__':
     #
@@ -565,6 +596,10 @@ if __name__ ==  '__main__':
                    ["libdrm/drm.h",
                     "fallback for UAPI drm.h in libdrm/drm.h",
                     [header_exists, "drm/drm.h"], "", "", ["backends"]],
+                   ["wayland",
+                    "Wayland windowing system",
+                    [header_exists, "wayland-client.h", "wayland/wayland-client.h"],
+                     wayland_cflags, wayland_libs, ["backends"]],
                    ["backtrace",
                     "C stack trace writeout",
                     [c_try_compile, "#include <execinfo.h>\nint main(void) { backtrace(0, 0); }",

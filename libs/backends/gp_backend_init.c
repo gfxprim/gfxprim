@@ -98,6 +98,17 @@ static gp_backend *x11_init(char *params, const char *caption)
 }
 #endif
 
+#ifdef HAVE_WAYLAND
+static gp_backend *wayland_init(char *params, const char *caption)
+{
+	gp_size w = 640, h = 480;
+
+	(void) params;
+
+	return gp_wayland_init(NULL, w, h, caption);
+}
+#endif
+
 #ifdef HAVE_LIBSDL
 static int parse_sdl_params(char *params, gp_size *w, gp_size *h,
                             gp_size *bpp, uint8_t *flags)
@@ -342,6 +353,13 @@ static struct backend_init backends[] = {
 	 .init = xcb_init,
 	 .usage = "",
 	 .help = {NULL},
+	},
+#endif
+#ifdef HAVE_WAYLAND
+	{.name = "wayland",
+	 .init = wayland_init,
+	 .usage = "wayland",
+	 .help = {"", NULL}
 	},
 #endif
 #ifdef HAVE_LIBX11
