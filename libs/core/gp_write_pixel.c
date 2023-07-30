@@ -17,6 +17,9 @@ void gp_write_pixels_1BPP_LE(void *start, uint8_t off,
 {
 	int len = cnt;
 
+	if (!len)
+		return;
+
 	/* Write start of the line */
 	switch (off) {
 	case 0:
@@ -90,6 +93,9 @@ void gp_write_pixels_1BPP_BE(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
+
+	if (!len)
+		return;
 
 	/* Write start of the line */
 	switch (off) {
