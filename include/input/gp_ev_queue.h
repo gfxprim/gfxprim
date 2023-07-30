@@ -25,6 +25,10 @@ struct gp_ev_queue {
 	unsigned int screen_w;
 	unsigned int screen_h;
 
+	/* Cursor position valid for the last event in the queue */
+	uint32_t cursor_x;
+	uint32_t cursor_y;
+
 	/* event queue */
 	unsigned int queue_first;
 	unsigned int queue_last;
