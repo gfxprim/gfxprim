@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: configure
-        run: ./configure -d V4L2 -d libpng -d jpeg -d tiff -d zlib -d libX11 -d freetype -d fontconfig -d pthread -d backtrace
+        run: ./configure -d V4L2 -d libpng -d jpeg -d tiff -d zlib -d libX11 -d freetype -d fontconfig -d pthread -d backtrace -d wayland -d libsdl
       - name: make
         run: make
       - name: tests
@@ -39,6 +39,8 @@ jobs:
         run: sudo apt-get install libx11-dev libxext-dev libsdl2-dev libaa1-dev libxcb1-dev libxcb-keysyms1-dev libxcb-shm0-dev
       - name: install-swig
         run: sudo apt-get install swig python2-dev
+      - name: install-wayland
+        run: sudo apt-get install libwayland-dev
       - name: configure
         run: ./configure
       - name: make
