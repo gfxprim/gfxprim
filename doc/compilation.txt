@@ -27,10 +27,11 @@ Dependencies
 
 * X11
 * link:http://aa-project.sourceforge.net/aalib/[AA-lib]
-* link:http://www.libsdl.org/[SDL] 1.2
+* link:http://www.libsdl.org/[SDL] 1.2 or 2
   (not recomended, known to be slow and buggy)
 * link:https://xcb.freedesktop.org/[XCB]
   (90% of code finished at this point)
+* link:https://wayland.freedesktop.org/[Wayland]
 
 *Python Bindings*
 
@@ -99,6 +100,11 @@ zypper in libX11-devel libXext-devel
 zypper in xcb-util-keysyms-devel
 -------------------------------------------------------------------------------
 
+.Install Wayland devel library
+-------------------------------------------------------------------------------
+zypper in wayland-devel
+-------------------------------------------------------------------------------
+
 .Install swig
 -------------------------------------------------------------------------------
 zypper in swig python-devel
@@ -108,7 +114,7 @@ zypper in swig python-devel
 -------------------------------------------------------------------------------
 zypper in gcc make libjpeg-devel libpng-devel giflib-devel libtiff-devel
           freetype-devel fontconfig-devel libX11-devel libXext-devel
-          xcb-util-keysyms-devel swig python-devel
+          xcb-util-keysyms-devel wayland-devel swig python-devel
 -------------------------------------------------------------------------------
 
 Debian
@@ -137,6 +143,11 @@ apt-get install libfreetype6-dev libfontconfig-dev
 apt-get install libx11-dev libxext-dev
 -------------------------------------------------------------------------------
 
+.Install Wayland devel library
+-------------------------------------------------------------------------------
+apt-get install libwayland-dev
+-------------------------------------------------------------------------------
+
 .Install swig
 -------------------------------------------------------------------------------
 apt-get install swig python-dev
@@ -146,7 +157,7 @@ apt-get install swig python-dev
 -------------------------------------------------------------------------------
 apt-get install gcc make pkg-config libjpeg-dev libpng-dev libgif-dev
                 libtiff-dev libwebp-dev libfreetype6-dev libfontconfig-dev
-                libx11-dev libxext-dev swig python-dev
+                libx11-dev libxext-dev libwayland-dev swig python-dev
 -------------------------------------------------------------------------------
 
 Deb packages can be build from the GFXprim source (after installing necessary
