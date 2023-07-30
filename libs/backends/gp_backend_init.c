@@ -470,11 +470,26 @@ static gp_backend *init_backend(const char *name, char *params,
 	return ret;
 }
 
+static const char *autodetect_backend(void)
+{
+	if (getenv("WAYLAND_DISPLAY"))
+		return "wayland";
+
+	if (getenv("DISPLAY"))
+		return "x11";
+
+	return NULL;
+}
+
 gp_backend *gp_backend_init(const char *params, const char *caption)
 {
-	if (params == NULL) {
-		do_help(NULL, NULL);
-		return NULL;
+	if (!params) {
+		params = autodetect_backend();
+
+		if (!params) {
+			do_help(NULL, NULL);
+			return NULL;
+		}
 	}
 
 	/* parse backend name */

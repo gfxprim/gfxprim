@@ -228,7 +228,7 @@ static int read_file_head(const char *filename)
 
 int main(int argc, char *argv[])
 {
-	const char *backend_opts = "X11";
+	const char *backend_opts = NULL;
 	int opt;
 
 	while ((opt = getopt(argc, argv, "b:f:h")) != -1) {

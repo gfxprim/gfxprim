@@ -385,7 +385,7 @@ void gp_widgets_redraw(struct gp_widget *layout)
 	render_and_flip(layout, 0);
 }
 
-static char *backend_init_str = "x11";
+static char *backend_init_str = NULL;
 
 void gp_widget_timer_queue_switch(gp_timer **);
 

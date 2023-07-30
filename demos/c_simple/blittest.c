@@ -139,7 +139,7 @@ void print_instructions(void)
 int main(int argc, char *argv[])
 {
 	const char *sprite = "ball.ppm";
-	const char *backend_opts = "X11";
+	const char *backend_opts = NULL;
 	int opt;
 
 	print_instructions();

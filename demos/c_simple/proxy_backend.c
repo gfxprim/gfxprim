@@ -20,7 +20,7 @@
 #include <backends/gp_proxy_cli.h>
 
 static gp_backend *backend;
-static const char *backend_opts = "x11";
+static const char *backend_opts = NULL;
 static struct gp_proxy_shm *shm;
 static struct gp_proxy_cli *clients;
 static struct gp_proxy_cli *cli_shown;
