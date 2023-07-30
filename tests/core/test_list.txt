@@ -1,5 +1,6 @@
 # Core testsuite
 write_pixel.gen
+write_pixels2.gen
 pixmap
 pixel
 get_set_bits.gen
