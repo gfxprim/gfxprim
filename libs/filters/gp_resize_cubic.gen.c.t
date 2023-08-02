@@ -94,10 +94,10 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 @         end
 			gp_pixel pix[4];
 
-			pix[0] = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, j, yi[0]);
-			pix[1] = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, j, yi[1]);
-			pix[2] = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, j, yi[2]);
-			pix[3] = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, j, yi[3]);
+			pix[0] = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, j, yi[0]);
+			pix[1] = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, j, yi[1]);
+			pix[2] = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, j, yi[2]);
+			pix[3] = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, j, yi[3]);
 
 @         for c in pt.chanslist:
 			{{ c.name }}v[0] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[0]);
@@ -160,7 +160,7 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 			}
 
 			gp_pixel pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, "(uint8_t)") }});
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, j, i, pix);
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, j, i, pix);
 		}
 
 		if (gp_progress_cb_report(callback, i, dst->h, dst->w))

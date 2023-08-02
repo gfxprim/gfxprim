@@ -7,7 +7,7 @@
  */
 
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
 
 #include <gfx/gp_circle.h>
 #include <gfx/gp_hline.h>
@@ -32,15 +32,15 @@ void gp_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 #include "algo/FillRing.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_FILL_FN_PER_BPP(gp_fill_ring_raw, DEF_FILLRING_FN)
+GP_DEF_FILL_FN_PER_PACK(gp_fill_ring_raw, DEF_FILLRING_FN)
 
 void gp_fill_ring_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
                      gp_size r1, gp_size r2, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(gp_fill_ring_raw, pixmap, pixmap,
-	                     xcenter, ycenter, r1, r2, pixel);
+	GP_FN_PER_PACK_PIXMAP(gp_fill_ring_raw, pixmap, pixmap,
+	                      xcenter, ycenter, r1, r2, pixel);
 }
 
 void gp_fill_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,

@@ -95,7 +95,7 @@ static int multitone_{{ pt.name }}(const gp_pixmap *const src,
 			unsigned int dst_x = x_dst + x;
 			unsigned int dst_y = y_dst + y;
 
-			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, src_x, src_y);
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, src_x, src_y);
 
 			pix = table[pix];
 

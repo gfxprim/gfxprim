@@ -8,11 +8,11 @@
 
 #include <string.h>
 #include <core/gp_get_set_bits.h>
-#include <core/gp_write_pixel.h>
+#include <core/gp_write_pixels.gen.h>
 
 static const uint8_t bytes_1BPP[] = {0x00, 0xff};
 
-void gp_write_pixels_1BPP_LE(void *start, uint8_t off,
+void gp_write_pixels_1BPP_DB(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -29,31 +29,37 @@ void gp_write_pixels_1BPP_LE(void *start, uint8_t off,
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 2:
 		GP_SET_BITS1_ALIGNED(2, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 3:
 		GP_SET_BITS1_ALIGNED(3, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 4:
 		GP_SET_BITS1_ALIGNED(4, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 5:
 		GP_SET_BITS1_ALIGNED(5, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 6:
 		GP_SET_BITS1_ALIGNED(6, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 7:
 		GP_SET_BITS1_ALIGNED(7, 1, start, val);
 
@@ -73,23 +79,29 @@ void gp_write_pixels_1BPP_LE(void *start, uint8_t off,
 	switch (len%8) {
 	case 7:
 		GP_SET_BITS1_ALIGNED(6, 1, start, val);
+		/* fallthrough */
 	case 6:
 		GP_SET_BITS1_ALIGNED(5, 1, start, val);
+		/* fallthrough */
 	case 5:
 		GP_SET_BITS1_ALIGNED(4, 1, start, val);
+		/* fallthrough */
 	case 4:
 		GP_SET_BITS1_ALIGNED(3, 1, start, val);
+		/* fallthrough */
 	case 3:
 		GP_SET_BITS1_ALIGNED(2, 1, start, val);
+		/* fallthrough */
 	case 2:
 		GP_SET_BITS1_ALIGNED(1, 1, start, val);
+		/* fallthrough */
 	case 1:
 		GP_SET_BITS1_ALIGNED(0, 1, start, val);
 	break;
 	}
 }
 
-void gp_write_pixels_1BPP_BE(void *start, uint8_t off,
+void gp_write_pixels_1BPP_UB(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -106,31 +118,37 @@ void gp_write_pixels_1BPP_BE(void *start, uint8_t off,
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 2:
 		GP_SET_BITS1_ALIGNED(5, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 3:
 		GP_SET_BITS1_ALIGNED(4, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 4:
 		GP_SET_BITS1_ALIGNED(3, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 5:
 		GP_SET_BITS1_ALIGNED(2, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 6:
 		GP_SET_BITS1_ALIGNED(1, 1, start, val);
 
 		if (--len == 0)
 			return;
+		/* fallthrough */
 	case 7:
 		GP_SET_BITS1_ALIGNED(0, 1, start, val);
 
@@ -150,16 +168,22 @@ void gp_write_pixels_1BPP_BE(void *start, uint8_t off,
 	switch (len%8) {
 	case 7:
 		GP_SET_BITS1_ALIGNED(1, 1, start, val);
+		/* fallthrough */
 	case 6:
 		GP_SET_BITS1_ALIGNED(2, 1, start, val);
+		/* fallthrough */
 	case 5:
 		GP_SET_BITS1_ALIGNED(3, 1, start, val);
+		/* fallthrough */
 	case 4:
 		GP_SET_BITS1_ALIGNED(4, 1, start, val);
+		/* fallthrough */
 	case 3:
 		GP_SET_BITS1_ALIGNED(5, 1, start, val);
+		/* fallthrough */
 	case 2:
 		GP_SET_BITS1_ALIGNED(6, 1, start, val);
+		/* fallthrough */
 	case 1:
 		GP_SET_BITS1_ALIGNED(7, 1, start, val);
 	break;
@@ -168,7 +192,7 @@ void gp_write_pixels_1BPP_BE(void *start, uint8_t off,
 
 static const uint8_t bytes_2BPP[] = {0x00, 0x55, 0xaa, 0xff};
 
-void gp_write_pixels_2BPP_LE(void *start, uint8_t off,
+void gp_write_pixels_2BPP_DB(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -177,17 +201,19 @@ void gp_write_pixels_2BPP_LE(void *start, uint8_t off,
 	switch (off) {
 	case 0:
 	break;
-	case 2:
+	case 1:
 		GP_SET_BITS1_ALIGNED(2, 2, start, val);
 
 		if (--len == 0)
 			return;
-	case 4:
+		/* fallthrough */
+	case 2:
 		GP_SET_BITS1_ALIGNED(4, 2, start, val);
 
 		if (--len == 0)
 			return;
-	case 6:
+		/* fallthrough */
+	case 3:
 		GP_SET_BITS1_ALIGNED(6, 2, start, val);
 
 		if (--len == 0)
@@ -206,15 +232,17 @@ void gp_write_pixels_2BPP_LE(void *start, uint8_t off,
 	switch (len%4) {
 	case 3:
 		GP_SET_BITS1_ALIGNED(4, 2, start, val);
+		/* fallthrough */
 	case 2:
 		GP_SET_BITS1_ALIGNED(2, 2, start, val);
+		/* fallthrough */
 	case 1:
 		GP_SET_BITS1_ALIGNED(0, 2, start, val);
 	break;
 	}
 }
 
-void gp_write_pixels_2BPP_BE(void *start, uint8_t off,
+void gp_write_pixels_2BPP_UB(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -223,18 +251,20 @@ void gp_write_pixels_2BPP_BE(void *start, uint8_t off,
 	switch (off) {
 	case 0:
 	break;
-	case 2:
-		GP_SET_BITS1_ALIGNED(6, 2, start, val);
-
-		if (--len == 0)
-			return;
-	case 4:
+	case 1:
 		GP_SET_BITS1_ALIGNED(4, 2, start, val);
 
 		if (--len == 0)
 			return;
-	case 6:
+		/* fallthrough */
+	case 2:
 		GP_SET_BITS1_ALIGNED(2, 2, start, val);
+
+		if (--len == 0)
+			return;
+		/* fallthrough */
+	case 3:
+		GP_SET_BITS1_ALIGNED(0, 2, start, val);
 
 		if (--len == 0)
 			return;
@@ -251,11 +281,13 @@ void gp_write_pixels_2BPP_BE(void *start, uint8_t off,
 	/* And the rest */
 	switch (len%4) {
 	case 3:
-		GP_SET_BITS1_ALIGNED(0, 2, start, val);
-	case 2:
 		GP_SET_BITS1_ALIGNED(2, 2, start, val);
-	case 1:
+		/* fallthrough */
+	case 2:
 		GP_SET_BITS1_ALIGNED(4, 2, start, val);
+		/* fallthrough */
+	case 1:
+		GP_SET_BITS1_ALIGNED(6, 2, start, val);
 	break;
 	}
 }
@@ -265,7 +297,7 @@ static const uint8_t bytes_4BPP[] = {
 	0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff
 };
 
-void gp_write_pixels_4BPP_LE(void *start, uint8_t off,
+void gp_write_pixels_4BPP_DB(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -274,7 +306,7 @@ void gp_write_pixels_4BPP_LE(void *start, uint8_t off,
 	switch (off) {
 	case 0:
 	break;
-	case 4:
+	case 1:
 		GP_SET_BITS1_ALIGNED(4, 4, start, val);
 
 		if (--len == 0)
@@ -297,7 +329,7 @@ void gp_write_pixels_4BPP_LE(void *start, uint8_t off,
 	}
 }
 
-void gp_write_pixels_4BPP_BE(void *start, uint8_t off,
+void gp_write_pixels_4BPP_UB(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -306,7 +338,7 @@ void gp_write_pixels_4BPP_BE(void *start, uint8_t off,
 	switch (off) {
 	case 0:
 	break;
-	case 4:
+	case 1:
 		GP_SET_BITS1_ALIGNED(0, 4, start, val);
 
 		if (--len == 0)

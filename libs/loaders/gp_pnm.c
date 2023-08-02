@@ -359,7 +359,7 @@ static int load_ascii_g1_inv(struct buf *buf, gp_pixmap *pixmap,
 			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
-			gp_putpixel_raw_1BPP_LE(pixmap, x, y, !val);
+			gp_putpixel_raw_1BPP(pixmap, x, y, !val);
 		}
 
 		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
@@ -371,9 +371,6 @@ static int load_ascii_g1_inv(struct buf *buf, gp_pixmap *pixmap,
 	gp_progress_cb_done(cb);
 	return 0;
 }
-
-//TODO: This is temporary till blit works with bitendian
-#include <core/gp_bit_swap.h>
 
 static int load_raw_g1_inv(struct buf *buf, gp_pixmap *pixmap,
                            gp_progress_cb *cb)
@@ -389,7 +386,7 @@ static int load_raw_g1_inv(struct buf *buf, gp_pixmap *pixmap,
 				return EIO;
 
 			addr = GP_PIXEL_ADDR(pixmap, x, y);
-			*addr = ~GP_BIT_SWAP_B1(val);
+			*addr = ~val;
 		}
 
 		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
@@ -419,7 +416,7 @@ static int load_ascii_g1(struct buf *buf, gp_pixmap *pixmap,
 				val = 1;
 			}
 
-			gp_putpixel_raw_1BPP_LE(pixmap, x, y, val);
+			gp_putpixel_raw_1BPP(pixmap, x, y, val);
 		}
 
 		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
@@ -449,7 +446,7 @@ static int load_ascii_g2(struct buf *buf, gp_pixmap *pixmap,
 				val = 3;
 			}
 
-			gp_putpixel_raw_2BPP_LE(pixmap, x, y, val);
+			gp_putpixel_raw_2BPP(pixmap, x, y, val);
 		}
 
 		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
@@ -479,7 +476,7 @@ static int load_ascii_g4(struct buf *buf, gp_pixmap *pixmap,
 				val = 15;
 			}
 
-			gp_putpixel_raw_4BPP_LE(pixmap, x, y, val);
+			gp_putpixel_raw_4BPP(pixmap, x, y, val);
 		}
 
 		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
@@ -661,7 +658,7 @@ static int read_bitmap(struct buf *buf, struct pnm_header *header,
 
 	ret = gp_pixmap_alloc(header->w, header->h, GP_PIXEL_G1);
 
-	if (ret == NULL) {
+	if (!ret) {
 		err = ENOMEM;
 		goto err1;
 	}

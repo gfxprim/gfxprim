@@ -35,7 +35,7 @@ static int histogram_{{ pt.name }}(gp_histogram *self, const gp_pixmap *src, gp_
 
 	for (y = 0; y < src->h; y++) {
 		for (x = 0; x < src->w; x++) {
-			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x, y);
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x, y);
 @         for c in pt.chanslist:
 			int32_t {{ c.name }} = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
 @         end

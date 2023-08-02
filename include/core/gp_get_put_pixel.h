@@ -1,20 +1,16 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
- * Copyright (C) 2011-2012 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2011-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 #ifndef CORE_GP_GETPUTPIXEL_H
 #define CORE_GP_GETPUTPIXEL_H
 
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_transform.h>
-#include <core/gp_fn_per_bpp.h>
 #include <core/gp_pixel.h>
-
-/*
- * Generated header
- */
+#include <core/gp_pixel_pack.gen.h>
 #include <core/gp_get_put_pixel.gen.h>
 
 /*
@@ -29,8 +25,7 @@ gp_pixel gp_getpixel(const gp_pixmap *pixmap, gp_coord x, gp_coord y);
 static inline gp_pixel gp_getpixel_raw(const gp_pixmap *pixmap,
                                        gp_coord x, gp_coord y)
 {
-	GP_FN_RET_PER_BPP(gp_getpixel_raw, pixmap->bpp, pixmap->bit_endian,
-		pixmap, x, y);
+	GP_FN_RET_PER_PACK_PIXMAP(gp_getpixel_raw, pixmap, pixmap, x, y);
 
 	GP_ABORT("Invalid pixmap pixel type");
 }
@@ -59,8 +54,7 @@ void gp_putpixel(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_pixel p);
 static inline void gp_putpixel_raw(gp_pixmap *pixmap,
                                    gp_coord x, gp_coord y, gp_pixel p)
 {
-	GP_FN_PER_BPP(gp_putpixel_raw, pixmap->bpp, pixmap->bit_endian,
-		pixmap, x, y, p);
+	GP_FN_PER_PACK_PIXMAP(gp_putpixel_raw, pixmap, pixmap, x, y, p);
 }
 
 /*
@@ -69,8 +63,7 @@ static inline void gp_putpixel_raw(gp_pixmap *pixmap,
 static inline void gp_putpixel_raw_clipped(gp_pixmap *pixmap,
                                            gp_coord x, gp_coord y, gp_pixel p)
 {
-	GP_FN_PER_BPP(gp_putpixel_raw_clipped, pixmap->bpp, pixmap->bit_endian,
-	              pixmap, x, y, p);
+	GP_FN_PER_PACK_PIXMAP(gp_putpixel_raw_clipped, pixmap, pixmap, x, y, p);
 }
 
 /*

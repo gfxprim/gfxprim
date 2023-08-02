@@ -7,9 +7,11 @@
 
 #include <core/gp_debug.h>
 #include <core/gp_get_put_pixel.h>
+#include <core/gp_pixel_pack.gen.h>
+
 #include <filters/gp_rotate.h>
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static int rotate_90_{{ ps.suffix }}(const gp_pixmap *src, gp_pixmap *dst,
                                      gp_progress_cb *callback)
 {
@@ -36,7 +38,7 @@ static int rotate_90_{{ ps.suffix }}(const gp_pixmap *src, gp_pixmap *dst,
 static int rotate_90(const gp_pixmap *src, gp_pixmap *dst,
                      gp_progress_cb *callback)
 {
-	GP_FN_RET_PER_BPP_PIXMAP(rotate_90, src, src, dst, callback);
+	GP_FN_RET_PER_PACK_PIXMAP(rotate_90, src, src, dst, callback);
 	return 1;
 }
 
@@ -82,7 +84,7 @@ gp_putpixel_raw_{{ ps.suffix }}({{ dst }}, {{ x0 }}, {{ y0 }}, pix1);
 gp_putpixel_raw_{{ ps.suffix }}({{ dst }}, {{ x1 }}, {{ y1 }}, pix0);
 @ end
 @
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static int rotate_180_{{ ps.suffix }}(const gp_pixmap *src, gp_pixmap *dst,
                                       gp_progress_cb *callback)
 {
@@ -111,7 +113,7 @@ static int rotate_180_{{ ps.suffix }}(const gp_pixmap *src, gp_pixmap *dst,
 static int rotate_180(const gp_pixmap *src, gp_pixmap *dst,
                       gp_progress_cb *callback)
 {
-	GP_FN_RET_PER_BPP_PIXMAP(rotate_180, src, src, dst, callback);
+	GP_FN_RET_PER_PACK_PIXMAP(rotate_180, src, src, dst, callback);
 	return 1;
 }
 
@@ -150,7 +152,7 @@ gp_pixmap *gp_filter_rotate_180_alloc(const gp_pixmap *src,
 	return res;
 }
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static int rotate_270_{{ ps.suffix }}(const gp_pixmap *src, gp_pixmap *dst,
                                       gp_progress_cb *callback)
 {
@@ -177,7 +179,7 @@ static int rotate_270_{{ ps.suffix }}(const gp_pixmap *src, gp_pixmap *dst,
 static int rotate_270(const gp_pixmap *src, gp_pixmap *dst,
                       gp_progress_cb *callback)
 {
-	GP_FN_RET_PER_BPP_PIXMAP(rotate_270, src, src, dst, callback);
+	GP_FN_RET_PER_PACK_PIXMAP(rotate_270, src, src, dst, callback);
 	return 1;
 }
 

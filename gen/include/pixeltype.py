@@ -6,7 +6,7 @@
 #
 
 import re
-from pixelsize import PixelSize
+from pixelpack import PixelPack
 
 class PixelChannel(list):
   def __init__(self, triplet, idx):
@@ -32,14 +32,14 @@ class PixelChannel(list):
     # Channel bitmas as hex string
     self.C_mask = hex(self.mask)
     # True if this channel is alpha channel
-    self.is_alpha = name is 'A'
+    self.is_alpha = name == 'A'
 
 class PixelType(object):
   """Representation of one gp_pixel_type"""
 
-  def __init__(self, name, pixelsize, chanslist):
+  def __init__(self, name, pixelpack, chanslist):
     """`name` must be a valid C identifier
-    `pixelsize` is an instance of PixelSize
+    `pixelpack` is an instance of PixelPack
     `chanslist` is a list of triplets describing individual channels as
       [ (`chan_name`, `bit_offset`, `bit_size`) ]
       where `chan_name` is usually one of: R, G, B,
@@ -57,18 +57,18 @@ class PixelType(object):
       self.chan_names.append(i[0])
     self.chanslist = new_chanslist
     self.chans = dict() # { chan_name: (offset, size) }
-    self.pixelsize = pixelsize
+    self.pixelpack = pixelpack
     # C enum as defined in GP_Pixel.gen.h
     self.C_type = "GP_PIXEL_" + self.name
 
     # Verify channel bits for overlaps
     # also builds a bit-map of the PixelType
-    self.bits = ['x'] * pixelsize.size
+    self.bits = ['x'] * pixelpack.size
     for c in new_chanslist:
       assert c[0] not in self.chans.keys()
       self.chans[c[0]] = c
       for i in range(c[1], c[1] + c[2]):
-        assert(i < self.pixelsize.size)
+        assert(i < self.pixelpack.size)
         assert(self.bits[i] == 'x')
         self.bits[i] = c[0]
 
@@ -77,7 +77,7 @@ class PixelType(object):
 
     # all types except UNKNOWN must have one of these sizes
     if not self.is_unknown():
-      assert(self.pixelsize in config.pixelsizes)
+      assert(self.pixelpack in config.pixelpacks)
 
   def __str__(self):
     return "<PixelType " + self.name + ">"

@@ -36,9 +36,9 @@ static int resize_nn_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 	/* Interpolate */
 	for (y = 0; y < (gp_coord)dst->h; y++) {
 		for (x = 0; x < (gp_coord)dst->w; x++) {
-			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, xmap[x], ymap[y]);
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xmap[x], ymap[y]);
 
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y, pix);
 		}
 
 		if (gp_progress_cb_report(callback, y, dst->h, dst->w)) {

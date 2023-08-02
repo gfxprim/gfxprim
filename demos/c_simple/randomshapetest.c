@@ -260,6 +260,8 @@ int main(int argc, char *argv[])
 	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
 	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
 
+	clear_screen();
+
 	for (;;) {
 		gp_backend_poll(win);
 		event_loop();

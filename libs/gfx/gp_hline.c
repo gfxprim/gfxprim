@@ -6,8 +6,9 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_transform.h>
+#include <core/gp_pixel_pack.gen.h>
 
 #include <gfx/gp_hline.h>
 #include <gfx/gp_vline.h>
@@ -17,7 +18,7 @@ void gp_hline_xxy_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(gp_hline_raw, pixmap, pixmap, x0, x1, y,
+	GP_FN_PER_PACK_PIXMAP(gp_hline_raw, pixmap, pixmap, x0, x1, y,
 	                      pixel);
 }
 

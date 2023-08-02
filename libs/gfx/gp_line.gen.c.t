@@ -7,9 +7,9 @@
  * Copyright (C) 2009-2018 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/gp_common.h"
+#include <core/gp_common.h>
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
 
 #include <gfx/gp_vline.h>
 #include <gfx/gp_hline.h>
@@ -22,7 +22,7 @@
  * for a nice and understandable description.
  */
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static void line_dy_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0, int x1, int y1, gp_pixel pixval)
 {
 	if (y0 > y1) {
@@ -122,8 +122,8 @@ void gp_line_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(gp_line_raw, pixmap, pixmap, x0, y0, x1, y1,
-	                     pixel);
+	GP_FN_PER_PACK_PIXMAP(gp_line_raw, pixmap, pixmap, x0, y0, x1, y1,
+	                      pixel);
 }
 
 void gp_line(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,

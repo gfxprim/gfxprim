@@ -9,7 +9,8 @@
 
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_transform.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
+
 #include <gfx/gp_hline.h>
 #include <gfx/gp_circle.h>
 #include <gfx/gp_circle_seg.h>
@@ -20,7 +21,7 @@
  * A filled ring is drawn in the same way as circle but we 'draw' two circles
  * at a time and fill the space between them.
  */
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 
 static void fill_ring_seg_{{ ps.suffix }}(gp_pixmap *pixmap,
 	gp_coord xcenter, gp_coord ycenter, int inner_r, int outer_r,
@@ -84,6 +85,6 @@ void gp_fill_ring_seg_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 	if (r1 > r2)
 		GP_SWAP(r1, r2);
 
-	GP_FN_PER_BPP_PIXMAP(fill_ring_seg, pixmap, pixmap,
-	                     xcenter, ycenter, r1, r2, seg_flag, pixel);
+	GP_FN_PER_PACK_PIXMAP(fill_ring_seg, pixmap, pixmap,
+	                      xcenter, ycenter, r1, r2, seg_flag, pixel);
 }

@@ -50,7 +50,51 @@ static void xabc8888_to_cba888(const uint8_t *inbuf, uint8_t *outbuf,
 		inbuf+=4;
 	}
 }
+/*
+static void bitswap_1bpp(const uint8_t *inbuf, uint8_t *outbuf, unsigned int len)
+{
+	unsigned int i;
 
+	for (i = 0; i < len/8; i++)
+		out[i] = GP_BIT_SWAP_B1(inbuf[i]);
+
+
+}
+
+static void bitswap_2bpp(const uint8_t *inbuf, uint8_t *outbuf, unsigned int len)
+{
+	unsigned int i;
+
+	for (i = 0; i < len/4; i++)
+		out[i] = GP_BIT_SWAP_B2(inbuf[i]);
+
+
+}
+
+static void bitswap_4bpp_be_le(const uint8_t *inbuf, uint8_t *outbuf, unsigned int len)
+{
+	unsigned int i;
+
+	for (i = 0; i < len/2; i++)
+		out[i] = GP_BIT_SWAP_B4(inbuf[i]);
+
+	if (len % 2)
+		out[i] = (out[i] & 0x0f) | ((inbuf[i] & 0x0f)<<4);
+
+}
+
+static void bitswap_4bpp_le_be(const uint8_t *inbuf, uint8_t *outbuf, unsigned int len)
+{
+	unsigned int i;
+
+	for (i = 0; i < len/2; i++)
+		out[i] = GP_BIT_SWAP_B4(inbuf[i]);
+
+	if (len % 2)
+		out[i] = (out[i] & 0xf0) | ((inbuf[i] & 0xf0)>>4);
+
+}
+*/
 gp_line_convert gp_line_convert_get(gp_pixel_type in, gp_pixel_type out)
 {
 	switch (in) {
@@ -84,6 +128,24 @@ gp_line_convert gp_line_convert_get(gp_pixel_type in, gp_pixel_type out)
 		break;
 		}
 	break;
+/*
+	case GP_PIXEL_G1_LE:
+		if (out == GP_PIXEL_G1_BE)
+			return bitswap_1bpp;
+	break;
+	case GP_PIXEL_G1_BE:
+		if (out == GP_PIXEL_G1_LE)
+			return bitswap_1bpp;
+	break;
+	case GP_PIXEL_G4_LE:
+		if (out == GP_PIXEL_G4_BE)
+			return bitswap_4bpp_le_be;
+	break;
+	case GP_PIXEL_G4_BE:
+		if (out == GP_PIXEL_G4_LE)
+			return bitspwap_4bpp_be_le;
+	break;
+*/
 	default:
 	break;
 	}

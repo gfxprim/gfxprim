@@ -38,7 +38,7 @@ static int apply_tables_{{ pt.name }}(const gp_pixmap *const src,
 			unsigned int dst_x = x_dst + x;
 			unsigned int dst_y = y_dst + y;
 
-			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, src_x, src_y);
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, src_x, src_y);
 
 @         for c in pt.chanslist:
 			{{ c.name }} = GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(pix);
@@ -46,7 +46,7 @@ static int apply_tables_{{ pt.name }}(const gp_pixmap *const src,
 @         end
 
 			pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }});
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, dst_x, dst_y, pix);
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, dst_x, dst_y, pix);
 		}
 
 		if (gp_progress_cb_report(callback, y, h_src, w_src)) {

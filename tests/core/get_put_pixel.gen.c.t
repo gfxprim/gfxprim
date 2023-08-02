@@ -64,16 +64,16 @@ static int GetPutPixel_{{ pt.name }}(void)
 		return TST_UNTESTED;
 	}
 
-	if (try_pattern(c, 0x55555555 & {{ 2 ** pt.pixelsize.size - 1}}U))
+	if (try_pattern(c, 0x55555555 & {{ 2 ** pt.pixelpack.size - 1}}U))
 		err++;
 
-	if (try_pattern(c, 0xaaaaaaaa & {{ 2 ** pt.pixelsize.size - 1}}U))
+	if (try_pattern(c, 0xaaaaaaaa & {{ 2 ** pt.pixelpack.size - 1}}U))
 		err++;
 
-	if (try_pattern(c, 0x0f0f0f0f & {{ 2 ** pt.pixelsize.size - 1}}U))
+	if (try_pattern(c, 0x0f0f0f0f & {{ 2 ** pt.pixelpack.size - 1}}U))
 		err++;
 
-	if (try_pattern(c, 0xf0f0f0f0 & {{ 2 ** pt.pixelsize.size - 1}}U))
+	if (try_pattern(c, 0xf0f0f0f0 & {{ 2 ** pt.pixelpack.size - 1}}U))
 		err++;
 
 	gp_pixmap_free(c);

@@ -1,4 +1,5 @@
 @ include source.t
+@ include ../../include/core/write_pixels.t
 /*
  * Horizontal line drawing
  *
@@ -8,18 +9,11 @@
  */
 
 #include <core/gp_get_put_pixel.gen.h>
-#include <core/gp_write_pixel.h>
+#include <core/gp_write_pixels.gen.h>
 
 #include <gfx/gp_hline.h>
 
-@ # Explicit list of BPP that have optimized write pixel
-@ have_writepixels = ['1BPP_LE', '1BPP_BE',
-@                     '2BPP_LE', '2BPP_BE',
-@                     '4BPP_LE', '4BPP_BE',
-@                     '8BPP', '16BPP',
-@                     '24BPP', '32BPP']
-@
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int x1, int y,
 			       gp_pixel pixel)
 {
@@ -35,12 +29,12 @@ void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int x1, int y,
 	x0 = GP_MAX(x0, 0);
 	x1 = GP_MIN(x1, (int) pixmap->w - 1);
 
-@     if ps.suffix in have_writepixels:
+@     if ps.suffix in optimized_writepixels:
 	size_t length = 1 + x1 - x0;
 	void *start = GP_PIXEL_ADDR(pixmap, x0, y);
 
-@         if ps.needs_bit_endian():
-	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x0);
+@         if ps.needs_bit_order():
+	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x0 + pixmap->offset);
 
 	gp_write_pixels_{{ ps.suffix }}(start, offset, length, pixel);
 @         else:

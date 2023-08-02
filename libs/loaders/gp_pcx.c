@@ -219,9 +219,6 @@ static int read_g1(gp_io *io, struct pcx_header *header,
 		gp_io_read(rle_io, addr, res->bytes_per_row);
 		gp_io_seek(rle_io, GP_SEEK_CUR, padd);
 
-		//TODO: FIX Endians
-		gp_bit_swap_row_b1(addr, res->bytes_per_row);
-
 		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			gp_io_close(rle_io);

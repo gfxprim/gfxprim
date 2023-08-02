@@ -388,9 +388,6 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	if (gamma > 0.1)
 		gp_pixmap_set_gamma(res, 1 / gamma);
 
-	if (color_type == PNG_COLOR_TYPE_GRAY && depth < 8)
-		png_set_packswap(png);
-
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 	/*
 	 * PNG stores 16 bit values in big endian, turn
@@ -444,9 +441,8 @@ static gp_pixel_type save_ptypes[] = {
 /*
  * Maps gfxprim Pixel Type to the PNG format
  */
-static int prepare_png_header(gp_pixel_type ptype, gp_size w, gp_size h, int bit_endian,
-                              png_structp png, png_infop png_info,
-                              int *bit_endian_flag)
+static int prepare_png_header(gp_pixel_type ptype, gp_size w, gp_size h,
+                              png_structp png, png_infop png_info)
 {
 	int bit_depth, color_type;
 
@@ -509,11 +505,6 @@ static int prepare_png_header(gp_pixel_type ptype, gp_size w, gp_size h, int bit
 		png_set_bgr(png);
 		png_set_swap_alpha(png);
 	break;
-	case GP_PIXEL_G1:
-	case GP_PIXEL_G2:
-	case GP_PIXEL_G4:
-		*bit_endian_flag = !bit_endian;
-	break;
 	default:
 	break;
 	}
@@ -533,22 +524,8 @@ static int prepare_png_header(gp_pixel_type ptype, gp_size w, gp_size h, int bit
 }
 
 static int write_png_data(const gp_pixmap *src, png_structp png,
-                          gp_progress_cb *callback, int bit_endian_flag)
+                          gp_progress_cb *callback)
 {
-	/* Look if we need to swap data when writing */
-	if (bit_endian_flag) {
-		switch (src->pixel_type) {
-		case GP_PIXEL_G1:
-		case GP_PIXEL_G2:
-		case GP_PIXEL_G4:
-			png_set_packswap(png);
-		break;
-		default:
-			return ENOSYS;
-		break;
-		}
-	}
-
 	unsigned int y;
 
 	for (y = 0; y < src->h; y++) {
@@ -610,7 +587,7 @@ int gp_write_png(const gp_pixmap *src, gp_io *io,
 
 	GP_DEBUG(1, "Writing PNG Image to I/O (%p)", io);
 
-	if (prepare_png_header(src->pixel_type, 0, 0, 0, NULL, NULL, NULL)) {
+	if (prepare_png_header(src->pixel_type, 0, 0, NULL, NULL)) {
 		out_pix = gp_line_convertible(src->pixel_type, save_ptypes);
 
 		if (out_pix == GP_PIXEL_UNKNOWN) {
@@ -646,14 +623,12 @@ int gp_write_png(const gp_pixmap *src, gp_io *io,
 
 	png_set_write_fn(png, io, write_data, flush_data);
 
-	int bit_endian_flag = 0;
 	/* Fill png header and prepare for data */
-	prepare_png_header(out_pix, src->w, src->h, src->bit_endian,
-	                   png, png_info, &bit_endian_flag);
+	prepare_png_header(out_pix, src->w, src->h, png, png_info);
 
 	/* Write bitmap buffer */
 	if (src->pixel_type == out_pix) {
-		if ((err = write_png_data(src, png, callback, bit_endian_flag)))
+		if ((err = write_png_data(src, png, callback)))
 			goto err;
 	} else {
 		if ((err = convert_write_png_data(src, out_pix, png, callback)))

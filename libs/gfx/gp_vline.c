@@ -6,9 +6,9 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/gp_common.h"
+#include <core/gp_common.h>
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
 
 #include <gfx/gp_vline.h>
 #include <gfx/gp_hline.h>
@@ -34,7 +34,7 @@ void gp_vline_xyy_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
 
 	ORDER_AND_CLIP_COORDS;
 
-	GP_FN_PER_BPP_PIXMAP(gp_vline_raw, pixmap, pixmap, x, y0, y1, pixel);
+	GP_FN_PER_PACK_PIXMAP(gp_vline_raw, pixmap, pixmap, x, y0, y1, pixel);
 }
 
 void gp_vline_xyh_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,

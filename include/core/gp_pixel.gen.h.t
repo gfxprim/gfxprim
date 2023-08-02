@@ -27,9 +27,11 @@ typedef enum gp_pixel_type {
 @     if not pt.is_unknown():
 /* Automatically generated code for pixel type {{ pt.name }}
  *
- * Size (bpp): {{ pt.pixelsize.size }} ({{ pt.pixelsize.suffix }})
- * Bit endian: {{ pt.pixelsize.bit_endian_const }}
+ * Size (bpp): {{ pt.pixelpack.size }} ({{ pt.pixelpack.suffix }})
  * Pixel structure: {{ "".join(pt.bits) }}
+@         if pt.pixelpack.needs_bit_order():
+ * Bit order: {{ pt.pixelpack.bit_order }}
+@         end
  * Channels:
 @         for c in pt.chanslist:
  *   {{ c[0] }}  offset:{{ c[1] }} size:{{ c[2] }}
@@ -46,8 +48,8 @@ typedef enum gp_pixel_type {
 /*
  * macros to get address and bit-offset of a pixel {{ pt.name }} in a pixmap
  */
-#define GP_PIXEL_ADDR_{{ pt.name }}(pixmap, x, y) GP_PIXEL_ADDR_{{ pt.pixelsize.suffix }}(pixmap, x, y)
-#define GP_PIXEL_ADDR_OFFSET_{{ pt.name }}(x) GP_PIXEL_ADDR_OFFSET_{{ pt.pixelsize.suffix }}(x)
+#define GP_PIXEL_ADDR_{{ pt.name }}(pixmap, x, y) GP_PIXEL_ADDR_{{ pt.pixelpack.suffix }}(pixmap, x, y)
+#define GP_PIXEL_ADDR_OFFSET_{{ pt.name }}(x) GP_PIXEL_ADDR_OFFSET_{{ pt.pixelpack.suffix }}(x)
 
 /*
  * macros to create gp_pixel of pixel type {{ pt.name }} directly from given values.
@@ -62,7 +64,7 @@ typedef enum gp_pixel_type {
 @ end
 
 /*
- * macros for branching on pixel_type (similar to gp_fn_per_bpp.h macros)
+ * macros for branching on pixel_type
  */
 
 @ for r in [('', ''), ('return ', 'RET_')]:

@@ -50,7 +50,7 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 		int yi = GP_MIN(y_src + y, (int)src->h - 1);
 
 		/* Fetch the whole row */
-		gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, 0, yi);
+		gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, 0, yi);
 
 		int xi = x_src - kw/2;
 		i = 0;
@@ -66,7 +66,7 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 
 		/* Use as much source image pixels as possible */
 		while (xi < (int)src->w && i < size) {
-			pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, xi, yi);
+			pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, yi);
 
 @         for c in pt.chanslist:
 			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
@@ -107,7 +107,7 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 @         for c in pt.chanslist:
 			{{ c.name }}_sum = GP_CLAMP({{ c.name }}_sum, 0, {{ c.max }});
 @         end
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x_dst + x, y_dst + y,
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x_dst + x, y_dst + y,
 			                      GP_PIXEL_CREATE_{{ pt.name }}(
 					      {{ arr_to_params(pt.chan_names, "", "_sum") }}
 					      ));
@@ -187,7 +187,7 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 		int xi = GP_MIN(x_src + x, (int)src->w - 1);
 
 		/* Fetch the whole row */
-		gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, xi, 0);
+		gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, 0);
 
 		int yi = y_src - kh/2;
 		i = 0;
@@ -204,7 +204,7 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 
 		/* Use as much source image pixels as possible */
 		while (yi < (int)src->h && i < size) {
-			pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, xi, yi);
+			pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, yi);
 
 @         for c in pt.chanslist:
 			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
@@ -246,7 +246,7 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 			{{ c.name }}_sum = GP_CLAMP({{ c.name }}_sum, 0, {{ c.max }});
 @         end
 
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x_dst + x, y_dst + y,
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x_dst + x, y_dst + y,
 			                      GP_PIXEL_CREATE_{{ pt.name }}(
 					      {{ arr_to_params(pt.chan_names, "", "_sum") }}
 					      ));
@@ -323,7 +323,7 @@ static int lin_conv_{{ pt.name }}(const gp_pixmap *src,
 				xi = GP_CLAMP(xi, 0, (int)src->w - 1);
 				yi = GP_CLAMP(yi, 0, (int)src->h - 1);
 
-				pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, xi, yi);
+				pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, yi);
 
 @         for c in pt.chanslist:
 				{{ c.name }}[i][j] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
@@ -345,7 +345,7 @@ static int lin_conv_{{ pt.name }}(const gp_pixmap *src,
 				xi = GP_CLAMP(xi, 0, (int)src->w - 1);
 				yi = GP_CLAMP(yi, 0, (int)src->h - 1);
 
-				pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, xi, yi);
+				pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, yi);
 
 @         for c in pt.chanslist:
 				{{ c.name }}[idx][j] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
@@ -380,7 +380,7 @@ static int lin_conv_{{ pt.name }}(const gp_pixmap *src,
 
 			pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, "", "_res") }});
 
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x_dst + x, y_dst + y, pix);
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x_dst + x, y_dst + y, pix);
 
 			idx++;
 

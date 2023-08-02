@@ -13,9 +13,8 @@
 
 #include <stdint.h>
 
-#include "core/gp_types.h"
-#include "core/gp_common.h"
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_types.h>
+#include <core/gp_common.h>
 
 /*
  * gp_pixel_type is an enum of pixel types,
@@ -29,21 +28,9 @@
  */
 #define GP_PIXEL_BITS (sizeof(gp_pixel) * 8)
 
-/* Generated header */
 #include <core/gp_pixel.gen.h>
+#include <core/gp_pixel_alias.h>
 #include <core/gp_get_set_bits.h>
-
-/*
- * Information about ordering of pixels in byte for 1, 2 and 4 bpp
- * used in a one bit variable in gp_pixmap
- */
-typedef enum {
-	/* less significant bits contain pixels with lower indices */
-	/* also used for irrelevant bit-endian */
-	GP_BIT_ENDIAN_LE = 0,
-	/* more significant bits contain pixels with lower indices */
-	GP_BIT_ENDIAN_BE,
-} GP_BIT_ENDIAN;
 
 /*
  * Description of one channel
@@ -86,7 +73,7 @@ struct gp_pixel_type_desc {
 	gp_pixel_type type;        /* Number of the type */
 	const char name[16];      /* Name */
 	uint8_t size;	          /* Size in bits */
-	GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
+	uint8_t pack;             /* Pixel packing */
 	uint8_t numchannels;      /* Number of channels */
 	gp_pixel_flags flags;
 	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/

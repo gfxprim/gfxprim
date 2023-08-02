@@ -14,8 +14,6 @@ endif
 
 LIBNAME=core
 
-gp_write_pixel.o: CFLAGS+=$(CFLAGS_WNIF)
-
 include $(TOPDIR)/gen.mk
 include $(TOPDIR)/lib.mk
 include $(TOPDIR)/post.mk

@@ -16,10 +16,10 @@
 #define GP_GFX_H
 
 /* basic definitions and structures */
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_write_pixel.h>
-#include "core/gp_fill.h"
+#include <core/gp_write_pixels.gen.h>
+#include <core/gp_fill.h>
 
 /* public drawing API */
 #include <gfx/gp_hline.h>

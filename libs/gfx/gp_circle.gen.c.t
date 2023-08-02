@@ -8,7 +8,8 @@
 
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_transform.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
+
 #include <gfx/gp_circle.h>
 #include <gfx/gp_circle_seg.h>
 
@@ -75,7 +76,7 @@
 		{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter+y, pixel);
 	}
 @ end
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static void circle_{{ ps.suffix }}(gp_pixmap *pixmap,
 	gp_coord xcenter, gp_coord ycenter, gp_size r, gp_pixel pixel)
 {
@@ -100,8 +101,8 @@ void gp_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(circle, pixmap, pixmap,
-	                     xcenter, ycenter, r, pixel);
+	GP_FN_PER_PACK_PIXMAP(circle, pixmap, pixmap,
+	                      xcenter, ycenter, r, pixel);
 }
 
 void gp_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,

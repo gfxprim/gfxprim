@@ -6,7 +6,8 @@
  */
 
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
+
 #include <gfx/gp_hline.h>
 #include <gfx/gp_vline.h>
 #include <gfx/gp_ellipse.h>
@@ -20,7 +21,7 @@
  * we just iterate X until Y reaches next line, and then draw the full line.
  */
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 
 static void gp_fill_ellipse_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord xcenter,
 		gp_coord ycenter, gp_size a, gp_size b, gp_pixel pixel)
@@ -56,8 +57,8 @@ void gp_fill_ellipse_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(gp_fill_ellipse_raw, pixmap, pixmap,
-	                     xcenter, ycenter, a, b, pixel);
+	GP_FN_PER_PACK_PIXMAP(gp_fill_ellipse_raw, pixmap, pixmap,
+	                      xcenter, ycenter, a, b, pixel);
 }
 
 void gp_fill_ellipse(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,

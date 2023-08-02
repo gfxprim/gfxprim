@@ -6,37 +6,11 @@
 #ifndef CORE_GP_CONVERT_H
 #define CORE_GP_CONVERT_H
 
-#include "core/gp_common.h"
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_pixel.h>
 
-/* Generated headers */
 #include <core/gp_convert.gen.h>
 #include <core/gp_convert_scale.gen.h>
-
-/*
- * Generated function to convert RGB888 to any type.
- * Does not work with palette types.
- */
-gp_pixel gp_RGB888_to_pixel(gp_pixel pixel, gp_pixel_type type);
-
-/*
- * Generated function to convert RGBA8888 to any type.
- * Does not work with palette types.
- */
-gp_pixel gp_RGBA8888_to_pixel(gp_pixel pixel, gp_pixel_type type);
-
-/*
- * Generated function to convert to RGB888 from any type.
- * Does not work with palette types.
- */
-gp_pixel gp_pixel_to_RGB888(gp_pixel pixel, gp_pixel_type type);
-
-/*
- * Generated function to convert to RGBA8888 from any type.
- * Does not work with palette types.
- */
-gp_pixel gp_pixel_to_RGBA8888(gp_pixel pixel, gp_pixel_type type);
 
 /*
  * Converts a color specified by its R, G, B components to a specified type.

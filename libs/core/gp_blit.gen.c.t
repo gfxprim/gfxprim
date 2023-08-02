@@ -41,7 +41,7 @@ static void blit_xyxy_naive_raw(const gp_pixmap *src,
 	}
 }
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 /*
  * Blit for equal pixel types {{ ps.suffix }}
  */
@@ -49,7 +49,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const gp_pixmap *src,
 	gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
 	gp_pixmap *dst, gp_coord x2, gp_coord y2)
 {
-@     if not ps.needs_bit_endian():
+@     if not ps.needs_bit_order():
 	/* memcpy() each horizontal line */
 	gp_coord y;
 
@@ -122,15 +122,15 @@ static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const gp_pixmap *src,
 
 			gp_pixel p1, p2 = 0, p3 = 0;
 
-			p1 = gp_getpixel_raw_{{ src.pixelsize.suffix }}(src, x, y);
+			p1 = gp_getpixel_raw_{{ src.pixelpack.suffix }}(src, x, y);
 @                     if src.is_alpha():
-			p2 = gp_getpixel_raw_{{ dst.pixelsize.suffix }}(dst, dx, dy);
+			p2 = gp_getpixel_raw_{{ dst.pixelpack.suffix }}(dst, dx, dy);
 			p3 = gp_mix_pixels_{{ src.name }}_{{ dst.name }}(p1, p2);
 @                     else:
 			GP_PIXEL_{{ src.name }}_TO_RGB888(p1, p2);
 			GP_PIXEL_RGB888_TO_{{ dst.name }}(p2, p3);
 @                     end
-			gp_putpixel_raw_{{ dst.pixelsize.suffix }}(dst, dx, dy, p3);
+			gp_putpixel_raw_{{ dst.pixelpack.suffix }}(dst, dx, dy, p3);
 		}
 	}
 }
@@ -143,8 +143,8 @@ void gp_blit_xyxy_raw_fast(const gp_pixmap *src,
 {
 	/* Same pixel type, could be (mostly) optimized to memcpy() */
 	if (src->pixel_type == dst->pixel_type) {
-		GP_FN_PER_BPP(blitXYXY_Raw, src->bpp, src->bit_endian,
-		              src, x0, y0, x1, y1, dst, x2, y2);
+		GP_FN_PER_PACK_PIXMAP(blitXYXY_Raw, src,
+		                      src, x0, y0, x1, y1, dst, x2, y2);
 		return;
 	}
 
@@ -195,13 +195,13 @@ static void blitXYXY_{{ src.name }}_{{ dst.name }}(const gp_pixmap *src,
 			gp_pixel p1, p2 = 0;
 			xt = x; yt = y;
 			GP_TRANSFORM_POINT(src, xt, yt);
-			p1 = gp_getpixel_raw_{{ src.pixelsize.suffix }}(src, xt, yt);
+			p1 = gp_getpixel_raw_{{ src.pixelpack.suffix }}(src, xt, yt);
 			GP_PIXEL_{{ src.name }}_TO_RGB888(p1, p2);
 			GP_PIXEL_RGB888_TO_{{ dst.name }}(p2, p1);
 			xt = x2 + (x - x0);
 			yt = y2 + (y - y0);
 			GP_TRANSFORM_POINT(dst, xt, yt);
-			gp_putpixel_raw_{{ dst.pixelsize.suffix }}(dst, xt, yt, p1);
+			gp_putpixel_raw_{{ dst.pixelpack.suffix }}(dst, xt, yt, p1);
 		}
 }
 
@@ -210,7 +210,7 @@ static void blitXYXY_{{ src.name }}_{{ dst.name }}(const gp_pixmap *src,
 /*
  * Same pixel type but with rotation.
  */
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 /*
  * Blits for same pixel type and bpp {{ ps.suffix }}
  */
@@ -244,8 +244,8 @@ void gp_blit_xyxy_fast(const gp_pixmap *src,
 
 	/* Same pixel type */
 	if (src->pixel_type == dst->pixel_type) {
-		GP_FN_PER_BPP(blitXYXY, src->bpp, src->bit_endian,
-		              src, x0, y0, x1, y1, dst, x2, y2);
+		GP_FN_PER_PACK_PIXMAP(blitXYXY, src,
+		                      src, x0, y0, x1, y1, dst, x2, y2);
 		return;
 	}
 

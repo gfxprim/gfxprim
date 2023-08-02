@@ -7,9 +7,9 @@ types. This is documentation to the engine internals.
 GFXprim Config
 ~~~~~~~~~~~~~~
 
-The configuration which describes pixel layout could be found in root GFXprim
-directory under name 'gfxprim_config.py' which is used to create objects
-described below.
+The configuration which describes pixel layout could be found in
+'gen/include/gfxprim_config.py' which is used to create objects described
+below.
 
 Main Objects
 ~~~~~~~~~~~~
@@ -19,21 +19,18 @@ Pixel Size
 
 [source,python]
 -------------------------------------------------------------------------------
-class PixelSize(object):
+class PixelPack(object):
     self.size = size
 
     self.suffix = suffix
 
-    self.bit_endian = bit_endian
-
-    def needs_bit_endian(self):
-       ...
+    self.pack = 'GP_PIXEL_PACK_' + suffix
 
     ...
 
 -------------------------------------------------------------------------------
 
-The Pixel Size object represents pixel as a continous block of data.
+The PixelPack object represents pixel as a continous block of data.
 
 The 'size' is size in bits and is sometimes called bpp which stands for "bits
 per pixel". This number includes padding bits, if any.
@@ -41,25 +38,15 @@ per pixel". This number includes padding bits, if any.
 The 'suffix' is a string used as a suffix for functions, macros and other
 identifiers that operate with this pixel size.
 
-The 'bit_endian' determines the ordering of pixel bits within a byte in bitmaps
-and graymaps. This is significant in pixel types with pixel boundaries
-within a byte, i.e. 1 bpp, 4 bpp or 17 bpp.
+The 'pack' is a pixel packing name. Note that for a given pixel size in bits
+you can have different packings. Consider for example 4-bit grayscale, there
+are two different orders how to put the two 4-bit blocks inside a byte and
+none of them is better.
 
-The function 'needs_bit_endian()' returns true for pixel sizes that are not
-aligned to the whole bytes.
-
-The bit endian can be either 'BE' or 'LE' (i.e. most significant bit left or
-right in the bitmap).  Usually, the bitmap is ordered with left bits earlier
-in the memory, but the earlier/later relationship is important.  This is
-defined in terms of natural pixel ordering within the memory.
-
-'BE' means that the earlier (usually left-most) pixels use the higher ("big")
-bits of the byte. I.e. in 1 bpp, the first pixel would have value 128, the second 64
-and so on.
-
-'LE' means that the earlier (usually left-most) pixels use the lower ("little")
-bits of the byte. I.e. in 1 bpp, the first pixel would have value 1, the second 2,
-the eight'th 128 and so on.
+Different pixel types (i.e. RGB888 and BGR888) can share the same pixel
+packing, since certain types of operations do not depend on the actual
+arrangement of the color channels in a pixel (i.e. get/put pixel, rotate
+buffer 90 degrees, etc.). These operations are generated per packing.
 
 The following two figures describe bit layout in 1 bpp and 2 bpp
 grayscale bitmaps. The rectangles in the figures represents bytes as they are
@@ -154,13 +141,6 @@ digraph bit_endian {
 }
 ------------------------------------------------------------------------------
 
-NOTE: Different pixel types (i.e. RGB888 and BGR888) can share the same pixel
-      size, since certain types of operations do not depend on the actual
-      arrangement of the color channels in a pixel
-      (i.e. get/put pixel, rotate buffer 90 degrees, etc.).
-
-TODO: Rename size to bpp?
-
 Pixel Type
 ^^^^^^^^^^
 
@@ -170,7 +150,7 @@ class PixelType(object):
     self.name = name
     self.chanslist = chanslist
     self.chans = dict() # { chan_name: (offset, size) }
-    self.pixelsize = pixelsize # bits per pixel
+    self.pixelsize = pixelsize # An instance of PixelSize
 
     def is_palette(self):
         ...

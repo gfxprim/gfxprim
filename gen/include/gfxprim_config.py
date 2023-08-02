@@ -13,22 +13,23 @@
 #
 
 from pixeltype import PixelType
-from pixelsize import PixelSize, LE, BE
+from pixelpack import PixelPack, DB, UB
 from gfxprimconfig import GfxPrimConfig
 
 # Declared pixel sizes:
-PS_1BPP_LE = PixelSize(1, bit_endian=LE)
-PS_1BPP_BE = PixelSize(1, bit_endian=BE)
-PS_2BPP_LE = PixelSize(2, bit_endian=LE)
-PS_2BPP_BE = PixelSize(2, bit_endian=BE)
-PS_4BPP_LE = PixelSize(4, bit_endian=LE)
-PS_4BPP_BE = PixelSize(4, bit_endian=BE)
-PS_8BPP = PixelSize(8)
-PS_16BPP = PixelSize(16)
-PS_24BPP = PixelSize(24)
-PS_32BPP = PixelSize(32)
+PS_1BPP_DB = PixelPack(1, bit_order=DB)
+PS_1BPP_UB = PixelPack(1, bit_order=UB)
+PS_2BPP_DB = PixelPack(2, bit_order=DB)
+PS_2BPP_UB = PixelPack(2, bit_order=UB)
+PS_4BPP_DB = PixelPack(4, bit_order=DB)
+PS_4BPP_UB = PixelPack(4, bit_order=UB)
+PS_8BPP = PixelPack(8)
+PS_16BPP = PixelPack(16)
+PS_24BPP = PixelPack(24)
+PS_32BPP = PixelPack(32)
+
 # Experimental:
-PS_18BPP_LE = PixelSize(18, bit_endian=LE)
+PS_18BPP_DB = PixelPack(18, bit_order=DB)
 
 config = GfxPrimConfig(
 
@@ -36,10 +37,10 @@ config = GfxPrimConfig(
     pixel_type = "uint32_t",
     pixel_size = 32,
 
-    # List of pixel sizes (bpp), explicit on purpose
-    pixelsizes = [PS_1BPP_LE, PS_1BPP_BE, PS_2BPP_LE, PS_2BPP_BE, PS_4BPP_LE, PS_4BPP_BE,
+    # List of pixel packings, explicit on purpose
+    pixelpacks = [PS_1BPP_DB, PS_1BPP_UB, PS_2BPP_DB, PS_2BPP_UB, PS_4BPP_DB, PS_4BPP_UB,
                   PS_8BPP, PS_16BPP, PS_24BPP, PS_32BPP,
-                  PS_18BPP_LE,
+                  PS_18BPP_DB,
                  ],
 
     # List of PixelTypes, order defines the numbering.
@@ -49,43 +50,43 @@ config = GfxPrimConfig(
       #
       # Standard RGB types
       #
-      PixelType(name='xRGB8888', pixelsize=PS_32BPP, chanslist=[
-	('R', 16, 8),
-	('G', 8, 8),
-	('B', 0, 8)]),
+      PixelType(name='xRGB8888', pixelpack=PS_32BPP, chanslist=[
+	  ('R', 16, 8),
+	  ('G', 8, 8),
+	  ('B', 0, 8)]),
 
-      PixelType(name='RGBA8888', pixelsize=PS_32BPP, chanslist=[
+      PixelType(name='RGBA8888', pixelpack=PS_32BPP, chanslist=[
 	  ('R', 24, 8),
 	  ('G', 16, 8),
 	  ('B', 8, 8),
 	  ('A', 0, 8)]),
 
-      PixelType(name='RGB888', pixelsize=PS_24BPP, chanslist=[
+      PixelType(name='RGB888', pixelpack=PS_24BPP, chanslist=[
 	  ('R', 16, 8),
 	  ('G', 8, 8),
 	  ('B', 0, 8)]),
 
-      PixelType(name='BGR888', pixelsize=PS_24BPP, chanslist=[
+      PixelType(name='BGR888', pixelpack=PS_24BPP, chanslist=[
 	  ('B', 16, 8),
 	  ('G', 8, 8),
 	  ('R', 0, 8)]),
 
-      PixelType(name='RGB555', pixelsize=PS_16BPP, chanslist=[
+      PixelType(name='RGB555', pixelpack=PS_16BPP, chanslist=[
 	  ('R', 10, 5),
 	  ('G', 5, 5),
 	  ('B', 0, 5)]),
 
-      PixelType(name='RGB565', pixelsize=PS_16BPP, chanslist=[
+      PixelType(name='RGB565', pixelpack=PS_16BPP, chanslist=[
 	  ('R', 11, 5),
 	  ('G', 5, 6),
 	  ('B', 0, 5)]),
 
-      PixelType(name='RGB666', pixelsize=PS_18BPP_LE, chanslist=[
+      PixelType(name='RGB666', pixelpack=PS_18BPP_DB, chanslist=[
 	  ('R', 12, 6),
 	  ('G', 6, 6),
 	  ('B', 0, 6)]),
 
-      PixelType(name='RGB332', pixelsize=PS_8BPP, chanslist=[
+      PixelType(name='RGB332', pixelpack=PS_8BPP, chanslist=[
 	  ('R', 5, 3),
 	  ('G', 2, 3),
 	  ('B', 0, 2)]),
@@ -93,7 +94,7 @@ config = GfxPrimConfig(
       #
       # CMYK
       #
-      PixelType(name="CMYK8888", pixelsize=PS_32BPP, chanslist=[
+      PixelType(name="CMYK8888", pixelpack=PS_32BPP, chanslist=[
 	  ('K', 24, 8),
 	  ('Y', 16, 8),
 	  ('M',  8, 8),
@@ -102,35 +103,44 @@ config = GfxPrimConfig(
       #
       # Palette types
       #
-      PixelType(name='P2', pixelsize=PS_2BPP_LE, chanslist=[
+      PixelType(name='P2', pixelpack=PS_2BPP_UB, chanslist=[
 	  ('P', 0, 2)]),
 
-      PixelType(name='P4', pixelsize=PS_4BPP_LE, chanslist=[
+      PixelType(name='P4', pixelpack=PS_4BPP_UB, chanslist=[
 	  ('P', 0, 4)]),
 
-      PixelType(name='P8', pixelsize=PS_8BPP, chanslist=[
+      PixelType(name='P8', pixelpack=PS_8BPP, chanslist=[
 	  ('P', 0, 8)]),
 
       #
       # Gray-only pixel types
       #
-      PixelType(name='G1', pixelsize=PS_1BPP_LE, chanslist=[
+      PixelType(name='G1_DB', pixelpack=PS_1BPP_DB, chanslist=[
 	  ('V', 0, 1)]),
 
-      PixelType(name='G2', pixelsize=PS_2BPP_LE, chanslist=[
+      PixelType(name='G2_DB', pixelpack=PS_2BPP_DB, chanslist=[
 	  ('V', 0, 2)]),
 
-      PixelType(name='G4', pixelsize=PS_4BPP_LE, chanslist=[
+      PixelType(name='G4_DB', pixelpack=PS_4BPP_DB, chanslist=[
 	  ('V', 0, 4)]),
 
-      PixelType(name='G8', pixelsize=PS_8BPP, chanslist=[
+      PixelType(name='G1_UB', pixelpack=PS_1BPP_UB, chanslist=[
+	  ('V', 0, 1)]),
+
+      PixelType(name='G2_UB', pixelpack=PS_2BPP_UB, chanslist=[
+	  ('V', 0, 2)]),
+
+      PixelType(name='G4_UB', pixelpack=PS_4BPP_UB, chanslist=[
+	  ('V', 0, 4)]),
+
+      PixelType(name='G8', pixelpack=PS_8BPP, chanslist=[
 	  ('V', 0, 8)]),
 
-      PixelType(name='GA88', pixelsize=PS_16BPP, chanslist=[
+      PixelType(name='GA88', pixelpack=PS_16BPP, chanslist=[
 	  ('V', 0, 8),
 	  ('A', 8, 8)]),
 
-      PixelType(name='G16', pixelsize=PS_16BPP, chanslist=[
+      PixelType(name='G16', pixelpack=PS_16BPP, chanslist=[
 	  ('V', 0, 16)]),
       ]
     )

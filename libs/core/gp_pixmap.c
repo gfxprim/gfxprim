@@ -76,7 +76,6 @@ gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type)
 	}
 
 	pixmap->pixels        = pixels;
-	pixmap->bpp           = bpp;
 	pixmap->bytes_per_row = bpr;
 	pixmap->offset        = 0;
 
@@ -86,8 +85,6 @@ gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type)
 	pixmap->gamma = NULL;
 
 	pixmap->pixel_type = type;
-	#warning Hmm, bit endianity... Why is not this settled by different pixel types?
-	pixmap->bit_endian = gp_pixel_types[type].bit_endian;
 
 	/* rotation and mirroring */
 	gp_pixmap_set_rotation(pixmap, 0, 0, 0);
@@ -130,7 +127,6 @@ gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
 	uint32_t bpr = get_bpr(bpp, w);
 
 	pixmap->pixels        = pixels;
-	pixmap->bpp           = bpp;
 	pixmap->bytes_per_row = bpr;
 	pixmap->offset        = 0;
 
@@ -138,7 +134,6 @@ gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
 	pixmap->h = h;
 
 	pixmap->pixel_type = type;
-	pixmap->bit_endian = 0;
 
 	pixmap->gamma = NULL;
 
@@ -152,7 +147,8 @@ gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
 
 int gp_pixmap_resize(gp_pixmap *pixmap, gp_size w, gp_size h)
 {
-	uint32_t bpr = get_bpr(pixmap->bpp, w);
+	uint32_t bpp = gp_pixel_size(pixmap->pixel_type);
+	uint32_t bpr = get_bpr(bpp, w);
 	void *pixels;
 
 	pixels = realloc(pixmap->pixels, bpr * h);
@@ -192,7 +188,6 @@ gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, int flags)
 	if (flags & GP_COPY_WITH_PIXELS)
 		memcpy(pixels, src->pixels, src->bytes_per_row * src->h);
 
-	new->bpp           = src->bpp;
 	new->bytes_per_row = src->bytes_per_row;
 	new->offset        = 0;
 
@@ -200,7 +195,6 @@ gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, int flags)
 	new->h = src->h;
 
 	new->pixel_type = src->pixel_type;
-	new->bit_endian = src->bit_endian;
 
 	if (flags & GP_COPY_WITH_ROTATION)
 		gp_pixmap_copy_rotation(src, new);
@@ -281,16 +275,13 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
 	GP_CHECK(pixmap->w >= x + w, "Subpixmap w out of original pixmap.");
 	GP_CHECK(pixmap->h >= y + h, "Subpixmap h out of original pixmap.");
 
-	subpixmap->bpp           = pixmap->bpp;
 	subpixmap->bytes_per_row = pixmap->bytes_per_row;
-	subpixmap->offset        = (pixmap->offset +
-	                            gp_pixel_addr_offset(x, pixmap->pixel_type)) % 8;
+	subpixmap->offset        = gp_pixel_addr_offset(x+pixmap->offset, pixmap->pixel_type);
 
 	subpixmap->w = w;
 	subpixmap->h = h;
 
 	subpixmap->pixel_type = pixmap->pixel_type;
-	subpixmap->bit_endian = pixmap->bit_endian;
 
 	/* gamma */
 	subpixmap->gamma = pixmap->gamma;
@@ -298,7 +289,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
 	/* rotation and mirroring */
 	gp_pixmap_copy_rotation(pixmap, subpixmap);
 
-	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x, y);
+	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x+pixmap->offset, y);
 
 	subpixmap->free_pixels = 0;
 
@@ -310,7 +301,7 @@ void gp_pixmap_print_info(const gp_pixmap *self)
 	printf("Pixmap info\n");
 	printf("------------\n");
 	printf("Size\t%ux%u\n", self->w, self->h);
-	printf("BPP\t%u\n", self->bpp);
+	printf("BPP\t%u\n", gp_pixel_size(self->pixel_type));
 	printf("BPR\t%u\n", self->bytes_per_row);
 	printf("Pixel\t%s (%u)\n", gp_pixel_type_name(self->pixel_type),
 	       self->pixel_type);

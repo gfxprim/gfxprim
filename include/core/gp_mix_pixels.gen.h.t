@@ -77,9 +77,9 @@ static inline gp_pixel gp_mix_pixels(gp_pixel pix1, gp_pixel pix2,
 static inline void gp_mix_pixel_raw_{{ pt.name }}(gp_pixmap *pixmap,
 			gp_coord x, gp_coord y, gp_pixel pixel, uint8_t perc)
 {
-	gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, x, y);
+	gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(pixmap, x, y);
 	pix = GP_MIX_PIXELS_{{ pt.name }}(pixel, pix, perc);
-	gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, x, y, pix);
+	gp_putpixel_raw_{{ pt.pixelpack.suffix }}(pixmap, x, y, pix);
 }
 
 @ end

@@ -1,8 +1,8 @@
 @ from gfxprim_config import config
-@ pixelsizes = config.pixelsizes
+@ pixelpacks = config.pixelpacks
 @ pixeltypes_dict = config.pixeltypes_dict
 @ pixeltypes = config.pixeltypes
-@ pixelsizes_by_bpp = config.pixelsizes_by_bpp
+@ pixelpacks_by_bpp = config.pixelpacks_by_bpp
 @
 @ def arr_to_params(array, prefix='', suffix=''):
 @     res = []

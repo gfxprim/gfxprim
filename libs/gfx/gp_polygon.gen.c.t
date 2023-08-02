@@ -218,7 +218,7 @@ static int comp_hlines(const void *a, const void *b)
 	return ha->lx <= hb->lx || ((ha->lx == hb->lx) && ha->rx <= hb->rx);
 }
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static void draw_scanlines_{{ ps.suffix }}(const struct gp_line *lines, unsigned int nvert,
                            gp_coord y,
                            gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off, gp_pixel pixel)
@@ -288,8 +288,8 @@ void gp_fill_polygon_raw(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
 	break;
 	}
 
-	GP_FN_PER_BPP_PIXMAP(fill_inner_polygon, pixmap, pixmap,
-                             x_off, y_off, nvert, xy, pixel);
+	GP_FN_PER_PACK_PIXMAP(fill_inner_polygon, pixmap, pixmap,
+                              x_off, y_off, nvert, xy, pixel);
 
 	draw_edges_hlines(pixmap, x_off, y_off, xy, nvert, pixel);
 }

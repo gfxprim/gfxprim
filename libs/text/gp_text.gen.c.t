@@ -60,7 +60,7 @@ static void draw_1BPP_glyph_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style
 					gp_coord sy = k;
 					GP_TRANSFORM_POINT(pixmap, sx, sy);
 					if (!GP_PIXEL_IS_CLIPPED(pixmap, sx, sy))
-						gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, sx, sy, fg);
+						gp_putpixel_raw_{{ pt.pixelpack.suffix }}(pixmap, sx, sy, fg);
 				}
 			}
 		}
@@ -91,7 +91,7 @@ static void draw_1BPP_glyph_nomul_{{ pt.name }}(gp_pixmap *pixmap, const gp_text
 			GP_TRANSFORM_POINT(pixmap, px, py);
 
 			if (!GP_PIXEL_IS_CLIPPED(pixmap, px, py))
-				gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, px, py, fg);
+				gp_putpixel_raw_{{ pt.pixelpack.suffix }}(pixmap, px, py, fg);
 		}
 		y++;
 	}

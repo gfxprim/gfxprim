@@ -28,12 +28,6 @@ static int Pixmap_Alloc_Free(void)
 		return TST_FAILED;
 	}
 
-	/* Assert pixmap properties */
-	if (c->bpp != 24) {
-		tst_msg("Pixmap->bpp != 24 (== %i)", c->bpp);
-		return TST_FAILED;
-	}
-
 	if (c->bytes_per_row != 3 * c->w) {
 		tst_msg("Pixmap->bytes_per_row != %i (== %i)",
 		        3 * c->w, c->bytes_per_row);
@@ -86,11 +80,6 @@ static int Pixmap_Alloc_Free(void)
 static int subpixmap_assert(const gp_pixmap *c, const gp_pixmap *sc,
                              gp_size w, gp_size h)
 {
-	if (c->bpp != sc->bpp) {
-		tst_msg("Pixmap->bpp != SubPixmap->bpp");
-		return TST_FAILED;
-	}
-
 	if (c->bytes_per_row != sc->bytes_per_row) {
 		tst_msg("Pixmap->bytes_per_row != SubPixmap->bytes_per_row");
 		return TST_FAILED;

@@ -108,10 +108,10 @@ gp_pixel gp_{{ pt.name }}_to_pixel(gp_pixel pixel, gp_pixel_type type);
  * Function converting to {{ pt.name }} from any other PixelType
  * Does not work on palette types at all (yet)
  */
-gp_pixel gp_pixel_to{{ pt.name }}(gp_pixel pixel, gp_pixel_type type);
+gp_pixel gp_pixel_to_{{ pt.name }}(gp_pixel pixel, gp_pixel_type type);
 
 @ end
 
 /* Experimental macros testing generated scripts */
 @ pixel_type_to_type(pixeltypes_dict['RGB565'], pixeltypes_dict['RGBA8888'])
-@ pixel_type_to_type(pixeltypes_dict['RGBA8888'], pixeltypes_dict['G2'])
+@ pixel_type_to_type(pixeltypes_dict['RGBA8888'], pixeltypes_dict['G2_UB'])

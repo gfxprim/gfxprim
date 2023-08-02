@@ -9,7 +9,7 @@
 
 #include <core/gp_common.h>
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
 
 #include <gfx/gp_hline.h>
 #include <gfx/gp_line.h>
@@ -29,7 +29,7 @@
  * See also http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
  */
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static void perp_dy_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
                   int dx, int dy, int errinit, int width, int winit,
 		  int xstep, int ystep, gp_pixel pixval)
@@ -256,7 +256,7 @@ void gp_line_th_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(gp_line_th_raw, pixmap, pixmap, x0, y0, x1, y1, r, pixel);
+	GP_FN_PER_PACK_PIXMAP(gp_line_th_raw, pixmap, pixmap, x0, y0, x1, y1, r, pixel);
 }
 
 void gp_line_th(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,

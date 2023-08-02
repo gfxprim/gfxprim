@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <core/gp_write_pixel.h>
+#include <core/gp_write_pixels.gen.h>
 
 #include "tst_test.h"
 
@@ -65,7 +65,7 @@ static int compare_buffers(uint8_t *exp, uint8_t *res, unsigned int len)
 @     for j in range(0, int(max_buf_len/8)):
 @         byte = 0;
 @         for i in range(0, 8):
-@             if endian == 'LE':
+@             if endian == 'DB':
 @                 byte = byte | (bits[i + j * 8] << i)
 @             else:
 @                 byte = byte | (bits[i + j * 8] << (7-i))
@@ -73,7 +73,7 @@ static int compare_buffers(uint8_t *exp, uint8_t *res, unsigned int len)
 @     end
 @     return bytes
 @
-@ for endian in ['LE', 'BE']:
+@ for endian in ['DB', 'UB']:
 @     for off in range(0, max_off):
 @         for len in range(0, max_len):
 static int write_pixels_1BPP_{{endian}}_{{off}}_{{len}}(void)
@@ -98,7 +98,7 @@ static int write_pixels_1BPP_{{endian}}_{{off}}_{{len}}(void)
 const struct tst_suite tst_suite = {
 	.suite_name = "write_pixels 1BPP tests",
 	.tests = {
-@ for endian in ['LE', 'BE']:
+@ for endian in ['DB', 'UB']:
 @     for bpp in [1]:
 @         for off in range(0, max_off):
 @             for len in range(0, max_len):

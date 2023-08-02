@@ -35,8 +35,7 @@
 %import "gp_convert.gen.h"
 %import "gp_convert_scale.gen.h"
 
-%import "gp_fn_per_bpp.h"
-%import "gp_fn_per_bpp.gen.h"
+%import "gp_pixel_pack.gen.h"
 
 %inline %{
 const gp_pixel_type_desc *gp_pixel_types_access(gp_pixel_type no)
@@ -54,7 +53,6 @@ const gp_pixel_type_desc *gp_pixel_types_access(gp_pixel_type no)
 %immutable gp_pixmap::w;
 %immutable gp_pixmap::h;
 %immutable gp_pixmap::pixel_type;
-%immutable gp_pixmap::bpp;
 %immutable gp_pixmap::bytes_per_row;
 /* Rename "internal" gp_pixmap */
 %rename("_%s") "gp_pixmap::pixels";
@@ -91,8 +89,8 @@ and self.thisown.") gp_pixmap;
 
 %extend gp_pixmap {
   ~gp_pixmap() {
-    GP_DEBUG(2, "[wrapper] gp_pixmap_free (%dx%d raw, %dbpp, free_pixels:%d)",
-      $self->w, $self->h, $self->bpp, $self->free_pixels);
+    GP_DEBUG(2, "[wrapper] gp_pixmap_free (%dx%d raw, free_pixels:%d)",
+      $self->w, $self->h, $self->free_pixels);
     gp_pixmap_free($self);
   }
   gp_pixmap(gp_coord w, gp_coord h, gp_pixel_type typeno) {
@@ -121,6 +119,6 @@ ERROR_ON_NULL(gp_sub_pixmap_alloc);
  */
 %include "gp_get_put_pixel.h"
 %import "gp_get_put_pixel.gen.h"
-%include "gp_write_pixel.h"
+%include "gp_write_pixels.gen.h"
 %include "gp_blit.h"
 %include "gp_fill.h"

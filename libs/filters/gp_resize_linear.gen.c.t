@@ -16,7 +16,7 @@
 @
 @ def fetch_rows(pt, y):
 for (x = 0; x < src->w; x++) {
-	gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x, {{ y }});
+	gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x, {{ y }});
 @     for c in pt.chanslist:
 	{{ c.name }}[x] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
 @     end
@@ -113,7 +113,7 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 @         for c in pt.chanslist:
 			uint32_t {{ c.name }}_p = ({{ c.name }}_res[x] + div/2) / div;
 @         end
-                        gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x, y,
+                        gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y,
 				GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, '', '_p') }}));
 		}
 
@@ -180,10 +180,10 @@ static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 			if (y1 >= (gp_coord)src->h)
 				y1 = src->h - 1;
 
-			pix00 = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
-			pix10 = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x1, y0);
-			pix01 = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x0, y1);
-			pix11 = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x1, y1);
+			pix00 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x0, y0);
+			pix10 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x1, y0);
+			pix01 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x0, y1);
+			pix11 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x1, y1);
 
 @         for c in pt.chanslist:
 			{{ c.name }}0 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix00) * (255 - xoff[x]);
@@ -205,7 +205,7 @@ static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 			{{ c.name }} = ({{ c.name }}1 * yoff[y] + {{ c.name }}0 * (255 - yoff[y]) + (1<<15)) >> 16;
 @         end
 
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x, y,
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y,
 			                      GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }}));
 		}
 

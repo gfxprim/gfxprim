@@ -36,8 +36,8 @@ const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX] = {
 	/* GP_PIXEL_{{ pt.name }} */ {
 		.type	= GP_PIXEL_{{ pt.name }},
 		.name	= "{{ pt.name }}",
-		.size	= {{ pt.pixelsize.size }},
-		.bit_endian  = {{ pt.pixelsize.bit_endian_const }},
+		.size	= {{ pt.pixelpack.size }},
+		.pack   = {{ pt.pixelpack.pack_id }},
 		.numchannels = {{ len(pt.chanslist) }},
 		.bitmap      = "{{ ''.join(pt.bits) }}",
 		.flags       = {{ getflags(pt) }},
@@ -57,8 +57,8 @@ const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX] = {
  */
 static void pixel_snprint_{{ pt.name }}(char *buf, size_t len, gp_pixel p)
 {
-	snprintf(buf, len, "{{ pt.name }} 0x%0{{ (pt.pixelsize.size+3)//4 }}lx {{ '=%li '.join(pt.chan_names) + '=%li' }}",
-		(unsigned long int)GP_GET_BITS(0, {{ pt.pixelsize.size }}, p),
+	snprintf(buf, len, "{{ pt.name }} 0x%0{{ (pt.pixelpack.size+3)//4 }}lx {{ '=%li '.join(pt.chan_names) + '=%li' }}",
+		(unsigned long int)GP_GET_BITS(0, {{ pt.pixelpack.size }}, p),
 		{{ arr_to_params(pt.chan_names, '(long int) GP_PIXEL_GET_', '_' + pt.name + '(p)') }});
 }
 

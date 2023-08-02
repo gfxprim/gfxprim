@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <core/gp_write_pixel.h>
+#include <core/gp_write_pixels.gen.h>
 
 #include "tst_test.h"
 

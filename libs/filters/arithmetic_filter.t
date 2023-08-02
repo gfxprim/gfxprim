@@ -18,8 +18,8 @@ static int filter_{{ name }}_{{ pt.name }}(const gp_pixmap *src_a, const gp_pixm
 
 	for (y = 0; y < h; y++) {
 		for (x = 0; x < w; x++) {
-			gp_pixel pix_a = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src_a, x, y);
-			gp_pixel pix_b = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src_b, x, y);
+			gp_pixel pix_a = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src_a, x, y);
+			gp_pixel pix_b = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src_b, x, y);
 
 @             for c in pt.chanslist:
 			int32_t {{ c.name }}_A = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix_a);
@@ -34,7 +34,7 @@ static int filter_{{ name }}_{{ pt.name }}(const gp_pixmap *src_a, const gp_pixm
 			gp_pixel pix;
 			pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }});
 
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y, pix);
 		}
 
 		if (gp_progress_cb_report(callback, y, h, w))

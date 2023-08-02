@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2012      Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2012 Cyril Hrubis <metan@ucw.cz>
  */
 
  /*

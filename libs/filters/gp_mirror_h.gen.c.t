@@ -10,7 +10,7 @@
 #include <core/gp_debug.h>
 #include <filters/gp_rotate.h>
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static int mirror_h_raw_{{ ps.suffix }}(const gp_pixmap *src,
                                         gp_pixmap *dst,
                                         gp_progress_cb *callback)
@@ -50,7 +50,7 @@ static int mirror_h_raw_{{ ps.suffix }}(const gp_pixmap *src,
 static int gp_filter_mirror_h_raw(const gp_pixmap *src, gp_pixmap *dst,
                                   gp_progress_cb *callback)
 {
-	GP_FN_RET_PER_BPP_PIXMAP(mirror_h_raw, src, src, dst, callback);
+	GP_FN_RET_PER_PACK_PIXMAP(mirror_h_raw, src, src, dst, callback);
 	return 1;
 }
 

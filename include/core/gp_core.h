@@ -23,7 +23,7 @@
 #include <core/gp_pixel.h>
 #include <core/gp_convert.h>
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_write_pixel.h>
+#include <core/gp_write_pixels.gen.h>
 #include <core/gp_blit.h>
 #include <core/gp_debug.h>
 #include <core/gp_fill.h>

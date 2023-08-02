@@ -8,7 +8,7 @@
 #include <core/gp_get_put_pixel.h>
 #include <gfx/gp_vline.gen.h>
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 void gp_vline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x,
 			gp_coord y0, gp_coord y1, gp_pixel pixel)
 {

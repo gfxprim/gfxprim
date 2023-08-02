@@ -51,6 +51,16 @@ gp_pixel_type gp_pixel_type_by_name(const char *name)
 {
 	unsigned int i;
 
+	/* Aliases */
+	if (!strcasecmp(name, "G1"))
+		return GP_PIXEL_G1_UB;
+
+	if (!strcasecmp(name, "G2"))
+		return GP_PIXEL_G2_UB;
+
+	if (!strcasecmp(name, "G4"))
+		return GP_PIXEL_G4_UB;
+
 	for (i = 0; i < GP_PIXEL_MAX; i++)
 		if (!strcasecmp(name, gp_pixel_types[i].name))
 			return i;

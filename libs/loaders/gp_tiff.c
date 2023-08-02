@@ -460,21 +460,6 @@ static int tiff_read(TIFF *tiff, gp_pixmap *res, struct tiff_header *header,
 				return EIO;
 			}
 
-			//Temporary, till bitendians are fixed
-			switch (res->pixel_type) {
-			case GP_PIXEL_G1:
-				gp_bit_swap_row_b1(addr, res->bytes_per_row);
-			break;
-			case GP_PIXEL_G2:
-				gp_bit_swap_row_b2(addr, res->bytes_per_row);
-			break;
-			case GP_PIXEL_G4:
-				gp_bit_swap_row_b4(addr, res->bytes_per_row);
-			break;
-			default:
-			break;
-			}
-
 			/* We need to negate the values when Min is White */
 			if (header->photometric == PHOTOMETRIC_MINISWHITE)
 				for (i = 0; i < res->bytes_per_row; i++)
@@ -606,36 +591,16 @@ err0:
 static int save_grayscale(TIFF *tiff, const gp_pixmap *src,
                           gp_progress_cb *callback)
 {
-	uint32_t x, y;
-	uint8_t buf[src->bytes_per_row];
-	tsize_t ret;
+	uint32_t y;
 
-	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, src->bpp);
+	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, gp_pixel_size(src->pixel_type));
 	TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 1);
 	TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 	TIFFSetField(tiff, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
 
 	for (y = 0; y < src->h; y++) {
 		uint8_t *addr = GP_PIXEL_ADDR(src, 0, y);
-
-		if (src->bpp < 8 && !src->bit_endian) {
-			for (x = 0; x < src->bytes_per_row; x++) {
-				switch (src->pixel_type) {
-				case GP_PIXEL_G1:
-					buf[x] = GP_BIT_SWAP_B1(addr[x]);
-				break;
-				case GP_PIXEL_G2:
-					buf[x] = GP_BIT_SWAP_B2(addr[x]);
-				break;
-				case GP_PIXEL_G4:
-					buf[x] = GP_BIT_SWAP_B4(addr[x]);
-				break;
-				default:
-					GP_BUG("Uh, oh, do we need swap?");
-				}
-			}
-			addr = buf;
-		}
+		tsize_t ret;
 
 		ret = TIFFWriteEncodedStrip(tiff, y, addr, src->bytes_per_row);
 

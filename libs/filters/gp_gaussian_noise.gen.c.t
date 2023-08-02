@@ -52,7 +52,7 @@ static int gaussian_noise_add_{{ pt.name }}(const gp_pixmap *src,
 @         end
 
 		for (x = 0; x < w_src; x++) {
-			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x + x_src, y + y_src);
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x + x_src, y + y_src);
 
 @         for c in pt.chanslist:
 			{{ c.name }}[x] += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
@@ -60,7 +60,7 @@ static int gaussian_noise_add_{{ pt.name }}(const gp_pixmap *src,
 @         end
 
 			pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, '', '[x]') }});
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x + x_dst, y + y_dst, pix);
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x + x_dst, y + y_dst, pix);
 		}
 
 		if (gp_progress_cb_report(callback, y, h_src, w_src)) {

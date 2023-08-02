@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 #ifndef CORE_GP_PIXMAP_H
@@ -19,7 +19,6 @@
 /* This structure holds all information needed for drawing into an image. */
 struct gp_pixmap {
 	uint8_t *pixels;	 /* pointer to image pixels */
-	uint8_t bpp;		 /* pixel size in bits */
 	uint32_t bytes_per_row;
 	uint32_t w;		 /* width in pixels */
 	uint32_t h;		 /* height in pixels */
@@ -31,7 +30,7 @@ struct gp_pixmap {
 	uint8_t offset;
 
 	/*
-	 * Pixel format. See GP_Pixel.gen.h and GP_Pixel.gen.c.
+	 * Pixel format. See gp_pixel.gen.h and gp_pixel.gen.c.
 	 */
 	enum gp_pixel_type pixel_type;
 
@@ -51,7 +50,6 @@ struct gp_pixmap {
 	uint8_t axes_swap:1;	/* swap axes so that x is y and y is x */
 	uint8_t x_swap:1;	/* swap direction on x */
 	uint8_t y_swap:1;	/* swap direction on y */
-	uint8_t bit_endian:1;	/* GP_BIT_ENDIAN */
 	uint8_t free_pixels:1;  /* If set pixels are freed on gp_pixmap_free */
 };
 
@@ -61,7 +59,7 @@ struct gp_pixmap {
  */
 #define GP_PIXEL_ADDR(pixmap, x, y) ((pixmap)->pixels \
 	+ (y) * (pixmap)->bytes_per_row \
-	+ ((x) * (pixmap)->bpp) / 8)
+	+ ((x) * gp_pixel_size((pixmap)->pixel_type)) / 8)
 
 #define GP_CALC_ROW_SIZE(pixel_type, width) \
 	 ((gp_pixel_size(pixel_type) * width) / 8 + \
@@ -70,7 +68,6 @@ struct gp_pixmap {
 /* Performs a series of sanity checks on pixmap, aborting if any fails. */
 #define GP_CHECK_PIXMAP(pixmap) do { \
 	GP_CHECK(pixmap, "NULL passed as pixmap"); \
-	GP_CHECK(pixmap->bpp <= 32, "invalid pixmap: unsupported bits-per-pixel count"); \
 	GP_CHECK(pixmap->pixels || pixmap->w == 0 || pixmap->h == 0, "invalid pixmap: pixels NULL on nonzero w h"); \
 } while (0)
 

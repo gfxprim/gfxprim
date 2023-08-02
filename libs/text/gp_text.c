@@ -3,11 +3,10 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <core/gp_pixmap.h>
-#include <core/gp_fn_per_bpp.h>
 #include <core/gp_debug.h>
 
 #include <gfx/gp_rect.h>

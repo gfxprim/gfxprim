@@ -3,14 +3,15 @@
  * Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/gp_common.h"
+#include <core/gp_common.h>
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
+
 #include <gfx/gp_symbol.h>
 #include <gfx/gp_hline.h>
 #include <gfx/gp_vline.h>
 
-@ for ps in pixelsizes:
+@ for ps in pixelpacks:
 static void triangle_up_{{ ps.suffix }}(gp_pixmap *pixmap,
                                         gp_coord xcenter, gp_coord ycenter,
                                         gp_size rx, gp_size ry,
@@ -93,16 +94,16 @@ void gp_symbol_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 
 	switch (stype) {
 	case GP_TRIANGLE_UP:
-		GP_FN_PER_BPP_PIXMAP(triangle_up, pixmap, pixmap, xcenter, ycenter, rx, ry, pixel);
+		GP_FN_PER_PACK_PIXMAP(triangle_up, pixmap, pixmap, xcenter, ycenter, rx, ry, pixel);
 	break;
 	case GP_TRIANGLE_DOWN:
-		GP_FN_PER_BPP_PIXMAP(triangle_down, pixmap, pixmap, xcenter, ycenter, rx, ry, pixel);
+		GP_FN_PER_PACK_PIXMAP(triangle_down, pixmap, pixmap, xcenter, ycenter, rx, ry, pixel);
 	break;
 	case GP_TRIANGLE_LEFT:
-		GP_FN_PER_BPP_PIXMAP(triangle_left, pixmap, pixmap, xcenter, ycenter, rx, ry, pixel);
+		GP_FN_PER_PACK_PIXMAP(triangle_left, pixmap, pixmap, xcenter, ycenter, rx, ry, pixel);
 	break;
 	case GP_TRIANGLE_RIGHT:
-		GP_FN_PER_BPP_PIXMAP(triangle_right, pixmap, pixmap, xcenter, ycenter, rx, ry, pixel);
+		GP_FN_PER_PACK_PIXMAP(triangle_right, pixmap, pixmap, xcenter, ycenter, rx, ry, pixel);
 	break;
 	}
 }

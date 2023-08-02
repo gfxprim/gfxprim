@@ -83,11 +83,11 @@ static int hilbert_peano_to_{{ pt.name }}_raw(const gp_pixmap *src,
 @         end
 
 @         if pt.is_gray():
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, state.x, state.y, res_V);
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, state.x, state.y, res_V);
 @         else:
 			gp_pixel res = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, 'res_') }});
 
-			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, state.x, state.y, res);
+			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, state.x, state.y, res);
 @         end
 			cnt++;
 

@@ -24,7 +24,7 @@ void gp_putpixel(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_pixel p)
 
 uint8_t gp_pixel_addr_offset(gp_coord x, gp_pixel_type pixel_type)
 {
-	GP_FN_RET_PER_BPP_PIXELTYPE(GP_PIXEL_ADDR_OFFSET, pixel_type, x);
+	GP_FN_RET_PER_PACK_PIXELTYPE(GP_PIXEL_ADDR_SHIFT, pixel_type, x);
 
 	return 0;
 }

@@ -52,7 +52,6 @@ static inline int gp_pixmap_from_sdl_surface(gp_pixmap *pixmap,
 
 	/* basic structure and size */
 	pixmap->pixels = surf->pixels;
-	pixmap->bpp = 8 * surf->format->BytesPerPixel;
 	pixmap->pixel_type = pixeltype;
 	pixmap->bytes_per_row = surf->pitch;
 	pixmap->w = surf->w;

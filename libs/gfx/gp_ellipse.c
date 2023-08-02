@@ -7,7 +7,7 @@
  */
 
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel_pack.gen.h>
 
 #include <gfx/gp_ellipse.h>
 #include <gfx/gp_hline.h>
@@ -15,14 +15,14 @@
 #include "algo/Ellipse.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(gp_ellipse_raw, DEF_ELLIPSE_FN)
+GP_DEF_DRAW_FN_PER_PACK(gp_ellipse_raw, DEF_ELLIPSE_FN)
 
 void gp_ellipse_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
                     gp_size a, gp_size b, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(gp_ellipse_raw, pixmap, pixmap,
+	GP_FN_PER_PACK_PIXMAP(gp_ellipse_raw, pixmap, pixmap,
 	                      xcenter, ycenter, a, b, pixel);
 }
 
