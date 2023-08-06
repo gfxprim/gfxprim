@@ -28,6 +28,7 @@
 #include <core/gp_types.h>
 
 #include <utils/gp_timer.h>
+#include <utils/gp_fds.h>
 
 #include <input/gp_ev_queue.h>
 #include <input/gp_task.h>
@@ -101,7 +102,8 @@ struct gp_backend {
 	/*
 	 * Non-blocking event loop.
 	 *
-	 * The events are filled into the event queue see GP_Input.h.
+	 * Backends that have a file descriptor does not set this function and
+	 * rather insert a file descriptor into the fds array.
 	 */
 	void (*poll)(gp_backend *self);
 
@@ -117,12 +119,13 @@ struct gp_backend {
 	 * translated to input events. So input queue may be empty
 	 * after Wait has returned.
 	 *
-	 * The events are filled into the event queue see GP_Input.h.
+	 * Backends that have a file descriptor does not set this function and
+	 * rather insert a file descriptor into the fds array.
 	 */
 	void (*wait)(gp_backend *self);
 
-	/* Connection fd. Set to -1 if not available */
-	int fd;
+	/* File descriptors to poll for */
+	gp_fds fds;
 
 	/*
 	 * Queue to store input events.

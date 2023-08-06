@@ -195,17 +195,18 @@ void gp_backend_poll(gp_backend *self)
 			return;
 	}
 
-	self->poll(self);
+	if (self->poll)
+		self->poll(self);
+
+	if (gp_fds_count(&self->fds))
+		gp_fds_poll(&self->fds, 0);
 }
 
-static void wait_timers_fd(gp_backend *self, uint64_t now)
+static void wait_timers_fds(gp_backend *self, uint64_t now)
 {
 	int timeout = self->timers->expires - now;
 
-	struct pollfd fd = {.fd = self->fd, .events = POLLIN, fd.revents = 0};
-
-	if (poll(&fd, 1, timeout))
-		self->poll(self);
+	gp_fds_poll(&self->fds, timeout);
 }
 
 /*
@@ -220,6 +221,9 @@ static void wait_timers_poll(gp_backend *self)
 			return;
 
 		self->poll(self);
+
+		if (gp_fds_count(&self->fds))
+			gp_fds_poll(&self->fds, 0);
 
 		if (gp_backend_events(self))
 			return;
@@ -238,15 +242,18 @@ void gp_backend_wait(gp_backend *self)
 			return;
 
 		/* Wait for events or timer expiration */
-		if (self->fd != -1)
-			wait_timers_fd(self, now);
-		else
+		if (self->poll)
 			wait_timers_poll(self);
+		else
+			wait_timers_fds(self, now);
 
 		return;
 	}
 
-	self->wait(self);
+	if (self->wait)
+		self->wait(self);
+	else
+		gp_fds_poll(&self->fds, -1);
 }
 
 gp_event *gp_backend_wait_event(gp_backend *self)

@@ -35,6 +35,7 @@
 
 static int resize_ximage(gp_backend *self, int w, int h);
 static int resize_shm_ximage(gp_backend *self, int w, int h);
+static void process_events(struct x11_win *win, gp_backend *backend);
 
 static void putimage(struct x11_win *win, int x0, int y0, int x1, int y1)
 {
@@ -66,6 +67,8 @@ static void x11_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 
 	XFlush(win->dpy);
 
+	process_events(win, self);
+
 	XUnlockDisplay(win->dpy);
 }
 
@@ -87,6 +90,8 @@ static void x11_flip(gp_backend *self)
 	putimage(win, 0, 0, w - 1, h - 1);
 
 	XFlush(win->dpy);
+
+	process_events(win, self);
 
 	XUnlockDisplay(win->dpy);
 }
@@ -171,28 +176,28 @@ static void x11_ev(XEvent *ev)
 	}
 }
 
-static void x11_poll(gp_backend *self)
+static void process_events(struct x11_win *win, gp_backend *backend)
 {
-	struct x11_win *win = GP_BACKEND_PRIV(self);
 	XEvent ev;
 
-	XLockDisplay(win->dpy);
-
-	while (XPending(win->dpy) && !gp_ev_queue_full(&self->event_queue)) {
+	while (XPending(win->dpy) && !gp_ev_queue_full(&backend->event_queue)) {
 		XNextEvent(win->dpy, &ev);
 		x11_ev(&ev);
 	}
-
-	XUnlockDisplay(win->dpy);
 }
 
-#include <poll.h>
-
-static void x11_wait(gp_backend *self)
+static int x11_process_fd(gp_fd *self)
 {
-	struct pollfd fd = {.fd = self->fd, .events = POLLIN, .revents = 0};
-	poll(&fd, 1, -1);
-	x11_poll(self);
+	gp_backend *backend = self->priv;
+	struct x11_win *win = GP_BACKEND_PRIV(backend);
+
+	XLockDisplay(win->dpy);
+
+	process_events(win, backend);
+
+	XUnlockDisplay(win->dpy);
+
+	return 0;
 }
 
 static int resize_buffer(struct gp_backend *self, uint32_t w, uint32_t h)
@@ -624,6 +629,10 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 		goto err1;
 	}
 
+	int fd = XConnectionNumber(win->dpy);
+
+	gp_fds_add(&backend->fds, fd, POLLIN, x11_process_fd, backend);
+
 	if (flags & GP_X11_FULLSCREEN)
 		x11_win_fullscreen(win, 1);
 
@@ -646,12 +655,9 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	backend->flip = x11_flip;
 	backend->update_rect = x11_update_rect;
 	backend->exit = x11_exit;
-	backend->poll = x11_poll;
-	backend->wait = x11_wait;
 	backend->set_attr = x11_set_attr;
 	backend->clipboard = x11_clipboard;
 	backend->resize_ack = x11_resize_ack;
-	backend->fd = XConnectionNumber(win->dpy);
 
 	return backend;
 err1:

@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -9,22 +9,24 @@
  * Simple wrapper around poll and gp_vec.
  */
 
-#ifndef GP_FDS
-#define GP_FDS
+#ifndef UTILS_GP_FDS__
+#define UTILS_GP_FDS__
 
+#include <utils/gp_vec.h>
 #include <poll.h>
 
-struct gp_fds {
+typedef struct gp_fds {
 	struct gp_fd *fds;
 	struct pollfd *pfds;
 	int modified:1;
-};
+} gp_fds;
 
-struct gp_fd {
+typedef struct gp_fd {
 	/* Called when revent != 0 */
-	int (*event)(struct gp_fd *self, struct pollfd *pfd);
+	int (*event)(struct gp_fd *self);
+	struct pollfd *pfd;
 	void *priv;
-};
+} gp_fd;
 
 #define GP_FDS_INIT {}
 
@@ -45,7 +47,7 @@ void gp_fds_clear(struct gp_fds *self);
  * @priv   Private pointer passed to the event() handler.
  */
 int gp_fds_add(struct gp_fds *self, int fd, short events,
-               int (*event)(struct gp_fd *self, struct pollfd *pfd), void *priv);
+               int (*event)(struct gp_fd *self), void *priv);
 
 /*
  * Removes a file descriptor.
@@ -68,4 +70,16 @@ int gp_fds_rem(struct gp_fds *self, int fd);
  */
 int gp_fds_poll(struct gp_fds *self, int timeout);
 
-#endif /* GP_FDS */
+/*
+ * @self The fds struct.
+ * @return Number of fds in the queue.
+ */
+static inline size_t gp_fds_count(struct gp_fds *self)
+{
+	if (!self->fds)
+		return 0;
+
+	return gp_vec_len(self->fds);
+}
+
+#endif /* UTILS_GP_FDS__ */

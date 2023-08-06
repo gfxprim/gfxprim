@@ -217,7 +217,6 @@ static struct gp_backend backend = {
 	.clipboard = sdl_clipboard,
 #endif
 	.exit = sdl_exit,
-	.fd = -1,
 	.poll = sdl_poll,
 	.wait = sdl_wait,
 };

@@ -21,6 +21,8 @@
 #include "gp_xcb_con.h"
 #include "gp_xcb_input.h"
 
+static void x_poll_events(gp_backend *backend);
+
 struct win {
 	xcb_screen_t *scr;
 	xcb_window_t win;
@@ -215,11 +217,15 @@ static void x_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 		put_shm_image(self, x0, y0, w, h);
 	else
 		put_image(self, x0, y0, w, h);
+
+	x_poll_events(self);
 }
 
 static void x_flip(gp_backend *self)
 {
 	x_update_rect(self, 0, 0, self->pixmap->w - 1, self->pixmap->h - 1);
+
+	x_poll_events(self);
 }
 
 static int x_resize_ack(struct gp_backend *self)
@@ -305,24 +311,23 @@ static void x_ev(gp_backend *self, xcb_generic_event_t *ev)
 	}
 }
 
-static void x_poll(gp_backend *self)
+static void x_poll_events(gp_backend *backend)
 {
 	xcb_generic_event_t *ev;
 
-	while ((ev = xcb_poll_for_event(x_con.c)) && !gp_ev_queue_full(&self->event_queue)) {
-		x_ev(self, ev);
+	while ((ev = xcb_poll_for_event(x_con.c)) && !gp_ev_queue_full(&backend->event_queue)) {
+		x_ev(backend, ev);
 		free(ev);
 	}
 }
 
-//TODO: Generic wait for backends!
-#include <poll.h>
-
-static void x_wait(gp_backend *self)
+static int x_process_fd(gp_fd *self)
 {
-	struct pollfd fd = {.fd = self->fd, .events = POLLIN, .revents = 0};
-	poll(&fd, 1, -1);
-	x_poll(self);
+	gp_backend *backend = self->priv;
+
+	x_poll_events(backend);
+
+	return 0;
 }
 
 static xcb_visualtype_t *visual_by_id(struct win *win, int *depth)
@@ -583,25 +588,29 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 	memset(backend, 0, size);
 
 	if (!x_connect(display))
-		goto err;
+		goto err0;
+
+	int fd = xcb_get_file_descriptor(x_con.c);
+
+	if (gp_fds_add(&backend->fds, fd, POLLIN, x_process_fd, backend))
+		goto err1;
 
 	win = GP_BACKEND_PRIV(backend);
 
 	if (create_window(backend, win, x, y, w, h, caption))
-		goto err;
+		goto err1;
 
 	backend->name = "XCB";
 	backend->flip = x_flip;
 	backend->update_rect = x_update_rect;
 	backend->exit = x_exit;
-	backend->poll = x_poll;
-	backend->wait = x_wait;
 	backend->set_attr = x_set_attr;
 	backend->resize_ack = x_resize_ack;
-	backend->fd = xcb_get_file_descriptor(x_con.c);
 
 	return backend;
-err:
+err1:
+	x_close();
+err0:
 	free(backend);
 	return NULL;
 }

@@ -106,13 +106,33 @@ static int set_get_kbd_leds(gp_ev_feedback *self, gp_ev_feedback_op *op)
 	return 0;
 }
 
+static int fb_process_fd(gp_fd *self)
+{
+	gp_backend *backend = self->priv;
+	struct fb_priv *fb = GP_BACKEND_PRIV(backend);
+	unsigned char buf[16];
+	int i, res;
+
+	res = read(fb->con_fd, buf, sizeof(buf));
+
+	for (i = 0; i < res; i++)
+		gp_input_driver_kbd_event_put(&backend->event_queue, buf[i]);
+
+	return 0;
+}
+
 /*
  * Save console mode and set the mode to raw.
  */
-static int init_kbd(struct fb_priv *fb)
+static int init_kbd(gp_backend *backend, struct fb_priv *fb)
 {
 	struct termios t;
 	int fd = fb->con_fd;
+
+	if (gp_fds_add(&backend->fds, fd, POLLIN, fb_process_fd, backend)) {
+		close(fd);
+		return -1;
+	}
 
 	if (tcgetattr(fd, &fb->ts)) {
 		GP_WARN("Failed to tcgetattr(): %s", strerror(errno));
@@ -246,30 +266,6 @@ static void free_console(struct fb_priv *fb)
 
 /* Backend API callbacks */
 
-static void fb_poll(gp_backend *self)
-{
-	struct fb_priv *fb = GP_BACKEND_PRIV(self);
-	unsigned char buf[16];
-	int i, res;
-
-	res = read(fb->con_fd, buf, sizeof(buf));
-
-	for (i = 0; i < res; i++)
-		gp_input_driver_kbd_event_put(&self->event_queue, buf[i]);
-}
-
-static void fb_wait(gp_backend *self)
-{
-	struct fb_priv *fb = GP_BACKEND_PRIV(self);
-
-	struct pollfd fd = {.fd = fb->con_fd, .events = POLLIN, .revents = 0};
-
-	if (poll(&fd, 1, -1) > 0)
-		fb_poll(self);
-	else
-		GP_WARN("poll(): %s", strerror(errno));
-}
-
 static void fb_exit(gp_backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
@@ -340,7 +336,7 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 		goto err0;
 
 	if (flags & GP_FB_INPUT_KBD) {
-		if (init_kbd(fb))
+		if (init_kbd(backend, fb))
 			goto err1;
 	}
 
@@ -436,10 +432,7 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	backend->pixmap = &fb->pixmap;
 	backend->flip = shadow ? fb_flip_shadow : NULL;
 	backend->update_rect = shadow ? fb_update_rect_shadow : NULL;
-	backend->poll = kbd ? fb_poll : NULL;
-	backend->wait = kbd ? fb_wait : NULL;
 	backend->exit = fb_exit;
-	backend->fd = fb->con_fd;
 
 	gp_ev_queue_init(&backend->event_queue, vscri.xres, vscri.yres, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 

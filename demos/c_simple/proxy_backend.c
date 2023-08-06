@@ -146,12 +146,9 @@ static void resize_shown_client(void)
 	gp_proxy_send(cli_shown->fd, GP_PROXY_UNMAP, NULL);
 }
 
-static int backend_event(struct gp_fd *self, struct pollfd *pfd)
+static int backend_event(gp_backend *b)
 {
-	gp_backend *b = self->priv;
 	gp_event *ev;
-
-	(void) pfd;
 
 	while ((ev = gp_backend_poll_event(b))) {
 		switch (ev->type) {
@@ -212,13 +209,11 @@ to_cli:
 	return 0;
 }
 
-struct gp_fds fds = GP_FDS_INIT;
-
-static int client_event(struct gp_fd *self, struct pollfd *pfd)
+static int client_event(gp_fd *self)
 {
 	if (gp_proxy_cli_read(self->priv, &cli_ops)) {
 		gp_proxy_cli_rem(&clients, self->priv);
-		close(pfd->fd);
+		close(self->pfd->fd);
 
 		if (self->priv == cli_shown) {
 			cli_shown = NULL;
@@ -231,14 +226,14 @@ static int client_event(struct gp_fd *self, struct pollfd *pfd)
 	return 0;
 }
 
-static int client_add(int fd)
+static int client_add(gp_backend *backend, int fd)
 {
 	struct gp_proxy_cli *cli = gp_proxy_cli_add(&clients, fd);
 
 	if (!cli)
 		goto err0;
 
-	if (gp_fds_add(&fds, fd, POLLIN, client_event, cli))
+	if (gp_fds_add(&backend->fds, fd, POLLIN, client_event, cli))
 		goto err1;
 
 	return 0;
@@ -249,19 +244,18 @@ err0:
 	return 1;
 }
 
-static int server_event(struct gp_fd *self, struct pollfd *pfd)
+static int server_event(gp_fd *self)
 {
-	(void) self;
 	int fd;
 
-	while ((fd = accept(pfd->fd, NULL, NULL)) > 0) {
+	while ((fd = accept(self->pfd->fd, NULL, NULL)) > 0) {
 		/*
 		 * Pixel type has to be send first so that backend can return
 		 * from init() function.
 		 */
 		gp_proxy_send(fd, GP_PROXY_PIXEL_TYPE, &backend->pixmap->pixel_type);
 
-		client_add(fd);
+		client_add(backend, fd);
 	}
 
 	return 0;
@@ -319,14 +313,14 @@ int main(int argc, char *argv[])
 
 	redraw();
 
-	gp_fds_add(&fds, backend->fd, POLLIN, backend_event, backend);
-
 	int server_fd = gp_proxy_server_init(NULL);
 
-	gp_fds_add(&fds, server_fd, POLLIN, server_event, NULL);
+	gp_fds_add(&backend->fds, server_fd, POLLIN, server_event, NULL);
 
-	for (;;)
-		gp_fds_poll(&fds, -1);
+	for (;;) {
+		gp_fds_poll(&backend->fds, -1);
+		backend_event(backend);
+	}
 
 	return 0;
 }

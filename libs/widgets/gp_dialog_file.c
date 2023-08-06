@@ -21,6 +21,7 @@
 #include <widgets/gp_file_size.h>
 #include <widgets/gp_dialog.h>
 #include <widgets/gp_dialog_file.h>
+#include <widgets/gp_widget_fds.h>
 
 #include "dialog_file_open.json.h"
 #include "dialog_file_save.json.h"
@@ -97,9 +98,8 @@ static int find_next(gp_widget *self)
 	}
 }
 
-static int notify_callback(struct gp_fd *self, struct pollfd *pfd)
+static int notify_callback(gp_fd *self)
 {
-	(void) pfd;
 	struct file_dialog *dialog = self->priv;
 
 	if (gp_dir_cache_notify(dialog->file_table->tbl->priv))
@@ -119,7 +119,7 @@ static gp_dir_cache *load_dir_cache(struct file_dialog *dialog)
 
 	notify_fd = gp_dir_cache_notify_fd(cache);
 	if (notify_fd > 0)
-		gp_fds_add(gp_widgets_fds, notify_fd, POLLIN, notify_callback, dialog);
+		gp_widget_fds_add(notify_fd, POLLIN, notify_callback, dialog);
 
 	return cache;
 }
@@ -134,7 +134,7 @@ static void free_dir_cache(struct file_dialog *dialog)
 
 	notify_fd = gp_dir_cache_notify_fd(self);
 	if (notify_fd > 0)
-		gp_fds_rem(gp_widgets_fds, notify_fd);
+		gp_widget_fds_rem(notify_fd);
 
 	gp_dir_cache_destroy(self);
 

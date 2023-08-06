@@ -148,7 +148,7 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	self->poll = backend->poll ? virt_poll : NULL;
 	self->wait = backend->wait ? virt_wait : NULL;
 	self->exit = virt_exit;
-	self->fd = backend->fd;
+	self->fds = backend->fds;
 
 	gp_ev_queue_init(&self->event_queue, backend->pixmap->w,
 	                    backend->pixmap->h, 0, 0);

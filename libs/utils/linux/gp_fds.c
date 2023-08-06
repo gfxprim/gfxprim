@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -18,7 +18,7 @@ void gp_fds_clear(struct gp_fds *self)
 }
 
 int gp_fds_add(struct gp_fds *self, int fd, short events,
-               int (*event)(struct gp_fd *self, struct pollfd *pfd), void *priv)
+               int (*event)(struct gp_fd *self), void *priv)
 {
 	GP_DEBUG(2, "Adding fd %i event %p priv %p", fd, event, priv);
 
@@ -106,7 +106,8 @@ int gp_fds_poll(struct gp_fds *self, int timeout)
 
 	for (i = 0; i < len; i++) {
 		if (self->pfds[i].revents) {
-			ret = self->fds[i].event(&self->fds[i], &self->pfds[i]);
+			self->fds[i].pfd = &self->pfds[i];
+			ret = self->fds[i].event(&self->fds[i]);
 			self->pfds[i].revents = 0;
 			if (ret) {
 				rem(self, i);

@@ -501,23 +501,13 @@ static int wayland_set_attr(gp_backend* self, enum gp_backend_attrs attrs, const
 	return 0;
 }
 
-#include <poll.h>
-
-static void wayland_poll(gp_backend* self)
-{
-	struct pollfd fd = {.fd = self->fd, .events = POLLIN, .revents = 0};
-
-	(void) self;
-
-	if (poll(&fd, 1, 0) > 0)
-		wl_display_dispatch(state.display);
-}
-
-static void wayland_wait(gp_backend* self)
+static int wayland_process_fd(gp_fd *self)
 {
 	(void) self;
 
 	wl_display_dispatch(state.display);
+
+	return 0;
 }
 
 static int wayland_resize_ack(gp_backend* self)
@@ -542,8 +532,6 @@ static struct gp_backend backend = {
 	.set_attr = wayland_set_attr,
 	.resize_ack = wayland_resize_ack,
 	.exit = wayland_exit,
-	.poll = wayland_poll,
-	.wait = wayland_wait,
 };
 
 gp_backend *gp_wayland_init(const char *display,
@@ -552,7 +540,15 @@ gp_backend *gp_wayland_init(const char *display,
 	if (display_connect(display, &state))
 		return NULL;
 
+	int fd = wl_display_get_fd(state.display);
+
+	if (gp_fds_add(&backend.fds, fd, POLLIN, wayland_process_fd, &backend)) {
+		display_disconnect(&state);
+		return NULL;
+	}
+
 	if (window_create(&state, w, h, caption)) {
+		gp_fds_rem(&backend.fds, fd);
 		display_disconnect(&state);
 		return NULL;
 	}
@@ -564,8 +560,6 @@ gp_backend *gp_wayland_init(const char *display,
 	backend.pixmap->pixels = (void*)frame.data;
 
 	gp_ev_queue_init(&backend.event_queue, w, h, 0, 0);
-
-	backend.fd = wl_display_get_fd(state.display);
 
 	return &backend;
 }

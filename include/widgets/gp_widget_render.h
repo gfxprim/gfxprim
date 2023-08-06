@@ -129,8 +129,6 @@ enum gp_widget_render_timer_flags {
 	GP_TIMER_RESCHEDULE = 0x01,
 };
 
-extern struct gp_fds *gp_widgets_fds;
-
 void gp_widget_render_timer(gp_widget *self, int flags, unsigned int timeout_ms);
 void gp_widget_render_timer_cancel(gp_widget *self);
 

@@ -23,6 +23,7 @@
 #include <widgets/gp_widgets_task.h>
 #include <widgets/gp_widget_keys.h>
 #include <widgets/gp_app_info.h>
+#include <widgets/gp_widget_fds.h>
 
 #include "gp_widgets_internal.h"
 
@@ -407,6 +408,62 @@ void gp_widgets_task_rem(gp_task *task)
 		gp_task_queue_rem(&task_queue, task);
 }
 
+//TODO: hack fix once fds switches to epoll!
+struct fds {
+	int fd;
+	short events;
+	int (*event)(gp_fd *self);
+	void *priv;
+};
+
+static struct fds *fds;
+
+void gp_widget_fds_add(int fd, short events, int (*event)(gp_fd *self), void *priv)
+{
+	if (backend) {
+		gp_fds_add(&backend->fds, fd, events, event, priv);
+		return;
+	}
+
+	if (!fds) {
+		fds = gp_vec_new(0, sizeof(struct fds));
+		if (!fds)
+			return;
+	}
+
+	size_t len = gp_vec_len(fds);
+
+	fds = gp_vec_expand(fds, 1);
+
+	fds[len].fd = fd;
+	fds[len].events = events;
+	fds[len].event = event;
+	fds[len].priv = priv;
+}
+
+void gp_widget_fds_rem(int fd)
+{
+	if (!backend) {
+		GP_FATAL("Not implemented!");
+		return;
+	}
+
+	gp_fds_rem(&backend->fds, fd);
+}
+
+static void move_fds(gp_fds *backend_fds)
+{
+	size_t i;
+
+	if (!fds)
+		return;
+
+	for (i = 0; i < gp_vec_len(fds); i++)
+		gp_fds_add(backend_fds, fds[i].fd, fds[i].events, fds[i].event, fds[i].priv);
+
+	gp_vec_free(fds);
+}
+
 void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 {
 	gp_widget_render_ctx_init();
@@ -414,6 +471,8 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 	backend = gp_backend_init(backend_init_str, 0, 0, win_tittle);
 	if (!backend)
 		exit(1);
+
+	move_fds(&backend->fds);
 
 	gp_widget_timer_queue_switch(&backend->timers);
 	gp_backend_task_queue_set(backend, &task_queue);
@@ -700,18 +759,7 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout)
 	return ret;
 }
 
-static int backend_event(struct gp_fd *self, struct pollfd *pfd)
-{
-	(void) pfd;
-	(void) self;
-
-	if (gp_widgets_process_events(win_layout))
-		return 1;
-
-	return 0;
-}
-
-static int input_event(struct gp_fd *self, struct pollfd *pfd)
+static int input_event(gp_fd *self)
 {
 	while (gp_input_linux_read(self->priv, &backend->event_queue) > 0);
 
@@ -721,10 +769,6 @@ static int input_event(struct gp_fd *self, struct pollfd *pfd)
 	return 0;
 }
 
-static struct gp_fds fds = GP_FDS_INIT;
-
-struct gp_fds *gp_widgets_fds = &fds;
-
 long gp_dialog_run(gp_dialog *dialog)
 {
 	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
@@ -733,13 +777,8 @@ long gp_dialog_run(gp_dialog *dialog)
 	cur_dialog = dialog;
 
 	for (;;) {
-		int ret = gp_fds_poll(&fds, gp_backend_timer_timeout(backend));
-
-		/* handle timers */
-		if (ret == 0) {
-			gp_backend_poll(backend);
-			gp_widgets_process_events(dialog->layout);
-		}
+		gp_backend_wait(backend);
+		gp_widgets_process_events(dialog->layout);
 
 		if (dialog->retval) {
 			cur_dialog = NULL;
@@ -766,25 +805,19 @@ void gp_widgets_main_loop(gp_widget *layout, const char *label,
 
 	win_layout = layout;
 
-	gp_fds_add(&fds, backend->fd, POLLIN, backend_event, NULL);
-
 	if (input_str) {
 		gp_input_linux *input = gp_input_linux_by_devstr(input_str);
 
 		if (input)
-			gp_fds_add(&fds, input->fd, POLLIN, input_event, input);
+			gp_fds_add(&backend->fds, input->fd, POLLIN, input_event, input);
 	}
 
 	if (init)
 		init(argc, argv);
 
 	for (;;) {
-		int ret = gp_fds_poll(&fds, gp_backend_timer_timeout(backend));
-		/* handle timers */
-		if (ret == 0) {
-			gp_backend_poll(backend);
-			gp_widgets_process_events(win_layout);
-		}
+		gp_backend_wait(backend);
+		gp_widgets_process_events(win_layout);
 		gp_widgets_redraw(win_layout);
 	}
 }
@@ -805,7 +838,7 @@ void gp_widgets_exit(int exit_value)
 	gp_font_face_free(render_font_bold);
 	gp_font_face_free(render_font_big);
 	gp_font_face_free(render_font_big_bold);
-	gp_fds_clear(gp_widgets_fds);
+	gp_fds_clear(&backend->fds);
 
 	exit(exit_value);
 }

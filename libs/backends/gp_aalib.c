@@ -238,7 +238,6 @@ gp_backend *gp_aalib_init(void)
 	backend->poll = aalib_poll;
 	backend->wait = aalib_wait;
 	backend->exit = aalib_exit;
-	backend->fd = -1;
 	gp_ev_queue_init(&backend->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	return backend;
