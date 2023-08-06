@@ -421,7 +421,7 @@ static struct fds *fds;
 void gp_widget_fds_add(int fd, short events, int (*event)(gp_fd *self), void *priv)
 {
 	if (backend) {
-		gp_fds_add(&backend->fds, fd, events, event, priv);
+		gp_backend_fds_add(backend, fd, events, event, priv);
 		return;
 	}
 
@@ -448,10 +448,10 @@ void gp_widget_fds_rem(int fd)
 		return;
 	}
 
-	gp_fds_rem(&backend->fds, fd);
+	gp_backend_fds_rem(backend, fd);
 }
 
-static void move_fds(gp_fds *backend_fds)
+static void move_fds(gp_backend *backend)
 {
 	size_t i;
 
@@ -459,7 +459,7 @@ static void move_fds(gp_fds *backend_fds)
 		return;
 
 	for (i = 0; i < gp_vec_len(fds); i++)
-		gp_fds_add(backend_fds, fds[i].fd, fds[i].events, fds[i].event, fds[i].priv);
+		gp_backend_fds_add(backend, fds[i].fd, fds[i].events, fds[i].event, fds[i].priv);
 
 	gp_vec_free(fds);
 }
@@ -472,7 +472,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 	if (!backend)
 		exit(1);
 
-	move_fds(&backend->fds);
+	move_fds(backend);
 
 	gp_widget_timer_queue_switch(&backend->timers);
 	gp_backend_task_queue_set(backend, &task_queue);

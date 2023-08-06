@@ -170,6 +170,18 @@ static inline void gp_backend_update_rect_xywh(gp_backend *self,
 	gp_backend_update_rect_xyxy(self, x, y, x + w - 1, y + h - 1);
 }
 
+static inline void gp_backend_fds_add(gp_backend *self,
+                                      int fd, short events,
+                                      int (*event)(gp_fd *self), void *priv)
+{
+	gp_fds_add(&self->fds, fd, events, event, priv);
+}
+
+static inline void gp_backend_fds_rem(gp_backend *self, int fd)
+{
+	gp_fds_rem(&self->fds, fd);
+}
+
 void gp_backend_exit(gp_backend *self);
 
 /*

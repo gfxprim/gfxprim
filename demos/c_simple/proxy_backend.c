@@ -233,12 +233,9 @@ static int client_add(gp_backend *backend, int fd)
 	if (!cli)
 		goto err0;
 
-	if (gp_fds_add(&backend->fds, fd, POLLIN, client_event, cli))
-		goto err1;
+	gp_backend_fds_add(backend, fd, POLLIN, client_event, cli);
 
 	return 0;
-err1:
-	gp_proxy_cli_rem(&clients, cli);
 err0:
 	close(fd);
 	return 1;
@@ -315,10 +312,10 @@ int main(int argc, char *argv[])
 
 	int server_fd = gp_proxy_server_init(NULL);
 
-	gp_fds_add(&backend->fds, server_fd, POLLIN, server_event, NULL);
+	gp_backend_fds_add(backend, server_fd, POLLIN, server_event, NULL);
 
 	for (;;) {
-		gp_fds_poll(&backend->fds, -1);
+		gp_backend_wait(backend);
 		backend_event(backend);
 	}
 
