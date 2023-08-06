@@ -46,6 +46,7 @@ static int redraw_task_callback(gp_task *self)
 int main(int argc, char *argv[])
 {
 	gp_backend *backend;
+	static gp_task_queue task_queue = {};
 	const char *backend_opts = "X11:100x100";
 	int opt;
 
@@ -65,7 +66,6 @@ int main(int argc, char *argv[])
 	}
 
 	backend = gp_backend_init(backend_opts, "Backend Example");
-
 	if (!backend) {
 		fprintf(stderr, "Failed to initialize backend\n");
 		return 1;
@@ -73,10 +73,13 @@ int main(int argc, char *argv[])
 
 	redraw(backend);
 
+	gp_backend_task_queue_set(backend, &task_queue);
+
 	gp_task redraw_task = {
 		.id = "redraw task",
 		.callback = redraw_task_callback,
 		.priv = backend,
+		.prio = GP_TASK_MIN_PRIO,
 	};
 
 	/* Handle events */
