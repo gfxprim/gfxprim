@@ -88,7 +88,7 @@ static void sdl_put_event(SDL_Event *ev)
 		new_h = ev->resize.h;
 	}
 #endif
-	gp_input_driver_sdl_event_put(&backend.event_queue, ev);
+	gp_input_driver_sdl_event_put(&backend, &backend.event_queue, ev);
 }
 
 static void sdl_poll(struct gp_backend *self __attribute__((unused)))

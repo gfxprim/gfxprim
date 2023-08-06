@@ -114,7 +114,7 @@ static uint16_t keysym_scancodes[] = {
 };
 #endif
 
-void gp_input_driver_sdl_event_put(gp_ev_queue *event_queue, SDL_Event *ev)
+void gp_input_driver_sdl_event_put(gp_backend *backend, gp_ev_queue *event_queue, SDL_Event *ev)
 {
 	uint32_t keysym;
 	uint32_t key = 0;
@@ -207,8 +207,14 @@ void gp_input_driver_sdl_event_put(gp_ev_queue *event_queue, SDL_Event *ev)
 		gp_ev_queue_push_resize(event_queue, ev->resize.w,
 		                           ev->resize.h, 0);
 	break;
+	case SDL_VIDEOEXPOSE:
+		gp_backend_flip(backend);
+	break;
 #elif LIBSDL_VERSION == 2
 	case SDL_WINDOWEVENT:
+		if (ev->window.event == SDL_WINDOWEVENT_EXPOSED)
+			gp_backend_flip(backend);
+
 		if (ev->window.event == SDL_WINDOWEVENT_SIZE_CHANGED ||
 		    ev->window.event == SDL_WINDOWEVENT_RESIZED) {
 			gp_ev_queue_push_resize(event_queue, ev->window.data1,

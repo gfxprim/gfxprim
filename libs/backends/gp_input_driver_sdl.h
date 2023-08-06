@@ -13,10 +13,11 @@
 #define INPUT_GP_INPUT_DRIVER_SDL_H
 
 #include <stdint.h>
+#include <backends/gp_backend.h>
 
 /*
  * Converts SDL event to GFXprim evevt and puts it into the queue.
  */
-void gp_input_driver_sdl_event_put(gp_ev_queue *event_queue, SDL_Event *ev);
+void gp_input_driver_sdl_event_put(gp_backend *backend, gp_ev_queue *event_queue, SDL_Event *ev);
 
 #endif /* INPUT_GP_INPUT_DRIVER_SDL_H */
