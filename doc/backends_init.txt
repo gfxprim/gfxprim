@@ -1,0 +1,223 @@
+[[GenericInit]]
+Backend init function
+---------------------
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+
+gp_backend *gp_backend_init(const char *params,
+                            gp_size pref_w, gp_size pref_h,
+                            const char *caption);
+
+void gp_backend_init_help(void);
+-------------------------------------------------------------------------------
+
+The 'params' string composes of backend name and backend dependend parameters.
+The format is 'backend_name:backend_params' for example
+'fb:new_console:/dev/fb1'.
+
+If NULL is passed in 'params' gfxprim attempts to autodetect the backend based
+on the environment variables, currently works for 'X11' and 'Wayland'.
+
+The 'pref_w' and 'pref_h' are preferred width and height, backends that do not
+run inside a window are free to ignore these values.
+
+The 'caption' string is used for window caption used in a case that the
+backend runs inside of a window.
+
+If 'params' is set to '"help"' help for all backends is printed into the
+stderr. The 'gp_backend_init_help()' function is a shortcut for
+'gp_backend_init("help", 0, 0, NULL)'.
+
+If initialization was successful pointer to allocated and initialized backend
+is returned otherwise NULL is returned and some helpful information should
+be printed into the stderr.
+
+[[LinuxFramebuffer]]
+Linux Framebuffer
+-----------------
+
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_linux_fb_flags {
+        GP_FB_INPUT_KBD = 0x01,
+        GP_FB_SHADOW = 0x02,
+        GP_FB_ALLOC_CON = 0x04,
+};
+
+gp_backend *gp_linux_fb_init(const char *path, int flags);
+-------------------------------------------------------------------------------
+
+Initializes a memory mapped frame-buffer backend. The path is path to
+the frame-buffer device i.e. '/dev/fbX'.
+
+If 'GP_FB_INPUT_KBD' flag is set console KBD driver is used to feed keystrokes
+into the event queue, otherwise no events are generated and you are expected to
+initialize input event driver yourself.
+
+If 'GP_FB_SHADOW' flag is set shadow frame-buffer is allocated and used for
+drawing, the memory is blitted to mmaped frame-buffer on Blit() or UpdateRect()
+operation. Otherwise the frame-buffer mapped memory is used directly.
+
+If 'GP_FB_ALLOC_CON' flag is set new console is allocated, otherwise current
+console is used.
+
+[[SDL]]
+SDL
+---
+
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_sdl_flags {
+        GP_SDL_FULLSCREEN = 0x01,
+        GP_SDL_RESIZABLE  = 0x02,
+};
+
+gp_backend *gp_sdl_init(gp_size w, gp_size h,
+                        uint8_t bpp, uint8_t flags,
+                        const char *caption);
+-------------------------------------------------------------------------------
+
+Initialize 'SDL' as a backend driver. The backend is thread safe as all the
+operations are guarded by locks.
+
+You can't initialize more than one backend at a time, which is inherited 'SDL'
+limitation. If you call the initialization for a second time, you will get a
+pointer to already running backend.
+
+If w, h and/or bpp are zero 'SDL' tries to do a guess, most of the time wrong
+for w and h though.
+
+The caption is window caption.
+
+And finally flags may change the 'SDL' to go to full-screen mode or make the
+window resizable.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_sdl_pixmap.h>
+
+int gp_pixmap_from_sdl_surface(gp_pixmap *c, const SDL_Surface *surf);
+-------------------------------------------------------------------------------
+
+This function allows you to mix 'SDL' and 'GFXprim' code.
+
+It initializes a 'GFXprim' pixmap from the 'SDL' surface using the pixel
+buffer from surface as pixel buffer for the pixmap.
+
+Function returns zero on success and non-zero on failure (i.e. there is no
+'GFXprim' pixel type to match given surface).
+
+For example usage see the link:example_SDL_glue.html[SDL glue example].
+
+[[X11]]
+X11
+---
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <backends/gp_x11.h>
+
+enum gp_x11_flags {
+	/* When set, w and h is ignored and root window is used */
+	GP_X11_USE_ROOT_WIN = 0x01,
+
+	/* Create new borderless window above the root window */
+	GP_X11_CREATE_ROOT_WIN = 0x02,
+
+	/* Start fullscreen */
+	GP_X11_FULLSCREEN = 0x04,
+
+	/* Do not use MIT SHM even if available */
+	GP_X11_DISABLE_SHM = 0x08,
+};
+
+gp_backend *gp_x11_init(const char *display, int x, int y,
+                        unsigned int w, unsigned int h,
+                        const char *caption,
+                        enum gp_x11_flags flags);
+-------------------------------------------------------------------------------
+
+Returns pointer to initialized X11 backend or in case of failure NULL.
+
+When display is NULL default display is used (which is what you want most of the
+time).
+
+This backends supports multiple windows. Each time you call the initialization
+routine new backend structure is returned. All backend instances share the Xlib
+connection so you need to wait or poll only on one of them. Each backend, on
+the other hand, has its own input queue.
+
+TIP: See multiple windows link:example_x11_windows.html[example].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <backends/gp_x11.h>
+
+/*
+ * Returns non-zero if backend is X11 backend
+ */
+int gp_backend_is_x11(gp_backend *self);
+-------------------------------------------------------------------------------
+
+The 'gp_backend_is_x11()' returns non-zero if backend is X11 backend, zero
+otherwise.
+
+[[Wayland]]
+Wayland
+-------
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <backends/gp_wayland.h>
+
+gp_backend *gp_wayland_init(const char *display,
+                            gp_size w, gp_size h, const char *caption);
+-------------------------------------------------------------------------------
+
+Work-in-progress Wayland backend, more to come.
+
+[[LinuxDRM]]
+Linux DRM
+---------
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <backends/gp_linux_drm.h>
+
+gp_backend *gp_linux_drm_init(const char *drm_path, int flags);
+-------------------------------------------------------------------------------
+
+The 'drm_path' is a path to a DRM device e.g. '/dev/dri/card0'.
+
+The 'flags' are currently unused and must be '0'.
+
+At the moment it does support single output only, support for multiple outputs
+will be implemented later.
+
+[[AALib]]
+AA-lib
+------
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <backends/AALib.h>
+
+gp_backend *gp_aalib_init(void);
+-------------------------------------------------------------------------------
+
+Currently the 'AA-lib' backend uses default initialization parameters.
+
+Way how to pass 'AA-lib' specific parameters will be added. This interface
+will likely change.

@@ -1,0 +1,397 @@
+General Backend API
+-------------------
+
+The backend API consist of a structure with callbacks. Every backend
+initialization yields this structure. Although is possible to call these
+pointers directly it's not recommended and everybody should rather use backend
+(inline) functions instead as they provide more convenient API and do
+additional sanity checks on parameters. Also functionality such as timers
+will not work if you decide to call raw callbacks.
+
+[source,c]
+-------------------------------------------------------------------------------
+typdef struct gp_backend {
+        /*
+         * Backend name.
+         */
+        const char *name;
+
+        /*
+         * Pointer to pixmap APP should draw to.
+         */
+        gp_pixmap *pixmap;
+
+	...
+
+	/*
+         * Connection fd. Set to -1 if not available
+         */
+        int fd;
+};
+-------------------------------------------------------------------------------
+
+The file descriptor 'fd' is either set to -1 (in case of 'SDL' or 'AA-lib' as
+they does not export it) or to a backend connection file descriptor usable for
+'select()' or 'poll()'.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_exit(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Calls a backend exit callback. Restores the display, keyboard, etc. state
+back.
+
+WARNING: It's important to call this functions on application exit. If you
+         doesn't do so, the state of the display, resolution etc. may not be
+         restored back to its original state. This includes program crashes and
+         interruptions. Also this function may not be signal-async-safe, it's
+         better to set signal handlers that calls it on SEGFAULT and SIGBUS
+	 as this usually works and not doing so may leave non-working system
+	 with black display or non-responding keyboard.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+gp_backend_flip(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Flips a screen. Blits backend buffer to the screen or window if the backend is
+buffered.
+
+WARN: The backend->pixmap pointer may change after backend is flipped.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_update_rect(gp_backend *self,
+                            gp_coord x0, gp_coord y0,
+                            gp_coord x1, gp_coord y1);
+-------------------------------------------------------------------------------
+
+Updates particular rectangle in case backend is buffered.
+
+[[Events]]
+Events
+------
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_poll(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Polls for backend events.
+
+The poll only reads events from event source (i.e. X11 socket, Linux evdev
+file descriptor), process them and may place new event into the backend event
+queue.
+
+This call returns immediately after queued events (from X11 socket, etc.) were
+processed.
+
+For backends that do not expose file descriptor (namely SDL) this should be
+called repeatedly. For other backends it may be called either repeatedly or
+when data are ready on file-descriptor.
+
+If the backend is the only source of events in your application, you should
+consider using the 'gp_backend_wait()' or 'gp_backend_wait_event()' described
+below.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+gp_event *gp_backend_poll_event(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Combines the 'gp_backend_poll()' with 'gp_backend_get_event()'.
+
+If there are any events in the backend event queue, the top event is returned,
+if none are queued NULL is returned.
+
+.Example 'gp_backend_poll_event()' usage.
+[source,c]
+-------------------------------------------------------------------------------
+        /* Called either repeatedly or when data are ready on backend fd */
+
+	gp_event *ev;
+
+	while ((ev = gp_backend_poll_event(backend))) {
+
+		/* process events */
+
+	}
+-------------------------------------------------------------------------------
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_wait(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Blocks until backend event arrives.
+
+NOTE: Events received by backend are not necessarily translated into the input
+      events.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+gp_event *gp_backend_wait_event(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Combines the 'gp_backend_wait()' with 'gp_backend_get_event()'.
+
+If there are any events in the backend event queue, the top event is returned
+and the call returns immediately.
+
+If backend event queue is empty 'gp_backend_wait()' is called, possibly
+repeatedly, until there is at least one event in the backend event queue.
+
+.Example 'gp_backend_wait_event()' usage.
+[source,c]
+-------------------------------------------------------------------------------
+	/* This is the main program loop */
+	gp_event *ev;
+
+	for (;;) {
+		ev = gp_backend_wait_event(backend);
+
+		/* process events */
+
+	}
+-------------------------------------------------------------------------------
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+unsigned int gp_backend_events(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Returns number of events queued in the backend event queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+gp_event *gp_backend_get_event(gp_backend *self);
+-------------------------------------------------------------------------------
+
+In case there are any events queued a pointer to a top event in the queue is
+returned. The pointer is valid until next call to +gp_backend_get_event()+.
+
+The pointer is also invalidated by a call to +gp_backend_put_event_back()+.
+
+If there are no events queued the call returns NULL.
+
+TIP: For more information on events see link:input.html[input events]
+     documentation.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+gp_event *gp_backend_peek_event(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Same as +gp_backend_get_event()+ but the top event is not removed from the
+queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_put_event_back(gp_backend *self, gp_event *ev);
+-------------------------------------------------------------------------------
+
+Puts event to the top of the queue. May be useful for putting back events that
+were removed from the queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+int gp_backend_key_pressed(gp_backend *self, uint32_t key);
+-------------------------------------------------------------------------------
+
+The backend event queue also maintains a keyboard state, i.e. which keys are
+pressed. The state is valid for the last even returned by the
++gp_backend_get_event()+.
+
+Returns non-zero if key is being currently hold down.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+int gp_backend_set_caption(gp_backend *self, const char *caption)
+-------------------------------------------------------------------------------
+
+Sets backend caption. On success zero is returned. On failure (backend doesn't
+support caption, operation failed) non zero is returned.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+int gp_backend_resize(gp_backend *self, uint32_t w, uint32_t h);
+-------------------------------------------------------------------------------
+
+Requests backend resize. If backend resize is supported and the resize request
+was successful (i.e. X server allowed us to resize the window) the resize
+event will be send and should be handled in your event loop. You must respond
+to it by the 'gp_backend_resize_ack()' described below.
+
+NOTE: The backend pixmap pointer or buffer pointer will only change after you
+      acknowledge the resize with gp_backend_resize_ack().
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+int gp_backend_resize_ack(gp_backend *self);
+-------------------------------------------------------------------------------
+
+If backend is resizable by user interaction (for example X Window) you will
+get resize event for each change of the window size, however the backend
+pixmap will not be resized until you call this function. This is useful in
+multi-threaded application where one threads waits for events and others draws
+into the buffer so you can stop the drawing threads before the backend pixmap
+buffer changes.
+
+[[Timers]]
+Timers
+------
+
+Timers are, as the name suggets, a way to run a function callback at a
+specified time in the future.
+
+TIP: For example usage see
+     link:example_backend_timers.html[backend timers example].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_add_timer(gp_backend *self, gp_timer *timer);
+-------------------------------------------------------------------------------
+
+Adds a link:timers.html[timer] to the backend timer queue.
+
+Timers added to the backend are processed automatically while you call any of
+backend 'Poll' or 'Wait' functions.
+
+If timer callback is set to NULL a timer event is pushed to the backend
+input queue once timer has expired otherwise timer callback is called.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_rem_timer(gp_backend *self, gp_timer *timer);
+-------------------------------------------------------------------------------
+
+Removes a link:timers.html[timer] from the backend timer queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_timers_in_queue(gp_backend *self);
+-------------------------------------------------------------------------------
+
+Returns number of timers scheduled in backend timer queue.
+
+[[Tasks]]
+Tasks
+-----
+
+Tasks are rutines schedulled in the backend main loop. Tasks are executed in
+FIFO order and have priorities. When program enters the backend loop via one
+of the functions to poll or wait for event exactly one task from the highest
+non empty FIFO list is executed.
+
+IMPORTANT: When backend is created there is no task queue, to be able to
+           schedulle tasks user has to allocate and set the task queue first.
+
+TIP: For example usage see
+     link:example_backend_tasks.html[backend tasks example].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue);
+-------------------------------------------------------------------------------
+
+Sets the backend task queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_task_ins(gp_backend *self, gp_task *task);
+-------------------------------------------------------------------------------
+
+Schedulles a link:tasks.html[task].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_task_rem(gp_backend *self, gp_task *task);
+-------------------------------------------------------------------------------
+
+If schedulled removes a link:tasks.html[task].

@@ -6,10 +6,11 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	environment_variables.txt debug.txt core.txt input.txt \
 	gen.txt pixels.txt coordinate_system.txt coding_style.txt \
 	get_put_pixel.txt blits.txt progress_callback.txt text.txt \
-	event_queue.txt compilation.txt filters_resize.txt \
+	event_queue.txt compilation.txt filters_resize.txt tasks.txt\
 	filters_dithering.txt filters_python.txt spiv.txt core_common.txt \
 	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt widgets.txt \
-	packages.txt bbox.txt utils.txt timers.txt priority_heap.txt
+	packages.txt bbox.txt utils.txt timers.txt priority_heap.txt backends_api.txt \
+	backends_init.txt
 
 SOURCES+=hash_table.txt linked_list.txt vector.txt matrix.txt block_alloc.txt utf.txt markup.txt
 

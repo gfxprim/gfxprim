@@ -1,7 +1,7 @@
 Graphics Backend
 ----------------
 This is a very simple backend example that shows how to use
-link:backends.html#Backend_Init[backend init function] and
+link:backends_init.html#GenericInit[backend init function] and
 link:input.html[input event layer].
 
 It also shows how to handle

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	backend = gp_backend_init(backend_opts, 0, 0, "Backend task example");
+	backend = gp_backend_init(backend_opts, 0, 0, "Backend tasks example");
 	if (!backend) {
 		fprintf(stderr, "Failed to initialize backend\n");
 		return 1;

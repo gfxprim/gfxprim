@@ -1,0 +1,63 @@
+Tasks
+-----
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <input/gp_task.h>
+
+#define GP_TASK_MIN_PRIO 1
+#define GP_TASK_MAX_PRIO 3
+
+struct gp_task_queue {
+        unsigned int task_cnt;
+        unsigned int min_prio;
+        gp_dlist queues[GP_TASK_MAX_PRIO - GP_TASK_MIN_PRIO + 1];
+};
+
+struct gp_task {
+        gp_dlist_head head;
+        unsigned int prio:3;
+        unsigned int queued:1;
+        char *id;
+        int (*callback)(gp_task *self);
+        void *priv;
+};
+
+int gp_task_queue_process(gp_task_queue *self);
+-------------------------------------------------------------------------------
+
+Tasks are implemented as an array of FIFO queues. When a task queue is
+processed i.e. the 'gp_task_queue_process()' is called, single task from the
+highest priority non-empty queue is processed.
+
+The return value from the task 'callback()' determines if a task has finished,
+i.e. if non-zero is returned, the callback is inserted at the end of the FIFO
+queue to be executed later on. If zero is returned the task is removed from
+the queue.
+
+TIP: See the link:example_backend_tasks.html[tasks example].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <input/gp_task.h>
+
+void gp_task_queue_ins(gp_task_queue *self, gp_task *task);
+-------------------------------------------------------------------------------
+
+Inserts a task into a queue. The task structure is allocated by the user and
+the 'id', 'callback', and 'prio' fields of the structure must be set.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <input/gp_task.h>
+
+void gp_task_queue_rem(gp_task_queue *self, gp_task *task);
+-------------------------------------------------------------------------------
+
+Removes a task from a queue.

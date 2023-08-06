@@ -38,7 +38,7 @@ SDL2_glue
 /proxy_backend
 /matrix
 bbox
-task_example
+backend_tasks_example
 json_writer
 drm_test
 draw_glyph

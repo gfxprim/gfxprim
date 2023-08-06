@@ -1,8 +1,8 @@
-Backend Timers
+Backend Tasks
 --------------
-This example shows how to use link:backends_api.html#Timers[backend timers].
+This example shows how to use link:backends_api.html#Tasks[backend tasks].
 
 [source,c]
 ------------------------------------------------------------------
-include::../demos/c_simple/backend_timers_example.c[]
+include::../demos/c_simple/backend_tasks_example.c[]
 ------------------------------------------------------------------
