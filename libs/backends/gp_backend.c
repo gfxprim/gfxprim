@@ -139,9 +139,9 @@ static uint32_t backend_task_dispatch(gp_timer *self)
 	gp_task_queue_process(backend->task_queue);
 
 	if (gp_task_queue_tasks(backend->task_queue))
-		return gp_task_queue_head_prio(backend->task_queue) * 10 + 10;
+		return 0;
 
-	return 0;
+	return GP_TIMER_STOP;
 }
 
 static gp_timer backend_task_timer = {
@@ -152,7 +152,7 @@ static gp_timer backend_task_timer = {
 static void start_task_timer(gp_backend *self)
 {
 	backend_task_timer.priv = self;
-	backend_task_timer.expires = gp_task_queue_head_prio(self->task_queue) * 100 + 100;
+	backend_task_timer.expires = 0;
 	gp_backend_add_timer(self, &backend_task_timer);
 }
 
