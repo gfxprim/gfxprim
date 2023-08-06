@@ -102,7 +102,7 @@ static inline char *gp_backend_clipboard_get(gp_backend *self)
  */
 static inline void gp_backend_clipboard_ready(gp_backend *self)
 {
-	gp_ev_queue_push(&self->event_queue, GP_EV_SYS, GP_EV_SYS_CLIPBOARD, 0, 0);
+	gp_ev_queue_push(self->event_queue, GP_EV_SYS, GP_EV_SYS_CLIPBOARD, 0, 0);
 }
 
 #endif /* BACKENDS_GP_CLIPBOARD_H */

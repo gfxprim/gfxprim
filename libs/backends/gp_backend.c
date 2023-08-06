@@ -106,7 +106,7 @@ void gp_backend_add_timer(gp_backend *self, gp_timer *timer)
 {
 	if (timer->callback == NULL) {
 		timer->callback = pushevent_callback;
-		timer->_priv = &self->event_queue;
+		timer->_priv = self->event_queue;
 	}
 
 	gp_timer_queue_ins(&self->timers, gp_time_stamp(), timer);

@@ -71,7 +71,7 @@ static void virt_poll(gp_backend *self)
 	gp_event *ev;
 
 	while ((ev = gp_backend_get_event(virt->backend)))
-		gp_ev_queue_put(&self->event_queue, ev);
+		gp_ev_queue_put(self->event_queue, ev);
 }
 
 static void virt_wait(gp_backend *self)
@@ -83,7 +83,7 @@ static void virt_wait(gp_backend *self)
 	gp_event *ev;
 
 	while ((ev = gp_backend_get_event(virt->backend)))
-		gp_ev_queue_put(&self->event_queue, ev);
+		gp_ev_queue_put(self->event_queue, ev);
 }
 
 static void virt_exit(gp_backend *self)
@@ -149,9 +149,7 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	self->wait = backend->wait ? virt_wait : NULL;
 	self->exit = virt_exit;
 	self->fds = backend->fds;
-
-	gp_ev_queue_init(&self->event_queue, backend->pixmap->w,
-	                    backend->pixmap->h, 0, 0);
+	self->event_queue = backend->event_queue;
 
 	return self;
 

@@ -40,6 +40,8 @@ struct fb_priv {
 	/* hook for the keymap to turn on/off keyboard leds */
 	int leds;
 	gp_ev_feedback feedback;
+	/* queue for input events */
+	gp_ev_queue ev_queue;
 
 	int fb_fd;
 	char path[];
@@ -116,7 +118,7 @@ static int fb_process_fd(gp_fd *self)
 	res = read(fb->con_fd, buf, sizeof(buf));
 
 	for (i = 0; i < res; i++)
-		gp_input_driver_kbd_event_put(&backend->event_queue, buf[i]);
+		gp_input_driver_kbd_event_put(backend->event_queue, buf[i]);
 
 	return 0;
 }
@@ -433,11 +435,12 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	backend->flip = shadow ? fb_flip_shadow : NULL;
 	backend->update_rect = shadow ? fb_update_rect_shadow : NULL;
 	backend->exit = fb_exit;
+	backend->event_queue = &fb->ev_queue;
 
-	gp_ev_queue_init(&backend->event_queue, vscri.xres, vscri.yres, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+	gp_ev_queue_init(backend->event_queue, vscri.xres, vscri.yres, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	if (kbd)
-		gp_ev_queue_feedback_register(&backend->event_queue, &fb->feedback);
+		gp_ev_queue_feedback_register(backend->event_queue, &fb->feedback);
 
 	return backend;
 err4:

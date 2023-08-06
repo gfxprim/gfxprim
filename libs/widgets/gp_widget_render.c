@@ -477,7 +477,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 	gp_widget_timer_queue_switch(&backend->timers);
 	gp_backend_task_queue_set(backend, &task_queue);
 
-	gp_key_repeat_timer_init(&backend->event_queue, &backend->timers);
+	gp_key_repeat_timer_init(backend->event_queue, &backend->timers);
 
 	ctx.buf = backend->pixmap;
 	ctx.pixel_type = backend->pixmap->pixel_type;
@@ -761,7 +761,7 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout)
 
 static int input_event(gp_fd *self)
 {
-	while (gp_input_linux_read(self->priv, &backend->event_queue) > 0);
+	while (gp_input_linux_read(self->priv, backend->event_queue) > 0);
 
 	if (gp_widgets_process_events(win_layout))
 		return 1;

@@ -95,8 +95,10 @@ struct client_state {
 	struct xdg_surface *xdg_surface;
 	struct xdg_toplevel *xdg_toplevel;
 
+	/* gfxprim */
 	uint32_t w, h;
 	gp_pixel pixel_type;
+	gp_ev_queue ev_queue;
 
 	gp_backend *backend;
 };
@@ -217,7 +219,7 @@ pointer_handle_motion(void UN(*data), struct wl_pointer UN(*pointer),
 	struct client_state *state = data;
 	gp_backend *backend = state->backend;
 
-	gp_ev_queue_push_rel_to(&backend->event_queue, sx/256, sy/256, 0);
+	gp_ev_queue_push_rel_to(backend->event_queue, sx/256, sy/256, 0);
 }
 
 static void
@@ -228,7 +230,7 @@ pointer_handle_button(void *data, struct wl_pointer UN(*pointer),
 	struct client_state *state = data;
 	gp_backend *backend = state->backend;
 
-	gp_ev_queue_push_key(&backend->event_queue, button, button_state, 0);
+	gp_ev_queue_push_key(backend->event_queue, button, button_state, 0);
 }
 
 static void
@@ -240,7 +242,7 @@ pointer_handle_axis(void UN(*data), struct wl_pointer UN(*pointer),
 
 	switch (axis) {
 	case WL_POINTER_AXIS_SOURCE_WHEEL:
-		gp_ev_queue_push(&backend->event_queue, GP_EV_REL, GP_EV_REL_WHEEL, value/(15 * 256), 0);
+		gp_ev_queue_push(backend->event_queue, GP_EV_REL, GP_EV_REL_WHEEL, value/(15 * 256), 0);
 	break;
 	}
 }
@@ -281,7 +283,7 @@ keyboard_handle_key(void *data, struct wl_keyboard UN(*keyboard),
 	struct client_state *state = data;
 	gp_backend *backend = state->backend;
 
-	gp_ev_queue_push_key(&backend->event_queue, key, key_state, 0);
+	gp_ev_queue_push_key(backend->event_queue, key, key_state, 0);
 }
 
 static void
@@ -559,7 +561,9 @@ gp_backend *gp_wayland_init(const char *display,
 
 	backend.pixmap->pixels = (void*)frame.data;
 
-	gp_ev_queue_init(&backend.event_queue, w, h, 0, 0);
+	backend.event_queue = &state.ev_queue;
+
+	gp_ev_queue_init(backend.event_queue, w, h, 0, 0);
 
 	return &backend;
 }

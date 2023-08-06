@@ -29,6 +29,7 @@ static pthread_mutex_t aalib_mutex = PTHREAD_MUTEX_INITIALIZER;
 struct aalib_priv {
 	aa_context *c;
 	gp_pixmap pixmap;
+	gp_ev_queue ev_queue;
 };
 
 /* ascii mapped keys */
@@ -146,7 +147,7 @@ static void parse_event(gp_backend *self, int ev)
 	if (ev == AA_RESIZE) {
 		GP_DEBUG(1, "Resize event");
 		//TODO: Can we get the new size somehow?
-		gp_ev_queue_push_resize(&self->event_queue, 0, 0, 0);
+		gp_ev_queue_push_resize(self->event_queue, 0, 0, 0);
 		return;
 	}
 
@@ -162,8 +163,8 @@ static void parse_event(gp_backend *self, int ev)
 	}
 
 	/* emulate keyup events */
-	gp_ev_queue_push_key(&self->event_queue, key, 1, 0);
-	gp_ev_queue_push_key(&self->event_queue, key, 0, 0);
+	gp_ev_queue_push_key(self->event_queue, key, 1, 0);
+	gp_ev_queue_push_key(self->event_queue, key, 0, 0);
 }
 
 static void aalib_poll(gp_backend *self)
@@ -184,7 +185,7 @@ static void aalib_wait(gp_backend *self)
 	for (;;) {
 		aalib_poll(self);
 
-		if (gp_ev_queue_events(&self->event_queue))
+		if (gp_ev_queue_events(self->event_queue))
 			return;
 
 		usleep(10000);
@@ -238,7 +239,9 @@ gp_backend *gp_aalib_init(void)
 	backend->poll = aalib_poll;
 	backend->wait = aalib_wait;
 	backend->exit = aalib_exit;
-	gp_ev_queue_init(&backend->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+	backend->event_queue = &aa->ev_queue;
+
+	gp_ev_queue_init(backend->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	return backend;
 err2:

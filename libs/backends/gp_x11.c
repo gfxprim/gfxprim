@@ -170,7 +170,7 @@ static void x11_ev(XEvent *ev)
 	/* fallthrough */
 	default:
 		//TODO: More accurate window w and h?
-		x11_input_event_put(&self->event_queue, ev, win,
+		x11_input_event_put(self->event_queue, ev, win,
 		                    self->pixmap->w, self->pixmap->h);
 	break;
 	}
@@ -180,7 +180,7 @@ static void process_events(struct x11_win *win, gp_backend *backend)
 {
 	XEvent ev;
 
-	while (XPending(win->dpy) && !gp_ev_queue_full(&backend->event_queue)) {
+	while (XPending(win->dpy) && !gp_ev_queue_full(backend->event_queue)) {
 		XNextEvent(win->dpy, &ev);
 		x11_ev(&ev);
 	}
@@ -259,7 +259,7 @@ static int x11_resize_ack(struct gp_backend *self)
 	win->resized_flag = 0;
 
 	if (!ret) {
-		gp_ev_queue_set_screen_size(&self->event_queue,
+		gp_ev_queue_set_screen_size(self->event_queue,
 		                               win->new_w, win->new_h);
 	}
 
@@ -637,7 +637,8 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 		x11_win_fullscreen(win, 1);
 
 	/* Init the event queue, once we know the window size */
-	gp_ev_queue_init(&backend->event_queue, wreq.w, wreq.h, 0, 0);
+	backend->event_queue = &win->ev_queue;
+	gp_ev_queue_init(backend->event_queue, wreq.w, wreq.h, 0, 0);
 
 	backend->pixmap = NULL;
 

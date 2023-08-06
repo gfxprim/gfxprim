@@ -123,8 +123,8 @@ static void show_client(int i)
 	hide_client();
 
 	struct gp_proxy_coord cur_pos = {
-		.x = backend->event_queue.state.cursor_x,
-		.y = backend->event_queue.state.cursor_y,
+		.x = backend->event_queue->state.cursor_x,
+		.y = backend->event_queue->state.cursor_y,
 	};
 
 	gp_proxy_send(cli->fd, GP_PROXY_MAP, &shm->path);

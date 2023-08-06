@@ -130,7 +130,7 @@ struct gp_backend {
 	/*
 	 * Queue to store input events.
 	 */
-	gp_ev_queue event_queue;
+	gp_ev_queue *event_queue;
 
 	/* Priority queue for timers. */
 	gp_timer *timers;
@@ -324,22 +324,22 @@ void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue);
  */
 static inline unsigned int gp_backend_events(gp_backend *self)
 {
-	return gp_ev_queue_events(&self->event_queue);
+	return gp_ev_queue_events(self->event_queue);
 }
 
 static inline gp_event *gp_backend_get_event(gp_backend *self)
 {
-	return gp_ev_queue_get(&self->event_queue);
+	return gp_ev_queue_get(self->event_queue);
 }
 
 static inline gp_event *gp_backend_peek_event(gp_backend *self)
 {
-	return gp_ev_queue_peek(&self->event_queue);
+	return gp_ev_queue_peek(self->event_queue);
 }
 
 static inline void gp_backend_put_event_back(gp_backend *self, gp_event *ev)
 {
-	gp_ev_queue_put_back(&self->event_queue, ev);
+	gp_ev_queue_put_back(self->event_queue, ev);
 }
 
 #endif /* BACKENDS_GP_BACKEND_H */
