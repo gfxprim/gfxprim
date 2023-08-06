@@ -53,12 +53,6 @@ static int virt_set_attr(struct gp_backend *self,
 	if (ret)
 		return ret;
 
-	if (attr == GP_BACKEND_SIZE) {
-		gp_pixmap_resize(self->pixmap,
-		                 ((const uint32_t *)vals)[0],
-		                 ((const uint32_t *)vals)[1]);
-	}
-
 	return 0;
 }
 
