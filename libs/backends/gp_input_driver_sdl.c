@@ -121,8 +121,8 @@ void gp_input_driver_sdl_event_put(gp_backend *backend, gp_ev_queue *event_queue
 
 	switch (ev->type) {
 	case SDL_MOUSEMOTION:
-		gp_ev_queue_push_rel(event_queue, ev->motion.xrel,
-		                        ev->motion.yrel, 0);
+		gp_ev_queue_push_rel_to(event_queue, ev->motion.x,
+		                        ev->motion.y, 0);
 	break;
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:

@@ -165,9 +165,8 @@ static int sdl_resize_ack(struct gp_backend *self __attribute__((unused)))
 #endif
 
 	gp_pixmap_from_sdl_surface(backend.pixmap, sdl_surface);
-
 	gp_ev_queue_set_screen_size(&backend.event_queue,
-	                               backend.pixmap->w, backend.pixmap->h);
+	                            backend.pixmap->w, backend.pixmap->h);
 
 	SDL_mutexV(mutex);
 
