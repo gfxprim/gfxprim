@@ -41,7 +41,7 @@ static const gp_text_style *get_font(const gp_widget_render_ctx *ctx, int attrs)
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int res = GP_MAX(self->markup->min_size_em, 20);
+	unsigned int res = GP_MAX(self->markup->min_size_em, 20u);
 
 	return gp_text_avg_width(ctx->font, res);
 }
@@ -204,6 +204,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_coord cur_y = y;
 	const gp_markup_lines *lines = self->markup->lines;
 
+	if (!lines)
+		return;
+
 	for (i = 0; i < lines->lines_cnt; i++) {
 		cur_y += render_line(&lines->lines[i], self, ctx, x, cur_y);
 
@@ -260,6 +263,9 @@ static gp_widget *json_to_markup(gp_json_reader *json, gp_json_val *val, gp_widg
 		break;
 		}
 	}
+
+	if (!ret)
+		ret = gp_widget_markup_new("", GP_MARKUP_GFXPRIM, 0);
 
 	if (!ret) {
 		GP_WARN("Missing markup");
