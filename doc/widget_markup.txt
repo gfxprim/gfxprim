@@ -5,7 +5,7 @@ Markup widget is a page of a text with possible additional formatting. The
 widget is build on the top of the link:markup.html[text markup].
 
 .A markup widget
-image:markup_widget.png[Markup widget]
+image:widget_markup.png[Markup widget]
 
 .Markup widget constructor
 [source,c]
