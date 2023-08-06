@@ -411,7 +411,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 {
 	gp_widget_render_ctx_init();
 
-	backend = gp_backend_init(backend_init_str, win_tittle);
+	backend = gp_backend_init(backend_init_str, 0, 0, win_tittle);
 	if (!backend)
 		exit(1);
 

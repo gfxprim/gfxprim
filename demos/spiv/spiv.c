@@ -715,7 +715,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = gp_backend_init(backend_opts, "Spiv");
+	backend = gp_backend_init(backend_opts, 0, 0, "Spiv");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
@@ -827,7 +827,6 @@ int main(int argc, char *argv[])
 	params.sleep_ms = 1000 * config.slideshow_delay + 0.5;
 
 	if (opts >= argc) {
-
 		if (!strcmp(config.backend_init, "help")) {
 			init_backend(config.backend_init);
 			return 0;

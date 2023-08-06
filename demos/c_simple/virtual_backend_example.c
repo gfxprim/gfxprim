@@ -69,7 +69,7 @@ static void redraw(gp_backend *backend)
 int main(int argc, char *argv[])
 {
 	gp_backend *backend;
-	const char *backend_opts = "X11:350x350";
+	const char *backend_opts = NULL;
 	int opt;
 	gp_pixel_type emul_type = GP_PIXEL_UNKNOWN;
 
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
                         }
 		break;
 		case 'h':
-			gp_backend_init("help", NULL);
+			gp_backend_init_help();
 			return 0;
 		break;
 		default:
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 	/* Turn on debug messages */
 	gp_set_debug_level(10);
 
-	backend = gp_backend_init(backend_opts, "Virtual Backend Example");
+	backend = gp_backend_init(backend_opts, 350, 350, "Virtual Backend Example");
 
 	if (emul_type != GP_PIXEL_UNKNOWN) {
 		gp_backend *emul;

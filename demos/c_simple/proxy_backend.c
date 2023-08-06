@@ -20,7 +20,6 @@
 #include <backends/gp_proxy_cli.h>
 
 static gp_backend *backend;
-static const char *backend_opts = NULL;
 static struct gp_proxy_shm *shm;
 static struct gp_proxy_cli *clients;
 static struct gp_proxy_cli *cli_shown;
@@ -280,6 +279,7 @@ static void print_help(void)
 
 int main(int argc, char *argv[])
 {
+	const char *backend_opts = NULL;
 	int opt;
 
 	print_help();
@@ -291,12 +291,15 @@ int main(int argc, char *argv[])
 		case 'b':
 			backend_opts = optarg;
 		break;
+		case 'h':
+			gp_backend_init_help();
+		break;
 		default:
 			fprintf(stderr, "Invalid parameter '%c'", opt);
 		}
 	}
 
-	backend = gp_backend_init(backend_opts, "proxy backend server");
+	backend = gp_backend_init(backend_opts, 0, 0, "proxy backend server");
 	if (!backend) {
 		fprintf(stderr, "Failed to initialize backend\n");
 		return 1;

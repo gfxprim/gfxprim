@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 		break;
 		case 'h':
 			printf("Usage: %s [-b backend] [-f font_face] filename\n\n", argv[0]);
-			gp_backend_init(NULL, NULL);
+			gp_backend_init_help();
 			return 0;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 	if (!read_file_head(argv[optind]))
 		return 1;
 
-	backend = gp_backend_init(backend_opts, "File View");
+	backend = gp_backend_init(backend_opts, 0, 0, "File View");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

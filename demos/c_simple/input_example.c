@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 			printf("-i /dev/input/eventX\n");
 			printf("-b backend\n\n");
 			printf("Backends\n--------\n\n");
-			gp_backend_init(NULL, NULL);
+			gp_backend_init_help();
 			return 0;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	backend = gp_backend_init(backend_opts, "Input Test");
+	backend = gp_backend_init(backend_opts, 0, 0, "Input Test");
 
 	if (!backend) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

@@ -36,11 +36,11 @@ static uint32_t timer_callback(gp_timer *self)
 int main(void)
 {
 	gp_backend *backend;
-	const char *backend_opts = "X11:100x100";
+	const char *backend_opts = NULL;
 
-	backend = gp_backend_init(backend_opts, "Backend Timers Example");
+	backend = gp_backend_init(backend_opts, 100, 100, "Backend Timers Example");
 
-	if (backend == NULL) {
+	if (!backend) {
 		fprintf(stderr, "Failed to initialize backend\n");
 		return 1;
 	}

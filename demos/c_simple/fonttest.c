@@ -262,7 +262,7 @@ void print_instructions(void)
 
 int main(int argc, char *argv[])
 {
-	const char *backend_opts = "X11:800x600";
+	const char *backend_opts = NULL;
 	int opt;
 
 	print_instructions();
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 		break;
 		case 'h':
 			printf("\nUsage: %s [-b backend] [-f font_face]\n\n", argv[0]);
-			gp_backend_init(NULL, NULL);
+			gp_backend_init_help();
 			return 0;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Failed to load font!\n");
 	}
 
-	win = gp_backend_init(backend_opts, "Font Test");
+	win = gp_backend_init(backend_opts, 800, 600, "Font Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

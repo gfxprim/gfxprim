@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 {
 	gp_backend *backend;
 	static gp_task_queue task_queue = {};
-	const char *backend_opts = "X11:100x100";
+	const char *backend_opts = NULL;
 	int opt;
 
 	while ((opt = getopt(argc, argv, "b:h")) != -1) {
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'h':
-			gp_backend_init(NULL, NULL);
+			gp_backend_init_help();
 			return 0;
 		break;
 		default:
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	backend = gp_backend_init(backend_opts, "Backend Example");
+	backend = gp_backend_init(backend_opts, 0, 0, "Backend task example");
 	if (!backend) {
 		fprintf(stderr, "Failed to initialize backend\n");
 		return 1;

@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 		break;
 		case 'h':
 			printf("Usage: %s [-b backend] [-f font_face] filename\n\n", argv[0]);
-			gp_backend_init(NULL, NULL);
+			gp_backend_init_help();
 			return 0;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 	if (font_face)
 		font = gp_font_face_load(font_face, 0, 20);
 
-	win = gp_backend_init(backend_opts, "Font Align Test");
+	win = gp_backend_init(backend_opts, 0, 0, "Font Align Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

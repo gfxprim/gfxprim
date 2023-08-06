@@ -8,7 +8,6 @@ gp_backend_init
 gp_backend_poll
 gp_backend_update_rect_xyxy
 gp_backend_wait_event
-gp_x11_fullscreen
 gp_sdl_init
 gp_backend_wait
 gp_backend_add_timer

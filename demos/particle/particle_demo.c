@@ -33,7 +33,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = gp_backend_init(backend_opts, "Particles");
+	backend = gp_backend_init(backend_opts, 0, 0, "Particles");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);

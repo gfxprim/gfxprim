@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'h':
-			gp_backend_init(NULL, NULL);
+			gp_backend_init_help();
 			return 0;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -165,9 +165,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	win = gp_backend_init(backend_opts, "Blit Test");
-
-	if (win == NULL) {
+	win = gp_backend_init(backend_opts, 0, 0, "Blit Test");
+	if (!win) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
 		        backend_opts);
 		return 1;

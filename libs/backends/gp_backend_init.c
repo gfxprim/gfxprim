@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2020 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include "../../config.h"
@@ -86,26 +86,27 @@ static int parse_x11_params(char *params, gp_size *w, gp_size *h,
 	return 0;
 }
 
-static gp_backend *x11_init(char *params, const char *caption)
+static gp_backend *x11_init(char *params,
+                            gp_size pref_w, gp_size pref_h,
+                            const char *caption)
 {
-	gp_size w = 640, h = 480;
 	enum gp_x11_flags flags = 0;
 
-	if (parse_x11_params(params, &w, &h, &flags))
+	if (parse_x11_params(params, &pref_w, &pref_h, &flags))
 		return NULL;
 
-	return gp_x11_init(NULL, 0, 0, w, h, caption, flags);
+	return gp_x11_init(NULL, 0, 0, pref_w, pref_h, caption, flags);
 }
 #endif
 
 #ifdef HAVE_WAYLAND
-static gp_backend *wayland_init(char *params, const char *caption)
+static gp_backend *wayland_init(char *params,
+                                gp_size pref_w, gp_size pref_h,
+                                const char *caption)
 {
-	gp_size w = 640, h = 480;
-
 	(void) params;
 
-	return gp_wayland_init(NULL, w, h, caption);
+	return gp_wayland_init(NULL, pref_w, pref_h, caption);
 }
 #endif
 
@@ -172,15 +173,17 @@ static int parse_sdl_params(char *params, gp_size *w, gp_size *h,
 	return 0;
 }
 
-static gp_backend *sdl_init(char *params, const char *caption)
+static gp_backend *sdl_init(char *params,
+                            gp_size pref_w, gp_size pref_h,
+                            const char *caption)
 {
-	gp_size w = 640, h = 480, bpp = 0;
+	gp_size bpp = 0;
 	uint8_t flags = GP_SDL_RESIZABLE;
 
-	if (parse_sdl_params(params, &w, &h, &bpp, &flags))
+	if (parse_sdl_params(params, &pref_w, &pref_h, &bpp, &flags))
 		return NULL;
 
-	return gp_sdl_init(w, h, bpp, flags, caption);
+	return gp_sdl_init(pref_w, pref_h, bpp, flags, caption);
 }
 #endif
 
@@ -220,11 +223,11 @@ static int parse_fb_params(char *params, int *flags, const char **fb)
 	return 0;
 }
 
-static gp_backend *fb_init(char *params, const char *caption)
+static gp_backend *fb_init(char *params,
+                           gp_size GP_UNUSED(pref_w), gp_size GP_UNUSED(pref_h),
+                           const char GP_UNUSED(*caption))
 {
 	const char *fb = "/dev/fb0";
-
-	(void) caption;
 
 	int flags = GP_FB_INPUT_KBD | GP_FB_SHADOW;
 
@@ -235,10 +238,14 @@ static gp_backend *fb_init(char *params, const char *caption)
 #endif
 
 #ifdef HAVE_AALIB
-static gp_backend *aa_init(char *params, const char *caption)
+static gp_backend *aa_init(char *params,
+                           gp_size pref_w, gp_size pref_h,
+                           const char *caption)
 {
 	(void) caption;
 	(void) params;
+	(void) pref_w;
+	(void) pref_h;
 
 	return gp_aalib_init();
 }
@@ -276,28 +283,33 @@ static int parse_xcb_params(char *params, gp_size *w, gp_size *h)
 	return 0;
 }
 
-static gp_backend *xcb_init(char *params, const char *caption)
+static gp_backend *xcb_init(char *params,
+                            gp_size pref_w, gp_size pref_h,
+                            const char *caption)
 {
-	gp_size w = 640, h = 480;
-
-	if (parse_xcb_params(params, &w, &h))
+	if (parse_xcb_params(params, &pref_w, &pref_h))
 		return NULL;
 
-	return gp_xcb_init(NULL, 0, 0, w, h, caption);
+	return gp_xcb_init(NULL, 0, 0, pref_w, pref_h, caption);
 }
 #endif
 
 #ifdef OS_LINUX
-static gp_backend *proxy_init(char *params, const char *caption)
+static gp_backend *proxy_init(char *params,
+                              gp_size GP_UNUSED(pref_w), gp_size GP_UNUSED(pref_h),
+                              const char *caption)
 {
 	return gp_proxy_init(params, caption);
 }
 #endif
 
 static gp_backend *init_backend(const char *name, char *params,
+                                gp_size pref_w, gp_size pref_h,
                                 const char *caption);
 
-static gp_backend *virt_init(char *params, const char *caption)
+static gp_backend *virt_init(char *params,
+                             gp_size pref_w, gp_size pref_h,
+                             const char *caption)
 {
 	char *pixel, *backend_name;
 	gp_backend *backend;
@@ -324,7 +336,7 @@ static gp_backend *virt_init(char *params, const char *caption)
 	backend_name = params;
 	params = next_param(params);
 
-	backend = init_backend(backend_name, params, caption);
+	backend = init_backend(backend_name, params, pref_w, pref_h, caption);
 	if (!backend)
 		return NULL;
 
@@ -333,12 +345,16 @@ static gp_backend *virt_init(char *params, const char *caption)
 
 struct backend_init {
 	const char *name;
-	gp_backend *(*init)(char *params, const char *caption);
+	gp_backend *(*init)(char *params,
+	                    gp_size pref_w, gp_size pref_h,
+	                    const char *caption);
 	const char *usage;
 	const char *help[10];
 };
 
-static gp_backend *do_help(char *params, const char *caption);
+static gp_backend *do_help(char *params,
+                           gp_size pref_w, gp_size pref_h,
+                           const char *caption);
 
 static struct backend_init backends[] = {
 #ifdef OS_LINUX
@@ -420,13 +436,12 @@ static struct backend_init backends[] = {
 	{.name = NULL}
 };
 
-static gp_backend *do_help(char *params, const char *caption)
+static gp_backend *do_help(char GP_UNUSED(*params),
+                           gp_size GP_UNUSED(pref_w), gp_size GP_UNUSED(pref_h),
+                           const char GP_UNUSED(*caption))
 {
 	struct backend_init *i;
 	unsigned int j;
-
-	(void) params;
-	(void) caption;
 
 	for (i = backends; (i+1)->name; i++) {
 		fprintf(stderr, "Backend %s\n\n %s\n\n",
@@ -454,6 +469,7 @@ static struct backend_init *get_backend(const char *name)
 }
 
 static gp_backend *init_backend(const char *name, char *params,
+                                gp_size pref_w, gp_size pref_h,
                                 const char *caption)
 {
 	struct backend_init *init = get_backend(name);
@@ -465,7 +481,7 @@ static gp_backend *init_backend(const char *name, char *params,
 		return NULL;
 	}
 
-	ret = init->init(params, caption);
+	ret = init->init(params, pref_w, pref_h, caption);
 
 	return ret;
 }
@@ -481,16 +497,24 @@ static const char *autodetect_backend(void)
 	return NULL;
 }
 
-gp_backend *gp_backend_init(const char *params, const char *caption)
+gp_backend *gp_backend_init(const char *params,
+                            gp_size pref_w, gp_size pref_h,
+                            const char *caption)
 {
 	if (!params) {
 		params = autodetect_backend();
 
 		if (!params) {
-			do_help(NULL, NULL);
+			do_help(NULL, 0, 0, NULL);
 			return NULL;
 		}
 	}
+
+	if (!pref_w)
+		pref_w = 640;
+
+	if (!pref_h)
+		pref_h = 480;
 
 	/* parse backend name */
 	int i, len = strlen(params);
@@ -508,5 +532,5 @@ gp_backend *gp_backend_init(const char *params, const char *caption)
 
 	GP_DEBUG(1, "Have backend name '%s' params '%s'", buf, backend_params);
 
-	return init_backend(buf, backend_params, caption);
+	return init_backend(buf, backend_params, pref_w, pref_h, caption);
 }

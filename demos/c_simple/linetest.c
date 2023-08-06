@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 		break;
 		case 'h':
 			printf("Usage: %s [-b backend]\n\n", argv[0]);
-			gp_backend_init(NULL, NULL);
+			gp_backend_init_help();
 			return 0;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	win = gp_backend_init(backend_opts, "Line Test");
+	win = gp_backend_init(backend_opts, 0, 0, "Line Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	struct bogoman_map *map;
 	GP_TIMER_DECLARE(timer, 0, 300, "Refresh", NULL, NULL);
 	const char *map_path = "map.txt";
-	const char *backend_opts = "x11";
+	const char *backend_opts = NULL;
 	int opt;
 
 	bogoman_set_dbg_level(10);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 		break;
 		case 'h':
 			printf("Usage: %s [-b backend] [-m map]\n\n", argv[0]);
-			gp_backend_init(NULL, NULL);
+			gp_backend_init_help();
 			return 0;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 
 	bogoman_map_dump(map);
 
-	backend = gp_backend_init(backend_opts, "Bogoman");
+	backend = gp_backend_init(backend_opts, 0, 0, "Bogoman");
 
 	if (!backend) {
 		fprintf(stderr, "Failed to initialize backend");

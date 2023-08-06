@@ -523,19 +523,23 @@ int main(int argc, char *argv[])
 	const char *backend_opts = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "b:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:h")) != -1) {
 		switch (opt) {
 		case 'b':
 			backend_opts = optarg;
+		break;
+		case 'h':
+			gp_backend_init_help();
+			return 0;
 		break;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
 		}
 	}
 
-	backend = gp_backend_init(backend_opts, "Shapetest");
+	backend = gp_backend_init(backend_opts, 0, 0, "Shapetest");
 
-	if (backend == NULL) {
+	if (!backend) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
 		        backend_opts);
 		return 1;

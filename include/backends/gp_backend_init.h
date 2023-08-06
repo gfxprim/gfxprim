@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -14,23 +14,29 @@
 
 #include <backends/gp_backend.h>
 
-/*
- * Initalize backend by a string.
+/**
+ * @brief Initalize backend by a string.
  *
- * The format is:
+ * The params format is:
  *
  * "backend_name:backend_params"
  *
  * For example "SDL:fs" is string for fullscreen SDL backend.
  *
- * The caption parameter may, or may not be used. For example in windowed
- * enviroment caption will become caption of a window. When running on
- * framebuffer it may be ignored completly.
- *
- * Returns initalized backend or NULL in case of failure.
- *
- * If help is passed as a backend name a help is printed into the stderr.
+ * @params A backend init string, in most cases passed down by an user.
+ *         If "help" is passed as a backend name a help is printed into the stderr.
+ * @pref_w Preferred width.
+ * @pref_h Preferred height.
+ * @caption A caption used in a case that backends runs in a window with a caption.
+ * @return Initalized backend or NULL in case of failure.
  */
-gp_backend *gp_backend_init(const char *params, const char *caption);
+gp_backend *gp_backend_init(const char *params,
+                            gp_size pref_w, gp_size pref_h,
+                            const char *caption);
+
+static inline void gp_backend_init_help(void)
+{
+	gp_backend_init("help", 0, 0, NULL);
+}
 
 #endif /* BACKENDS_GP_BACKEND_INIT_H */
