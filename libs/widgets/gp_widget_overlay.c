@@ -113,10 +113,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 }
 
 enum keys {
+	HIDDEN,
 	WIDGETS,
 };
 
 static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("hidden", GP_JSON_ARR),
 	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
 };
 
@@ -138,6 +140,26 @@ static gp_widget *json_to_overlay(gp_json_reader *json, gp_json_val *val,
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
+		case HIDDEN:
+			GP_JSON_ARR_FOREACH(json, val) {
+				if (val->type != GP_JSON_INT) {
+					gp_json_warn(json, "Wrong type, expected integer");
+					continue;
+				}
+
+				if (val->val_int < 0) {
+					gp_json_warn(json, "Expected positive integer");
+					continue;
+				}
+
+				if ((size_t)val->val_int >= gp_vec_len(ret->overlay->stack)) {
+					gp_json_warn(json, "Position out of stack, have you defined widgets first?");
+					continue;
+				}
+
+				ret->overlay->stack[val->val_int].hidden = 1;
+			}
+		break;
 		case WIDGETS:
 			GP_JSON_ARR_FOREACH(json, val) {
 				child = gp_widget_from_json(json, val, ctx);
@@ -151,8 +173,10 @@ static gp_widget *json_to_overlay(gp_json_reader *json, gp_json_val *val,
 				}
 
 				ret->overlay->stack = tmp;
-				ret->overlay->stack[cnt++].widget = child;
+				ret->overlay->stack[cnt].widget = child;
+				ret->overlay->stack[cnt].hidden = 0;
 				gp_widget_set_parent(child, ret);
+				cnt++;
 			}
 		break;
 		}
@@ -301,6 +325,23 @@ unsigned int gp_widget_overlay_stack_size(gp_widget *self)
 	GP_WIDGET_ASSERT(self, GP_WIDGET_OVERLAY, 0);
 
 	return gp_vec_len(self->overlay->stack);
+}
+
+int gp_widget_overlay_stack_pos_by_child(gp_widget *self, gp_widget *child,
+                                         unsigned int *stack_pos)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_OVERLAY, 0);
+
+	unsigned int i;
+
+	for (i = 0; i < gp_widget_overlay_stack_size(self); i++) {
+		if (child == self->overlay->stack[i].widget) {
+			*stack_pos = i;
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 static int stack_pos_is_invalid(gp_widget *self, unsigned int stack_pos)

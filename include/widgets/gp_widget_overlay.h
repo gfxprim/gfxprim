@@ -16,7 +16,7 @@
 
 struct gp_widget_overlay_elem {
 	int hidden:1;
-	struct gp_widget *widget;
+	gp_widget *widget;
 };
 
 struct gp_widget_overlay {
@@ -56,6 +56,17 @@ void gp_widget_overlay_show(gp_widget *self, unsigned int stack_pos);
  * @return Stack size.
  */
 unsigned int gp_widget_overlay_stack_size(gp_widget *self);
+
+/**
+ * @brief Returns widget overlay stack position by child widget pointer.
+ *
+ * @self An overlay widget.
+ * @child An overlay widget child widget.
+ * @stack_pos A variable to store the stack position to.
+ * @return Zero-on succes, non-zero if not found.
+ */
+int gp_widget_overlay_stack_pos_by_child(gp_widget *self, gp_widget *child,
+                                         unsigned int *stack_pos);
 
 /**
  * @brief Puts a widget on stack_pos into an overlay.
