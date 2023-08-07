@@ -30,6 +30,8 @@ struct win {
 	xcb_pixmap_t pixmap;
 	xcb_shm_seg_t shmseg;
 
+	gp_ev_queue ev_queue;
+
 	int new_w;
 	int new_h;
 
@@ -539,6 +541,7 @@ static int create_window(struct gp_backend *self, struct win *win,
 	set_title(c, win->win, caption);
 
 	//TODO: XCB key handling!!!
+	self->event_queue = &win->ev_queue;
 	gp_ev_queue_init(self->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	/* Get pixel format */
