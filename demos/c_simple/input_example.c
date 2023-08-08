@@ -10,12 +10,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "gfxprim.h"
-
-#include <input/gp_input_driver_linux.h>
+#include <gfxprim.h>
 
 static gp_backend *backend;
-static gp_input_linux *input;
 
 static gp_pixel red, green, white, black;
 
@@ -52,9 +49,7 @@ static void event_loop(void)
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
 	for (;;) {
-		gp_backend_poll(backend);
-		if (input)
-			gp_input_linux_read(input, backend->event_queue);
+		gp_backend_wait(backend);
 
 		while (gp_backend_events(backend)) {
 			gp_event *ev = gp_backend_get_event(backend);
@@ -132,8 +127,6 @@ static void event_loop(void)
 			break;
 			}
 		}
-
-		usleep(100);
 	}
 }
 
@@ -148,11 +141,11 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'i':
-			input = gp_input_linux_open(optarg);
-			if (!input) {
-				fprintf(stderr, "Cannot initialize '%s'\n", optarg);
-				return 1;
-			}
+	//		input = gp_input_linux_open(optarg);
+	//		if (!input) {
+	//			fprintf(stderr, "Cannot initialize '%s'\n", optarg);
+	//			return 1;
+	//		}
 		break;
 		case 'h':
 			printf("Options\n-------\n\n");
@@ -168,7 +161,6 @@ int main(int argc, char *argv[])
 	}
 
 	backend = gp_backend_init(backend_opts, 0, 0, "Input Test");
-
 	if (!backend) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
 		        backend_opts);

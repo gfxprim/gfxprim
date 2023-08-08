@@ -20,6 +20,7 @@
 
 #include <backends/gp_backend.h>
 #include <backends/gp_linux_drm.h>
+#include <backends/gp_linux_input.h>
 #include <core/gp_debug.h>
 #include <core/gp_pixmap.h>
 
@@ -61,6 +62,9 @@ struct backend_drm_priv {
 
 	/* framebuffer pixmap */
 	gp_pixmap pixmap;
+
+	/* input event queue */
+	gp_ev_queue ev_queue;
 
 	/* Saved state for our connector */
 	struct drm_mode_crtc saved_crtc;
@@ -338,13 +342,10 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	struct gp_backend *ret;
 	size_t size = sizeof(gp_backend) + sizeof(struct backend_drm_priv);
 
-	if (flags) {
+	if (flags & GP_LINUX_DRM_NO_INPUT) {
 		GP_WARN("Invalid flags %i", flags);
 		return NULL;
 	}
-
-	if (!drm_path)
-		drm_path = "/dev/dri/card0";
 
 	ret = malloc(size);
 	if (!ret) {
@@ -356,24 +357,38 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	priv = GP_BACKEND_PRIV(ret);
 
+	if (!(flags & GP_LINUX_DRM_NO_INPUT)) {
+		if (gp_linux_input_hotplug_new(ret))
+			goto err0;
+	}
+
+	if (!drm_path)
+		drm_path = "/dev/dri/card0";
+
 	priv->drm_fd = drm_open(drm_path);
 	if (priv->drm_fd < 0)
-		goto err0;
-
-	if (init_drm(priv))
 		goto err1;
 
-	if (modeset(priv))
+	if (init_drm(priv))
 		goto err2;
 
-	ret->exit = backend_drm_exit;
+	if (modeset(priv))
+		goto err3;
+
 	ret->pixmap = &priv->pixmap;
 
+	ret->event_queue = &priv->ev_queue;
+	gp_ev_queue_init(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+
+	ret->exit = backend_drm_exit;
+
 	return ret;
-err2:
+err3:
 	munmap_fb(priv);
-err1:
+err2:
 	close(priv->drm_fd);
+err1:
+	gp_backend_input_destroy(ret);
 err0:
 	free(ret);
 	return NULL;

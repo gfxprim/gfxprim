@@ -12,15 +12,19 @@
 #ifndef BACKENDS_GP_BACKENDS_H
 #define BACKENDS_GP_BACKENDS_H
 
-/*
- * Base backend definitions.
- */
+/* Base backend definitions */
 #include <backends/gp_backend.h>
+
+/* Clipboard */
 #include <backends/gp_clipboard.h>
 
-/*
- * Backends.
- */
+/* Generic backend initalization */
+#include <backends/gp_backend_init.h>
+
+/* Backend input drivers */
+#include <backends/gp_backend_input.h>
+
+/* Backends. */
 #include <backends/gp_linux_fb.h>
 #include <backends/gp_linux_drm.h>
 #include <backends/gp_wayland.h>
@@ -30,10 +34,5 @@
 #include <backends/gp_aalib.h>
 #include <backends/gp_backend_virtual.h>
 #include <backends/gp_proxy.h>
-
-/*
- * Simplified backend initalization.
- */
-#include <backends/gp_backend_init.h>
 
 #endif /* BACKENDS_GP_BACKENDS_H */

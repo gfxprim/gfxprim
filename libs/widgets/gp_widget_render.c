@@ -14,7 +14,7 @@
 #include <utils/gp_fds.h>
 #include <utils/gp_user_path.h>
 #include <backends/gp_backends.h>
-#include <input/gp_input_driver_linux.h>
+
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_key_repeat_timer.h>
@@ -760,16 +760,6 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout)
 	return ret;
 }
 
-static int input_event(gp_fd *self)
-{
-	while (gp_input_linux_read(self->priv, backend->event_queue) > 0);
-
-	if (gp_widgets_process_events(win_layout))
-		return 1;
-
-	return 0;
-}
-
 long gp_dialog_run(gp_dialog *dialog)
 {
 	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
@@ -806,12 +796,8 @@ void gp_widgets_main_loop(gp_widget *layout, const char *label,
 
 	win_layout = layout;
 
-	if (input_str) {
-		gp_input_linux *input = gp_input_linux_by_devstr(input_str);
-
-		if (input)
-			gp_fds_add(&backend->fds, input->fd, POLLIN, input_event, input);
-	}
+	if (input_str)
+		//gp_input_linux *input = gp_input_linux_by_devstr(input_str);
 
 	if (init)
 		init(argc, argv);

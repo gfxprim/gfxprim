@@ -237,6 +237,50 @@ static gp_backend *fb_init(char *params,
 }
 #endif
 
+#ifdef HAVE_LINUX_DRM
+static int parse_drm_params(char *params, int *flags, const char **dev)
+{
+	char *param;
+
+	if (!params)
+		return 0;
+
+	do {
+		param = params;
+		params = next_param(params);
+
+		if (!strcasecmp(param, "no_input")) {
+			*flags |= GP_LINUX_DRM_NO_INPUT;
+			GP_DEBUG(1, "Linux input layer disabled");
+			continue;
+		}
+
+		if (strncmp(param, "/dev/", 5)) {
+			GP_FATAL("Invalid parameter '%s'", *dev);
+			return 1;
+		}
+
+		*dev = param;
+		GP_DEBUG(1, "DRM device set to '%s'", *dev);
+	} while (params);
+
+	return 0;
+}
+
+static gp_backend *drm_init(char *params,
+                            gp_size GP_UNUSED(pref_w), gp_size GP_UNUSED(pref_h),
+                            const char GP_UNUSED(*caption))
+{
+	int flags = 0;
+	const char *dev = "/dev/dri/card0";
+
+	if (parse_drm_params(params, &flags, &dev))
+		return NULL;
+
+	return gp_linux_drm_init(dev, flags);
+}
+#endif
+
 #ifdef HAVE_AALIB
 static gp_backend *aa_init(char *params,
                            gp_size pref_w, gp_size pref_h,
@@ -421,6 +465,15 @@ static struct backend_init backends[] = {
 	 .help  = {"no_shadow   - turns off shadow buffer",
 	           "new_console - allocate new console",
 	           NULL}
+	},
+#endif
+#ifdef HAVE_LINUX_DRM
+	{.name = "DRM",
+	 .init = drm_init,
+	 .usage = "drm:[/dev/dri/cardX]:[noinput]",
+	 .help = {"Linux DRM backend",
+		  "no_input - do not use Linux input for keyboard/mouse",
+	          NULL}
 	},
 #endif
 #ifdef HAVE_AALIB

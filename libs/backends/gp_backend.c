@@ -16,6 +16,7 @@
 
 #include <backends/gp_backend.h>
 #include <backends/gp_clipboard.h>
+#include <backends/gp_backend_input.h>
 
 void gp_backend_update_rect_xyxy(gp_backend *self,
                                  gp_coord x0, gp_coord y0,
@@ -291,6 +292,8 @@ void gp_backend_exit(gp_backend *self)
 		return;
 
 	gp_backend_clipboard(self, &op);
+
+	gp_backend_input_destroy(self);
 
 	self->exit(self);
 }

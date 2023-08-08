@@ -28,6 +28,7 @@
 #include <core/gp_types.h>
 
 #include <utils/gp_timer.h>
+#include <utils/gp_list.h>
 #include <utils/gp_fds.h>
 
 #include <input/gp_ev_queue.h>
@@ -137,6 +138,13 @@ struct gp_backend {
 
 	/* Task queue */
 	gp_task_queue *task_queue;
+
+	/**
+	 * List of input drivers feeding the ev_queue
+	 *
+	 * The file descriptor has to be registered separatelly to the gp_fds.
+	 */
+	gp_dlist input_drivers;
 
 	void *clipboard_data;
 
