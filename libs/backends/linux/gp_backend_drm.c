@@ -85,6 +85,7 @@ static int mmap_fb(struct backend_drm_priv *priv)
 	struct drm_mode_create_dumb creq = {
 		.width = priv->pixmap.w,
 		.height = priv->pixmap.h,
+		.bpp = 32,
 	};
 
 	if (ioctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq)) {
@@ -107,6 +108,7 @@ static int mmap_fb(struct backend_drm_priv *priv)
 		.height = priv->pixmap.h,
 		.pitch = priv->pixmap.bytes_per_row,
 		.depth = 24,
+		.bpp = 32,
 		.handle = priv->fb_handle
 	};
 
