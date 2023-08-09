@@ -12,9 +12,9 @@
 
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#ifdef HAVE_DRM_DRM_H
+#if defined(HAVE_DRM_DRM_H)
 # include <drm/drm.h>
-#elif HAVE_LIBDRM_DRM_H
+#elif defined(HAVE_LIBDRM_DRM_H)
 # include <libdrm/drm.h>
 #endif
 

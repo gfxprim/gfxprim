@@ -595,7 +595,7 @@ if __name__ ==  '__main__':
                     [header_exists, "drm/drm.h"], "", "", ["backends"]],
                    ["libdrm/drm.h",
                     "fallback for UAPI drm.h in libdrm/drm.h",
-                    [header_exists, "drm/drm.h"], "", "", ["backends"]],
+                    [header_exists, "libdrm/drm.h"], "", "", ["backends"]],
                    ["wayland",
                     "Wayland windowing system",
                     [header_exists, "wayland-client.h", "wayland/wayland-client.h"],
