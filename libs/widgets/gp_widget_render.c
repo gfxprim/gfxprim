@@ -331,6 +331,7 @@ void gp_widget_render_timer(gp_widget *self, int flags, unsigned int timeout_ms)
 	}
 
 	timers[i].expires = timeout_ms;
+	timers[i].period = GP_TIMER_STOP;
 	timers[i].id = gp_widget_type_id(self);
 	timers[i].priv = self;
 

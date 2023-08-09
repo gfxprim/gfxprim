@@ -99,12 +99,12 @@ static uint32_t pushevent_callback(gp_timer *self)
 
 	gp_ev_queue_put(self->_priv, &ev);
 
-	return GP_TIMER_STOP;
+	return self->period;
 }
 
 void gp_backend_add_timer(gp_backend *self, gp_timer *timer)
 {
-	if (timer->callback == NULL) {
+	if (!timer->callback) {
 		timer->callback = pushevent_callback;
 		timer->_priv = self->event_queue;
 	}

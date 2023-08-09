@@ -22,7 +22,7 @@ static uint32_t callback_periodic(gp_timer *self)
 {
 	(void) self;
 
-	return 0;
+	return self->period;
 }
 
 uint32_t callback_random(gp_timer *self)
