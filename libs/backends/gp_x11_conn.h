@@ -110,7 +110,7 @@ static unsigned int x11_open(const char *display)
 
 	disp = XDisplayName(display);
 
-	if (disp && disp[0] == ':')
+	if (disp && (disp[0] == ':' || (disp[0] == '0' && disp[1] == ':')))
 		x11_conn.local = 1;
 	else
 		x11_conn.local = 0;

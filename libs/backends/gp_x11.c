@@ -339,7 +339,7 @@ static int create_shm_ximage(gp_backend *self, gp_size w, gp_size h)
 		goto err0;
 	}
 
-	win->shminfo.shmid = shmget(IPC_PRIVATE, size, 0600);
+	win->shminfo.shmid = shmget(IPC_PRIVATE, size, 0666);
 
 	if (win->shminfo.shmid == -1) {
 		GP_WARN("Calling shmget() failed: %s", strerror(errno));
