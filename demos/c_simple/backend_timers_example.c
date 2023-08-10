@@ -67,7 +67,7 @@ int main(void)
 	 * Periodic timer with 1000ms interval. As the callback is set to NULL
 	 * Timer Event is pushed to event queue upon expiration. The backend
 	 * timer callback returns the .period value, which reschedulles the
-	 * time. You can also set .period to GP_TIMER_STOP which would make the
+	 * timer. You can also set .period to GP_TIMER_STOP which would make the
 	 * timer oneshot.
 	 *
 	 * NOTE: The .expires is set to 0 which means that the timer first
@@ -81,7 +81,7 @@ int main(void)
 
 	/*
 	 * Timer with a callback, this timer gets scheduled depending on ouput
-	 * from callback (GP_TIMER_STOP) means disable timer).
+	 * from callback, GP_TIMER_STOP means disable the timer.
 	 */
 	gp_timer timer2 = {
 		.expires = 5000,
