@@ -32,6 +32,15 @@ License
 
 The code is licensed under LGPL 2.1 or (at your opinion) any later.
 
+Packages
+~~~~~~~~
+
+Get rpm packages (for RedHat and SUSE) from
+https://build.opensuse.org/package/show/home:metan/gfxprim[buildservice].
+
+Get deb packages (for Debian, Ubuntu and Raspbian) from
+https://build.opensuse.org/package/show/home:metan/gfxprim-debian[buildservice].
+
 Bugs
 ----
 
@@ -39,31 +48,6 @@ Report bugs on the GFXprim
 http://www.ucw.cz/mailman/listinfo/gfxprim[mailing list].
 Eventually you can use GitHub
 https://github.com/gfxprim/gfxprim/issues[issue tracker].
-
-News
-----
-
-The GFXprim 1.0.0-rc1 has been released!
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-See what is link:news_1_0_0-rc1.html[new].
-
-Download the
-http://gfxprim.ucw.cz/releases/gfxprim_1.0.0-rc1.tar.bz2[1.0.0-rc1] tarball (without docs).
-
-Get rpm packages (for RedHat and SUSE) from
-https://build.opensuse.org/package/show/home:metan/gfxprim[buildservice].
-
-Or download prebuild Debian
-http://gfxprim.ucw.cz/packages/debian/wheezy/[amd64 Wheezy packages].
-
-The GFXprim 1.0.0-rc0 has been released!
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Download
-http://gfxprim.ucw.cz/releases/gfxprim_1.0.0-rc0.tar.bz2[1.0.0-rc0] tarball (without docs).
-
-Or get the code from directly from http://github.com/gfxprim/gfxprim/[github].
 
 Contact
 -------
