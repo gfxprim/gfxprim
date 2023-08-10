@@ -22,7 +22,7 @@ body {
 a, a:visited {
   color: #333;
   font-weight: bolder;
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 a:hover {
