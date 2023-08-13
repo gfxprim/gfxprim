@@ -441,7 +441,7 @@ def freetype_cflags(cfg):
 
 def wayland_cflags(cfg):
     cmds = [
-        'pkg-config --cflags wayland-client 2> /dev/null'
+        'pkg-config --cflags xkbcommon wayland-client 2> /dev/null'
     ]
 
     flags = cmd_output(cmds);
@@ -452,7 +452,7 @@ def wayland_cflags(cfg):
 
 def wayland_libs(cfg):
     cmds = [
-        'pkg-config --libs wayland-client 2> /dev/null'
+        'pkg-config --libs xkbcommon wayland-client 2> /dev/null'
     ]
 
     flags = cmd_output(cmds);
@@ -479,15 +479,6 @@ def sdl_libs(cfg):
         return '`sdl2-config --libs`'
 
     return '`sdl-config --libs`'
-
-def wayland_exists(cfg):
-    if (header_exists(cfg, "wayland-client.h")):
-        return True;
-
-    if (header_exists(cfg, "wayland/wayland-client.h")):
-        return True;
-
-    return False;
 
 if __name__ ==  '__main__':
     #

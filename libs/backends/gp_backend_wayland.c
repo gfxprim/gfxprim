@@ -8,6 +8,7 @@
 
 #include <core/gp_debug.h>
 #include <core/gp_pixmap.h>
+#include <utils/gp_utf.h>
 #include <backends/gp_backends.h>
 
 #ifdef HAVE_WAYLAND
@@ -15,6 +16,7 @@
 #include <wayland-util.h>
 #include <wayland-version.h>
 #include <wayland-client.h>
+#include <xkbcommon/xkbcommon.h>
 
 #include "xdg-shell-client-protocol.h"
 #include "xdg-decoration-unstable-v1.h"
@@ -90,6 +92,11 @@ struct client_state {
 	struct wl_seat *seat;
 	struct wl_keyboard *keyboard;
 	struct wl_pointer *pointer;
+
+	/* keymap */
+	struct xkb_context *keymap_context;
+	struct xkb_state *keymap_state;
+	struct xkb_keymap *keymap;
 
 	/* window */
 	struct wl_surface *surface;
@@ -200,8 +207,7 @@ static void shm_format(void *data, struct wl_shm *shm, uint32_t format)
 }
 
 static struct wl_shm_listener shm_listener = {
-	.format = shm_format
-};
+	.format = shm_format};
 
 static void
 pointer_handle_enter(void UN(*data), struct wl_pointer UN(*pointer),
@@ -260,9 +266,40 @@ static const struct wl_pointer_listener pointer_listener = {
 };
 
 static void
-keyboard_handle_keymap(void UN(*data), struct wl_keyboard UN(*keyboard),
-                       uint32_t UN(format), int fd, uint32_t UN(size))
+keyboard_handle_keymap(void *data, struct wl_keyboard UN(*keyboard),
+                       uint32_t format, int fd, uint32_t size)
 {
+	struct client_state *state = data;
+
+	GP_DEBUG(0, "keymap change");
+
+	if (format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
+		GP_WARN("Unknown keymap format!");
+		goto err0;
+
+	}
+
+	char *keymap_str = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (keymap_str == MAP_FAILED) {
+		GP_WARN("Failed to map keymap");
+		goto err0;
+	}
+
+	xkb_keymap_unref(state->keymap);
+	xkb_context_unref(state->keymap_context);
+	xkb_state_unref(state->keymap_state);
+
+	state->keymap_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+	state->keymap = xkb_keymap_new_from_string(state->keymap_context,
+	                                           keymap_str,
+	                                           XKB_KEYMAP_FORMAT_TEXT_V1,
+	                                           XKB_KEYMAP_COMPILE_NO_FLAGS);
+	state->keymap_state = xkb_state_new(state->keymap);
+
+	munmap(keymap_str, size);
+
+	GP_DEBUG(1, "Keymap created");
+err0:
 	close(fd);
 }
 
@@ -286,16 +323,32 @@ keyboard_handle_key(void *data, struct wl_keyboard UN(*keyboard),
 {
 	struct client_state *state = data;
 	gp_backend *backend = state->backend;
+	int ret;
+	char buf[128];
 
 	gp_ev_queue_push_key(backend->event_queue, key, key_state, 0);
+
+	ret = xkb_state_key_get_utf8(state->keymap_state, key+8, buf, sizeof(buf));
+	if (ret) {
+		uint32_t unicode;
+		const char *str = buf;
+
+		while ((unicode = gp_utf8_next(&str)))
+			gp_ev_queue_push_utf(backend->event_queue, unicode, 0);
+	}
 }
 
 static void
-keyboard_handle_modifiers(void UN(*data), struct wl_keyboard UN(*keyboard),
-                          uint32_t UN(serial), uint32_t UN(mods_depressed),
-                          uint32_t UN(mods_latched), uint32_t UN(mods_locked),
-                          uint32_t UN(group))
+keyboard_handle_modifiers(void *data, struct wl_keyboard UN(*keyboard),
+                          uint32_t UN(serial), uint32_t mods_depressed,
+                          uint32_t mods_latched, uint32_t mods_locked,
+                          uint32_t group)
 {
+	struct client_state *state = data;
+
+	xkb_state_update_mask(state->keymap_state,
+	                      mods_depressed, mods_latched, mods_locked,
+	                      0, 0, group);
 }
 
 static const struct wl_keyboard_listener keyboard_listener = {
@@ -572,6 +625,11 @@ static int wayland_resize_ack(gp_backend* self)
 static void wayland_exit(gp_backend* self)
 {
 	(void) self;
+
+	/* Free keymap */
+	xkb_keymap_unref(state.keymap);
+	xkb_context_unref(state.keymap_context);
+	xkb_state_unref(state.keymap_state);
 
 	window_destroy(&state);
 	display_disconnect(&state);
