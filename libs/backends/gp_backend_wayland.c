@@ -17,6 +17,7 @@
 #include <wayland-client.h>
 
 #include "xdg-shell-client-protocol.h"
+#include "xdg-decoration-unstable-v1.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -94,6 +95,9 @@ struct client_state {
 	struct wl_surface *surface;
 	struct xdg_surface *xdg_surface;
 	struct xdg_toplevel *xdg_toplevel;
+	/* window decoration */
+	struct zxdg_decoration_manager_v1 *decoration_manager;
+	struct zxdg_toplevel_decoration_v1 *decoration;
 
 	/* gfxprim */
 	uint32_t w, h;
@@ -196,7 +200,7 @@ static void shm_format(void *data, struct wl_shm *shm, uint32_t format)
 }
 
 static struct wl_shm_listener shm_listener = {
-	shm_format
+	.format = shm_format
 };
 
 static void
@@ -248,11 +252,11 @@ pointer_handle_axis(void UN(*data), struct wl_pointer UN(*pointer),
 }
 
 static const struct wl_pointer_listener pointer_listener = {
-	pointer_handle_enter,
-	pointer_handle_leave,
-	pointer_handle_motion,
-	pointer_handle_button,
-	pointer_handle_axis,
+	.enter = pointer_handle_enter,
+	.leave = pointer_handle_leave,
+	.motion = pointer_handle_motion,
+	.button = pointer_handle_button,
+	.axis = pointer_handle_axis,
 };
 
 static void
@@ -295,13 +299,11 @@ keyboard_handle_modifiers(void UN(*data), struct wl_keyboard UN(*keyboard),
 }
 
 static const struct wl_keyboard_listener keyboard_listener = {
-	keyboard_handle_keymap,
-	keyboard_handle_enter,
-	keyboard_handle_leave,
-	keyboard_handle_key,
-	keyboard_handle_modifiers,
-	//repeat_info
-	NULL
+	.keymap = keyboard_handle_keymap,
+	.enter = keyboard_handle_enter,
+	.leave = keyboard_handle_leave,
+	.key = keyboard_handle_key,
+	.modifiers = keyboard_handle_modifiers,
 };
 
 static void seat_handle_capabilities(void *data, struct wl_seat *seat,
@@ -327,7 +329,19 @@ static void seat_handle_capabilities(void *data, struct wl_seat *seat,
 }
 
 static const struct wl_seat_listener seat_listener = {
-        seat_handle_capabilities,
+	.capabilities = seat_handle_capabilities,
+};
+
+static void configure_decorations(void UN(*data),
+                                  struct zxdg_toplevel_decoration_v1 UN(*zxdg_toplevel_decoration_v1),
+                                  uint32_t mode)
+{
+	if (mode != ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE)
+		GP_WARN("Failed to turn on server side decorations!");
+}
+
+static struct zxdg_toplevel_decoration_v1_listener decoration_listener = {
+	configure_decorations,
 };
 
 static void registry_global(void *data, struct wl_registry *registry,
@@ -336,6 +350,8 @@ static void registry_global(void *data, struct wl_registry *registry,
 	struct client_state *state = data;
 
 	(void) version;
+
+	GP_DEBUG(5, "Wayland interface '%s'", interface);
 
 	if (!strcmp(interface, "wl_shm")) {
 		state->shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
@@ -360,15 +376,21 @@ static void registry_global(void *data, struct wl_registry *registry,
 		wl_seat_add_listener(state->seat, &seat_listener, state);
 		return;
 	}
+
+	if (!strcmp(interface, "zxdg_decoration_manager_v1")) {
+		if (version != 1) {
+			GP_WARN("Unexpected decoration manager version %"PRIu32, version);
+			return;
+		}
+		state->decoration_manager = wl_registry_bind(registry, name, &zxdg_decoration_manager_v1_interface, 1);
+		return;
+	}
 }
 
 static void
-registry_global_remove(void *data,
-		struct wl_registry *registry, uint32_t name)
+registry_global_remove(void UN(*data),
+		struct wl_registry UN(*registry), uint32_t UN(name))
 {
-	(void) data;
-	(void) registry;
-	(void) name;
 }
 
 static const struct wl_registry_listener wl_registry_listener = {
@@ -414,7 +436,7 @@ static int display_connect(const char *disp_name, struct client_state *state)
 		return 1;
 	}
 
-/* we added shm listener in the first roundtrip trigger it with second call */
+	/* we added shm listener in the first roundtrip trigger it with second call */
 	wl_display_roundtrip(state->display);
 
 	if (state->pixel_type == GP_PIXEL_UNKNOWN) {
@@ -437,6 +459,26 @@ static void window_destroy(struct client_state *state)
 	wl_surface_destroy(state->surface);
 }
 
+static void toplevel_configure(void *data, struct xdg_toplevel UN(*toplevel),
+                               int32_t w, int32_t h, struct wl_array UN(*states))
+{
+	struct client_state *st = data;
+
+	gp_ev_queue_push_resize(st->backend->event_queue, w, h, 0);
+}
+
+static void toplevel_close(void *data, struct xdg_toplevel UN(*toplevel))
+{
+	struct client_state *st = data;
+
+	gp_ev_queue_push(st->backend->event_queue, GP_EV_SYS, GP_EV_SYS_QUIT, 0, 0);
+}
+
+static const struct xdg_toplevel_listener toplevel_listener = {
+	.configure = toplevel_configure,
+	.close = toplevel_close,
+};
+
 static int window_create(struct client_state *state, unsigned int w, unsigned int h, const char *caption)
 {
 	state->w = w;
@@ -452,15 +494,23 @@ static int window_create(struct client_state *state, unsigned int w, unsigned in
 	}
 
 	xdg_surface_add_listener(state->xdg_surface, &xdg_surface_listener, state);
-	state->xdg_toplevel = xdg_surface_get_toplevel(state->xdg_surface);
 
+	state->xdg_toplevel = xdg_surface_get_toplevel(state->xdg_surface);
 	if (!state->xdg_toplevel) {
 		GP_FATAL("Failed to get xdg_toplevel");
 		window_destroy(state);
 		return 1;
 	}
 
+	xdg_toplevel_add_listener(state->xdg_toplevel, &toplevel_listener, state);
+	xdg_toplevel_set_app_id(state->xdg_toplevel, caption);
 	xdg_toplevel_set_title(state->xdg_toplevel, caption);
+
+	if (state->decoration_manager) {
+		state->decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(state->decoration_manager, state->xdg_toplevel);
+		zxdg_toplevel_decoration_v1_add_listener(state->decoration, &decoration_listener, state);
+		zxdg_toplevel_decoration_v1_set_mode(state->decoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
+	}
 
 	buffered_frame_init(state, &frame);
 
