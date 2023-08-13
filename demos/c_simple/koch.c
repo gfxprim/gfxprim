@@ -177,8 +177,14 @@ int main(int argc, char *argv[])
 				}
 			break;
 			case GP_EV_SYS:
-				if (ev->code == GP_EV_SYS_RESIZE)
+				switch (ev->code) {
+				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);
+				break;
+				case GP_EV_SYS_QUIT:
+					gp_backend_exit(backend);
+					return 0;
+				}
 			}
 		}
 		usleep(TIMER_TICK);
