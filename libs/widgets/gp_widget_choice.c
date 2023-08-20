@@ -375,8 +375,12 @@ void gp_widget_choice_sel_set_(gp_widget *self, size_t sel)
 		return;
 	}
 
-	if (call_get_sel(self) == sel)
+	size_t cur_sel = call_get_sel(self);
+
+	if (cur_sel == sel)
 		return;
+
+	self->choice->prev_sel = cur_sel;
 
 	call_set_sel(self, sel);
 }
@@ -395,4 +399,11 @@ size_t gp_widget_choice_sel_get(gp_widget *self)
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_CHOICE, 0);
 
 	return call_get_sel(self);
+}
+
+size_t gp_widget_choice_prev_sel_get(gp_widget *self)
+{
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_CHOICE, 0);
+
+	return self->choice->prev_sel;
 }

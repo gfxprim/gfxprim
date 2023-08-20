@@ -60,6 +60,9 @@ struct gp_widget_choice {
 	size_t cnt;
 	size_t sel;
 
+	/* Previously selected choice can be queried in the widget callback */
+	size_t prev_sel;
+
 	/* Pointer to a widget data */
 	union {
 		void *ops_priv;
@@ -144,10 +147,20 @@ void gp_widget_choice_sel_set(gp_widget *self, size_t sel);
  * @brief Returns a selected choice.
  *
  * @self A choice widget.
- *
  * @return Currently selected choice widget.
  */
 size_t gp_widget_choice_sel_get(gp_widget *self);
+
+/**
+ * @brief Returns previously selected choice.
+ *
+ * The value is valid only after choice was changed from the UI, i.e. can be
+ * used in the widget event callback to get the previosly selected choice.
+ *
+ * @self A choice widget.
+ * @return A previously selected choice.
+ */
+size_t gp_widget_choice_prev_sel_get(gp_widget *self);
 
 /**
  * @brief Returns a choice value for a given index.

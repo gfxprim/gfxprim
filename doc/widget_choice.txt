@@ -18,6 +18,8 @@ void gp_widget_choice_sel_set(gp_widget *self, size_t sel);
 
 size_t gp_widget_choice_sel_get(gp_widget *self);
 
+size_t gp_widget_choice_prev_sel_get(gp_widget *self);
+
 size_t gp_widget_choice_cnt_get(gp_widget *self);
 
 const char *gp_widget_choice_name_get(gp_widget *self, size_t idx);
@@ -25,6 +27,9 @@ const char *gp_widget_choice_name_get(gp_widget *self, size_t idx);
 
 Functions to get and set the selected choice, the choices count and particular
 choice name and the choice widget class constructor.
+
+The 'gp_widget_choice_prev_sel_get()' can be used to query previously selected
+choice inside of the widget event handler.
 
 .Choice class ops and array constructors
 [source,c]
