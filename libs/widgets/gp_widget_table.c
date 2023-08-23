@@ -372,6 +372,34 @@ redraw:
 	return 1;
 }
 
+static int move_first(gp_widget *self)
+{
+	gp_widget_table *tbl = self->tbl;
+
+	tbl->row_selected = 1;
+	tbl->selected_row = 0;
+	tbl->start_row = 0;
+
+	gp_widget_send_widget_event(self, GP_WIDGET_TABLE_SELECT, (long)tbl->selected_row);
+	gp_widget_redraw(self);
+
+	return 1;
+}
+
+static int move_last(gp_widget *self, const gp_widget_render_ctx *ctx)
+{
+	gp_widget_table *tbl = self->tbl;
+
+	tbl->row_selected = 1;
+	tbl->selected_row = last_row(self);
+	tbl->start_row = tbl->selected_row - display_rows(self, ctx);
+
+	gp_widget_send_widget_event(self, GP_WIDGET_TABLE_SELECT, (long)tbl->selected_row);
+	gp_widget_redraw(self);
+
+	return 1;
+}
+
 static int scroll_down(gp_widget *self, const gp_widget_render_ctx *ctx,
                        unsigned int rows)
 {
@@ -581,6 +609,10 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			return move_up(self, ctx, display_rows(self, ctx));
 		case GP_KEY_PAGE_DOWN:
 			return move_down(self, ctx, display_rows(self, ctx));
+		case GP_KEY_END:
+			return move_last(self, ctx);
+		case GP_KEY_HOME:
+			return move_first(self);
 		case GP_BTN_LEFT:
 			return click(self, ctx, ev);
 		case GP_KEY_ENTER:
