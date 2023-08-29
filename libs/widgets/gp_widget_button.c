@@ -578,3 +578,20 @@ gp_widget *gp_widget_button_new(const char *label,
 
 	return ret;
 }
+
+enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_BUTTON, 0);
+
+	return GP_BUTTON_TYPE_MASK & self->button->type;
+}
+
+void gp_widget_button_type_set(gp_widget *self, enum gp_widget_button_type type)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_BUTTON, );
+
+	self->button->type = type;
+
+	gp_widget_resize(self);
+	gp_widget_redraw(self);
+}

@@ -33,6 +33,17 @@ could be overriden by bit-or of 'GP_BUTTON_TEXT_LEFT' or
 Buttons with just a label are created with 'btype' set to 'GP_BUTTON_LABEL'
 which is equal to '0'.
 
+.Button type modification
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self);
+
+void gp_widget_button_type_set(gp_widget *self, enum gp_widget_button_type type);
+-------------------------------------------------------------------------------
+
+Functions to get and set button type during the runtime. The alignment is
+masked out of the return value from the get function.
+
 .Button types
 image:button_types.png[Button types]
 

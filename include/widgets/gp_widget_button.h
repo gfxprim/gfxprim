@@ -105,4 +105,22 @@ static inline gp_widget *gp_widget_button_new2(const char *label,
 	return ret;
 }
 
+/**
+ * @brief Returns a button type.
+ *
+ * The aligment is masked out of the return value.
+ *
+ * @self A button widget.
+ * @return A button type.
+ */
+enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self);
+
+/**
+ * @brief Sets a button type.
+ *
+ * @self A button widget.
+ * @type New button type.
+ */
+void gp_widget_button_type_set(gp_widget *self, enum gp_widget_button_type type);
+
 #endif /* GP_WIDGET_BUTTON_H */
