@@ -1560,6 +1560,30 @@ void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
 		set_border_fill(self, border, fill);
 }
 
+void gp_widget_grid_col_fill_set(gp_widget *self, unsigned int col, uint8_t fill)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+
+	if (col >= self->grid->cols) {
+		GP_WARN("Invalid grid col %u have %u cols", col, self->grid->cols);
+		return;
+	}
+
+	self->grid->col_s[col].fill = fill;
+}
+
+void gp_widget_grid_row_fill_set(gp_widget *self, unsigned int row, uint8_t fill)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+
+	if (row >= self->grid->rows) {
+		GP_WARN("Invalid grid row %u have %u rows", row, self->grid->rows);
+		return;
+	}
+
+	self->grid->row_s[row].fill = fill;
+}
+
 /*
 
  This part implements hbox and vbox which are JSON shortcuts for a grid with single col/row.

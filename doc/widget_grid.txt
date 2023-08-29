@@ -210,6 +210,24 @@ If `fill` is -1 no changes to border fills are done.
 
 See the detailed description below on padding and fill.
 
+Cell row and column fill
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_col_fill_set(gp_widget *self,
+                                 unsigned int col, uint8_t fill);
+
+void gp_widget_grid_row_fill_set(gp_widget *self,
+                                 unsigned int row, uint8_t fill);
+-------------------------------------------------------------------------------
+
+Sets cell column and row fill coeficient. When fill is set to 0 the respective
+column or row is set to its minimal horizontal or vertical size. When non-zero
+the coeficient describes how aggresively is leftover space allocated, the
+higher coeficient the more space is allocated. When grid is created all
+columnt and row fill coeficients are set to 1.
+
 Grid JSON Example
 ~~~~~~~~~~~~~~~~~
 

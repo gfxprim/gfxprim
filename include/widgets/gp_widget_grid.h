@@ -313,4 +313,22 @@ static inline void gp_widget_grid_no_border(gp_widget *self)
 	gp_widget_grid_border_set(self, GP_WIDGET_BORDER_ALL, 0, 0);
 }
 
+/**
+ * @brief Sets grid cell column fill coeficient.
+ *
+ * @self A grid widget.
+ * @col A column.
+ * @fill A fill coeficient.
+ */
+void gp_widget_grid_col_fill_set(gp_widget *self, unsigned int col, uint8_t fill);
+
+/**
+ * @brief Sets grid cell row fill coeficient.
+ *
+ * @self A grid widget.
+ * @row A row.
+ * @fill A fill coeficient.
+ */
+void gp_widget_grid_row_fill_set(gp_widget *self, unsigned int row, uint8_t fill);
+
 #endif /* GP_WIDGET_GRID_H */
