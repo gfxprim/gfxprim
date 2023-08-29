@@ -52,7 +52,7 @@ void gp_ev_queue_set_screen_size(gp_ev_queue *self,
 	if (self->cursor_x >= w)
 		self->cursor_x = w - 1;
 
-	if (self->cursor_y >= w)
+	if (self->cursor_y >= h)
 		self->cursor_y = h - 1;
 }
 
