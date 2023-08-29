@@ -92,6 +92,12 @@ void gp_widget_int_val_set(gp_widget *self, int64_t val)
 	//TODO: On event?
 }
 
+int64_t gp_widget_int_val_get(gp_widget *self)
+{
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, 0);
+
+	return self->i->val;
+}
 
 void gp_widget_int_max_set(gp_widget *self, int64_t max)
 {

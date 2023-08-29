@@ -25,10 +25,7 @@ struct gp_widget_int {
 	char payload[];
 };
 
-static inline int64_t gp_widget_int_val_get(gp_widget *self)
-{
-	return self->i->val;
-}
+int64_t gp_widget_int_val_get(gp_widget *self);
 
 void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val);
 
