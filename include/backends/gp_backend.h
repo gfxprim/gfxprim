@@ -29,7 +29,7 @@
 
 #include <utils/gp_timer.h>
 #include <utils/gp_list.h>
-#include <utils/gp_fds.h>
+#include <utils/gp_poll.h>
 
 #include <input/gp_ev_queue.h>
 #include <input/gp_task.h>
@@ -126,7 +126,7 @@ struct gp_backend {
 	void (*wait)(gp_backend *self);
 
 	/* File descriptors to poll for */
-	gp_fds fds;
+	gp_poll fds;
 
 	/*
 	 * Queue to store input events.
@@ -178,16 +178,14 @@ static inline void gp_backend_update_rect_xywh(gp_backend *self,
 	gp_backend_update_rect_xyxy(self, x, y, x + w - 1, y + h - 1);
 }
 
-static inline void gp_backend_fds_add(gp_backend *self,
-                                      int fd, short events,
-                                      int (*event)(gp_fd *self), void *priv)
+static inline void gp_backend_poll_add(gp_backend *self, gp_fd *fd)
 {
-	gp_fds_add(&self->fds, fd, events, event, priv);
+	gp_poll_add(&self->fds, fd);
 }
 
-static inline void gp_backend_fds_rem(gp_backend *self, int fd)
+static inline void gp_backend_poll_rem(gp_backend *self, gp_fd *fd)
 {
-	gp_fds_rem(&self->fds, fd);
+	gp_poll_rem(&self->fds, fd);
 }
 
 void gp_backend_exit(gp_backend *self);

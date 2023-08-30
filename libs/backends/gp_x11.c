@@ -631,7 +631,14 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 
 	int fd = XConnectionNumber(win->dpy);
 
-	gp_fds_add(&backend->fds, fd, POLLIN, x11_process_fd, backend);
+	win->fd = (gp_fd) {
+		.fd = fd,
+		.event = x11_process_fd,
+		.events = GP_POLLIN,
+		.priv = backend,
+	};
+
+	gp_poll_add(&backend->fds, &win->fd);
 
 	if (flags & GP_X11_FULLSCREEN)
 		x11_win_fullscreen(win, 1);

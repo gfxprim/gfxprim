@@ -41,6 +41,9 @@ struct x11_win {
 	int shm_flag:1;
 	int fullscreen_flag:1;
 
+	/* poll fd structure */
+	gp_fd fd;
+
 	/* used to store width and height from ConfigureNotify event */
 	unsigned int new_w;
 	unsigned int new_h;

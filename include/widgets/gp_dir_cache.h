@@ -9,6 +9,7 @@
 #ifndef GP_DIR_CACHE_H
 #define GP_DIR_CACHE_H
 
+#include <utils/gp_poll.h>
 #include <time.h>
 
 typedef struct gp_dir_entry {
@@ -174,9 +175,9 @@ int gp_dir_cache_notify(gp_dir_cache *self);
  * @brief Returns notify_fd if available.
  *
  * @self A direcotry cache
- * @return A file descriptor or -1 if notify is not supported/available
+ * @return A file descriptor structure for gp_poll().
  */
-int gp_dir_cache_notify_fd(gp_dir_cache *self);
+gp_fd *gp_dir_cache_notify_fd(gp_dir_cache *self);
 
 /**
  * @brief Creates a directory and updates the cache.

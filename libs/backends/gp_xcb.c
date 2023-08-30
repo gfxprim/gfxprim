@@ -32,6 +32,8 @@ struct win {
 
 	gp_ev_queue ev_queue;
 
+	gp_fd fd;
+
 	int new_w;
 	int new_h;
 
@@ -593,12 +595,19 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 	if (!x_connect(display))
 		goto err0;
 
+	win = GP_BACKEND_PRIV(backend);
+
 	int fd = xcb_get_file_descriptor(x_con.c);
 
-	if (gp_fds_add(&backend->fds, fd, POLLIN, x_process_fd, backend))
-		goto err1;
+	win->fd = (gp_fd) {
+		.fd = fd,
+		.event = x_process_fd,
+		.events = GP_POLLIN,
+		.priv = &backend,
+	};
 
-	win = GP_BACKEND_PRIV(backend);
+	if (gp_poll_add(&backend->fds, &win->fd))
+		goto err1;
 
 	if (create_window(backend, win, x, y, w, h, caption))
 		goto err1;

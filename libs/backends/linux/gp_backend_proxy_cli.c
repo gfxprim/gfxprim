@@ -36,7 +36,7 @@ static int set_name(struct gp_proxy_cli *app, void *name, size_t size)
 
 void gp_proxy_cli_rem(struct gp_proxy_cli **root, struct gp_proxy_cli *self)
 {
-	GP_DEBUG(1, "Freeing client (%p) fd %i", self, self->fd);
+	GP_DEBUG(1, "Freeing client (%p) fd %i", self, self->fd.fd);
 
 	if (self->next)
 		self->next->prev = self->prev;
@@ -62,7 +62,7 @@ static int parse(struct gp_proxy_cli *self, struct gp_proxy_cli_ops *ops)
 				return 1;
 		break;
 		case GP_PROXY_EXIT:
-			GP_DEBUG(1, "Client (%p) fd %i requests exit", self, self->fd);
+			GP_DEBUG(1, "Client (%p) fd %i requests exit", self, self->fd.fd);
 			return 1;
 		break;
 		case GP_PROXY_UPDATE:
@@ -90,7 +90,7 @@ static int parse(struct gp_proxy_cli *self, struct gp_proxy_cli_ops *ops)
 		break;
 		default:
 			GP_DEBUG(1, "Client (%p) fd (%i) invalid request %i",
-			         self, self->fd, msg->type);
+			         self, self->fd.fd, msg->type);
 			return 1;
 		}
 	}
@@ -105,7 +105,7 @@ int gp_proxy_cli_read(struct gp_proxy_cli *self, struct gp_proxy_cli_ops *ops)
 {
 	ssize_t ret;
 
-	ret = gp_proxy_buf_recv(self->fd, &self->buf);
+	ret = gp_proxy_buf_recv(self->fd.fd, &self->buf);
 
 	if (ret > 0) {
 		if (parse(self, ops))
@@ -134,10 +134,14 @@ struct gp_proxy_cli *gp_proxy_cli_add(struct gp_proxy_cli **root, int cli_fd)
 	if (!cli)
 		return NULL;
 
-	cli->fd = cli_fd;
 	cli->next = *root;
 	cli->prev = NULL;
 	cli->name = NULL;
+
+	cli->fd = (gp_fd) {
+		.fd = cli_fd,
+		.events = GP_POLLIN,
+	};
 
 	gp_proxy_buf_init(&cli->buf);
 

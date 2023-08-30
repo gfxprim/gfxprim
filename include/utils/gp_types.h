@@ -11,6 +11,7 @@
 
 typedef struct gp_htable gp_htable;
 typedef struct gp_heap_head gp_heap_head;
+typedef struct gp_fd gp_fd;
 
 struct gp_heap_head {
 	gp_heap_head *left;

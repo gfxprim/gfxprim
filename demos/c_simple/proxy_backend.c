@@ -87,9 +87,9 @@ static void on_unmap(struct gp_proxy_cli *self)
 		if (gp_proxy_shm_resize(shm, backend->pixmap->w, backend->pixmap->h) < 0)
 			do_exit();
 
-		gp_proxy_send(cli_shown->fd, GP_PROXY_MAP, &shm->path);
-		gp_proxy_send(cli_shown->fd, GP_PROXY_PIXMAP, &shm->pixmap);
-		gp_proxy_send(cli_shown->fd, GP_PROXY_SHOW, NULL);
+		gp_proxy_cli_send(cli_shown, GP_PROXY_MAP, &shm->path);
+		gp_proxy_cli_send(cli_shown, GP_PROXY_PIXMAP, &shm->pixmap);
+		gp_proxy_cli_send(cli_shown, GP_PROXY_SHOW, NULL);
 	}
 }
 
@@ -103,8 +103,8 @@ static void hide_client(void)
 	if (!cli_shown)
 		return;
 
-	gp_proxy_send(cli_shown->fd, GP_PROXY_HIDE, NULL);
-	gp_proxy_send(cli_shown->fd, GP_PROXY_UNMAP, NULL);
+	gp_proxy_cli_send(cli_shown, GP_PROXY_HIDE, NULL);
+	gp_proxy_cli_send(cli_shown, GP_PROXY_UNMAP, NULL);
 
 	cli_shown = NULL;
 }
@@ -127,10 +127,10 @@ static void show_client(int i)
 		.y = backend->event_queue->state.cursor_y,
 	};
 
-	gp_proxy_send(cli->fd, GP_PROXY_MAP, &shm->path);
-	gp_proxy_send(cli->fd, GP_PROXY_PIXMAP, &shm->pixmap);
-	gp_proxy_send(cli->fd, GP_PROXY_CURSOR_POS, &cur_pos);
-	gp_proxy_send(cli->fd, GP_PROXY_SHOW, NULL);
+	gp_proxy_cli_send(cli, GP_PROXY_MAP, &shm->path);
+	gp_proxy_cli_send(cli, GP_PROXY_PIXMAP, &shm->pixmap);
+	gp_proxy_cli_send(cli, GP_PROXY_CURSOR_POS, &cur_pos);
+	gp_proxy_cli_send(cli, GP_PROXY_SHOW, NULL);
 
 	cli_shown = cli;
 }
@@ -143,7 +143,7 @@ static void resize_shown_client(void)
 		return;
 	}
 
-	gp_proxy_send(cli_shown->fd, GP_PROXY_UNMAP, NULL);
+	gp_proxy_cli_send(cli_shown, GP_PROXY_UNMAP, NULL);
 }
 
 static int backend_event(gp_backend *b)
@@ -168,7 +168,7 @@ static int backend_event(gp_backend *b)
 			break;
 			case GP_KEY_Q:
 				if (cli_shown)
-					gp_proxy_send(cli_shown->fd, GP_PROXY_EXIT, NULL);
+					gp_proxy_cli_send(cli_shown, GP_PROXY_EXIT, NULL);
 			break;
 			case GP_KEY_L:
 				hide_client();
@@ -213,7 +213,7 @@ static int client_event(gp_fd *self)
 {
 	if (gp_proxy_cli_read(self->priv, &cli_ops)) {
 		gp_proxy_cli_rem(&clients, self->priv);
-		close(self->pfd->fd);
+		close(self->fd);
 
 		if (self->priv == cli_shown) {
 			cli_shown = NULL;
@@ -233,7 +233,10 @@ static int client_add(gp_backend *backend, int fd)
 	if (!cli)
 		goto err0;
 
-	gp_backend_fds_add(backend, fd, POLLIN, client_event, cli);
+	cli->fd.event = client_event;
+	cli->fd.priv = cli;
+
+	gp_backend_poll_add(backend, &cli->fd);
 
 	return 0;
 err0:
@@ -245,7 +248,7 @@ static int server_event(gp_fd *self)
 {
 	int fd;
 
-	while ((fd = accept(self->pfd->fd, NULL, NULL)) > 0) {
+	while ((fd = accept(self->fd, NULL, NULL)) > 0) {
 		/*
 		 * Pixel type has to be send first so that backend can return
 		 * from init() function.
@@ -310,9 +313,14 @@ int main(int argc, char *argv[])
 
 	redraw();
 
-	int server_fd = gp_proxy_server_init(NULL);
+	int fd = gp_proxy_server_init(NULL);
+	gp_fd server_fd = {
+		.fd = fd,
+		.event = server_event,
+		.events = GP_POLLIN,
+	};
 
-	gp_backend_fds_add(backend, server_fd, POLLIN, server_event, NULL);
+	gp_backend_poll_add(backend, &server_fd);
 
 	for (;;) {
 		gp_backend_wait(backend);

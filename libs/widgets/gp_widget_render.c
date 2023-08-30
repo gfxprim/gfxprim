@@ -11,7 +11,7 @@
 
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
-#include <utils/gp_fds.h>
+#include <utils/gp_poll.h>
 #include <utils/gp_user_path.h>
 #include <backends/gp_backends.h>
 
@@ -23,7 +23,7 @@
 #include <widgets/gp_widgets_task.h>
 #include <widgets/gp_widget_keys.h>
 #include <widgets/gp_app_info.h>
-#include <widgets/gp_widget_fds.h>
+#include <widgets/gp_widget_poll.h>
 
 #include "gp_widgets_internal.h"
 
@@ -409,60 +409,32 @@ void gp_widgets_task_rem(gp_task *task)
 		gp_task_queue_rem(&task_queue, task);
 }
 
-//TODO: hack fix once fds switches to epoll!
-struct fds {
-	int fd;
-	short events;
-	int (*event)(gp_fd *self);
-	void *priv;
-};
+static gp_dlist fds;
 
-static struct fds *fds;
-
-void gp_widget_fds_add(int fd, short events, int (*event)(gp_fd *self), void *priv)
+void gp_widget_poll_add(gp_fd *fd)
 {
-	if (backend) {
-		gp_backend_fds_add(backend, fd, events, event, priv);
-		return;
-	}
-
-	if (!fds) {
-		fds = gp_vec_new(0, sizeof(struct fds));
-		if (!fds)
-			return;
-	}
-
-	size_t len = gp_vec_len(fds);
-
-	fds = gp_vec_expand(fds, 1);
-
-	fds[len].fd = fd;
-	fds[len].events = events;
-	fds[len].event = event;
-	fds[len].priv = priv;
+	if (backend)
+		gp_backend_poll_add(backend, fd);
+	else
+		gp_dlist_push_head(&fds, &fd->lhead);
 }
 
-void gp_widget_fds_rem(int fd)
+void gp_widget_poll_rem(gp_fd *fd)
 {
 	if (!backend) {
 		GP_FATAL("Not implemented!");
 		return;
 	}
 
-	gp_backend_fds_rem(backend, fd);
+	gp_backend_poll_rem(backend, fd);
 }
 
-static void move_fds(gp_backend *backend)
+static void move_poll(gp_backend *backend)
 {
-	size_t i;
+	gp_dlist_head *lh;
 
-	if (!fds)
-		return;
-
-	for (i = 0; i < gp_vec_len(fds); i++)
-		gp_backend_fds_add(backend, fds[i].fd, fds[i].events, fds[i].event, fds[i].priv);
-
-	gp_vec_free(fds);
+	while ((lh = gp_dlist_pop_head(&fds)))
+		gp_backend_poll_add(backend, GP_LIST_ENTRY(lh, gp_fd, lhead));
 }
 
 void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
@@ -473,7 +445,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 	if (!backend)
 		exit(1);
 
-	move_fds(backend);
+	move_poll(backend);
 
 	gp_widget_timer_queue_switch(&backend->timers);
 	gp_backend_task_queue_set(backend, &task_queue);
@@ -825,7 +797,7 @@ void gp_widgets_exit(int exit_value)
 	gp_font_face_free(render_font_bold);
 	gp_font_face_free(render_font_big);
 	gp_font_face_free(render_font_big_bold);
-	gp_fds_clear(&backend->fds);
+	gp_poll_clear(&backend->fds);
 
 	exit(exit_value);
 }

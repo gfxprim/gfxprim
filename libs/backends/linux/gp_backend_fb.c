@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <sys/types.h>
@@ -42,6 +42,8 @@ struct fb_priv {
 	gp_ev_feedback feedback;
 	/* queue for input events */
 	gp_ev_queue ev_queue;
+	/* poll fd struct */
+	gp_fd fd;
 
 	int fb_fd;
 	char path[];
@@ -129,14 +131,20 @@ static int fb_process_fd(gp_fd *self)
 static int init_kbd(gp_backend *backend, struct fb_priv *fb)
 {
 	struct termios t;
-	int fd = fb->con_fd;
 
-	if (gp_fds_add(&backend->fds, fd, POLLIN, fb_process_fd, backend)) {
-		close(fd);
+	fb->fd = (gp_fd) {
+		.fd = fb->con_fd,
+		.event = fb_process_fd,
+		.events = GP_POLLIN,
+		.priv = &backend,
+	};
+
+	if (gp_poll_add(&backend->fds, &fb->fd)) {
+		close(fb->con_fd);
 		return -1;
 	}
 
-	if (tcgetattr(fd, &fb->ts)) {
+	if (tcgetattr(fb->con_fd, &fb->ts)) {
 		GP_WARN("Failed to tcgetattr(): %s", strerror(errno));
 		fb->restore_termios = 0;
 	} else {
@@ -145,27 +153,27 @@ static int init_kbd(gp_backend *backend, struct fb_priv *fb)
 
 	cfmakeraw(&t);
 
-	if (tcsetattr(fd, TCSANOW, &t) < 0) {
+	if (tcsetattr(fb->con_fd, TCSANOW, &t) < 0) {
 		GP_DEBUG(1, "Failed to tcsetattr(): %s",
 		         strerror(errno));
-		close(fd);
+		close(fb->con_fd);
 		return -1;
 	}
 
-	if (ioctl(fd, KDGKBMODE, &fb->saved_kb_mode)) {
+	if (ioctl(fb->con_fd, KDGKBMODE, &fb->saved_kb_mode)) {
 		GP_DEBUG(1, "Failed to ioctl KDGKBMODE tty%i: %s",
 		         fb->con_nr, strerror(errno));
-		close(fd);
+		close(fb->con_fd);
 		return -1;
 	}
 
 	GP_DEBUG(2, "Previous keyboard mode was '%i'",
 	         fb->saved_kb_mode);
 
-	if (ioctl(fd, KDSKBMODE, K_MEDIUMRAW) < 0) {
+	if (ioctl(fb->con_fd, KDSKBMODE, K_MEDIUMRAW) < 0) {
 		GP_DEBUG(1, "Failed to ioctl KDSKBMODE tty%i: %s",
 		        fb->con_nr, strerror(errno));
-		close(fd);
+		close(fb->con_fd);
 		return -1;
 	}
 

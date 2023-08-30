@@ -21,7 +21,7 @@
 struct linux_input_hotplug {
 	gp_backend_input input;
 	gp_backend *backend;
-	int inotify_fd;
+	gp_fd fd;
 };
 
 static int input_walk(gp_backend *backend)
@@ -58,8 +58,9 @@ static int input_hotplug_read(gp_fd *fd)
 	char buf[BUF_LEN], str[BUF_LEN];
 	int len, i;
 	struct inotify_event *ev;
+	int ifd = hotplug->fd.fd;
 
-	len = read(hotplug->inotify_fd, buf, sizeof(buf));
+	len = read(ifd, buf, sizeof(buf));
 	if (len < 0)
 		return 1;
 
@@ -94,7 +95,7 @@ static void input_hotplug_destroy(gp_backend_input *self)
 
 	GP_DEBUG(1, "Destroying Linux input hotplug");
 
-	close(hotplug->inotify_fd);
+	close(hotplug->fd.fd);
 	free(hotplug);
 }
 
@@ -108,13 +109,13 @@ int gp_linux_input_hotplug_new(gp_backend *backend)
 		return 1;
 	}
 
-	hotplug->inotify_fd = inotify_init();
-	if (hotplug->inotify_fd < 0) {
+	int fd = inotify_init();
+	if (fd < 0) {
 		GP_DEBUG(1, "Failed to intialize inotify: %s", strerror(errno));
 		goto err0;
 	}
 
-	wd = inotify_add_watch(hotplug->inotify_fd, DEV_PATH, IN_CREATE | IN_DELETE);
+	wd = inotify_add_watch(fd, DEV_PATH, IN_CREATE | IN_DELETE);
 	if (wd < 0) {
 		GP_DEBUG(1, "Failed to add inotify watch: %s", strerror(errno));
 		goto err1;
@@ -124,20 +125,26 @@ int gp_linux_input_hotplug_new(gp_backend *backend)
 
 	hotplug->input.destroy = input_hotplug_destroy;
 	hotplug->backend = backend;
+	hotplug->fd = (gp_fd) {
+		.fd = fd,
+		.event = input_hotplug_read,
+		.events = GP_POLLIN,
+		.priv = hotplug,
+	};
 
 	gp_dlist_push_head(&backend->input_drivers, &hotplug->input.list_head);
 
-	gp_backend_fds_add(backend, hotplug->inotify_fd, POLLIN, input_hotplug_read, hotplug);
+	gp_backend_poll_add(backend, &hotplug->fd);
 
 	if (input_walk(backend))
 		goto err2;
 
 	return 0;
 err2:
-	gp_backend_fds_rem(backend, hotplug->inotify_fd);
+	gp_backend_poll_rem(backend, &hotplug->fd);
 	gp_dlist_rem(&backend->input_drivers, &hotplug->input.list_head);
 err1:
-	close(hotplug->inotify_fd);
+	close(fd);
 err0:
 	free(hotplug);
 	return 1;

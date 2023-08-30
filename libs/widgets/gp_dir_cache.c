@@ -227,11 +227,11 @@ int gp_dir_cache_notify(gp_dir_cache *self)
 }
 
 __attribute__((weak))
-int gp_dir_cache_notify_fd(gp_dir_cache *self)
+gp_fd *gp_dir_cache_notify_fd(gp_dir_cache *self)
 {
 	(void) self;
 
-	return -1;
+	return NULL;
 }
 
 __attribute__((weak))

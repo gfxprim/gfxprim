@@ -54,7 +54,7 @@
 #include <widgets/gp_widget_json.h>
 #include <widgets/gp_widget_uid.h>
 #include <widgets/gp_widget_timer.h>
-#include <widgets/gp_widget_fds.h>
+#include <widgets/gp_widget_poll.h>
 #include <widgets/gp_widgets_task.h>
 #include <widgets/gp_file_size.h>
 

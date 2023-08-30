@@ -110,6 +110,7 @@ struct client_state {
 	uint32_t w, h;
 	gp_pixel pixel_type;
 	gp_ev_queue ev_queue;
+	gp_fd fd;
 
 	gp_backend *backend;
 };
@@ -652,13 +653,20 @@ gp_backend *gp_wayland_init(const char *display,
 
 	int fd = wl_display_get_fd(state.display);
 
-	if (gp_fds_add(&backend.fds, fd, POLLIN, wayland_process_fd, &backend)) {
+	state.fd = (gp_fd) {
+		.fd = fd,
+		.event = wayland_process_fd,
+		.events = GP_POLLIN,
+		.priv = &backend,
+	};
+
+	if (gp_poll_add(&backend.fds, &state.fd)) {
 		display_disconnect(&state);
 		return NULL;
 	}
 
 	if (window_create(&state, w, h, caption)) {
-		gp_fds_rem(&backend.fds, fd);
+		gp_poll_rem(&backend.fds, &state.fd);
 		display_disconnect(&state);
 		return NULL;
 	}

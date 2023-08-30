@@ -8,13 +8,13 @@
 #ifndef GP_PROXY_CLI_H
 #define GP_PROXY_CLI_H
 
-#include <utils/gp_fds.h>
+#include <utils/gp_poll.h>
 #include <backends/gp_proxy_proto.h>
 
 struct gp_event;
 
 struct gp_proxy_cli {
-	int fd;
+	gp_fd fd;
 
 	char *name;
 
@@ -31,7 +31,7 @@ static inline void gp_proxy_cli_show(struct gp_proxy_cli *self)
         if (!self)
                 return;
 
-        gp_proxy_send(self->fd, GP_PROXY_SHOW, NULL);
+        gp_proxy_send(self->fd.fd, GP_PROXY_SHOW, NULL);
 }
 
 static inline void gp_proxy_cli_hide(struct gp_proxy_cli *self)
@@ -39,13 +39,20 @@ static inline void gp_proxy_cli_hide(struct gp_proxy_cli *self)
         if (!self)
                 return;
 
-        gp_proxy_send(self->fd, GP_PROXY_HIDE, NULL);
+        gp_proxy_send(self->fd.fd, GP_PROXY_HIDE, NULL);
 }
 
 static inline void gp_proxy_cli_event(struct gp_proxy_cli *self, gp_event *ev)
 {
-        if (gp_proxy_send(self->fd, GP_PROXY_EVENT, ev))
+        if (gp_proxy_send(self->fd.fd, GP_PROXY_EVENT, ev))
                 GP_WARN("Dropping event");
+}
+
+static inline int gp_proxy_cli_send(struct gp_proxy_cli *self,
+                                    enum gp_proxy_msg_types type,
+                                    void *payload)
+{
+	return gp_proxy_send(self->fd.fd, type, payload);
 }
 
 struct gp_proxy_cli_ops {
@@ -80,5 +87,6 @@ struct gp_proxy_cli *gp_proxy_cli_add(struct gp_proxy_cli **root, int cli_fd);
  * @self A client to be removed.
  */
 void gp_proxy_cli_rem(struct gp_proxy_cli **root, struct gp_proxy_cli *self);
+
 
 #endif /* GP_PROXY_CLI_H */

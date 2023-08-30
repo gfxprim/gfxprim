@@ -161,10 +161,15 @@ static int proc_mounts_event(gp_fd *self)
 int main(int argc, char *argv[])
 {
 	fs_widget_groups = gp_htable_new(0, GP_HTABLE_COPY_KEY);
-	int fd = open_proc_mounts();
+	int fd_proc = open_proc_mounts();
 	gp_widget *layout = load_fsinfo();
+	gp_fd fd = {
+		.fd = fd_proc,
+		.event = proc_mounts_event,
+		.events = GP_POLLPRI,
+	};
 
-	gp_widget_fds_add(fd, POLLPRI, proc_mounts_event, NULL);
+	gp_widget_poll_add(&fd);
 
 	gp_widgets_main_loop(layout, "Disk Free", NULL, argc, argv);
 

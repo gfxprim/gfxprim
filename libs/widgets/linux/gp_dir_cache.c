@@ -20,13 +20,14 @@
 #include <core/gp_common.h>
 #include <core/gp_debug.h>
 #include <utils/gp_block_alloc.h>
+#include <utils/gp_poll.h>
 #include <widgets/gp_dir_cache.h>
 
 typedef struct gp_dir_cache_linux {
 	gp_dir_cache dir_cache;
 	DIR *dir;
 	int dirfd;
-	int inotify_fd;
+	gp_fd inotify_fd;
 } gp_dir_cache_linux;
 
 static void add_entry(gp_dir_cache_linux *self, const char *name, int mode)
@@ -68,27 +69,29 @@ static void populate(gp_dir_cache_linux *self)
 
 static void open_inotify(gp_dir_cache_linux *self, const char *path)
 {
-	self->inotify_fd = inotify_init1(IN_NONBLOCK);
+	self->inotify_fd.fd = inotify_init1(IN_NONBLOCK);
 
-	if (self->inotify_fd < 0) {
+	if (self->inotify_fd.fd < 0) {
 		GP_DEBUG(1, "inotify_init(): %s", strerror(errno));
 		return;
 	}
 
-	int watch = inotify_add_watch(self->inotify_fd, path, IN_CREATE | IN_DELETE | IN_MOVE);
+	int watch = inotify_add_watch(self->inotify_fd.fd, path, IN_CREATE | IN_DELETE | IN_MOVE);
 
 	if (watch < 0) {
 		GP_DEBUG(1, "inotify_add_watch(): %s", strerror(errno));
-		close(self->inotify_fd);
-		self->inotify_fd = -1;
+		close(self->inotify_fd.fd);
+		self->inotify_fd.fd = -1;
 		return;
 	}
+
+	self->inotify_fd.events = GP_POLLIN;
 }
 
 static void close_inotify(gp_dir_cache_linux *self)
 {
-	if (self->inotify_fd > 0)
-		close(self->inotify_fd);
+	if (self->inotify_fd.fd > 0)
+		close(self->inotify_fd.fd);
 }
 
 static void append_slash(struct inotify_event *ev)
@@ -158,10 +161,10 @@ static int dir_cache_inotify(gp_dir_cache_linux *self, const char *new_dir)
 	int sort = 0;
 	ssize_t len;
 
-	if (self->inotify_fd <= 0)
+	if (self->inotify_fd.fd <= 0)
 		return 0;
 
-	while ((len = read(self->inotify_fd, &buf, sizeof(buf))) > 0) {
+	while ((len = read(self->inotify_fd.fd, &buf, sizeof(buf))) > 0) {
 		ssize_t i = 0;
 
 		while (i < len) {
@@ -186,11 +189,14 @@ int gp_dir_cache_notify(gp_dir_cache *cache)
 	return dir_cache_inotify(self, NULL);
 }
 
-int gp_dir_cache_notify_fd(gp_dir_cache *cache)
+gp_fd *gp_dir_cache_notify_fd(gp_dir_cache *cache)
 {
 	gp_dir_cache_linux *self = GP_CONTAINER_OF(cache, gp_dir_cache_linux, dir_cache);
 
-	return self->inotify_fd;
+	if (self->inotify_fd.fd > 0)
+		return &self->inotify_fd;
+
+	return NULL;
 }
 
 int gp_dir_cache_mkdir(gp_dir_cache *cache, const char *dirname)

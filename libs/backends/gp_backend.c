@@ -199,15 +199,15 @@ void gp_backend_poll(gp_backend *self)
 	if (self->poll)
 		self->poll(self);
 
-	if (gp_fds_count(&self->fds))
-		gp_fds_poll(&self->fds, 0);
+	if (gp_poll_fds(&self->fds))
+		gp_poll_wait(&self->fds, 0);
 }
 
 static void wait_timers_fds(gp_backend *self, uint64_t now)
 {
 	int timeout = self->timers->expires - now;
 
-	gp_fds_poll(&self->fds, timeout);
+	gp_poll_wait(&self->fds, timeout);
 }
 
 /*
@@ -223,8 +223,8 @@ static void wait_timers_poll(gp_backend *self)
 
 		self->poll(self);
 
-		if (gp_fds_count(&self->fds))
-			gp_fds_poll(&self->fds, 0);
+		if (gp_poll_fds(&self->fds))
+			gp_poll_wait(&self->fds, 0);
 
 		if (gp_backend_events(self))
 			return;
@@ -254,7 +254,7 @@ void gp_backend_wait(gp_backend *self)
 	if (self->wait)
 		self->wait(self);
 	else
-		gp_fds_poll(&self->fds, -1);
+		gp_poll_wait(&self->fds, -1);
 }
 
 gp_event *gp_backend_wait_event(gp_backend *self)

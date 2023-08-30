@@ -21,7 +21,7 @@
 #include <widgets/gp_file_size.h>
 #include <widgets/gp_dialog.h>
 #include <widgets/gp_dialog_file.h>
-#include <widgets/gp_widget_fds.h>
+#include <widgets/gp_widget_poll.h>
 
 #include "dialog_file_open.json.h"
 #include "dialog_file_save.json.h"
@@ -111,30 +111,33 @@ static int notify_callback(gp_fd *self)
 static gp_dir_cache *load_dir_cache(struct file_dialog *dialog)
 {
 	gp_dir_cache *cache;
-	int notify_fd;
+	gp_fd *notify_fd;
 
 	cache = gp_dir_cache_new(dialog->dir_path->tbox->buf);
 	if (!cache)
 		return NULL;
 
 	notify_fd = gp_dir_cache_notify_fd(cache);
-	if (notify_fd > 0)
-		gp_widget_fds_add(notify_fd, POLLIN, notify_callback, dialog);
+	if (notify_fd) {
+		notify_fd->event = notify_callback;
+		notify_fd->priv = dialog;
+		gp_widget_poll_add(notify_fd);
+	}
 
 	return cache;
 }
 
 static void free_dir_cache(struct file_dialog *dialog)
 {
-	int notify_fd;
+	gp_fd *notify_fd;
 	gp_dir_cache *self = dialog->file_table->tbl->priv;
 
 	if (!self)
 		return;
 
 	notify_fd = gp_dir_cache_notify_fd(self);
-	if (notify_fd > 0)
-		gp_widget_fds_rem(notify_fd);
+	if (notify_fd)
+		gp_widget_poll_rem(notify_fd);
 
 	gp_dir_cache_destroy(self);
 

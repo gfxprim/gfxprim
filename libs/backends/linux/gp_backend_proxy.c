@@ -27,7 +27,7 @@ struct proxy_priv {
 
 	gp_ev_queue ev_queue;
 
-	int fd;
+	gp_fd fd;
 
 	int visible;
 
@@ -40,7 +40,7 @@ static int proxy_set_attr(gp_backend *self, enum gp_backend_attrs attr, const vo
 {
 	switch (attr) {
 	case GP_BACKEND_TITLE:
-//		gp_proxy_send(priv->fd, GP_PROXY_NAME, vals);
+//		gp_proxy_send(priv->fd.fd, GP_PROXY_NAME, vals);
 	break;
 	default:
 	break;
@@ -53,7 +53,7 @@ static void proxy_exit(gp_backend *self)
 {
 	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
 
-	gp_proxy_send(priv->fd, GP_PROXY_EXIT, NULL);
+	gp_proxy_send(priv->fd.fd, GP_PROXY_EXIT, NULL);
 }
 
 static void map_buffer(gp_backend *self, union gp_proxy_msg *msg)
@@ -84,7 +84,7 @@ static void map_buffer(gp_backend *self, union gp_proxy_msg *msg)
 	priv->map = p;
 	priv->map_size = msg->map.size;
 
-	gp_proxy_send(priv->fd, GP_PROXY_MAP, NULL);
+	gp_proxy_send(priv->fd.fd, GP_PROXY_MAP, NULL);
 }
 
 static void visible(gp_backend *self)
@@ -121,7 +121,7 @@ static void unmap_buffer(gp_backend *self)
 
 //	hidden(self);
 
-	gp_proxy_send(priv->fd, GP_PROXY_UNMAP, NULL);
+	gp_proxy_send(priv->fd.fd, GP_PROXY_UNMAP, NULL);
 }
 
 static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
@@ -150,7 +150,7 @@ static int proxy_process_fd(gp_fd *self)
 	union gp_proxy_msg *msg;
 	int ret;
 
-	while ((ret = gp_proxy_buf_recv(priv->fd, &priv->buf)) > 0) {
+	while ((ret = gp_proxy_buf_recv(priv->fd.fd, &priv->buf)) > 0) {
 		while (gp_proxy_next(&priv->buf, &msg)) {
 			switch (msg->type) {
 			case GP_PROXY_PIXEL_TYPE:
@@ -210,7 +210,7 @@ static void proxy_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 		.h = y1 - y0 + 1,
 	};
 
-	gp_proxy_send(priv->fd, GP_PROXY_UPDATE, &rect);
+	gp_proxy_send(priv->fd.fd, GP_PROXY_UPDATE, &rect);
 }
 
 static void proxy_flip(gp_backend *self)
@@ -238,7 +238,16 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 		return NULL;
 	}
 
-	if (gp_fds_add(&ret->fds, fd, POLLIN, proxy_process_fd, ret)) {
+	struct proxy_priv *priv = GP_BACKEND_PRIV(ret);
+
+	priv->fd = (gp_fd) {
+		.fd = fd,
+		.event = proxy_process_fd,
+		.events = GP_POLLIN,
+		.priv = ret,
+	};
+
+	if (gp_poll_add(&ret->fds, &priv->fd)) {
 		close(fd);
 		free(ret);
 		return NULL;
@@ -250,11 +259,9 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	ret->update_rect = proxy_update_rect;
 	ret->flip = proxy_flip;
 
-	struct proxy_priv *priv = GP_BACKEND_PRIV(ret);
 
 	priv->map = NULL;
 	priv->map_size = 0;
-	priv->fd = fd;
 	priv->visible = 0;
 
 	gp_proxy_buf_init(&priv->buf);
@@ -270,7 +277,7 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 
 	/* Wait for the pixel type */
 	while (!priv->dummy.pixel_type)
-		gp_fds_poll(&ret->fds, -1);
+		gp_poll_wait(&ret->fds, -1);
 
 	gp_pixmap_init(&priv->dummy, 0, 0, priv->dummy.pixel_type, NULL, 0);
 

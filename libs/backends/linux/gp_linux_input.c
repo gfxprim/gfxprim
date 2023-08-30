@@ -20,8 +20,7 @@ struct linux_input {
 	gp_backend_input input;
 	gp_backend *backend;
 
-	/* fd */
-	int fd;
+	gp_fd fd;
 
 	/* to store rel coordinates */
 	int rel_x;
@@ -205,7 +204,7 @@ static int input_read(gp_fd *self)
 	struct input_event ev;
 	int ret;
 
-	ret = read(input->fd, &ev, sizeof(ev));
+	ret = read(input->fd.fd, &ev, sizeof(ev));
 
 	if (ret == -1 && errno == EAGAIN)
 		return 0;
@@ -274,29 +273,30 @@ static void try_load_callibration(struct linux_input *self)
 {
 	long bit = 0;
 	int abs[6];
+	int fd = self->fd.fd;
 
-	ioctl(self->fd, EVIOCGBIT(EV_ABS, EV_ABS), &bit);
+	ioctl(fd, EVIOCGBIT(EV_ABS, EV_ABS), &bit);
 
 	if (!bit) {
 		GP_DEBUG(3, "Not an absolute input device");
 		return;
 	}
 
-	if (!ioctl(self->fd, EVIOCGABS(ABS_X), abs)) {
+	if (!ioctl(fd, EVIOCGABS(ABS_X), abs)) {
 		GP_DEBUG(3, "ABS X = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
 		self->abs_min_x = abs[1];
 		self->abs_max_x = abs[2];
 	}
 
-	if (!ioctl(self->fd, EVIOCGABS(ABS_Y), abs)) {
+	if (!ioctl(fd, EVIOCGABS(ABS_Y), abs)) {
 		GP_DEBUG(3, "ABS Y = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
 		self->abs_min_y = abs[1];
 		self->abs_max_y = abs[2];
 	}
 
-	if (!ioctl(self->fd, EVIOCGABS(ABS_PRESSURE), abs)) {
+	if (!ioctl(fd, EVIOCGABS(ABS_PRESSURE), abs)) {
 		GP_DEBUG(3, "ABS P = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
 		self->abs_press_max = abs[2];
@@ -361,7 +361,12 @@ static struct linux_input *new_input_driver(int fd)
 		return NULL;
 	}
 
-	ret->fd = fd;
+	ret->fd = (gp_fd) {
+		.fd = fd,
+		.event = input_read,
+		.events = GP_POLLIN,
+		.priv = ret,
+	};
 
 	ret->rel_x = 0;
 	ret->rel_y = 0;
@@ -481,12 +486,12 @@ static void input_destroy(gp_backend_input *self)
 	struct linux_input *input = GP_CONTAINER_OF(self, struct linux_input, input);
 
 	GP_DEBUG(1, "Closing input device");
-	print_name(input->fd);
+	print_name(input->fd.fd);
 
-	gp_backend_fds_rem(input->backend, input->fd);
+	gp_backend_poll_rem(input->backend, &input->fd);
 	gp_dlist_rem(&input->backend->input_drivers, &input->input.list_head);
 
-	close(input->fd);
+	close(input->fd.fd);
 	free(input);
 }
 
@@ -495,7 +500,6 @@ int gp_linux_input_new(const char *dev_path, gp_backend *backend)
 	GP_DEBUG(2, "Opening '%s'", dev_path);
 
 	int fd = open(dev_path, O_RDONLY | O_NONBLOCK);
-
 	if (fd < 0) {
 		GP_FATAL("Failed to open '%s': %s", dev_path, strerror(errno));
 		return 1;
@@ -510,7 +514,7 @@ int gp_linux_input_new(const char *dev_path, gp_backend *backend)
 	input->backend = backend;
 	input->input.destroy = input_destroy;
 
-	gp_backend_fds_add(backend, input->fd, POLLIN, input_read, input);
+	gp_backend_poll_add(backend, &input->fd);
 	gp_dlist_push_head(&backend->input_drivers, &input->input.list_head);
 
 	return 0;
