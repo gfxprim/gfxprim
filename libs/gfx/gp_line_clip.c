@@ -37,7 +37,7 @@ int gp_line_clip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)
 	if (x0 == x1) {
 
 		/* orient the line from top to down */
-		if (x1 < x0) {
+		if (y1 < y0) {
 			GP_SWAP(x0, x1);
 			GP_SWAP(y0, y1);
 		}
@@ -90,8 +90,7 @@ int gp_line_clip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)
 	if (y1 < 0.0f) {
 		x1 = x1 - y1*dxy;
 		y1 = 0.0f;
-	}
-	else if (y1 > ymax) {
+	} else if (y1 > ymax) {
 		x1 = x1 - (y1 - ymax)*dxy;
 		y1 = ymax;
 	}
