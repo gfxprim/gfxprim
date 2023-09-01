@@ -429,6 +429,16 @@ void gp_widget_poll_rem(gp_fd *fd)
 	gp_backend_poll_rem(backend, fd);
 }
 
+gp_fd *gp_widget_poll_rem_by_fd(int fd)
+{
+	if (!backend) {
+		GP_FATAL("Not implemented!");
+		return NULL;
+	}
+
+	return gp_backend_poll_rem_by_fd(backend, fd);
+}
+
 static void move_poll(gp_backend *backend)
 {
 	gp_dlist_head *lh;

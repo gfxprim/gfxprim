@@ -66,12 +66,22 @@ int gp_poll_add(gp_poll *self, gp_fd *fd);
 /*
  * Removes a file descriptor.
  *
- * @self The fds struct.
+ * @self The poll struct.
  * @fd   File descriptor to be removed.
  *
  * Returns 0 on success and -1 if fd is not in fds.
  */
 int gp_poll_rem(gp_poll *self, gp_fd *fd);
+
+/*
+ * Looks up and removes a gp_fd by a fd.
+ *
+ * @self The poll struct.
+ * @fd A file descriptor for the lookup.
+ *
+ * @return A gp_fd if found or NULL.
+ */
+gp_fd *gp_poll_rem_by_fd(gp_poll *self, int fd);
 
 /*
  * Poll wrapper around the poll().

@@ -18,4 +18,6 @@ void gp_widget_poll_add(gp_fd *fd);
 
 void gp_widget_poll_rem(gp_fd *fd);
 
+gp_fd *gp_widget_poll_rem_by_fd(int fd);
+
 #endif /* WIDGETS_GP_WIDGET_POLL_H */

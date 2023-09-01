@@ -66,6 +66,26 @@ int gp_poll_rem(gp_poll *self, gp_fd *fd)
 	return 0;
 }
 
+gp_fd *gp_poll_rem_by_fd(gp_poll *self, int fd)
+{
+	gp_fd *ret;
+	gp_dlist_head *i;
+
+	GP_LIST_FOREACH(&self->fds, i) {
+		ret = GP_LIST_ENTRY(i, gp_fd, lhead);
+
+		if (ret->fd == fd)
+			break;
+	}
+
+	if (i) {
+		gp_poll_rem(self, ret);
+		return ret;
+	}
+
+	return NULL;
+}
+
 int gp_poll_wait(gp_poll *self, int timeout)
 {
 	struct epoll_event events[16];

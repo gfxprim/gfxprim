@@ -188,6 +188,11 @@ static inline void gp_backend_poll_rem(gp_backend *self, gp_fd *fd)
 	gp_poll_rem(&self->fds, fd);
 }
 
+static inline gp_fd *gp_backend_poll_rem_by_fd(gp_backend *self, int fd)
+{
+	return gp_poll_rem_by_fd(&self->fds, fd);
+}
+
 void gp_backend_exit(gp_backend *self);
 
 /*
