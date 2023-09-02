@@ -44,6 +44,7 @@
 #include <widgets/gp_widget_switch.h>
 #include <widgets/gp_widget_overlay.h>
 #include <widgets/gp_widget_log.h>
+#include <widgets/gp_widget_graph.h>
 
 #include <widgets/gp_widget_app.h>
 #include <widgets/gp_app_info.h>

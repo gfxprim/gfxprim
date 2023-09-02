@@ -126,6 +126,8 @@ struct gp_widget {
 
 		struct gp_widget_log *log;
 
+		struct gp_widget_graph *graph;
+
 		void *payload;
 	};
 	char buf[];
@@ -152,6 +154,7 @@ enum gp_widget_type {
 	GP_WIDGET_SWITCH,
 	GP_WIDGET_OVERLAY,
 	GP_WIDGET_LOG,
+	GP_WIDGET_GRAPH,
 	GP_WIDGET_MAX,
 };
 
