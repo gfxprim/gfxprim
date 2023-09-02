@@ -132,17 +132,17 @@ static int cursor_state_test(void)
 
 	gp_ev_queue_init(&queue, 10, 10, 0, 0);
 
-	if (queue.state.cursor_x != 5 || queue.state.cursor_y != 5) {
+	if (queue.state.saved_cursor_x != 5 || queue.state.saved_cursor_y != 5) {
 		tst_msg("Wrong cursor after init %ux%u expected 5x5",
-			(unsigned)queue.state.cursor_x, (unsigned)queue.state.cursor_y);
+			(unsigned)queue.state.saved_cursor_x, (unsigned)queue.state.saved_cursor_y);
 		fail++;
 	}
 
 	gp_ev_queue_push_rel(&queue, -10, 1, 0);
 
-	if (queue.state.cursor_x != 5 || queue.state.cursor_y != 5) {
+	if (queue.state.saved_cursor_x != 5 || queue.state.saved_cursor_y != 5) {
 		tst_msg("Wrong cursor after push_rel() %ux%u expected 5x5",
-			(unsigned)queue.state.cursor_x, (unsigned)queue.state.cursor_y);
+			(unsigned)queue.state.saved_cursor_x, (unsigned)queue.state.saved_cursor_y);
 		fail++;
 	}
 
@@ -156,9 +156,9 @@ static int cursor_state_test(void)
 
 	gp_ev_queue_push_abs(&queue, 5, 0, 0, 10, 10, 10, 0);
 
-	if (queue.state.cursor_x != 0 || queue.state.cursor_y != 6) {
+	if (queue.state.saved_cursor_x != 0 || queue.state.saved_cursor_y != 6) {
 		tst_msg("Wrong cursor after push_abs() %ux%u expected 0x6",
-			(unsigned)queue.state.cursor_x, (unsigned)queue.state.cursor_y);
+			(unsigned)queue.state.saved_cursor_x, (unsigned)queue.state.saved_cursor_y);
 		fail++;
 	}
 

@@ -21,8 +21,8 @@ void gp_ev_queue_init(gp_ev_queue *self,
 
 	memset(&self->state, 0, sizeof(self->state));
 
-	self->cursor_x = self->state.cursor_x = screen_w / 2;
-	self->cursor_y = self->state.cursor_y = screen_h / 2;
+	self->cursor_x = self->state.saved_cursor_x = screen_w / 2;
+	self->cursor_y = self->state.saved_cursor_y = screen_h / 2;
 
 	self->keymap = NULL;
 
@@ -43,11 +43,11 @@ void gp_ev_queue_set_screen_size(gp_ev_queue *self,
 	self->screen_h = h;
 
 	/* clip cursor */
-	if (self->state.cursor_x >= w)
-		self->state.cursor_x = w - 1;
+	if (self->state.saved_cursor_x >= w)
+		self->state.saved_cursor_x = w - 1;
 
-	if (self->state.cursor_y >= h)
-		self->state.cursor_y = h - 1;
+	if (self->state.saved_cursor_y >= h)
+		self->state.saved_cursor_y = h - 1;
 
 	if (self->cursor_x >= w)
 		self->cursor_x = w - 1;
@@ -65,8 +65,8 @@ void gp_ev_queue_set_cursor_pos(gp_ev_queue *self,
 		return;
 	}
 
-	self->cursor_x = self->state.cursor_x = x;
-	self->cursor_y = self->state.cursor_y = y;
+	self->cursor_x = self->state.saved_cursor_x = x;
+	self->cursor_y = self->state.saved_cursor_y = y;
 }
 
 unsigned int gp_ev_queue_events(gp_ev_queue *self)
@@ -119,9 +119,9 @@ gp_event *gp_ev_queue_get(gp_ev_queue *self)
 	case GP_EV_REL:
 		/* Move the global cursor */
 		if (ev->code == GP_EV_REL_POS) {
-			self->state.cursor_x = clip_rel(self->state.cursor_x,
+			self->state.saved_cursor_x = clip_rel(self->state.saved_cursor_x,
 					                self->screen_w, ev->rel.rx);
-			self->state.cursor_y = clip_rel(self->state.cursor_y,
+			self->state.saved_cursor_y = clip_rel(self->state.saved_cursor_y,
 				                        self->screen_h, ev->rel.ry);
 		}
 	break;
@@ -133,13 +133,16 @@ gp_event *gp_ev_queue_get(gp_ev_queue *self)
 			 * only y. In such case x_max or y_max is zero.
 			 */
 			if (ev->abs.x_max != 0)
-				self->state.cursor_x = ev->abs.x * (self->screen_w - 1) / ev->abs.x_max;
+				self->state.saved_cursor_x = ev->abs.x * (self->screen_w - 1) / ev->abs.x_max;
 
 			if (ev->abs.y_max != 0)
-				self->state.cursor_y = ev->abs.y * (self->screen_h - 1) / ev->abs.y_max;
+				self->state.saved_cursor_y = ev->abs.y * (self->screen_h - 1) / ev->abs.y_max;
 		}
 	break;
 	}
+
+	self->state.cursor_x = self->state.saved_cursor_x;
+	self->state.cursor_y = self->state.saved_cursor_y;
 
 	ev->st = &self->state;
 
@@ -234,6 +237,10 @@ void gp_ev_queue_push_rel_to(gp_ev_queue *self,
 
 	int32_t rx = x - self->cursor_x;
 	int32_t ry = y - self->cursor_y;
+
+
+	if (rx == 0 && ry == 0)
+		return;
 
 	gp_ev_queue_push_rel(self, rx, ry, time);
 }

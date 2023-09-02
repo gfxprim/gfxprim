@@ -87,6 +87,9 @@ struct gp_events_state {
 	/** Cursor coordinates */
 	uint32_t cursor_x;
 	uint32_t cursor_y;
+
+	uint32_t saved_cursor_x;
+	uint32_t saved_cursor_y;
 };
 
 struct gp_event {
