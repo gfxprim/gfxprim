@@ -5,6 +5,7 @@ api_coverage.gen
 hline
 vline
 line
+line_th
 line_symmetry.gen
 circle
 fill_circle

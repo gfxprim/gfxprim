@@ -6,7 +6,8 @@ GENSOURCES=api_coverage.gen.c line_symmetry.gen.c fill_triangle.gen.c gfx_benchm
 
 APPS=circle fill_circle line circle_seg polygon ellipse hline\
      vline fill_ellipse fill_rect api_coverage.gen\
-     line_symmetry.gen fill_triangle.gen fill_triangle gfx_benchmark.gen
+     line_symmetry.gen fill_triangle.gen fill_triangle gfx_benchmark.gen\
+     line_th
 
 circle: common.o
 fill_circle: common.o
@@ -20,6 +21,7 @@ vline: common.o
 fill_rect: common.o
 fill_triangle: common.o
 api_coverage.gen: common.o
+line_th: common.o
 
 include ../tests.mk
 

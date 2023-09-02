@@ -7,6 +7,7 @@ fill_ellipse
 fill_rect
 hline
 line
+line_th
 polygon
 vline
 gfx_benchmark.gen

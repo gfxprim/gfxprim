@@ -90,7 +90,7 @@ static void line_dy_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 	int dy = y1 - y0;
 	int dx = GP_ABS(x1 - x0);
 
-	int width = 4*r*sqrt(dx*dx + dy*dy);
+	int width = 2*r*sqrt(dx*dx + dy*dy) + 2*(dx + dy);
 
 	int err = 0;
 	int perr = 0;
@@ -178,7 +178,7 @@ static void line_dx_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 	int dx = x1 - x0;
 	int dy = GP_ABS(y1 - y0);
 
-	int width = 4*r*sqrt(dx*dx + dy*dy);
+	int width = 2*r*sqrt(dx*dx + dy*dy) + 2*(dx + dy);
 
 	int err = 0;
 	int perr = 0;
@@ -254,6 +254,11 @@ void gp_line_th_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
                     gp_coord x1, gp_coord y1, gp_size r,
                     gp_pixel pixel)
 {
+	if (r == 0) {
+		gp_line_raw(pixmap, x0, y0, x1, y1, pixel);
+		return;
+	}
+
 	GP_CHECK_PIXMAP(pixmap);
 
 	GP_FN_PER_PACK_PIXMAP(gp_line_th_raw, pixmap, pixmap, x0, y0, x1, y1, r, pixel);
