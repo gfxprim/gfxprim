@@ -42,10 +42,10 @@ static void eink_hw_init(struct gp_display_spi *self)
 //	gp_display_spi_data(self, 0x24);
 
 	/* Booster settings */
-//	gp_display_spi_cmd(self, SPD1656_BSST);
-//	gp_display_spi_data(self, 0x17);
-//	gp_display_spi_data(self, 0x17);
-//	gp_display_spi_data(self, 0x28);
+	gp_display_spi_cmd(self, SPD1656_BSST);
+	gp_display_spi_data(self, 0x17);
+	gp_display_spi_data(self, 0x17);
+	gp_display_spi_data(self, 0x28);
 
 	/* Set PLL to 100Hz */
 //	gp_display_spi_cmd(self, SPD1656_PLL);
