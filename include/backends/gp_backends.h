@@ -34,5 +34,6 @@
 #include <backends/gp_aalib.h>
 #include <backends/gp_backend_virtual.h>
 #include <backends/gp_proxy.h>
+#include <backends/gp_display.h>
 
 #endif /* BACKENDS_GP_BACKENDS_H */

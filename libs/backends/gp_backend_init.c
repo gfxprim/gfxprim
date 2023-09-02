@@ -339,11 +339,51 @@ static gp_backend *xcb_init(char *params,
 #endif
 
 #ifdef OS_LINUX
+
+#include <backends/gp_linux_input.h>
+
 static gp_backend *proxy_init(char *params,
                               gp_size GP_UNUSED(pref_w), gp_size GP_UNUSED(pref_h),
                               const char *caption)
 {
 	return gp_proxy_init(params, caption);
+}
+
+static gp_backend *display_init(char *params,
+                                gp_size GP_UNUSED(pref_w), gp_size GP_UNUSED(pref_h),
+                                const char GP_UNUSED(*caption))
+{
+	unsigned int i;
+
+	if (!strcmp(params, "help")) {
+		printf("display_models:\n\n");
+		for (i = 0; gp_backend_display_models[i].name; i++) {
+			printf("\t%s - %s\n",
+			       gp_backend_display_models[i].name,
+			       gp_backend_display_models[i].desc);
+		}
+
+		printf("\n");
+		return NULL;
+	}
+
+	for (i = 0; gp_backend_display_models[i].name; i++) {
+		if (!strcasecmp(gp_backend_display_models[i].name, params)) {
+			gp_backend *ret = gp_backend_display_init(i);
+
+			if (gp_linux_input_hotplug_new(ret)) {
+				GP_WARN("Failed to initialize Linux input");
+				gp_backend_exit(ret);
+				return NULL;
+			}
+
+			return ret;
+		}
+	}
+
+	printf("Unknown display model name '%s'\n", params);
+
+	return NULL;
 }
 #endif
 
@@ -406,6 +446,14 @@ static struct backend_init backends[] = {
 	 .init = proxy_init,
 	 .usage = "path",
 	 .help = {"path - Path to an UNIX socket"}
+	},
+	{.name = "display",
+	 .init = display_init,
+	 .usage = "display:display_model",
+	 .help = {
+		"display_type A display type (pass help for list)",
+		NULL
+	 }
 	},
 #endif
 #ifdef HAVE_LIBXCB
