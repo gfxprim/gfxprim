@@ -14,7 +14,7 @@
 #include <core/gp_get_put_pixel.gen.h>
 
 /*
- * GetPixel with pixmap transformations and clipping.
+ * get_pixel with pixmap transformations and clipping.
  * Returns 0 for clipped pixels or pixels outside bitmap.
  */
 gp_pixel gp_getpixel(const gp_pixmap *pixmap, gp_coord x, gp_coord y);
@@ -67,8 +67,8 @@ static inline void gp_putpixel_raw_clipped(gp_pixmap *pixmap,
 }
 
 /*
- * Returns pixel offset.
+ * Returns pixel offset, in pixels.
  */
-uint8_t gp_pixel_addr_offset(gp_coord x, gp_pixel_type pixel_type);
+uint8_t gp_pixel_addr_offset(const gp_pixmap *pixmap, gp_coord x);
 
 #endif /* CORE_GP_GETPUTPIXEL_H */

@@ -23,9 +23,11 @@ struct gp_pixmap {
 	uint32_t w;		 /* width in pixels */
 	uint32_t h;		 /* height in pixels */
 	/*
-	 * Row bit offset. The offset is ignored for byte aligned pixels.
-	 * Basically it's used for non aligned pixels with combination
-	 * with subpixmapes.
+	 * Offset, in pixels, for non-byte aligned pixels. The x = 0 coordinate
+	 * in the pixmap starts at this offset. It's mainly useful for subpixmaps
+	 * for 1BPP, 2BPP and 4BPP pixel types.
+	 *
+	 * The offset is ignored for byte aligned pixels.
 	 */
 	uint8_t offset;
 
@@ -59,7 +61,7 @@ struct gp_pixmap {
  */
 #define GP_PIXEL_ADDR(pixmap, x, y) ((pixmap)->pixels \
 	+ (y) * (pixmap)->bytes_per_row \
-	+ ((x) * gp_pixel_size((pixmap)->pixel_type)) / 8)
+	+ ((x + (pixmap)->offset) * gp_pixel_size((pixmap)->pixel_type)) / 8)
 
 #define GP_CALC_ROW_SIZE(pixel_type, width) \
 	 ((gp_pixel_size(pixel_type) * width) / 8 + \

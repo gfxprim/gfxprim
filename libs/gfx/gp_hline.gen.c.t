@@ -27,15 +27,14 @@ void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int x1, int y,
 
 	/* clip the line against surface boundaries */
 	x0 = GP_MAX(x0, 0);
-	x1 = GP_MIN(x1, (int) pixmap->w - 1);
+	x1 = GP_MIN(x1, (gp_coord) pixmap->w - 1);
 
 @     if ps.suffix in optimized_writepixels:
 	size_t length = 1 + x1 - x0;
-	void *start = GP_PIXEL_ADDR(pixmap, x0, y);
+	void *start = GP_PIXEL_ADDR_{{ ps.suffix }}(pixmap, x0, y);
 
 @         if ps.needs_bit_order():
-	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x0 + pixmap->offset);
-
+	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(pixmap, x0);
 	gp_write_pixels_{{ ps.suffix }}(start, offset, length, pixel);
 @         else:
 	gp_write_pixels_{{ ps.suffix }}(start, length, pixel);

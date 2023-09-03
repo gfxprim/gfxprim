@@ -22,9 +22,9 @@ void gp_putpixel(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_pixel p)
 		gp_putpixel_raw(pixmap, x, y, p);
 }
 
-uint8_t gp_pixel_addr_offset(gp_coord x, gp_pixel_type pixel_type)
+uint8_t gp_pixel_addr_offset(const gp_pixmap *pixmap, gp_coord x)
 {
-	GP_FN_RET_PER_PACK_PIXELTYPE(GP_PIXEL_ADDR_SHIFT, pixel_type, x);
+	GP_FN_RET_PER_PACK_PIXMAP(GP_PIXEL_ADDR_OFFSET, pixmap, pixmap, x);
 
 	return 0;
 }

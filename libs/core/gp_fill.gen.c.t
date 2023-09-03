@@ -34,7 +34,7 @@ static void fill_{{ ps.suffix }}(gp_pixmap *pixmap, gp_pixel val)
 }
 
 @ end
-
+@
 void gp_fill(gp_pixmap *pixmap, gp_pixel val)
 {
 	GP_FN_PER_PACK_PIXMAP(fill, pixmap, pixmap, val);

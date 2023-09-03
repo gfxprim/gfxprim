@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <errno.h>
@@ -276,7 +276,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
 	GP_CHECK(pixmap->h >= y + h, "Subpixmap h out of original pixmap.");
 
 	subpixmap->bytes_per_row = pixmap->bytes_per_row;
-	subpixmap->offset        = gp_pixel_addr_offset(x+pixmap->offset, pixmap->pixel_type);
+	subpixmap->offset = gp_pixel_addr_offset(pixmap, x);
 
 	subpixmap->w = w;
 	subpixmap->h = h;
@@ -289,7 +289,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
 	/* rotation and mirroring */
 	gp_pixmap_copy_rotation(pixmap, subpixmap);
 
-	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x+pixmap->offset, y);
+	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x, y);
 
 	subpixmap->free_pixels = 0;
 

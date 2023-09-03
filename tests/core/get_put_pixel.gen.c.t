@@ -1,6 +1,6 @@
 @ include source.t
 /*
- * GetPutPixel tests.
+ * get_put_pixel tests.
  *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
@@ -52,7 +52,7 @@ static int try_pattern(gp_pixmap *c, gp_pixel p)
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-static int GetPutPixel_{{ pt.name }}(void)
+static int get_put_pixel_{{ pt.name }}(void)
 {
 	gp_pixmap *c;
 	int err = 0;
@@ -87,7 +87,7 @@ static int GetPutPixel_{{ pt.name }}(void)
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-static int GetPutPixel_Clipping_{{ pt.name }}(void)
+static int get_put_pixel_clipping_{{ pt.name }}(void)
 {
 	gp_pixmap *c;
 
@@ -130,18 +130,18 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 @ end
 
 const struct tst_suite tst_suite = {
-	.suite_name = "GetPutPixel Testsuite",
+	.suite_name = "get_put_pixel Testsuite",
 	.tests = {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-		{.name = "GetPutPixel {{ pt.name }}",
-		 .tst_fn = GetPutPixel_{{ pt.name }}},
+		{.name = "get_put_pixel {{ pt.name }}",
+		 .tst_fn = get_put_pixel_{{ pt.name }}},
 @ end
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-		{.name = "GetPutPixel Clipping {{ pt.name }}",
-		 .tst_fn = GetPutPixel_Clipping_{{ pt.name }}},
+		{.name = "get_put_pixel clipping {{ pt.name }}",
+		 .tst_fn = get_put_pixel_clipping_{{ pt.name }}},
 @ end
 
 		{.name = NULL}
