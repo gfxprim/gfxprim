@@ -96,6 +96,15 @@ static const char *str_font_size;
 static const char *font_family;
 static const char *input_str;
 
+static void update_ctx_sizes(void)
+{
+	ctx.padd = 2 * gp_text_descent(ctx.font);
+
+	ctx.fr_thick = ctx.font_size / 25 + 1;
+	ctx.fr_round = ctx.font_size / 15 + 3;
+	ctx.cur_thick = ctx.font_size / 25 + 1;
+}
+
 static int try_compiled_in_font_family(const char *family_name, unsigned int mul)
 {
 	const gp_font_family *family;
@@ -135,6 +144,8 @@ static int try_compiled_in_font_family(const char *family_name, unsigned int mul
 		gp_text_style_embold(&font_mono_bold, mono, mul);
 	else
 		gp_text_style_normal(&font_mono_bold, mono_bold, mul);
+
+	update_ctx_sizes();
 
 	return 1;
 }
@@ -200,10 +211,7 @@ static void init_fonts(void)
 	gp_text_style_normal(ctx.font_mono, ffont_mono, 1);
 	gp_text_style_normal(ctx.font_mono_bold, ffont_mono_bold, 1);
 
-	ctx.padd = 2 * gp_text_descent(ctx.font);
-	ctx.fr_thick = ctx.font_size / 25 + 1;
-	ctx.fr_round = ctx.font_size / 15 + 3;
-	ctx.cur_thick = ctx.font_size / 25 + 1;
+	update_ctx_sizes();
 }
 
 struct gp_json_struct render_ctx_desc[] = {
