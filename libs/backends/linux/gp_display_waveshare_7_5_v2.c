@@ -27,25 +27,25 @@ static void eink_hw_init(struct gp_display_spi *self)
 	/* LUT from register, Black & White, buffer direction settings */
 	gp_display_spi_data(self, 0x1f);
 
-	gp_display_spi_cmd(self, SPD1656_PWR);
+//	gp_display_spi_cmd(self, SPD1656_PWR);
 	/* turn on VSR, VS, VG internal DC/DC */
-	gp_display_spi_data(self, 0x07);
+//	gp_display_spi_data(self, 0x27);
 	/* VGH VGL voltage level +20V -20V (default) */
-	gp_display_spi_data(self, 0x17);
+//	gp_display_spi_data(self, 0x07);
 	/* VDH level 15V (default 14V) */
-	gp_display_spi_data(self, 0x3f);
+//	gp_display_spi_data(self, 0x3f);
 	/* VDL level -15V (default -14V) */
-	gp_display_spi_data(self, 0x3f);
+//	gp_display_spi_data(self, 0x3f);
 
 	/* Sets VCOM DC voltage == contrast */
 //	gp_display_spi_cmd(self, SPD1656_VDCS);
 //	gp_display_spi_data(self, 0x24);
 
 	/* Booster settings */
-	gp_display_spi_cmd(self, SPD1656_BSST);
-	gp_display_spi_data(self, 0x17);
-	gp_display_spi_data(self, 0x17);
-	gp_display_spi_data(self, 0x28);
+	//gp_display_spi_cmd(self, SPD1656_BSST);
+	//gp_display_spi_data(self, 0x17);
+	//gp_display_spi_data(self, 0x17);
+	//gp_display_spi_data(self, 0x28);
 
 	/* Set PLL to 100Hz */
 //	gp_display_spi_cmd(self, SPD1656_PLL);
@@ -58,19 +58,22 @@ static void eink_hw_init(struct gp_display_spi *self)
 	gp_display_spi_data(self, 0x01);
 	gp_display_spi_data(self, 0xe0);
 
-	/* Set bit polarity and border polarity so that 1 == white and 0 == black */
+	/*
+	 * Set border to Hi-Z so that it does not flash on refresh
+	 *
+	 * And LUT for BW so that 1 == white and 0 == black
+	 */
 	gp_display_spi_cmd(self, SPD1656_VCON);
-	gp_display_spi_data(self, 0x21);
-	//gp_display_spi_data(self, 0x10);
+	gp_display_spi_data(self, 0x83);
 
-	gp_display_spi_cmd(self, SPD1656_TCON);
-	gp_display_spi_data(self, 0x22);
+//	gp_display_spi_cmd(self, SPD1656_TCON);
+//	gp_display_spi_data(self, 0x77);
 
-	gp_display_spi_cmd(self, SPD1656_GSST);
-	gp_display_spi_data(self, 0x00);
-	gp_display_spi_data(self, 0x00);
-	gp_display_spi_data(self, 0x00);
-	gp_display_spi_data(self, 0x00);
+//	gp_display_spi_cmd(self, SPD1656_GSST);
+//	gp_display_spi_data(self, 0x00);
+//	gp_display_spi_data(self, 0x00);
+//	gp_display_spi_data(self, 0x00);
+//	gp_display_spi_data(self, 0x00);
 
 	/* Fill OLD data with zeroes otherwise refresh will be messy */
 	gp_display_spi_cmd(self, SPD1656_DTM1);
