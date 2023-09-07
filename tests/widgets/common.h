@@ -17,6 +17,7 @@ static gp_pixmap dummy_pixmap = {
 
 static gp_widget_render_ctx dummy_ctx = {
 	.buf = &dummy_pixmap,
+	.pixel_type = GP_PIXEL_RGB888,
 };
 
 static inline void dummy_render(gp_widget *widget)
