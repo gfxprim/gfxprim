@@ -75,21 +75,18 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	gp_pixel text_color = ctx->text_color;
 
-	if (gp_widget_is_disabled(self, flags))
-		text_color = ctx->col_disabled;
+	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
+	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	gp_pixel color = self->focused ? ctx->sel_color : text_color;
-
 	if (tbox->alert) {
-		color = ctx->alert_color;
+		fr_color = ctx->alert_color;
 		gp_widget_render_timer(self, GP_TIMER_RESCHEDULE, 500);
 	}
 
-	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, color);
+	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, fr_color);
 
 	if (!(*self->tbox->buf) && !self->focused) {
 		if (!self->tbox->help)

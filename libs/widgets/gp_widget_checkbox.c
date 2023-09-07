@@ -84,10 +84,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	gp_pixel text_color = ctx->text_color;
 
-	if (gp_widget_is_disabled(self, flags))
-		text_color = ctx->col_disabled;
+	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
+	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
@@ -95,9 +95,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	y += ctx->padd;
 
-	gp_pixel color = self->focused ? ctx->sel_color : text_color;
-
-	gp_fill_rrect_xywh(ctx->buf, x, y, text_a, text_a, ctx->bg_color, ctx->fg_color, color);
+	gp_fill_rrect_xywh(ctx->buf, x, y, text_a, text_a, ctx->bg_color, ctx->fg_color, fr_color);
 
 	if (self->b->val) {
 		cross(ctx->buf, x, y,
@@ -107,7 +105,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (!self->b->label)
 		return;
 
-	gp_text(ctx->buf, ctx->font,
+	gp_text(ctx->buf, font,
 		x + text_a + ctx->padd, y,
 		GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 		text_color, ctx->bg_color, self->b->label);

@@ -82,11 +82,11 @@ void gp_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y,
 	gp_fill_rect_xyxy(pix, x+w-1, uy, x+w-1-th, dy, color);
 }
 
-void gp_fill_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_size h,
-                        gp_pixel bg_color, gp_pixel fg_color, gp_pixel fr_color)
+static void gp_fill_rrect_xywh_(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_size h,
+                                gp_pixel bg_color, gp_pixel fg_color, gp_pixel fr_color,
+                                unsigned int th)
 {
 	unsigned int rs = ctx.fr_round;
-	unsigned int th = ctx.fr_thick - 1;
 
 	gp_coord lx = x + rs;
 	gp_coord rx = x + w - rs - 1;
@@ -116,4 +116,21 @@ void gp_fill_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_si
 	gp_fill_rect_xyxy(pix, lx, y+h-1-th, rx, y+h-1, fr_color);
 	gp_fill_rect_xyxy(pix, x, uy, x+th, dy, fr_color);
 	gp_fill_rect_xyxy(pix, x+w-1, uy, x+w-1-th, dy, fr_color);
+}
+
+void gp_fill_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_size h,
+                        gp_pixel bg_color, gp_pixel fg_color, gp_pixel fr_color)
+{
+	gp_fill_rrect_xywh_(pix, x, y, w, h, bg_color, fg_color, fr_color, ctx.fr_thick - 1);
+}
+
+void gp_fill_rrect_xywh_focused(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_size h,
+                                gp_pixel bg_color, gp_pixel fg_color, gp_pixel fr_color, int focused)
+{
+	unsigned int th = ctx.fr_thick-1;
+
+	if (focused && gp_pixel_size(ctx.pixel_type) == 1)
+		th++;
+
+	gp_fill_rrect_xywh_(pix, x, y, w, h, bg_color, fg_color, fr_color, th);
 }

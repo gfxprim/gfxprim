@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -57,20 +57,6 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 
 	unsigned int wd = self->pbar->val * w / self->pbar->max;
 
-	gp_pixmap p;
-
-	gp_sub_pixmap(ctx->buf, &p, x, y, wd, h);
-	if (p.w > 0) {
-		gp_fill_rrect_xywh(&p, 0, 0, w, h, ctx->bg_color,
-		                   ctx->hl_color, text_color);
-	}
-
-	gp_sub_pixmap(ctx->buf, &p, x+wd, y, w-wd, h);
-	if (p.w > 0) {
-		gp_fill_rrect_xywh(&p, -wd, 0, w, h, ctx->bg_color,
-		                   ctx->fg_color, text_color);
-	}
-
 	char buf[64];
 	float val = self->pbar->val;
 
@@ -102,9 +88,37 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	break;
 	}
 
-	gp_print(ctx->buf, ctx->font, x + w/2, y + ctx->padd,
-		 GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
-		 text_color, ctx->bg_color, "%s", buf);
+	gp_pixmap p;
+
+	int is_1bpp = gp_pixel_size(ctx->pixel_type) == 1;
+
+	gp_sub_pixmap(ctx->buf, &p, x, y, wd, h);
+	if (p.w > 0) {
+		gp_fill_rrect_xywh(&p, 0, 0, w, h, ctx->bg_color,
+		                   ctx->hl_color, text_color);
+		if (is_1bpp) {
+			gp_print(&p, ctx->font, w/2, ctx->padd,
+			         GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
+			         ctx->fg_color, ctx->hl_color, "%s", buf);
+		}
+	}
+
+	gp_sub_pixmap(ctx->buf, &p, x+wd, y, w-wd, h);
+	if (p.w > 0) {
+		gp_fill_rrect_xywh(&p, -wd, 0, w, h, ctx->bg_color,
+		                   ctx->fg_color, text_color);
+		if (is_1bpp) {
+			gp_print(&p, ctx->font, w/2 -wd, ctx->padd,
+			         GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
+			         ctx->text_color, ctx->fg_color, "%s", buf);
+		}
+	}
+
+	if (!is_1bpp) {
+		gp_print(ctx->buf, ctx->font, x + w/2, y + ctx->padd,
+		         GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
+		         text_color, ctx->fg_color, "%s", buf);
+	}
 }
 
 static int check_val(double val, double max)

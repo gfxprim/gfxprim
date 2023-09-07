@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -15,6 +15,7 @@
 #include <widgets/gp_widget_keys.h>
 
 #include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_style.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_widget_gfx.h>

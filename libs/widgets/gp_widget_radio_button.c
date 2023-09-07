@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -43,10 +43,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 	unsigned int i;
-	gp_pixel text_color = ctx->text_color;
 
-	if (gp_widget_is_disabled(self, flags))
-		text_color = ctx->col_disabled;
+	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
+	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
@@ -63,13 +63,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 		unsigned int cx = x + r;
 
 		gp_fill_circle(ctx->buf, cx, cy, r, ctx->fg_color);
-		gp_pixel color = self->focused ? ctx->sel_color : text_color;
-		gp_fill_ring(ctx->buf, cx, cy, r - ctx->fr_thick + 1, r, color);
+		gp_fill_ring(ctx->buf, cx, cy, r - ctx->fr_thick + 1, r, fr_color);
 
 		if (i == sel)
 			gp_fill_circle(ctx->buf, cx, cy, GP_MAX((gp_size)1, r/2), text_color);
 
-		gp_text(ctx->buf, ctx->font,
+		gp_text(ctx->buf, font,
 			x + ctx->padd + text_a, y,
 		        GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
                         text_color, ctx->bg_color,

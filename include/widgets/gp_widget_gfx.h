@@ -9,6 +9,7 @@
 #ifndef GP_WIDGET_GFX_H
 #define GP_WIDGET_GFX_H
 
+#include <widgets/gp_widget.h>
 #include <core/gp_core.h>
 #include <gfx/gp_gfx.h>
 #include <text/gp_text.h>
@@ -19,6 +20,9 @@ void gp_text_fit(gp_pixmap *pix, const gp_text_style *style,
 
 void gp_fill_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_size h,
                         gp_pixel bg_color, gp_pixel fg_color, gp_pixel fr_color);
+
+void gp_fill_rrect_xywh_focused(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_size h,
+                                gp_pixel bg_color, gp_pixel fg_color, gp_pixel fr_color, int focused);
 
 void gp_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y,
                    gp_size w, gp_size h, gp_pixel color);

@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -91,15 +91,13 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	gp_pixel text_color = ctx->text_color;
 
-	if (gp_widget_is_disabled(self, flags))
-		text_color = ctx->col_disabled;
+	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
+	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
+	gp_pixel bg_color = self->b->val ? ctx->bg_color : ctx->fg_color;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
-
-	gp_pixel bg_color = self->b->val ? ctx->bg_color : ctx->fg_color;
-	gp_pixel fr_color = self->focused ? ctx->sel_color : text_color;
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, bg_color, fr_color);
 
@@ -121,7 +119,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 				tcx += asc/2 + spc/2;
 		}
 
-		len = gp_text(ctx->buf, ctx->font,
+		len = gp_text(ctx->buf, font,
 			tcx, cy-(asc-asc_half), GP_ALIGN_CENTER|GP_VALIGN_BELOW,
 			text_color, bg_color, self->b->label);
 

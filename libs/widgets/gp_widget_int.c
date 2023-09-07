@@ -275,35 +275,34 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	unsigned int sx = 2 * sy;
 	struct gp_widget_int *spin = self->spin;
 
-	(void)flags;
+	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
+	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
-
 	if (spin->alert) {
-		color = ctx->alert_color;
+		fr_color = ctx->alert_color;
 		gp_widget_render_timer(self, GP_TIMER_RESCHEDULE, 500);
 	}
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h,
-	                   ctx->bg_color, ctx->fg_color, color);
+	                   ctx->bg_color, ctx->fg_color, fr_color);
 
-	gp_print(ctx->buf, ctx->font, x + w - s - ctx->padd, y + ctx->padd,
+	gp_print(ctx->buf, font, x + w - s - ctx->padd, y + ctx->padd,
 		 GP_ALIGN_LEFT | GP_VALIGN_BELOW,
-		 ctx->text_color, ctx->bg_color, "%"PRIi64, spin->val);
-
+		 text_color, ctx->bg_color, "%"PRIi64, spin->val);
 
 	gp_coord rx = x + w - s;
 
-	gp_vline_xyh(ctx->buf, rx-1, y, h, color);
-	gp_hline_xyw(ctx->buf, rx, y + h/2, s, color);
+	gp_vline_xyh(ctx->buf, rx-1, y, h, fr_color);
+	gp_hline_xyw(ctx->buf, rx, y + h/2, s, fr_color);
 
 	gp_pixel arr_col;
 
-	arr_col = spin->val >= spin->max ? ctx->bg_color : ctx->text_color;
+	arr_col = spin->val >= spin->max ? ctx->bg_color : text_color;
 	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, sx, sy, GP_TRIANGLE_UP, arr_col);
-	arr_col = spin->val <= spin->min ? ctx->bg_color : ctx->text_color;
+	arr_col = spin->val <= spin->min ? ctx->bg_color : text_color;
 	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, sx, sy, GP_TRIANGLE_DOWN, arr_col);
 }
 
@@ -497,32 +496,33 @@ static void slider_render(gp_widget *self, const gp_offset *offset,
 	unsigned int asc = gp_text_ascent(ctx->font);
 	int val = GP_ABS(self->slider->val);
 
-	(void)flags;
+	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
+	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	gp_pixel fr_color = self->focused ? ctx->sel_color : ctx->text_color;
-
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, fr_color);
+
+	gp_size fr_thick = ctx->fr_thick+1;
 
 	switch (self->slider->dir) {
 	case GP_WIDGET_HORIZ:
 		w = asc;
-		x = x + (self->w - w - 4) * val / steps + 2;
-		y += 2;
-		h -= 4;
+		x = x + (self->w - w - 2 * fr_thick) * val / steps + fr_thick;
+		y += fr_thick;
+		h -= 2 * fr_thick;
 	break;
 	case GP_WIDGET_VERT:
 		//TODO!
 		val = self->i->max - val;
 		h = asc;
-		y = y + (self->h - h - 4) * val / steps + 2;
-		x += 2;
-		w -= 4;
+		y = y + (self->h - h - 2 * fr_thick) * val / steps + fr_thick;
+		x += fr_thick;
+		w -= 2 * fr_thick;
 	break;
 	}
 
-	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->fg_color, ctx->bg_color, ctx->text_color);
+	gp_fill_rrect_xywh_focused(ctx->buf, x, y, w, h, ctx->fg_color, ctx->bg_color, text_color, self->focused);
 }
 
 static int coord_to_val(gp_widget *self, int coord,

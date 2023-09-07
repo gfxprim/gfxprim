@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -238,7 +238,8 @@ static void fix_selected_row(gp_widget_table *tbl)
 }
 
 static void render_cell(gp_widget_table_cell *cell, const gp_widget_render_ctx *ctx,
-                        gp_coord x, gp_coord y, gp_size w, gp_pixel bg_col)
+                        gp_coord x, gp_coord y, gp_size w,
+                        gp_pixel text_col, gp_pixel bg_col)
 {
 	const gp_text_style *font = gp_widget_tattr_font(cell->tattr & ~GP_TATTR_LARGE, ctx);
 	int halign = gp_widget_tattr_halign(cell->tattr);
@@ -247,8 +248,7 @@ static void render_cell(gp_widget_table_cell *cell, const gp_widget_render_ctx *
 		halign = GP_ALIGN_LEFT;
 
 	gp_text_fit(ctx->buf, font, x, y, w,
-	            halign|GP_VALIGN_BASELINE, ctx->text_color, bg_col, cell->text);
-
+	            halign|GP_VALIGN_BASELINE, text_col, bg_col, cell->text);
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
@@ -296,15 +296,27 @@ static void render(gp_widget *self, const gp_offset *offset,
 	for (i = 0; i < rows; i++) {
 		cx = x + ctx->padd;
 		gp_pixel bg_col = ctx->fg_color;
+		gp_pixel text_col = ctx->text_color;
 
 		gp_coord ix = x+ctx->fr_thick;
 		gp_coord iw = self->w - 2*ctx->fr_thick;
 
 		if (tbl->row_selected && cur_row == tbl->selected_row) {
-			bg_col = self->focused ? ctx->sel_color : ctx->bg_color;
+			bg_col = gp_widget_frame_color(self, ctx, flags);
 
-			gp_fill_rect_xywh(ctx->buf, ix, cy - ctx->padd/2+1,
-			                  iw, text_a + ctx->padd-1, bg_col);
+			int is_1bpp = gp_pixel_size(ctx->pixel_type) == 1;
+
+			if (is_1bpp && self->focused)
+				text_col = ctx->fg_color;
+
+			if (is_1bpp && !self->focused) {
+				gp_rect_xywh(ctx->buf, ix, cy - ctx->padd/2+1,
+				             iw, text_a + ctx->padd-1, bg_col);
+			} else {
+				gp_fill_rect_xywh(ctx->buf, ix, cy - ctx->padd/2+1,
+				                  iw, text_a + ctx->padd-1, bg_col);
+			}
+
 		}
 
 		if (cur_row < tbl->last_rows) {
@@ -313,7 +325,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 				if (get_cell(self, &cell, j)) {
 					unsigned int by = cy + text_a - ctx->padd/4;
-					render_cell(&cell, ctx, cx, by, tbl->cols_w[j], bg_col);
+					render_cell(&cell, ctx, cx, by, tbl->cols_w[j], text_col, bg_col);
 				}
 
 				cx += tbl->cols_w[j] + ctx->padd;

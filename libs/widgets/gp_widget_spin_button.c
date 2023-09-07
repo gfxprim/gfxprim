@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -48,30 +48,30 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int s = buttons_width(ctx);
 	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
 	unsigned int sx = 2*sy;
-	gp_pixel text_color = ctx->text_color;
+
+	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
+	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 
 	size_t sel = call_get_sel(self);
 	size_t cnt = call_get_cnt(self);
 
-	if (gp_widget_is_disabled(self, flags))
-		text_color = ctx->col_disabled;
-
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	gp_pixel color = self->focused ? ctx->sel_color : text_color;
-
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h,
-	                   ctx->bg_color, ctx->fg_color, color);
+	                   ctx->bg_color, ctx->fg_color, fr_color);
 
-	gp_print(ctx->buf, ctx->font, x + ctx->padd, y + ctx->padd,
+	gp_print(ctx->buf, font, x + ctx->padd, y + ctx->padd,
 		 GP_ALIGN_RIGHT | GP_VALIGN_BELOW,
 		 text_color, ctx->bg_color, "%s",
 		 call_get_choice(self, sel));
 
 	gp_coord rx = x + w - s;
 
-	gp_vline_xyh(ctx->buf, rx-1, y, h, color);
-	gp_hline_xyw(ctx->buf, rx, y + h/2, s, color);
+	gp_vline_xyh(ctx->buf, rx-1, y, h, fr_color);
+	gp_hline_xyw(ctx->buf, rx, y + h/2, s, fr_color);
+
+	gp_pixel color;
 
 	if (sel == 0)
 		color = ctx->bg_color;
