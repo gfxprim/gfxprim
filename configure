@@ -178,6 +178,14 @@ class libraries:
             exit(1)
         else:
             self.results[name] = val
+
+    def get(self, name):
+        if name not in self.results:
+            sys.stderr.write("ERROR: Invalid library '%s'\n" % name)
+            exit(1)
+        else:
+            return self.results[name]
+
     #
     # Calls a function on arguments, all is stored in array if
     # not set previously
@@ -188,7 +196,12 @@ class libraries:
         sys.stderr.write("----------------------\n")
         for i in self.libraries:
             if i[0] not in self.results:
-                self.results[i[0]] = i[2][0](self.cfg, *i[2][1:])
+                if len(i) > 6 and not self.get(i[6]):
+                    sys.stderr.write("Disabling %s because of missing %s\n\n" % (i[0], i[6]))
+                    self.results[i[0]] = False
+                else:
+                    self.results[i[0]] = i[2][0](self.cfg, *i[2][1:])
+
 
                 # Resolve dynamic CFLAGS && LDFLAGS
                 if self.results[i[0]]:
@@ -452,7 +465,7 @@ def wayland_cflags(cfg):
 
 def wayland_libs(cfg):
     cmds = [
-        'pkg-config --libs xkbcommon wayland-client 2> /dev/null'
+        'pkg-config --libs wayland-client 2> /dev/null'
     ]
 
     flags = cmd_output(cmds);
@@ -592,10 +605,14 @@ if __name__ ==  '__main__':
                    ["libdrm/drm.h",
                     "fallback for UAPI drm.h in libdrm/drm.h",
                     [header_exists, "libdrm/drm.h"], "", "", ["backends"]],
+                   ["xkbcommon",
+                    "Keymap handling library for toolkits and window systems",
+                    [header_exists, "xkbcommon/xkbcommon.h"],
+                     "", "-lxkbcommon", ["backends"]],
                    ["wayland",
                     "Wayland windowing system",
                     [header_exists, "wayland-client.h", "wayland/wayland-client.h"],
-                     wayland_cflags, wayland_libs, ["backends"]],
+                     wayland_cflags, wayland_libs, ["backends"], "xkbcommon"],
                    ["backtrace",
                     "C stack trace writeout",
                     [c_try_compile, "#include <execinfo.h>\nint main(void) { backtrace(0, 0); }",
