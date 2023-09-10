@@ -19,4 +19,5 @@ markup_html
 markup_justify
 json_serdes
 balloc
+cbuffer
 heap

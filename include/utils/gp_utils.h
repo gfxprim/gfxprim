@@ -21,6 +21,7 @@
 #include <utils/gp_utf_pos.h>
 #include <utils/gp_avl_tree.h>
 #include <utils/gp_trie.h>
+#include <utils/gp_cbuffer.h>
 
 #include <utils/gp_path.h>
 #include <utils/gp_user_path.h>
