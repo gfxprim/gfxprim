@@ -106,6 +106,10 @@ struct client_state {
 	struct zxdg_decoration_manager_v1 *decoration_manager;
 	struct zxdg_toplevel_decoration_v1 *decoration;
 
+	/* output size and physical size */
+	struct wl_output *output;
+	unsigned int dw, dw_mm, dh, dh_mm;
+
 	/* gfxprim */
 	uint32_t w, h;
 	gp_pixel pixel_type;
@@ -398,6 +402,56 @@ static struct zxdg_toplevel_decoration_v1_listener decoration_listener = {
 	configure_decorations,
 };
 
+static void display_handle_geometry(void *data, struct wl_output UN(*wl_output),
+                                    int32_t UN(x), int32_t UN(y),
+                                    int32_t physical_width, int32_t physical_height,
+                                    int32_t UN(subpixel), const char UN(*make),
+                                    const char UN(*model), int32_t UN(transform))
+{
+	struct client_state *state = data;
+
+	state->dw_mm = physical_width;
+	state->dh_mm = physical_height;
+}
+
+static void display_handle_mode(void *data, struct wl_output UN(*wl_output),
+                                uint32_t UN(flags), int32_t width, int32_t height,
+                                int32_t UN(refresh))
+{
+	struct client_state *state = data;
+
+	state->dw = width;
+	state->dh = height;
+}
+
+static void display_handle_done(void UN(*data), struct wl_output UN(*wl_output))
+{
+}
+
+static void display_handle_scale(void UN(*data), struct wl_output UN(*wl_output),
+                                 int32_t UN(factor))
+{
+}
+
+static void display_handle_name(void UN(*data), struct wl_output UN(*wl_output),
+                                const char UN(*name))
+{
+}
+
+static void display_handle_desc(void UN(*data), struct wl_output UN(*wl_output),
+                                const char UN(*desc))
+{
+}
+
+static const struct wl_output_listener output_listener = {
+	display_handle_geometry,
+	display_handle_mode,
+	display_handle_done,
+	display_handle_scale,
+	display_handle_name,
+	display_handle_desc,
+};
+
 static void registry_global(void *data, struct wl_registry *registry,
                             uint32_t name, const char *interface, uint32_t version)
 {
@@ -437,6 +491,12 @@ static void registry_global(void *data, struct wl_registry *registry,
 			return;
 		}
 		state->decoration_manager = wl_registry_bind(registry, name, &zxdg_decoration_manager_v1_interface, 1);
+		return;
+	}
+
+	if (!strcmp(interface, "wl_output")) {
+		state->output = wl_registry_bind(registry, name, &wl_output_interface, 1);
+		wl_output_add_listener(state->output, &output_listener, state);
 		return;
 	}
 }
@@ -678,6 +738,15 @@ gp_backend *gp_wayland_init(const char *display,
 	backend.pixmap->pixels = (void*)frame.data;
 
 	backend.event_queue = &state.ev_queue;
+
+	if (state.dw_mm && state.dh_mm) {
+		backend.dpi = gp_dpi_from_size(state.w, state.dw_mm,
+		                               state.h, state.dh_mm);
+	} else {
+		backend.dpi = 0;
+
+		GP_DEBUG(1, "Output size and DPI is not known");
+	}
 
 	gp_ev_queue_init(backend.event_queue, w, h, 0, 0);
 

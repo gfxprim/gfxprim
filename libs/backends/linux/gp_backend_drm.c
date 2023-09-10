@@ -22,6 +22,7 @@
 #include <backends/gp_linux_drm.h>
 #include <backends/gp_linux_input.h>
 #include <core/gp_debug.h>
+#include <backends/gp_dpi.h>
 #include <core/gp_pixmap.h>
 
 #if defined(HAVE_DRM_DRM_H) || defined(HAVE_LIBDRM_DRM_H)
@@ -75,6 +76,10 @@ struct backend_drm_priv {
 
 	/* mode to use resolution etc. */
 	struct drm_mode_modeinfo mode;
+
+	/* Physical size of the display */
+	uint32_t mm_width;
+	uint32_t mm_height;
 
 	/* frame buffer info */
 	uint32_t fb_handle;
@@ -254,6 +259,9 @@ retry:
 		priv->pixmap.w = modes[0].hdisplay;
 		priv->pixmap.h = modes[0].vdisplay;
 
+		priv->mm_width = conn.mm_width;
+		priv->mm_height = conn.mm_height;
+
 		priv->mode = modes[0];
 
 		if (conn.encoder_id) {
@@ -381,6 +389,9 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	gp_ev_queue_init(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	ret->exit = backend_drm_exit;
+
+	ret->dpi = gp_dpi_from_size(ret->pixmap->w, priv->mm_width,
+	                            ret->pixmap->h, priv->mm_height);
 
 	return ret;
 err3:

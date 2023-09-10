@@ -148,6 +148,11 @@ struct gp_backend {
 
 	void *clipboard_data;
 
+	/**
+	 * DPI if unknown it's set to 0.
+	 */
+	unsigned int dpi;
+
 	/* Backed private data */
 	char priv[];
 };

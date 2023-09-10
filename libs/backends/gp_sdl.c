@@ -237,6 +237,8 @@ static void sdl_exit(struct gp_backend *self __attribute__((unused)))
 gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
                         const char *caption)
 {
+	float dpi_v, dpi_h;
+
 	/* SDL was already initalized */
 	if (backend.pixmap != NULL)
 		return &backend;
@@ -314,6 +316,10 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
 			);
 
 	backend.pixmap = &pixmap;
+
+	SDL_GetDisplayDPI(0, &dpi_v, &dpi_h, NULL);
+
+	backend.dpi = (dpi_v + dpi_h + 1)/2;
 
 	return &backend;
 }

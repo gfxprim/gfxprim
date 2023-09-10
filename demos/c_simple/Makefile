@@ -29,7 +29,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      debug_handler gaussian_noise version pretty_print timers\
      zip_container backend_timers_example memory_io data_storage\
      vector matrix proxy_backend bbox backend_tasks_example json_writer\
-     drm_test draw_glyph
+     drm_test draw_glyph dpi_check
 
 ifneq ($(SDL_CONFIG),)
 APPS+=SDL_glue
@@ -73,6 +73,7 @@ memory_io: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
 data_storage: LDLIBS+=-lgfxprim-loaders
 drm_test: LDLIBS+=-lgfxprim-backends
 draw_glyph: LDLIBS+=-lgfxprim-backends
+dpi_check: LDLIBS+=-lgfxprim-backends
 
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk

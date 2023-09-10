@@ -143,6 +143,7 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	self->wait = backend->wait ? virt_wait : NULL;
 	self->exit = virt_exit;
 	self->fds = backend->fds;
+	self->dpi = backend->dpi;
 	self->event_queue = backend->event_queue;
 
 	return self;

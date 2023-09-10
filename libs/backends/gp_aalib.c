@@ -240,6 +240,7 @@ gp_backend *gp_aalib_init(void)
 	backend->wait = aalib_wait;
 	backend->exit = aalib_exit;
 	backend->event_queue = &aa->ev_queue;
+	backend->dpi = 0;
 
 	gp_ev_queue_init(backend->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 

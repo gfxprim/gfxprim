@@ -23,6 +23,7 @@
 
 /* Backend input drivers */
 #include <backends/gp_backend_input.h>
+#include <backends/gp_dpi.h>
 
 /* Backends. */
 #include <backends/gp_linux_fb.h>

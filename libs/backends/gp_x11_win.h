@@ -393,6 +393,38 @@ static int x11_win_open(struct x11_wreq *wreq)
 	return 0;
 }
 
+#ifdef HAVE_LIBXRANDR
+
+#include <X11/extensions/Xrandr.h>
+
+static inline unsigned int x11_win_get_dpi(struct x11_win *win)
+{
+	XRRScreenResources *screen_resource;
+	XRRCrtcInfo *crtc_info;
+	XRROutputInfo *output_info;
+
+	screen_resource = XRRGetScreenResources(win->dpy, DefaultRootWindow(win->dpy));
+	crtc_info = XRRGetCrtcInfo(win->dpy, screen_resource, screen_resource->crtcs[0]);
+	output_info = XRRGetOutputInfo(win->dpy, screen_resource, screen_resource->outputs[0]);
+
+	unsigned int dpi = gp_dpi_from_size(crtc_info->width, output_info->mm_width,
+	                                    crtc_info->height, output_info->mm_height);
+
+	XRRFreeOutputInfo(output_info);
+	XRRFreeCrtcInfo(crtc_info);
+	XRRFreeScreenResources(screen_resource);
+
+	return dpi;
+}
+#else
+static inline unsigned int x11_win_get_dpi(struct x11_win *win)
+{
+	(void) win;
+	GP_WARN("Xrandr not compiled in");
+	return 0;
+}
+#endif /* HAVE_LIBXRANDR */
+
 static void x11_win_close(struct x11_win *win)
 {
 	GP_DEBUG(1, "Closing window");

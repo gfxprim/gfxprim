@@ -27,6 +27,7 @@
 #endif /* HAVE_X_SHM */
 
 #include <backends/gp_x11.h>
+#include <backends/gp_dpi.h>
 
 #include "gp_x11_conn.h"
 #include "gp_x11_win.h"
@@ -656,6 +657,8 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	}
 
 	XFlush(win->dpy);
+
+	backend->dpi = x11_win_get_dpi(win);
 
 	win->resized_flag = 0;
 

@@ -247,6 +247,7 @@ gp_backend *gp_waveshare_7_5_v2_init(void)
 	gp_display_eink_init(backend);
 
 	backend->exit = backend_exit;
+	backend->dpi = 125;
 
 	return backend;
 err1:
