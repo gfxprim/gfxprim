@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -49,25 +49,20 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, ctx->text_color);
 
-	/* Figure out how many lines we can fit into the box first */
-	size_t box_lines = (h - ctx->padd) / line_h;
-	size_t logs = gp_vec_len(log->logs);
-	size_t cur_str = logs;
-	size_t cur_line = 0;
-
-	if (!logs)
+	if (!gp_cbuffer_used(&log->log))
 		return;
 
-	for (;;) {
-		if (!cur_str)
-			break;
+	/* Figure out how many lines we can fit into the box first */
+	size_t box_lines = (h - ctx->padd) / line_h;
+	size_t cur_line = 0;
 
+	gp_cbuffer_iter iter;
+
+	GP_CBUFFER_FOREACH_REV(&log->log, &iter) {
 		if (cur_line >= box_lines)
 			break;
 
-		cur_str--;
-
-		const char *text = log->logs[cur_str];
+		const char *text = log->logs[iter.idx];
 
 		size_t str_width = gp_text_wbbox(font, text);
 		size_t lines_per_str = GP_MAX((size_t)1, str_width / line_w + !!(str_width % line_w));
@@ -75,21 +70,32 @@ static void render(gp_widget *self, const gp_offset *offset,
 		cur_line += lines_per_str;
 	}
 
-	size_t render_line = GP_MIN(cur_line, box_lines);
+	size_t render_lines = GP_MIN(cur_line, box_lines);
+	size_t off_lines = cur_line - render_lines;
 
 	/* Then finally render it */
 	x += ctx->padd;
 	y += ctx->padd;
 
-	for (;;) {
-		const char *line = log->logs[cur_str];
+	size_t count = iter.cnt;
+	size_t first = gp_cbuffer_used(&log->log) - count;
+
+	GP_CBUFFER_FOREACH_RANGE(&log->log, &iter, first, count) {
+		const char *line = log->logs[iter.idx];
 		size_t line_len = strlen(line);
 
 		for (;;) {
-			if (!render_line)
+			if (!render_lines)
 				return;
 
 			size_t chars = gp_text_fit_width(font, line, line_w);
+
+			if (off_lines) {
+				line_len -= chars;
+				line += chars;
+				off_lines--;
+				continue;
+			}
 
 			gp_print(ctx->buf, font, x, y,
 			         GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
@@ -97,7 +103,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 				 "%.*s", (int)chars, line);
 
 			y += line_h;
-			render_line--;
+			render_lines--;
 
 			line_len -= chars;
 			line += chars;
@@ -105,19 +111,18 @@ static void render(gp_widget *self, const gp_offset *offset,
 			if (!line_len)
 				break;
 		}
-
-		if (++cur_str >= logs)
-			return;
 	}
 }
 
 enum keys {
+	MAX_LOGS,
 	MIN_LINES,
 	MIN_WIDTH,
 	TATTR,
 };
 
 static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("max_logs", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("min_lines", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("min_width", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
@@ -132,12 +137,20 @@ static gp_widget *json_to_log(gp_json_reader *json, gp_json_val *val, gp_widget_
 {
 	int width = 80;
 	int lines = 25;
+	int max_logs = 0;
 	gp_widget_tattr attr = 0;
 
 	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
+		case MAX_LOGS:
+			max_logs = val->val_int;
+			if (lines <= 0) {
+				gp_json_warn(json, "Invalid max logs %i", max_logs);
+				return NULL;
+			}
+		break;
 		case MIN_LINES:
 			lines = val->val_int;
 			if (lines <= 0) {
@@ -159,20 +172,22 @@ static gp_widget *json_to_log(gp_json_reader *json, gp_json_val *val, gp_widget_
 		}
 	}
 
-	gp_widget *ret = gp_widget_log_new(attr, width, lines);
+	gp_widget *ret = gp_widget_log_new(attr, width, lines, max_logs);
 
 	return ret;
 }
 
 static void free_(gp_widget *self)
 {
+	gp_cbuffer_iter iter;
+
 	if (!self->log->logs)
 		return;
 
-	GP_VEC_FOREACH(self->log->logs, char *, log)
-		free(*log);
+	GP_CBUFFER_FOREACH(&self->log->log, &iter)
+		free(self->log->logs[iter.idx]);
 
-	gp_vec_free(self->log->logs);
+	free(self->log->logs);
 }
 
 struct gp_widget_ops gp_widget_log_ops = {
@@ -192,22 +207,33 @@ void gp_widget_log_append(gp_widget *self, const char *text)
 	GP_DEBUG(3, "Appending to log widget (%p) '%s'", self, text);
 
 	str = strdup(text);
-	if (!GP_VEC_APPEND(self->log->logs, str)) {
-		free(str);
+	if (!str) {
+		GP_DEBUG(3, "Malloc failed :(");
 		return;
 	}
+
+	size_t idx = gp_cbuffer_append(&self->log->log);
+
+	free(self->log->logs[idx]);
+	self->log->logs[idx] = str;
 
 	gp_widget_redraw(self);
 }
 
 gp_widget *gp_widget_log_new(gp_widget_tattr tattr,
-                             unsigned int min_width, unsigned int min_lines)
+                             unsigned int min_width, unsigned int min_lines,
+			     size_t max_logs)
 {
 	gp_widget *ret;
 
 	if (min_width <= 0 || min_lines <= 0) {
 		GP_WARN("Invalid min_width or min_lines");
 		return NULL;
+	}
+
+	if (!max_logs) {
+		max_logs = (size_t)10 * min_lines;
+		GP_DEBUG(1, "Defaulting to max logs = 10 * min_lines = %zu", max_logs);
 	}
 
 	ret = gp_widget_new(GP_WIDGET_LOG, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_log));
@@ -217,12 +243,15 @@ gp_widget *gp_widget_log_new(gp_widget_tattr tattr,
 	ret->log->tattr = tattr;
 	ret->log->min_width = min_width;
 	ret->log->min_lines = min_lines;
-	ret->log->logs = gp_vec_new(0, sizeof(char **));
+	ret->log->logs = malloc(sizeof(char **) * max_logs);
 
 	if (!ret->log->logs) {
 		gp_widget_free(ret);
 		return NULL;
 	}
+
+	memset(ret->log->logs, 0, sizeof(char **) * max_logs);
+	gp_cbuffer_init(&ret->log->log, max_logs);
 
 	return ret;
 }
