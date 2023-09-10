@@ -740,8 +740,8 @@ gp_backend *gp_wayland_init(const char *display,
 	backend.event_queue = &state.ev_queue;
 
 	if (state.dw_mm && state.dh_mm) {
-		backend.dpi = gp_dpi_from_size(state.w, state.dw_mm,
-		                               state.h, state.dh_mm);
+		backend.dpi = gp_dpi_from_size(state.dw, state.dw_mm,
+		                               state.dh, state.dh_mm);
 	} else {
 		backend.dpi = 0;
 
