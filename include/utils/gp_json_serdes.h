@@ -17,6 +17,7 @@ enum json_serdes_type {
 	GP_JSON_SERDES_STR,
 	GP_JSON_SERDES_UINT,
 	GP_JSON_SERDES_INT,
+	GP_JSON_SERDES_FLOAT,
 
 	/* parameter does not have to be present */
 	GP_JSON_SERDES_OPTIONAL = 0x80,
@@ -29,6 +30,11 @@ struct gp_json_int_limits {
 	uint64_t max;
 };
 
+struct gp_json_float_limits {
+	float min;
+	float max;
+};
+
 typedef struct gp_json_struct {
 	const char *id; /* JSON id */
 	size_t offset;  /* Offset in base struct */
@@ -38,6 +44,7 @@ typedef struct gp_json_struct {
 
 	union {
 		struct gp_json_int_limits lim_int;
+		struct gp_json_float_limits lim_float;
 		size_t str_max_size;
 	};
 } gp_json_struct;
@@ -152,6 +159,20 @@ typedef struct gp_json_struct {
 	 .type = GP_JSON_SERDES_INT | flags, \
 	 .type_size = 8, \
 	 .lim_int = {min, max}}
+
+#define GP_JSON_SERDES_FLOAT(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_FLOAT | flags, \
+	 .type_size = sizeof(float), \
+	 .lim_float = {min, max}}
+
+#define GP_JSON_SERDES_DOUBLE(struct, memb, flags, min, max, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_FLOAT | flags, \
+	 .type_size = sizeof(double), \
+	 .lim_float = {min, max}}
 
 /**
  * @brief Deserializes a JSON object into a C structure

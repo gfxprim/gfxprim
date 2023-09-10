@@ -33,6 +33,13 @@ static size_t count_and_check_descs(gp_json_struct *desc)
 				return 0;
 			}
 		break;
+		case GP_JSON_SERDES_FLOAT:
+			if (i->type_size != sizeof(float) &&
+			    i->type_size != sizeof(double)) {
+				GP_WARN("Invalid float/double size %zu", i->type_size);
+				return 0;
+			}
+		break;
 		case GP_JSON_SERDES_STR:
 		break;
 		}
@@ -250,6 +257,39 @@ static int uint_store(gp_json_reader *json, gp_json_struct *desc,
 	return 1;
 }
 
+static int float_store(gp_json_reader *json, gp_json_struct *desc,
+                       gp_json_val *val, void *baseptr)
+{
+	(void) json;
+
+	*(float*)(baseptr+desc->offset) = val->val_float;
+
+	return 0;
+}
+
+static int double_store(gp_json_reader *json, gp_json_struct *desc,
+                        gp_json_val *val, void *baseptr)
+{
+	(void) json;
+
+	*(double*)(baseptr+desc->offset) = val->val_float;
+
+	return 0;
+}
+
+static int float_double_store(gp_json_reader *json, gp_json_struct *desc,
+                              gp_json_val *val, void *baseptr)
+{
+	switch (desc->type_size) {
+	case sizeof(float):
+		return float_store(json, desc, val, baseptr);
+	case sizeof(double):
+		return double_store(json, desc, val, baseptr);
+	}
+
+	return 0;
+}
+
 static int int_check(gp_json_reader *json, gp_json_struct *desc,
                      gp_json_val *val)
 {
@@ -263,6 +303,24 @@ static int int_check(gp_json_reader *json, gp_json_struct *desc,
 	if (val->val_int > 0 && (uint64_t)val->val_int > desc->lim_int.max) {
 		gp_json_warn(json, "Int value out of range %li > %lli",
 		             val->val_int, (long long int) desc->lim_int.max);
+		return 1;
+	}
+
+	return 0;
+}
+
+static int float_check(gp_json_reader *json, gp_json_struct *desc,
+                       gp_json_val *val)
+{
+	if (val->val_float < desc->lim_float.min) {
+		gp_json_warn(json, "Float value out of range %f < %lf",
+		             val->val_float, desc->lim_float.min);
+		return 1;
+	}
+
+	if (val->val_float > desc->lim_float.max) {
+		gp_json_warn(json, "Float value out of range %f > %lf",
+		             val->val_float, desc->lim_float.max);
 		return 1;
 	}
 
@@ -283,6 +341,10 @@ static int memb_store(gp_json_reader *json, gp_json_struct *desc,
 		if (int_check(json, desc, val))
 			return 1;
 		return uint_store(json, desc, val, baseptr);
+	case GP_JSON_SERDES_FLOAT:
+		if (float_check(json, desc, val))
+			return 1;
+		return float_double_store(json, desc, val, baseptr);
 	}
 
 	return 1;
@@ -380,6 +442,18 @@ static uint64_t uint_val(gp_json_struct *desc, void *baseptr)
 	return 0;
 }
 
+static float float_val(gp_json_struct *desc, void *baseptr)
+{
+	switch (desc->type_size) {
+	case sizeof(float):
+		return *(float*)(baseptr + desc->offset);
+	case sizeof(double):
+		return *(double*)(baseptr + desc->offset);
+	}
+
+	return 0;
+}
+
 int gp_json_write_struct(gp_json_writer *json, gp_json_struct *desc,
                          const char *id, void *baseptr)
 {
@@ -395,6 +469,9 @@ int gp_json_write_struct(gp_json_writer *json, gp_json_struct *desc,
 		break;
 		case GP_JSON_SERDES_UINT:
 			gp_json_int_add(json, i->id, uint_val(i, baseptr));
+		break;
+		case GP_JSON_SERDES_FLOAT:
+			gp_json_float_add(json, i->id, float_val(i, baseptr));
 		break;
 		case GP_JSON_SERDES_STR:
 			gp_json_str_add(json, i->id, str_ptr(i, baseptr));
