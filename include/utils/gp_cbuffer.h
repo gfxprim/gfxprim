@@ -134,6 +134,11 @@ typedef struct gp_cbuffer_iter {
 	     (iter)->cnt < (self)->used; \
 	     (iter)->idx = gp_cbuffer_next(self, (iter)->idx), (iter)->cnt++)
 
+#define GP_CBUFFER_FOREACH_RANGE(self, iter, skip, count) \
+	for ((iter)->idx = (gp_cbuffer_first(self) + skip) % (self)->size, (iter)->cnt = 0; \
+	     (iter)->cnt < count; \
+	     (iter)->idx = gp_cbuffer_next(self, (iter)->idx), (iter)->cnt++)
+
 #define GP_CBUFFER_FOREACH_REV(self, iter) \
 	for ((iter)->idx = gp_cbuffer_last(self), (iter)->cnt = 0; \
 	     (iter)->cnt < (self)->used; \
