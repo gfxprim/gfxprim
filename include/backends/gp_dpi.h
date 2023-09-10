@@ -22,7 +22,7 @@ static inline unsigned int gp_dpi_from_size(unsigned int w, unsigned int w_mm,
 {
 	unsigned int dpi = ((w * 25.4) / w_mm + (h * 25.4) / h_mm + 1)/2;
 
-	GP_DEBUG(1, "Resolution %ux%u - %ummx%umm - dpi %u\n", w, h, w_mm, h_mm, dpi);
+	GP_DEBUG(1, "Resolution %ux%u - %ummx%umm - dpi %u", w, h, w_mm, h_mm, dpi);
 
 	return dpi;
 }
@@ -36,6 +36,17 @@ static inline unsigned int gp_dpi_from_size(unsigned int w, unsigned int w_mm,
 static inline float gp_dpi_to_ppmm(unsigned int dpi)
 {
 	return dpi / 25.4;
+}
+
+/**
+ * Converts milimeters to pixels.
+ *
+ * @mm Size in milimeters.
+ * @return Size in pixels.
+ */
+static inline gp_size gp_dpi_mm_to_px(unsigned int dpi, float mm)
+{
+	return gp_dpi_to_ppmm(dpi) * mm + 0.5;
 }
 
 #endif /* BACKENDS_GP_DPI_H */
