@@ -80,6 +80,8 @@ struct gp_widget_render_ctx {
 	uint8_t cur_thick;
 	/* font size */
 	uint8_t font_size;
+	/* font size in mm */
+	float font_size_mm;
 	/* maximal delay between two clicks for a double click */
 	uint16_t dclick_ms;
 
@@ -101,14 +103,6 @@ static inline int gp_widgets_is_dclick(uint64_t time_now, uint64_t time_prev,
 
 	return 0;
 }
-
-/*
- * @brief Initializes render context fonts and padding.
- *
- * Colors are not initialized until we have a pixmap to render to since we do
- * not know the pixel format until that time.
- */
-void gp_widget_render_ctx_init(void);
 
 /**
  * @brief Returns a pointer to a render pixmap.

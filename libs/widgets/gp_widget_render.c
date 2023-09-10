@@ -82,6 +82,7 @@ struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.fr_round = 3,
 	.dclick_ms = 500,
 	.font_size = 16,
+	.font_size_mm = 2.5,
 	.color_scheme = GP_WIDGET_COLOR_SCHEME_DEFAULT,
 };
 
@@ -150,8 +151,7 @@ static int try_compiled_in_font_family(const char *family_name, unsigned int mul
 	return 1;
 }
 
-
-static void init_fonts(void)
+static void init_fonts(gp_backend *backend)
 {
 	int size = 1;
 
@@ -170,6 +170,11 @@ static void init_fonts(void)
 		if (!try_compiled_in_font_family(font_family, size))
 			GP_WARN("Failed to load compiled in font '%s'", font_family);
 		return;
+	}
+
+	if (backend->dpi) {
+		ctx.font_size = gp_dpi_mm_to_px(backend->dpi, ctx.font_size_mm);
+		GP_DEBUG(1, "Font size %.2fmm is %upx", ctx.font_size_mm, ctx.font_size);
 	}
 
 	gp_font_face *ffont = gp_font_face_fc_load("DroidSans", 0, ctx.font_size);
@@ -218,13 +223,14 @@ struct gp_json_struct render_ctx_desc[] = {
 	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, cur_thick, GP_JSON_SERDES_OPTIONAL, 1, 255, "cursor_thickness"),
 	GP_JSON_SERDES_UINT16(struct gp_widget_render_ctx, dclick_ms, GP_JSON_SERDES_OPTIONAL, 100, 10000, "double_click_ms"),
 	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, font_size, GP_JSON_SERDES_OPTIONAL, 10, 100, "font_size"),
+	GP_JSON_SERDES_FLOAT(struct gp_widget_render_ctx, font_size_mm, GP_JSON_SERDES_OPTIONAL, 1, 100, "font_size_mm"),
 	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, fr_round, GP_JSON_SERDES_OPTIONAL, 0, 255, "frame_roundness"),
 	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, fr_thick, GP_JSON_SERDES_OPTIONAL, 1, 255, "frame_thickness"),
 	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, padd, GP_JSON_SERDES_OPTIONAL, 2, 255, "padding"),
 	{}
 };
 
-static void render_ctx_init(void)
+static void render_ctx_init(gp_backend *backend)
 {
 	char *path = gp_user_path(".config", "gfxprim.json");
 
@@ -235,7 +241,7 @@ static void render_ctx_init(void)
 	if (json)
 		gp_json_read_struct(json, &val, render_ctx_desc, &ctx);
 
-	init_fonts();
+	init_fonts(backend);
 
 	if (!json)
 		return;
@@ -246,7 +252,12 @@ static void render_ctx_init(void)
 	gp_json_reader_free(json);
 }
 
-void gp_widget_render_ctx_init(void)
+static gp_backend *backend;
+static gp_widget *app_layout;
+static gp_dialog *cur_dialog;
+static int back_from_dialog;
+
+static void gp_widget_render_ctx_init(void)
 {
 	static uint8_t initialized;
 
@@ -254,14 +265,9 @@ void gp_widget_render_ctx_init(void)
 		return;
 
 	GP_DEBUG(1, "Initializing fonts and padding");
-	render_ctx_init();
+	render_ctx_init(backend);
 	initialized = 1;
 }
-
-static gp_backend *backend;
-static gp_widget *app_layout;
-static gp_dialog *cur_dialog;
-static int back_from_dialog;
 
 static void render_and_flip(gp_widget *layout, int render_flags)
 {
@@ -295,7 +301,7 @@ void gp_widget_render_zoom(int zoom_inc)
 		return;
 
 	ctx.font_size += zoom_inc;
-	render_ctx_init();
+	render_ctx_init(backend);
 	//TODO: Broken!
 	gp_widget_render(app_layout, &ctx, GP_WIDGET_RESIZE);
 }
@@ -457,11 +463,11 @@ static void move_poll(gp_backend *backend)
 
 void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 {
-	gp_widget_render_ctx_init();
-
 	backend = gp_backend_init(backend_init_str, 0, 0, win_tittle);
 	if (!backend)
 		exit(1);
+
+	gp_widget_render_ctx_init();
 
 	move_poll(backend);
 
