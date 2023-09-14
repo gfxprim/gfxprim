@@ -313,6 +313,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 				gp_rect_xywh(ctx->buf, ix, cy - ctx->padd/2+1,
 				             iw, text_a + ctx->padd-1, bg_col);
 			} else {
+				bg_col = self->focused ? ctx->sel_color : ctx->bg_color;
+
 				gp_fill_rect_xywh(ctx->buf, ix, cy - ctx->padd/2+1,
 				                  iw, text_a + ctx->padd-1, bg_col);
 			}

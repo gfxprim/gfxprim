@@ -172,9 +172,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 	                  gp_text_wbbox_len(font, str, sel_len),
 	                  gp_text_height(font), ctx->sel_color);
 
+
+	gp_pixel rev_text_col = gp_pixel_size(ctx->pixel_type) == 1 ? ctx->fg_color : ctx->text_color;
+
 	gp_text_ext(ctx->buf, font, sel_x_off, y + ctx->padd,
 	            GP_ALIGN_RIGHT | GP_VALIGN_BELOW,
-	            text_color, ctx->sel_color, str,
+	            rev_text_col, ctx->sel_color, str,
 		    sel_len);
 }
 
