@@ -41,27 +41,29 @@ static void render_line_graph(struct gp_widget_graph *graph,
                               gp_pixmap *pix, gp_coord w, gp_coord h,
                               const gp_widget_render_ctx *ctx)
 {
-	size_t i;
+	gp_cbuffer_iter iter;
 
 	gp_size line_th = (ctx->fr_thick+1)/2;
 	gp_size circle_r = line_th;
 	gp_pixel col = ctx->colors[graph->color];
 
-	gp_coord px = transform_x(graph, graph->data[graph->data_first].x, w-2*circle_r-1) + circle_r;
-	gp_coord py = transform_y(graph, graph->data[graph->data_first].y, h-2*circle_r-1) + circle_r;
+	size_t first = gp_cbuffer_first(&graph->data_idx);
 
-	for (i = (graph->data_first + 1)%graph->data_points; i != graph->data_last; i = (i+1) % graph->data_points) {
-		gp_coord dx = transform_x(graph, graph->data[i].x, w-2*circle_r-1) + circle_r;
-		gp_coord dy = transform_y(graph, graph->data[i].y, h-2*circle_r-1) + circle_r;
+	gp_coord px = transform_x(graph, graph->data[first].x, w-2*circle_r-1) + circle_r;
+	gp_coord py = transform_y(graph, graph->data[first].y, h-2*circle_r-1) + circle_r;
+
+	GP_CBUFFER_FOREACH_RANGE(&graph->data_idx, &iter, 1, gp_cbuffer_used(&graph->data_idx)-1) {
+		gp_coord dx = transform_x(graph, graph->data[iter.idx].x, w-2*circle_r-1) + circle_r;
+		gp_coord dy = transform_y(graph, graph->data[iter.idx].y, h-2*circle_r-1) + circle_r;
 
 		gp_line_th(pix, px, py, dx, dy, line_th, col);
 
 		px = dx; py = dy;
 	}
 
-	for (i = graph->data_first; i != graph->data_last; i = (i+1) % graph->data_points) {
-		gp_coord dx = transform_x(graph, graph->data[i].x, w-2*circle_r-1) + circle_r;
-		gp_coord dy = transform_y(graph, graph->data[i].y, h-2*circle_r-1) + circle_r;
+	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
+		gp_coord dx = transform_x(graph, graph->data[iter.idx].x, w-2*circle_r-1) + circle_r;
+		gp_coord dy = transform_y(graph, graph->data[iter.idx].y, h-2*circle_r-1) + circle_r;
 
 		gp_fill_circle(pix, dx, dy, circle_r, col);
 	}
@@ -72,15 +74,15 @@ static void render_point_graph(struct gp_widget_graph *graph,
                                gp_pixmap *pix, gp_coord w, gp_coord h,
                                const gp_widget_render_ctx *ctx)
 {
-	size_t i;
+	gp_cbuffer_iter iter;
 
 	gp_size line_th = (ctx->fr_thick+1)/2;
 	gp_size circle_r = line_th*2;
 	gp_pixel col = ctx->colors[graph->color];
 
-	for (i = graph->data_first; i != graph->data_last; i = (i+1) % graph->data_points) {
-		gp_coord dx = transform_x(graph, graph->data[i].x, w-2*circle_r-1) + circle_r;
-		gp_coord dy = transform_y(graph, graph->data[i].y, h-2*circle_r-1) + circle_r;
+	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
+		gp_coord dx = transform_x(graph, graph->data[iter.idx].x, w-2*circle_r-1) + circle_r;
+		gp_coord dy = transform_y(graph, graph->data[iter.idx].y, h-2*circle_r-1) + circle_r;
 
 		gp_fill_circle(pix, dx, dy, circle_r, col);
 	}
@@ -90,16 +92,17 @@ static void render_fill_graph(struct gp_widget_graph *graph,
                               gp_pixmap *pix, gp_size w, gp_size h,
                               const gp_widget_render_ctx *ctx)
 {
-	gp_coord poly[graph->data_points * 2 + 4];
+	gp_coord poly[gp_cbuffer_used(&graph->data_idx) * 2 + 4];
 	gp_pixel col = ctx->colors[graph->color];
-	size_t i = 0, pos = 1;
+	gp_cbuffer_iter iter;
+	size_t pos = 1;
 
 	poly[0] = 0;
 	poly[1] = h - 1;
 
-	for (i = graph->data_first; i != graph->data_last; i = (i+1) % graph->data_points) {
-		poly[2 * pos] = transform_x(graph, graph->data[i].x, w - 1);
-		poly[2 * pos + 1] = transform_y(graph, graph->data[i].y, h - 1);
+	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
+		poly[2 * pos] = transform_x(graph, graph->data[iter.idx].x, w - 1);
+		poly[2 * pos + 1] = transform_y(graph, graph->data[iter.idx].y, h - 1);
 		pos++;
 	}
 
@@ -144,13 +147,15 @@ static void render(gp_widget *self, const gp_offset *offset,
 }
 
 enum keys {
-	H,
-	W,
+	MAX_DATA_POINTS,
+	MIN_H,
+	MIN_W,
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("h", GP_JSON_VOID),
-	GP_JSON_OBJ_ATTR("w", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR("max_data_points", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("min_w", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR("min_w", GP_JSON_VOID),
 };
 
 static const gp_json_obj obj_filter = {
@@ -162,16 +167,23 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 {
 	gp_widget_size w = {};
 	gp_widget_size h = {};
+	size_t data_points = 100;
 
 	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
-		case H:
+		case MAX_DATA_POINTS:
+			if (val->val_int <= 0)
+				gp_json_warn(json, "data_points must be > 0!");
+			else
+				data_points = val->val_int;
+		break;
+		case MIN_H:
 			switch (val->type) {
 			case GP_JSON_INT:
 				if (val->val_int < 0)
-					gp_json_warn(json, "Size must be > 0!");
+					gp_json_warn(json, "Size must be >= 0!");
 				else
 					h.px = val->val_int;
 			break;
@@ -183,11 +195,11 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 				gp_json_warn(json, "Invalid size type!");
 			}
 		break;
-		case W:
+		case MIN_W:
 			switch (val->type) {
 			case GP_JSON_INT:
 				if (val->val_int < 0)
-					gp_json_warn(json, "Size must be > 0!");
+					gp_json_warn(json, "Size must be >= 0!");
 				else
 					w.px = val->val_int;
 			break;
@@ -202,7 +214,7 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 		}
 	}
 
-	return gp_widget_pixmap_new(w, h, NULL, NULL);
+	return gp_widget_graph_new(w, h, NULL, NULL, data_points);
 }
 
 struct gp_widget_ops gp_widget_graph_ops = {
@@ -237,29 +249,30 @@ gp_widget *gp_widget_graph_new(gp_widget_size min_w, gp_widget_size min_h,
 
 	ret->graph->min_w = min_w;
 	ret->graph->min_h = min_h;
-	ret->graph->data_first = 0;
-	ret->graph->data_last = 0;
-	ret->graph->data_points = max_data_points;
+
+	gp_cbuffer_init(&ret->graph->data_idx, max_data_points);
 
 	return ret;
 }
 
 static void new_min_max(struct gp_widget_graph *graph)
 {
-	size_t i;
+	gp_cbuffer_iter iter;
 
-	graph->min_x = graph->data[graph->data_first].x;
-	graph->max_x = graph->data[graph->data_first].x;
+	size_t first = gp_cbuffer_first(&graph->data_idx);
+
+	graph->min_x = graph->data[first].x;
+	graph->max_x = graph->data[first].x;
 
 	if (!graph->min_y_fixed)
-		graph->min_y = graph->data[graph->data_first].y;
+		graph->min_y = graph->data[first].y;
 
 	if (!graph->max_y_fixed)
-		graph->max_y = graph->data[graph->data_first].y;
+		graph->max_y = graph->data[first].y;
 
-	for (i = graph->data_first; i != graph->data_last; i = (i + 1) % graph->data_points) {
-		double x = graph->data[i].x;
-		double y = graph->data[i].y;
+	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
+		double x = graph->data[iter.idx].x;
+		double y = graph->data[iter.idx].y;
 
 		graph->min_x = GP_MIN(graph->min_x, x);
 		graph->max_x = GP_MAX(graph->max_x, x);
@@ -299,15 +312,10 @@ void gp_widget_graph_point_add(gp_widget *self, double x, double y)
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
-	size_t pos = graph->data_last;
+	size_t pos = gp_cbuffer_append(&graph->data_idx);
 
 	graph->data[pos].x = x;
 	graph->data[pos].y = y;
-
-	graph->data_last = (graph->data_last + 1) % graph->data_points;
-
-	if (graph->data_last == graph->data_first)
-		graph->data_first = (graph->data_first + 1) % graph->data_points;
 
 	new_min_max(graph);
 

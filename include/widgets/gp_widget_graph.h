@@ -9,6 +9,7 @@
 #ifndef GP_WIDGET_GRAPH_H
 #define GP_WIDGET_GRAPH_H
 
+#include <utils/gp_cbuffer.h>
 #include <widgets/gp_widget_types.h>
 #include <widgets/gp_widget_size_units.h>
 
@@ -44,9 +45,7 @@ struct gp_widget_graph {
 	/* Graph data */
 	enum gp_widget_graph_type graph_type;
 	enum gp_widgets_color color;
-	size_t data_points;
-	size_t data_first;
-	size_t data_last;
+	gp_cbuffer data_idx;
 	struct gp_widget_graph_point *data;
 };
 
