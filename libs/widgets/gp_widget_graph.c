@@ -52,7 +52,7 @@ static void render_line_graph(struct gp_widget_graph *graph,
 	gp_coord px = transform_x(graph, graph->data[first].x, w-2*circle_r-1) + circle_r;
 	gp_coord py = transform_y(graph, graph->data[first].y, h-2*circle_r-1) + circle_r;
 
-	GP_CBUFFER_FOREACH_RANGE(&graph->data_idx, &iter, 1, gp_cbuffer_used(&graph->data_idx)-1) {
+	GP_CBUFFER_FORRANGE(&graph->data_idx, &iter, 1, gp_cbuffer_used(&graph->data_idx)-1) {
 		gp_coord dx = transform_x(graph, graph->data[iter.idx].x, w-2*circle_r-1) + circle_r;
 		gp_coord dy = transform_y(graph, graph->data[iter.idx].y, h-2*circle_r-1) + circle_r;
 

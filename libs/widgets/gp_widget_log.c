@@ -80,7 +80,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	size_t count = iter.cnt;
 	size_t first = gp_cbuffer_used(&log->log) - count;
 
-	GP_CBUFFER_FOREACH_RANGE(&log->log, &iter, first, count) {
+	GP_CBUFFER_FORRANGE(&log->log, &iter, first, count) {
 		const char *line = log->logs[iter.idx];
 		size_t line_len = strlen(line);
 
