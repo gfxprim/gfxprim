@@ -35,7 +35,7 @@ static int graph_type_on_event(gp_widget_event *ev)
 
 	size_t type = gp_widget_choice_sel_get(ev->self);
 
-	gp_widget_graph_type_set(graph, type);
+	gp_widget_graph_style_set(graph, type);
 
 	return 0;
 }
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 	                                       NULL, NULL, 50);
 	gp_widget *grid = gp_widget_grid_new(1, 2, 0);
 	gp_widget *hbox = gp_widget_grid_new(6, 1, 0);
-	gp_widget *graph_type = gp_widget_spinbutton_new(gp_widget_graph_type_names, GP_WIDGET_GRAPH_TYPE_MAX, 0);
+	gp_widget *graph_type = gp_widget_spinbutton_new(gp_widget_graph_style_names, GP_WIDGET_GRAPH_STYLE_MAX, 0);
 	gp_widget *pause_btn = gp_widget_button_new(NULL, GP_BUTTON_PAUSE);
 	gp_widget *max_y_spinner = gp_widget_spinner_new(1, 10, 5);
 	gp_widget *min_y_spinner = gp_widget_spinner_new(-5, 0, 0);
@@ -118,10 +118,7 @@ int main(int argc, char *argv[])
 	grid->align = GP_FILL;
 	graph->align = GP_FILL;
 
-	graph->graph->min_y_fixed = 1;
-	graph->graph->max_y_fixed = 1;
-	graph->graph->min_y = 0;
-	graph->graph->max_y = 5;
+	gp_widget_graph_yrange_set(graph, 0, 5);
 
 	graph->graph->color = GP_WIDGETS_COL_BLUE;
 

@@ -131,7 +131,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_sub_pixmap(ctx->buf, &pix, x, y, w, h);
 
-	switch (graph->graph_type) {
+	switch (graph->graph_style) {
 	case GP_WIDGET_GRAPH_POINT:
 		render_point_graph(graph, &pix, w, h, ctx);
 	break;
@@ -142,20 +142,30 @@ static void render(gp_widget *self, const gp_offset *offset,
 		render_fill_graph(graph, &pix, w, h, ctx);
 	break;
 	default:
-		GP_WARN("Invalid graph type %i", graph->graph_type);
+		GP_WARN("Invalid graph type %i", graph->graph_style);
 	}
 }
 
+const char *gp_widget_graph_style_names[GP_WIDGET_GRAPH_STYLE_MAX] = {
+	"point",
+	"line",
+	"fill",
+};
+
 enum keys {
+	COLOR,
 	MAX_DATA_POINTS,
 	MIN_H,
 	MIN_W,
+	STYLE,
 };
 
 static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("color", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("max_data_points", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("min_h", GP_JSON_VOID),
 	GP_JSON_OBJ_ATTR("min_w", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR("style", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {
@@ -163,16 +173,37 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
+static enum gp_widget_graph_style str_to_style(const char *style)
+{
+	size_t i;
+
+	for (i = 0; i < GP_WIDGET_GRAPH_STYLE_MAX; i++) {
+		if (!strcmp(style, gp_widget_graph_style_names[i]))
+			return i;
+	}
+
+	return GP_WIDGET_GRAPH_STYLE_MAX;
+}
+
 static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	gp_widget_size w = {};
 	gp_widget_size h = {};
 	size_t data_points = 100;
+	enum gp_widget_graph_style style = GP_WIDGET_GRAPH_STYLE_MAX;
+	int color = GP_WIDGETS_COL_TEXT;
 
 	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
+		case COLOR:
+			color = gp_widgets_color_name_idx(val->val_str);
+			if (color < 0) {
+				gp_json_warn(json, "Invalid color '%s'", val->val_str);
+				color = GP_WIDGETS_COL_TEXT;
+			}
+		break;
 		case MAX_DATA_POINTS:
 			if (val->val_int <= 0)
 				gp_json_warn(json, "data_points must be > 0!");
@@ -211,10 +242,25 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 				gp_json_warn(json, "Invalid size type!");
 			}
 		break;
+		case STYLE:
+			style = str_to_style(val->val_str);
+			if (style == GP_WIDGET_GRAPH_STYLE_MAX)
+				gp_json_warn(json, "Invalid graph style");
+		break;
 		}
 	}
 
-	return gp_widget_graph_new(w, h, NULL, NULL, data_points);
+	gp_widget *ret = gp_widget_graph_new(w, h, NULL, NULL, data_points);
+
+	if (!ret)
+		return NULL;
+
+	if (style != GP_WIDGET_GRAPH_STYLE_MAX)
+		ret->graph->graph_style = style;
+
+	ret->graph->color = color;
+
+	return ret;
 }
 
 struct gp_widget_ops gp_widget_graph_ops = {
@@ -283,26 +329,20 @@ static void new_min_max(struct gp_widget_graph *graph)
 	}
 }
 
-const char *gp_widget_graph_type_names[GP_WIDGET_GRAPH_TYPE_MAX] = {
-	"point",
-	"line",
-	"fill",
-};
-
-void gp_widget_graph_type_set(gp_widget *self, enum gp_widget_graph_type type)
+void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
-	if (type >= GP_WIDGET_GRAPH_TYPE_MAX) {
-		GP_WARN("Invalid graph type %i\n", type);
+	if (style >= GP_WIDGET_GRAPH_STYLE_MAX) {
+		GP_WARN("Invalid graph style %i\n", style);
 		return;
 	}
 
-	if (graph->graph_type == type)
+	if (graph->graph_style == style)
 		return;
 
-	graph->graph_type = type;
+	graph->graph_style = style;
 
 	gp_widget_redraw(self);
 }
@@ -320,4 +360,55 @@ void gp_widget_graph_point_add(gp_widget *self, double x, double y)
 	new_min_max(graph);
 
 	gp_widget_redraw(self);
+}
+
+void gp_widget_graph_yrange_set(gp_widget *self, double min_y, double max_y)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = self->graph;
+
+	graph->min_y = min_y;
+	graph->max_y = max_y;
+
+	graph->min_y_fixed = 1;
+	graph->max_y_fixed = 1;
+}
+
+void gp_widget_graph_ymin_set(gp_widget *self, double min_y)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = self->graph;
+
+	graph->min_y = min_y;
+
+	graph->min_y_fixed = 1;
+}
+
+void gp_widget_graph_ymax_set(gp_widget *self, double max_y)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = self->graph;
+
+	graph->max_y = max_y;
+
+	graph->max_y_fixed = 1;
+}
+
+void gp_widget_graph_yrange_clear(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = self->graph;
+
+	graph->min_y_fixed = 0;
+	graph->max_y_fixed = 0;
+
+	new_min_max(graph);
+}
+
+void gp_widget_graph_color_set(gp_widget *self, enum gp_widgets_color color)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = self->graph;
+
+	graph->color = color;
 }
