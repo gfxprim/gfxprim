@@ -154,7 +154,7 @@ enum keys {
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("max_data_points", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("min_w", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR("min_h", GP_JSON_VOID),
 	GP_JSON_OBJ_ATTR("min_w", GP_JSON_VOID),
 };
 
