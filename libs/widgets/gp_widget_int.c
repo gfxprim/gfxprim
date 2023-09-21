@@ -375,12 +375,14 @@ static void spin_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_even
 static void spin_min(gp_widget *self)
 {
 	self->spin->val = self->spin->min;
+	gp_widget_send_widget_event(self, 0);
 	gp_widget_redraw(self);
 }
 
 static void spin_max(gp_widget *self)
 {
 	self->spin->val = self->spin->max;
+	gp_widget_send_widget_event(self, 0);
 	gp_widget_redraw(self);
 }
 
