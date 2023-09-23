@@ -11,6 +11,7 @@
 extern const gp_font_face gp_default_font;
 
 extern const gp_font_family font_family_gfxprim;
+extern const gp_font_family font_family_haxor_medium_10;
 extern const gp_font_family font_family_haxor_medium_12;
 extern const gp_font_family font_family_haxor_narrow_15;
 extern const gp_font_family font_family_haxor_narrow_16;
@@ -22,6 +23,7 @@ extern const gp_font_family font_family_square;
 
 static const gp_font_family *const font_families[] = {
 	&font_family_gfxprim,
+	&font_family_haxor_medium_10,
 	&font_family_haxor_medium_12,
 	&font_family_haxor_narrow_15,
 	&font_family_haxor_narrow_16,
