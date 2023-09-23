@@ -19,6 +19,7 @@ FONTS_DIR="../../../fonts/"
 
 fonts:
 	export LICENSE="SPDX-License-Identifier: LGPL-2.1-or-later" && \
+	./bdf2c.pl $(FONTS_DIR)/HaxorMedium-12-utf.bdf haxor_medium_12 haxor-medium-12 11 > gp_haxor_medium_12.c && \
 	HIRAGANA=1 KATAKANA=1 GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-15-utf.bdf haxor_narrow_15 haxor-narrow-15 14 > gp_haxor_narrow_15.c && \
 	GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-16-utf.bdf haxor_narrow_16 haxor-narrow-16 15 > gp_haxor_narrow_16.c && \
 	GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-17-utf.bdf haxor_narrow_17 haxor-narrow-17 16 > gp_haxor_narrow_17.c && \
