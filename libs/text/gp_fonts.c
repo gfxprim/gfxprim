@@ -63,12 +63,18 @@ const gp_font_face *gp_font_family_face_lookup(const gp_font_family *family, uin
 		family = gp_font_family_default;
 
 	for (f = family->fonts; *f; f++) {
-		if ((*f)->style == GP_FONT_STYLE(style))
+		if ((*f)->style == GP_FONT_STYLE(style)) {
+			GP_DEBUG(3, "Found style %i", style);
 			return *f;
+		}
 	}
 
-	if (style & GP_FONT_FALLBACK)
+	if (style & GP_FONT_FALLBACK) {
+		GP_DEBUG(3, "Style not found, choosing fallback");
 		return family->fonts[0];
+	}
+
+	GP_DEBUG(3, "Style not found!");
 
 	return NULL;
 }
@@ -84,6 +90,8 @@ const gp_font_face *gp_font_face_lookup(const char *family_name, uint8_t style)
 		GP_DEBUG(3, "Font family '%s' not found; using default font", family_name);
 		return &gp_default_font;
 	}
+
+	GP_DEBUG(3, "Font family not found!");
 
 	return NULL;
 }
