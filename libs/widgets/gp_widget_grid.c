@@ -542,7 +542,7 @@ static int try_focus(gp_widget *self, unsigned int col, unsigned int row, int se
 	GP_DEBUG(4, "Trying to focus widget %p (%s) %ux%u",
 		 w, gp_widget_type_id(w), col, row);
 
-	if (!gp_widget_ops_render_focus(widget_grid_get(self, col, row), sel))
+	if (!gp_widget_ops_render_focus(w, GP_FOCUS_IN))
 		return 0;
 
 	gp_widget_ops_render_focus(widget_grid_focused(self), GP_FOCUS_OUT);
