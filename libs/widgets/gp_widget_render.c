@@ -76,7 +76,7 @@ struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.font_big_bold = &font_big_bold,
 	.font_mono = &font_mono,
 	.font_mono_bold = &font_mono_bold,
-	.padd = 10,
+	.padd = 4,
 	.fr_thick = 1,
 	.cur_thick = 1,
 	.fr_round = 3,
@@ -100,6 +100,7 @@ static const char *input_str;
 static void update_ctx_sizes(void)
 {
 	ctx.padd = 2 * gp_text_descent(ctx.font);
+	ctx.font_size = gp_text_height(ctx.font);
 
 	ctx.fr_thick = ctx.font_size / 25 + 1;
 	ctx.fr_round = ctx.font_size / 15 + 3;
