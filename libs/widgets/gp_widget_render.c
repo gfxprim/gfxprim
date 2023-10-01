@@ -172,7 +172,7 @@ static void init_fonts(gp_backend *backend)
 		return;
 	}
 
-	if (backend->dpi) {
+	if (backend->dpi && !str_font_size) {
 		ctx.font_size = gp_dpi_mm_to_px(backend->dpi, ctx.font_size_mm);
 		GP_DEBUG(1, "Font size %.2fmm is %upx", ctx.font_size_mm, ctx.font_size);
 	}
