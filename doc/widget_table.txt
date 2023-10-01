@@ -72,9 +72,26 @@ If any of the table columns is sortable the 'sortable' flag has to be set in
 the corresponding column description and the 'col_ops->sort()' callback must
 be implemented for the particular column.
 
+.Table JSON attributes
+[cols=",,,3",options="header"]
+|==================================================================
+| Attribute     |  Type  | Default | Description
+|  +col_ops+    | string |         | An column ops id.
+|  +header+     | array  |         | Array of table header objects.
+|  +min_rows+   |  int   |         | Minimal number of table rows.
+|==================================================================
 
-Table widget events
-~~~~~~~~~~~~~~~~~~~
+.Table Header JSON attributes
+[cols=",,,3",options="header"]
+|=================================================================================
+|  Attribute    |  Type  | Default | Description
+|    +fill+     |   int  |    0    | Column fill coeficient.
+|     +id+      | string |         | Column id to match in gp_widget_table_col_dsc
+|    +label+    | string |         | If set it's the the column heading label.
+|   +min_size+  |   int  |         | Minimal column width.
+|    +order+    | string |         | If column is sortable, it can be asc or desc.
+|    +tattr+    | tattr  |  bold   | Column heading label text attribute.
+|=================================================================================
 
 .Table widget events
 [cols=",3",options="header"]
