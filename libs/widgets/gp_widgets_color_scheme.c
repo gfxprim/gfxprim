@@ -121,6 +121,48 @@ gp_pixel gp_widgets_color(const gp_widget_render_ctx *ctx, enum gp_widgets_color
 	return ctx->colors[color];
 }
 
+static void widgets_color_scheme_load_1bpp(void)
+{
+	gp_pixel fg, bg;
+
+	switch (ctx.color_scheme) {
+	case GP_WIDGET_COLOR_SCHEME_LIGHT:
+		fg = 0;
+		bg = 1;
+	break;
+	case GP_WIDGET_COLOR_SCHEME_DARK:
+		fg = 1;
+		bg = 0;
+	break;
+	case GP_WIDGET_COLOR_SCHEME_DEFAULT:
+	break;
+	}
+
+	ctx.text_color = fg;
+	ctx.alert_color = fg;
+	ctx.warn_color = fg;
+	ctx.accept_color = fg;
+	ctx.col_disabled = fg;
+	ctx.hl_color = fg;
+	ctx.sel_color = fg;
+
+	ctx.bg_color = bg;
+	ctx.fg_color = bg;
+}
+
+static void widgets_color_scheme_load_rgb(struct color_scheme *scheme)
+{
+	RGB_TO_PIXEL(ctx, scheme, text_color, GP_WIDGETS_COL_TEXT);
+	RGB_TO_PIXEL(ctx, scheme, bg_color, GP_WIDGETS_COL_BG);
+	RGB_TO_PIXEL(ctx, scheme, fg_color, GP_WIDGETS_COL_FG);
+	RGB_TO_PIXEL(ctx, scheme, fg2_color, GP_WIDGETS_COL_HIGHLIGHT);
+	RGB_TO_PIXEL(ctx, scheme, sel_color, GP_WIDGETS_COL_SELECT);
+	RGB_TO_PIXEL(ctx, scheme, alert_color, GP_WIDGETS_COL_ALERT);
+	RGB_TO_PIXEL(ctx, scheme, warn_color, GP_WIDGETS_COL_WARN);
+	RGB_TO_PIXEL(ctx, scheme, accept_color, GP_WIDGETS_COL_ACCEPT);
+	RGB_TO_PIXEL(ctx, scheme, disabled_color, GP_WIDGETS_COL_DISABLED);
+}
+
 void __attribute__((visibility ("hidden"))) widgets_color_scheme_load(void)
 {
 	struct color_scheme *scheme = NULL;
@@ -140,16 +182,14 @@ void __attribute__((visibility ("hidden"))) widgets_color_scheme_load(void)
 		return;
 	}
 
-	/* Theme colors */
-	RGB_TO_PIXEL(ctx, scheme, text_color, GP_WIDGETS_COL_TEXT);
-	RGB_TO_PIXEL(ctx, scheme, bg_color, GP_WIDGETS_COL_BG);
-	RGB_TO_PIXEL(ctx, scheme, fg_color, GP_WIDGETS_COL_FG);
-	RGB_TO_PIXEL(ctx, scheme, fg2_color, GP_WIDGETS_COL_HIGHLIGHT);
-	RGB_TO_PIXEL(ctx, scheme, sel_color, GP_WIDGETS_COL_SELECT);
-	RGB_TO_PIXEL(ctx, scheme, alert_color, GP_WIDGETS_COL_ALERT);
-	RGB_TO_PIXEL(ctx, scheme, warn_color, GP_WIDGETS_COL_WARN);
-	RGB_TO_PIXEL(ctx, scheme, accept_color, GP_WIDGETS_COL_ACCEPT);
-	RGB_TO_PIXEL(ctx, scheme, disabled_color, GP_WIDGETS_COL_DISABLED);
+	switch (gp_pixel_size(ctx.pixel_type)) {
+	case 1:
+		widgets_color_scheme_load_1bpp();
+	break;
+	default:
+		widgets_color_scheme_load_rgb(scheme);
+	break;
+	}
 
 	/* 16 colors */
 	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BLACK, 0x00, 0x00, 0x00);
