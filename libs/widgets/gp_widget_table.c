@@ -74,14 +74,14 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 	if (tbl->header) {
 		for (i = 0; i < tbl->cols; i++)
-			tbl->cols_w[i] = header_min_w(tbl, ctx, i);
+			tbl->cols_w[i].min_size = header_min_w(tbl, ctx, i);
 	}
 
 	for (i = 0; i < tbl->cols; i++) {
 		unsigned int col_size;
 		col_size = gp_text_max_width(ctx->font, tbl->header[i].col_min_size);
-		tbl->cols_w[i] = GP_MAX(tbl->cols_w[i], col_size);
-		sum_cols_w += tbl->cols_w[i];
+		tbl->cols_w[i].min_size = GP_MAX(tbl->cols_w[i].min_size, col_size);
+		sum_cols_w += tbl->cols_w[i].min_size;
 	}
 
 	return sum_cols_w + (2 * tbl->cols) * ctx->padd;
@@ -134,7 +134,7 @@ static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int n
 	(void)new_wh;
 
 	for (i = 0; i < tbl->cols; i++) {
-		sum_cols_w += tbl->cols_w[i];
+		sum_cols_w += tbl->cols_w[i].min_size;
 		sum_fills += tbl->header[i].col_fill;
 	}
 
@@ -145,7 +145,7 @@ static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int n
 	unsigned int diff = self->w - table_w;
 
 	for (i = 0; i < tbl->cols; i++)
-		tbl->cols_w[i] += tbl->header[i].col_fill * (diff/sum_fills);
+		tbl->cols_w[i].size = tbl->cols_w[i].min_size + tbl->header[i].col_fill * (diff/sum_fills);
 }
 
 static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
@@ -162,11 +162,11 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 		return 0;
 
 	for (i = 0; i < tbl->cols; i++) {
-		unsigned int ex = cx + tbl->cols_w[i];
+		unsigned int ex = cx + tbl->cols_w[i].size;
 
 		if (col_is_sortable(tbl, i)) {
 			gp_size sym_size = text_a/3;
-			gp_size sx = cx + tbl->cols_w[i] - ctx->padd;
+			gp_size sx = cx + tbl->cols_w[i].size - ctx->padd;
 			gp_size sy = cy + text_a/2;
 
 			if (i == tbl->sorted_by_col) {
@@ -193,7 +193,7 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 			            halign | GP_VALIGN_BELOW, ctx->text_color, ctx->bg_color, header[i].label);
 		}
 
-		cx += tbl->cols_w[i] + ctx->padd;
+		cx += tbl->cols_w[i].size + ctx->padd;
 
 		if (i < tbl->cols - 1) {
 			gp_vline_xyh(ctx->buf, cx, y+1,
@@ -287,7 +287,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int cx = x + ctx->padd;
 
 	for (j = 0; j < tbl->cols-1; j++) {
-		cx += tbl->cols_w[j] + ctx->padd;
+		cx += tbl->cols_w[j].size + ctx->padd;
 		gp_vline_xyy(ctx->buf, cx, cy+1, self->y + offset->y + self->h - 2, ctx->bg_color);
 		cx += ctx->padd;
 	}
@@ -327,10 +327,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 				if (get_cell(self, &cell, j)) {
 					unsigned int by = cy + text_a - ctx->padd/4;
-					render_cell(&cell, ctx, cx, by, tbl->cols_w[j], text_col, bg_col);
+					render_cell(&cell, ctx, cx, by, tbl->cols_w[j].size, text_col, bg_col);
 				}
 
-				cx += tbl->cols_w[j] + ctx->padd;
+				cx += tbl->cols_w[j].size + ctx->padd;
 
 			//	if (j < tbl->cols - 1) {
 			//		gp_vline_xyh(ctx->buf, cx, cy,
@@ -492,7 +492,7 @@ static int header_click(gp_widget *self, const gp_widget_render_ctx *ctx, unsign
 
 	//TODO: inverval division?
 	for (i = 0; i < tbl->cols-1; i++) {
-		cx += tbl->cols_w[i] + 2 * ctx->padd;
+		cx += tbl->cols_w[i].size + 2 * ctx->padd;
 
 		if (x <= cx)
 			break;
@@ -933,7 +933,7 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	size_t size = sizeof(struct gp_widget_table);
 	gp_widget *ret;
 
-	size += cols * sizeof(unsigned int);
+	size += cols * sizeof(gp_widget_table_col);
 
 	ret = gp_widget_new(GP_WIDGET_TABLE, GP_WIDGET_CLASS_NONE, size);
 	if (!ret)

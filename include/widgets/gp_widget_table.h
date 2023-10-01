@@ -76,6 +76,14 @@ typedef struct gp_widget_table_header {
 	unsigned int col_fill;
 } gp_widget_table_header;
 
+/**
+ * Column size and minimal size in pixels
+ */
+typedef struct gp_widget_table_col {
+	unsigned int size;
+	unsigned int min_size;
+} gp_widget_table_col;
+
 typedef struct gp_widget_table {
 	unsigned int cols;
 	unsigned int min_rows;
@@ -96,7 +104,7 @@ typedef struct gp_widget_table {
 	unsigned int start_row;
 	unsigned int last_rows;
 
-	unsigned int *cols_w;
+	gp_widget_table_col *cols_w;
 
 	void *priv;
 
