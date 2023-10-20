@@ -63,7 +63,8 @@ int gp_spi_write(int spi_fd, uint8_t byte)
 	return 0;
 }
 
-int gp_spi_transfer(int spi_fd, uint8_t *tx_buf, uint8_t *rx_buf, size_t len)
+int gp_spi_transfer(int spi_fd, const uint8_t *tx_buf,
+                    uint8_t *rx_buf, size_t len)
 {
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)tx_buf,

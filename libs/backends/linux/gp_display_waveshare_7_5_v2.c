@@ -227,7 +227,7 @@ gp_backend *gp_waveshare_7_5_v2_init(void)
 
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);
 
-	ret = gp_display_spi_init(&eink->spi, EINK_SPI_DEV, EINK_SPI_MODE, EINK_SPI_SPEED_HZ, &gpio_map_rpi);
+	ret = gp_display_spi_init(&eink->spi, EINK_SPI_DEV, EINK_SPI_MODE, EINK_SPI_SPEED_HZ, &gpio_map_rpi, 800, 480);
 	if (ret)
 		goto err1;
 

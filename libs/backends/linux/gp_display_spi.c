@@ -12,7 +12,7 @@
 
 int gp_display_spi_init(struct gp_display_spi *self,
                         const char *spi_dev, uint8_t mode, uint32_t speed,
-			struct gp_gpio_map *map)
+			struct gp_gpio_map *map, uint16_t w, uint16_t h)
 {
 	int ret;
 
@@ -28,6 +28,9 @@ int gp_display_spi_init(struct gp_display_spi *self,
 	}
 
 	self->gpio_map = map;
+
+	self->w = w;
+	self->h = h;
 
 	return 0;
 }
@@ -56,7 +59,7 @@ void gp_display_spi_data(struct gp_display_spi *self, uint8_t data)
 }
 
 void gp_display_spi_data_transfer(struct gp_display_spi *self,
-                                  uint8_t *tx_buf, uint8_t *rx_buf, size_t len)
+                                  const uint8_t *tx_buf, uint8_t *rx_buf, size_t len)
 {
 	gp_gpio_write(&self->gpio_map->dc, 1);
 	gp_spi_transfer(self->spi_fd, tx_buf, rx_buf, len);

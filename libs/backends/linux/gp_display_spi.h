@@ -23,13 +23,17 @@ struct gp_gpio_map {
 };
 
 struct gp_display_spi {
-	int spi_fd;
 	struct gp_gpio_map *gpio_map;
+
+	int spi_fd;
+
+	uint16_t w;
+	uint16_t h;
 };
 
 int gp_display_spi_init(struct gp_display_spi *self,
                         const char *spi_dev, uint8_t mode, uint32_t speed,
-			struct gp_gpio_map *map);
+			struct gp_gpio_map *map, uint16_t w, uint16_t h);
 
 void gp_display_spi_exit(struct gp_display_spi *self);
 
@@ -64,7 +68,7 @@ void gp_display_spi_data(struct gp_display_spi *self, uint8_t data);
  * @len The size of tx and rx buffers.
  */
 void gp_display_spi_data_transfer(struct gp_display_spi *self,
-                                  uint8_t *tx_buf, uint8_t *rx_buf, size_t len);
+                                  const uint8_t *tx_buf, uint8_t *rx_buf, size_t len);
 
 /**
  * @brief Sets up an GPIO as an interrupt source.

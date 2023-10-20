@@ -33,13 +33,14 @@ int gp_spi_write(int spi_fd, uint8_t byte);
  * @brief Runs an SPI transfer.
  *
  * @spi_fd An SPI bus file descriptor.
- * @rx_buf A buffer for received data, may be NULL.
  * @tx_buf A buffer for transfered data, may be NULL.
+ * @rx_buf A buffer for received data, may be NULL.
  * @size The size of the rx_buf and tx_buf buffers.
  *
  * @return Zero on success, non-zero otherwise.
  */
-int gp_spi_transfer(int spi_fd, uint8_t *rx_buf, uint8_t *tx_buf, size_t size);
+int gp_spi_transfer(int spi_fd, const uint8_t *tx_buf,
+                    uint8_t *rx_buf, size_t size);
 
 /**
  * @brief Closes SPI bus.
