@@ -501,7 +501,9 @@ int gp_linux_input_new(const char *dev_path, gp_backend *backend)
 
 	int fd = open(dev_path, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
+		int err = errno;
 		GP_FATAL("Failed to open '%s': %s", dev_path, strerror(errno));
+		errno = err;
 		return 1;
 	}
 

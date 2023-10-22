@@ -73,8 +73,27 @@ static int input_hotplug_read(gp_fd *fd)
 			         ev->name);
 
 			if (ev->mask & IN_CREATE) {
+				int retries = 100;
+
 				GP_DEBUG(4, "Plugging new device '%s'.", str);
-				gp_linux_input_new(str, hotplug->backend);
+
+				//TODO: fire up a timer for the retry!
+				for (;;) {
+					int ret = gp_linux_input_new(str, hotplug->backend);
+
+					if (!ret)
+						break;
+
+					if (errno != EPERM)
+						break;
+
+					if (retries-- <= 0) {
+						GP_WARN("Timeouted while waiting for '%s'", str);
+						break;
+					}
+
+					usleep(10000);
+				}
 			}
 
 			if (ev->mask & IN_DELETE) {
