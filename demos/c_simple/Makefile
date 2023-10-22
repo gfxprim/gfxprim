@@ -29,7 +29,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      debug_handler gaussian_noise version pretty_print timers\
      zip_container backend_timers_example memory_io data_storage\
      vector matrix proxy_backend bbox backend_tasks_example json_writer\
-     drm_test draw_glyph dpi_check
+     drm_test draw_glyph dpi_check unicodetest
 
 ifneq ($(SDL_CONFIG),)
 APPS+=SDL_glue
@@ -63,6 +63,7 @@ fileview: LDLIBS+=-lgfxprim-backends
 linetest: LDLIBS+=-lgfxprim-backends -lm
 randomshapetest: LDLIBS+=-lgfxprim-backends
 fonttest: LDLIBS+=-lgfxprim-backends
+unicodetest: LDLIBS+=-lgfxprim-backends
 textaligntest: LDLIBS+=-lgfxprim-backends
 loaders_register: LDLIBS+=-lgfxprim-loaders
 gaussian_noise: LDLIBS+=-lgfxprim-loaders

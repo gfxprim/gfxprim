@@ -43,3 +43,4 @@ json_writer
 drm_test
 draw_glyph
 dpi_check
+unicodetest
