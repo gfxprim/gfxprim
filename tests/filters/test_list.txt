@@ -4,3 +4,4 @@ api_coverage.gen
 filters_compare.gen
 filter_mirror_h
 linear_convolution
+dither_bench

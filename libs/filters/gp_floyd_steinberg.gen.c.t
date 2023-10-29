@@ -1,8 +1,8 @@
 @ include source.t
 /*
- * Floyd Steinberg dithering RGB888 -> any pixel
+ * Floyd Steinberg dithering -> any pixel
  *
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 #include <string.h>
 #include <errno.h>
@@ -11,21 +11,37 @@
 #include <core/gp_pixel.h>
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_convert.h>
-#include "core/gp_clamp.h"
+#include <core/gp_clamp.h>
 #include <filters/gp_filter.h>
 #include <filters/gp_dither.h>
 
-@ def distribute_error(errors, x, y, w, err):
-if ({{ x }} + 1 < {{ w }})
-	{{ errors }}[{{ y }}%2][{{ x }}+1] += 7 * {{ err }} / 16;
+@ def distribute_error_fs(c, x, y, err):
+errors_{{ c.name }}[{{ y }}%2][{{ x }}+2] += 7 * {{ err }};
 
-if ({{ x }} > 1)
-	{{ errors }}[!({{ y }}%2)][{{ x }}-1] += 3 * {{ err }} / 16;
+errors_{{ c.name }}[!({{ y }}%2)][{{ x }}] += 3 * {{ err }};
 
-{{ errors }}[!({{ y }}%2)][{{ x }}] += 5 * {{ err }} / 16;
+errors_{{ c.name }}[!({{ y }}%2)][{{ x }}+1] += 5 * {{ err }};
 
-if ({{ x }} + 1 < {{ w }})
-	{{ errors }}[!({{ y }}%2)][{{ x }}+1] += {{ err }} / 16;
+errors_{{ c.name }}[!({{ y }}%2)][{{ x }}+2] += {{ err }};
+@ end
+@
+@ def get_error(c, x, y):
+errors_{{ c.name }}[{{ y }} % 2][{{ x }} + 1] / 16
+@ end
+@
+@ def clear_errors(pt, w, y):
+@     for c in pt.chanslist:
+memset(errors_{{ c.name }}[{{ y }} % 2], 0, (2 + {{ w }}) * sizeof(uint32_t));
+@     end
+@ end
+@
+@ def def_errors(pt, w):
+@     for c in pt.chanslist:
+uint32_t errors_{{ c.name }}[2][{{ w }} + 2];
+@     end
+
+{@ clear_errors(pt, w, 0) @}
+{@ clear_errors(pt, w, 1) @}
 @ end
 @
 @ for pt in pixeltypes:
@@ -37,21 +53,14 @@ static int floyd_steinberg_to_{{ pt.name }}_raw(const gp_pixmap *src,
                                                 gp_pixmap *dst,
                                                 gp_progress_cb *callback)
 {
-@         for c in pt.chanslist:
-	float errors_{{ c.name }}[2][src->w];
-@         end
+	gp_coord x, y;
+
+	{@ def_errors(pt, 'src->w') @}
 
 	GP_DEBUG(1, "Floyd Steinberg %s to %s %ux%u",
 	            gp_pixel_type_name(src->pixel_type),
 	            gp_pixel_type_name(GP_PIXEL_{{ pt.name }}),
 		    src->w, src->h);
-
-	gp_coord x, y;
-
-@         for c in pt.chanslist:
-	memset(errors_{{ c.name }}[0], 0, src->w * sizeof(float));
-	memset(errors_{{ c.name }}[1], 0, src->w * sizeof(float));
-@         end
 
 	for (y = 0; y < (gp_coord)src->h; y++) {
 		for (x = 0; x < (gp_coord)src->w; x++) {
@@ -62,24 +71,24 @@ static int floyd_steinberg_to_{{ pt.name }}_raw(const gp_pixmap *src,
 
 @         for c in pt.chanslist:
 @             if pt.is_gray():
-			float val_{{ c.name }} = GP_PIXEL_GET_R_RGB888(pix) +
+			uint32_t val_{{ c.name }} = GP_PIXEL_GET_R_RGB888(pix) +
 			                       GP_PIXEL_GET_G_RGB888(pix) +
 			                       GP_PIXEL_GET_B_RGB888(pix);
 @             else:
-			float val_{{ c.name }} = GP_PIXEL_GET_{{ c.name }}_RGB888(pix);
+			uint32_t val_{{ c.name }} = GP_PIXEL_GET_{{ c.name }}_RGB888(pix);
 @             end
-			val_{{ c.name }} += errors_{{ c.name }}[y%2][x];
+			val_{{ c.name }} += {@ get_error(c, 'x', 'y') @};
 
-			float err_{{ c.name }} = val_{{ c.name }};
+			uint32_t err_{{ c.name }} = val_{{ c.name }};
 @             if pt.is_gray():
-			gp_pixel res_{{ c.name }} = {{ 2 ** c[2] - 1}} * val_{{ c.name }} / (3 * 255);
-			err_{{ c.name }} -= res_{{ c.name }} * (3 * 255) / {{ 2 ** c[2] - 1}};
+			gp_pixel res_{{ c.name }} = {{ c.max }} * val_{{ c.name }} / (3 * 255);
+			err_{{ c.name }} -= res_{{ c.name }} * (3 * 255) / {{ c.max }};
 @             else:
-			gp_pixel res_{{ c.name }} = {{ 2 ** c[2] - 1}} * val_{{ c.name }} / 255;
-			err_{{ c.name }} -= res_{{ c.name }} * 255 / {{ 2 ** c[2] - 1}};
+			gp_pixel res_{{ c.name }} = {{ c.max }} * val_{{ c.name }} / 255;
+			err_{{ c.name }} -= res_{{ c.name }} * 255 / {{ c.max }};
 @             end
 
-			{@ distribute_error('errors_' + c.name, 'x', 'y', '(gp_coord)src->w', 'err_' + c.name) @}
+			{@ distribute_error_fs(c, 'x', 'y', 'err_' + c.name) @}
 
 			GP_CLAMP_DOWN({{ 'res_' + c.name }}, {{ c.max }});
 @         end
@@ -93,9 +102,7 @@ static int floyd_steinberg_to_{{ pt.name }}_raw(const gp_pixmap *src,
 @         end
 		}
 
-@         for c in pt.chanslist:
-		memset(errors_{{ c.name }}[y%2], 0, src->w * sizeof(float));
-@         end
+		{@ clear_errors(pt, 'src->w', 'y') @}
 
 		if (gp_progress_cb_report(callback, y, src->h, src->w))
 			return 1;
@@ -147,7 +154,7 @@ gp_pixmap *gp_filter_floyd_steinberg_alloc(const gp_pixmap *src,
 
 	ret = gp_pixmap_alloc(src->w, src->h, pixel_type);
 
-	if (ret == NULL)
+	if (!ret)
 		return NULL;
 
 	if (floyd_steinberg(src, ret, callback)) {
