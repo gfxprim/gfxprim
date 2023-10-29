@@ -23,7 +23,7 @@ FILTER_FUNC(brightness);
 FILTER_FUNC(contrast);
 FILTER_FUNC(brightness_contrast);
 FILTER_FUNC(posterize);
-%include "gp_point.h"
+%include "gp_point.gen.h"
 
 /* Arithmetic filters */
 FILTER_FUNC(addition);
@@ -98,8 +98,10 @@ FILTER_FUNC(resize_cubic_int);
 
 /* Ditherings */
 FILTER_FUNC(floyd_steinberg);
+FILTER_FUNC(sierra);
+FILTER_FUNC(sierra_lite);
 FILTER_FUNC(hilbert_peano);
-%include "gp_dither.h"
+%include "gp_dither.gen.h"
 
 /* Laplace and Laplace Edge Sharpening */
 FILTER_FUNC(laplace);

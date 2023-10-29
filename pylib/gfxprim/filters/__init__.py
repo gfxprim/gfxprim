@@ -43,7 +43,7 @@ def _init(module):
 	       'floyd_steinberg', 'floyd_steinberg_alloc',
 	       'hilbert_peano', 'hilbert_peano_alloc',
 	       'sepia', 'sepia_alloc', 'sepia_ex', 'sepia_ex_alloc']:
-    extend_submodule(FiltersSubmodule, name, c_filters.__getattribute__('gp_filter_' + name))
+    extend_submodule(FiltersSubmodule, name, 'gp_filter_' + name)
 
   def array_to_kern(kernel, kernel_div):
     h = len(kernel)

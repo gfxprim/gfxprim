@@ -31,6 +31,7 @@
  */
 %include "gp_pixel.h"
 %include "gp_pixel.gen.h" /* Includes enum gp_pixel_type definition */
+%include "gp_pixel_alias.h"
 %include "gp_convert.h"
 %import "gp_convert.gen.h"
 %import "gp_convert_scale.gen.h"

@@ -5,6 +5,10 @@ def load(filename, callback=None):
   c = c_loaders.gp_load_image(filename, callback)
   return c
 
+def save(filename, callback=None):
+  "Save the image, guessing the type from the extension."
+  c_loaders.gp_save_image(filename, callback)
+
 def _init(module):
   "Extend Pixmap with loaders submodule"
 

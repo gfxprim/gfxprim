@@ -166,15 +166,15 @@ def _init(module):
 
   extend(_pixmap, name='_submodules')({})
 
-  old__getattr__ = _pixmap.__getattr__
-  def Pixmap__getattr__(self, name):
-    if name in _pixmap._submodules:
-      assert name in _available_submodules
-      return _pixmap._submodules[name](self)
-    if name in _available_submodules:
-      raise RuntimeError("GfxPrim submodule '%s' not loaded" % name)
-    return old__getattr__(self, name)
-  _pixmap.__getattr__ = Pixmap__getattr__
+ # old__getattr__ = _pixmap.__getattr__
+ # def Pixmap__getattr__(self, name):
+ #   if name in _pixmap._submodules:
+ #     assert name in _available_submodules
+ #     return _pixmap._submodules[name](self)
+ #   if name in _available_submodules:
+ #     raise RuntimeError("GfxPrim submodule '%s' not loaded" % name)
+ #   return old__getattr__(self, name)
+ # _pixmap.__getattr__ = Pixmap__getattr__
 
   # Import constants into a separate module
 
