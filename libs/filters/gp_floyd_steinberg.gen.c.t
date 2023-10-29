@@ -67,26 +67,22 @@ static int floyd_steinberg_to_{{ pt.name }}_raw(const gp_pixmap *src,
 			gp_pixel pix;
 
 			pix = gp_getpixel_raw(src, x, y);
+@         if pt.is_rgb():
 			pix = gp_pixel_to_RGB888(pix, src->pixel_type);
+@         end
 
 @         for c in pt.chanslist:
 @             if pt.is_gray():
-			uint32_t val_{{ c.name }} = GP_PIXEL_GET_R_RGB888(pix) +
-			                       GP_PIXEL_GET_G_RGB888(pix) +
-			                       GP_PIXEL_GET_B_RGB888(pix);
+			uint32_t val_{{ c.name }} = gp_pixel_to_G8(pix, src->pixel_type);
 @             else:
 			uint32_t val_{{ c.name }} = GP_PIXEL_GET_{{ c.name }}_RGB888(pix);
 @             end
 			val_{{ c.name }} += {@ get_error(c, 'x', 'y') @};
 
 			uint32_t err_{{ c.name }} = val_{{ c.name }};
-@             if pt.is_gray():
-			gp_pixel res_{{ c.name }} = {{ c.max }} * val_{{ c.name }} / (3 * 255);
-			err_{{ c.name }} -= res_{{ c.name }} * (3 * 255) / {{ c.max }};
-@             else:
+
 			gp_pixel res_{{ c.name }} = {{ c.max }} * val_{{ c.name }} / 255;
 			err_{{ c.name }} -= res_{{ c.name }} * 255 / {{ c.max }};
-@             end
 
 			{@ distribute_error_fs(c, 'x', 'y', 'err_' + c.name) @}
 
