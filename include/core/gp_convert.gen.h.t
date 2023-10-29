@@ -27,6 +27,11 @@
 	GP_SET_BITS({{ K.off }}+o2, {{ K.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ K.size }}({{ max_val }} - gp_k)); \
 @ end
 @
+@ def cmyk_chan_to_rgb_chan(pt_cmyk, c_cmyk, c_rgb):
+@     K = pt_cmyk.chans['K']
+(({{ c_rgb.C_max }} * ({{ K.C_max }} - GP_GET_BITS({{ K.off }}+o1, {{ K.size }}, p1)) * \
+ ({{ c_cmyk.C_max }} - GP_GET_BITS({{ c_cmyk.off }}+o1, {{ c_cmyk.size }}, p1)))) / ({{ K.C_max }} * {{ c_cmyk.C_max }}) \
+@
 @ def pixel_type_to_type(pt1, pt2):
 /*** {{ pt1.name }} -> {{ pt2.name }} ***
  * macro reads p1 ({{ pt1.name }} at bit-offset o1)
@@ -69,11 +74,18 @@
 @                     V = pt1.chans['Y']
 @                 end
 	GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2,\
-                    (({{ c2.C_max }} * ({{ K.C_max }} - GP_GET_BITS({{ K.off }}+o1, {{ K.size }}, p1)) * \
-                     ({{ V.C_max }} - GP_GET_BITS({{ V.off }}+o1, {{ V.size }}, p1)))) / ({{ K.C_max }} * {{ V.C_max }})); \
+                    {@ cmyk_chan_to_rgb_chan(pt1, V, c2) @}
+		    ); \
+@             # case 6: CMYK to V
+@             elif c2[0] == 'V' and pt1.is_cmyk():
+	GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2, (\
+                    {@ cmyk_chan_to_rgb_chan(pt1, pt1.chans['C'], c2) @}
+                    + {@ cmyk_chan_to_rgb_chan(pt1, pt1.chans['M'], c2) @}
+                    + {@ cmyk_chan_to_rgb_chan(pt1, pt1.chans['Y'], c2) @}
+		    )/3); \
 @             # case 7: invalid mapping
 @             else:
-{{ error('Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not supported.') }}
+GP_ABORT("{{'Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not supported.'}}"); \
 @     end
 } while (0)
 
@@ -90,22 +102,22 @@
 @
 @ # Loop around "central" pixel types
 @
-@ for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888']]:
+@ for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888'], pixeltypes_dict['G8']]:
 @     for i in pixeltypes:
 @         if not i.is_unknown() and not i.is_palette():
 @             pixel_type_to_type(pt, i)
-@             if i.name not in ['RGB888', 'RGBA8888']:
+@             if i.name not in ['RGB888', 'RGBA8888', 'G8']:
 @                 pixel_type_to_type(i, pt)
 @     end
 
 /*
- * Convert {{ pt.name }} to any other PixelType
+ * Convert {{ pt.name }} to any other pixel type
  * Does not work on palette types at all (yet)
  */
 gp_pixel gp_{{ pt.name }}_to_pixel(gp_pixel pixel, gp_pixel_type type);
 
 /*
- * Function converting to {{ pt.name }} from any other PixelType
+ * Function converting to {{ pt.name }} from any other pixel type
  * Does not work on palette types at all (yet)
  */
 gp_pixel gp_pixel_to_{{ pt.name }}(gp_pixel pixel, gp_pixel_type type);

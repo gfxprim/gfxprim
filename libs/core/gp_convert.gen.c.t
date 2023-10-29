@@ -9,7 +9,7 @@
 #include <core/gp_convert.h>
 @
 @ # Loop around pixel types central for the conversion.
-@ for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888']]:
+@ for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888'], pixeltypes_dict['G8']]:
 
 gp_pixel gp_{{ pt.name }}_to_pixel(gp_pixel pixel, gp_pixel_type type)
 {
