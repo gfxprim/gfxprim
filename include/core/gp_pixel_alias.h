@@ -6,6 +6,19 @@
 #define CORE_GP_PIXEL_ALIAS_H
 
 /* Define the more common grayscal pixel types as default */
+
+enum gp_pixel_type_alias {
+#ifdef GP_PIXEL_G1_UB
+	GP_PIXEL_G1 = GP_PIXEL_G1_UB,
+#endif
+#ifdef GP_PIXEL_G2_UB
+	GP_PIXEL_G2 = GP_PIXEL_G2_UB,
+#endif
+#ifdef GP_PIXEL_G4_UB
+	GP_PIXEL_G4 = GP_PIXEL_G4_UB,
+#endif
+};
+
 #ifdef GP_PIXEL_G1_UB
 # define GP_PIXEL_G1 GP_PIXEL_G1_UB
 # define GP_PIXEL_ADDR_1BPP GP_PIXEL_ADDR_1BPP_UB
