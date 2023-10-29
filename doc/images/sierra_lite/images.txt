@@ -1,0 +1,20 @@
+.Original Image; Sierra Lite Dithering: RGB332, G8, G4, G2, G1
+image:images/orig/lenna_small.png[
+	"Original Image",
+	link="images/orig/lenna.png"]
+image:images/sierra_lite/lenna_small_8.png[
+	"RGB332",
+	link="images/sierra_lite/lenna_8.png"]
+image:images/sierra_lite/lenna_small_19.png[
+	"G8",
+	link="images/sierra_lite/lenna_19.png"]
+image:images/sierra_lite/lenna_small_18.png[
+	"G4",
+	link="images/sierra_lite/lenna_18.png"]
+image:images/sierra_lite/lenna_small_17.png[
+	"G2",
+	link="images/sierra_lite/lenna_17.png"]
+image:images/sierra_lite/lenna_small_16.png[
+	"G1",
+	link="images/sierra_lite/lenna_16.png"]
+

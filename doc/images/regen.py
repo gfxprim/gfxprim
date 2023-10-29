@@ -35,14 +35,14 @@ def to_str(x, to_str):
 
 def convert(pixmap):
     if (pixmap.pixel_type == core.C.PIXEL_RGB332):
-        return pixmap.Convert(core.C.PIXEL_RGB888)
+        return pixmap.convert(core.C.PIXEL_RGB888)
     return pixmap
 
 class ImgGen:
     def __init__(self, orig_path):
         self.orig_path = orig_path
-        self.img = loaders.Load('../' + orig_path + 'lenna.png')
-        self.img_small = loaders.Load('../' + orig_path + 'lenna_small.png')
+        self.img = loaders.load('../' + orig_path + 'lenna.png')
+        self.img_small = loaders.load('../' + orig_path + 'lenna_small.png')
 
     def write_asciidoc_head(self, dst_path, heading):
         self.f = open('../' + dst_path + 'images.txt', 'w')
@@ -92,73 +92,73 @@ class ImgGen:
             self.write_img_asciidoc(desc, fname, fname_small)
 
             res = convert(func(self.img, *params))
-            res.loaders.Save('../' + fname)
+            loaders.save(res, '../' + fname)
 
             res = convert(func(self.img_small, *params))
-            res.loaders.Save('../' + fname_small)
+            loaders.save(res, '../' + fname_small)
 
         self.write_asciidoc_tail()
 
 def main():
     imggen = ImgGen('images/orig/')
 
-    imggen.gen(filters.InvertAlloc, [],
+    imggen.gen(filters.invert_alloc, [],
                [[]],
                'images/invert/', 'Inverted')
 
-    imggen.gen(filters.BrightnessAlloc, ['p'],
+    imggen.gen(filters.brightness_alloc, ['p'],
                [[-.5], [-.2], [.2], [.5]],
                'images/brightness/', 'Brightness')
 
-    imggen.gen(filters.ContrastAlloc, ['p'],
+    imggen.gen(filters.contrast_alloc, ['p'],
                [[.2], [.5], [1.5], [2], [3]],
                'images/contrast/', 'Contrast')
 
-    imggen.gen(filters.BrightnessContrastAlloc, ['b', 'c'],
+    imggen.gen(filters.brightness_contrast_alloc, ['b', 'c'],
                [[-.2, .8], [-.5, 2], [.2, .8], [.2, 1.5]],
                'images/brightness_contrast/', 'BrightnessContrast')
 
-    imggen.gen(filters.PosterizeAlloc, ['s'],
+    imggen.gen(filters.posterize_alloc, ['s'],
                [[2], [3], [4], [5], [6]],
                'images/posterize/', 'Posterize')
 
-    imggen.gen(filters.MirrorHAlloc, [],
+    imggen.gen(filters.mirror_h_alloc, [],
                [[]],
                'images/mirror_h/', 'Mirrored Horizontally')
 
-    imggen.gen(filters.MirrorVAlloc, [],
+    imggen.gen(filters.mirror_v_alloc, [],
                [[]],
                'images/mirror_v/', 'Mirrored Vertically')
 
-    imggen.gen(filters.Rotate90Alloc, [],
+    imggen.gen(filters.rotate_90_alloc, [],
                [[]],
                'images/rotate_90/', 'Rotated by 90 degrees')
 
-    imggen.gen(filters.Rotate180Alloc, [],
+    imggen.gen(filters.rotate_180_alloc, [],
                [[]],
                'images/rotate_180/', 'Rotated by 180 degrees')
 
-    imggen.gen(filters.Rotate270Alloc, [],
+    imggen.gen(filters.rotate_270_alloc, [],
                [[]],
                'images/rotate_270/', 'Rotated by 270 degrees')
 
-    imggen.gen(filters.GaussianBlurAlloc, ['xsig', 'ysig'],
+    imggen.gen(filters.gaussian_blur_alloc, ['xsig', 'ysig'],
                [[2, 2], [0, 4], [4, 0], [4, 4], [10, 10]],
                'images/blur/', 'Gaussian Blur')
 
-    imggen.gen(filters.MedianAlloc, ['xr', 'yr'],
+    imggen.gen(filters.median_alloc, ['xr', 'yr'],
                [[3, 3], [5, 5], [7, 7], [9, 9], [12, 12]],
                'images/median/', 'Median')
 
-    imggen.gen(filters.EdgeSharpeningAlloc, ['w'],
+    imggen.gen(filters.edge_sharpening_alloc, ['w'],
                [[0.1], [0.3], [0.5], [0.8], [1.0]],
                'images/edge_sharpening/', 'Edge Sharpening')
 
-    imggen.gen(filters.GaussianNoiseAddAlloc, ['s', 'm'],
+    imggen.gen(filters.gaussian_noise_add_alloc, ['s', 'm'],
                [[0.03, 0], [0.05, 0], [0.05, -0.1], [0.05, 0.1], [0.07, 0.0]],
                'images/gaussian_noise/', 'Gaussian Additive Noise')
 
-    imggen.gen(filters.ConvolutionAlloc, ['k', 'kd'],
+    imggen.gen(filters.convolution_alloc, ['k', 'kd'],
                [
                 [[[1, 1, 1],
                   [1, 1, 1],
@@ -197,7 +197,7 @@ def main():
                'Simple Conversion',
                ['RGB332', 'G8', 'G4', 'G2', 'G1'])
 
-    imggen.gen(filters.FloydSteinbergAlloc, ['p'],
+    imggen.gen(filters.floyd_steinberg_alloc, ['p'],
                [
                 [core.C.PIXEL_RGB332],
                 [core.C.PIXEL_G8],
@@ -209,7 +209,31 @@ def main():
                'Floyd Steinberg Dithering',
                ['RGB332', 'G8', 'G4', 'G2', 'G1'])
 
-    imggen.gen(filters.HilbertPeanoAlloc, ['p'],
+    imggen.gen(filters.sierra_alloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/sierra/',
+               'Sierra Dithering',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
+    imggen.gen(filters.sierra_lite_alloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/sierra_lite/',
+               'Sierra Lite Dithering',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
+    imggen.gen(filters.hilbert_peano_alloc, ['p'],
                [
                 [core.C.PIXEL_RGB332],
                 [core.C.PIXEL_G8],

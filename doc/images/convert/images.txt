@@ -5,16 +5,16 @@ image:images/orig/lenna_small.png[
 image:images/convert/lenna_small_8.png[
 	"RGB332",
 	link="images/convert/lenna_8.png"]
-image:images/convert/lenna_small_16.png[
+image:images/convert/lenna_small_19.png[
 	"G8",
-	link="images/convert/lenna_16.png"]
-image:images/convert/lenna_small_15.png[
+	link="images/convert/lenna_19.png"]
+image:images/convert/lenna_small_18.png[
 	"G4",
-	link="images/convert/lenna_15.png"]
-image:images/convert/lenna_small_14.png[
+	link="images/convert/lenna_18.png"]
+image:images/convert/lenna_small_17.png[
 	"G2",
-	link="images/convert/lenna_14.png"]
-image:images/convert/lenna_small_13.png[
+	link="images/convert/lenna_17.png"]
+image:images/convert/lenna_small_16.png[
 	"G1",
-	link="images/convert/lenna_13.png"]
+	link="images/convert/lenna_16.png"]
 
