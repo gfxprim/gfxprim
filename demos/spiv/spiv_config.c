@@ -102,9 +102,6 @@ static int set_opt(struct cfg_opt *self, unsigned int lineno)
 	(void) lineno;
 
 	switch (self->opt) {
-	case 'd':
-		config.floyd_steinberg = 1;
-	break;
 	case 'f':
 		config.full_screen = 1;
 	break;
@@ -245,6 +242,23 @@ static int set_font_height(struct cfg_opt *self, unsigned int lineno)
 	return 0;
 }
 
+static int set_dithering(struct cfg_opt *self, unsigned int lineno)
+{
+	gp_dither_type dither_type = gp_dither_type_by_name(self->val);
+
+	if (dither_type == GP_DITHER_MAX) {
+		fprintf(stderr,
+		        "ERROR: %u: Invalid dithering algorithm '%s'\n",
+		        lineno, self->val);
+		return 1;
+	}
+
+	config.enable_dithering = 1;
+	config.dither_type = dither_type;
+
+	return 0;
+}
+
 static int help(struct cfg_opt *self, unsigned int lineno)
 {
 	(void) self;
@@ -314,9 +328,9 @@ struct cfg_opt spiv_opts[] = {
 	 .key = "Dithering",
 	 .opt = 'd',
 	 .opt_long = "dithering",
-	 .opt_has_value = 0,
-	 .set = set_opt,
-	 .help = "Turn on Floyd-Steinberg dithering",
+	 .opt_has_value = 1,
+	 .set = set_dithering,
+	 .help = "Turn on dithering floyd-steinberg/sierra lite/sierra two row/hilbert peano",
 	},
 	{.name_space = "Gui",
 	 .key = "Orientation",

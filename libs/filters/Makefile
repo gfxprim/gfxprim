@@ -15,7 +15,7 @@ ARITHMETIC_FILTERS=gp_diff.gen.c gp_add.gen.c gp_min.gen.c\
 RESAMPLING_FILTERS=gp_resize_nn.gen.c gp_cubic.gen.c gp_resize_cubic.gen.c\
                    gp_resize_linear.gen.c
 
-GENSOURCES=gp_mirror_h.gen.c gp_rotate.gen.c gp_floyd_steinberg.gen.c gp_hilbert_peano.gen.c\
+GENSOURCES=gp_mirror_h.gen.c gp_rotate.gen.c gp_dither.gen.c gp_hilbert_peano.gen.c\
            $(POINT_FILTERS) $(ARITHMETIC_FILTERS) $(STATS_FILTERS) $(RESAMPLING_FILTERS)\
 	   gp_linear_convolution.gen.c
 

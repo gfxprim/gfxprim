@@ -1,6 +1,6 @@
 @ include source.t
 /*
- * Hilbert Peano dithering RGB888 -> any pixel
+ * Hilbert Peano dithering to any pixel
  *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
@@ -12,7 +12,7 @@
 #include <core/gp_convert.h>
 #include <filters/gp_hilbert_curve.h>
 #include <filters/gp_filter.h>
-#include <filters/gp_dither.h>
+#include <filters/gp_dither.gen.h>
 
 /*
  * Returns closest greater square of two, used to determine the curve size.
@@ -143,23 +143,4 @@ int gp_filter_hilbert_peano(const gp_pixmap *src, gp_pixmap *dst,
 	GP_CHECK(src->h <= dst->h);
 
 	return hilbert_peano(src, dst, callback);
-}
-
-gp_pixmap *gp_filter_hilbert_peano_alloc(const gp_pixmap *src,
-                                         gp_pixel_type pixel_type,
-                                         gp_progress_cb *callback)
-{
-	gp_pixmap *ret;
-
-	ret = gp_pixmap_alloc(src->w, src->h, pixel_type);
-
-	if (ret == NULL)
-		return NULL;
-
-	if (hilbert_peano(src, ret, callback)) {
-		gp_pixmap_free(ret);
-		return NULL;
-	}
-
-	return ret;
 }

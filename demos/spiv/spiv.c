@@ -258,6 +258,12 @@ static void show_info(struct loader_params *params, gp_pixmap *img,
 		y += th + 2;
 	}
 
+	if (config.enable_dithering) {
+		info_printf(pixmap, 10, y, "Dithering: %s",
+		            gp_dither_type_name(config.dither_type));
+		y += th + 2;
+	}
+
 	unsigned int count = image_loader_count();
 	unsigned int pos = image_loader_pos() + 1;
 
@@ -345,11 +351,10 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 
 	cpu_timer_start(&timer, "Blitting");
 
-	if (config.floyd_steinberg) {
+	if (config.enable_dithering) {
 		callback.priv = "Dithering";
 		gp_sub_pixmap(pixmap, &sub_display, cx, cy, img->w, img->h);
-		gp_filter_floyd_steinberg(img, &sub_display, NULL);
-	//	gp_filter_hilbert_peano(img, &sub_display, NULL);
+		gp_filter_dither(config.dither_type, img, &sub_display, NULL);
 	} else {
 		if (gp_pixel_has_flags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
 			pattern_fill(pixmap, cx, cy, img->w, img->h);
@@ -1106,6 +1111,21 @@ int main(int argc, char *argv[])
 				case GP_KEY_F1 ... GP_KEY_F10:
 					image_action_run(ev->key.key - GP_KEY_F1 + 1,
 					                 image_loader_img_path());
+				break;
+				case GP_KEY_BACKSLASH:
+					config.enable_dithering = !config.enable_dithering;
+					show_image(&params);
+				break;
+				case GP_KEY_APOSTROPHE:
+					config.dither_type = (config.dither_type + 1) % GP_DITHER_MAX;
+					show_image(&params);
+				break;
+				case GP_KEY_SEMICOLON:
+					if (config.dither_type > 0)
+						config.dither_type--;
+					else
+						config.dither_type = GP_DITHER_MAX - 1;
+					show_image(&params);
 				break;
 				}
 			break;

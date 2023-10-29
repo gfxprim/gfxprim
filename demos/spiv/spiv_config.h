@@ -42,12 +42,13 @@ struct spiv_config {
 
 	int show_progress:1;
 	int show_info:1;
-	int floyd_steinberg:1;
+	int enable_dithering:1;
 	int timers:1;
 	int full_screen:1;
 	int exif_autorotate:1;
 	char backend_init[128];
 	gp_pixel_type emul_type;
+	gp_dither_type dither_type;
 
 	/* Font information */
 	gp_text_style *style;

@@ -46,7 +46,7 @@
 #include <filters/gp_resize_cubic.h>
 
 /* Bitmap dithering */
-#include <filters/gp_dither.h>
+#include <filters/gp_dither.gen.h>
 
 /* Laplace based filters */
 #include <filters/gp_laplace.h>
