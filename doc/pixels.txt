@@ -18,10 +18,19 @@ typedef enum gp_pixel_type {
 	GP_PIXEL_RGBA8888,
 	GP_PIXEL_RGB888,
 	GP_PIXEL_BGR888,
+	GP_PIXE_CMYK8888,
+	/* optional RGB pixel types (can be disabled in config) */
+	GP_PIXEL_RGB565,
+	GP_PIXEL_RGB555,
+	GP_PIXEL_RGB332,
+	...
 	GP_PIXEL_G1,
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,
 	GP_PIXEL_G8,
+	/* optional grayscale pixel types (can be disabled in config) */
+	GP_PIXEL_GA88,
+	GP_PIXEL_G16,
 	...
 	GP_PIXEL_MAX,
 } gp_pixel_type;
@@ -41,7 +50,7 @@ typedef enum gp_pixel_type {
 
 Pixels are described by a pixel type, which is an enumeration type.
 
-The enum is defined in the 'GP_Pixel.gen.h' header link:gen.html[generated]
+The enum is defined in the 'gp_pixel.gen.h' header link:gen.html[generated]
 from a configuration file.
 
 The header and must contain at least the members listed above.
@@ -70,7 +79,6 @@ typedef struct {
 	gp_pixel_type type;        /* Number of the type */
 	const char name[16];      /* Name */
 	uint8_t size;	          /* Size in bits */
-	GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
 	uint8_t numchannels;      /* Number of channels */
 	gp_pixel_flags flags;
 	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
