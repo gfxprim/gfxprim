@@ -21,6 +21,14 @@ errors_{{ c.name }}[{{ y }}%2][{{ x }}+2] += 7 * {{ err }};
 errors_{{ c.name }}[!({{ y }}%2)][{{ x }}] += 3 * {{ err }};
 errors_{{ c.name }}[!({{ y }}%2)][{{ x }}+1] += 5 * {{ err }};
 errors_{{ c.name }}[!({{ y }}%2)][{{ x }}+2] += 1 * {{ err }};
+@     elif name == 'atkinson':
+errors_{{ c.name }}[{{ y }}%3][{{ x }}+2] += 1 * {{ err }};
+errors_{{ c.name }}[{{ y }}%3][{{ x }}+3] += 1 * {{ err }};
+errors_{{ c.name }}[({{ y }}+1)%3][{{ x }}] += 1 * {{ err }};
+errors_{{ c.name }}[({{ y }}+1)%3][{{ x }}+1] += 1 * {{ err }};
+errors_{{ c.name }}[({{ y }}+1)%3][{{ x }}+2] += 1 * {{ err }};
+errors_{{ c.name }}[({{ y }}+2)%3][{{ x }}+0] += 1 * {{ err }};
+errors_{{ c.name }}[({{ y }}+2)%3][{{ x }}+1] += 1 * {{ err }};
 @     elif name == 'sierra':
 errors_{{ c.name }}[{{ y }}%3][{{ x }}+3] += 5 * {{ err }};
 errors_{{ c.name }}[{{ y }}%3][{{ x }}+4] += 3 * {{ err }};
@@ -49,10 +57,12 @@ errors_{{ c.name }}[!({{ y }}%2)][{{ x }}+1] += 1 * {{ err }};
 @ def get_error(name, c, x, y):
 @     if name == 'floyd_steinberg':
 errors_{{ c.name }}[{{ y }} % 2][{{ x }} + 1] / 16
-@     elif name == 'sierra_two_row':
-errors_{{ c.name }}[{{ y }} % 2][{{ x }} + 2] / 16
+@     elif name == 'atkinson':
+errors_{{ c.name }}[{{ y }} % 3][{{ x }} + 1] / 8
 @     elif name == 'sierra':
 errors_{{ c.name }}[{{ y }} % 3][{{ x }} + 2] / 32
+@     elif name == 'sierra_two_row':
+errors_{{ c.name }}[{{ y }} % 2][{{ x }} + 2] / 16
 @     elif name == 'sierra_lite':
 errors_{{ c.name }}[{{ y }} % 2][{{ x }} + 1] / 4
 @ end
@@ -61,6 +71,9 @@ errors_{{ c.name }}[{{ y }} % 2][{{ x }} + 1] / 4
 @     if name == 'floyd_steinberg' or name == 'sierra_lite':
 @         rows = 2
 @         add = 2
+@     elif name == 'atkinson':
+@         rows = 3
+@         add = 4
 @     elif name == 'sierra_two_row':
 @         rows = 2
 @         add = 4
@@ -77,6 +90,9 @@ memset(errors_{{ c.name }}[{{ y }} % {{ rows }}], 0, ({{ add }} + {{ w }}) * siz
 @     if name == 'floyd_steinberg' or name == 'sierra_lite':
 @         rows = 2
 @         add = 2
+@     elif name == 'atkinson':
+@         rows = 3
+@         add = 4
 @     elif name == 'sierra_two_row':
 @         rows = 2
 @         add = 4
@@ -190,5 +206,6 @@ int gp_filter_{{ fname }}(const gp_pixmap *src, gp_pixmap *dst,
 @ end
 @
 {@ gen_dither("Floyd Steinberg", "floyd_steinberg") @}
+{@ gen_dither("Atkinson", "atkinson") @}
 {@ gen_dither("Sierra", "sierra") @}
 {@ gen_dither("Sierra Lite", "sierra_lite") @}

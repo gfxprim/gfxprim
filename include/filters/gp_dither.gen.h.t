@@ -24,6 +24,24 @@ typedef enum gp_dither_type {
 	 */
 	GP_DITHER_FLOYD_STEINBERG,
 	/*
+	 * Modified Atkinson dithering.
+	 *
+	 * Distributes only 7/8 of the error, result has best contrast, but
+	 * large areas may be "washed out" and the image tends to be darker.
+	 *
+	 * I've found that the original Atkinson that distributes 6/8 of the
+	 * error tends to be too dark and that distributing 7/8 works better.
+	 *
+	 *          |   X   |  1/8  |  1/8
+	 *   -------------------------------
+	 *     1/8  |  1/8  |  1/8  |
+	 *   -------------------------------
+	 *     1/8  |  1/8  |       |
+	 *      ^
+	 *   This is zero in the original Atkinson.
+	 */
+	GP_DITHER_ATKINSON,
+	/*
 	 *
 	 * Sierra, produces shaper than Floyd-Steinberg, sometimes with less
 	 * patterns. Generally preferable for small image sizes.
@@ -88,7 +106,7 @@ gp_pixmap *gp_filter_dither_alloc(gp_dither_type type,
                                   gp_pixel_type pixel_type,
                                   gp_progress_cb *callback);
 
-@ for name in ['floyd_steinberg', 'sierra', 'sierra_lite', 'hilbert_peano']:
+@ for name in ['floyd_steinberg', 'atkinson', 'sierra', 'sierra_lite', 'hilbert_peano']:
 int gp_filter_{{ name }}(const gp_pixmap *src,
                          gp_pixmap *dst,
                          gp_progress_cb *callback);

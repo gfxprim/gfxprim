@@ -14,6 +14,8 @@ int gp_filter_dither(gp_dither_type type,
 	switch (type) {
 	case GP_DITHER_FLOYD_STEINBERG:
 		return gp_filter_floyd_steinberg(src, dst, callback);
+	case GP_DITHER_ATKINSON:
+		return gp_filter_atkinson(src, dst, callback);
 	case GP_DITHER_SIERRA:
 		return gp_filter_sierra(src, dst, callback);
 	case GP_DITHER_SIERRA_LITE:
@@ -49,6 +51,7 @@ static const struct dither_names {
 	const char *short_name;
 } dither_names[GP_DITHER_MAX] = {
 	[GP_DITHER_FLOYD_STEINBERG] = {"Floyd Steinberg", "fs"},
+	[GP_DITHER_ATKINSON] = {"Atkinson", "at"},
 	[GP_DITHER_SIERRA] = {"Sierra", "si"},
 	[GP_DITHER_SIERRA_LITE] = {"Sierra Lite", "sl"},
 	[GP_DITHER_HILBERT_PEANO] = {"Hilbert Peano", "hp"},
