@@ -1,0 +1,63 @@
+Hardware display backends
+-------------------------
+
+Hardware display backends support various displays connected to hardware
+link:backends_gpio.html[GPIO] e.g. SPI e-ink RPi Hat. These displays are
+coupled with Linux input driver so that you can get a computer with a
+keyboard, mouse and display just by connecting display to
+link:backends_gpio.html[GPIOs] as well as USB keyboard and/or mouse.
+
+In order to start an application with a hardware display backend
+'display:$display_name' string has to be passed to the display init function.
+This is usually done on a commandline by passing the '-b' option.
+
+IMPORTANT: In order to run display backends as a regular user the user has
+           to be in the right groups that is 'gpio' and for SPI displays 'spi'
+	   group as well.
+
+E-ink displays
+~~~~~~~~~~~~~
+
+E-ink displays repaint is slow, especially the large ones, the refresh can
+take up to a few seconds. In order to make such displays usable with an
+interactive work e-ink display backends implements asynchronous mode. That
+means that during the display refresh the areas that were requested to be
+repainted by the application are merged and once the display is ready the
+merged area is refreshed on the display. With this even terminal emulator
+is quite usable on e-ink displays.
+
+E-ink displays that support partial refresh have to do a full refresh once in
+a while in order to get rid of noise/artifacts/ghosts that is added by doing
+several partial refreshes in a row. The e-ink display layer keeps track of
+partial refreshes and schedulles full refresh when needed so that this is
+transparent to the application.
+
+SPI displays
+~~~~~~~~~~~~
+
+SPI displays need 'spidev' userspace SPI driver and a few GPIOs for additional
+signaling. The default RPi GPIO mapping is compatible with WaveShare e-ink
+display hats.
+
+.RPi GPIO map
+[cols=",,,3",options="autowidth,header"]
+|===========================================
+| Display       | GPIO  | Display SPI | GPIO
+| Reset         | 17    | MOSI        | 19
+| Data/Command  | 25    | MISO        |  9
+| Power         | 18    | SCLK        | 11
+| Busy          | 24    | CS0         |  8
+|===========================================
+
+IMPORTANT: SPI displays require 'spidev' (userspace SPI interface) driver that
+           is bind to the hardware SPI driver. On RPi this is done by
+	   'raspi-config' where you enable SPI and reboot. After the reboot the
+	   /dev/spidev0.0 should be available.
+
+.Currently supported displays
+[cols=",,,,3",options="header"]
+|====================================================================
+| Name             | Type  | Driver IC           | Depth | Resolution
+| link:backends_display_waveshare_7_5_v2.html[WaveShare-7.5-v2]
+| e-ink | GD7965 aka UC8179c  | 1 BPP | 800x480
+|====================================================================

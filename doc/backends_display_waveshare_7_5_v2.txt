@@ -1,0 +1,31 @@
+Display WaveShare 7.5-v2
+------------------------
+
+To start an application with this backend pass the '-b
+display:WaveShare-7.5-v2' on the application commandline.
+
+.Links
+link:https://www.waveshare.com/w/upload/6/60/7.5inch_e-Paper_V2_Specification.pdf[Specification]
+link:https://www.waveshare.net/datasheet/EK_PDF/EK79655.pdf[GD7965 datasheet]
+
+.Display parameters
+[cols=",3",options="header"]
+|====================================================================
+| Name            | WaveShare-7.5-v2
+| Type            | e-ink
+| Driver IC       | GD7965 aka UC8179c
+| Depth           | 1 BPP
+| Resolution      | 800x480
+| Size            | 170.2 mm x 111.2 mm
+| DPI             | 125
+| Full refresh    | ~4s
+| Partial refresh | ~4s
+|====================================================================
+
+.Terminal, Dictionary, IRC Client, Image Viewer, Music Player, and Process Top
+image:images/waveshare_7_5_v2/termini_small.jpg[link="images/waveshare_7_5_v2/termini.jpg"]
+image:images/waveshare_7_5_v2/gpdict_small.jpg[link="images/waveshare_7_5_v2/gpdict.jpg"]
+image:images/waveshare_7_5_v2/gpirc_small.jpg[link="images/waveshare_7_5_v2/gpirc.jpg"]
+image:images/waveshare_7_5_v2/dither_small.jpg[link="images/waveshare_7_5_v2/dither.jpg"]
+image:images/waveshare_7_5_v2/gpplayer_small.jpg[link="images/waveshare_7_5_v2/gpplayer.jpg"]
+image:images/waveshare_7_5_v2/gptop_small.jpg[link="images/waveshare_7_5_v2/gptop.jpg"]

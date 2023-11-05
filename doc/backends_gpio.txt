@@ -1,0 +1,119 @@
+Linux SPI and GPIO
+------------------
+
+This is a low level interface to a GPIO and SPI under Linux. This
+functionality is used by the link:backends_display.html[display backends] to
+communicate to the hardware.
+
+.Linux userspace GPIO
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_gpio_dir {
+	GP_GPIO_IN = 0,
+	GP_GPIO_OUT = 1,
+};
+
+struct gp_gpio {
+	const uint16_t nr;
+	/* enum gp_gpio_dir */
+	const uint16_t dir:1;
+	int fd;
+};
+
+void gp_gpio_unexport(struct gp_gpio *gpio, unsigned int gpio_cnt);
+
+int gp_gpio_export(struct gp_gpio *gpio, unsigned int gpio_cnt);
+
+int gp_gpio_write(struct gp_gpio *self, int val);
+
+int gp_gpio_read(struct gp_gpio *self);
+-------------------------------------------------------------------------------
+
+Linux GPIO implements an API to atomically export an array of GPIOs.
+
+.Example usage
+[source,c]
+-------------------------------------------------------------------------------
+static struct gp_gpio gpio_map[] = {
+	{.nr = 10, dir = GP_GPIO_OUT},
+	{.nr = 12, dir = GP_GPIO_OUT},
+};
+
+...
+	/* Export GPIO 10 and 12 to be usable from userspace */
+	if (gp_gpio_export(gpio_map, 2)) {
+		printf("Failed to export GPIOs\n");
+		return 1;
+	}
+
+	/* Turn ON GPIO 10 */
+	gp_gpio_write(&gpio_map[0], 1);
+
+	...
+
+
+	/* Unexport the GPIOs */
+	gp_gpio_unexport(gpio_map);
+...
+-------------------------------------------------------------------------------
+
+.Linux userspace SPI (spidev)
+[source,c]
+-------------------------------------------------------------------------------
+#include <linux/spi/spidev.h>
+
+int gp_spi_open(const char *spi_dev, uint8_t mode, uint32_t speed);
+
+int gp_spi_write(int spi_fd, uint8_t byte);
+
+void gp_spi_close(int spi_fd);
+-------------------------------------------------------------------------------
+
+The device is usually '/dev/spidev0.0' the mode is a combination of 'SPI_*'
+flags defined in 'spidev.h' and the speed is bus speed in Hz.
+
+.SPI display
+[source,c]
+-------------------------------------------------------------------------------
+struct gp_gpio_map {
+	union {
+		struct gp_gpio gpio[4];
+		struct {
+			struct gp_gpio reset;
+			struct gp_gpio dc;
+			struct gp_gpio pwr;
+			struct gp_gpio busy;
+		};
+	};
+};
+
+struct gp_display_spi {
+	int spi_fd;
+	struct gp_gpio_map *gpio_map;
+	...
+};
+
+int gp_display_spi_init(struct gp_display_spi *self,
+                        const char *spi_dev, uint8_t mode, uint32_t speed,
+			struct gp_gpio_map *map);
+
+void gp_display_spi_exit(struct gp_display_spi *self);
+
+void gp_display_spi_cmd(struct gp_display_spi *self, uint8_t cmd);
+
+void gp_display_spi_data(struct gp_display_spi *self, uint8_t data);
+
+int gp_display_spi_busy(struct gp_display_spi *self);
+
+void gp_display_spi_wait_ready(struct gp_display_spi *self, int ready);
+-------------------------------------------------------------------------------
+
+SPI display abstraction combines Linux SPI and GPIOs into a display driver
+into a single entity.
+
+The 'gp_display_spi_cmd()' turns off the 'dc' GPIO pin then writes the cmd byte
+to the SPI bus. Similarily the 'gp_display_spi_data()' turns on the 'dc' GPIO
+pin and writes the data byte to the SPI bus.
+
+The 'gp_display_spi_busy()' function reads the 'busy' GPIO and returns its
+value.
