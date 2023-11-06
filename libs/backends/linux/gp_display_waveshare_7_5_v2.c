@@ -87,20 +87,18 @@ static void eink_hw_init(struct gp_display_spi *self)
 	}
 }
 
-static void eink_hw_exit(struct gp_display_spi *self)
+static void deep_sleep(struct gp_display_spi *self)
 {
-	gp_display_spi_cmd(self, UC8179_POF);
-	gp_display_spi_wait_ready(self, 1);
 	gp_display_spi_cmd(self, UC8179_DSLP);
-	gp_display_spi_exit(self);
 }
 
-static void backend_exit(gp_backend *self)
+static void display_exit(gp_backend *self)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 
-	eink_hw_exit(&eink->spi);
+	deep_sleep(&eink->spi);
 
+	gp_display_spi_exit(&eink->spi);
 	free(self);
 }
 
@@ -124,10 +122,11 @@ static void repaint_full_start(gp_backend *self)
 		gp_display_spi_data_transfer(spi, tx_buf, NULL, 100);
 	}
 
-	/* Refresh display */
-	gp_display_spi_cmd(spi, UC8179_DRF);
 	/* Setup interrupt source */
 	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_RISE);
+
+	/* Refresh display */
+	gp_display_spi_cmd(spi, UC8179_DRF);
 }
 
 static void repaint_full_finish(gp_backend *self)
@@ -186,10 +185,11 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 		gp_display_spi_data_transfer(spi, tx_buf, NULL, len);
 	}
 
-	/* Refresh display */
-	gp_display_spi_cmd(spi, UC8179_DRF);
 	/* Setup interrupt source */
 	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_RISE);
+
+	/* Refresh display */
+	gp_display_spi_cmd(spi, UC8179_DRF);
 }
 
 static void repaint_part_finish(gp_backend *self)
@@ -239,13 +239,11 @@ gp_backend *gp_waveshare_7_5_v2_init(void)
 	eink->repaint_full_finish = repaint_full_finish;
 	eink->repaint_part_start = repaint_part_start;
 	eink->repaint_part_finish = repaint_part_finish;
+	eink->display_exit = display_exit;
 
 	gp_display_eink_init(backend);
 
-	backend->exit = backend_exit;
 	backend->dpi = 125;
-
-	gp_backend_poll_add(backend, &eink->busy_fd);
 
 	return backend;
 err1:

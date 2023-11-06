@@ -232,5 +232,7 @@ int gp_gpio_edge_set(struct gp_gpio *self, enum gp_gpio_edge edge)
 		return 1;
 	}
 
+	gp_gpio_read(self);
+
 	return 0;
 }

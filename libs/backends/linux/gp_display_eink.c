@@ -76,6 +76,8 @@ static int flush_queued_repaints(gp_fd *self)
 	gp_backend *backend = self->priv;
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);
 
+	gp_gpio_read(&eink->spi.gpio_map->busy);
+
 	if (eink->full_in_progress) {
 		GP_DEBUG(4, "Finishing full repaint");
 		eink->full_in_progress = 0;
@@ -86,6 +88,11 @@ static int flush_queued_repaints(gp_fd *self)
 		GP_DEBUG(4, "Finishing partial repaint");
 		eink->part_in_progress = 0;
 		eink->repaint_part_finish(backend);
+	}
+
+	if (eink->exitting) {
+		GP_DEBUG(4, "Exit was schedulled during repaint");
+		return 0;
 	}
 
 	if (eink->do_full) {
@@ -110,14 +117,41 @@ static int flush_queued_repaints(gp_fd *self)
 	return 0;
 }
 
+static void eink_exit(gp_backend *self)
+{
+	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
+
+	if (can_start_repaint(self)) {
+		GP_DEBUG(4, "No repaint in progress exitting");
+		eink->display_exit(self);
+		return;
+	}
+
+	GP_DEBUG(4, "Schedulling exit after repaint is finished and polling...");
+	eink->exitting = 1;
+
+	/* poll for repaint events */
+	for (;;) {
+		gp_poll_wait(&self->fds, 0);
+
+		if (can_start_repaint(self)) {
+			GP_DEBUG(4, "Repaint finished, exitting...");
+			eink->display_exit(self);
+			return;
+		}
+	}
+}
+
 void gp_display_eink_init(gp_backend *self)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 
 	eink->part_cnt = 0;
+	eink->exitting = 0;
 
 	self->flip = gp_display_eink_flip;
 	self->update_rect = gp_display_eink_update_rect;
+	self->exit = eink_exit;
 
 	eink->busy_fd = (gp_fd) {
 		.fd = eink->spi.gpio_map->busy.fd,
@@ -125,4 +159,6 @@ void gp_display_eink_init(gp_backend *self)
 		.events = GP_POLLPRI,
 		.priv = self,
 	};
+
+	gp_backend_poll_add(self, &eink->busy_fd);
 }

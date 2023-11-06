@@ -43,6 +43,7 @@ struct gp_display_eink {
 	unsigned int full_in_progress:1;
 	unsigned int do_full:1;
 	unsigned int do_part:1;
+	unsigned int exitting:1;
 
 	gp_coord x0, y0, x1, y1;
 
@@ -55,6 +56,8 @@ struct gp_display_eink {
 
 	void (*repaint_part_start)(gp_backend *self, gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1);
 	void (*repaint_part_finish)(gp_backend *self);
+
+	void (*display_exit)(gp_backend *self);
 };
 
 void gp_display_eink_init(gp_backend *self);
