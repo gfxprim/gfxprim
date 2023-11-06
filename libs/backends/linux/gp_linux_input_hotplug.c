@@ -84,7 +84,7 @@ static int input_hotplug_read(gp_fd *fd)
 					if (!ret)
 						break;
 
-					if (errno != EPERM)
+					if (errno != EACCES)
 						break;
 
 					if (retries-- <= 0) {
