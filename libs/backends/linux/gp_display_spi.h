@@ -33,15 +33,61 @@ int gp_display_spi_init(struct gp_display_spi *self,
 
 void gp_display_spi_exit(struct gp_display_spi *self);
 
+/**
+ * @brief Sends a single command byte to the display.
+ *
+ * Sets the dc pin low and writes a command byte to SPI bus.
+ *
+ * @self A SPI display.
+ * @cmd A byte to be send.
+ */
 void gp_display_spi_cmd(struct gp_display_spi *self, uint8_t cmd);
 
+/**
+ * @brief Sends a single data byte to the display.
+ *
+ * Sets the dc pin high and writes a data byte to SPI bus.
+ *
+ * @self A SPI display.
+ * @data A byte to be send.
+ */
 void gp_display_spi_data(struct gp_display_spi *self, uint8_t data);
 
+/**
+ * @brief Runs a SPI data transfer.
+ *
+ * Sets the dc pin high and does SPI transfer.
+ *
+ * @self A SPI display.
+ * @tx_buf A transmit buffer, can be NULL.
+ * @rx_buf A receive buffer, can be NULL.
+ * @len The size of tx and rx buffers.
+ */
 void gp_display_spi_data_transfer(struct gp_display_spi *self,
                                   uint8_t *tx_buf, uint8_t *rx_buf, size_t len);
 
-int gp_display_spi_busy(struct gp_display_spi *self);
+/**
+ * @brief Sets up an GPIO as an interrupt source.
+ *
+ * The GPIO busy file descriptor can be passed to poll() with POLLPRI in order
+ * to get asynchronous edge change notification. Note that you need to set up
+ * the poll() handler elsewhere, this only enables the kernel functionality.
+ *
+ * @self A SPI display.
+ * @edge An GPIO edge pass GP_GPIO_EDGE_NONE to disable edge notifications.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
+int gp_display_spi_busy_edge_set(struct gp_display_spi *self, enum gp_gpio_edge edge);
 
+/**
+ * @brief Spin wait for busy signal.
+ *
+ * Spins in place until busy signal == ready.
+ *
+ * @self A SPI display.
+ * @ready Value when display is ready, 0 == GND, 1 == VDD.
+ */
 void gp_display_spi_wait_ready(struct gp_display_spi *self, int ready);
 
 #endif /* GP_DISPLAY_SPI_H */

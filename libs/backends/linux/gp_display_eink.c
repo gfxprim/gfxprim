@@ -10,53 +10,7 @@ static int can_start_repaint(gp_backend *backend)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);
 
-	if (!gp_timer_running(&eink->repaint_timer))
-		return 1;
-
-	if (eink->is_busy(backend))
-		return 0;
-
-	gp_backend_rem_timer(backend, &eink->repaint_timer);
-
-	return 1;
-}
-
-static uint32_t gp_display_eink_repaint_finish_tmr(gp_timer *self)
-{
-	gp_backend *backend = self->priv;
-	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);
-
-	if (eink->full_in_progress) {
-		GP_DEBUG(4, "Finishing full repaint");
-		eink->full_in_progress = 0;
-		eink->repaint_full_finish(backend);
-	}
-
-	if (eink->part_in_progress) {
-		GP_DEBUG(4, "Finishing partial repaint");
-		eink->part_in_progress = 0;
-		eink->repaint_part_finish(backend);
-	}
-
-	if (eink->do_full) {
-		GP_DEBUG(4, "Starting queued full repaint");
-		eink->do_full = 0;
-		eink->repaint_full_start(backend);
-		eink->full_in_progress = 1;
-		return eink->full_repaint_ms;
-	}
-
-	if (eink->do_part) {
-		GP_DEBUG(4, "Starting queued partial repaint");
-		eink->do_part = 0;
-		eink->part_cnt++;
-		eink->repaint_part_start(backend, eink->x0, eink->y0, eink->x1, eink->y1);
-		eink->part_in_progress = 1;
-		return eink->part_repaint_ms;
-	}
-
-	GP_DEBUG(4, "No repaint queued, stopping repaint timer");
-	return GP_TIMER_STOP;
+	return !(eink->full_in_progress || eink->part_in_progress);
 }
 
 static void gp_display_eink_flip(gp_backend *self)
@@ -68,8 +22,6 @@ static void gp_display_eink_flip(gp_backend *self)
 		eink->repaint_full_start(self);
 		eink->full_in_progress = 1;
 		eink->part_cnt = 0;
-		eink->repaint_timer.expires = eink->full_repaint_ms;
-		gp_backend_add_timer(self, &eink->repaint_timer);
 		return;
 	}
 
@@ -95,8 +47,6 @@ static void gp_display_eink_update_rect(gp_backend *self, gp_coord x0, gp_coord 
 		eink->part_cnt++;
 		eink->repaint_part_start(self, x0, y0, x1, y1);
 		eink->part_in_progress = 1;
-		eink->repaint_timer.expires = eink->part_repaint_ms;
-		gp_backend_add_timer(self, &eink->repaint_timer);
 		return;
 	}
 
@@ -121,18 +71,58 @@ static void gp_display_eink_update_rect(gp_backend *self, gp_coord x0, gp_coord 
 	}
 }
 
+static int flush_queued_repaints(gp_fd *self)
+{
+	gp_backend *backend = self->priv;
+	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);
+
+	if (eink->full_in_progress) {
+		GP_DEBUG(4, "Finishing full repaint");
+		eink->full_in_progress = 0;
+		eink->repaint_full_finish(backend);
+	}
+
+	if (eink->part_in_progress) {
+		GP_DEBUG(4, "Finishing partial repaint");
+		eink->part_in_progress = 0;
+		eink->repaint_part_finish(backend);
+	}
+
+	if (eink->do_full) {
+		GP_DEBUG(4, "Starting queued full repaint");
+		eink->do_full = 0;
+		eink->repaint_full_start(backend);
+		eink->full_in_progress = 1;
+		return 0;
+	}
+
+	if (eink->do_part) {
+		GP_DEBUG(4, "Starting queued partial repaint");
+		eink->do_part = 0;
+		eink->part_cnt++;
+		eink->repaint_part_start(backend, eink->x0, eink->y0, eink->x1, eink->y1);
+		eink->part_in_progress = 1;
+		return 0;
+	}
+
+	GP_DEBUG(4, "No repaint queued");
+
+	return 0;
+}
+
 void gp_display_eink_init(gp_backend *self)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 
 	eink->part_cnt = 0;
 
-	eink->repaint_timer = (gp_timer) {
-		.id = "E-ink repaint",
-		.callback = gp_display_eink_repaint_finish_tmr,
-		.priv = self,
-	};
-
 	self->flip = gp_display_eink_flip;
 	self->update_rect = gp_display_eink_update_rect;
+
+	eink->busy_fd = (gp_fd) {
+		.fd = eink->spi.gpio_map->busy.fd,
+		.event = flush_queued_repaints,
+		.events = GP_POLLPRI,
+		.priv = self,
+	};
 }

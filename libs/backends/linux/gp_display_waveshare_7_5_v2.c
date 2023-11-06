@@ -126,6 +126,8 @@ static void repaint_full_start(gp_backend *self)
 
 	/* Refresh display */
 	gp_display_spi_cmd(spi, UC8179_DRF);
+	/* Setup interrupt source */
+	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_RISE);
 }
 
 static void repaint_full_finish(gp_backend *self)
@@ -133,7 +135,8 @@ static void repaint_full_finish(gp_backend *self)
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 	struct gp_display_spi *spi = &eink->spi;
 
-	gp_display_spi_wait_ready(spi, 1);
+	/* Disable interrupt source */
+	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_NONE);
 
 	/* Power off and wait for ready */
 	gp_display_spi_cmd(spi, UC8179_POF);
@@ -185,6 +188,8 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 
 	/* Refresh display */
 	gp_display_spi_cmd(spi, UC8179_DRF);
+	/* Setup interrupt source */
+	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_RISE);
 }
 
 static void repaint_part_finish(gp_backend *self)
@@ -192,7 +197,8 @@ static void repaint_part_finish(gp_backend *self)
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 	struct gp_display_spi *spi = &eink->spi;
 
-	gp_display_spi_wait_ready(spi, 1);
+	/* Disable interrupt source */
+	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_NONE);
 
 	/* Exit partial mode */
 	gp_display_spi_cmd(spi, UC8179_PTOUT);
@@ -200,14 +206,6 @@ static void repaint_part_finish(gp_backend *self)
 	/* Power off and wait for ready */
 	gp_display_spi_cmd(spi, UC8179_POF);
 	gp_display_spi_wait_ready(spi, 1);
-}
-
-static int is_busy(gp_backend *self)
-{
-	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
-	struct gp_display_spi *spi = &eink->spi;
-
-	return gp_display_spi_busy(spi) == 0;
 }
 
 gp_backend *gp_waveshare_7_5_v2_init(void)
@@ -241,12 +239,13 @@ gp_backend *gp_waveshare_7_5_v2_init(void)
 	eink->repaint_full_finish = repaint_full_finish;
 	eink->repaint_part_start = repaint_part_start;
 	eink->repaint_part_finish = repaint_part_finish;
-	eink->is_busy = is_busy;
 
 	gp_display_eink_init(backend);
 
 	backend->exit = backend_exit;
 	backend->dpi = 125;
+
+	gp_backend_poll_add(backend, &eink->busy_fd);
 
 	return backend;
 err1:

@@ -20,13 +20,60 @@ struct gp_gpio {
 	int fd;
 };
 
+/**
+ * @brief Closes and unexports previously exported GPIOs
+ *
+ * @gpio An array of GPIO descriptions
+ * @gpio_cnt A number of GPIOs in the gpio array
+ */
 void gp_gpio_unexport(struct gp_gpio *gpio, unsigned int gpio_cnt);
 
+/**
+ * @brief Exports and opens GPIOs
+ *
+ * Export and opens all GPIOs in the description atomically.
+ *
+ * @gpio An array of GPIO descriptions
+ * @gpio_cnt A number of GPIOs in the gpio array
+ * @return Non-zero on success (all GPIOs were exported succesfully), non-zero
+ *         otherwise.
+ */
 int gp_gpio_export(struct gp_gpio *gpio, unsigned int gpio_cnt);
 
+/**
+ * @brief Writes a GPIO value
+ *
+ * @self An output GPIO
+ * @val A value, zero turns the GPIO off, non-zero on.
+ */
 int gp_gpio_write(struct gp_gpio *self, int val);
 
+/**
+ * @brief Reads a GPIO value.
+ *
+ * @self An input GPIO
+ * @return A GPIO state.
+ */
 int gp_gpio_read(struct gp_gpio *self);
+
+enum gp_gpio_edge {
+	GP_GPIO_EDGE_NONE,
+	GP_GPIO_EDGE_FALL,
+	GP_GPIO_EDGE_RISE,
+	GP_GPIO_EDGE_BOTH,
+};
+
+/**
+ * @brief Sets or resets a GPIO edge trigger.
+ *
+ * If set as edge interrupt source the GPIO file descriptor can be passed to
+ * poll(2) with POLLPRI for asynchronous edge notification.
+ *
+ * @self An input GPIO.
+ * @edge Edge to watch for.
+ * @return A zero on success, non-zero otherwise.
+ */
+int gp_gpio_edge_set(struct gp_gpio *self, enum gp_gpio_edge edge);
 -------------------------------------------------------------------------------
 
 Linux GPIO implements an API to atomically export an array of GPIOs.
@@ -132,24 +179,71 @@ int gp_display_spi_init(struct gp_display_spi *self,
 
 void gp_display_spi_exit(struct gp_display_spi *self);
 
+/**
+ * @brief Sends a single command byte to the display.
+ *
+ * Sets the dc pin low and writes a command byte to SPI bus.
+ *
+ * @self A SPI display.
+ * @cmd A byte to be send.
+ */
 void gp_display_spi_cmd(struct gp_display_spi *self, uint8_t cmd);
 
+/**
+ * @brief Sends a single data byte to the display.
+ *
+ * Sets the dc pin high and writes a data byte to SPI bus.
+ *
+ * @self A SPI display.
+ * @data A byte to be send.
+ */
 void gp_display_spi_data(struct gp_display_spi *self, uint8_t data);
 
+/**
+ * @brief Runs a SPI data transfer.
+ *
+ * Sets the dc pin high and does SPI transfer.
+ *
+ * @self A SPI display.
+ * @tx_buf A transmit buffer, can be NULL.
+ * @rx_buf A receive buffer, can be NULL.
+ * @len The size of tx and rx buffers.
+ */
 void gp_display_spi_data_transfer(struct gp_display_spi *self,
                                   uint8_t *tx_buf, uint8_t *rx_buf, size_t len);
 
-int gp_display_spi_busy(struct gp_display_spi *self);
+/**
+ * @brief Sets up an GPIO as an interrupt source.
+ *
+ * The GPIO busy file descriptor can be passed to poll() with POLLPRI in order
+ * to get asynchronous edge change notification. Note that you need to set up
+ * the poll() handler elsewhere, this only enables the kernel functionality.
+ *
+ * @self A SPI display.
+ * @edge An GPIO edge pass GP_GPIO_EDGE_NONE to disable edge notifications.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
+int gp_display_spi_busy_edge_set(struct gp_display_spi *self, enum gp_gpio_edge edge);
 
+/**
+ * @brief Spin wait for busy signal.
+ *
+ * Spins in place until busy signal == ready.
+ *
+ * @self A SPI display.
+ * @ready Value when display is ready, 0 == GND, 1 == VDD.
+ */
 void gp_display_spi_wait_ready(struct gp_display_spi *self, int ready);
 -------------------------------------------------------------------------------
 
 SPI display abstraction combines Linux SPI and GPIOs into a display driver
 into a single entity.
 
-The 'gp_display_spi_cmd()' turns off the 'dc' GPIO pin then writes the cmd byte
-to the SPI bus. Similarily the 'gp_display_spi_data()' turns on the 'dc' GPIO
-pin and writes the data byte to the SPI bus.
+The dc (data/command) GPIO is set automatically based on which function is
+called. The busy GPIO can be either waited for with
+'gp_display_spi_wait_ready()' or used asynchronously with 'poll(2)' if set as
+edge interrupt source.
 
-The 'gp_display_spi_busy()' function reads the 'busy' GPIO and returns its
-value.
+The 'reset' and 'pwr' pins are supposed to be used by the display driver and
+the display library does not set set them.

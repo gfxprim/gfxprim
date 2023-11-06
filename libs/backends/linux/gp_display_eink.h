@@ -46,8 +46,8 @@ struct gp_display_eink {
 
 	gp_coord x0, y0, x1, y1;
 
-	/* repaint timer */
-	gp_timer repaint_timer;
+	/* File descriptor for the busy interrupts */
+	gp_fd busy_fd;
 
 	/* callbacks to driver that sends the data/commands */
 	void (*repaint_full_start)(gp_backend *self);
@@ -55,8 +55,6 @@ struct gp_display_eink {
 
 	void (*repaint_part_start)(gp_backend *self, gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1);
 	void (*repaint_part_finish)(gp_backend *self);
-
-	int (*is_busy)(gp_backend *self);
 };
 
 void gp_display_eink_init(gp_backend *self);

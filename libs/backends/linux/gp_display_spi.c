@@ -62,9 +62,9 @@ void gp_display_spi_data_transfer(struct gp_display_spi *self,
 	gp_spi_transfer(self->spi_fd, tx_buf, rx_buf, len);
 }
 
-int gp_display_spi_busy(struct gp_display_spi *self)
+int gp_display_spi_busy_edge_set(struct gp_display_spi *self, enum gp_gpio_edge edge)
 {
-	return gp_gpio_read(&self->gpio_map->busy);
+	return gp_gpio_edge_set(&self->gpio_map->busy, edge);
 }
 
 void gp_display_spi_wait_ready(struct gp_display_spi *self, int ready)
@@ -76,7 +76,7 @@ void gp_display_spi_wait_ready(struct gp_display_spi *self, int ready)
 	usleep(10000);
 
 	while (timeout-- > 0) {
-		if (gp_display_spi_busy(self) == ready) {
+		if (gp_gpio_read(&self->gpio_map->busy) == ready) {
 			GP_DEBUG(5, "Display ready");
 			return;
 		}

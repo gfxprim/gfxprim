@@ -17,6 +17,7 @@
 #define GPIO_UNEXPORT_PATH "/sys/class/gpio/unexport"
 #define GPIO_DIRECTION_PATH "/sys/class/gpio/gpio%"PRIu16"/direction"
 #define GPIO_VALUE_PATH "/sys/class/gpio/gpio%"PRIu16"/value"
+#define GPIO_EDGE_PATH "/sys/class/gpio/gpio%"PRIu16"/edge"
 
 static void gpio_unexport(struct gp_gpio *gpio, unsigned int gpio_cnt, int warn_on_fail)
 {
@@ -189,4 +190,47 @@ int gp_gpio_read(struct gp_gpio *self)
 		GP_WARN("Invalid value GPIO %"PRIu16, self->nr);
 		return 0;
 	}
+}
+
+#define EDGE_NAME(ename) {.name = ename, .name_len = sizeof(ename)-1}
+
+static struct edge_names {
+	const char *name;
+	unsigned int name_len;
+} edge_names[] = {
+	EDGE_NAME("none"),
+	EDGE_NAME("falling"),
+	EDGE_NAME("rising"),
+	EDGE_NAME("both"),
+};
+
+int gp_gpio_edge_set(struct gp_gpio *self, enum gp_gpio_edge edge)
+{
+	char buf[256];
+
+	snprintf(buf, sizeof(buf), GPIO_EDGE_PATH, self->nr);
+
+	GP_DEBUG(4, "Setting GPIO %"PRIu16" edge to %s",
+	         self->nr, edge_names[edge].name);
+
+	int fd = open(buf, O_WRONLY);
+	if (!fd) {
+		GP_FATAL("Failed to open %s: %s", buf, strerror(errno));
+		return 1;
+	}
+
+	ssize_t len = edge_names[edge].name_len;
+
+	if (write(fd, edge_names[edge].name, len) != len) {
+		GP_FATAL("Failed to write %s to %s: %s",
+		          edge_names[edge].name, buf, strerror(errno));
+		return 1;
+	}
+
+	if (close(fd)) {
+		GP_FATAL("Failed to close %s: %s", buf, strerror(errno));
+		return 1;
+	}
+
+	return 0;
 }

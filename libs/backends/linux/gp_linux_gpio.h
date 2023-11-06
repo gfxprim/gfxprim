@@ -34,7 +34,7 @@ void gp_gpio_unexport(struct gp_gpio *gpio, unsigned int gpio_cnt);
  * Export and opens all GPIOs in the description atomically.
  *
  * @gpio An array of GPIO descriptions
- * @gpio_Cnt A number of GPIOs in the gpio array
+ * @gpio_cnt A number of GPIOs in the gpio array
  * @return Non-zero on success (all GPIOs were exported succesfully), non-zero
  *         otherwise.
  */
@@ -55,5 +55,24 @@ int gp_gpio_write(struct gp_gpio *self, int val);
  * @return A GPIO state.
  */
 int gp_gpio_read(struct gp_gpio *self);
+
+enum gp_gpio_edge {
+	GP_GPIO_EDGE_NONE,
+	GP_GPIO_EDGE_FALL,
+	GP_GPIO_EDGE_RISE,
+	GP_GPIO_EDGE_BOTH,
+};
+
+/**
+ * @brief Sets or resets a GPIO edge trigger.
+ *
+ * If set as edge interrupt source the GPIO file descriptor can be passed to
+ * poll(2) with POLLPRI for asynchronous edge notification.
+ *
+ * @self An input GPIO.
+ * @edge Edge to watch for.
+ * @return A zero on success, non-zero otherwise.
+ */
+int gp_gpio_edge_set(struct gp_gpio *self, enum gp_gpio_edge edge);
 
 #endif /* GP_LINUX_GPIO_H */
