@@ -9,7 +9,7 @@
 
 #include "gp_display_eink.h"
 #include "gp_display_waveshare.h"
-#include "gp_display_spd1656.h"
+#include "gp_display_uc8179.h"
 
 static void eink_hw_init(struct gp_display_spi *self)
 {
@@ -23,11 +23,11 @@ static void eink_hw_init(struct gp_display_spi *self)
 	usleep(10000);
 
 	/* Black & White */
-	gp_display_spi_cmd(self, SPD1656_PSR);
+	gp_display_spi_cmd(self, UC8179_PSR);
 	/* LUT from register, Black & White, buffer direction settings */
 	gp_display_spi_data(self, 0x1f);
 
-//	gp_display_spi_cmd(self, SPD1656_PWR);
+//	gp_display_spi_cmd(self, UC8179_PWR);
 	/* turn on VSR, VS, VG internal DC/DC */
 //	gp_display_spi_data(self, 0x27);
 	/* VGH VGL voltage level +20V -20V (default) */
@@ -38,21 +38,21 @@ static void eink_hw_init(struct gp_display_spi *self)
 //	gp_display_spi_data(self, 0x3f);
 
 	/* Sets VCOM DC voltage == contrast */
-//	gp_display_spi_cmd(self, SPD1656_VDCS);
+//	gp_display_spi_cmd(self, UC8179_VDCS);
 //	gp_display_spi_data(self, 0x24);
 
 	/* Booster settings */
-	//gp_display_spi_cmd(self, SPD1656_BSST);
+	//gp_display_spi_cmd(self, UC8179_BSST);
 	//gp_display_spi_data(self, 0x17);
 	//gp_display_spi_data(self, 0x17);
 	//gp_display_spi_data(self, 0x28);
 
 	/* Set PLL to 100Hz */
-//	gp_display_spi_cmd(self, SPD1656_PLL);
+//	gp_display_spi_cmd(self, UC8179_PLL);
 //	gp_display_spi_data(self, 0x0f);
 
 	/* Set 800x480 resolution */
-	gp_display_spi_cmd(self, SPD1656_TRES);
+	gp_display_spi_cmd(self, UC8179_TRES);
 	gp_display_spi_data(self, 0x03);
 	gp_display_spi_data(self, 0x20);
 	gp_display_spi_data(self, 0x01);
@@ -63,20 +63,20 @@ static void eink_hw_init(struct gp_display_spi *self)
 	 *
 	 * And LUT for BW so that 1 == white and 0 == black
 	 */
-	gp_display_spi_cmd(self, SPD1656_VCON);
+	gp_display_spi_cmd(self, UC8179_VCON);
 	gp_display_spi_data(self, 0x83);
 
-//	gp_display_spi_cmd(self, SPD1656_TCON);
+//	gp_display_spi_cmd(self, UC8179_TCON);
 //	gp_display_spi_data(self, 0x77);
 
-//	gp_display_spi_cmd(self, SPD1656_GSST);
+//	gp_display_spi_cmd(self, UC8179_GSST);
 //	gp_display_spi_data(self, 0x00);
 //	gp_display_spi_data(self, 0x00);
 //	gp_display_spi_data(self, 0x00);
 //	gp_display_spi_data(self, 0x00);
 
 	/* Fill OLD data with zeroes otherwise refresh will be messy */
-	gp_display_spi_cmd(self, SPD1656_DTM1);
+	gp_display_spi_cmd(self, UC8179_DTM1);
 	unsigned int x, y;
 
 	for (y = 0; y < 480; y++) {
@@ -89,9 +89,9 @@ static void eink_hw_init(struct gp_display_spi *self)
 
 static void eink_hw_exit(struct gp_display_spi *self)
 {
-	gp_display_spi_cmd(self, SPD1656_POF);
+	gp_display_spi_cmd(self, UC8179_POF);
 	gp_display_spi_wait_ready(self, 1);
-	gp_display_spi_cmd(self, SPD1656_DSLP);
+	gp_display_spi_cmd(self, UC8179_DSLP);
 	gp_display_spi_exit(self);
 }
 
@@ -111,11 +111,11 @@ static void repaint_full_start(gp_backend *self)
 	struct gp_display_spi *spi = &eink->spi;
 
 	/* Power on and wait for ready */
-	gp_display_spi_cmd(spi, SPD1656_PON);
+	gp_display_spi_cmd(spi, UC8179_PON);
 	gp_display_spi_wait_ready(spi, 1);
 
 	/* Start data transfer into RAM */
-	gp_display_spi_cmd(spi, SPD1656_DTM2);
+	gp_display_spi_cmd(spi, UC8179_DTM2);
 
 	for (y = 0; y < 480; y++) {
 		for (x = 0; x < 100; x++) {
@@ -126,7 +126,7 @@ static void repaint_full_start(gp_backend *self)
 	}
 
 	/* Refresh display */
-	gp_display_spi_cmd(spi, SPD1656_DRF);
+	gp_display_spi_cmd(spi, UC8179_DRF);
 }
 
 static void repaint_full_finish(gp_backend *self)
@@ -137,7 +137,7 @@ static void repaint_full_finish(gp_backend *self)
 	gp_display_spi_wait_ready(spi, 1);
 
 	/* Power off and wait for ready */
-	gp_display_spi_cmd(spi, SPD1656_POF);
+	gp_display_spi_cmd(spi, UC8179_POF);
 	gp_display_spi_wait_ready(spi, 1);
 }
 
@@ -152,11 +152,11 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	uint16_t vert_end = y1;
 
 	/* Power on and wait for ready */
-	gp_display_spi_cmd(spi, SPD1656_PON);
+	gp_display_spi_cmd(spi, UC8179_PON);
 	gp_display_spi_wait_ready(spi, 1);
 
 	/* Set partial refresh window, 10bit integers horizontal direction is rounded to whole bytes */
-	gp_display_spi_cmd(spi, SPD1656_PTL);
+	gp_display_spi_cmd(spi, UC8179_PTL);
 
 	gp_display_spi_data(spi, horiz_start>>8);
 	gp_display_spi_data(spi, horiz_start);
@@ -169,10 +169,10 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	gp_display_spi_data(spi, vert_end&0xff);
 
 	/* Enter partial mode */
-	gp_display_spi_cmd(spi, SPD1656_PTIN);
+	gp_display_spi_cmd(spi, UC8179_PTIN);
 
 	/* Start partial data transfer into RAM */
-	gp_display_spi_cmd(spi, SPD1656_DTM2);
+	gp_display_spi_cmd(spi, UC8179_DTM2);
 
 	uint16_t x, y;
 
@@ -185,7 +185,7 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	}
 
 	/* Refresh display */
-	gp_display_spi_cmd(spi, SPD1656_DRF);
+	gp_display_spi_cmd(spi, UC8179_DRF);
 }
 
 static void repaint_part_finish(gp_backend *self)
@@ -196,10 +196,10 @@ static void repaint_part_finish(gp_backend *self)
 	gp_display_spi_wait_ready(spi, 1);
 
 	/* Exit partial mode */
-	gp_display_spi_cmd(spi, SPD1656_PTOUT);
+	gp_display_spi_cmd(spi, UC8179_PTOUT);
 
 	/* Power off and wait for ready */
-	gp_display_spi_cmd(spi, SPD1656_POF);
+	gp_display_spi_cmd(spi, UC8179_POF);
 	gp_display_spi_wait_ready(spi, 1);
 }
 

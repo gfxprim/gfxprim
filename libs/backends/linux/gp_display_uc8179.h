@@ -4,36 +4,43 @@
  */
 
 /*
+ * There are a few rebranded driver chips that are mostly the same:
+ *
+ * UC8179: https://www.buydisplay.com/download/ic/UC8179.pdf
+ * GD7965: https://www.waveshare.net/datasheet/EK_PDF/EK79655.pdf
+ *
+ * This chip is used in these displays:
+ *
  * https://www.waveshare.com/w/upload/6/60/7.5inch_e-Paper_V2_Specification.pdf
  */
 
-#ifndef GP_SPD1656_H
-#define GP_SPD1656_H
+#ifndef GP_UC8179_H
+#define GP_UC8179_H
 
 /*
- * SPD1656 e-ink driver constants
+ * UC8179 e-ink driver constants
  */
 enum spd1656_cmds {
 	/* Panel settings */
-	SPD1656_PSR = 0x00,
+	UC8179_PSR = 0x00,
 	/* Power settings */
-	SPD1656_PWR = 0x01,
+	UC8179_PWR = 0x01,
 	/* High voltage boosters, controllers, regulators, temperature sensor, power off */
-	SPD1656_POF = 0x02,
+	UC8179_POF = 0x02,
 	/* Power off sequence setting */
-	SPD1656_PFS = 0x03,
+	UC8179_PFS = 0x03,
 	/*
 	 * High voltage boosters, controllers, regulators, temperature sensor, power on
 	 *
 	 * May damage display if it's kept on for a long time!
 	 */
-	SPD1656_PON = 0x04,
+	UC8179_PON = 0x04,
 
 	/* Booster soft start */
-	SPD1656_BSST = 0x06,
+	UC8179_BSST = 0x06,
 
 	/* Deep sleep mode, can be waken up by reset */
-	SPD1656_DSLP = 0x07,
+	UC8179_DSLP = 0x07,
 
 	/*
 	 * Data start transmission 1
@@ -41,10 +48,10 @@ enum spd1656_cmds {
 	 * In B&W mode writes OLD data
 	 * IN B&W&R mode writes B&W data
 	 */
-	SPD1656_DTM1 = 0x10,
+	UC8179_DTM1 = 0x10,
 
 	/* Display refresh */
-	SPD1656_DRF = 0x12,
+	UC8179_DRF = 0x12,
 
 	/*
 	 * Data start transmission 2
@@ -52,39 +59,39 @@ enum spd1656_cmds {
 	 * In B&W mode writes NEW data
 	 * IN B&W&R mode writes RED data
 	 */
-	SPD1656_DTM2 = 0x13,
+	UC8179_DTM2 = 0x13,
 
 	/* Dual SPI */
-	SPD1656_DUSPI = 0x15,
+	UC8179_DUSPI = 0x15,
 
 	/* VCOM LUT */
-	SPD1656_LUTC = 0x20,
+	UC8179_LUTC = 0x20,
 	/* Waveform LUTs */
-	SPD1656_LUTB = 0x21,
-	SPD1656_LUTW = 0x22,
-	SPD1656_LUTG1 = 0x23,
-	SPD1656_LUTG2 = 0x24,
-	SPD1656_LUTR0 = 0x25,
-	SPD1656_LUTR1 = 0x26,
-	SPD1656_LUTR2 = 0x27,
+	UC8179_LUTB = 0x21,
+	UC8179_LUTW = 0x22,
+	UC8179_LUTG1 = 0x23,
+	UC8179_LUTG2 = 0x24,
+	UC8179_LUTR0 = 0x25,
+	UC8179_LUTR1 = 0x26,
+	UC8179_LUTR2 = 0x27,
 
 	/* Clock frequency */
-	SPD1656_PLL = 0x30,
+	UC8179_PLL = 0x30,
 
 	/* VCON settings */
-	SPD1656_VCON = 0x50,
+	UC8179_VCON = 0x50,
 
 	/* TCON settings */
-	SPD1656_TCON = 0x60,
+	UC8179_TCON = 0x60,
 
 	/* Set display resolution */
-	SPD1656_TRES = 0x61,
+	UC8179_TRES = 0x61,
 
 	/* Gate source start settings */
-	SPD1656_GSST = 0x65,
+	UC8179_GSST = 0x65,
 
 	/* VCOM_DC voltage */
-	SPD1656_VDCS = 0x82,
+	UC8179_VDCS = 0x82,
 
 	/*
 	 * Sets partial window
@@ -100,11 +107,11 @@ enum spd1656_cmds {
 	 * Vertical start
 	 * Vertical end
 	 */
-	SPD1656_PTL = 0x90,
+	UC8179_PTL = 0x90,
 	/* Enter partial mode */
-	SPD1656_PTIN = 0x91,
+	UC8179_PTIN = 0x91,
 	/* Exit partial mode */
-	SPD1656_PTOUT = 0x92,
+	UC8179_PTOUT = 0x92,
 };
 
-#endif /* GP_SDP1656_H__ */
+#endif /* GP_UC8179_H__ */
