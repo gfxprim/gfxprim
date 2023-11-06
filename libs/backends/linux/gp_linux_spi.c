@@ -49,12 +49,26 @@ err0:
 
 int gp_spi_write(int spi_fd, uint8_t byte)
 {
-	uint8_t rx;
-
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)&byte,
-		.rx_buf = (unsigned long)&rx,
+		.rx_buf = (unsigned long)NULL,
 		.len = 1,
+	};
+
+	if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &tr) < 1) {
+		GP_WARN("Failed to send SPI message: %s", strerror(errno));
+		return 1;
+	}
+
+	return 0;
+}
+
+int gp_spi_transfer(int spi_fd, uint8_t *tx_buf, uint8_t *rx_buf, size_t len)
+{
+	struct spi_ioc_transfer tr = {
+		.tx_buf = (unsigned long)tx_buf,
+		.rx_buf = (unsigned long)rx_buf,
+		.len = len,
 	};
 
 	if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &tr) < 1) {

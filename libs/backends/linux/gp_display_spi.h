@@ -37,6 +37,9 @@ void gp_display_spi_cmd(struct gp_display_spi *self, uint8_t cmd);
 
 void gp_display_spi_data(struct gp_display_spi *self, uint8_t data);
 
+void gp_display_spi_data_transfer(struct gp_display_spi *self,
+                                  uint8_t *tx_buf, uint8_t *rx_buf, size_t len);
+
 int gp_display_spi_busy(struct gp_display_spi *self);
 
 void gp_display_spi_wait_ready(struct gp_display_spi *self, int ready);

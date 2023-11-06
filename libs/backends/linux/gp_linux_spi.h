@@ -8,10 +8,42 @@
 
 #include <linux/spi/spidev.h>
 
+/**
+ * @brief Opens a SPI bus.
+ *
+ * @spi_dev A SPI device dev path, e.g. /dev/spidev0.0
+ * @mode A SPI mode, SPI_* constants in the linux/spi/spidev.h
+ * @speed A SPI speed in Hz.
+ *
+ * @return A file descriptor or -1 in a case of a failure.
+ */
 int gp_spi_open(const char *spi_dev, uint8_t mode, uint32_t speed);
 
+/**
+ * @brief Writes a single byte to the SPI bus.
+ *
+ * @spi_fd An SPI bus file descriptor.
+ * @byte A byte to transfer.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
 int gp_spi_write(int spi_fd, uint8_t byte);
 
+/**
+ * @brief Runs an SPI transfer.
+ *
+ * @spi_fd An SPI bus file descriptor.
+ * @rx_buf A buffer for received data, may be NULL.
+ * @tx_buf A buffer for transfered data, may be NULL.
+ * @size The size of the rx_buf and tx_buf buffers.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
+int gp_spi_transfer(int spi_fd, uint8_t *rx_buf, uint8_t *tx_buf, size_t size);
+
+/**
+ * @brief Closes SPI bus.
+ */
 void gp_spi_close(int spi_fd);
 
 #endif /* GP_LINUX_SPI_H */

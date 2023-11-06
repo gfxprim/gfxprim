@@ -62,15 +62,48 @@ static struct gp_gpio gpio_map[] = {
 -------------------------------------------------------------------------------
 #include <linux/spi/spidev.h>
 
+/**
+ * @brief Opens a SPI bus.
+ *
+ * @spi_dev A SPI device dev path, e.g. /dev/spidev0.0
+ * @mode A SPI mode, SPI_* constants in the linux/spi/spidev.h
+ * @speed A SPI speed in Hz.
+ *
+ * @return A file descriptor or -1 in a case of a failure.
+ */
 int gp_spi_open(const char *spi_dev, uint8_t mode, uint32_t speed);
 
+/**
+ * @brief Writes a single byte to the SPI bus.
+ *
+ * @spi_fd An SPI bus file descriptor.
+ * @byte A byte to transfer.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
 int gp_spi_write(int spi_fd, uint8_t byte);
 
+/**
+ * @brief Runs an SPI transfer.
+ *
+ * @spi_fd An SPI bus file descriptor.
+ * @rx_buf A buffer for received data, may be NULL.
+ * @tx_buf A buffer for transfered data, may be NULL.
+ * @size The size of the rx_buf and tx_buf buffers.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
+int gp_spi_transfer(int spi_fd, uint8_t *rx_buf, uint8_t *tx_buf, size_t size);
+
+/**
+ * @brief Closes SPI bus.
+ */
 void gp_spi_close(int spi_fd);
 -------------------------------------------------------------------------------
 
-The device is usually '/dev/spidev0.0' the mode is a combination of 'SPI_*'
-flags defined in 'spidev.h' and the speed is bus speed in Hz.
+This is a very thin wrapper for the Linux userspace SPI driver (spidev). The
+kernel takes care of the SPI signaling (RX, TX, CLK) as well as the CS (chip
+select).
 
 .SPI display
 [source,c]
@@ -102,6 +135,9 @@ void gp_display_spi_exit(struct gp_display_spi *self);
 void gp_display_spi_cmd(struct gp_display_spi *self, uint8_t cmd);
 
 void gp_display_spi_data(struct gp_display_spi *self, uint8_t data);
+
+void gp_display_spi_data_transfer(struct gp_display_spi *self,
+                                  uint8_t *tx_buf, uint8_t *rx_buf, size_t len);
 
 int gp_display_spi_busy(struct gp_display_spi *self);
 

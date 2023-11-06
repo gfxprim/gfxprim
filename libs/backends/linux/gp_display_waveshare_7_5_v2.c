@@ -106,9 +106,10 @@ static void backend_exit(gp_backend *self)
 
 static void repaint_full_start(gp_backend *self)
 {
-	unsigned int x, y;
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 	struct gp_display_spi *spi = &eink->spi;
+
+	unsigned int y;
 
 	/* Power on and wait for ready */
 	gp_display_spi_cmd(spi, UC8179_PON);
@@ -118,11 +119,9 @@ static void repaint_full_start(gp_backend *self)
 	gp_display_spi_cmd(spi, UC8179_DTM2);
 
 	for (y = 0; y < 480; y++) {
-		for (x = 0; x < 100; x++) {
-			uint8_t byte = self->pixmap->pixels[100 * y + x];
-			//TODO: write whole lines
-			gp_display_spi_data(spi, byte);
-		}
+		uint8_t *tx_buf = &self->pixmap->pixels[100 * y];
+
+		gp_display_spi_data_transfer(spi, tx_buf, NULL, 100);
 	}
 
 	/* Refresh display */
@@ -146,8 +145,8 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 	struct gp_display_spi *spi = &eink->spi;
 
-	uint16_t horiz_start = (x0 & ~0x07);
-	uint16_t horiz_end = x1 & ~0x07;
+	uint16_t horiz_start = x0 & ~0x07;
+	uint16_t horiz_end = x1 | 0x07;
 	uint16_t vert_start = y0;
 	uint16_t vert_end = y1;
 
@@ -161,7 +160,7 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	gp_display_spi_data(spi, horiz_start>>8);
 	gp_display_spi_data(spi, horiz_start);
 	gp_display_spi_data(spi, horiz_end>>8);
-	gp_display_spi_data(spi, (horiz_end&0xff) | 0x07);
+	gp_display_spi_data(spi, horiz_end&0xff);
 
 	gp_display_spi_data(spi, vert_start>>8);
 	gp_display_spi_data(spi, vert_start&0xff);
@@ -174,14 +173,14 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	/* Start partial data transfer into RAM */
 	gp_display_spi_cmd(spi, UC8179_DTM2);
 
-	uint16_t x, y;
+	gp_coord y;
+
+	size_t len = (horiz_end - horiz_start)/8 + 1;
 
 	for (y = y0; y <= y1; y++) {
-		for (x = x0/8; x <= x1/8; x++) {
-			uint8_t byte = self->pixmap->pixels[100 * y + x];
-			//TODO: write whole lines
-			gp_display_spi_data(spi, byte);
-		}
+		uint8_t *tx_buf = &self->pixmap->pixels[100 * y + x0/8];
+
+		gp_display_spi_data_transfer(spi, tx_buf, NULL, len);
 	}
 
 	/* Refresh display */

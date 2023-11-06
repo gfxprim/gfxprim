@@ -55,6 +55,13 @@ void gp_display_spi_data(struct gp_display_spi *self, uint8_t data)
 	gp_spi_write(self->spi_fd, data);
 }
 
+void gp_display_spi_data_transfer(struct gp_display_spi *self,
+                                  uint8_t *tx_buf, uint8_t *rx_buf, size_t len)
+{
+	gp_gpio_write(&self->gpio_map->dc, 1);
+	gp_spi_transfer(self->spi_fd, tx_buf, rx_buf, len);
+}
+
 int gp_display_spi_busy(struct gp_display_spi *self)
 {
 	return gp_gpio_read(&self->gpio_map->busy);
