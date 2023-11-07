@@ -3,8 +3,11 @@
  * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
  */
 
+#include <pthread.h>
 #include <core/gp_debug.h>
 #include "gp_display_eink.h"
+
+static pthread_mutex_t repaint_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static int can_start_repaint(gp_backend *backend)
 {
@@ -13,7 +16,7 @@ static int can_start_repaint(gp_backend *backend)
 	return !(eink->full_in_progress || eink->part_in_progress);
 }
 
-static void gp_display_eink_flip(gp_backend *self)
+static void schedulle_full_repaint(gp_backend *self)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 
@@ -31,15 +34,24 @@ static void gp_display_eink_flip(gp_backend *self)
 	eink->do_part = 0;
 }
 
+static void gp_display_eink_flip(gp_backend *self)
+{
+	pthread_mutex_lock(&repaint_lock);
+	schedulle_full_repaint(self);
+	pthread_mutex_unlock(&repaint_lock);
+}
+
 static void gp_display_eink_update_rect(gp_backend *self, gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 
+	pthread_mutex_lock(&repaint_lock);
+
 	if (eink->part_cnt >= 5) {
 		eink->part_cnt = 0;
 		GP_DEBUG(4, "Five partial repaints in row, requesting full repaint");
-		gp_display_eink_flip(self);
-		return;
+		schedulle_full_repaint(self);
+		goto unlock;
 	}
 
 	if (can_start_repaint(self)) {
@@ -47,12 +59,12 @@ static void gp_display_eink_update_rect(gp_backend *self, gp_coord x0, gp_coord 
 		eink->part_cnt++;
 		eink->repaint_part_start(self, x0, y0, x1, y1);
 		eink->part_in_progress = 1;
-		return;
+		goto unlock;
 	}
 
 	if (eink->do_full) {
 		GP_DEBUG(4, "Full repaint already queued");
-		return;
+		goto unlock;
 	}
 
 	if (eink->do_part) {
@@ -69,12 +81,16 @@ static void gp_display_eink_update_rect(gp_backend *self, gp_coord x0, gp_coord 
 		eink->do_part = 1;
 		GP_DEBUG(4, "Queueing partial repaint");
 	}
+unlock:
+	pthread_mutex_unlock(&repaint_lock);
 }
 
 static int flush_queued_repaints(gp_fd *self)
 {
 	gp_backend *backend = self->priv;
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);
+
+	pthread_mutex_lock(&repaint_lock);
 
 	gp_gpio_read(&eink->spi.gpio_map->busy);
 
@@ -92,7 +108,7 @@ static int flush_queued_repaints(gp_fd *self)
 
 	if (eink->exitting) {
 		GP_DEBUG(4, "Exit was schedulled during repaint");
-		return 0;
+		goto unlock;
 	}
 
 	if (eink->do_full) {
@@ -100,7 +116,7 @@ static int flush_queued_repaints(gp_fd *self)
 		eink->do_full = 0;
 		eink->repaint_full_start(backend);
 		eink->full_in_progress = 1;
-		return 0;
+		goto unlock;
 	}
 
 	if (eink->do_part) {
@@ -109,10 +125,13 @@ static int flush_queued_repaints(gp_fd *self)
 		eink->part_cnt++;
 		eink->repaint_part_start(backend, eink->x0, eink->y0, eink->x1, eink->y1);
 		eink->part_in_progress = 1;
-		return 0;
+		goto unlock;
 	}
 
 	GP_DEBUG(4, "No repaint queued");
+
+unlock:
+	pthread_mutex_unlock(&repaint_lock);
 
 	return 0;
 }
@@ -120,6 +139,8 @@ static int flush_queued_repaints(gp_fd *self)
 static void eink_exit(gp_backend *self)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
+
+	pthread_mutex_lock(&repaint_lock);
 
 	if (can_start_repaint(self)) {
 		GP_DEBUG(4, "No repaint in progress exitting");
@@ -129,6 +150,8 @@ static void eink_exit(gp_backend *self)
 
 	GP_DEBUG(4, "Schedulling exit after repaint is finished and polling...");
 	eink->exitting = 1;
+
+	pthread_mutex_unlock(&repaint_lock);
 
 	/* poll for repaint events */
 	for (;;) {
