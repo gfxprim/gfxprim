@@ -43,7 +43,7 @@ display hats.
 [cols=",,,3",options="autowidth,header"]
 |===========================================
 | Display       | GPIO  | Display SPI | GPIO
-| Reset         | 17    | MOSI        | 19
+| Reset         | 17    | MOSI        | 10
 | Data/Command  | 25    | MISO        |  9
 | Power         | 18    | SCLK        | 11
 | Busy          | 24    | CS0         |  8
