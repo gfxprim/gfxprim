@@ -272,7 +272,9 @@ static void waveshare_3_7_init(struct gp_display_spi *self)
 	ssd1677_reset_ram_window(self);
 
 	gp_display_spi_cmd(self, SSD16XX_UPDT_CTRL2);
-	gp_display_spi_data(self, 0xc4);
+	gp_display_spi_data(self, SSD16XX_UPDT_EN_CLK | SSD16XX_UPDT_EN_ANALOG |
+	                          SSD16XX_UPDT_DISPLAY |
+	                          SSD16XX_UPDT_DIS_ANALOG | SSD16XX_UPDT_DIS_CLK);
 }
 
 static void ssd16xx_deep_sleep(struct gp_display_spi *self)
