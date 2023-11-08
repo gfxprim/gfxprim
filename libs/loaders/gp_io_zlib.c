@@ -50,7 +50,7 @@ static ssize_t zlib_read(gp_io *io, void *buf, size_t size)
 	size_t bread;
 	int ret;
 
-	GP_DEBUG(3, "Read %p %zu", buf, size);
+	GP_DEBUG(6, "Read %p %zu", buf, size);
 
 	if (priv->eos)
 		return 0;
