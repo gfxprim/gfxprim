@@ -13,7 +13,8 @@
 #ifndef GP_SSD16XX_H
 #define GP_SSD16XX_H
 
-#define SSD16XX_LUT_SIZE 105
+#define SSD1677_LUT_SIZE 105
+#define SSD168X_LUT_SIZE 150
 
 /*
  * SSD16XX e-ink driver constants
@@ -98,6 +99,16 @@ enum ssd16xx_cmds {
 
 	/*
 	 * Display update control 2
+	 *
+	 * 0x80 enable clock
+	 * 0x40 enable analog
+	 * 0x20 read temp
+	 * 0x10 load lut mode1
+	 * 0x10 | 0x08 load lut mode2
+	 * 0x01 disable clock
+	 * 0x02 disable analog
+	 * 0x04 display mode1
+	 * 0x04 | 0x08 display mode2
 	 */
 	SSD16XX_UPDT_CTRL2 = 0x22,
 
@@ -106,6 +117,15 @@ enum ssd16xx_cmds {
 	 */
 	SSD16XX_WRITE_BW_RAM = 0x24,
 	SSD16XX_WRITE_RED_RAM = 0x26,
+
+
+	/*
+	 * Write LUT table.
+	 *
+	 * ssd1677 - 105 bytes
+	 * ssd168x - 150 bytes
+	 */
+	SSD16XX_WRITE_LUT = 0x32,
 
 	/*
 	 * Write Register for Display Option
@@ -153,6 +173,20 @@ enum ssd16xx_cmds {
 	 * Set Y RAM address counter initial value.
 	 */
 	SSD16XX_YRAM_ADDR = 0x4f,
+};
+
+enum ssd16xx_updt_ctrl2 {
+	SSD16XX_UPDT_EN_CLK = 0x80,
+	SSD16XX_UPDT_EN_ANALOG = 0x40,
+	SSD16XX_UPDT_READ_TEMP = 0x20,
+	SSD16XX_UPDT_DIS_CLK = 0x01,
+	SSD16XX_UPDT_DIS_ANALOG = 0x02,
+	/* Loads LUT from OTP */
+	SSD16XX_UPDT_LOAD_LUT = 0x10,
+	/* Display image on the display */
+	SSD16XX_UPDT_DISPLAY = 0x04,
+	/* Sets MODE2 for DISPLAY and LOAD_LUT */
+	SSD16XX_UPDT_MODE2 = 0x08,
 };
 
 #endif /* GP_SSD16XX_H */

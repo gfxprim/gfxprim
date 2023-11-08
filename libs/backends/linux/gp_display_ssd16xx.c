@@ -11,7 +11,7 @@
 #include "gp_display_waveshare.h"
 #include "gp_display_ssd16xx.h"
 
-static const uint8_t lut_1bpp_DU[SSD16XX_LUT_SIZE] =
+static const uint8_t lut_1bpp_DU[SSD1677_LUT_SIZE] =
 {
     /* Source and VCOM voltages */
     0x2A,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,//1
@@ -34,7 +34,7 @@ static const uint8_t lut_1bpp_DU[SSD16XX_LUT_SIZE] =
     0x22,0x22,0x22,0x22,0x22
 };
 
-static const uint8_t lut_1bpp_A2[SSD16XX_LUT_SIZE] =
+static const uint8_t lut_1bpp_A2[SSD1677_LUT_SIZE] =
 {
     /* Source and VCOM voltages */
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //1
@@ -57,11 +57,45 @@ static const uint8_t lut_1bpp_A2[SSD16XX_LUT_SIZE] =
     0x22,0x22,0x22,0x22,0x22
 };
 
-static void ssd16xx_load_lut(struct gp_display_spi *self, const uint8_t *lut)
+static const uint8_t lut_ssd168x_part[SSD168X_LUT_SIZE] =
 {
-	GP_DEBUG(4, "Loading LUT");
-	gp_display_spi_cmd(self, 0x32);
-	gp_display_spi_data_transfer(self, lut, NULL, SSD16XX_LUT_SIZE);
+    /* Source and VCOM voltages */
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //1
+    0x0a,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //2
+    0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //3
+    0x0a,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //4
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //5
+    /* TP TP SR TP TP SR RP */
+    0x00,0x00,0x00, 0x03,0x05,0x00, 0x01,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    0x00,0x00,0x00, 0x00,0x00,0x00, 0x00,
+    /* Frame rate */
+    0x22,0x22,0x22,0x22,0x22,0x22,
+};
+
+static void ssd1677_load_lut(struct gp_display_spi *self, const uint8_t *lut)
+{
+	GP_DEBUG(4, "Writing LUT");
+	gp_display_spi_cmd(self, SSD16XX_WRITE_LUT);
+	gp_display_spi_data_transfer(self, lut, NULL, SSD1677_LUT_SIZE);
+	gp_display_spi_wait_ready(self, 0);
+}
+
+static void ssd168x_load_lut(struct gp_display_spi *self, const uint8_t *lut)
+{
+	GP_DEBUG(4, "Writing LUT");
+	gp_display_spi_cmd(self, SSD16XX_WRITE_LUT);
+	gp_display_spi_data_transfer(self, lut, NULL, SSD168X_LUT_SIZE);
+	gp_display_spi_wait_ready(self, 0);
 }
 
 static void ssd1677_set_ram_addr(struct gp_display_spi *spi, uint16_t x, uint16_t y)
@@ -135,14 +169,14 @@ static void ssd168x_reset_ram_window(struct gp_display_spi *spi)
 	ssd168x_set_ram_window(spi, 0, spi->w-1, 0, spi->h-1);
 }
 
-static void ssd1677_clear_red_ram(struct gp_display_spi *spi)
+static void ssd16xx_clear_red_ram(struct gp_display_spi *spi)
 {
 	gp_display_spi_cmd(spi, SSD16XX_CLR_RED_RAM);
 	gp_display_spi_data(spi, 0xf7);
 	gp_display_spi_wait_ready(spi, 0);
 }
 
-static void ssd1677_clear_bw_ram(struct gp_display_spi *spi)
+static void ssd16xx_clear_bw_ram(struct gp_display_spi *spi)
 {
 	gp_display_spi_cmd(spi, SSD16XX_CLR_BW_RAM);
 	gp_display_spi_data(spi, 0xf7);
@@ -194,9 +228,10 @@ static void ssd16xx_data_entry_mode(struct gp_display_spi *disp, uint8_t dem)
 static void ssd168x_init(struct gp_display_spi *disp)
 {
 	ssd16xx_pwr_on_and_reset(disp);
-	ssd1677_clear_red_ram(disp);
-	ssd1677_clear_bw_ram(disp);
+	ssd16xx_clear_red_ram(disp);
+	ssd16xx_clear_bw_ram(disp);
 	ssd16xx_doc(disp, disp->h - 1);
+	ssd16xx_read_temp(disp);
 	ssd168x_reset_ram_window(disp);
 	ssd168x_set_ram_addr(disp, 0, 0);
 
@@ -207,8 +242,8 @@ static void waveshare_3_7_init(struct gp_display_spi *self)
 {
 	ssd16xx_pwr_on_and_reset(self);
 
-	ssd1677_clear_red_ram(self);
-	ssd1677_clear_bw_ram(self);
+	ssd16xx_clear_red_ram(self);
+	ssd16xx_clear_bw_ram(self);
 
 	ssd16xx_doc(self, self->h - 1);
 
@@ -278,16 +313,13 @@ static void ssd168x_full_repaint_start(gp_backend *self)
 	}
 
 	gp_display_spi_cmd(disp, SSD16XX_UPDT_CTRL2);
-	gp_display_spi_data(disp, 0xf7);
+	gp_display_spi_data(disp, SSD16XX_UPDT_EN_CLK | SSD16XX_UPDT_EN_ANALOG |
+				  SSD16XX_UPDT_READ_TEMP | SSD16XX_UPDT_LOAD_LUT |
+	                          SSD16XX_UPDT_DISPLAY |
+	                          SSD16XX_UPDT_DIS_ANALOG | SSD16XX_UPDT_DIS_CLK);
+
 	gp_display_spi_busy_edge_set(disp, GP_GPIO_EDGE_FALL);
 	gp_display_spi_cmd(disp, SSD16XX_DISP_UPDT);
-}
-
-static void ssd168x_part_repaint_start(gp_backend *self,
-                                       gp_coord x0, gp_coord y0,
-                                       gp_coord x1, gp_coord y1)
-{
-	ssd168x_full_repaint_start(self);
 }
 
 static void repaint_full_start(gp_backend *self)
@@ -310,7 +342,7 @@ static void repaint_full_start(gp_backend *self)
 		gp_display_spi_data_transfer(spi, tx_buf, NULL, line_bytes);
 	}
 
-	ssd16xx_load_lut(spi, lut_1bpp_DU);
+	ssd1677_load_lut(spi, lut_1bpp_DU);
 	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_FALL);
 	gp_display_spi_cmd(spi, SSD16XX_DISP_UPDT);
 }
@@ -350,9 +382,45 @@ static void repaint_part_start(gp_backend *self,
 		gp_display_spi_data_transfer(spi, tx_buf, NULL, len);
 	}
 
-	ssd16xx_load_lut(spi, lut_1bpp_A2);
+	ssd1677_load_lut(spi, lut_1bpp_A2);
 	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_FALL);
 	gp_display_spi_cmd(spi, SSD16XX_DISP_UPDT);
+}
+
+static void ssd168x_part_repaint_start(gp_backend *self,
+                                       gp_coord x0, gp_coord y0,
+                                       gp_coord x1, gp_coord y1)
+{
+	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
+	struct gp_display_spi *disp = &eink->spi;
+	unsigned int y;
+
+	uint16_t xs = x0 & ~0x07;
+	uint16_t xe = (x1 + 0x06) & ~0x07;
+	uint16_t ys = y0;
+	uint16_t ye = y1;
+
+	ssd168x_set_ram_window(disp, xs, xe, ys, ye);
+	ssd168x_set_ram_addr(disp, xs, ys);
+
+	gp_display_spi_cmd(disp, SSD16XX_WRITE_BW_RAM);
+
+	unsigned int line_bytes = (disp->w + 0x06)/8;
+	unsigned int len = (xe - xs)/8 + 1;
+
+	for (y = ys; y <= ye; y++) {
+		uint8_t *tx_buf = &self->pixmap->pixels[line_bytes * y + xs/8];
+
+		gp_display_spi_data_transfer(disp, tx_buf, NULL, len);
+	}
+
+	gp_display_spi_cmd(disp, SSD16XX_UPDT_CTRL2);
+	gp_display_spi_data(disp, SSD16XX_UPDT_EN_CLK | SSD16XX_UPDT_EN_ANALOG |
+	                          SSD16XX_UPDT_DISPLAY |
+	                          SSD16XX_UPDT_DIS_ANALOG | SSD16XX_UPDT_DIS_CLK);
+	ssd168x_load_lut(disp, lut_ssd168x_part);
+	gp_display_spi_busy_edge_set(disp, GP_GPIO_EDGE_FALL);
+	gp_display_spi_cmd(disp, SSD16XX_DISP_UPDT);
 }
 
 static gp_backend *ssd16xx_backend_init(uint16_t w, uint16_t h, gp_pixel_type pixel_type)
