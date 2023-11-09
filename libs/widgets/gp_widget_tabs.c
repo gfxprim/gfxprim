@@ -368,6 +368,7 @@ static int focus(gp_widget *self, int sel)
 		return 0;
 	case GP_FOCUS_RIGHT:
 		return 0;
+	case GP_FOCUS_IN:
 	case GP_FOCUS_UP:
 	case GP_FOCUS_PREV:
 		return focus_prev(self);
