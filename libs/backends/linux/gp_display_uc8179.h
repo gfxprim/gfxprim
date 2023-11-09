@@ -14,8 +14,8 @@
  * https://www.waveshare.com/w/upload/6/60/7.5inch_e-Paper_V2_Specification.pdf
  */
 
-#ifndef GP_UC8179_H
-#define GP_UC8179_H
+#ifndef GP_DISPLAY_UC8179_H
+#define GP_DISPLAY_UC8179_H
 
 enum uc8179_psr {
 	/* Use LUT from register instead of OTP */
@@ -82,11 +82,11 @@ enum uc8179_cmds {
 	/* VCOM LUT */
 	UC8179_LUTC = 0x20,
 	/* Waveform LUTs */
-	UC8179_LUTB = 0x21,
-	UC8179_LUTW = 0x22,
-	UC8179_LUTG1 = 0x23,
-	UC8179_LUTG2 = 0x24,
-	UC8179_LUTR0 = 0x25,
+	UC8179_LUTWW = 0x21,
+	UC8179_LUTKW = 0x22,
+	UC8179_LUTWK = 0x23,
+	UC8179_LUTKK = 0x24,
+	UC8179_LUTBD = 0x25,
 	UC8179_LUTR1 = 0x26,
 	UC8179_LUTR2 = 0x27,
 
@@ -129,4 +129,4 @@ enum uc8179_cmds {
 	UC8179_PTOUT = 0x92,
 };
 
-#endif /* GP_UC8179_H__ */
+#endif /* GP_DISPLAY_UC8179_H */

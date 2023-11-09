@@ -11,6 +11,7 @@
 #include "gp_display_eink.h"
 #include "gp_display_waveshare.h"
 #include "gp_display_uc8179.h"
+#include "gp_display_uc8179_luts.h"
 
 static void uc81xx_tres(struct gp_display_spi *disp, uint16_t w, uint16_t h)
 {
@@ -33,11 +34,7 @@ static void uc81xx_init(struct gp_display_spi *self)
 	gp_gpio_write(&self->gpio_map->reset, 1);
 	usleep(10000);
 
-	/* LUT from register, Black & White, buffer direction settings */
-	gp_display_spi_cmd(self, UC8179_PSR);
-	gp_display_spi_data(self, UC8179_PSR_KW |
-	                          UC8179_PSR_UD | UC8179_PSR_SHL |
-				  UC8179_PSR_SHD_N | UC8179_PSR_RST_N);
+	uc8179_write_lut(self, &gp_uc8179_bw_lut);
 
 	/* Set resolution */
 	uc81xx_tres(self, self->w, self->h);
@@ -49,7 +46,6 @@ static void uc81xx_init(struct gp_display_spi *self)
 	 */
 	gp_display_spi_cmd(self, UC8179_VCON);
 	gp_display_spi_data(self, 0x83);
-
 }
 
 static void uc81xx_deep_sleep(struct gp_display_spi *self)
@@ -70,28 +66,34 @@ static void display_exit(gp_backend *self)
 static void repaint_full_start(gp_backend *self)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
-	struct gp_display_spi *spi = &eink->spi;
+	struct gp_display_spi *disp = &eink->spi;
 
 	unsigned int y;
 
 	/* Power on and wait for ready */
-	gp_display_spi_cmd(spi, UC8179_PON);
-	gp_display_spi_wait_ready(spi, 1);
+	gp_display_spi_cmd(disp, UC8179_PON);
+	gp_display_spi_wait_ready(disp, 1);
 
 	/* Start data transfer into RAM */
-	gp_display_spi_cmd(spi, UC8179_DTM2);
+	gp_display_spi_cmd(disp, UC8179_DTM2);
 
 	for (y = 0; y < 480; y++) {
 		uint8_t *tx_buf = &self->pixmap->pixels[100 * y];
 
-		gp_display_spi_data_transfer(spi, tx_buf, NULL, 100);
+		gp_display_spi_data_transfer(disp, tx_buf, NULL, 100);
 	}
 
 	/* Setup interrupt source */
-	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_RISE);
+	gp_display_spi_busy_edge_set(disp, GP_GPIO_EDGE_RISE);
+
+	/* LUT from OTP, Black & White, buffer direction settings */
+	gp_display_spi_cmd(disp, UC8179_PSR);
+	gp_display_spi_data(disp, UC8179_PSR_KW |
+	                          UC8179_PSR_UD | UC8179_PSR_SHL |
+				  UC8179_PSR_SHD_N | UC8179_PSR_RST_N);
 
 	/* Refresh display */
-	gp_display_spi_cmd(spi, UC8179_DRF);
+	gp_display_spi_cmd(disp, UC8179_DRF);
 }
 
 static void repaint_full_finish(gp_backend *self)
@@ -110,7 +112,7 @@ static void repaint_full_finish(gp_backend *self)
 static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
-	struct gp_display_spi *spi = &eink->spi;
+	struct gp_display_spi *disp = &eink->spi;
 
 	uint16_t horiz_start = x0 & ~0x07;
 	uint16_t horiz_end = x1 | 0x07;
@@ -118,27 +120,27 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	uint16_t vert_end = y1;
 
 	/* Power on and wait for ready */
-	gp_display_spi_cmd(spi, UC8179_PON);
-	gp_display_spi_wait_ready(spi, 1);
+	gp_display_spi_cmd(disp, UC8179_PON);
+	gp_display_spi_wait_ready(disp, 1);
 
 	/* Set partial refresh window, 10bit integers horizontal direction is rounded to whole bytes */
-	gp_display_spi_cmd(spi, UC8179_PTL);
+	gp_display_spi_cmd(disp, UC8179_PTL);
 
-	gp_display_spi_data(spi, horiz_start>>8);
-	gp_display_spi_data(spi, horiz_start);
-	gp_display_spi_data(spi, horiz_end>>8);
-	gp_display_spi_data(spi, horiz_end&0xff);
+	gp_display_spi_data(disp, horiz_start>>8);
+	gp_display_spi_data(disp, horiz_start);
+	gp_display_spi_data(disp, horiz_end>>8);
+	gp_display_spi_data(disp, horiz_end&0xff);
 
-	gp_display_spi_data(spi, vert_start>>8);
-	gp_display_spi_data(spi, vert_start&0xff);
-	gp_display_spi_data(spi, vert_end>>8);
-	gp_display_spi_data(spi, vert_end&0xff);
+	gp_display_spi_data(disp, vert_start>>8);
+	gp_display_spi_data(disp, vert_start&0xff);
+	gp_display_spi_data(disp, vert_end>>8);
+	gp_display_spi_data(disp, vert_end&0xff);
 
 	/* Enter partial mode */
-	gp_display_spi_cmd(spi, UC8179_PTIN);
+	gp_display_spi_cmd(disp, UC8179_PTIN);
 
 	/* Start partial data transfer into RAM */
-	gp_display_spi_cmd(spi, UC8179_DTM2);
+	gp_display_spi_cmd(disp, UC8179_DTM2);
 
 	gp_coord y;
 
@@ -147,14 +149,20 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	for (y = y0; y <= y1; y++) {
 		uint8_t *tx_buf = &self->pixmap->pixels[100 * y + x0/8];
 
-		gp_display_spi_data_transfer(spi, tx_buf, NULL, len);
+		gp_display_spi_data_transfer(disp, tx_buf, NULL, len);
 	}
 
 	/* Setup interrupt source */
-	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_RISE);
+	gp_display_spi_busy_edge_set(disp, GP_GPIO_EDGE_RISE);
+
+	/* LUT from Register, Black & White, buffer direction settings */
+	gp_display_spi_cmd(disp, UC8179_PSR);
+	gp_display_spi_data(disp, UC8179_PSR_KW | UC8179_PSR_LUT_REG |
+	                          UC8179_PSR_UD | UC8179_PSR_SHL |
+				  UC8179_PSR_SHD_N | UC8179_PSR_RST_N);
 
 	/* Refresh display */
-	gp_display_spi_cmd(spi, UC8179_DRF);
+	gp_display_spi_cmd(disp, UC8179_DRF);
 }
 
 static void repaint_part_finish(gp_backend *self)
