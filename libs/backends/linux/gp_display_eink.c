@@ -24,7 +24,6 @@ static void schedulle_full_repaint(gp_backend *self)
 		GP_DEBUG(4, "Starting full repaint");
 		eink->repaint_full_start(self);
 		eink->full_in_progress = 1;
-		eink->part_cnt = 0;
 		return;
 	}
 
@@ -97,6 +96,7 @@ static int flush_queued_repaints(gp_fd *self)
 	if (eink->full_in_progress) {
 		GP_DEBUG(4, "Finishing full repaint");
 		eink->full_in_progress = 0;
+		eink->part_cnt = 0;
 		eink->repaint_full_finish(backend);
 	}
 
