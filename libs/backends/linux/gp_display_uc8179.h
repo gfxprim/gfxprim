@@ -17,10 +17,25 @@
 #ifndef GP_UC8179_H
 #define GP_UC8179_H
 
+enum uc8179_psr {
+	/* Use LUT from register instead of OTP */
+	UC8179_PSR_LUT_REG = 0x20,
+	/* B/W mode (KW) instead of B/W/R (KWR) */
+	UC8179_PSR_KW = 0x10,
+	/* Gate scan direction scans up instead of down */
+	UC8179_PSR_UD = 0x08,
+	/* Source shift direction shift right instead of left */
+	UC8179_PSR_SHL = 0x04,
+	/* Turn on booster switch */
+	UC8179_PSR_SHD_N = 0x02,
+	/* Turn off soft reset */
+	UC8179_PSR_RST_N = 0x01,
+};
+
 /*
  * UC8179 e-ink driver constants
  */
-enum spd1656_cmds {
+enum uc8179_cmds {
 	/* Panel settings */
 	UC8179_PSR = 0x00,
 	/* Power settings */

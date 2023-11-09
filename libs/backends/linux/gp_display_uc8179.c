@@ -3,6 +3,7 @@
  * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
  */
 
+#include <inttypes.h>
 #include <backends/gp_backend.h>
 #include <core/gp_pixmap.h>
 #include <core/gp_debug.h>
@@ -11,7 +12,17 @@
 #include "gp_display_waveshare.h"
 #include "gp_display_uc8179.h"
 
-static void eink_hw_init(struct gp_display_spi *self)
+static void uc81xx_tres(struct gp_display_spi *disp, uint16_t w, uint16_t h)
+{
+	uint8_t tx_buf[4] = {w>>8, w & 0xff, h>>8, h & 0xff};
+
+	GP_DEBUG(4, "Setting display resolution %"PRIu16" x %"PRIu16, w, h);
+
+	gp_display_spi_cmd(disp, UC8179_TRES);
+	gp_display_spi_data_transfer(disp, tx_buf, NULL, sizeof(tx_buf));
+}
+
+static void uc81xx_init(struct gp_display_spi *self)
 {
 	GP_DEBUG(4, "Turning on display power & hardware reset");
 
@@ -22,41 +33,14 @@ static void eink_hw_init(struct gp_display_spi *self)
 	gp_gpio_write(&self->gpio_map->reset, 1);
 	usleep(10000);
 
-	/* Black & White */
-	gp_display_spi_cmd(self, UC8179_PSR);
 	/* LUT from register, Black & White, buffer direction settings */
-	gp_display_spi_data(self, 0x1f);
+	gp_display_spi_cmd(self, UC8179_PSR);
+	gp_display_spi_data(self, UC8179_PSR_KW |
+	                          UC8179_PSR_UD | UC8179_PSR_SHL |
+				  UC8179_PSR_SHD_N | UC8179_PSR_RST_N);
 
-//	gp_display_spi_cmd(self, UC8179_PWR);
-	/* turn on VSR, VS, VG internal DC/DC */
-//	gp_display_spi_data(self, 0x27);
-	/* VGH VGL voltage level +20V -20V (default) */
-//	gp_display_spi_data(self, 0x07);
-	/* VDH level 15V (default 14V) */
-//	gp_display_spi_data(self, 0x3f);
-	/* VDL level -15V (default -14V) */
-//	gp_display_spi_data(self, 0x3f);
-
-	/* Sets VCOM DC voltage == contrast */
-//	gp_display_spi_cmd(self, UC8179_VDCS);
-//	gp_display_spi_data(self, 0x24);
-
-	/* Booster settings */
-	//gp_display_spi_cmd(self, UC8179_BSST);
-	//gp_display_spi_data(self, 0x17);
-	//gp_display_spi_data(self, 0x17);
-	//gp_display_spi_data(self, 0x28);
-
-	/* Set PLL to 100Hz */
-//	gp_display_spi_cmd(self, UC8179_PLL);
-//	gp_display_spi_data(self, 0x0f);
-
-	/* Set 800x480 resolution */
-	gp_display_spi_cmd(self, UC8179_TRES);
-	gp_display_spi_data(self, 0x03);
-	gp_display_spi_data(self, 0x20);
-	gp_display_spi_data(self, 0x01);
-	gp_display_spi_data(self, 0xe0);
+	/* Set resolution */
+	uc81xx_tres(self, self->w, self->h);
 
 	/*
 	 * Set border to Hi-Z so that it does not flash on refresh
@@ -66,28 +50,9 @@ static void eink_hw_init(struct gp_display_spi *self)
 	gp_display_spi_cmd(self, UC8179_VCON);
 	gp_display_spi_data(self, 0x83);
 
-//	gp_display_spi_cmd(self, UC8179_TCON);
-//	gp_display_spi_data(self, 0x77);
-
-//	gp_display_spi_cmd(self, UC8179_GSST);
-//	gp_display_spi_data(self, 0x00);
-//	gp_display_spi_data(self, 0x00);
-//	gp_display_spi_data(self, 0x00);
-//	gp_display_spi_data(self, 0x00);
-
-	/* Fill OLD data with zeroes otherwise refresh will be messy */
-	gp_display_spi_cmd(self, UC8179_DTM1);
-	unsigned int x, y;
-
-	for (y = 0; y < 480; y++) {
-		for (x = 0; x < 100; x++) {
-			//TODO: write whole lines
-			gp_display_spi_data(self, 0);
-		}
-	}
 }
 
-static void deep_sleep(struct gp_display_spi *self)
+static void uc81xx_deep_sleep(struct gp_display_spi *self)
 {
 	gp_display_spi_cmd(self, UC8179_DSLP);
 }
@@ -96,7 +61,7 @@ static void display_exit(gp_backend *self)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 
-	deep_sleep(&eink->spi);
+	uc81xx_deep_sleep(&eink->spi);
 
 	gp_display_spi_exit(&eink->spi);
 	free(self);
@@ -231,7 +196,7 @@ gp_backend *gp_waveshare_7_5_v2_init(void)
 	if (ret)
 		goto err1;
 
-	eink_hw_init(&eink->spi);
+	uc81xx_init(&eink->spi);
 
 	eink->full_repaint_ms = 4000;
 	eink->part_repaint_ms = 4000;
