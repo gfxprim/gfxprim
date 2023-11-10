@@ -34,8 +34,6 @@ static void uc81xx_init(struct gp_display_spi *self)
 	gp_gpio_write(&self->gpio_map->reset, 1);
 	usleep(10000);
 
-	uc8179_write_lut(self, &gp_uc8179_bw_lut);
-
 	/* Set resolution */
 	uc81xx_tres(self, self->w, self->h);
 
@@ -86,9 +84,11 @@ static void repaint_full_start(gp_backend *self)
 	/* Setup interrupt source */
 	gp_display_spi_busy_edge_set(disp, GP_GPIO_EDGE_RISE);
 
+	uc8179_write_lut(disp, &gp_uc8179_bw_lut_full);
+
 	/* LUT from OTP, Black & White, buffer direction settings */
 	gp_display_spi_cmd(disp, UC8179_PSR);
-	gp_display_spi_data(disp, UC8179_PSR_KW |
+	gp_display_spi_data(disp, UC8179_PSR_KW | UC8179_PSR_LUT_REG |
 	                          UC8179_PSR_UD | UC8179_PSR_SHL |
 				  UC8179_PSR_SHD_N | UC8179_PSR_RST_N);
 
@@ -154,6 +154,8 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 
 	/* Setup interrupt source */
 	gp_display_spi_busy_edge_set(disp, GP_GPIO_EDGE_RISE);
+
+	uc8179_write_lut(disp, &gp_uc8179_bw_lut_part);
 
 	/* LUT from Register, Black & White, buffer direction settings */
 	gp_display_spi_cmd(disp, UC8179_PSR);
