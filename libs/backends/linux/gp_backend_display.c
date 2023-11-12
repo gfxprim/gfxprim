@@ -17,12 +17,15 @@ const struct gp_backend_display_model gp_backend_display_models[] = {
 	 .desc = "1BPP/4BPP Grayscale 3.7 inch SPI e-ink display"},
 	{.name = "WeAct-2.13",
 	 .desc = "1BPP Grayscale 2.13 inch SPI e-ink display"},
+	{.name = "GMG12864",
+	 .desc = "1BPP Grayscale 58.5x46.5mm SPI LCD display"},
 	{}
 };
 
 gp_backend *gp_waveshare_7_5_v2_init(void);
 gp_backend *gp_waveshare_3_7_init(void);
 gp_backend *gp_weact_2_13_init(void);
+gp_backend *gp_st7565_init(unsigned int dpi);
 
 static gp_ev_queue event_queue;
 
@@ -39,6 +42,9 @@ gp_backend *gp_backend_display_init(enum gp_backend_display_model_ids model)
 	break;
 	case GP_WEACT_2_13_BW:
 		ret = gp_weact_2_13_init();
+	break;
+	case GP_GMG12864:
+		ret = gp_st7565_init(67);
 	break;
 	default:
 		GP_FATAL("Invalid model %i\n", model);

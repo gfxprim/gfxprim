@@ -63,6 +63,14 @@ enum gp_backend_display_model_ids {
 	 * Chip SSD1680
 	 */
 	GP_WEACT_2_13_BW = 2,
+	/**
+	 * @brief An 128 x 64 BW LCD display.
+	 *
+	 * 1BPP Grayscale 58.5x46.5mm SPI LCD display.
+	 *
+	 * Chip ST7565
+	 */
+	GP_GMG12864 = 3,
 };
 
 /** @brief A display model description.  */
