@@ -60,4 +60,8 @@ IMPORTANT: SPI displays require 'spidev' (userspace SPI interface) driver that
 | Name             | Type  | Driver IC           | Depth | Resolution
 | link:backends_display_waveshare_7_5_v2.html[WaveShare-7.5-v2]
 | e-ink | GD7965 aka UC8179c  | 1 BPP | 800x480
+| link:backends_display_waveshare_3_7.html[WaveShare-3.7]
+| e-ink | SSD1677  | 1 BPP | 480x280
+| link:backends_display_weact.html[WeAct-2.13]
+| e-ink | SSD1680  | 1 BPP | 250x122
 |====================================================================

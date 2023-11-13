@@ -18,7 +18,7 @@ enum gp_backend_display_model_ids {
 	/* WaveShare RPi e-ink HAT 1BPP/4BPP grayscale 280x480 */
 	GP_WAVESHARE_3_7 = 1,
 	/* WeeAct 2.13 inch BW display */
-	GP_WEEACT_2_13_BW = 2,
+	GP_WEACT_2_13_BW = 2,
 };
 
 struct gp_backend_display_model {

@@ -1,0 +1,22 @@
+Display WeAct 2.13
+------------------
+
+To start an application with this backend pass the '-b
+display:WeAct-2.13' on the application commandline.
+
+.Links
+link:https://github.com/WeActStudio/WeActStudio.EpaperModule/tree/master[Documentation]
+
+.Display parameters
+[cols=",3",options="header"]
+|====================================================================
+| Name            | WeAct-2.13
+| Type            | e-ink
+| Driver IC       | SSD1680
+| Depth           | 1 BPP
+| Resolution      | 250x122
+| Size            | 29.2 mm x 59.2 mm
+| DPI             | 130
+| Full refresh    | ~1s
+| Partial refresh | ~0.1s
+|====================================================================

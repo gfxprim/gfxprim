@@ -485,7 +485,7 @@ gp_backend *gp_waveshare_3_7_init(void)
 	return backend;
 }
 
-gp_backend *gp_weeact_2_13_init(void)
+gp_backend *gp_weact_2_13_init(void)
 {
 	gp_backend *backend;
 

@@ -1,0 +1,25 @@
+Display WaveShare 3.7
+---------------------
+
+To start an application with this backend pass the '-b
+display:WaveShare-3.7' on the application commandline.
+
+So far only 1bpp mode is implemented.
+
+.Links
+link:https://files.waveshare.com/upload/7/71/3.7inch_e-Paper_Specification.pdf[Specification]
+link:https://files.waveshare.com/upload/2/2a/SSD1677_1.0.pdf[SSD1677 datasheet]
+
+.Display parameters
+[cols=",3",options="header"]
+|====================================================================
+| Name            | WaveShare-3.7
+| Type            | e-ink
+| Driver IC       | SSD1677
+| Depth           | 1 BPP
+| Resolution      | 480x280
+| Size            | 54.9 mm x 93.3 mm
+| DPI             | 150
+| Full refresh    | ~1s
+| Partial refresh | ~0.1s
+|====================================================================

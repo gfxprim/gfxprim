@@ -12,7 +12,8 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	packages.txt bbox.txt utils.txt timers.txt priority_heap.txt backends_api.txt \
 	backends_init.txt backends_display.txt
 
-SOURCES+=backends_gpio.txt backends_display_waveshare_7_5_v2.txt
+SOURCES+=backends_gpio.txt backends_display_waveshare_7_5_v2.txt backends_display_waveshare_3_7.txt \
+	 backends_display_weact.txt
 
 SOURCES+=hash_table.txt linked_list.txt vector.txt matrix.txt block_alloc.txt utf.txt markup.txt
 
