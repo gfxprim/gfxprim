@@ -19,6 +19,7 @@ static const char *font_family_name;
 
 static const char *font_path;
 static unsigned int font_h = 16;
+static int reverse;
 
 struct codepage {
 	const char *name;
@@ -42,10 +43,15 @@ unsigned int spacing = 10;
 
 static void redraw_screen(void)
 {
-	gp_fill(win->pixmap, black_pixel);
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BELOW;
 	struct codepage *codepage = &codepages[cur_codepage];
 	unsigned int i;
+	gp_pixel bg_col = white_pixel, fg_col = black_pixel;
+
+	if (reverse)
+		GP_SWAP(fg_col, bg_col);
+
+	gp_fill(win->pixmap, bg_col);
 
 	style.pixel_xmul = pixel_size;
 	style.pixel_ymul = pixel_size;
@@ -68,10 +74,10 @@ static void redraw_screen(void)
 	gp_coord x = wspacing;
 	gp_coord y = spacing;
 
-	gp_print(win->pixmap, &style, x, y, align, white_pixel, black_pixel,
+	gp_print(win->pixmap, &style, x, y, align, fg_col, bg_col,
 	         "Family: %s Style: %s", font_family_name, gp_font_style_name(style.font->style));
 	y += lh + spacing;
-	gp_text(win->pixmap, &style, x, y, align, white_pixel, black_pixel, codepage->name);
+	gp_text(win->pixmap, &style, x, y, align, fg_col, bg_col, codepage->name);
 	y += lh + spacing;
 
 	for (i = codepage->first; i <= codepage->last; i++) {
@@ -79,10 +85,10 @@ static void redraw_screen(void)
 
 		gp_print(win->pixmap, &desc_style, x + lw/2, y,
 		         GP_VALIGN_BELOW | GP_ALIGN_CENTER,
-		         white_pixel, black_pixel, "0x%x", i);
+		         fg_col, bg_col, "0x%x", i);
 
 		gp_rect_xywh(win->pixmap, x, gy, lw, lh, dark_gray_pixel);
-		gp_glyph_draw(win->pixmap, &style, x, gy, align | GP_TEXT_BEARING, white_pixel, black_pixel, i);
+		gp_glyph_draw(win->pixmap, &style, x, gy, align | GP_TEXT_BEARING, fg_col, bg_col, i);
 
 		x += GP_MAX(lw, dw) + spacing;
 
@@ -91,6 +97,8 @@ static void redraw_screen(void)
 			y += lh + dh + spacing;
 		}
 	}
+
+	gp_backend_flip(win);
 }
 
 static void next_font(int dir)
@@ -129,25 +137,25 @@ void event_loop(void)
 				continue;
 
 			switch (ev->key.key) {
+			case GP_KEY_R:
+				reverse = !reverse;
+				redraw_screen();
+			break;
 			case GP_KEY_SPACE:
 				next_font(GP_FONTS_ITER_NEXT);
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_BACKSPACE:
 				next_font(GP_FONTS_ITER_PREV);
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_UP:
 				pixel_size++;
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_DOWN:
 				pixel_size--;
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_LEFT:
 				if (cur_codepage)
@@ -156,7 +164,6 @@ void event_loop(void)
 					cur_codepage = GP_ARRAY_SIZE(codepages) - 1;
 
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_RIGHT:
 				if (cur_codepage < GP_ARRAY_SIZE(codepages) - 1)
@@ -165,7 +172,6 @@ void event_loop(void)
 					cur_codepage = 0;
 
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_B:
 				font_h++;
@@ -178,7 +184,6 @@ void event_loop(void)
 					gp_font_face_free(font);
 					font = new_font;
 					redraw_screen();
-					gp_backend_flip(win);
 				}
 			break;
 			case GP_KEY_S:
@@ -192,7 +197,6 @@ void event_loop(void)
 					gp_font_face_free(font);
 					font = new_font;
 					redraw_screen();
-					gp_backend_flip(win);
 				}
 			break;
 			case GP_KEY_ESC:
@@ -210,7 +214,6 @@ void event_loop(void)
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(win);
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			}
 		break;
@@ -278,7 +281,6 @@ int main(int argc, char *argv[])
 	next_font(GP_FONTS_ITER_FIRST);
 
 	redraw_screen();
-	gp_backend_flip(win);
 
 	event_loop();
 
