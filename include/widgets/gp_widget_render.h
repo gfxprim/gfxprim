@@ -84,7 +84,8 @@ struct gp_widget_render_ctx {
 	float font_size_mm;
 	/* maximal delay between two clicks for a double click */
 	uint16_t dclick_ms;
-
+	/* feedback delay, how long should be button pressed, tbox red etc */
+	uint16_t feedback_ms;
 	/* area to update on a screen after a call to gp_widget_render() */
 	gp_bbox *flip;
 

@@ -81,6 +81,7 @@ struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.cur_thick = 1,
 	.fr_round = 3,
 	.dclick_ms = 500,
+	.feedback_ms = 200,
 	.font_size = 16,
 	.font_size_mm = 2.5,
 	.color_scheme = GP_WIDGET_COLOR_SCHEME_DEFAULT,

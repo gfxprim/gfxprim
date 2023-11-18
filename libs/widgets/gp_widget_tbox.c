@@ -83,7 +83,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	if (tbox->alert) {
 		fr_color = ctx->alert_color;
-		gp_widget_render_timer(self, GP_TIMER_RESCHEDULE, 500);
+		gp_widget_render_timer(self, GP_TIMER_RESCHEDULE, ctx->feedback_ms);
 	}
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, fr_color);

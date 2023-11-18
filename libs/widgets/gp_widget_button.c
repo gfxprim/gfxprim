@@ -352,7 +352,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	}
 
 	if (self->b->val)
-		gp_widget_render_timer(self, 0, 200);
+		gp_widget_render_timer(self, 0, ctx->feedback_ms);
 }
 
 static void set(gp_widget *self)
