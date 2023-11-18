@@ -12,7 +12,7 @@
 #include <gfxprim.h>
 
 static const char help[] = {
-	"usage: ttf2img -f font.ttf -i file.png -s string [-d debug_level]\n",
+	"usage: ttf2img -f font.ttf -i file.png -s string -l size [-d debug_level]\n",
 };
 
 static void print_help(int i)
@@ -28,8 +28,9 @@ int main(int argc, char *argv[])
 	const char *string   = "Foo Bar!";
 	int opt, debug_level = 0;
 	int img_w = 400, img_h = 100;
+	int height = 27;
 
-	while ((opt = getopt(argc, argv, "d:f:i:s:")) != -1) {
+	while ((opt = getopt(argc, argv, "d:f:i:l:s:")) != -1) {
 		switch (opt) {
 		case 'f':
 			font_path = optarg;
@@ -42,6 +43,9 @@ int main(int argc, char *argv[])
 		break;
 		case 'h':
 			print_help(0);
+		break;
+		case 'l':
+			height = atoi(optarg);
 		break;
 		case 's':
 			string = optarg;
@@ -66,7 +70,7 @@ int main(int argc, char *argv[])
 
 	gp_text_style style = GP_DEFAULT_TEXT_STYLE;
 
-	style.font = gp_font_face_load(font_path, 27, 0);
+	style.font = gp_font_face_load(font_path, height, 0);
 
 	gp_text(pixmap, &style, img_w/2, img_h/2, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
 	        black_pixel, white_pixel, string);
