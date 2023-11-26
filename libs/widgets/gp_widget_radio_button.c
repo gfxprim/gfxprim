@@ -16,12 +16,13 @@
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int text_a = gp_text_ascent(ctx->font);
+	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
+	unsigned int text_a = gp_text_ascent(font);
 	unsigned int text_w = 0;
 	unsigned int i, w;
 
 	for (i = 0; i < gp_widget_choice_cnt_get(self); i++) {
-		w = gp_text_wbbox(ctx->font, call_get_choice(self, i));
+		w = gp_text_wbbox(font, call_get_choice(self, i));
 		text_w = GP_MAX(text_w, w);
 	}
 
@@ -44,7 +45,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int h = self->h;
 	unsigned int i;
 
-	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	const gp_text_style *font = gp_widget_focused_font(ctx, self->focused);
 	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
 	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 

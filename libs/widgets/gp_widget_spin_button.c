@@ -22,9 +22,10 @@ static unsigned int buttons_width(const gp_widget_render_ctx *ctx)
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int i, max_len = 0;
+	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
 
 	for (i = 0; i < gp_widget_choice_cnt_get(self); i++) {
-		unsigned int len = gp_text_wbbox(ctx->font, call_get_choice(self, i));
+		unsigned int len = gp_text_wbbox(font, call_get_choice(self, i));
 		max_len = GP_MAX(max_len, len);
 	}
 
@@ -49,7 +50,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
 	unsigned int sx = 2*sy;
 
-	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	const gp_text_style *font = gp_widget_focused_font(ctx, self->focused);
 	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
 	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 

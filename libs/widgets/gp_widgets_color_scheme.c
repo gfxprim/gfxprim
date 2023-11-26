@@ -191,6 +191,9 @@ void __attribute__((visibility ("hidden"))) widgets_color_scheme_load(void)
 	break;
 	}
 
+	if (gp_pixel_size(ctx.pixel_type) <= 2)
+		ctx.focused_is_bold = 1;
+
 	/* 16 colors */
 	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_BLACK, 0x00, 0x00, 0x00);
 	RGB_TO_PIXEL2(ctx, GP_WIDGETS_COL_RED, 0xcd, 0x00, 0x00);

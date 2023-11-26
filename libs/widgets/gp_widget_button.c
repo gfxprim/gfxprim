@@ -16,15 +16,16 @@
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int ret = 2 * ctx->padd;
+	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
 
 	if (self->b->label)
-		ret += gp_text_wbbox(ctx->font, self->b->label);
+		ret += gp_text_wbbox(font, self->b->label);
 
 	if (self->b->type & GP_BUTTON_TYPE_MASK)
-		ret += GP_ODD_UP(gp_text_ascent(ctx->font));
+		ret += GP_ODD_UP(gp_text_ascent(font));
 
 	if (self->b->label && self->b->type & GP_BUTTON_TYPE_MASK)
-		ret += gp_text_wbbox(ctx->font, " ");
+		ret += gp_text_wbbox(font, " ");
 
 	return ret;
 }
@@ -92,7 +93,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 
-	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	const gp_text_style *font = gp_widget_focused_font(ctx, self->focused);
 	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
 	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 	gp_pixel bg_color = self->b->val ? ctx->bg_color : ctx->fg_color;

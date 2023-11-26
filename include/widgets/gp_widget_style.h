@@ -13,21 +13,9 @@
 #ifndef WIDGETS_GP_WIDGET_STYLE_H
 #define WIDGETS_GP_WIDGET_STYLE_H
 
-static inline const gp_text_style *gp_widget_label_text_style(gp_widget *self,
-                                                              const gp_widget_render_ctx *ctx)
+static inline const gp_text_style *gp_widget_focused_font(const gp_widget_render_ctx *ctx, int is_focused)
 {
-	const gp_text_style *style = ctx->font;
-
-	switch (gp_pixel_size(ctx->pixel_type)) {
-	case 1:
-		if (self->focused)
-			style = ctx->font_bold;
-	break;
-	default:
-	break;
-	}
-
-	return style;
+	return (is_focused && ctx->focused_is_bold) ? ctx->font_bold : ctx->font;
 }
 
 static inline gp_pixel gp_widget_text_color(gp_widget *self,

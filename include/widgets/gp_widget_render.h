@@ -92,6 +92,8 @@ struct gp_widget_render_ctx {
 	/* passed down if only part of the layout has to be rendered */
 	gp_bbox *bbox;
 
+	/* if set focused widget uses bold font, useful for 1bpp */
+	int focused_is_bold:1;
 	/* draws rectangles around container widgets */
 	int debug_layout:1;
 };

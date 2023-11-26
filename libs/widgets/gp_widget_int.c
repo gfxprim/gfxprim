@@ -243,12 +243,13 @@ static unsigned int spin_buttons_width(const gp_widget_render_ctx *ctx)
 
 static unsigned int spin_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
 	unsigned int min_digits = snprintf(NULL, 0, "%"PRIi64, self->spin->min);
 	unsigned int max_digits = snprintf(NULL, 0, "%"PRIi64, self->spin->max);
 
 	unsigned int ret = 2 * ctx->padd;
 
-	ret += gp_text_max_width_chars(ctx->font, "-0123456789",
+	ret += gp_text_max_width_chars(font, "-0123456789",
 			               GP_MAX(min_digits, max_digits));
 
 	ret += spin_buttons_width(ctx);
@@ -275,7 +276,7 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	unsigned int sx = 2 * sy;
 	struct gp_widget_int *spin = self->spin;
 
-	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	const gp_text_style *font = gp_widget_focused_font(ctx, self->focused);
 	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
 	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 

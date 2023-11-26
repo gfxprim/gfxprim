@@ -14,11 +14,12 @@
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int text_a = gp_text_ascent(ctx->font);
+	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
+	unsigned int text_a = gp_text_ascent(font);
 	unsigned int text_w = 0;
 
 	if (self->b->label)
-		text_w = gp_text_wbbox(ctx->font, self->b->label) + ctx->padd;
+		text_w = gp_text_wbbox(font, self->b->label) + ctx->padd;
 
 	return text_a + text_w;
 }
@@ -85,7 +86,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 
-	const gp_text_style *font = gp_widget_label_text_style(self, ctx);
+	const gp_text_style *font = gp_widget_focused_font(ctx, self->focused);
 	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
 	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
 
