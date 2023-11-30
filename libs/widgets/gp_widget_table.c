@@ -79,9 +79,14 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 	for (i = 0; i < tbl->cols; i++) {
 		unsigned int col_size;
+
 		col_size = gp_text_max_width(ctx->font, tbl->header[i].col_min_size);
-		tbl->cols_w[i].min_size = GP_MAX(tbl->cols_w[i].min_size, col_size);
-		sum_cols_w += tbl->cols_w[i].min_size;
+
+		if (tbl->header)
+			col_size = GP_MAX(col_size, header_min_w(tbl, ctx, i));
+
+		tbl->cols_w[i].min_size = col_size;
+		sum_cols_w += col_size;
 	}
 
 	return sum_cols_w + (2 * tbl->cols) * ctx->padd;
@@ -136,6 +141,7 @@ static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int n
 	for (i = 0; i < tbl->cols; i++) {
 		sum_cols_w += tbl->cols_w[i].min_size;
 		sum_fills += tbl->header[i].col_fill;
+		tbl->cols_w[i].size = tbl->cols_w[i].min_size;
 	}
 
 	if (!sum_fills)
@@ -145,7 +151,7 @@ static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int n
 	unsigned int diff = self->w - table_w;
 
 	for (i = 0; i < tbl->cols; i++)
-		tbl->cols_w[i].size = tbl->cols_w[i].min_size + tbl->header[i].col_fill * (diff/sum_fills);
+		tbl->cols_w[i].size += tbl->header[i].col_fill * (diff/sum_fills);
 }
 
 static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
