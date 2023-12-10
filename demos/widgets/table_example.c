@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2021-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -82,13 +82,25 @@ int table_on_event(gp_widget_event *ev)
 	return 1;
 }
 
+gp_app_info app_info = {
+	.name = "Table Example",
+	.desc = "Table widget OPS example",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2021-2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	gp_widget *layout = gp_widget_layout_json("table_example.json", NULL, NULL);
 	if (!layout)
 		return 0;
 
-	gp_widgets_main_loop(layout, "Table Example", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

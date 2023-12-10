@@ -61,6 +61,18 @@ static int on_new(gp_widget_event *ev)
 	return 1;
 }
 
+gp_app_info app_info = {
+	.name = "TODO",
+	.desc = "Classic TODO application",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Richard Palethorpe", .email = "richiejp@f-m.fm", .years = "2020"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	int i;
@@ -73,6 +85,9 @@ int main(int argc, char *argv[])
 	grid = gp_widget_grid_new(2, 1, 0);
 	gp_widget_grid_put(outer, 0, 1, grid);
 
+	gp_widget_grid_no_border(grid);
+	gp_widget_grid_col_fill_set(grid, 1, 0);
+
 	grid->align = GP_HFILL | GP_TOP;
 
 	gp_widget_grid_put(grid, 0, 0, gp_widget_label_new("Description", GP_TATTR_BOLD, 0));
@@ -81,7 +96,7 @@ int main(int argc, char *argv[])
 	for (i = 0; todos[i].active; i++)
 		widget_todo_add(i);
 
-	gp_widgets_main_loop(outer, "TODO", NULL, argc, argv);
+	gp_widgets_main_loop(outer, NULL, argc, argv);
 
 	return 0;
 }

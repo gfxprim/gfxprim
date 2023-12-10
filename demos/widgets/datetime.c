@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 	gp_widgets_by_uids(uids, uid_map, &widgets);
 	gp_htable_free(uids);
 
-	gp_widgets_main_loop(layout, "Date & Time", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

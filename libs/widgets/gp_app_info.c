@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -11,11 +11,16 @@
 
 #include "dialog_app_info.json.h"
 
-static gp_app_info *app_info;
+extern gp_app_info app_info;
 
-void gp_app_info_set(gp_app_info *app_info_)
+__attribute__((weak)) gp_app_info app_info;
+
+const char *gp_app_info_name(void)
 {
-	app_info = app_info_;
+	if (!app_info.name)
+		return "App info not set!";
+
+	return app_info.name;
 }
 
 static void format_authors(gp_app_info_author *authors)
@@ -41,24 +46,24 @@ static void format_authors(gp_app_info_author *authors)
 
 void gp_app_info_print(void)
 {
-	if (!app_info) {
-		printf("app_info not passed!\n");
+	if (!app_info.name || !app_info.version) {
+		printf("app_info not defined!\n");
 		return;
 	}
 
-	printf("%s %s\n", app_info->name, app_info->version);
+	printf("%s %s\n", app_info.name, app_info.version);
 
-	if (app_info->desc)
-		printf(" %s\n", app_info->desc);
+	if (app_info.desc)
+		printf(" %s\n", app_info.desc);
 
-	if (app_info->url)
-		printf("\n%s\n", app_info->url);
+	if (app_info.url)
+		printf("\n%s\n", app_info.url);
 
-	if (app_info->authors)
-		format_authors(app_info->authors);
+	if (app_info.authors)
+		format_authors(app_info.authors);
 
-	if (app_info->license)
-		printf("\nLicensed under %s\n", app_info->license);
+	if (app_info.license)
+		printf("\nLicensed under %s\n", app_info.license);
 }
 
 static int do_ok(gp_widget_event *ev)
@@ -116,7 +121,7 @@ void gp_app_info_dialog_run(void)
 	gp_dialog dialog = {};
 	gp_widget *w;
 
-	if (!app_info) {
+	if (!app_info.name) {
 		gp_dialog_msg_run(GP_DIALOG_MSG_WARN, NULL, "Application info not set!");
 		return;
 	}
@@ -132,29 +137,29 @@ void gp_app_info_dialog_run(void)
 
 	w = gp_widget_by_uid(uids, "app_name", GP_WIDGET_LABEL);
 	if (w)
-		gp_widget_label_set(w, app_info->name);
+		gp_widget_label_set(w, app_info.name);
 
 	w = gp_widget_by_uid(uids, "app_version", GP_WIDGET_LABEL);
 	if (w)
-		gp_widget_label_printf(w, "Ver: %s", app_info->version);
+		gp_widget_label_printf(w, "Ver: %s", app_info.version);
 
 	w = gp_widget_by_uid(uids, "app_desc", GP_WIDGET_LABEL);
 	if (w)
-		gp_widget_label_set(w, app_info->desc);
+		gp_widget_label_set(w, app_info.desc);
 
 	w = gp_widget_by_uid(uids, "app_url", GP_WIDGET_LABEL);
 	if (w)
-		gp_widget_label_set(w, app_info->url);
+		gp_widget_label_set(w, app_info.url);
 
 	w = gp_widget_by_uid(uids, "app_license", GP_WIDGET_LABEL);
 	if (w)
-		gp_widget_label_printf(w, "License: %s", app_info->license);
+		gp_widget_label_printf(w, "License: %s", app_info.license);
 
 	w = gp_widget_by_uid(uids, "app_info", GP_WIDGET_GRID);
 	if (w) {
-		if (app_info->authors) {
+		if (app_info.authors) {
 			gp_widget_grid_row_append(w);
-			gp_widget_grid_put(w, 0, w->grid->rows-1, authors(app_info->authors));
+			gp_widget_grid_put(w, 0, w->grid->rows-1, authors(app_info.authors));
 		}
 	}
 

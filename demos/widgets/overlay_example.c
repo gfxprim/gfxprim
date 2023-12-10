@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
 	gp_widgets_timer_ins(&tmr);
 
-	gp_widgets_main_loop(layout, "Layout overlay test", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

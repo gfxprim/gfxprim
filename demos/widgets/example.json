@@ -1,11 +1,12 @@
 {
  "info": {"version": 1, "license": "GPL-2.0-or-later"},
  "layout": {
-  "rows": 10,
+  "type": "vbox",
   "widgets": [
    {"type": "label", "text": "Label", "tattr": "large"},
    {"type": "checkbox", "label": "Check Box", "set": true},
-   {"type": "pbar", "val": 50.1},
+   {"type": "pbar", "val": 50, "uid": "pbar"},
+   {"type": "slider", "min": 0, "max": 100, "val": 50, "on_event": "slider_event"},
    {"type": "tbox", "text": "Text Box", "len": 18},
    {"type": "tbox", "len": 18, "ttype": "hidden", "uid": "passwd", "help": "Password"},
    {"type": "tbox", "text": "http://example.com/index.html", "ttype": "URL"},

@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	gp_widget_grid_put(grid, 0, 0, btn1);
 	gp_widget_grid_put(grid, 1, 0, btn2);
 
-	gp_widgets_main_loop(grid, "Focus", NULL, argc, argv);
+	gp_widgets_main_loop(grid, NULL, argc, argv);
 
 	return 0;
 }

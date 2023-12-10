@@ -3,7 +3,7 @@
  "layout": {
   "rows": 3,
   "widgets": [
-   {"type": "label", "text": "Please log in."},
+   {"type": "label", "tattr": "bold", "text": "Please log in."},
    {"cols": 2, "rows": 2,
     "widgets": [
      {"type": "label", "text": "Username:", "halign": "right"},

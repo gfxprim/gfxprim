@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2019 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2021-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -54,18 +54,38 @@ int do_exit(gp_widget_event *ev)
 	gp_widgets_exit(0);
 }
 
+gp_app_info app_info = {
+	.name = "File Dialogs",
+	.desc = "File dialogs example application",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2021-2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	gp_widget *btn_open = gp_widget_button_new2("Load File", 0, open_file, NULL);
 	gp_widget *btn_save = gp_widget_button_new2("Save File", 0, save_file, NULL);
 	gp_widget *btn_exit = gp_widget_button_new2("Exit", 0, do_exit, NULL);
-	gp_widget *grid = gp_widget_grid_new(3, 1, 0);
+	gp_widget *grid = gp_widget_grid_new(3, 1, GP_WIDGET_GRID_UNIFORM);
+	gp_widget *layout = gp_widget_grid_new(1, 2, 0);
+
+	btn_open->align = GP_HFILL;
+	btn_save->align = GP_HFILL;
+	btn_exit->align = GP_HFILL;
 
 	gp_widget_grid_put(grid, 0, 0, btn_open);
 	gp_widget_grid_put(grid, 1, 0, btn_save);
 	gp_widget_grid_put(grid, 2, 0, btn_exit);
 
-	gp_widgets_main_loop(grid, "File Open Save", NULL, argc, argv);
+	gp_widget_grid_put(layout, 0, 0, gp_widget_label_new("Choose dialog", GP_TATTR_LARGE, 0));
+	gp_widget_grid_put(layout, 0, 1, grid);
+
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

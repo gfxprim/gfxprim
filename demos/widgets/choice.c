@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2021-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -76,6 +76,18 @@ const gp_widget_choice_desc choice_desc = {
 	}
 };
 
+gp_app_info app_info = {
+	.name = "Choice OPS",
+	.desc = "Choice ops example",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2021-2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	gp_htable *uids;
@@ -88,7 +100,7 @@ int main(int argc, char *argv[])
 
 	gp_htable_free(uids);
 
-	gp_widgets_main_loop(layout, "Choices OPS", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

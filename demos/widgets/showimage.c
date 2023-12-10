@@ -50,6 +50,14 @@ int pixmap_on_event(gp_widget_event *ev)
 	}
 }
 
+gp_app_info app_info = {
+	.name = "Show Image",
+	.desc = "Shows an image",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+};
+
 int main(int argc, char *argv[])
 {
 	gp_widget *layout = gp_widget_grid_new(1, 1, 0);
@@ -81,7 +89,7 @@ int main(int argc, char *argv[])
 
 	gp_widget_scroll_area_put(area, pixmap);
 
-	gp_widgets_main_loop(layout, "Show Image", NULL, 0, NULL);
+	gp_widgets_main_loop(layout, NULL, 0, NULL);
 
 	return 0;
 }

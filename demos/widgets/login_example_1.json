@@ -4,7 +4,7 @@
   "rows": 3,
   "border": 2,
   "widgets": [
-   {"type": "label", "text": "Enter your login information."},
+   {"type": "label", "tattr": "bold", "text": "Enter your login information."},
    {
     "cols": 2,
     "rows": 3,

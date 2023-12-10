@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 	gp_widget_on_event_set(layout, keypress_handler, layout);
 	gp_widget_event_unmask(layout, GP_WIDGET_EVENT_INPUT);
 
-	gp_widgets_main_loop(layout, "Layout switch test", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

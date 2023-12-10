@@ -29,12 +29,24 @@ int spinner_on_event(gp_widget_event *ev)
 {
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_WIDGET:
-		printf("Choice value %i\n", choices[gp_widget_int_val_get(ev->self)].val);
+		printf("Choice value %i\n", choices[gp_widget_choice_sel_get(ev->self)].val);
 	break;
 	}
 
 	return 0;
 }
+
+gp_app_info app_info = {
+	.name = "Choice array",
+	.desc = "Choice array example",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2021-2023"},
+		{}
+	}
+};
 
 int main(int argc, char *argv[])
 {
@@ -53,7 +65,7 @@ int main(int argc, char *argv[])
 	if (!layout)
 		return 0;
 
-	gp_widgets_main_loop(layout, "Choices arr", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

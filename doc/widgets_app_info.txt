@@ -1,0 +1,38 @@
+App info
+--------
+
+Application info is a structure, that if defined, stores an application
+information such as name, licence, description, version and a list of authors.
+
+The application info is shown as an dialog when 'Ctrl+i' is pressed and
+printed into the stdout when application is passed '-i' on the command line.
+
+IMPORTANT: The app info structure has to be populated in order to have the
+           application name in the window tittle.
+
+Example
+~~~~~~~
+
+.App info example
+[source,c]
+-------------------------------------------------------------------------------
+gp_app_info app_info = {
+        .name = "Foo",
+        .desc = "Simple Foo application"
+        .version = "1.0",
+        .license = "GPL-2.0-or-later",
+        .url = "http://foo.url",
+        .authors = (gp_app_info_author []) {
+                {.name = "Jonh Hacker", .email = "jonh.hacker@foo.url", .years = "2023"},
+                {}
+        }
+};
+-------------------------------------------------------------------------------
+
+IMPORTANT: The structure has to be called 'app_info' so that the linker links
+           it correctly.
+
+
+.App info dialog
+image:widgets_app_info.png[App info]
+

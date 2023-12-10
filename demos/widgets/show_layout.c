@@ -32,6 +32,18 @@ struct gp_task screenshot_task = {
 	.callback = screenshot_callback,
 };
 
+gp_app_info app_info = {
+	.name = "Show Layout",
+	.desc = "Shows a JSON widget layout",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2014-2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	gp_widgets_getopt(&argc, &argv);
@@ -52,7 +64,7 @@ int main(int argc, char *argv[])
 		gp_widgets_task_ins(&screenshot_task);
 	}
 
-	gp_widgets_main_loop(layout, "Layout", NULL, 0, NULL);
+	gp_widgets_main_loop(layout, NULL, 0, NULL);
 
 	return 0;
 }

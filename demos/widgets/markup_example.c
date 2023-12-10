@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	gp_widget_grid_put(layout, 0, 0, markup);
 	gp_widget_grid_put(layout, 0, 1, gp_widget_markup_new("#Markup \\#2#", GP_MARKUP_GFXPRIM, 0));
 
-	gp_widgets_main_loop(layout, "Markup test", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

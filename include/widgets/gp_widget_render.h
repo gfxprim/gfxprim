@@ -160,12 +160,11 @@ void gp_widgets_register_callback(int (*on_event)(gp_event *));
  * etc. This function does not return.
  *
  * @layout A widget layout to show.
- * @label Application label.
  * @init An init function.
  * @argc A main() argc.
  * @argv A main() argv.
  */
-void gp_widgets_main_loop(struct gp_widget *layout, const char *label,
+void gp_widgets_main_loop(struct gp_widget *layout,
                           void (*init)(int argc, char *argv[]),
                           int argc, char *argv[])
                           __attribute__((noreturn));

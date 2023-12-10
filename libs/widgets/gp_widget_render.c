@@ -24,6 +24,7 @@
 #include <widgets/gp_widget_keys.h>
 #include <widgets/gp_app_info.h>
 #include <widgets/gp_widget_poll.h>
+#include <widgets/gp_dialog_msg.h>
 
 #include "gp_widgets_internal.h"
 
@@ -257,7 +258,9 @@ static void render_ctx_init(gp_backend *backend)
 static gp_backend *backend;
 static gp_widget *app_layout;
 static gp_dialog *cur_dialog;
+
 static int back_from_dialog;
+static int getopt_called;
 
 static void gp_widget_render_ctx_init(void)
 {
@@ -465,6 +468,9 @@ static void move_poll(gp_backend *backend)
 
 void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 {
+	if (backend)
+		return;
+
 	backend = gp_backend_init(backend_init_str, 0, 0, win_tittle);
 	if (!backend)
 		exit(1);
@@ -690,6 +696,8 @@ void gp_widgets_getopt(int *argc, char **argv[])
 {
 	int opt;
 
+	getopt_called = 1;
+
 	while ((opt = getopt(*argc, *argv, "b:d:f:F:hiI:s:")) != -1) {
 		switch (opt) {
 		case 'i':
@@ -760,7 +768,12 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout)
 
 long gp_dialog_run(gp_dialog *dialog)
 {
-	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
+	gp_widget *saved = NULL;
+
+	if (backend)
+		saved = gp_widget_layout_replace(dialog->layout);
+
+	gp_widgets_layout_init(dialog->layout, gp_app_info_name());
 
 	dialog->retval = 0;
 	cur_dialog = dialog;
@@ -772,7 +785,8 @@ long gp_dialog_run(gp_dialog *dialog)
 		if (dialog->retval) {
 			cur_dialog = NULL;
 
-			gp_widget_layout_replace(saved);
+			if (saved)
+				gp_widget_layout_replace(saved);
 
 			back_from_dialog = 1;
 
@@ -783,14 +797,25 @@ long gp_dialog_run(gp_dialog *dialog)
 	}
 }
 
-void gp_widgets_main_loop(gp_widget *layout, const char *label,
+void gp_widgets_main_loop(gp_widget *layout,
                           void (*init)(int argc, char *argv[]),
                           int argc, char *argv[])
 {
-	if (argv)
-		gp_widgets_getopt(&argc, &argv);
+	if (argv) {
+		if (getopt_called) {
+			gp_dialog_msg_run(GP_DIALOG_MSG_ERR, __func__,
+			                  "Options already parsed with getopt!");
+		} else {
+			gp_widgets_getopt(&argc, &argv);
+		}
+	} else {
+		if (!getopt_called) {
+			gp_dialog_msg_run(GP_DIALOG_MSG_ERR, __func__,
+			                  "Options (argc & argv) were not passed!");
+		}
+	}
 
-	gp_widgets_layout_init(layout, label);
+	gp_widgets_layout_init(layout, gp_app_info_name());
 
 	win_layout = layout;
 

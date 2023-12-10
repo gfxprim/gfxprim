@@ -2,7 +2,7 @@
 
 /*
 
-    Copyright (C) 2007-2021 Cyril Hrubis <metan@ucw.cz>
+    Copyright (C) 2007-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -158,11 +158,25 @@ static int proc_mounts_event(gp_fd *self)
 	return 0;
 }
 
+gp_app_info app_info = {
+	.name = "Disk Free",
+	.desc = "Disk free space example",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2007-2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	fs_widget_groups = gp_htable_new(0, GP_HTABLE_COPY_KEY);
-	int fd_proc = open_proc_mounts();
+
 	gp_widget *layout = load_fsinfo();
+
+	int fd_proc = open_proc_mounts();
 	gp_fd fd = {
 		.fd = fd_proc,
 		.event = proc_mounts_event,
@@ -171,7 +185,7 @@ int main(int argc, char *argv[])
 
 	gp_widget_poll_add(&fd);
 
-	gp_widgets_main_loop(layout, "Disk Free", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

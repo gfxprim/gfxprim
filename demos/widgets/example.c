@@ -9,6 +9,7 @@
 #include <widgets/gp_widgets.h>
 
 static gp_htable *uids;
+static gp_widget *pbar;
 
 int button_on_event(gp_widget_event *ev)
 {
@@ -23,12 +24,25 @@ int button_on_event(gp_widget_event *ev)
 	return 1;
 }
 
-static gp_app_info app_info = {
+int slider_event(gp_widget_event *ev)
+{
+	if (ev->type == GP_WIDGET_EVENT_NEW)
+		return 0;
+
+	printf("Slider value=%"PRIi64"\n", ev->self->slider->val);
+
+	if (pbar)
+		gp_widget_pbar_set(pbar, ev->self->slider->val);
+
+	return 0;
+}
+
+gp_app_info app_info = {
 	.name = "Example",
 	.desc = "Example application",
 	.version = "1.0",
 	.license = "GPL-2.0-or-later",
-	.url = "http://foo.bar",
+	.url = "http://gfxprim.ucw.cz",
 	.authors = (gp_app_info_author []) {
 		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2014-2022"},
 		{}
@@ -41,9 +55,9 @@ int main(int argc, char *argv[])
 	if (!layout)
 		return 0;
 
-	gp_app_info_set(&app_info);
+	pbar = gp_widget_by_uid(uids, "pbar", GP_WIDGET_PROGRESSBAR);
 
-	gp_widgets_main_loop(layout, "Widgets Example", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

@@ -28,17 +28,31 @@ static int enable(gp_widget_event *ev)
 	return 0;
 }
 
+gp_app_info app_info = {
+	.name = "Disable",
+	.desc = "Disabled widgets example",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2020-2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
-	gp_widget *btn_disable = gp_widget_button_new("Disable", 0);
-	gp_widget *btn_enable = gp_widget_button_new("Enable", 0);
-	gp_widget *buttons = gp_widget_grid_new(2, 1, 0);
-	gp_widget *grid = gp_widget_grid_new(1, 2, 0);
 	const char *choices[] = {
 		"Choice #1",
 		"Choice #2",
 		"Choice #3"
 	};
+
+	gp_widget *btn_disable = gp_widget_button_new("Disable", 0);
+	gp_widget *btn_enable = gp_widget_button_new("Enable", 0);
+	gp_widget *buttons = gp_widget_grid_new(2, 1, 0);
+	gp_widget *grid = gp_widget_grid_new(1, 2, 0);
+
 	gp_widget *choice = gp_widget_radiobutton_new(choices, 3, 0);
 	gp_widget *frame = gp_widget_frame_new("Target widget", 0, choice);
 
@@ -53,7 +67,7 @@ int main(int argc, char *argv[])
 	gp_widget_grid_put(grid, 0, 0, frame);
 	gp_widget_grid_put(grid, 0, 1, buttons);
 
-	gp_widgets_main_loop(grid, "Disable", NULL, argc, argv);
+	gp_widgets_main_loop(grid, NULL, argc, argv);
 
 	return 0;
 }

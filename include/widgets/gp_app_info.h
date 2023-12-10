@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -26,10 +26,21 @@ typedef struct gp_app_info {
 	gp_app_info_author *authors;
 } gp_app_info;
 
-void gp_app_info_set(gp_app_info *app_info);
+/**
+ * @brief Returns application name.
+ *
+ * @return Application name.
+ */
+const char *gp_app_info_name(void);
 
+/**
+ * @brief Shows application info in an dialog.
+ */
 void gp_app_info_dialog_run(void);
 
+/**
+ * @brief Prints application info into stdout.
+ */
 void gp_app_info_print(void);
 
 #endif /* GP_APP_INFO_H */

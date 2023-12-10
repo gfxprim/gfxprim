@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	gp_widget_grid_put(layout, 0, 0, gp_widget_label_new("Text Label", 0, 0));
 	gp_widget_grid_put(layout, 0, 1, button_ok);
 
-	gp_widgets_main_loop(layout, "t3", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

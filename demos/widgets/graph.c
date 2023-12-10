@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -89,6 +89,18 @@ static int min_y_on_event(gp_widget_event *ev)
 	return 0;
 }
 
+gp_app_info app_info = {
+	.name = "Graph Example",
+	.desc = "Graph widget xample application",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	gp_widget *graph = gp_widget_graph_new(GP_WIDGET_SIZE(400, 0, 0),
@@ -127,14 +139,10 @@ int main(int argc, char *argv[])
 	gp_widget_on_event_set(max_y_spinner, max_y_on_event, graph);
 	gp_widget_on_event_set(min_y_spinner, min_y_on_event, graph);
 
-//	gp_widget_graph_point_add(graph, 0, 0);
-//	gp_widget_graph_point_add(graph, 0, 1);
-//	gp_widget_graph_point_add(graph, 2, 2);
-
 	tmr.priv = graph;
 	gp_widgets_timer_ins(&tmr);
 
-	gp_widgets_main_loop(grid, "Graph", NULL, argc, argv);
+	gp_widgets_main_loop(grid, NULL, argc, argv);
 
 	return 0;
 }

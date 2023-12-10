@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	if (!layout)
 		return 0;
 
-	gp_widgets_main_loop(layout, "Scroll area example", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

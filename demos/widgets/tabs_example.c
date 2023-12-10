@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2019 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 	if (!layout)
 		return 0;
 
-	gp_widgets_main_loop(layout, "Tabs example", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

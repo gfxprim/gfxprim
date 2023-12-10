@@ -46,13 +46,25 @@ const gp_widget_choice_desc choice_desc = {
 	},
 };
 
+gp_app_info app_info = {
+	.name = "Choice JSON array",
+	.desc = "Choice JSON array example",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2021-2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	gp_widget *layout = gp_widget_layout_json("choice_json_arr.json", NULL, NULL);
 	if (!layout)
 		return 0;
 
-	gp_widgets_main_loop(layout, "Choices JSON arr", NULL, argc, argv);
+	gp_widgets_main_loop(layout, NULL, argc, argv);
 
 	return 0;
 }

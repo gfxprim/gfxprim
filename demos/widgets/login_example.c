@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -49,6 +49,18 @@ int show_password(gp_widget_event *ev)
 	return 0;
 }
 
+gp_app_info app_info = {
+	.name = "Login!",
+	.desc = "Login example",
+	.version = "1.0",
+	.license = "GPL-2.0-or-later",
+	.url = "http://gfxprim.ucw.cz",
+	.authors = (gp_app_info_author []) {
+		{.name = "Cyril Hrubis", .email = "metan@ucw.cz", .years = "2014-2023"},
+		{}
+	}
+};
+
 int main(int argc, char *argv[])
 {
 	const char *layout_path = "login_example_1.json";
@@ -62,7 +74,7 @@ int main(int argc, char *argv[])
 	if (!layout)
 		return 0;
 
-	gp_widgets_main_loop(layout, "Login!", NULL, 0, NULL);
+	gp_widgets_main_loop(layout, NULL, 0, NULL);
 
 	return 0;
 }

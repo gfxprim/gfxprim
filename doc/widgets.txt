@@ -24,6 +24,7 @@ look like this is probably as close as you can get...
 Widgets generic documetation
 ----------------------------
 
+* link:widgets_app_info.html[App info]
 * link:widgets_json.html[JSON layout format]
 * link:widgets_events.html[Event handlers]
 * link:widgets_alignment.html[Alignment and fill]
