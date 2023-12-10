@@ -57,7 +57,7 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 
 	unsigned int wd = self->pbar->val * w / self->pbar->max;
 
-	char buf[64];
+	char buf[64] = {};
 	float val = self->pbar->val;
 
 	unsigned int hours, mins, secs;
@@ -67,7 +67,7 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 
 	switch (self->pbar->unit & GP_WIDGET_PBAR_TMASK) {
 	case GP_WIDGET_PBAR_NONE:
-		return;
+		break;
 	case GP_WIDGET_PBAR_PERCENTS:
 		snprintf(buf, sizeof(buf), "%.2f%%",
 		         100 * val / self->pbar->max);
