@@ -18,8 +18,8 @@ link:https://www.waveshare.net/datasheet/EK_PDF/EK79655.pdf[GD7965 datasheet]
 | Resolution      | 800x480
 | Size            | 170.2 mm x 111.2 mm
 | DPI             | 125
-| Full refresh    | ~4s
-| Partial refresh | ~4s
+| Full refresh    | \~4s OTP LUT, ~3s GFXprim LUT
+| Partial refresh | \~4s OTP LUT, ~1s GFXprim LUT
 |====================================================================
 
 .Terminal, Dictionary, IRC Client, Image Viewer, Music Player, and Process Top
