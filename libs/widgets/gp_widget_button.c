@@ -37,22 +37,6 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	return 2 * ctx->padd + GP_ODD_UP(gp_text_ascent(ctx->font));
 }
 
-static void magnifying_glass(gp_pixmap *buf, gp_coord cx, gp_coord cy,
-                             gp_size sym_r, gp_size asc_half, gp_pixel color)
-{
-	unsigned int i;
-
-	gp_fill_ring(buf, cx, cy, sym_r, sym_r + asc_half/4, color);
-
-	for (i = 0; i <= asc_half/4; i++)
-		gp_line(buf, cx + sym_r, cy+sym_r-i, cx+sym_r+asc_half/2, cy+sym_r+asc_half/2-i, color);
-
-	gp_line(buf, cx + sym_r-1, cy+sym_r-1, cx+sym_r+asc_half/2, cy+sym_r+asc_half/2, color);
-
-	for (i = 0; i <= asc_half/4; i++)
-		gp_line(buf, cx + sym_r-i, cy+sym_r, cx+sym_r+asc_half/2-i, cy+sym_r+asc_half/2, color);
-}
-
 static void cross(gp_pixmap *buf, gp_coord cx, gp_coord cy,
                   gp_size sym_r, gp_size thickness, gp_pixel color)
 {
@@ -311,24 +295,20 @@ static void render(gp_widget *self, const gp_offset *offset,
 		backspace(ctx->buf, cx-sym_r/5, cy, sym_r+sym_r/2, ctx->text_color, ctx->bg_color);
 	break;
 	case GP_BUTTON_ZOOM_IN:
-		gp_fill_rect(ctx->buf, cx - asc/14, cy - sym_r/2,
-		             cx + asc/14, cy + sym_r/2,
-		             ctx->text_color);
-	/* fallthrough */
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_IN,
+		                       sx, sy, sw, sh, bg_color, ctx);
+	break;
 	case GP_BUTTON_ZOOM_OUT:
-		gp_fill_rect(ctx->buf, cx - sym_r/2, cy - asc/14,
-		             cx + sym_r/2, cy + asc/14,
-		             ctx->text_color);
-
-		magnifying_glass(ctx->buf, cx, cy, sym_r, asc_half, ctx->text_color);
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_OUT,
+		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ZOOM_FIT:
-	for (i = 0; i < asc_half/4; i++)
-		gp_rect(ctx->buf, cx-sym_r/2+i, cy-sym_r/2+i, cx+sym_r/2-i, cy+sym_r/2-i, ctx->text_color);
-
-	/* fallthrough */
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_FIT,
+		                       sx, sy, sw, sh, bg_color, ctx);
+	break;
 	case GP_BUTTON_ZOOM_NORMAL:
-		magnifying_glass(ctx->buf, cx, cy, sym_r, asc_half, ctx->text_color);
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM,
+		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ROTATE_CW:
 		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ROTATE_CW,

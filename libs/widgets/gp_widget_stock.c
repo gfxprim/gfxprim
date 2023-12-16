@@ -998,6 +998,43 @@ static void render_stock_star(gp_pixmap *pix,
 	gp_polygon_th(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, 1, gp_pixel_chans_add(ctx->pixel_type, ctx->warn_color, -5));
 }
 
+static void render_stock_zoom(gp_pixmap *pix, enum gp_widget_stock_type type,
+                              gp_coord x, gp_coord y,
+                              gp_size w, gp_size h, gp_pixel bg_col,
+                              const gp_widget_render_ctx *ctx)
+{
+	gp_size th = 2*(GP_MIN(3*w/8, 3*h/8)+1)/8;
+	gp_size co = GP_MIN(w/2, h/2) - th;
+	gp_size ch = GP_MIN(w/2, h/2);
+
+	gp_size sym_line_w = (th+1)/2;
+	gp_size sym_len = co-2*th;
+
+	gp_coord cx = x + w/2 - th;
+	gp_coord cy = y + h/2 - th;
+
+	switch (GP_WIDGET_STOCK_TYPE(type)) {
+	case GP_WIDGET_STOCK_ZOOM:
+	break;
+	case GP_WIDGET_STOCK_ZOOM_IN:
+		gp_fill_rect_xyxy(pix, cx-sym_line_w, cy-sym_len, cx+sym_line_w, cy+sym_len, ctx->text_color);
+	/* fallthrough */
+	case GP_WIDGET_STOCK_ZOOM_OUT:
+		gp_fill_rect_xyxy(pix, cx-sym_len, cy-sym_line_w, cx+sym_len, cy+sym_line_w, ctx->text_color);
+	break;
+	case GP_WIDGET_STOCK_ZOOM_FIT:
+		gp_fill_rect_xyxy(pix, cx-sym_len+1, cy-sym_len+1, cx+sym_len-1, cy+sym_len-1, ctx->text_color);
+		gp_fill_rect_xyxy(pix, cx-sym_len+2*sym_line_w+1, cy-sym_len+2*sym_line_w+1,
+		                       cx+sym_len-2*sym_line_w-1, cy+sym_len-2*sym_line_w-1, bg_col);
+	break;
+	}
+
+	gp_fill_ring(pix, cx, cy, co, co - th, ctx->text_color);
+
+	gp_line_th(pix, cx+co/1.44, cy+co/1.44, cx+ch, cy+ch, th, ctx->text_color);
+	gp_fill_circle(pix, cx+ch, cy+ch, th, ctx->text_color);
+}
+
 static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
                                 gp_coord x, gp_coord y, gp_size w, gp_size h,
                                 gp_pixel bg_col, const gp_widget_render_ctx *ctx)
@@ -1079,6 +1116,12 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	break;
 	case GP_WIDGET_STOCK_STAR:
 		render_stock_star(pix, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_ZOOM:
+	case GP_WIDGET_STOCK_ZOOM_IN:
+	case GP_WIDGET_STOCK_ZOOM_OUT:
+	case GP_WIDGET_STOCK_ZOOM_FIT:
+		render_stock_zoom(pix, type, x, y, w, h, bg_col, ctx);
 	break;
 	}
 
@@ -1172,6 +1215,11 @@ static struct stock_types {
 	{"night", GP_WIDGET_STOCK_NIGHT},
 
 	{"star", GP_WIDGET_STOCK_STAR},
+
+	{"zoom", GP_WIDGET_STOCK_ZOOM},
+	{"zoom_in", GP_WIDGET_STOCK_ZOOM_IN},
+	{"zoom_out", GP_WIDGET_STOCK_ZOOM_OUT},
+	{"zoom_fit", GP_WIDGET_STOCK_ZOOM_FIT},
 };
 
 static int gp_widget_stock_type_from_str(const char *type)
