@@ -92,7 +92,7 @@ zypper in freetype-devel fontconfig-devel
 
 .Install X11 devel library
 -------------------------------------------------------------------------------
-zypper in libX11-devel libXext-devel
+zypper in libX11-devel libXext-devel libXrandr-devel
 -------------------------------------------------------------------------------
 
 .Install XCB devel library
@@ -114,7 +114,8 @@ zypper in swig python-devel
 -------------------------------------------------------------------------------
 zypper in gcc make libjpeg-devel libpng-devel giflib-devel libtiff-devel
           freetype-devel fontconfig-devel libX11-devel libXext-devel
-          xcb-util-keysyms-devel wayland-devel swig python-devel
+	  libXrandr-devel xcb-util-keysyms-devel wayland-devel swig
+	  python-devel
 -------------------------------------------------------------------------------
 
 Debian
@@ -140,7 +141,7 @@ apt-get install libfreetype6-dev libfontconfig-dev
 
 .Install X11 devel library
 -------------------------------------------------------------------------------
-apt-get install libx11-dev libxext-dev
+apt-get install libx11-dev libxext-dev libxrandr-dev
 -------------------------------------------------------------------------------
 
 .Install Wayland devel library
@@ -157,7 +158,8 @@ apt-get install swig python-dev
 -------------------------------------------------------------------------------
 apt-get install gcc make pkg-config libjpeg-dev libpng-dev libgif-dev
                 libtiff-dev libwebp-dev libfreetype6-dev libfontconfig-dev
-                libx11-dev libxext-dev libwayland-dev swig python-dev
+                libx11-dev libxext-dev libxrandr-dev libwayland-dev swig
+                python-dev
 -------------------------------------------------------------------------------
 
 Deb packages can be build from the GFXprim source (after installing necessary
