@@ -20,6 +20,7 @@ enum gp_widget_pbar_unit {
 struct gp_widget_pbar {
 	float max;
 	float val;
+	float step;
 	enum gp_widget_pbar_unit unit;
 };
 

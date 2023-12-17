@@ -49,6 +49,7 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 	gp_pixel text_color = ctx->text_color;
+	gp_pixel frame_color = self->focused ? ctx->sel_color : ctx->text_color;
 
 	if (gp_widget_is_disabled(self, flags))
 		text_color = ctx->col_disabled;
@@ -94,8 +95,8 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 
 	gp_sub_pixmap(ctx->buf, &p, x, y, wd, h);
 	if (p.w > 0) {
-		gp_fill_rrect_xywh(&p, 0, 0, w, h, ctx->bg_color,
-		                   ctx->hl_color, text_color);
+		gp_fill_rrect_xywh_focused(&p, 0, 0, w, h, ctx->bg_color,
+		                           ctx->hl_color, frame_color, self->focused);
 		if (is_1bpp) {
 			gp_print(&p, ctx->font, w/2, ctx->padd,
 			         GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
@@ -105,8 +106,8 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 
 	gp_sub_pixmap(ctx->buf, &p, x+wd, y, w-wd, h);
 	if (p.w > 0) {
-		gp_fill_rrect_xywh(&p, -wd, 0, w, h, ctx->bg_color,
-		                   ctx->fg_color, text_color);
+		gp_fill_rrect_xywh_focused(&p, -wd, 0, w, h, ctx->bg_color,
+		                           ctx->fg_color, frame_color, self->focused);
 		if (is_1bpp) {
 			gp_print(&p, ctx->font, w/2 -wd, ctx->padd,
 			         GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
@@ -204,10 +205,110 @@ static gp_widget *json_to_pbar(gp_json_reader *json, gp_json_val *val, gp_widget
 	return gp_widget_pbar_new(pbval, max, unit);
 }
 
+static int pbar_val_add(gp_widget *self, float val)
+{
+	struct gp_widget_pbar *pbar = self->pbar;
+
+	if (val == 0)
+		return 0;
+
+	if (val > 0) {
+		if (pbar->val + val > pbar->max) {
+			if (pbar->val == pbar->max)
+				return 0;
+			pbar->val = pbar->max;
+		} else {
+			pbar->val += val;
+		}
+	}
+
+	if (val < 0) {
+		if (pbar->val + val < 0) {
+			if (pbar->val == 0)
+				return 0;
+			pbar->val = 0;
+		} else {
+			pbar->val += val;
+		}
+	}
+
+	gp_widget_send_widget_event(self, 0);
+	gp_widget_redraw(self);
+
+	return 1;
+}
+
+static int pbar_val_set(gp_widget *self, float val)
+{
+	struct gp_widget_pbar *pbar = self->pbar;
+
+	if (pbar->val == val)
+		return 0;
+
+	pbar->val = val;
+
+	gp_widget_send_widget_event(self, 0);
+	gp_widget_redraw(self);
+
+	return 1;
+}
+
+static int pbar_coord_to_val(gp_widget *self, const gp_widget_render_ctx *ctx, int coord)
+{
+	struct gp_widget_pbar *pbar = self->pbar;
+
+	float new_val = pbar->max * (coord - ctx->fr_thick) / (self->w - 2*ctx->fr_thick);
+
+	if (new_val < 0)
+		new_val = 0;
+
+	if (new_val > pbar->max)
+		new_val = pbar->max;
+
+	return pbar_val_set(self, new_val);
+}
+
+static int pbar_event(gp_widget *self, const gp_widget_render_ctx *ctx,
+                      gp_event *ev)
+{
+	switch (ev->type) {
+	case GP_EV_ABS:
+		if (ev->code == GP_EV_ABS_POS)
+			return pbar_coord_to_val(self, ctx, ev->st->cursor_x);
+	break;
+	case GP_EV_REL:
+                if (ev->code == GP_EV_REL_WHEEL)
+			return pbar_val_add(self, ev->val);
+		if (ev->code == GP_EV_REL_POS && gp_ev_key_pressed(ev, GP_BTN_LEFT))
+			return pbar_coord_to_val(self, ctx, ev->st->cursor_x);
+	break;
+	case GP_EV_KEY:
+		if (ev->code == GP_EV_KEY_UP)
+			return 0;
+
+		switch (ev->val) {
+		case GP_BTN_LEFT:
+			return pbar_coord_to_val(self, ctx, ev->st->cursor_x);
+		case GP_KEY_RIGHT:
+			return pbar_val_add(self, self->pbar->step);
+		case GP_KEY_LEFT:
+			return pbar_val_add(self, -self->pbar->step);
+		case GP_KEY_HOME:
+			return pbar_val_set(self, 0);
+		case GP_KEY_END:
+			return pbar_val_set(self, self->pbar->max);
+		}
+	break;
+	}
+
+	return 0;
+}
+
 struct gp_widget_ops gp_widget_pbar_ops = {
 	.min_w = pbar_min_w,
 	.min_h = pbar_min_h,
 	.render = pbar_render,
+	.event = pbar_event,
 	.from_json = json_to_pbar,
 	.id = "pbar",
 };
@@ -227,6 +328,9 @@ gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_unit uni
 	ret->pbar->val = val;
 	ret->pbar->unit = unit;
 	ret->pbar->max = max;
+	ret->pbar->step = 1;
+
+	ret->no_events = 1;
 
 	return ret;
 }
@@ -241,9 +345,11 @@ void gp_widget_pbar_set(gp_widget *self, float val)
 	if (check_val(val, self->pbar->max))
 		return;
 
+	if (self->pbar->val == val)
+		return;
+
 	self->pbar->val = val;
 
-	//TODO: check when we should redraw
 	gp_widget_redraw(self);
 }
 

@@ -26,13 +26,24 @@ int button_on_event(gp_widget_event *ev)
 
 int slider_event(gp_widget_event *ev)
 {
-	if (ev->type == GP_WIDGET_EVENT_NEW)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	printf("Slider value=%"PRIi64"\n", ev->self->slider->val);
 
 	if (pbar)
 		gp_widget_pbar_set(pbar, ev->self->slider->val);
+
+	return 0;
+}
+
+int pbar_event(gp_widget_event *ev)
+{
+
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	printf("Progress bar value %f\n", ev->self->pbar->val);
 
 	return 0;
 }
