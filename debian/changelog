@@ -1,4 +1,4 @@
-gfxprim (1.0.0-rc0-1) unstable; urgency=low
+gfxprim (1.0.0-1) unstable; urgency=low
 
   * Initial release (based on the commit 38c6f4, not including
     the Python bindings)
