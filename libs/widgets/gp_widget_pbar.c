@@ -26,19 +26,19 @@ static unsigned int pbar_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	return 2 * ctx->padd + gp_text_ascent(ctx->font);
 }
 
-static unsigned int val_to_secs(float sec)
+static unsigned int val_to_secs(uint64_t sec)
 {
-	return (unsigned int)(sec + 0.5) % 60;
+	return sec % 60;
 }
 
-static unsigned int val_to_mins(float sec)
+static unsigned int val_to_mins(int64_t sec)
 {
-	return ((unsigned int)sec/60) % 60;
+	return (sec/60) % 60;
 }
 
-static unsigned int val_to_hours(float sec)
+static unsigned int val_to_hours(uint64_t sec)
 {
-	return ((unsigned int)sec/3600) % 60;
+	return (sec/3600) % 60;
 }
 
 static void pbar_render(gp_widget *self, const gp_offset *offset,
@@ -56,10 +56,10 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	unsigned int wd = self->pbar->val * w / self->pbar->max;
+	unsigned int wd = 1.00 * self->pbar->val * w / self->pbar->max;
 
 	char buf[64] = {};
-	float val = self->pbar->val;
+	uint64_t val = self->pbar->val;
 
 	unsigned int hours, mins, secs;
 
@@ -71,7 +71,7 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 		break;
 	case GP_WIDGET_PBAR_PERCENTS:
 		snprintf(buf, sizeof(buf), "%.2f%%",
-		         100 * val / self->pbar->max);
+		         100.00 * val / self->pbar->max);
 	break;
 	case GP_WIDGET_PBAR_SECONDS:
 		hours = val_to_hours(val);
@@ -122,20 +122,20 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	}
 }
 
-static int check_val(double val, double max)
+static int check_val(uint64_t val, uint64_t max)
 {
-	if (val < 0 || val > max) {
-		GP_WARN("Invalid progressbar value %lf", val);
+	if (val > max) {
+		GP_WARN("Invalid progressbar value %"PRIu64" > max %"PRIu64, val, max);
 		return 1;
 	}
 
 	return 0;
 }
 
-static int check_max(double max)
+static int check_max(uint64_t max)
 {
-	if (max <= 0) {
-		GP_WARN("Invalid progressbar max %lf", max);
+	if (max == 0) {
+		GP_WARN("Invalid progressbar max %"PRIu64, max);
 		return 1;
 	}
 
@@ -151,9 +151,9 @@ enum keys {
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("inverse", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("max", GP_JSON_FLOAT),
+	GP_JSON_OBJ_ATTR("max", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("unit", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("val", GP_JSON_FLOAT),
+	GP_JSON_OBJ_ATTR("val", GP_JSON_INT),
 };
 
 static const gp_json_obj obj_filter = {
@@ -163,7 +163,7 @@ static const gp_json_obj obj_filter = {
 
 static gp_widget *json_to_pbar(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	double pbval = 0, max = 100;
+	double pbval = 0, max = 10000;
 	enum gp_widget_pbar_unit unit = GP_WIDGET_PBAR_PERCENTS;
 	int inverse = 0;
 
@@ -194,7 +194,7 @@ static gp_widget *json_to_pbar(gp_json_reader *json, gp_json_val *val, gp_widget
 	}
 
 	if (check_max(max))
-		max = 100;
+		max = 10000;
 
 	if (check_val(pbval, max))
 		pbval = 0;
@@ -313,7 +313,7 @@ struct gp_widget_ops gp_widget_pbar_ops = {
 	.id = "pbar",
 };
 
-gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_unit unit)
+gp_widget *gp_widget_pbar_new(uint64_t val, uint64_t max, enum gp_widget_pbar_unit unit)
 {
 	size_t size = sizeof(struct gp_widget_pbar);
 	gp_widget *ret;
@@ -335,11 +335,11 @@ gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_unit uni
 	return ret;
 }
 
-void gp_widget_pbar_set(gp_widget *self, float val)
+void gp_widget_pbar_val_set(gp_widget *self, uint64_t val)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_PROGRESSBAR, );
 
-	GP_DEBUG(3, "Setting widget (%p) progressbar val '%.2f' -> '%.2f'",
+	GP_DEBUG(3, "Setting widget (%p) progressbar val %"PRIu64" -> %"PRIu64,
 		 self, self->pbar->val, val);
 
 	if (check_val(val, self->pbar->max))
@@ -353,18 +353,22 @@ void gp_widget_pbar_set(gp_widget *self, float val)
 	gp_widget_redraw(self);
 }
 
-void gp_widget_pbar_set_max(gp_widget *self, float max)
+void gp_widget_pbar_max_set(gp_widget *self, uint64_t max)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_PROGRESSBAR, );
 
-	GP_DEBUG(3, "Setting widget (%p) progressbar max '%.2f' -> '%.2f'",
+	GP_DEBUG(3, "Setting widget (%p) progressbar max %"PRIu64" -> %"PRIu64,
 		 self, self->pbar->max, max);
-
-	if (check_max(max))
-		return;
 
 	self->pbar->val = GP_MIN(self->pbar->val, max);
 	self->pbar->max = max;
 
 	gp_widget_redraw(self);
+}
+
+uint64_t gp_widget_pbar_val_get(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_PROGRESSBAR, 0);
+
+	return self->pbar->val;
 }

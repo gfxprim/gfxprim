@@ -2,12 +2,14 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #ifndef GP_WIDGET_PBAR_H
 #define GP_WIDGET_PBAR_H
+
+#include <stdint.h>
 
 enum gp_widget_pbar_unit {
 	GP_WIDGET_PBAR_NONE,
@@ -18,9 +20,9 @@ enum gp_widget_pbar_unit {
 };
 
 struct gp_widget_pbar {
-	float max;
-	float val;
-	float step;
+	uint64_t max;
+	uint64_t val;
+	int32_t step;
 	enum gp_widget_pbar_unit unit;
 };
 
@@ -33,7 +35,8 @@ struct gp_widget_pbar {
  *
  * @return A progress bar widget.
  */
-gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_unit unit);
+gp_widget *gp_widget_pbar_new(uint64_t val, uint64_t max,
+                              enum gp_widget_pbar_unit unit);
 
 /**
  * @brief Sets a progress bar value.
@@ -41,7 +44,7 @@ gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_unit uni
  * @self A progress bar widget.
  * @val New progress bar value.
  */
-void gp_widget_pbar_set(gp_widget *self, float val);
+void gp_widget_pbar_val_set(gp_widget *self, uint64_t val);
 
 /**
  * @brief Sets a progress bar maximum.
@@ -49,6 +52,14 @@ void gp_widget_pbar_set(gp_widget *self, float val);
  * @self A progress bar widget.
  * @max New maximal progress bar value.
  */
-void gp_widget_pbar_set_max(gp_widget *self, float max);
+void gp_widget_pbar_max_set(gp_widget *self, uint64_t max);
+
+/**
+ * @brief Returns progressbar value.
+ *
+ * @self A progress bar widget.
+ * @return A progress bar value.
+ */
+uint64_t gp_widget_pbar_val_get(gp_widget *self);
 
 #endif /* GP_WIDGET_PBAR_H */

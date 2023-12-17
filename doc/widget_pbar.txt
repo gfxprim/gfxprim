@@ -2,7 +2,7 @@ Progressbar widget
 ------------------
 
 Progressbar is a widget that shows a progress. The progress is internally
-stored as a floating point number that starts at 0 and ends at `max`.
+stored as a 64-bit integer number that starts at 0 and ends at `max`.
 
 The value can be associated with a unit currently 'none', 'percents' and
 'seconds' are supported.
@@ -11,6 +11,9 @@ Progressbar can also be set to be inverse which means that the value used for
 unit display will be `max - val` instead of `val`.
 
 The default unit is 'percents'.
+
+If progressbar has an event handler set it's seekable, i.e. the user can
+change it's value.
 
 .A progressbar widget unit=none
 image:widget_pbar_none.png[Progressbar widget unit=none]
@@ -33,37 +36,36 @@ enum gp_widget_pbar_unit {
         GP_WIDGET_PBAR_INVERSE = 0x80,
 };
 
-gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_unit unit);
+gp_widget *gp_widget_pbar_new(uint64_t val, uint64_t max,
+                              enum gp_widget_pbar_unit unit);
 -------------------------------------------------------------------------------
 
 The unit can be bitwise ored with `GP_WIDGET_PBAR_INVERSE` to make the
 progressbar unit display inverse.
 
-.Function to set progress
 [source,c]
 -------------------------------------------------------------------------------
-void gp_widget_pbar_set(gp_widget *self, float val);
+void gp_widget_pbar_val_set(gp_widget *self, uint64_t val);
+
+uint64_t gp_widget_pbar_val_get(gp_widget *self);
 -------------------------------------------------------------------------------
 
-This function sets a progressbar value, i.e. the progress that is shown on a
-screen.
+This function sets and gets a progressbar value, i.e. the progress that is
+shown on a screen.
 
-.Function to set max
 [source,c]
 -------------------------------------------------------------------------------
-void gp_widget_pbar_set_max(gp_widget *self, float max)
+void gp_widget_pbar_max_set(gp_widget *self, uint64_t max)
 -------------------------------------------------------------------------------
 
 Sets a progress bar maximum.
-
-
 
 .Progressbar JSON attributes
 [cols=",,,3",options="header"]
 |===================================================
 |  Attribute  |  Type  |   Default  | Description
-|   +val+     | float  |      0     | Initial value
-|   +max+     | float  |    100     | Maximal value
+|   +val+     |  uint  |      0     | Initial value
+|   +max+     |  uint  |   10000    | Maximal value
 |   +inverse+ | bool   |   false    | Inverse progress
 |   +unit+    | string | "percents" | Value units
 |===================================================
@@ -72,4 +74,6 @@ Sets a progress bar maximum.
 [cols=",3",options="header"]
 |===================================================
 | Widget event value | Description
+|         0          | Emitted when progress bar
+                       value has been changed.
 |===================================================

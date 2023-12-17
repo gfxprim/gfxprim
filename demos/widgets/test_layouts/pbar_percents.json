@@ -5,8 +5,8 @@
   "widgets": [
    {
     "type": "pbar",
-    "max": 100,
-    "val": 50
+    "max": 1000,
+    "val": 500
    }
   ]
  }
