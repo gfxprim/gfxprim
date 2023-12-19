@@ -24,19 +24,22 @@ Packages are build for:
 The packages are build in the
 link:https://build.opensuse.org/package/show/home:metan/gfxprim-debian[build service].
 
-.Install apt key
+.Install apt key and add repository
 -------------------------------------------------------------------------------
-# The $DISTRO is a distribution name as in the build service
+# Older distros use apt-key
+# The $DISTRO is a distribution name as in the build service, e.g. Debian_10
 
 wget http://download.opensuse.org/repositories/home:/metan/$DISTRO/Release.key
 apt-key add Release.key
--------------------------------------------------------------------------------
-
-.Add repository
--------------------------------------------------------------------------------
-# The $DISTRO is a distribution name as in the build service
-
 echo "deb http://download.opensuse.org/repositories/home:/metan/$DISTRO ./" >> /etc/apt/sources.list
+
+# For newer distros apt-key is deprecated
+# The $DISTRO is a distribution name as in the build service, e.g. Debian_12
+
+wget -O- http://download.opensuse.org/repositories/home:/metan/$DISTRO/Release.key | \
+     gpg --dearmor --yes --output /usr/share/keyrings/gfxprim.gpg
+echo "deb [signed-by=/usr/share/keyrings/gfxprim.gpg] http://download.opensuse.org/repositories/home:/metan/$DISTRO ./" \
+     >> /etc/apt/sources.list
 -------------------------------------------------------------------------------
 
 .Install packages
