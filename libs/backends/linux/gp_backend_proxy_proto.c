@@ -120,7 +120,8 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 		payload_size = sizeof(gp_event);
 	break;
 	case GP_PROXY_MAP:
-		payload_size = sizeof(struct gp_proxy_map);
+		if (payload)
+			payload_size = sizeof(struct gp_proxy_path);
 	break;
 	case GP_PROXY_PIXMAP:
 		payload_size = sizeof(gp_pixmap);

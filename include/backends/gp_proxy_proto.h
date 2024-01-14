@@ -87,9 +87,21 @@ enum gp_proxy_msg_types {
 	GP_PROXY_PIXEL_TYPE,
 	/* Payload type is gp_event */
 	GP_PROXY_EVENT,
-	/* Asks client to map a shared buffer */
+	/*
+	 * - Sever asks client to map a shared buffer.
+	 *   Payload is gp_proxy_path type.
+	 *
+	 * - Clients notifies server that buffer has been mapped.
+	 *   No payload.
+	 */
 	GP_PROXY_MAP,
-	/* Asks client to unmap a shared buffer */
+	/*
+	 * - Server asks client to unmap a shared buffer.
+	 *   No payload.
+	 *
+	 * - Client notifies sever that buffer has been unmapped.
+	 *   No payload.
+	 */
 	GP_PROXY_UNMAP,
 	/* Asks client to create a pixmap from the shared buffer */
 	GP_PROXY_PIXMAP,

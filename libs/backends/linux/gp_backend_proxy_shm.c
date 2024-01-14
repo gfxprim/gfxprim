@@ -29,7 +29,7 @@ static size_t round_to_page_size(size_t size)
 	return ret;
 }
 
-struct gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, gp_pixel_type type)
+gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, gp_pixel_type type)
 {
 	size_t path_size = strlen(path)+1;
 
@@ -38,7 +38,7 @@ struct gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, g
 		return NULL;
 	}
 
-	struct gp_proxy_shm *ret = malloc(sizeof(struct gp_proxy_shm));
+	gp_proxy_shm *ret = malloc(sizeof(struct gp_proxy_shm));
 
 	if (!ret) {
 		GP_WARN("Malloc failed :-(");
@@ -85,7 +85,7 @@ err0:
 	return NULL;
 }
 
-int gp_proxy_shm_resize(struct gp_proxy_shm *self, gp_size w, gp_size h)
+int gp_proxy_shm_resize(gp_proxy_shm *self, gp_size w, gp_size h)
 {
 	gp_pixmap new;
 	gp_pixel_type ptype = self->pixmap.pixel_type;
@@ -119,7 +119,7 @@ int gp_proxy_shm_resize(struct gp_proxy_shm *self, gp_size w, gp_size h)
 	return 1;
 }
 
-void gp_proxy_shm_exit(struct gp_proxy_shm *self)
+void gp_proxy_shm_exit(gp_proxy_shm *self)
 {
 	close(self->fd);
 	munmap(self->pixmap.pixels, self->size);
