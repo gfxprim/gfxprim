@@ -107,13 +107,13 @@ enum gp_proxy_msg_types {
 /* Must be bigger than maximal message size! */
 #define GP_PROXY_BUF_SIZE 128
 
-struct gp_proxy_buf {
+typedef struct gp_proxy_buf {
 	size_t pos;
 	size_t size;
 	char buf[GP_PROXY_BUF_SIZE];
-};
+} gp_proxy_buf;
 
-static inline void gp_proxy_buf_init(struct gp_proxy_buf *buf)
+static inline void gp_proxy_buf_init(gp_proxy_buf *buf)
 {
 	buf->pos = 0;
 	buf->size = 0;
@@ -127,7 +127,7 @@ static inline void gp_proxy_buf_init(struct gp_proxy_buf *buf)
  * @msg Pointer to the start of the next message.
  * @return Non-zero if full message was found in the buffer, zero otherwise.
  */
-int gp_proxy_next(struct gp_proxy_buf *buf, union gp_proxy_msg **msg);
+int gp_proxy_next(gp_proxy_buf *buf, union gp_proxy_msg **msg);
 
 /*
  * Receives data from from fd and stores them to the proxy buffer.
@@ -136,7 +136,7 @@ int gp_proxy_next(struct gp_proxy_buf *buf, union gp_proxy_msg **msg);
  * @buf Proxy buffer to store data to.
  * @return Number of bytes stored into the buffer, -1 on failure.
  */
-int gp_proxy_buf_recv(int fd, struct gp_proxy_buf *buf);
+int gp_proxy_buf_recv(int fd, gp_proxy_buf *buf);
 
 /*
  * Sends data to the server/client.

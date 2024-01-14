@@ -34,19 +34,13 @@ static int set_name(struct gp_proxy_cli *app, void *name, size_t size)
 	return 0;
 }
 
-void gp_proxy_cli_rem(struct gp_proxy_cli **root, struct gp_proxy_cli *self)
+void gp_proxy_cli_rem(gp_dlist *clients, struct gp_proxy_cli *self)
 {
 	GP_DEBUG(1, "Freeing client (%p) fd %i", self, self->fd.fd);
 
-	if (self->next)
-		self->next->prev = self->prev;
+	gp_dlist_rem(clients, &self->head);
 
-	if (self->prev)
-		self->prev->next = self->next;
-
-	if (*root == self)
-		*root = self->next;
-
+	free(self->name);
 	free(self);
 }
 
@@ -125,7 +119,7 @@ int gp_proxy_cli_read(struct gp_proxy_cli *self, struct gp_proxy_cli_ops *ops)
 	return 0;
 }
 
-struct gp_proxy_cli *gp_proxy_cli_add(struct gp_proxy_cli **root, int cli_fd)
+struct gp_proxy_cli *gp_proxy_cli_add(gp_dlist *clients, int cli_fd)
 {
 	struct gp_proxy_cli *cli = malloc(sizeof(*cli));
 
@@ -134,21 +128,16 @@ struct gp_proxy_cli *gp_proxy_cli_add(struct gp_proxy_cli **root, int cli_fd)
 	if (!cli)
 		return NULL;
 
-	cli->next = *root;
-	cli->prev = NULL;
-	cli->name = NULL;
-
 	cli->fd = (gp_fd) {
 		.fd = cli_fd,
 		.events = GP_POLLIN,
 	};
 
+	cli->name = NULL;
+
 	gp_proxy_buf_init(&cli->buf);
 
-	if (*root)
-		(*root)->prev = cli;
-
-	*root = cli;
+	gp_dlist_push_head(clients, &cli->head);
 
 	return cli;
 }

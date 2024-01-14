@@ -21,15 +21,15 @@
 
 static gp_backend *backend;
 static struct gp_proxy_shm *shm;
-static struct gp_proxy_cli *clients;
-static struct gp_proxy_cli *cli_shown;
+static gp_dlist clients;
+static gp_proxy_cli *cli_shown;
 
 static gp_pixel bg;
 static gp_pixel fg;
 
 static void redraw(void)
 {
-	struct gp_proxy_cli *i;
+	gp_dlist_head *i;
 	gp_fill(backend->pixmap, bg);
 
 	gp_coord y = 20;
@@ -42,16 +42,17 @@ static void redraw(void)
 
 	y += spacing;
 
-	for (i = clients; i; i = i->next) {
+	GP_LIST_FOREACH(&clients, i) {
+		gp_proxy_cli *cli = GP_LIST_ENTRY(i, struct gp_proxy_cli, head);
 		gp_print(backend->pixmap, NULL, x, y, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-			 fg, bg, "%i: '%s'", n++, i->name);
+			 fg, bg, "%i: '%s'", n++, cli->name);
 		y += spacing;
 	}
 
 	gp_backend_flip(backend);
 }
 
-static void shm_update(struct gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp_size h)
+static void shm_update(gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp_size h)
 {
 	gp_size screen_h = backend->pixmap->h;
 
@@ -81,7 +82,7 @@ static void do_exit(void)
  * App resize handler, we have to wait for the client to unmap the memory
  * before we resize it, hence we have to wait for the application to ack the resize.
  */
-static void on_unmap(struct gp_proxy_cli *self)
+static void on_unmap(gp_proxy_cli *self)
 {
 	if (self == cli_shown) {
 		if (gp_proxy_shm_resize(shm, backend->pixmap->w, backend->pixmap->h) < 0)
@@ -109,16 +110,21 @@ static void hide_client(void)
 	cli_shown = NULL;
 }
 
-static void show_client(int i)
+static void show_client(int pos)
 {
 	int n = 0;
-	struct gp_proxy_cli *cli;
+	gp_dlist_head *i;
 
-	for (cli = clients; cli && n < i; cli = cli->next)
+	GP_LIST_FOREACH(&clients, i) {
+		if (n >= pos)
+			break;
 		n++;
+	}
 
-	if (!cli)
+	if (!i)
 		return;
+
+	gp_proxy_cli *cli = GP_LIST_ENTRY(i, struct gp_proxy_cli, head);
 
 	hide_client();
 
@@ -228,7 +234,7 @@ static int client_event(gp_fd *self)
 
 static int client_add(gp_backend *backend, int fd)
 {
-	struct gp_proxy_cli *cli = gp_proxy_cli_add(&clients, fd);
+	gp_proxy_cli *cli = gp_proxy_cli_add(&clients, fd);
 
 	if (!cli)
 		goto err0;
