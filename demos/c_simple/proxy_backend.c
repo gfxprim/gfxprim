@@ -218,7 +218,7 @@ to_cli:
 static int client_event(gp_fd *self)
 {
 	if (gp_proxy_cli_read(self->priv, &cli_ops)) {
-		gp_proxy_cli_rem(&clients, self->priv);
+		gp_backend_poll_rem(backend, self);
 		close(self->fd);
 
 		if (self->priv == cli_shown) {
@@ -226,7 +226,7 @@ static int client_event(gp_fd *self)
 			redraw();
 		}
 
-		return 1;
+		gp_proxy_cli_rem(&clients, self->priv);
 	}
 
 	return 0;
