@@ -453,7 +453,7 @@ static long parse_info_block(gp_json_reader *json, gp_json_val *val)
 			license_set = 1;
 		break;
 		case INFO_VERSION:
-			GP_DEBUG(1, "Layout version: %li", val->val_int);
+			GP_DEBUG(1, "Layout version: %lli", val->val_int);
 			version = val->val_int;
 		break;
 		}

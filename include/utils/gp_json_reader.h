@@ -52,7 +52,7 @@ typedef struct gp_json_val {
 	/** An union to store the parsed value into. */
 	union {
 		int val_bool;
-		long val_int;
+		long long val_int;
 		const char *val_str;
 	};
 

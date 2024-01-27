@@ -6,8 +6,6 @@
 #ifndef GP_JSON_COMMON_H
 #define GP_JSON_COMMON_H
 
-#include <stdio.h>
-
 #define GP_JSON_ERR_MAX 128
 #define GP_JSON_ID_MAX 64
 
