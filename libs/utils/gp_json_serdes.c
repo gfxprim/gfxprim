@@ -12,9 +12,9 @@
 #include <utils/gp_json_writer.h>
 #include <utils/gp_json_serdes.h>
 
-static size_t count_and_check_descs(gp_json_struct *desc)
+static size_t count_and_check_descs(const gp_json_struct *desc)
 {
-	gp_json_struct *i, *prev = NULL;
+	const gp_json_struct *i, *prev = NULL;
 	size_t cnt = 0;
 
 	for (i = desc; i->id; i++) {
@@ -51,7 +51,7 @@ static size_t count_and_check_descs(gp_json_struct *desc)
 	return cnt;
 }
 
-static int str_cpy(gp_json_struct *desc, gp_json_val *val, void *baseptr)
+static int str_cpy(const gp_json_struct *desc, gp_json_val *val, void *baseptr)
 {
 	char *dsc = baseptr + desc->offset;
 
@@ -62,7 +62,7 @@ static int str_cpy(gp_json_struct *desc, gp_json_val *val, void *baseptr)
 	return 0;
 }
 
-static int str_dup(gp_json_struct *desc, gp_json_val *val, void *baseptr)
+static int str_dup(const gp_json_struct *desc, gp_json_val *val, void *baseptr)
 {
 	char **dsc = baseptr + desc->offset;
 
@@ -71,7 +71,7 @@ static int str_dup(gp_json_struct *desc, gp_json_val *val, void *baseptr)
 	return *dsc == NULL;
 }
 
-static int str_store(gp_json_struct *desc, gp_json_val *val, void *baseptr)
+static int str_store(const gp_json_struct *desc, gp_json_val *val, void *baseptr)
 {
 	if (desc->type_size)
 		return str_cpy(desc, val, baseptr);
@@ -79,7 +79,7 @@ static int str_store(gp_json_struct *desc, gp_json_val *val, void *baseptr)
 	return str_dup(desc, val, baseptr);
 }
 
-static int int8_store(gp_json_reader *json, gp_json_struct *desc,
+static int int8_store(gp_json_reader *json, const gp_json_struct *desc,
                       gp_json_val *val, void *baseptr)
 {
 	if (val->val_int < INT8_MIN) {
@@ -97,7 +97,7 @@ static int int8_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int int16_store(gp_json_reader *json, gp_json_struct *desc,
+static int int16_store(gp_json_reader *json, const gp_json_struct *desc,
                        gp_json_val *val, void *baseptr)
 {
 	if (val->val_int < INT16_MIN) {
@@ -115,7 +115,7 @@ static int int16_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int int32_store(gp_json_reader *json, gp_json_struct *desc,
+static int int32_store(gp_json_reader *json, const gp_json_struct *desc,
                        gp_json_val *val, void *baseptr)
 {
 	if (val->val_int < INT32_MIN) {
@@ -123,7 +123,7 @@ static int int32_store(gp_json_reader *json, gp_json_struct *desc,
 		return 1;
 	}
 
-	if (val->val_int > INT16_MAX) {
+	if (val->val_int > INT32_MAX) {
 		gp_json_warn(json, "Int32 value out of range");
 		return 1;
 	}
@@ -133,7 +133,7 @@ static int int32_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int int64_store(gp_json_reader *json, gp_json_struct *desc,
+static int int64_store(gp_json_reader *json, const gp_json_struct *desc,
                        gp_json_val *val, void *baseptr)
 {
 	if (val->val_int < INT64_MIN) {
@@ -151,7 +151,7 @@ static int int64_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int int_store(gp_json_reader *json, gp_json_struct *desc,
+static int int_store(gp_json_reader *json, const gp_json_struct *desc,
                      gp_json_val *val, void *baseptr)
 {
 	switch (desc->type_size) {
@@ -168,7 +168,7 @@ static int int_store(gp_json_reader *json, gp_json_struct *desc,
 	return 1;
 }
 
-static int uint8_store(gp_json_reader *json, gp_json_struct *desc,
+static int uint8_store(gp_json_reader *json, const gp_json_struct *desc,
                        gp_json_val *val, void *baseptr)
 {
 	if (val->val_int < 0) {
@@ -186,7 +186,7 @@ static int uint8_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int uint16_store(gp_json_reader *json, gp_json_struct *desc,
+static int uint16_store(gp_json_reader *json, const gp_json_struct *desc,
                         gp_json_val *val, void *baseptr)
 {
 	if (val->val_int < 0) {
@@ -204,7 +204,7 @@ static int uint16_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int uint32_store(gp_json_reader *json, gp_json_struct *desc,
+static int uint32_store(gp_json_reader *json, const gp_json_struct *desc,
                         gp_json_val *val, void *baseptr)
 {
 	if (val->val_int < 0) {
@@ -222,7 +222,7 @@ static int uint32_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int uint64_store(gp_json_reader *json, gp_json_struct *desc,
+static int uint64_store(gp_json_reader *json, const gp_json_struct *desc,
                         gp_json_val *val, void *baseptr)
 {
 	if (val->val_int < 0) {
@@ -240,7 +240,7 @@ static int uint64_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int uint_store(gp_json_reader *json, gp_json_struct *desc,
+static int uint_store(gp_json_reader *json, const gp_json_struct *desc,
                       gp_json_val *val, void *baseptr)
 {
 	switch (desc->type_size) {
@@ -257,7 +257,7 @@ static int uint_store(gp_json_reader *json, gp_json_struct *desc,
 	return 1;
 }
 
-static int float_store(gp_json_reader *json, gp_json_struct *desc,
+static int float_store(gp_json_reader *json, const gp_json_struct *desc,
                        gp_json_val *val, void *baseptr)
 {
 	(void) json;
@@ -267,7 +267,7 @@ static int float_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int double_store(gp_json_reader *json, gp_json_struct *desc,
+static int double_store(gp_json_reader *json, const gp_json_struct *desc,
                         gp_json_val *val, void *baseptr)
 {
 	(void) json;
@@ -277,7 +277,7 @@ static int double_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int float_double_store(gp_json_reader *json, gp_json_struct *desc,
+static int float_double_store(gp_json_reader *json, const gp_json_struct *desc,
                               gp_json_val *val, void *baseptr)
 {
 	switch (desc->type_size) {
@@ -290,18 +290,18 @@ static int float_double_store(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int int_check(gp_json_reader *json, gp_json_struct *desc,
+static int int_check(gp_json_reader *json, const gp_json_struct *desc,
                      gp_json_val *val)
 {
 
 	if (val->val_int < desc->lim_int.min) {
-		gp_json_warn(json, "Int value out of range %li < %lli",
+		gp_json_warn(json, "Int value out of range %lli < %lli",
 		             val->val_int, (long long int) desc->lim_int.min);
 		return 1;
 	}
 
 	if (val->val_int > 0 && (uint64_t)val->val_int > desc->lim_int.max) {
-		gp_json_warn(json, "Int value out of range %li > %lli",
+		gp_json_warn(json, "Int value out of range %lli > %lli",
 		             val->val_int, (long long int) desc->lim_int.max);
 		return 1;
 	}
@@ -309,7 +309,7 @@ static int int_check(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int float_check(gp_json_reader *json, gp_json_struct *desc,
+static int float_check(gp_json_reader *json, const gp_json_struct *desc,
                        gp_json_val *val)
 {
 	if (val->val_float < desc->lim_float.min) {
@@ -327,7 +327,7 @@ static int float_check(gp_json_reader *json, gp_json_struct *desc,
 	return 0;
 }
 
-static int memb_store(gp_json_reader *json, gp_json_struct *desc,
+static int memb_store(gp_json_reader *json, const gp_json_struct *desc,
                       gp_json_val *val, void *baseptr)
 {
 	switch (GP_JSON_SERDES_TYPE(desc->type)) {
@@ -350,13 +350,13 @@ static int memb_store(gp_json_reader *json, gp_json_struct *desc,
 	return 1;
 }
 
-static size_t memb_lookup(const char *id, gp_json_struct *desc, size_t desc_cnt)
+static size_t memb_lookup(const char *id, const gp_json_struct *desc, size_t desc_cnt)
 {
 	return gp_json_lookup(desc, sizeof(*desc), desc_cnt, id);
 }
 
 int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
-                        gp_json_struct *desc, void *baseptr)
+                        const gp_json_struct *desc, void *baseptr)
 {
 	size_t desc_cnt, i;
 	int err = 0;
@@ -402,7 +402,7 @@ int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
 	return err;
 }
 
-static inline const char *str_ptr(gp_json_struct *desc, void *baseptr)
+static inline const char *str_ptr(const gp_json_struct *desc, void *baseptr)
 {
 	if (desc->type_size)
 		return baseptr + desc->offset;
@@ -410,7 +410,7 @@ static inline const char *str_ptr(gp_json_struct *desc, void *baseptr)
 	return *((char**)(baseptr + desc->offset));
 }
 
-static int64_t int_val(gp_json_struct *desc, void *baseptr)
+static int64_t int_val(const gp_json_struct *desc, void *baseptr)
 {
 	switch (desc->type_size) {
 	case 1:
@@ -426,7 +426,7 @@ static int64_t int_val(gp_json_struct *desc, void *baseptr)
 	return 0;
 }
 
-static uint64_t uint_val(gp_json_struct *desc, void *baseptr)
+static uint64_t uint_val(const gp_json_struct *desc, void *baseptr)
 {
 	switch (desc->type_size) {
 	case 1:
@@ -442,7 +442,7 @@ static uint64_t uint_val(gp_json_struct *desc, void *baseptr)
 	return 0;
 }
 
-static float float_val(gp_json_struct *desc, void *baseptr)
+static float float_val(const gp_json_struct *desc, void *baseptr)
 {
 	switch (desc->type_size) {
 	case sizeof(float):
@@ -454,10 +454,10 @@ static float float_val(gp_json_struct *desc, void *baseptr)
 	return 0;
 }
 
-int gp_json_write_struct(gp_json_writer *json, gp_json_struct *desc,
+int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
                          const char *id, void *baseptr)
 {
-	gp_json_struct *i;
+	const gp_json_struct *i;
 	int err = 0;
 
 	err |= gp_json_obj_start(json, id);

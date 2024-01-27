@@ -12,6 +12,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <limits.h>
 
 enum json_serdes_type {
 	GP_JSON_SERDES_STR,
@@ -188,7 +189,7 @@ typedef struct gp_json_struct {
  * @baseptr A pointer to the deserialized C structure.
  */
 int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
-                        gp_json_struct *desc, void *baseptr);
+                        const gp_json_struct *desc, void *baseptr);
 
 /**
  * @brief Serializes a C structure into a JSON object
@@ -199,7 +200,7 @@ int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
  *     current context, e.g. inside of an JSON array.
  * @baseptr A pointer to the serialized C structure.
  */
-int gp_json_write_struct(gp_json_writer *json, gp_json_struct *desc,
+int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
                          const char *id, void *baseptr);
 
 #endif /* GP_JSON_SERDES_H */
