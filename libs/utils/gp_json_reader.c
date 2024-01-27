@@ -12,6 +12,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <core/gp_debug.h>
+
 #include <utils/gp_utf.h>
 #include <utils/gp_json_reader.h>
 
@@ -1059,4 +1061,28 @@ void gp_json_reader_finish(gp_json_reader *self)
 void gp_json_reader_free(gp_json_reader *buf)
 {
 	free(buf);
+}
+
+gp_json_val *gp_json_val_alloc(size_t buf_size)
+{
+	buf_size = buf_size == 0 ? 4096 : buf_size;
+	gp_json_val *ret;
+
+	ret = malloc(sizeof(gp_json_val) + buf_size);
+	if (!ret) {
+		GP_WARN("Malloc failed :-(");
+		return NULL;
+	}
+
+	memset(ret, 0, sizeof(gp_json_val) + buf_size);
+
+	ret->buf = ret->buf__;
+	ret->buf_size = buf_size;
+
+	return ret;
+}
+
+void gp_json_val_free(gp_json_val *self)
+{
+	free(self);
 }

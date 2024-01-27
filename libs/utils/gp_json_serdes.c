@@ -402,6 +402,30 @@ int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
 	return err;
 }
 
+int gp_json_load_struct(const char *path,
+                        const gp_json_struct *desc, void *baseptr)
+{
+	gp_json_val *val;
+	gp_json_reader *json;
+	int err = 1;
+
+	val = gp_json_val_alloc(0);
+	json = gp_json_reader_load(path);
+
+	if (!val || !json)
+		goto exit;
+
+	err = gp_json_read_struct(json, val, desc, baseptr);
+	if (err)
+		goto exit;
+
+	gp_json_reader_finish(json);
+exit:
+	gp_json_val_free(val);
+	gp_json_reader_free(json);
+	return err;
+}
+
 static inline const char *str_ptr(const gp_json_struct *desc, void *baseptr)
 {
 	if (desc->type_size)

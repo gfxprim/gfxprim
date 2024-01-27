@@ -60,7 +60,24 @@ typedef struct gp_json_val {
 
 	/** An ID for object values */
 	char id[GP_JSON_ID_MAX];
+
+	char buf__[];
 } gp_json_val;
+
+/**
+ * @brief Allocates a JSON value.
+ *
+ * @buf_size A maximal buffer size for a string value, pass 0 for default.
+ * @return A newly allocated JSON value.
+ */
+gp_json_val *gp_json_val_alloc(size_t buf_size);
+
+/**
+ * @brief Frees a JSON value.
+ *
+ * @self A JSON value previously allocated by gp_json_val_alloc().
+ */
+void gp_json_val_free(gp_json_val *self);
 
 /*
  * @brief Returns type name.

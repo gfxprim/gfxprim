@@ -192,6 +192,19 @@ int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
                         const gp_json_struct *desc, void *baseptr);
 
 /**
+ * @brief Deserializes a JSON object into a C structure
+ *
+ * This is a simplified interface that loads just a single structure from a file.
+ *
+ * @path A path to a file.
+ * @desc An alphabetically sorted by id and NULL id terminatred array of
+ *       structure member descriptions.
+ * @baseptr A pointer to the deserialized C structure.
+ */
+int gp_json_load_struct(const char *path,
+                        const gp_json_struct *desc, void *baseptr);
+
+/**
  * @brief Serializes a C structure into a JSON object
  *
  * @json A json writer

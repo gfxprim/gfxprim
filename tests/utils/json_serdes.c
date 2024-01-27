@@ -24,7 +24,7 @@ struct test_struct {
 	int8_t i8;
 };
 
-static gp_json_struct test_struct_desc[] = {
+static const gp_json_struct test_struct_desc[] = {
 	GP_JSON_SERDES_STR_DUP(struct test_struct, str1, GP_JSON_SERDES_OPTIONAL, 1024, "greeting"),
 	GP_JSON_SERDES_INT16(struct test_struct, i16, 0, -100, 100),
 	GP_JSON_SERDES_INT32(struct test_struct, i32, 0, -100, 100),
@@ -168,6 +168,39 @@ static int json_read_opt_struct(void)
 	return TST_PASSED;
 }
 
+static int json_load_struct(void)
+{
+	struct test_struct s = {};
+
+	if (gp_json_load_struct("serdes.json", test_struct_desc, &s)) {
+		tst_msg("Failed to parse serdes.json");
+		return TST_FAILED;
+	}
+
+	COMPARE_INT(s.i8, -1, "i8");
+	COMPARE_INT(s.i16, -2, "i16");
+	COMPARE_INT(s.i32, -3, "i32");
+	COMPARE_INT(s.i64, -4, "i64");
+	COMPARE_INT(s.u8, 1, "i8");
+	COMPARE_INT(s.u16, 2, "i16");
+	COMPARE_INT(s.u32, 3, "i32");
+	COMPARE_INT(s.u64, 4, "i64");
+
+	if (strcmp(s.str1, "json")) {
+		tst_msg("Wrong str dup");
+		return TST_FAILED;
+	}
+
+	if (strcmp(s.str2, "test")) {
+		tst_msg("Wrong str cpy");
+		return TST_FAILED;
+	}
+
+	free(s.str1);
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "JSON serdes testsuite",
 	.tests = {
@@ -179,6 +212,11 @@ const struct tst_suite tst_suite = {
 
 		{.name = "JSON read opt struct",
 		 .tst_fn = json_read_opt_struct},
+
+		{.name = "JSON load struct from file",
+		 .tst_fn = json_load_struct,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC,
+		 .res_path = "data/serdes/serdes.json"},
 
 		{}
 	}
