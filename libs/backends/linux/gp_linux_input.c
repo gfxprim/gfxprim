@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <sys/types.h>
@@ -13,6 +13,11 @@
 
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
+#include <core/gp_clamp.h>
+
+#include <utils/gp_app_cfg.h>
+#include <utils/gp_json_reader.h>
+#include <utils/gp_json_serdes.h>
 
 #include <backends/gp_linux_input.h>
 
@@ -34,19 +39,27 @@ struct linux_input {
 	int abs_y;
 	int abs_press;
 
-	int abs_min_x;
-	int abs_max_x;
-	int abs_max_y;
-	int abs_min_y;
+	/* Coordinate limits after transformation */
+	int abs_x_max;
+	int abs_y_max;
+	int abs_press_min;
 	int abs_press_max;
+
+	/*
+	 * Affine transformation matrix
+	 *
+	 * The multipliers are in 16.16 fixed point format
+	 */
+	int abs_x_off;
+	int abs_y_off;
+	int abs_x_mul_x;
+	int abs_x_mul_y;
+	int abs_y_mul_x;
+	int abs_y_mul_y;
 
 	uint8_t abs_flag_x:1;
 	uint8_t abs_flag_y:1;
 	uint8_t abs_pen_flag:1;
-
-	uint8_t abs_swap:1;
-	uint8_t abs_mirror_x:1;
-	uint8_t abs_mirror_y:1;
 };
 
 static void input_rel(struct linux_input *self, struct input_event *ev)
@@ -129,58 +142,31 @@ static void do_sync(struct linux_input *self, gp_ev_queue *ev_queue)
 		self->rel_flag = 0;
 	}
 
-	if (self->abs_flag_x || self->abs_flag_y) {
-		uint32_t x = 0, y = 0, x_max = 0, y_max = 0;
+	if (self->abs_flag_x && self->abs_flag_y) {
+		int64_t abs_x = self->abs_x;
+		int64_t abs_y = self->abs_y;
 
-		if (self->abs_flag_x) {
-			/* clipping */
-			if (self->abs_x > self->abs_max_x)
-				self->abs_x = self->abs_max_x;
+		int x = self->abs_x_off;
+		int y = self->abs_y_off;
 
-			if (self->abs_x < self->abs_min_x)
-				self->abs_x = self->abs_min_x;
+		x+=(abs_x * self->abs_x_mul_x + abs_y * self->abs_x_mul_y)>>16;
+		y+=(abs_x * self->abs_y_mul_x + abs_y * self->abs_y_mul_y)>>16;
 
-			x     = self->abs_x - self->abs_min_x;
-			x_max = self->abs_max_x - self->abs_min_x;
-
-			self->abs_flag_x = 0;
-		}
-
-		if (self->abs_flag_y) {
-			/* clipping */
-			if (self->abs_y > self->abs_max_y)
-				self->abs_y = self->abs_max_y;
-
-			if (self->abs_y < self->abs_min_y)
-				self->abs_y = self->abs_min_y;
-
-			y     = self->abs_y - self->abs_min_y;
-			y_max = self->abs_max_y - self->abs_min_y;
-
-			self->abs_flag_y = 0;
-		}
-
-		if (self->abs_swap) {
-			GP_SWAP(x, y);
-			GP_SWAP(x_max, y_max);
-		}
-
-		if (self->abs_mirror_x)
-			x = x_max - x;
-
-		if (self->abs_mirror_y)
-			y = y_max - y;
+		x = GP_CLAMP(x, 0, self->abs_x_max);
+		y = GP_CLAMP(y, 0, self->abs_y_max);
 
 		gp_ev_queue_push_abs(ev_queue, x, y, self->abs_press,
-		                     x_max, y_max, self->abs_press_max, 0);
-
-		self->abs_press = 0;
+		                     self->abs_x_max, self->abs_y_max, self->abs_press_max, 0);
 
 		if (self->abs_pen_flag) {
 			gp_ev_queue_push_key(ev_queue, BTN_TOUCH, 1, 0);
 			self->abs_pen_flag = 0;
 		}
 	}
+
+	self->abs_press = 0;
+	self->abs_flag_x = 0;
+	self->abs_flag_y = 0;
 }
 
 static void input_syn(struct linux_input *self,
@@ -245,9 +231,6 @@ static int get_version(int fd)
 	return 0;
 }
 
-/*
- * Returns size on success just as read()
- */
 static int get_name(int fd, char *buf, size_t buf_len)
 {
 	int ret;
@@ -269,6 +252,72 @@ static void print_name(int fd)
 		GP_DEBUG(2, "Input device name '%s'", name);
 }
 
+static int replace_in_name(char ch)
+{
+	switch (ch) {
+	default:
+		return '_';
+	case 0x21 ... 0x7e:
+	case 0x00:
+		return ch;
+	}
+}
+
+static const struct gp_json_struct input_desc[] = {
+	GP_JSON_SERDES_INT(struct linux_input, abs_x_max, 0, INT_MIN, INT_MAX),
+	GP_JSON_SERDES_INT(struct linux_input, abs_x_mul_x, GP_JSON_SERDES_OPTIONAL, INT_MIN, INT_MAX),
+	GP_JSON_SERDES_INT(struct linux_input, abs_x_mul_y, GP_JSON_SERDES_OPTIONAL, INT_MIN, INT_MAX),
+	GP_JSON_SERDES_INT(struct linux_input, abs_x_off, GP_JSON_SERDES_OPTIONAL, INT_MIN, INT_MAX),
+	GP_JSON_SERDES_INT(struct linux_input, abs_y_max, 0, INT_MIN, INT_MAX),
+	GP_JSON_SERDES_INT(struct linux_input, abs_y_mul_x, GP_JSON_SERDES_OPTIONAL, INT_MIN, INT_MAX),
+	GP_JSON_SERDES_INT(struct linux_input, abs_y_mul_y, GP_JSON_SERDES_OPTIONAL, INT_MIN, INT_MAX),
+	GP_JSON_SERDES_INT(struct linux_input, abs_y_off, GP_JSON_SERDES_OPTIONAL, INT_MIN, INT_MAX),
+	{}
+};
+
+static int load_callibration_file(struct linux_input *self)
+{
+	char *fname;
+	char input_name[256];
+	int ret, i;
+
+	ret = get_name(self->fd.fd, input_name, sizeof(input_name)-6);
+	if (ret < 0) {
+		GP_WARN("Failed to get input device name!");
+		return 0;
+	}
+
+	for (i = 0; i < ret; i++)
+		input_name[i] = replace_in_name(input_name[i]);
+
+	input_name[ret-1] = '.';
+	input_name[ret] = 'j';
+	input_name[ret+1] = 's';
+	input_name[ret+2] = 'o';
+	input_name[ret+3] = 'n';
+	input_name[ret+4] = '\0';
+
+	fname = gp_app_cfg_path("gfxprim/input", input_name);
+
+	GP_DEBUG(3, "Trying to load callibration at '%s'", fname);
+
+	self->abs_x_mul_x = (1<<16);
+	self->abs_y_mul_x = 0;
+	self->abs_x_mul_y = 0;
+	self->abs_y_mul_y = (1<<16);
+	self->abs_x_off = 0;
+	self->abs_y_off = 0;
+
+	if (gp_json_load_struct(fname, input_desc, self))
+		return 0;
+
+	GP_DEBUG(3, "Callibration loaded! x_off=%i x_max=%i y_off=%i y_max=%i matrix = [%i, %i, %i %i]",
+		 self->abs_x_off, self->abs_x_max, self->abs_y_off, self->abs_y_max,
+	         self->abs_x_mul_x, self->abs_x_mul_y, self->abs_y_mul_x, self->abs_y_mul_y);
+
+	return 1;
+}
+
 static void try_load_callibration(struct linux_input *self)
 {
 	long bit = 0;
@@ -282,23 +331,50 @@ static void try_load_callibration(struct linux_input *self)
 		return;
 	}
 
+	if (load_callibration_file(self))
+		return;
+
+	self->abs_x_mul_y = 0;
+	self->abs_y_mul_x = 0;
+
 	if (!ioctl(fd, EVIOCGABS(ABS_X), abs)) {
 		GP_DEBUG(3, "ABS X = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
-		self->abs_min_x = abs[1];
-		self->abs_max_x = abs[2];
+
+		int diff = abs[2] - abs[1];
+
+		if (diff < 0) {
+			self->abs_x_off = -diff;
+			self->abs_x_max = -diff;
+			self->abs_x_mul_x = -(1<<16);
+		} else {
+			self->abs_x_off = 0;
+			self->abs_x_max = diff;
+			self->abs_x_mul_x = (1<<16);
+		}
 	}
 
 	if (!ioctl(fd, EVIOCGABS(ABS_Y), abs)) {
 		GP_DEBUG(3, "ABS Y = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
-		self->abs_min_y = abs[1];
-		self->abs_max_y = abs[2];
+
+		int diff = abs[2] - abs[1];
+
+		if (diff < 0) {
+			self->abs_y_off = -diff;
+			self->abs_y_max = -diff;
+			self->abs_y_mul_y = -(1<<16);
+		} else {
+			self->abs_y_off = 0;
+			self->abs_y_max = diff;
+			self->abs_y_mul_y = (1<<16);
+		}
 	}
 
 	if (!ioctl(fd, EVIOCGABS(ABS_PRESSURE), abs)) {
 		GP_DEBUG(3, "ABS P = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
+		self->abs_press_min = abs[1];
 		self->abs_press_max = abs[2];
 	}
 }
@@ -378,10 +454,6 @@ static struct linux_input *new_input_driver(int fd)
 	ret->abs_flag_x = 0;
 	ret->abs_flag_y = 0;
 	ret->abs_pen_flag = 1;
-
-	ret->abs_swap = 0;
-	ret->abs_mirror_x = 0;
-	ret->abs_mirror_y = 0;
 
 	try_load_callibration(ret);
 
