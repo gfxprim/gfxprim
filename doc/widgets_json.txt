@@ -9,6 +9,10 @@ application binary at runtime.
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_app_layout_load(const char *app_name, void **uids);
+
+gp_widget *gp_app_layout_load2(const char *app_name,
+                               const gp_widget_json_callbacks *const callbacks,
+                               gp_htable **uids);
 -------------------------------------------------------------------------------
 
 Attempts to load an application layout based on `app_name`. The library first
@@ -19,15 +23,46 @@ application layout by creating one in the user home directory.
 The `uids` is a pointer to store the hash table of mappings between widget
 unique ids and pointers to.
 
+Unless NULL `id` terminated array of callbacks is provided function and
+structure pointers are resolved from the runing application by `dlsym()`.
+
 The function returns NULL if no layout has been found or if it couldn't be
 parsed.
+
+.Callback and structure description table
+[source,c]
+-------------------------------------------------------------------------------
+typedef struct gp_widget_json_addr {
+        union {
+                void *addr;
+                int (*on_event)(gp_widget_event *);
+                const struct gp_widget_table_col_ops *table_col_ops;
+        };
+        const char *id;
+} gp_widget_json_addr;
+
+/* Example use */
+static const gp_widget_json_addr app_callbacks[] = {
+	{.id = "abort", .on_event = abort_on_event},
+	{.id = "file_table", .table_col_ops = file_table_ops},
+	{}
+};
+-------------------------------------------------------------------------------
+
+The pointers to application callbacks can either be resolved by the dynamic
+linker at runtime, or can be explicitly passed in this table. The table has to
+be sorted by `id` and NULL `id` terminted.
 
 .Function to load an JSON layout
 [source,c]
 -------------------------------------------------------------------------------
-gp_widget *gp_widget_from_json_str(const char *str, void **uids);
+gp_widget *gp_widget_from_json_str(const char *str,
+                                   const gp_widget_json_callbacks *const callbacks,
+                                   gp_htable **uids);
 
-gp_widget *gp_widget_layout_json(const char *fname, void **uids);
+gp_widget *gp_widget_layout_json(const char *fname,
+                                 const gp_widget_json_callbacks *const callbacks,
+                                 gp_htable **uids);
 -------------------------------------------------------------------------------
 
 JSON layout can be also loaded from a file or C string.
