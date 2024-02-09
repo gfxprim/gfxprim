@@ -603,7 +603,7 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 		.fd = fd,
 		.event = x_process_fd,
 		.events = GP_POLLIN,
-		.priv = &backend,
+		.priv = backend,
 	};
 
 	if (gp_poll_add(&backend->fds, &win->fd))
