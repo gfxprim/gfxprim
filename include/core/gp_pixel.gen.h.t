@@ -12,12 +12,12 @@
 /*
  * List of all known pixel types
  */
-typedef enum gp_pixel_type {
+enum gp_pixel_type {
 @ for pt in pixeltypes:
 	GP_PIXEL_{{ pt.name }},
 @ end
 	GP_PIXEL_MAX,
-} gp_pixel_type;
+};
 
 @ for pt in pixeltypes:
 #define GP_PIXEL_{{ pt.name }} GP_PIXEL_{{ pt.name }}

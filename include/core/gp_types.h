@@ -16,6 +16,8 @@ typedef unsigned int gp_size;
 
 typedef int gp_ssize;
 
+typedef enum gp_pixel_type gp_pixel_type;
+
 /* Pixel integer value packed accordingly to gp_pixel_type */
 typedef uint32_t gp_pixel;
 
