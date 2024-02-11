@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -31,6 +31,11 @@ struct x11_conn {
 
 	/* Is set to 1 if connection is local -> we can use SHM */
 	int local:1;
+
+	Cursor cursor_arrow;
+	Cursor cursor_text_edit;
+	Cursor cursor_crosshair;
+	Cursor cursor_hand;
 
 	/* reference counter, incremented on window creation */
 	unsigned int ref_cnt;
@@ -97,6 +102,14 @@ static void x11_detect_wm_features(void)
 	}
 }
 
+static void x11_get_cursors(void)
+{
+	x11_conn.cursor_arrow = XCreateFontCursor(x11_conn.dpy, XC_left_ptr);
+	x11_conn.cursor_text_edit = XCreateFontCursor(x11_conn.dpy, XC_xterm);
+	x11_conn.cursor_crosshair = XCreateFontCursor(x11_conn.dpy, XC_tcross);
+	x11_conn.cursor_hand = XCreateFontCursor(x11_conn.dpy, XC_hand2);
+}
+
 static void x11_input_init(void);
 
 static unsigned int x11_open(const char *display)
@@ -133,6 +146,7 @@ static unsigned int x11_open(const char *display)
 	/* Initialized key translation table */
 	x11_input_init();
 	x11_detect_wm_features();
+	x11_get_cursors();
 
 	return ++x11_conn.ref_cnt;
 }

@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -43,6 +43,24 @@ enum gp_backend_attrs {
 	GP_BACKEND_TITLE,
 	/* fullscreen mode */
 	GP_BACKEND_FULLSCREEN,
+};
+
+enum gp_backend_cursors {
+	/* Arrow default cursor type */
+	GP_BACKEND_CURSOR_ARROW,
+	/* Text edit cursor */
+	GP_BACKEND_CURSOR_TEXT_EDIT,
+	/* Crosshair */
+	GP_BACKEND_CURSOR_CROSSHAIR,
+	/* Used typicaly while howering over links */
+	GP_BACKEND_CURSOR_HAND,
+	/* Last cursor + 1 */
+	GP_BACKEND_CURSOR_MAX,
+
+	/* Shows cursor */
+	GP_BACKEND_CURSOR_SHOW = 0xc000,
+	/* Hides cursor */
+	GP_BACKEND_CURSOR_HIDE = 0x8000,
 };
 
 struct gp_backend {
@@ -87,6 +105,11 @@ struct gp_backend {
 	 */
 	int (*set_attr)(gp_backend *self, enum gp_backend_attrs attr,
 			const void *vals);
+
+	/**
+	 * If non NULL backend can enable/disable/change cursor.
+	 */
+	int (*set_cursor)(gp_backend *self, enum gp_backend_cursors cursor);
 
 	/*
 	 * Resize acknowledge callback. This must be called
@@ -196,6 +219,14 @@ static inline void gp_backend_poll_rem(gp_backend *self, gp_fd *fd)
 static inline gp_fd *gp_backend_poll_rem_by_fd(gp_backend *self, int fd)
 {
 	return gp_poll_rem_by_fd(&self->fds, fd);
+}
+
+static inline int gp_backend_cursor_set(gp_backend *self, enum gp_backend_cursors cursor)
+{
+	if (self->set_cursor)
+		return self->set_cursor(self, cursor);
+
+	return 1;
 }
 
 void gp_backend_exit(gp_backend *self);

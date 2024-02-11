@@ -29,7 +29,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      debug_handler gaussian_noise version pretty_print timers\
      zip_container backend_timers_example memory_io data_storage\
      vector matrix proxy_backend bbox backend_tasks_example json_writer\
-     drm_test draw_glyph dpi_check unicodetest
+     drm_test draw_glyph dpi_check unicodetest backend_cursor
 
 ifneq ($(SDL_CONFIG),)
 APPS+=SDL_glue
@@ -45,6 +45,7 @@ backend_tasks_example: LDLIBS+=-lgfxprim-backends
 proxy_backend: LDLIBS+=-lgfxprim-backends
 showimage: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
 backend_example: LDLIBS+=-lgfxprim-backends
+backend_cursor: LDLIBS+=-lgfxprim-backends
 backend_timers_example: LDLIBS+=-lgfxprim-backends
 virtual_backend_example: LDLIBS+=-lgfxprim-backends -lm
 loaders_example: LDLIBS+=-lgfxprim-loaders

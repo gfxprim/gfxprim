@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2019 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include "../../config.h"
@@ -15,6 +15,7 @@
 #include <sys/shm.h>
 #include <xcb/xcb.h>
 #include <xcb/shm.h>
+#include <xcb/xfixes.h>
 
 #include <core/gp_pixmap.h>
 
@@ -579,6 +580,44 @@ static int create_window(struct gp_backend *self, struct win *win,
 	return 0;
 }
 
+static int x_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
+{
+	struct win *win = GP_BACKEND_PRIV(self);
+	xcb_connection_t *c = x_con.c;
+	uint32_t cursor_val;
+
+	switch (cursor) {
+	case GP_BACKEND_CURSOR_HIDE:
+		xcb_xfixes_hide_cursor(c, win->win);
+	break;
+	case GP_BACKEND_CURSOR_SHOW:
+		xcb_xfixes_show_cursor(c, win->win);
+	break;
+	case GP_BACKEND_CURSOR_ARROW:
+		cursor_val = x_con.cursor_arrow;
+		xcb_change_window_attributes(c, win->win, XCB_CW_CURSOR, &cursor_val);
+	break;
+	case GP_BACKEND_CURSOR_TEXT_EDIT:
+		cursor_val = x_con.cursor_text_edit;
+		xcb_change_window_attributes(c, win->win, XCB_CW_CURSOR, &cursor_val);
+	break;
+	case GP_BACKEND_CURSOR_CROSSHAIR:
+		cursor_val = x_con.cursor_crosshair;
+		xcb_change_window_attributes(c, win->win, XCB_CW_CURSOR, &cursor_val);
+	break;
+	case GP_BACKEND_CURSOR_HAND:
+		cursor_val = x_con.cursor_hand;
+		xcb_change_window_attributes(c, win->win, XCB_CW_CURSOR, &cursor_val);
+	break;
+	default:
+		return 1;
+	}
+
+	xcb_flush(c);
+
+	return 0;
+}
+
 gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
                         const char *caption)
 {
@@ -618,6 +657,7 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 	backend->exit = x_exit;
 	backend->set_attr = x_set_attr;
 	backend->resize_ack = x_resize_ack;
+	backend->set_cursor = x_set_cursor;
 
 	return backend;
 err1:

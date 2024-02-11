@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <string.h>
@@ -19,6 +19,8 @@
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>
 #include <X11/Xlocale.h>
+#include <X11/cursorfont.h>
+#include <X11/extensions/Xfixes.h>
 
 #ifdef HAVE_X_SHM
 #include <sys/ipc.h>
@@ -591,6 +593,36 @@ static int x11_set_attr(gp_backend *self, enum gp_backend_attrs attr,
 	return 0;
 }
 
+static int x11_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
+{
+	struct x11_win *win = GP_BACKEND_PRIV(self);
+
+	switch (cursor) {
+	case GP_BACKEND_CURSOR_HIDE:
+		XFixesHideCursor(win->dpy, win->win);
+	break;
+	case GP_BACKEND_CURSOR_SHOW:
+		XFixesShowCursor(win->dpy, win->win);
+	break;
+	case GP_BACKEND_CURSOR_ARROW:
+		XDefineCursor(win->dpy, win->win, x11_conn.cursor_arrow);
+	break;
+	case GP_BACKEND_CURSOR_TEXT_EDIT:
+		XDefineCursor(win->dpy, win->win, x11_conn.cursor_text_edit);
+	break;
+	case GP_BACKEND_CURSOR_CROSSHAIR:
+		XDefineCursor(win->dpy, win->win, x11_conn.cursor_crosshair);
+	break;
+	case GP_BACKEND_CURSOR_HAND:
+		XDefineCursor(win->dpy, win->win, x11_conn.cursor_hand);
+	break;
+	default:
+		return 1;
+	}
+
+	return 0;
+}
+
 gp_backend *gp_x11_init(const char *display, int x, int y,
                         unsigned int w, unsigned int h,
                         const char *caption,
@@ -669,6 +701,7 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	backend->set_attr = x11_set_attr;
 	backend->clipboard = x11_clipboard;
 	backend->resize_ack = x11_resize_ack;
+	backend->set_cursor = x11_set_cursor;
 
 	return backend;
 err1:

@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include "../../config.h"
@@ -34,6 +34,11 @@ static gp_pixmap pixmap;
 
 #if LIBSDL_VERSION == 2
 static SDL_Window *window;
+
+static SDL_Cursor *cursor_arrow;
+static SDL_Cursor *cursor_edit;
+static SDL_Cursor *cursor_crosshair;
+static SDL_Cursor *cursor_hand;
 #endif
 
 static uint32_t sdl_flags = SDL_SWSURFACE;
@@ -124,6 +129,52 @@ static void sdl_wait(struct gp_backend *self)
 		usleep(10000);
 	}
 }
+
+#if LIBSDL_VERSION == 2
+static int sdl_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
+{
+	switch (cursor) {
+	case GP_BACKEND_CURSOR_HIDE:
+		SDL_ShowCursor(SDL_DISABLE);
+	break;
+	case GP_BACKEND_CURSOR_SHOW:
+		SDL_ShowCursor(SDL_ENABLE);
+	break;
+	case GP_BACKEND_CURSOR_ARROW:
+		if (!cursor_arrow)
+			cursor_arrow = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+
+		if (cursor_arrow)
+			SDL_SetCursor(cursor_arrow);
+	break;
+	case GP_BACKEND_CURSOR_TEXT_EDIT:
+		if (!cursor_edit)
+			cursor_edit = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+
+		if (cursor_edit)
+			SDL_SetCursor(cursor_edit);
+	break;
+	case GP_BACKEND_CURSOR_CROSSHAIR:
+		if (!cursor_crosshair)
+			cursor_crosshair = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
+
+		if (cursor_crosshair)
+			SDL_SetCursor(cursor_crosshair);
+	break;
+	case GP_BACKEND_CURSOR_HAND:
+		if (!cursor_hand)
+			cursor_hand = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+
+		if (cursor_hand)
+			SDL_SetCursor(cursor_hand);
+	break;
+	default:
+		return 1;
+	}
+
+	return 0;
+}
+#endif
 
 static int sdl_set_attr(struct gp_backend *self, enum gp_backend_attrs attr,
                         const void *vals)
@@ -217,6 +268,7 @@ static struct gp_backend backend = {
 	.resize_ack = sdl_resize_ack,
 #if LIBSDL_VERSION == 2
 	.clipboard = sdl_clipboard,
+	.set_cursor = sdl_set_cursor,
 #endif
 	.exit = sdl_exit,
 	.poll = sdl_poll,

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2019 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -14,6 +14,11 @@ struct x_con {
 
 	xcb_atom_t wm_protocols;
 	xcb_atom_t wm_delete_window;
+
+	xcb_cursor_t cursor_arrow;
+	xcb_cursor_t cursor_text_edit;
+	xcb_cursor_t cursor_crosshair;
+	xcb_cursor_t cursor_hand;
 
 	int shm_completion_ev;
 
@@ -65,6 +70,24 @@ ret:
 	free(rep);
 }
 
+static void x_check_x_fixes(xcb_connection_t *c)
+{
+	xcb_xfixes_query_version_reply_t *rep;
+	xcb_xfixes_query_version_cookie_t ck;
+
+	ck = xcb_xfixes_query_version(c, XCB_XFIXES_MAJOR_VERSION, XCB_XFIXES_MINOR_VERSION);
+	rep = xcb_xfixes_query_version_reply(c, ck, NULL);
+	if (!rep) {
+		GP_WARN("Failed to query xfixes version");
+		return;
+	}
+
+	GP_DEBUG(4, "xfixes version %i.%i",
+	         rep->major_version, rep->minor_version);
+
+	free(rep);
+}
+
 static int x_get_atom(xcb_connection_t *c, const char *name, xcb_atom_t *ret)
 {
 	xcb_intern_atom_cookie_t cookie;
@@ -110,6 +133,39 @@ static void x_detect_wm_features(xcb_connection_t *c)
 
 }
 
+#define CURSOR_LEFT_PTR 68
+#define CURSOR_XTERM 152
+#define CURSOR_TCROSS 130
+#define CURSOR_HAND2 60
+
+static void x_load_cursors(xcb_connection_t *c)
+{
+	xcb_font_t font = xcb_generate_id(c);
+
+	xcb_open_font(c, font, strlen("cursor"), "cursor");
+
+	x_con.cursor_arrow = xcb_generate_id(c);
+	x_con.cursor_text_edit = xcb_generate_id(c);
+	x_con.cursor_crosshair = xcb_generate_id(c);
+	x_con.cursor_hand = xcb_generate_id(c);
+
+	xcb_create_glyph_cursor(c, x_con.cursor_arrow, font, font,
+	                        CURSOR_LEFT_PTR, CURSOR_LEFT_PTR+1,
+                                0, 0, 0, 65535, 65535, 65535);
+
+	xcb_create_glyph_cursor(c, x_con.cursor_text_edit, font, font,
+	                        CURSOR_XTERM, CURSOR_XTERM+1,
+                                0, 0, 0, 65535, 65535, 65535);
+
+	xcb_create_glyph_cursor(c, x_con.cursor_crosshair, font, font,
+	                        CURSOR_TCROSS, CURSOR_TCROSS+1,
+                                0, 0, 0, 65535, 65535, 65535);
+
+	xcb_create_glyph_cursor(c, x_con.cursor_hand, font, font,
+	                        CURSOR_HAND2, CURSOR_HAND2+1,
+                                0, 0, 0, 65535, 65535, 65535);
+}
+
 static void xcb_input_init(xcb_connection_t *c);
 
 static void check_local_connection(const char *display)
@@ -153,6 +209,8 @@ static unsigned int x_connect(const char *display)
 		x_check_shm(x_con.c);
 
 	x_detect_wm_features(x_con.c);
+	x_check_x_fixes(x_con.c);
+	x_load_cursors(x_con.c);
 
 	return ++x_con.ref_cnt;
 }
