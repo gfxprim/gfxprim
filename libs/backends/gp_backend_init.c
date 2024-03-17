@@ -191,6 +191,9 @@ static gp_backend *sdl_init(char *params,
 static int parse_fb_params(char *params, int *flags, const char **fb)
 {
 	char *param;
+	int input = 0;
+	int kbd = 0;
+	int none = 0;
 
 	if (!params)
 		return 0;
@@ -211,6 +214,21 @@ static int parse_fb_params(char *params, int *flags, const char **fb)
 			continue;
 		}
 
+		if (!strcasecmp(param, "input=linux")) {
+			input = 1;
+			continue;
+		}
+
+		if (!strcasecmp(param, "input=kbd")) {
+			kbd = 1;
+			continue;
+		}
+
+		if (!strcasecmp(param, "input=none")) {
+			none = 1;
+			continue;
+		}
+
 		*fb = param;
 
 		if (strncmp(*fb, "/dev/", 5))
@@ -219,6 +237,16 @@ static int parse_fb_params(char *params, int *flags, const char **fb)
 		GP_DEBUG(1, "Framebuffer console set to '%s'", *fb);
 
 	} while (params);
+
+	if (input + kbd + none > 1) {
+		GP_FATAL("Too many input= parameters!");
+		return 1;
+	}
+
+	if (kbd)
+		*flags |= GP_FB_INPUT_KBD;
+	else if (!none)
+		*flags |= GP_FB_INPUT_LINUX;
 
 	return 0;
 }
@@ -229,7 +257,7 @@ static gp_backend *fb_init(char *params,
 {
 	const char *fb = "/dev/fb0";
 
-	int flags = GP_FB_INPUT_KBD | GP_FB_SHADOW;
+	int flags = GP_FB_SHADOW;
 
 	parse_fb_params(params, &flags, &fb);
 
@@ -509,9 +537,13 @@ static struct backend_init backends[] = {
 #ifdef OS_LINUX
 	{.name  = "FB",
 	 .init  = fb_init,
-	 .usage = "fb:[no_shadow]:[new_console]:[/dev/fbX]",
+	 .usage = "fb:[no_shadow]:[new_console][input=..]:[/dev/fbX]",
 	 .help  = {"no_shadow   - turns off shadow buffer",
 	           "new_console - allocate new console",
+	           "input=[linux,kbd,none]",
+	           "      linux - (default) Linux input for keyboards and pointer devices"
+	           "      kbd   - Konsole KBD keyboard",
+	           "      none  - No input devices",
 	           NULL}
 	},
 #endif

@@ -21,6 +21,12 @@ enum gp_linux_fb_flags {
 	 * Allocate new console, if not set current is used.
 	 */
 	GP_FB_ALLOC_CON = 0x04,
+	/*
+	 * Use Linux input
+	 *
+	 * Cannot be enabled together with KBD!
+	 */
+	GP_FB_INPUT_LINUX = 0x08,
 };
 
 /*

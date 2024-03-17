@@ -19,8 +19,9 @@
 #include <linux/vt.h>
 
 #include <core/gp_debug.h>
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <input/gp_input_driver_kbd.h>
+#include <backends/gp_linux_input.h>
 #include <backends/gp_linux_fb.h>
 
 struct fb_priv {
@@ -125,9 +126,28 @@ static int fb_process_fd(gp_fd *self)
 	return 0;
 }
 
-/*
- * Save console mode and set the mode to raw.
- */
+static int set_kbd(struct fb_priv *fb, int mode)
+{
+	if (ioctl(fb->con_fd, KDGKBMODE, &fb->saved_kb_mode)) {
+		GP_DEBUG(1, "Failed to ioctl KDGKBMODE tty%i: %s",
+		         fb->con_nr, strerror(errno));
+		close(fb->con_fd);
+		return -1;
+	}
+
+	GP_DEBUG(2, "Previous keyboard mode was '%i'",
+	         fb->saved_kb_mode);
+
+	if (ioctl(fb->con_fd, KDSKBMODE, mode) < 0) {
+		GP_DEBUG(1, "Failed to ioctl KDSKBMODE tty%i: %s",
+		        fb->con_nr, strerror(errno));
+		close(fb->con_fd);
+		return -1;
+	}
+
+	return 0;
+}
+
 static int init_kbd(gp_backend *backend, struct fb_priv *fb)
 {
 	struct termios t;
@@ -160,24 +180,26 @@ static int init_kbd(gp_backend *backend, struct fb_priv *fb)
 		return -1;
 	}
 
-	if (ioctl(fb->con_fd, KDGKBMODE, &fb->saved_kb_mode)) {
-		GP_DEBUG(1, "Failed to ioctl KDGKBMODE tty%i: %s",
-		         fb->con_nr, strerror(errno));
-		close(fb->con_fd);
+	if (set_kbd(fb, K_MEDIUMRAW))
 		return -1;
-	}
-
-	GP_DEBUG(2, "Previous keyboard mode was '%i'",
-	         fb->saved_kb_mode);
-
-	if (ioctl(fb->con_fd, KDSKBMODE, K_MEDIUMRAW) < 0) {
-		GP_DEBUG(1, "Failed to ioctl KDSKBMODE tty%i: %s",
-		        fb->con_nr, strerror(errno));
-		close(fb->con_fd);
-		return -1;
-	}
 
 	return 0;
+}
+
+static int disable_kbd(struct fb_priv *fb)
+{
+	if (set_kbd(fb, K_OFF))
+		return -1;
+
+	return 0;
+}
+
+static int setup_kbd(gp_backend *backend, struct fb_priv *fb)
+{
+	if (fb->flags & GP_FB_INPUT_KBD)
+		return init_kbd(backend, fb);
+
+	return disable_kbd(fb);
 }
 
 /*
@@ -188,33 +210,7 @@ static int allocate_console(struct fb_priv *fb, int flags)
 	struct vt_stat vts;
 	int fd, nr = -1;
 	char buf[255];
-	const char *tty = "/dev/tty";
-
-	if (flags & GP_FB_ALLOC_CON) {
-		GP_DEBUG(1, "Allocating new console");
-
-		fd = open("/dev/tty1", O_WRONLY);
-
-		if (fd < 0) {
-			GP_DEBUG(1, "Opening console /dev/tty1 failed: %s",
-			         strerror(errno));
-			return -1;
-		}
-
-		if (ioctl(fd, VT_OPENQRY, &nr) < 0) {
-			GP_DEBUG(1, "Failed to ioctl VT_OPENQRY /dev/tty1: %s",
-			            strerror(errno));
-			close(fd);
-			return -1;
-		}
-
-		GP_DEBUG(1, "Has been granted tty%i", nr);
-
-		close(fd);
-
-		snprintf(buf, sizeof(buf), "/dev/tty%i", nr);
-		tty = buf;
-	}
+	const char *tty = "/dev/tty1";
 
 	fd = open(tty, O_RDWR | O_NONBLOCK);
 
@@ -228,6 +224,26 @@ static int allocate_console(struct fb_priv *fb, int flags)
 		fb->last_con_nr = vts.v_active;
 	else
 		fb->last_con_nr = -1;
+
+	snprintf(buf, sizeof(buf), "/dev/tty%i", fb->last_con_nr);
+
+	if (flags & GP_FB_ALLOC_CON) {
+		if (ioctl(fd, VT_OPENQRY, &nr) < 0) {
+			GP_DEBUG(1, "Failed to ioctl VT_OPENQRY /dev/tty1: %s",
+			            strerror(errno));
+			close(fd);
+			return -1;
+		}
+
+		GP_DEBUG(1, "Has been granted tty%i", nr);
+
+		snprintf(buf, sizeof(buf), "/dev/tty%i", nr);
+		tty = buf;
+	}
+
+	close(fd);
+
+	fd = open(tty, O_RDWR | O_NONBLOCK);
 
 	if (flags & GP_FB_ALLOC_CON) {
 		if (ioctl(fd, VT_ACTIVATE, nr) < 0) {
@@ -287,8 +303,7 @@ static void fb_exit(gp_backend *self)
 	munmap(fb->fb_mem, fb->bsize);
 	close(fb->fb_fd);
 
-	if (fb->flags & GP_FB_INPUT_KBD)
-		exit_kbd(fb);
+	exit_kbd(fb);
 
 	free_console(fb);
 
@@ -331,6 +346,11 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	struct fb_var_screeninfo vscri;
 	int fd;
 
+	if ((flags & GP_FB_INPUT_LINUX) && (flags & GP_FB_INPUT_KBD)) {
+		GP_FATAL("Linux input and console KBD cannot be both enabled!");
+		return NULL;
+	}
+
 	size_t size = sizeof(gp_backend) +
 	              sizeof(struct fb_priv) + strlen(path) + 1;
 
@@ -341,12 +361,16 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	memset(backend, 0, size);
 
 	fb = GP_BACKEND_PRIV(backend);
+	fb->flags = flags;
 
 	if (allocate_console(fb, flags))
 		goto err0;
 
-	if (flags & GP_FB_INPUT_KBD) {
-		if (init_kbd(backend, fb))
+	if (setup_kbd(backend, fb))
+		goto err1;
+
+	if (flags & GP_FB_INPUT_LINUX) {
+		if (gp_linux_input_hotplug_new(backend))
 			goto err1;
 	}
 
@@ -417,7 +441,6 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	fb->fb_fd = fd;
 	fb->bsize = fscri.smem_len;
 	strcpy(fb->path, path);
-	fb->flags = flags;
 
 	if (!(flags & GP_FB_SHADOW))
 		fb->pixmap.pixels = fb->fb_mem;
@@ -457,8 +480,10 @@ err4:
 err3:
 	close(fd);
 err2:
-	if (flags & GP_FB_INPUT_KBD)
-		exit_kbd(fb);
+	exit_kbd(fb);
+
+	if (flags & GP_FB_INPUT_LINUX)
+		gp_backend_input_destroy(backend);
 err1:
 	free_console(fb);
 err0:
