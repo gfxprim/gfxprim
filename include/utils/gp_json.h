@@ -3,6 +3,11 @@
  * Copyright (C) 2021-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_json.h
+ * @brief Includes all JSON headers.
+ */
+
 #ifndef GP_JSON_H
 #define GP_JSON_H
 

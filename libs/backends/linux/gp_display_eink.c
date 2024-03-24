@@ -84,7 +84,7 @@ unlock:
 	pthread_mutex_unlock(&repaint_lock);
 }
 
-static int flush_queued_repaints(gp_fd *self)
+static enum gp_poll_event_ret flush_queued_repaints(gp_fd *self)
 {
 	gp_backend *backend = self->priv;
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);

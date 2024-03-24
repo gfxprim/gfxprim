@@ -98,7 +98,7 @@ static int find_next(gp_widget *self)
 	}
 }
 
-static int notify_callback(gp_fd *self)
+static enum gp_poll_event_ret notify_callback(gp_fd *self)
 {
 	struct file_dialog *dialog = self->priv;
 

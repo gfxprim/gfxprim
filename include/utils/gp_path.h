@@ -6,15 +6,16 @@
 
  */
 
-/*
- * Utility functions for building paths.
+/**
+ * @file gp_path.h
+ * @brief Utility functions for building paths.
  */
 
 #ifndef GP_PATH_H
 #define GP_PATH_H
 
 /**
- * Returns a user home directory.
+ * @brief Returns a user home directory.
  *
  * The home directory is validated to be an absolute path.
  *
@@ -22,18 +23,18 @@
  */
 char *gp_user_home(void);
 
+char *gp_compose_path_(const char *dir, ...);
+
 /**
- * Builds a path from directories passsed in arguments.
+ * @brief Builds a path from directories passsed in arguments.
  *
  * The returned path is normalized, i.e. there are no two path delimiters '/'
  * next to each other.
  *
- * @dir A first directory in path.
- * @... A NULL terminated list of path components.
+ * @param dir A first directory in path.
+ * @param ... A NULL terminated list of path components.
  * @return A newly allocated buffer with path or NULL in a case of a failure.
  */
-char *gp_compose_path_(const char *dir, ...);
-
 #define gp_compose_path(dir, ...) gp_compose_path_(dir, ##__VA_ARGS__, NULL);
 
 enum gp_mkpath_flags {
@@ -42,15 +43,15 @@ enum gp_mkpath_flags {
 };
 
 /**
- * Creates a path, if it does not exists.
+ * @brief Creates a path, if it does not exists.
  *
  * Works similar to 'mkdir -p'. Hoever if last compoment of the path is a file,
  * i.e. last path component does not end with '/' it's ignored.
  *
- * @base_path A path to create the directories under, can be NULL.
- * @path A path, one or more directories.
- * @flags An enum gp_mkpath_flags.
- * @mode A mode for the directories created in the path.
+ * @param base_path A path to create the directories under, can be NULL.
+ * @param path A path, one or more directories.
+ * @param flags An enum gp_mkpath_flags.
+ * @param mode A mode for the directories created in the path.
  * @return Zero on success, non-zero otherwise and errno is set.
  */
 int gp_mkpath(const char *base_path, const char *path,

@@ -44,7 +44,7 @@ int main(void)
 	printf("\nInsert 0: ");
 	print_int_vec(ints);
 
-	ints = GP_VEC_PUSH(ints, 11);
+	ints = GP_VEC_APPEND(ints, 11);
 
 	printf("\nPush 11: ");
 	print_int_vec(ints);
@@ -75,6 +75,10 @@ int main(void)
 	ints = gp_vec_del(ints, 0, 1);
 	printf("\nDelete 0 at 0: ");
 	print_int_vec(ints);
+
+	printf("\nNow print the int vector with FOREACH macro:\n");
+	GP_VEC_FOREACH(ints, int, val)
+		printf("%i\n", *val);
 
 	gp_vec_free(ints);
 

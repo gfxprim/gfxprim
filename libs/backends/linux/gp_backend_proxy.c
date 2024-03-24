@@ -143,7 +143,7 @@ static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
 	gp_ev_queue_set_screen_size(self->event_queue, msg->pix.pix.w, msg->pix.pix.h);
 }
 
-static int proxy_process_fd(gp_fd *self)
+static enum gp_poll_event_ret proxy_process_fd(gp_fd *self)
 {
 	gp_backend *backend = self->priv;
 	struct proxy_priv *priv = GP_BACKEND_PRIV(backend);

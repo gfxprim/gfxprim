@@ -111,7 +111,7 @@ static int set_get_kbd_leds(gp_ev_feedback *self, gp_ev_feedback_op *op)
 	return 0;
 }
 
-static int fb_process_fd(gp_fd *self)
+static enum gp_poll_event_ret fb_process_fd(gp_fd *self)
 {
 	gp_backend *backend = self->priv;
 	struct fb_priv *fb = GP_BACKEND_PRIV(backend);

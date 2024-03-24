@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @file gp_types.h
+ * @brief Common header for types.
+ */
+
 #ifndef UTILS_GP_TYPES_H
 #define UTILS_GP_TYPES_H
 

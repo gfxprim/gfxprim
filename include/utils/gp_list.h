@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @file gp_list.h
+ * @brief A linked list implementation.
+ */
+
 #ifndef GP_LIST_H
 #define GP_LIST_H
 
@@ -41,11 +46,11 @@ typedef struct gp_dlist {
 #define GP_DLIST_REV_FOREACH(list, entry) \
 	for (entry = (list)->tail; entry; entry = entry->prev)
 
-/*
+/**
  * @brief Pushes into head of linked list.
  *
- * @list A linked list.
- * @entry An entry to be pushed.
+ * @param list A linked list.
+ * @param entry An entry to be pushed.
  */
 static inline void gp_list_push_head(gp_list *list, gp_list_head *entry)
 {
@@ -58,11 +63,11 @@ static inline void gp_list_push_head(gp_list *list, gp_list_head *entry)
 	list->cnt++;
 }
 
-/*
+/**
  * @brief Pushes into head of double linked list.
  *
- * @list A double linked list.
- * @entry An entry to be pushed.
+ * @param list A double linked list.
+ * @param entry An entry to be pushed.
  */
 static inline void gp_dlist_push_head(gp_dlist *list, gp_dlist_head *entry)
 {
@@ -88,11 +93,11 @@ static inline void gp_list_push_tail_(gp_list *list, gp_list_head *entry)
 	list->cnt++;
 }
 
-/*
+/**
  * @brief Pushes into tail of linked list.
  *
- * @list A linked list.
- * @entry An entry to be pushed.
+ * @param list A linked list.
+ * @param entry An entry to be pushed.
  */
 static inline void gp_list_push_tail(gp_list *list, gp_list_head *entry)
 {
@@ -101,11 +106,11 @@ static inline void gp_list_push_tail(gp_list *list, gp_list_head *entry)
 	list->tail = entry;
 }
 
-/*
+/**
  * @brief Pushes into tail of double linked list.
  *
- * @list A double linked list.
- * @entry An entry to be pushed.
+ * @param list A double linked list.
+ * @param entry An entry to be pushed.
  */
 static inline void gp_dlist_push_tail(gp_dlist *list, gp_dlist_head *entry)
 {
@@ -115,12 +120,12 @@ static inline void gp_dlist_push_tail(gp_dlist *list, gp_dlist_head *entry)
 	list->tail = entry;
 }
 
-/*
+/**
  * @brief Pushes an entry into a double linked list after an entry.
  *
- * @list A double linked list.
- * @after The entry to be pushed after.
- * @entry An entry to be pushed.
+ * @param list A double linked list.
+ * @param after The entry to be pushed after.
+ * @param entry An entry to be pushed.
  */
 static inline void gp_dlist_push_after(gp_dlist *list, gp_dlist_head *after, gp_dlist_head *entry)
 {
@@ -137,12 +142,12 @@ static inline void gp_dlist_push_after(gp_dlist *list, gp_dlist_head *after, gp_
 	list->cnt++;
 }
 
-/*
+/**
  * @brief Pushes an entry into a double linked list before an entry.
  *
- * @list A double linked list.
- * @before The entry to be pushed before.
- * @entry An entry to be pushed.
+ * @param list A double linked list.
+ * @param before The entry to be pushed before.
+ * @param entry An entry to be pushed.
  */
 static inline void gp_dlist_push_before(gp_dlist *list, gp_dlist_head *before, gp_dlist_head *entry)
 {
@@ -159,12 +164,12 @@ static inline void gp_dlist_push_before(gp_dlist *list, gp_dlist_head *before, g
 	list->cnt++;
 }
 
-/*
+/**
  * @brief Pops from a head of a linked list.
  *
  * The returned pointer has to be converted to a structure by gp_list_entry().
  *
- * @list A linked list.
+ * @param list A linked list.
  * @return Entry list head or NULL on empty list.
  */
 static inline gp_list_head *gp_list_pop_head(gp_list *list)
@@ -183,12 +188,12 @@ static inline gp_list_head *gp_list_pop_head(gp_list *list)
 	return ret;
 }
 
-/*
+/**
  * @brief Pops from a head of a double linked list.
  *
  * The returned pointer has to be converted to a structure by gp_list_entry().
  *
- * @list A double linked list.
+ * @param list A double linked list.
  * @return Entry list head or NULL on empty list.
  */
 static inline gp_dlist_head *gp_dlist_pop_head(gp_dlist *list)
@@ -203,12 +208,12 @@ static inline gp_dlist_head *gp_dlist_pop_head(gp_dlist *list)
 	return ret;
 }
 
-/*
+/**
  * @brief Pops from a tail of a double linked list.
  *
  * The returned pointer has to be converted to a structure by gp_list_entry().
  *
- * @list A double linked list.
+ * @param list A double linked list.
  * @return Entry list head or NULL on empty list.
  */
 static inline gp_dlist_head *gp_dlist_pop_tail(gp_dlist *list)
@@ -230,13 +235,13 @@ static inline gp_dlist_head *gp_dlist_pop_tail(gp_dlist *list)
 	return ret;
 }
 
-/*
+/**
  * @brief Removes a entry from a double linked list.
  *
  * The entry must be present in the list!
  *
- * @list A double linked list.
- * @entry An entry to remove.
+ * @param list A double linked list.
+ * @param entry An entry to remove.
  */
 static inline void gp_dlist_rem(gp_dlist *list, gp_dlist_head *entry)
 {
@@ -302,15 +307,15 @@ static inline gp_list_head *gp_list_merge_sort(gp_list_head *head,
 	return ret;
 }
 
-/*
- * @brief Sorts a linked list given a compare function.
+/**
+ * @brief Sorts a linked list given a element comparsion function.
  *
  * The compare function works the same as a in the qsort() system function,
  * however the pointers passed are pointers to list head structure. Use
  * gp_list_entry() macro to get the pointers to the structures instead.
  *
  * Example compare function would look like:
- *
+ * @code
  * struct foo {
  *	int i;
  *	gp_list_head head;
@@ -323,9 +328,10 @@ static inline gp_list_head *gp_list_merge_sort(gp_list_head *head,
  *
  *	return fa->i - fb->i;
  * }
+ * @endcode
  *
- * @list A linked list.
- * @cmp A compare function.
+ * @param list A linked list.
+ * @param cmp A compare function.
  */
 static inline void gp_list_sort(gp_list *list,
                                 int (*cmp)(const void *, const void *))
@@ -342,13 +348,13 @@ static inline void gp_list_sort(gp_list *list,
 	list->tail = tail;
 }
 
-/*
+/**
  * @brief Sorts a double linked list given a compare function.
  *
  * See gp_list_sort() for detailed description.
  *
- * @list A double linked list.
- * @cmp A compare function.
+ * @param list A double linked list.
+ * @param cmp A compare function.
  */
 static inline void gp_dlist_sort(gp_dlist *list,
                                  int (*cmp)(const void *, const void *))

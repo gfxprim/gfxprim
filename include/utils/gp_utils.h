@@ -5,6 +5,11 @@
 
  */
 
+/**
+ * @file gp_utils.h
+ * @brief Includes all util headers.
+ */
+
 #ifndef GP_UTILS_H
 #define GP_UTILS_H
 

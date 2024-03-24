@@ -3,20 +3,35 @@
  * Copyright (C) 2022 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_utf.h
+ * @brief Unicode helper macros and functions.
+ */
+
 #ifndef UTILS_GP_UTF_H
 #define UTILS_GP_UTF_H
 
 #include <stdint.h>
 #include <stddef.h>
 
+/** Returns true if unicode byte is ASCII */
 #define GP_UTF8_IS_ASCII(ch) (!((ch) & 0x80))
+/** Returns true if we have first unicode byte of single byte sequence */
 #define GP_UTF8_IS_NBYTE(ch) (((ch) & 0xc0) == 0x80)
+/** Returns true if we have first unicode byte of two byte sequence */
 #define GP_UTF8_IS_2BYTE(ch) (((ch) & 0xe0) == 0xc0)
+/** Returns true if we have first unicode byte of three byte sequence */
 #define GP_UTF8_IS_3BYTE(ch) (((ch) & 0xf0) == 0xe0)
+/** Returns true if we have first unicode byte of four byte sequence */
 #define GP_UTF8_IS_4BYTE(ch) (((ch) & 0xf8) == 0xf0)
 
 #define GP_UTF8_NBYTE_MASK 0x3f
 
+/**
+ * @brief Parses next unicode character in UTF-8 string.
+ * @param str A pointer to the C string.
+ * @return A unicode character or 0 on error or end of the string.
+ */
 static inline uint32_t gp_utf8_next(const char **str)
 {
 	uint32_t s0 = *str[0];
@@ -66,34 +81,38 @@ static inline uint32_t gp_utf8_next(const char **str)
 }
 
 /**
- * Returns number of bytes next character is occupying in an UTF-8 string.
+ * @brief Returns number of bytes next character is occupying in an UTF-8 string.
  *
- * @str A pointer to a string.
- * @off An offset into the string, must point to a valid multibyte boundary.
+ * @param str A pointer to a string.
+ * @param off An offset into the string, must point to a valid multibyte boundary.
  * @return Number of bytes next character occupies, zero on string end and -1 on failure.
  */
 int8_t gp_utf8_next_chsz(const char *str, size_t off);
 
 /**
- * Returns number of bytes previous character is occupying in an UTF-8 string.
+ * @brief Returns number of bytes previous character is occupying in an UTF-8 string.
  *
- * @str A pointer to a string.
- * @off An offset into the string, must point to a valid multibyte boundary.
+ * @param str A pointer to a string.
+ * @param off An offset into the string, must point to a valid multibyte boundary.
  * @return Number of bytes previous character occupies, and -1 on failure.
  */
 int8_t gp_utf8_prev_chsz(const char *str, size_t off);
 
 /**
+ * @brief Returns a number of characters in UTF-8 string.
+ *
  * Returns number of characters in an UTF-8 string, which may be less or equal
  * to what strlen() reports.
  *
- * @str An UTF-8 string.
+ * @param str An UTF-8 string.
  * @return Number of characters in the string.
  */
 size_t gp_utf8_strlen(const char *str);
 
 /**
- * @unicode A unicode character.
+ * @brief Returns a number of bytes needed to store unicode character into UTF-8.
+ *
+ * @param unicode A unicode character.
  * @return Number of utf8 bytes required to store a unicode character.
  */
 static inline unsigned int gp_utf8_bytes(uint32_t unicode)
@@ -111,12 +130,12 @@ static inline unsigned int gp_utf8_bytes(uint32_t unicode)
 }
 
 /**
- * Writes an unicode characters into a byte buffer.
+ * @brief Writes an unicode character into a UTF-8 buffer.
  *
  * The buffer _must_ be large enough!
  *
- * @unicode A unicode character.
- * @buf A byte buffer.
+ * @param unicode A unicode character.
+ * @param buf A byte buffer.
  * @return A number of bytes written.
  */
 static inline int gp_to_utf8(uint32_t unicode, char *buf)
@@ -147,10 +166,12 @@ static inline int gp_to_utf8(uint32_t unicode, char *buf)
 }
 
 /**
- * Attempts to strip diacritics and replace symbols with a similar meaning which
- * produces text that can be stil readable even with ascii only font.
+ * @brief Attempts to strip diacritics from an unicode character.
  *
- * @ch An UTF character.
+ * Attempts to strip diacritics and replace symbols with a similar meaning which
+ * produces text that can be stil readable even with ASCII only font.
+ *
+ * @param ch An UTF character.
  * @return A replacemement for a character with the same meaning or original
  *         character if mapping was not found.
  */

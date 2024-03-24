@@ -184,7 +184,7 @@ static void input_syn(struct linux_input *self,
 	}
 }
 
-static int input_read(gp_fd *self)
+static enum gp_poll_event_ret input_read(gp_fd *self)
 {
 	struct linux_input *input = self->priv;
 	struct input_event ev;

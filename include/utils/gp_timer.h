@@ -3,10 +3,9 @@
  * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
-
-  Timers and timer queue implementation.
-
+/**
+ * @file gp_timer.h
+ * @brief Timers and timer queue implementation.
  */
 
 #ifndef UTILS_GP_TIMER_H
@@ -16,43 +15,47 @@
 #include <utils/gp_types.h>
 #include <input/gp_types.h>
 
-/*
- * Return this value from the callback to stop a timer.
+/**
+ * @brief Return this value from the callback to stop a timer.
  */
 #define GP_TIMER_STOP UINT32_MAX
 
+/**
+ * @brief A timer.
+ */
 struct gp_timer {
 	union {
 		gp_heap_head heap;
 		gp_timer *next;
 	};
 
-	/* Expiration time, set by user, modified by the queue */
+	/** Expiration time, set by user, modified by the queue */
 	uint64_t expires;
 
-	/* Timer id, showed in debug messages */
+	/** Timer name showed in debug messages */
 	const char *id;
 
-	/* User variable may be used to store the timer period */
+	/** User variable may be used to store the timer period */
 	uint32_t period;
 
-	/* Set if timer is inserted into a queue */
+	/** Set if timer is inserted into a queue */
 	uint32_t running:1;
-	/* Set in the timer callback */
+	/** Set during the run of the timer callback */
 	uint32_t in_callback:1;
-	/* Set if timer was reschedulled from callback */
+	/** Set if timer was reschedulled from callback */
 	uint32_t res_in_callback:1;
 
-	/* Do not touch */
+	/* Do not touch! */
 	void *_priv;
 
-	/*
-	 * Timer callback
+	/**
+	 * @brief Timer callback
 	 *
 	 * Unless GP_TIMER_STOP is returned the timer is rescheduled to expire
 	 * return value from now.
 	 */
 	uint32_t (*callback)(struct gp_timer *self);
+	/** A user private pointer */
 	void *priv;
 };
 
@@ -65,9 +68,11 @@ struct gp_timer {
 		.priv = tpriv \
 	}
 /**
- * Returns if timer is running, i.e. inserted into a timer queue.
+ * @brief Returns if timer is running.
  *
- * @timer A timer.
+ * A timer is running if it's inserted into a timer queue.
+ *
+ * @param timer A timer.
  * @return Non-zero if timer is running, zero otherwise.
  */
 static inline int gp_timer_running(gp_timer *timer)
@@ -75,8 +80,10 @@ static inline int gp_timer_running(gp_timer *timer)
 	return timer->running;
 }
 
-/*
- * Prints the structrue of binary heap into stdout, only for debugging.
+/**
+ * @brief Prints the structrue of binary heap into stdout, only for debugging.
+ *
+ * @param queue A timer queue.
  */
 void gp_timer_queue_dump(gp_timer *queue);
 
@@ -92,9 +99,9 @@ void gp_timer_queue_dump(gp_timer *queue);
  * reschedulled at now + timer->expired time and the return value from the
  * callback is discarded.
  *
- * @queue A timer queue.
- * @now A timestamp, usually obtained by calling gp_time_stamp().
- * @timer A timer to insert.
+ * @param queue A timer queue.
+ * @param now A timestamp, usually obtained by calling gp_time_stamp().
+ * @param timer A timer to insert.
  */
 void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer);
 
@@ -106,8 +113,8 @@ void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer);
  * If called from the timer callback the timer is stopped and the return value
  * from the callback is discarded.
  *
- * @queue A timer queue.
- * @timer A timer to insert.
+ * @param queue A timer queue.
+ * @param timer A timer to insert.
  */
 void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer);
 
@@ -117,8 +124,8 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer);
  * It's possible to reschedulle a timer with expires set to 0, which will
  * process the timer on the next process call.
  *
- * @queue A timer queue.
- * @now A timestamp, usually obtained by calling gp_time_stamp().
+ * @param queue A timer queue.
+ * @param now A timestamp, usually obtained by calling gp_time_stamp().
  * @return Number of timers processed.
  */
 int gp_timer_queue_process(gp_timer **queue, uint64_t now);
@@ -126,7 +133,7 @@ int gp_timer_queue_process(gp_timer **queue, uint64_t now);
 /**
  * @brief Returns size of the queue, i.e. number of timers.
  *
- * @queue A timer queue.
+ * @param queue A timer queue.
  * @return A Number of timers in the queue.
  */
 static inline unsigned int gp_timer_queue_size(gp_timer *queue)

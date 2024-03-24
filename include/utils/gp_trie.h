@@ -6,22 +6,25 @@
 
  */
 
-/*
-
-   An unicode trie.
-
+/**
+ * @file gp_trie.h
+ * @brief An unicode trie.
+ *
+ * Unicode trie with AVL trees for nodes.
  */
 
 #ifndef UTILS_GP_TRIE_H
-#define UtILS_GP_TRIE_H
+#define UTILS_GP_TRIE_H
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include <core/gp_common.h>
+#include <core/gp_compiler.h>
 #include <utils/gp_avl_tree.h>
 #include <utils/gp_utf.h>
 
+/** @brief Trie node stores pointers. */
 typedef struct gp_trie_node {
 	void *payload;
 	struct gp_trie_node *parent;
@@ -93,8 +96,7 @@ static inline int gp_trie_key_cmp(gp_avl_node *a, const void *key)
 	return ta->key - kval;
 }
 
-__attribute__((warn_unused_result))
-static inline gp_trie_node *gp_trie_ins(gp_trie_node *root, const char *str_key, void *payload)
+GP_WUR static inline gp_trie_node *gp_trie_ins(gp_trie_node *root, const char *str_key, void *payload)
 {
 	uint32_t key = gp_utf8_next(&str_key);
 	gp_trie_node *node = NULL;
@@ -147,8 +149,7 @@ static inline gp_trie_node *gp_trie_lookup(gp_trie_node *root, const char *str_k
 	return gp_trie_lookup(GP_CONTAINER_OF(avl_node, gp_trie_node, avl_next), str_key);
 }
 
-__attribute__((warn_unused_result))
-static inline gp_trie_node *gp_trie_del_(gp_trie_node *root, const char *str_key, void **payload)
+GP_WUR static inline gp_trie_node *gp_trie_del_(gp_trie_node *root, const char *str_key, void **payload)
 {
 	uint32_t key = gp_utf8_next(&str_key);
 	gp_trie_node *node = NULL;
@@ -188,8 +189,7 @@ static inline gp_trie_node *gp_trie_del_(gp_trie_node *root, const char *str_key
 	return root;
 }
 
-__attribute__((warn_unused_result))
-static inline gp_trie_node *gp_trie_del(gp_trie_node *root, const char *str_key, void **payload)
+GP_WUR static inline gp_trie_node *gp_trie_del(gp_trie_node *root, const char *str_key, void **payload)
 {
 	gp_trie_node *node = gp_trie_del_(root, str_key, payload);
 

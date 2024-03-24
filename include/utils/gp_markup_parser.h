@@ -3,23 +3,34 @@
  * Copyright (C) 2022-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_markup_parser.h
+ * @brief A markup parsers.
+ */
+
 #ifndef UTILS_GP_MARKUP_PARSER_H
 #define UTILS_GP_MARKUP_PARSER_H
 
 #include <utils/gp_markup.h>
 
+/**
+ * @brief Markup format to parse.
+ */
 enum gp_markup_fmt {
+	/** An UTF-8 text without any formatting */
 	GP_MARKUP_PLAINTEXT,
+	/** A GFXprim markup */
 	GP_MARKUP_GFXPRIM,
+	/** A small subset of HTML */
 	GP_MARKUP_HTML,
 };
 
 /**
  * @brief Parsers a markup string.
  *
- * @fmt A markup format.
- * @markup A string with a markup.
- * @flags A flags passed to markup parser.
+ * @param fmt A markup format.
+ * @param markup A string with a markup.
+ * @param flags A flags passed to markup parser.
  *
  * @return A parsed markup or NULL in a case of a failure.
  */
@@ -29,8 +40,8 @@ gp_markup *gp_markup_parse(enum gp_markup_fmt fmt, const char *markup,
 /**
  * @brief Parses a plaintext markup.
  *
- * @markup A string with a markup.
- * @flags A flags passed to markup parser.
+ * @param markup A string with a markup.
+ * @param flags Flags passed to markup parser.
  *
  * @return A parsed markup or NULL in a case of a failure.
  */
@@ -40,14 +51,17 @@ gp_markup *gp_markup_plaintext_parse(const char *markup,
 /**
  * @brief Parses a gfxprim markup.
  *
- * @markup A string with a markup.
- * @flags A flags passed to markup parser.
+ * @param markup A string with a markup.
+ * @param flags Flags passed to markup parser.
  *
  * @return A parsed markup or NULL in a case of a failure.
  */
 gp_markup *gp_markup_gfxprim_parse(const char *markup,
                                    enum gp_markup_flags flags);
 
+/**
+ * HTML parser markup flags.
+ */
 enum gp_markup_html_flags {
 	/**
 	 * Keep whitespaces
@@ -59,10 +73,10 @@ enum gp_markup_html_flags {
 };
 
 /**
- * @brief Parses a html markup.
+ * @brief Parses a HTML markup.
  *
- * @markup A string with a markup.
- * @flags A flags passed to markup parser.
+ * @param markup A string with a markup.
+ * @param flags A flags passed to markup parser.
  *
  * @return A parsed markup or NULL in a case of a failure.
  */
@@ -72,7 +86,7 @@ gp_markup *gp_markup_html_parse(const char *markup,
 /**
  * @brief Frees a markup.
  *
- * @markup A parsed markup.
+ * @param markup A parsed markup.
  */
 void gp_markup_free(gp_markup *self);
 

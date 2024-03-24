@@ -6,8 +6,9 @@
 
  */
 
-/*
- * Utility functions for building paths.
+/**
+ * @file gp_user_path.h
+ * @brief Utility functions for building paths.
  */
 
 #ifndef GP_USER_PATH_H
@@ -16,20 +17,24 @@
 #include <utils/gp_path.h>
 
 /**
- * Prepares a buffer with "$HOME/$PATH/$FILE_NAME" path.
+ * @brief Prepares a buffer with a path.
  *
- * @path A path, one or more directories.
- * @file_name A file name.
+ * The path is constructed as "$HOME/$PATH/$FILE_NAME".
+ *
+ * @param path A path, one or more directories.
+ * @param file_name A file name.
  * @return A newly allocated buffer with path or NULL in a case of a failure.
  */
 char *gp_user_path(const char *path, const char *file_name);
 
 /**
- * Creates a path, if it does not exists, for config files in "$HOME/$PATH/".
+ * @brief Creates a path, if it does not exists.
+ *
+ * The path is constructed in "$HOME/$PATH/".
  *
  * Works exactly the same as 'mkdir -p'.
  *
- * @path A path, one or more directories.
+ * @param path A path, one or more directories.
  * @return Zero on success, non-zero otherwise and errno is set.
  */
 int gp_user_mkpath(const char *path, enum gp_mkpath_flags flags);

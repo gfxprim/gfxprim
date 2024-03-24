@@ -16,6 +16,7 @@
 #define CORE_GP_CORE_H
 
 #include <core/gp_version.h>
+#include <core/gp_compiler.h>
 #include <core/gp_common.h>
 #include <core/gp_pixmap.h>
 #include <core/gp_transform.h>

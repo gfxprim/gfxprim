@@ -1,0 +1,43 @@
+PROJECT_NAME           = GFXprim
+PROJECT_BRIEF          = "2D bitmap graphics library with emphasis on speed and correctness"
+PROJECT_LOGO           = ./gfxprim_logo2.png
+OUTPUT_DIRECTORY       = api-docs
+TAB_SIZE               = 8
+OPTIMIZE_OUTPUT_FOR_C  = YES
+TOC_INCLUDE_HEADINGS   = 0
+DISTRIBUTE_GROUP_DOC   = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = NO
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+CASE_SENSE_NAMES       = YES
+WARN_NO_PARAMDOC       = YES
+INPUT                  = ../include/ \
+                         ../lib/
+FILE_PATTERNS          = *.h \
+                         *.c
+RECURSIVE              = YES
+EXCLUDE                = README.md
+SOURCE_BROWSER         = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+REFERENCES_LINK_SOURCE = NO
+GENERATE_LATEX         = NO
+MACRO_EXPANSION        = YES
+INCLUDE_PATH           = ../include/
+PREDEFINED             = DOXYGEN=1
+EXPAND_AS_DEFINED      = no_name
+HAVE_DOT               = YES
+CLASS_GRAPH            = NO
+COLLABORATION_GRAPH    = NO
+INCLUDE_GRAPH          = NO
+INCLUDED_BY_GRAPH      = NO
+GRAPHICAL_HIERARCHY    = NO
+DIRECTORY_GRAPH        = NO
+
+# Awesome doxygen style 
+DISABLE_INDEX = NO
+FULL_SIDEBAR = NO
+HTML_EXTRA_STYLESHEET = doxygen-awesome.css
+HTML_EXTRA_FILES = doxygen-awesome-darkmode-toggle.js doxygen-awesome-fragment-copy-button.js doxygen-awesome-interactive-toc.js doxygen-awesome-paragraph-link.js doxygen-awesome-tabs.js favicon.png
+HTML_HEADER = doxygen-custom-header.html

@@ -3,10 +3,9 @@
  * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
-
-   Generic min/max heap implementation.
-
+/**
+ * @file gp_heap.h
+ * @brief A min/max heap implementation.
  */
 
 #ifndef UTILS_GP_HEAP_H
@@ -15,6 +14,7 @@
 #include <string.h>
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
+#include <core/gp_compiler.h>
 #include <utils/gp_types.h>
 
 #define GP_HEAP_ENTRY(ptr, structure, member) \
@@ -117,9 +117,8 @@ static int gp_heap_well_balanced(unsigned int children)
 /*
  * Inserts an element into a heap.
  */
-__attribute__((warn_unused_result))
-gp_heap_head *gp_heap_ins_(gp_heap_head *heap, gp_heap_head *parent, gp_heap_head *elem,
-                           int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
+GP_WUR gp_heap_head *gp_heap_ins_(gp_heap_head *heap, gp_heap_head *parent, gp_heap_head *elem,
+                                  int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
 {
 	if (!heap) {
 		memset(elem, 0, sizeof(*elem));
@@ -147,23 +146,30 @@ gp_heap_head *gp_heap_ins_(gp_heap_head *heap, gp_heap_head *parent, gp_heap_hea
 	return heap;
 }
 
-__attribute__((warn_unused_result))
-gp_heap_head *gp_heap_ins(gp_heap_head *heap, gp_heap_head *elem,
+/**
+ * @brief Inserts a node into a heap.
+ *
+ * @param heap An heep tree root.
+ * @param elem An element to be insterted.
+ * @param cmp An element comparsion callback.
+ * @return A new tree root.
+ */
+GP_WUR gp_heap_head *gp_heap_ins(gp_heap_head *heap, gp_heap_head *elem,
                           int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
 {
 	return gp_heap_ins_(heap, NULL, elem, cmp);
 }
 
-/*
- * Removes last element on the last level.
+/**
+ * @brief Removes last element on the last level.
  *
  * The head pointer only changes if we remove last element from heap.
  *
- * @heap A heap pointer.
- * @last A pointer to store the last element to.
+ * @param heap A heap pointer.
+ * @param last A pointer to store the last element to.
  * @return A pointer to new head.
  */
-static inline gp_heap_head *gp_heap_rem_last(gp_heap_head *heap,
+GP_WUR static inline gp_heap_head *gp_heap_rem_last(gp_heap_head *heap,
 	gp_heap_head **last)
 {
 	if (!heap->left) {
@@ -208,14 +214,13 @@ static inline gp_heap_head *gp_heap_bubble_down(gp_heap_head *heap,
 	return heap;
 }
 
-/*
- * Removes top element from the heap.
+/**
+ * @brief Removes top element from the heap.
  *
- * @heap Old heap pointer.
+ * @param heap Old heap pointer.
  * @return New heap pointer.
  */
-__attribute__((warn_unused_result))
-static inline gp_heap_head *gp_heap_pop(gp_heap_head *heap,
+GP_WUR static inline gp_heap_head *gp_heap_pop(gp_heap_head *heap,
 	int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
 {
 	gp_heap_head *last;
@@ -237,12 +242,10 @@ static inline gp_heap_head *gp_heap_pop(gp_heap_head *heap,
 	return gp_heap_bubble_down(last, cmp);
 }
 
-#include <assert.h>
-
 /*
  * Moves replacement element up if needed.
  */
-static inline gp_heap_head *gp_heap_bubble_up(gp_heap_head *heap,
+GP_WUR static inline gp_heap_head *gp_heap_bubble_up(gp_heap_head *heap,
 	int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
 {
 	if (!heap || !heap->up)
@@ -264,13 +267,17 @@ static inline gp_heap_head *gp_heap_bubble_up(gp_heap_head *heap,
 }
 
 /**
- * Removes element from a heap.
+ * @brief Removes element from a heap.
  *
  * Does a buble down on a (sub) heap starting at the removed element and fixes
  * the links afterwards.
+ *
+ * @param heap An heep tree root.
+ * @param elem An element to be removed.
+ * @param cmp An element comparsion callback.
+ * @return A new tree root.
  */
-__attribute__((warn_unused_result))
-static inline gp_heap_head *gp_heap_rem(gp_heap_head *heap, gp_heap_head *elem,
+GP_WUR static inline gp_heap_head *gp_heap_rem(gp_heap_head *heap, gp_heap_head *elem,
 	int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
 {
 	gp_heap_head *last;

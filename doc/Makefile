@@ -42,9 +42,9 @@ PAGES=$(subst .txt,.html,$(SOURCES))
 PAGES+=$(subst .txt,.html,$(EXAMPLE_SOURCES))
 PAGES+=examples.html
 
-.PHONY: toolcheck clean
+.PHONY: toolcheck clean doxygen
 
-all: toolcheck examples.html $(PAGES)
+all: toolcheck doxygen examples.html $(PAGES)
 
 $(PAGES): asciidoc.conf
 
@@ -71,6 +71,12 @@ toolcheck:
 		echo "error: could not find 'latex'" ; exit 127 ; fi
 	@if [ -z `which dvipng 2>/dev/null` ] ; then \
 		echo "error: could not find 'dvipng'" ; exit 127 ; fi
+	@if [ -z `which doxygen 2>/dev/null` ] ; then \
+		echo "error: could not find 'doxygen'" ; exit 127 ; fi
+
+doxygen:
+	doxygen
+
 
 #
 # Create page for each part of API description
@@ -98,6 +104,7 @@ CLEAN+=$(PAGES)
 
 clean:
 	rm -f $(CLEAN)
+	rm -rf ./api-docs
 
 INSTALL_DOC=$(PAGES) *.png *.svg asciidoc.css images/*/*.png
 install: $(INSTALL_DOC)

@@ -189,7 +189,7 @@ static void process_events(struct x11_win *win, gp_backend *backend)
 	}
 }
 
-static int x11_process_fd(gp_fd *self)
+static enum gp_poll_event_ret x11_process_fd(gp_fd *self)
 {
 	gp_backend *backend = self->priv;
 	struct x11_win *win = GP_BACKEND_PRIV(backend);

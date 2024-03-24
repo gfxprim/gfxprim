@@ -3,6 +3,11 @@
  * Copyright (C) 2021-2022 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_json_common.h
+ * @brief Common JSON reader/writer definitions.
+ */
+
 #ifndef GP_JSON_COMMON_H
 #define GP_JSON_COMMON_H
 
@@ -11,6 +16,9 @@
 
 #define GP_JSON_RECURSION_MAX 128
 
+/**
+ * @brief A JSON data type.
+ */
 enum gp_json_type {
 	GP_JSON_VOID = 0,
 	GP_JSON_INT,
@@ -29,7 +37,7 @@ enum gp_json_type {
  * @brief default error print handler
  *
  * @print_priv A json buffer print_priv pointer.
- * @line A line of output to be printed
+ * @line A line of output to be printed.
  */
 void gp_json_err_handler(void *print_priv, const char *line);
 

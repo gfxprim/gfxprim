@@ -52,7 +52,7 @@ static int input_walk(gp_backend *backend)
 	return 0;
 }
 
-static int input_hotplug_read(gp_fd *fd)
+static enum gp_poll_event_ret input_hotplug_read(gp_fd *fd)
 {
 	struct linux_input_hotplug *hotplug = fd->priv;
 	char buf[BUF_LEN], str[BUF_LEN];

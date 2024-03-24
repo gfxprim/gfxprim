@@ -326,7 +326,7 @@ static void x_poll_events(gp_backend *backend)
 	}
 }
 
-static int x_process_fd(gp_fd *self)
+static enum gp_poll_event_ret x_process_fd(gp_fd *self)
 {
 	gp_backend *backend = self->priv;
 

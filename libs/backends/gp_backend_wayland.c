@@ -667,7 +667,7 @@ static int wayland_set_attr(gp_backend* self, enum gp_backend_attrs attrs, const
 	return 0;
 }
 
-static int wayland_process_fd(gp_fd *self)
+static enum gp_poll_event_ret wayland_process_fd(gp_fd *self)
 {
 	(void) self;
 

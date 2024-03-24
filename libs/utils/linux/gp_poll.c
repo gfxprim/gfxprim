@@ -29,7 +29,7 @@ int gp_poll_add(gp_poll *self, gp_fd *fd)
 		self->ep_fd = epoll_create(1);
 		if (self->ep_fd < 0) {
 			GP_WARN("epoll_create() failed: %s", strerror(errno));
-			return 1;
+			return -1;
 		}
 	}
 
@@ -86,19 +86,27 @@ gp_fd *gp_poll_rem_by_fd(gp_poll *self, int fd)
 	return NULL;
 }
 
-int gp_poll_wait(gp_poll *self, int timeout)
+int gp_poll_wait(gp_poll *self, int timeout_ms)
 {
 	struct epoll_event events[16];
 	int nfds, i;
 
-	nfds = epoll_wait(self->ep_fd, events, GP_ARRAY_SIZE(events), timeout);
+	nfds = epoll_wait(self->ep_fd, events, GP_ARRAY_SIZE(events), timeout_ms);
 	for (i = 0; i < nfds; i++) {
 		gp_fd *fd = events[i].data.ptr;
 
 		fd->revents = events[i].events;
 
-		if (fd->event(fd))
+		switch (fd->event(fd)) {
+		case 0:
+		break;
+		case GP_POLL_RET_REM:
 			gp_poll_rem(self, fd);
+		break;
+		default:
+			GP_WARN("Invalid event() callback return value fd=%i!", fd->fd);
+			return -1;
+		}
 	}
 
 	return 0;

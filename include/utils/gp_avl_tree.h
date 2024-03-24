@@ -2,21 +2,41 @@
 
 /*
 
-   Copyright (c) 2007 - 2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2007 - 2024 Cyril Hrubis <metan@ucw.cz>
 
+ */
+
+/**
+ * @file gp_avl_tree.h
+ * @brief AVL tree implementation.
  */
 
 #ifndef UTILS_GP_AVL_TREE_H
 #define UTILS_GP_AVL_TREE_H
 
+#include <core/gp_compiler.h>
+
+/**
+ * @brief AVL tree node.
+ *
+ * The node is supposed to be embedded in a user structure.
+ */
 typedef struct gp_avl_node {
-	//void *up;
+	/** Pointer to the left subtree. */
 	void *left;
+	/** Pointer to the right subtree. */
 	void *right;
+	/** Subtree depth i.e. maximum of the left and right subtree depths. */
 	unsigned long depth;
 } gp_avl_node;
 
-static inline unsigned int gp_avl_tree_depth_(gp_avl_node *root)
+/**
+ * @brief Returns AVL tree depth.
+ *
+ * @param root An AVL tree root.
+ * @return An AVL tree depth.
+ */
+static inline unsigned int gp_avl_tree_depth(gp_avl_node *root)
 {
 	if (!root)
 		return 0;
@@ -24,9 +44,10 @@ static inline unsigned int gp_avl_tree_depth_(gp_avl_node *root)
 	return root->depth;
 }
 
+
 static inline int gp_avl_tree_depth_diff_(gp_avl_node *root)
 {
-	return gp_avl_tree_depth_(root->left) - gp_avl_tree_depth_(root->right);
+	return gp_avl_tree_depth(root->left) - gp_avl_tree_depth(root->right);
 }
 
 static inline int gp_avl_tree_left_deeper_(gp_avl_node *root)
@@ -41,8 +62,8 @@ static inline int gp_avl_tree_right_deeper_(gp_avl_node *root)
 
 static inline void gp_avl_tree_update_subtree_depth_(gp_avl_node *root)
 {
-	unsigned long left  = gp_avl_tree_depth_(root->left);
-	unsigned long right = gp_avl_tree_depth_(root->right);
+	unsigned long left  = gp_avl_tree_depth(root->left);
+	unsigned long right = gp_avl_tree_depth(root->right);
 
 	if (left > right)
 		right = left;
@@ -50,8 +71,7 @@ static inline void gp_avl_tree_update_subtree_depth_(gp_avl_node *root)
 	root->depth = right + 1;
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_rotate_left_(gp_avl_node *root)
+GP_WUR static inline gp_avl_node *gp_avl_tree_rotate_left_(gp_avl_node *root)
 {
 	gp_avl_node *pivot = root->left;
 
@@ -64,8 +84,7 @@ static inline gp_avl_node *gp_avl_tree_rotate_left_(gp_avl_node *root)
 	return pivot;
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_rotate_right_(gp_avl_node *root)
+GP_WUR static inline gp_avl_node *gp_avl_tree_rotate_right_(gp_avl_node *root)
 {
 	gp_avl_node *pivot = root->right;
 
@@ -78,24 +97,21 @@ static inline gp_avl_node *gp_avl_tree_rotate_right_(gp_avl_node *root)
 	return pivot;
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_rotate_left_right_(gp_avl_node *root)
+GP_WUR static inline gp_avl_node *gp_avl_tree_rotate_left_right_(gp_avl_node *root)
 {
 	root->left = gp_avl_tree_rotate_right_(root->left);
 
 	return gp_avl_tree_rotate_left_(root);
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_rotate_right_left_(gp_avl_node *root)
+GP_WUR static inline gp_avl_node *gp_avl_tree_rotate_right_left_(gp_avl_node *root)
 {
 	root->right = gp_avl_tree_rotate_left_(root->right);
 
 	return gp_avl_tree_rotate_right_(root);
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_balance_(gp_avl_node *root)
+GP_WUR static inline gp_avl_node *gp_avl_tree_balance_(gp_avl_node *root)
 {
 	switch (gp_avl_tree_depth_diff_(root)) {
 	case 2:
@@ -117,8 +133,7 @@ static inline gp_avl_node *gp_avl_tree_balance_(gp_avl_node *root)
 	return root;
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_ins_(gp_avl_node *root, gp_avl_node *node, int (*cmp)(gp_avl_node *a, gp_avl_node *b))
+GP_WUR static inline gp_avl_node *gp_avl_tree_ins_(gp_avl_node *root, gp_avl_node *node, int (*cmp)(gp_avl_node *a, gp_avl_node *b))
 {
 	if (!root)
 		return node;
@@ -131,8 +146,15 @@ static inline gp_avl_node *gp_avl_tree_ins_(gp_avl_node *root, gp_avl_node *node
 	return gp_avl_tree_balance_(root);
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_ins(gp_avl_node *root, gp_avl_node *node, int (*cmp)(gp_avl_node *a, gp_avl_node *b))
+/**
+ * @brief Inserts a node into an AVL tree.
+ *
+ * @param root An AVL tree root.
+ * @param node A node to be insterted.
+ * @param cmp A node comparsion callback.
+ * @return A new tree root.
+ */
+GP_WUR static inline gp_avl_node *gp_avl_tree_ins(gp_avl_node *root, gp_avl_node *node, int (*cmp)(gp_avl_node *a, gp_avl_node *b))
 {
 	node->depth = 1;
 	node->left  = NULL;
@@ -141,8 +163,14 @@ static inline gp_avl_node *gp_avl_tree_ins(gp_avl_node *root, gp_avl_node *node,
 	return gp_avl_tree_ins_(root, node, cmp);
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_del_min(gp_avl_node *root, gp_avl_node **min)
+/**
+ * @brief Removes a minimal node from an AVL tree.
+ *
+ * @param root An AVL tree root.
+ * @param min A pointer to store the minimal node to.
+ * @return A new tree root.
+ */
+GP_WUR static inline gp_avl_node *gp_avl_tree_del_min(gp_avl_node *root, gp_avl_node **min)
 {
 	if (!root->right) {
 		gp_avl_node *left = root->left;
@@ -162,8 +190,14 @@ static inline gp_avl_node *gp_avl_tree_del_min(gp_avl_node *root, gp_avl_node **
 	return gp_avl_tree_balance_(root);
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_del_max(gp_avl_node *root, gp_avl_node **max)
+/**
+ * @brief Removes a maximal node from an AVL tree.
+ *
+ * @param root An AVL tree root.
+ * @param max A pointer to store the maximal node to.
+ * @return A new tree root.
+ */
+GP_WUR static inline gp_avl_node *gp_avl_tree_del_max(gp_avl_node *root, gp_avl_node **max)
 {
 	if (!root->left) {
 		gp_avl_node *right = root->right;
@@ -183,9 +217,17 @@ static inline gp_avl_node *gp_avl_tree_del_max(gp_avl_node *root, gp_avl_node **
 	return gp_avl_tree_balance_(root);
 }
 
-__attribute__((warn_unused_result))
-static inline gp_avl_node *gp_avl_tree_del(gp_avl_node *root, const void *key, gp_avl_node **del,
-                                           int (*cmp)(gp_avl_node *a, const void *key))
+/**
+ * @brief Removes a node by a key from an AVL tree.
+ *
+ * @param root An AVL tree root.
+ * @param key A key to look the node by.
+ * @param del A pointer to store the removed node to.
+ * @param cmp A node comparsion callback.
+ * @return A new tree root.
+ */
+GP_WUR static inline gp_avl_node *gp_avl_tree_del(gp_avl_node *root, const void *key, gp_avl_node **del,
+                                                  int (*cmp)(gp_avl_node *a, const void *key))
 {
 	int res;
 
@@ -225,14 +267,14 @@ static inline gp_avl_node *gp_avl_tree_del(gp_avl_node *root, const void *key, g
 	return gp_avl_tree_balance_(root);
 }
 
-static inline unsigned long gp_avl_tree_depth(gp_avl_node *root)
-{
-	if (!root)
-		return 0;
-
-	return root->depth;
-}
-
+/**
+ * @brief Looks up a node by a key.
+ *
+ * @param root An AVL tree root.
+ * @param key A key to look the node by.
+ * @param cmp A node comparsion callback.
+ * @return A looked up node or NULL if not found.
+ */
 static inline gp_avl_node *gp_avl_tree_lookup(gp_avl_node *root, const void *key,
                                               int (*cmp)(gp_avl_node *a, const void *key))
 {
