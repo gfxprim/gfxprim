@@ -50,6 +50,11 @@ config = GfxPrimConfig(
       #
       # Standard RGB types
       #
+      PixelType(name='RGB101010', pixelpack=PS_32BPP, chanslist=[
+      ('R', 20, 10),
+      ('G', 10, 10),
+      ('B',  0, 10)]),
+
       PixelType(name='xRGB8888', pixelpack=PS_32BPP, chanslist=[
 	  ('R', 16, 8),
 	  ('G', 8, 8),
