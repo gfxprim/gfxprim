@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ */
+
+/**
+ * @file gp_fill.h
+ * @brief Fills a pixmap.
  */
 
 #ifndef CORE_GP_FILL_H
@@ -8,8 +13,11 @@
 
 #include <core/gp_types.h>
 
-/*
- * Fills pixmap with givel pixel value
+/**
+ * @brief Fills pixmap with given pixel value.
+ *
+ * @param pixmap A pixmap to be filled.
+ * @val A pixel value to fill the pixmap with.
  */
 void gp_fill(gp_pixmap *pixmap, gp_pixel val);
 

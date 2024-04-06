@@ -19,7 +19,7 @@
  * Per-channel lookup tables.
  */
 typedef struct gp_filter_tables {
-	gp_pixel *table[GP_PIXELTYPE_MAX_CHANNELS];
+	gp_pixel *table[GP_PIXEL_CHANS_MAX];
 	int free_table:1;
 } gp_filter_tables;
 

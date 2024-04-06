@@ -2,19 +2,32 @@
 /*
  * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
  */
+
+/**
+ * @file gp_pixel_alias.h
+ * @brief Pixel type aliases.
+ */
 #ifndef CORE_GP_PIXEL_ALIAS_H
 #define CORE_GP_PIXEL_ALIAS_H
 
-/* Define the more common grayscal pixel types as default */
+#include <core/gp_pixel.gen.h>
 
+/**
+ * @brief List of pixel type aliases.
+ *
+ * Defines the more common grayscal pixel packings as default.
+ */
 enum gp_pixel_type_alias {
 #ifdef GP_PIXEL_G1_UB
+	/** @brief Default packing for G1 pixel is UB */
 	GP_PIXEL_G1 = GP_PIXEL_G1_UB,
 #endif
 #ifdef GP_PIXEL_G2_UB
+	/** @brief Default packing for G2 pixel is UB */
 	GP_PIXEL_G2 = GP_PIXEL_G2_UB,
 #endif
 #ifdef GP_PIXEL_G4_UB
+	/** @brief Default packing for G4 pixel is UB */
 	GP_PIXEL_G4 = GP_PIXEL_G4_UB,
 #endif
 };

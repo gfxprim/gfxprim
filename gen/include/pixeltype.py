@@ -60,6 +60,8 @@ class PixelType(object):
     self.pixelpack = pixelpack
     # C enum as defined in GP_Pixel.gen.h
     self.C_type = "GP_PIXEL_" + self.name
+    # Number of channels in the pixel
+    self.chan_cnt = len(self.chanslist)
 
     # Verify channel bits for overlaps
     # also builds a bit-map of the PixelType

@@ -13,7 +13,7 @@ HIDE_UNDOC_CLASSES     = YES
 CASE_SENSE_NAMES       = YES
 WARN_NO_PARAMDOC       = YES
 INPUT                  = ../include/ \
-                         ../lib/
+                         ../libs/
 FILE_PATTERNS          = *.h \
                          *.c
 RECURSIVE              = YES
@@ -34,6 +34,12 @@ INCLUDE_GRAPH          = NO
 INCLUDED_BY_GRAPH      = NO
 GRAPHICAL_HIERARCHY    = NO
 DIRECTORY_GRAPH        = NO
+
+
+# Where to take images from
+IMAGE_PATH = .
+# The paths to examples start at root directory
+EXAMPLE_PATH = ../
 
 # Awesome doxygen style 
 DISABLE_INDEX = NO

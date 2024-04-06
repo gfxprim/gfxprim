@@ -1,9 +1,12 @@
 @ include header.t
 /*
- * Convert PixelType values macros and functions
- *
- * Copyright (C) 2011-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2011-2024 Cyril Hrubis <metan@ucw.cz>
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
+ */
+
+/**
+ * @file gp_convert.gen.h
+ * @brief Macros and functions for conversions between pixel types.
  */
 @
 @ # RGB -> CMYK requires special handling
@@ -33,10 +36,13 @@
  ({{ c_cmyk.C_max }} - GP_GET_BITS({{ c_cmyk.off }}+o1, {{ c_cmyk.size }}, p1)))) / ({{ K.C_max }} * {{ c_cmyk.C_max }}) \
 @
 @ def pixel_type_to_type(pt1, pt2):
-/*** {{ pt1.name }} -> {{ pt2.name }} ***
+/*
+ * Converts {{ pt1.name }} -> {{ pt2.name }}
+ *
  * macro reads p1 ({{ pt1.name }} at bit-offset o1)
  * and writes to p2 ({{ pt2.name }} at bit-offset o2)
- * the relevant part of p2 is assumed to be cleared (zero) */
+ * the relevant part of p2 is assumed to be cleared (zero)
+ */
 #define GP_PIXEL_{{ pt1.name }}_TO_{{ pt2.name }}_OFFSET(p1, o1, p2, o2) do { \
 @     # special cases
 @     if pt1.is_rgb() and pt2.is_cmyk():
@@ -96,7 +102,7 @@ GP_ABORT("{{'Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not support
 @ end
 
 #include <core/gp_get_set_bits.h>
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_pixel.h>
 
 @
@@ -110,15 +116,27 @@ GP_ABORT("{{'Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not support
 @                 pixel_type_to_type(i, pt)
 @     end
 
-/*
- * Convert {{ pt.name }} to any other pixel type
+/**
+ * @brief Convert {{ pt.name }} to any other pixel type.
+ *
  * Does not work on palette types at all (yet)
+ *
+ * @param pixel A pixel value.
+ * @param type A pixel type to convert the value to.
+ *
+ * @return A converted pixel value.
  */
 gp_pixel gp_{{ pt.name }}_to_pixel(gp_pixel pixel, gp_pixel_type type);
 
-/*
- * Function converting to {{ pt.name }} from any other pixel type
+/**
+ * @brief Converts to {{ pt.name }} from any other pixel type.
+ *
  * Does not work on palette types at all (yet)
+ *
+ * @param pixel A pixel value.
+ * @param type A pixel type for the value.
+ *
+ * @return A converted pixel value.
  */
 gp_pixel gp_pixel_to_{{ pt.name }}(gp_pixel pixel, gp_pixel_type type);
 

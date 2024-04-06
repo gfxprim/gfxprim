@@ -87,18 +87,21 @@ gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type)
 	pixmap->pixel_type = type;
 
 	/* rotation and mirroring */
-	gp_pixmap_set_rotation(pixmap, 0, 0, 0);
+	gp_pixmap_rotation_set(pixmap, 0, 0, 0);
 
 	pixmap->free_pixels = 1;
 
 	return pixmap;
 }
 
-int gp_pixmap_set_gamma(gp_pixmap *self, float gamma)
+int gp_pixmap_gamma_set(gp_pixmap *self, gp_correction_type corr_type,
+                        float gamma)
 {
-	gp_gamma_release(self->gamma);
+	gp_gamma *old_gamma = self->gamma;
 
-	self->gamma = gp_gamma_acquire(self->pixel_type, gamma);
+	self->gamma = gp_gamma_acquire(self->pixel_type, corr_type, gamma);
+
+	gp_gamma_decref(old_gamma);
 
 	return !self->gamma;
 }
@@ -107,14 +110,13 @@ void gp_pixmap_free(gp_pixmap *pixmap)
 {
 	GP_DEBUG(1, "Freeing pixmap (%p)", pixmap);
 
-	if (pixmap == NULL)
+	if (!pixmap)
 		return;
 
 	if (pixmap->free_pixels)
 		free(pixmap->pixels);
 
-	if (pixmap->gamma)
-		gp_gamma_release(pixmap->gamma);
+	gp_gamma_decref(pixmap->gamma);
 
 	free(pixmap);
 }
@@ -137,8 +139,7 @@ gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
 
 	pixmap->gamma = NULL;
 
-	/* rotation and mirroring */
-	gp_pixmap_set_rotation(pixmap, 0, 0, 0);
+	gp_pixmap_rotation_set(pixmap, 0, 0, 0);
 
 	pixmap->free_pixels = !!(flags & GP_PIXMAP_FREE_PIXELS);
 
@@ -164,18 +165,18 @@ int gp_pixmap_resize(gp_pixmap *pixmap, gp_size w, gp_size h)
 	return 0;
 }
 
-gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, int flags)
+gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, enum gp_pixmap_copy_flags flags)
 {
 	gp_pixmap *new;
 	uint8_t *pixels;
 
-	if (src == NULL)
+	if (!src)
 		return NULL;
 
 	new = malloc(sizeof(gp_pixmap));
 	pixels = malloc(src->bytes_per_row * src->h);
 
-	if (pixels == NULL || new == NULL) {
+	if (!pixels || !new) {
 		free(pixels);
 		free(new);
 		GP_WARN("Malloc failed :(");
@@ -197,12 +198,11 @@ gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, int flags)
 	new->pixel_type = src->pixel_type;
 
 	if (flags & GP_COPY_WITH_ROTATION)
-		gp_pixmap_copy_rotation(src, new);
+		gp_pixmap_rotation_copy(src, new);
 	else
-		gp_pixmap_set_rotation(new, 0, 0, 0);
+		gp_pixmap_rotation_set(new, 0, 0, 0);
 
-	//TODO: Copy the gamma too
-	new->gamma = NULL;
+	new->gamma = gp_gamma_incref(src->gamma);
 
 	new->free_pixels = 1;
 
@@ -256,7 +256,7 @@ gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *pixmap,
 {
 	gp_pixmap *res = malloc(sizeof(gp_pixmap));
 
-	if (res == NULL) {
+	if (!res) {
 		GP_WARN("Malloc failed :(");
 		errno = ENOMEM;
 		return NULL;
@@ -287,7 +287,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
 	subpixmap->gamma = pixmap->gamma;
 
 	/* rotation and mirroring */
-	gp_pixmap_copy_rotation(pixmap, subpixmap);
+	gp_pixmap_rotation_copy(pixmap, subpixmap);
 
 	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x, y);
 

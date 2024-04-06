@@ -194,7 +194,7 @@ static int read_convert_bitmap(gp_pixmap *res, gp_progress_cb *callback,
 	unsigned int y;
 
 	if (gamma < 0.01)
-		gp_pixmap_set_gamma(res, 2.2);
+		gp_pixmap_gamma_set(res, GP_CORRECTION_GAMMA, 2.2);
 
 	for (y = 0; y < res->h; y++) {
 		png_read_row(png, (void*)row, NULL);
@@ -386,7 +386,7 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	}
 
 	if (gamma > 0.1)
-		gp_pixmap_set_gamma(res, 1 / gamma);
+		gp_pixmap_gamma_set(res, GP_CORRECTION_GAMMA, 1 / gamma);
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 	/*

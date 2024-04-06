@@ -33,15 +33,15 @@ uint{{ gamma_in_bits(c[2]) }}_t *{{ pref + c.name }}_2_LIN{{ suff }} = NULL;
 @     for c in pt.chanslist:
 uint{{ gamma_out_bits(c[2]) }}_t *{{ pref + c.name }}_2_GAMMA{{ suff }} = NULL;
 @     end
-@     i = 0
 
 if ({{ ctx }}->gamma) {
+@     i = 0
 @     for c in pt.chanslist:
-	{{ pref + c.name }}_2_LIN{{ suff }} = {{ ctx }}->gamma->tables[{{ i }}]->u{{ gamma_in_bits(c[2]) }};
+	{{ pref + c.name }}_2_LIN{{ suff }} = {{ ctx }}->gamma->lin[{{ i }}]->u{{ gamma_in_bits(c[2]) }};
 @         i = i + 1
-@     i = len(pt.chanslist)
+@     i = 0
 @     for c in pt.chanslist:
-	{{ pref + c.name }}_2_GAMMA{{ suff }} = {{ ctx }}->gamma->tables[{{ i }}]->u{{ gamma_out_bits(c[2]) }};
+	{{ pref + c.name }}_2_GAMMA{{ suff }} = {{ ctx }}->gamma->enc[{{ i }}]->u{{ gamma_out_bits(c[2]) }};
 @         i = i + 1
 @     end
 }

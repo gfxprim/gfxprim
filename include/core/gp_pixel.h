@@ -3,9 +3,14 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
+ */
+
+/**
+ * @file gp_pixel.h
+ * @brief A pixel description.
  */
 
 #ifndef CORE_GP_PIXEL_H
@@ -16,74 +21,75 @@
 #include <core/gp_types.h>
 #include <core/gp_common.h>
 
-/*
- * gp_pixel_type is an enum of pixel types,
- *
- * each named GP_PIXEL_<TYPENAME>, such as GP_PIXEL_RGB888
- * see the beginning of GP_Pixel.gen.h for a complete list
- *
- * The type always contains GP_PIXEL_UNKNOWN = 0 and
- * GP_PIXEL_MAX as the last value (also the number of valid types)
- * The types are numbered to use the entire range 0 .. GP_PIXEL_MAX-1
- */
 #define GP_PIXEL_BITS (sizeof(gp_pixel) * 8)
 
 #include <core/gp_pixel.gen.h>
 #include <core/gp_pixel_alias.h>
 #include <core/gp_get_set_bits.h>
 
-/*
- * Description of one channel
+/**
+ * @brief Description of one pixel channel.
+ *
  * Assumes all the channel names to be at most 7 chars long
  *
  * The common channel names are:
- *  R, G, B  - as usual
- *  V        - value, for grayscale
- *  A        - opacity (0=transparent)
- *  P        - palette (index)
+ *
+ *  R, G, B     - RGB as usual
+ *  C, M, Y, K  - CMYK
+ *  V           - value, for grayscale
+ *  A           - opacity (0=transparent)
+ *  P           - palette (index)
  */
 typedef struct gp_pixel_channel {
-	char name[8];    /* Channel name */
-	uint8_t offset;  /* Offset in bits */
-	uint8_t size;    /* Bit-size */
+	/** Pixel channel name */
+	char name[8];
+	/** Channel offset in bits */
+	uint8_t offset;
+	/** Channel size in bits */
+	uint8_t size;
 } gp_pixel_channel;
 
-/*
- * Maximum number of channels in a PixelType
- */
-#define GP_PIXELTYPE_MAX_CHANNELS 8
-
-/*
- * Pixel type flags for various pixel properties.
+/**
+ * @brief Pixel type flags for various pixel properties.
  */
 typedef enum gp_pixel_flags {
+	/** @brief Pixel has an alpha channel */
 	GP_PIXEL_HAS_ALPHA = 0x01,
+	/** @brief Pixel has RGB channels */
 	GP_PIXEL_IS_RGB = 0x02,
+	/** @brief Pixel is palette */
 	GP_PIXEL_IS_PALETTE = 0x04,
+	/** @brief Pixel has CMYK channels */
 	GP_PIXEL_IS_CMYK = 0x08,
+	/** @brief Pixel is grayscale */
 	GP_PIXEL_IS_GRAYSCALE = 0x10,
 } gp_pixel_flags;
 
-/*
- * Description of one PixelType
+/**
+ * @brief A description of a gp_pixel_type
  * Assumes name with at most 15 chars
- * Assumes at most 8 channels
  */
 struct gp_pixel_type_desc {
-	gp_pixel_type type;        /* Number of the type */
-	const char name[16];      /* Name */
-	uint8_t size;	          /* Size in bits */
-	uint8_t pack;             /* Pixel packing */
-	uint8_t numchannels;      /* Number of channels */
+	/** @brief An id of the pixel type */
+	gp_pixel_type type;
+	/** @brief A name e.g. xRGB8888 */
+	const char name[16];
+	/** @brief A pixel size in bits */
+	uint8_t size;
+	/** @brief A pixel packing */
+	uint8_t pack;
+	/** @brief A number of channels */
+	uint8_t numchannels;
+	/** @brief Bitwise or of gp_pixel_flags */
 	gp_pixel_flags flags;
-	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
+	/** @brief String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
 	const char bitmap[GP_PIXEL_BITS + 1];
-	/* Individual channels */
-	const gp_pixel_channel channels[GP_PIXELTYPE_MAX_CHANNELS];
+	/** @brief An individual channel descriptions */
+	const gp_pixel_channel channels[GP_PIXEL_CHANS_MAX];
 };
 
-/*
- * Array of size GP_PIXEL_MAX describing known pixel types
+/**
+ * @brief Array with description for all pixel types.
  */
 extern const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX];
 

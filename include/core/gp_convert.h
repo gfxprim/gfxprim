@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
+ * Copyright (C) 2023-2024 Cyril Hrubis <metan@ucw.cz>
+ */
+
+/**
+ * @file gp_convert.h
+ * @brief A pixel value conversions.
  */
 
 #ifndef CORE_GP_CONVERT_H
@@ -8,12 +14,18 @@
 
 #include <core/gp_pixmap.h>
 #include <core/gp_pixel.h>
-
 #include <core/gp_convert.gen.h>
 #include <core/gp_convert_scale.gen.h>
 
-/*
- * Converts a color specified by its R, G, B components to a specified type.
+/**
+ * @brief Converts a color specified by its R, G, B components to a specified type.
+ *
+ * @param r A red channel value.
+ * @param g A green channel value.
+ * @param b A blue channel value.
+ * @param type A pixel type for the resulting pixel value.
+ *
+ * @return A pixel value.
  */
 static inline gp_pixel gp_rgb_to_pixel(uint8_t r, uint8_t g, uint8_t b,
                                        gp_pixel_type type)
@@ -22,8 +34,16 @@ static inline gp_pixel gp_rgb_to_pixel(uint8_t r, uint8_t g, uint8_t b,
 	return gp_RGB888_to_pixel(p, type);
 }
 
-/*
- * Converts a color specified by its R, G, B, A components to a specified type.
+/**
+ * @brief Converts a color specified by its R, G, B, A components to a specified type.
+ *
+ * @param r A red channel value.
+ * @param g A green channel value.
+ * @param b A blue channel value.
+ * @param a An alpha channel value.
+ * @param type A pixel type for the resulting pixel value.
+ *
+ * @return A pixel value.
  */
 static inline gp_pixel gp_rgba_to_pixel(uint8_t r, uint8_t g, uint8_t b,
                                         uint8_t a, gp_pixel_type type)

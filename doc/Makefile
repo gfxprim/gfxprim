@@ -75,6 +75,7 @@ toolcheck:
 		echo "error: could not find 'doxygen'" ; exit 127 ; fi
 
 doxygen:
+	$(MAKE) -C ../include/
 	doxygen
 
 

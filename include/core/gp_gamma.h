@@ -1,175 +1,192 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
-
-  Gamma correction.
-
-  What is gamma and what is it doing in my computer?
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  First of all gamma is a function, or better there is a gamma function and
-  it's inverse function. Both gamma function and it's inverse are defined on
-  interval [0,1] and are defined as out = in^(gamma) and it's inverse as
-  out = in^(1/gamma).
-
-  The purpose of this function is to compensate nonlinearity of human eye
-  perception. The human eye is more sensitive to dark tones than the light ones
-  so without gamma correction storage and manipulation with image data would
-  either be less efficient in space (in case you decided to use more bits and
-  encode the image linearly) or quantization in darker tones would be more
-  visible resulting in "pixelated" images (aliasing).
-
-  So there is a gamma, the Internet seems to suggest that usual values for
-  gamma are 2.5 for old CRT monitors and about 2.2 for LCD ones, ideally you
-  should have color profile for your device (you need special hardware to
-  measure it). So if you are trying to draw linear gradient on the screen
-  you need to generate sequence of numbers accordingly to gamma function
-  (the 50% intensity is around 186 for gamma = 2.2 and 8bit grayscale pixel).
-
-  Moreover image formats tend to save data in nonlinear fashion (some formats
-  include gamma value used to for the image) so before you apply filter that
-  manipulates with pixel values, you need to convert it to linear space (adding
-  some more bits to compensate for rounding errors).
-
-  Also it's important to take gamma, into an account, when drawing anti-aliased
-  shapes, you can't get right results otherwise.
-
+/**
+ * @file gp_gamma.h
+ * @brief Gamma and sRGB corrections.
+ *
+ * What is gamma?
+ * ==============
+ *
+ * First of all gamma is a function, or better there is a gamma function and
+ * it's inverse function. Both gamma function and it's inverse are defined on
+ * interval [0,1] and are defined as out = in^(gamma) and it's inverse as
+ * out = in^(1/gamma).
+ *
+ * The purpose of this function is to compensate nonlinearity of human eye
+ * perception. The human eye is more sensitive to dark tones than the light ones
+ * so without gamma correction storage and manipulation with image data would
+ * either be less efficient in space (in case you decided to use more bits and
+ * encode the image linearly) or quantization in darker tones would be more
+ * visible resulting in "pixelated" images (aliasing).
+ *
+ * So there is a gamma, the Internet seems to suggest that usual values for
+ * gamma are 2.5 for old CRT monitors and about 2.2 for LCD ones, ideally you
+ * should have color profile for your device (you need special hardware to
+ * measure it). So if you are trying to draw linear gradient on the screen
+ * you need to generate sequence of numbers accordingly to gamma function
+ * (the 50% intensity is around 186 for gamma = 2.2 and 8bit grayscale pixel).
+ *
+ * Moreover image formats tend to save data in nonlinear fashion (some formats
+ * include gamma value used to for the image) so before you apply filter that
+ * manipulates with pixel values, you need to convert it to linear space (adding
+ * some more bits to compensate for rounding errors).
+ *
+ * Also it's important to take gamma, into an account, when drawing anti-aliased
+ * shapes, you can't get right results otherwise.
+ *
+ * Implementation
+ * ==============
+ *
+ * This code implements management functions for easy, per pixmap, per
+ * channel, gamma tables.
+ *
+ * The tables for particular gamma are reference counted. There is only one
+ * table for particular gamma value and bit depth in memory at a time.
+ *
+ * The pointers to gamma tables are storied in gp_gamma structure and are
+ * organized in the same order as channels. The lin tables linearize pixel
+ * values and use at least two more bits than the input size. The enc tables
+ * encode the linear values back into the original non-linear space.
+ *
+ * E.g. if we have RGB888 pixel and gamma 2.2 there are two lookup tables in
+ * the memory, one for gamma=2.2 8bit -> 10bit that's an array of 256 x u16
+ * values and its inverse gamma=0.4545... 10bit -> 8bit that's an array 1024 x
+ * u8 values. The gp_gamma lin[] first three pointers point to the first table
+ * and the first three pointers in enc[] points to the second table.
+ *
+ * To get a linear value for a RGB888 pixel channel:
+ * @code
+ * uint32_t chan_val_lin = gamma->lin[chan_number].u16[chan_val];
+ * @endcode
+ *
+ * And to get the value back:
+ * @code
+ * uint8_t chan_val = gamma->enc[chan_number].u8[chan_val_lin];
+ * @endcode
+ *
+ * When doing more than one conversion it's better to save pointers to
+ * individual table:
+ *
+ * @code
+ * uint16_t *R_2_LIN = gamma->lin[0].u16;
+ * ...
+ * uint8_t *R_2_GAMMA = gamma->enc[0].u8;
+ * ...
+ * @endcode
  */
-
- /*
-
-   This code implements management functions for easy, per pixmap, per
-   channel, gamma tables.
-
-   The tables for particular gamma are reference counted. There is only one
-   table for particular gamma value and bit depth in memory at a time.
-
-   Also the table output, for linear values, has two more bits than original in
-   order not to loose precision.
-
-   The pointers to gamma tables are storied in gp_gamma structure and are
-   organized in the same order as channels. First N tables for each channel and
-   gamma value gamma, then N tables for inverse 1/gamma function.
-
-   So when we have RGB888 pixel and gamma 2.2 there are two tables in the
-   memory, one for gamma 2.2 input 8bit output 10bit and it's inverse input
-   10bit output 8bit. The gp_gamma contains six pointers. First three points to
-   the gamma table for gamma 2.2 with 8bit input (256 array members) and the
-   output format is 10bits so each array member is uint16_t. The other three
-   are for inverse gamma function (gamma = 0.454545...) with 10bit input (1024
-   array members) and 8bit output so each member is uint8_t.
-
-   The whole interface is designed for speed, so that conversion to linear
-   space or from linear space is just a matter of indexing arrays. Imagine you
-   need to get gamma-corrected pixel value. First you take individual pixel
-   channels then use the gp_gamma structure as follows:
-
-   gamma->tables[chan_number].u16[chan_val]
-
-   or when result has no more than 8bits
-
-   gamma->tables[chan_number].u8[chan_val]
-
-   The inverse transformation is done as:
-
-   gamma->tables[chan_count + chan_number].u8[chan_val]
-
-   or when original pixel channel had more than 8bits
-
-   gamma->tables[chan_count + chan_number].u16[chan_val]
-
-   When doing more than one conversion it's better to save pointers to
-   individual table (example for RGB888):
-
-   uint16_t *R_2_LIN = gamma->tables[0].u16;
-   ...
-   uint8_t *R_2_GAMMA = gamma->tables[3].u8;
-   ...
-
-  */
 
 #ifndef CORE_GP_GAMMA_H
 #define CORE_GP_GAMMA_H
 
 #include <stdint.h>
 
-#include "core/gp_pixmap.h"
+#include <core/gp_types.h>
 
+/**
+ * @brief A list of supported correction types
+ */
 typedef enum gp_correction_type {
-	/* Classical gamma correction */
+	/** @brief Classical gamma correction */
 	GP_CORRECTION_GAMMA,
-	/* Standard RGB */
-	GP_CORRECTION_sRGB,
+	/** @brief Standard RGB - gamma = 2.2 linearized near zero */
+	GP_CORRECTION_SRGB,
 } gp_correction_type;
 
-
-/*
- * Gamma table.
+/**
+ * @brief A lookup gamma table.
  */
 typedef struct gp_gamma_table {
-	/* Table description */
+	/** @brief Correction type */
 	gp_correction_type type;
+	/** @brief Gamma for GP_CORRECTION_GAMMA */
 	float gamma;
+
+	/** @brief Number of input bits */
 	uint8_t in_bits;
+	/** @brief Number of output bits */
 	uint8_t out_bits;
 
-	/* Used for internal purpose */
+	/** @brief Reference counter */
 	unsigned int ref_count;
 	struct gp_gamma_table *next;
 
-	/* The table itself */
+	/** @brief Lookup table */
 	union {
 		uint8_t u8[0];
 		uint16_t u16[0];
 	};
 } gp_gamma_table;
 
-/*
- * Gamma structure for general pixel type.
+/**
+ * @brief A correction tables for all pixel channels.
  *
- * The gp_gamma structure contains pointers to tables for each pixel
- * channel and for gamma and it's inverse transformation.
- *
- * The interface is specially designed so that getting Gamma corrected value is
- * a matter of indexing two arrays.
+ * Contains pointers to lookup tables for each pixel channel for linearization
+ * and inverse transformation. Linearization produces a values with a few more
+ * bits, e.g. for 8bit value you end up with at least 10bits to correctly
+ * encode the linearized values.
  */
-struct gp_gamma {
+typedef struct gp_gamma {
+	/** @brief Pixel type the table could be used for */
 	gp_pixel_type pixel_type;
 
+	/** @brief Reference counter */
 	unsigned int ref_count;
 
-	gp_gamma_table *tables[];
-};
+	/** @brief Tables to linearize channel values */
+	gp_gamma_table *lin[GP_PIXEL_CHANS_MAX];
+	/** @brief Tables to encode the values back */
+	gp_gamma_table *enc[GP_PIXEL_CHANS_MAX];
+} gp_gamma;
 
-/*
- * Returns pointer to a gamma translation table, the same gamma is used for all
- * channels.
+/**
+ * @brief Acquires a gamma tables for a given pixel type, correction type and
+ *        a gamma value.
  *
- * May fail, in case malloc() has failed.
+ * For a GP_CORRECTION_SRGB the gamma value is ignored.
+ *
+ * @param pixel_type A pixel type to build the tables for
+ * @param corr_type A correction type.
+ * @param gamma A gamma value, rounded to three decimal places internally.
  */
-gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type, float gamma);
+gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type,
+                           gp_correction_type corr_type, float gamma);
 
-/*
- * Returns pointer to the sRGB translation table.
+/**
+ * @brief Increases reference counters.
+ *
+ * Increases reference counters for gamma tables. Each time a pixmap is
+ * duplicated or new pixmap is created as a result of filters the newly created
+ * pixmap needs to inherit the gamma correction tables.
+ *
+ * @param gamma A gamma table.
+ * @return A pointer to the gamma table passed as argument.
  */
-gp_gamma *gp_sRGB_acquire(gp_pixel_type pixel_type);
+gp_gamma *gp_gamma_incref(gp_gamma *gamma);
 
-/*
- * Copies Gamma table (actually increases ref_count) so it's fast and can't
- * fail.
+/**
+ * @brief Decreases reference counters.
+ *
+ * Decreases reference counters and frees the table if counters drop to zero.
+ *
+ * @param self A gamma table.
  */
-gp_gamma *gp_gamma_copy(gp_gamma *gamma);
+void gp_gamma_decref(gp_gamma *self);
 
-/*
- * Releases gamma table.
+/**
+ * @brief Returns correction name.
+ *
+ * @param type A correction type.
+ * @return A correction name.
  */
-void gp_gamma_release(gp_gamma *self);
+const char *gp_correction_type_name(gp_correction_type type);
 
-/*
- * Prints info about gamma table into the stdout.
+/**
+ * @brief Prints info about gamma table into the stdout.
+ *
+ * @param self A gamma table.
  */
 void gp_gamma_print(const gp_gamma *self);
 

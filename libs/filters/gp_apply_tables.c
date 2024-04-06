@@ -32,7 +32,7 @@ static void free_tables(gp_filter_tables *self)
 {
 	unsigned int i;
 
-	for (i = 0; i < GP_PIXELTYPE_MAX_CHANNELS; i++) {
+	for (i = 0; i < GP_PIXEL_CHANS_MAX; i++) {
 
 		if (!self->table[i])
 			break;
@@ -50,7 +50,7 @@ int gp_filter_tables_init(gp_filter_tables *self, const gp_pixmap *pixmap)
 	GP_DEBUG(2, "Allocating tables for pixel %s",
 	         gp_pixel_type_name(pixmap->pixel_type));
 
-	for (i = 0; i < GP_PIXELTYPE_MAX_CHANNELS; i++)
+	for (i = 0; i < GP_PIXEL_CHANS_MAX; i++)
 		self->table[i] = NULL;
 
 	desc = gp_pixel_desc(pixmap->pixel_type);

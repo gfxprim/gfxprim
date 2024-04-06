@@ -3,9 +3,16 @@
  * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
+/**
+ * @file gp_pixel_pack.gen.h
+ * @brief Defines how are pixels packed in a buffer.
+ */
+
+/**
+ * @brief Pixel packings.
+ *
  * Pixel packing defines how pixels are packed in a stream of bytes. Note that
- * there may be more than one packing defined for a single bit depth.
+ * there may be more than one packing defined for a single pixel size.
  *
  * The bits_per_pixel (pixel size) defines how big is a pixel, it's useful for
  * determining the buffer size, but it does not tell us anything about how
@@ -14,17 +21,18 @@
  * more different packings than pixel sizes.
  */
 typedef enum gp_pixel_pack {
-@ for ps in pixelpacks:
-	{{ ps.pack}} = {{ '0x%02x' % ps.pack_id }},
+@ for pp in pixelpacks:
+	/** @brief {{ pp.pack }} */
+	{{ pp.pack}} = {{ '0x%02x' % pp.pack_id }},
 @ end
 } gp_pixel_pack;
 
-@ for ps in pixelpacks:
-#define {{ ps.pack }} {{ ps.pack }}
+@ for pp in pixelpacks:
+#define {{ pp.pack }} {{ pp.pack }}
 @ end
 
-/*
- * Returns pixel size, e.g. bits per pixel given pixel packing.
+/**
+ * @brief Returns pixel size, e.g. bits per pixel given pixel packing.
  */
 uint8_t gp_pixel_bpp_by_pack(enum gp_pixel_pack pack);
 

@@ -49,7 +49,7 @@
  */
 
 #include <core/gp_get_set_bits.h>
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 
 @ for ps in pixelpacks:
 /*

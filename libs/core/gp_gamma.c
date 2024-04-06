@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <math.h>
 
 #include <core/gp_pixel.h>
 #include <core/gp_debug.h>
-
 #include <core/gp_gamma.h>
 
 static gp_gamma_table *tables = NULL;
@@ -42,25 +41,25 @@ static gp_gamma_table *get_table(float gamma, uint8_t in_bits, uint8_t out_bits)
 {
 	gp_gamma_table *i;
 
-	for (i = tables; i != NULL; i = i->next)
+	for (i = tables; i != NULL; i = i->next) {
 		if (gamma == i->gamma && in_bits == i->in_bits &&
 		    out_bits == i->out_bits)
 			break;
+	}
 
-	if (i != NULL) {
-		GP_DEBUG(2, "Found Gamma table Gamma %f, in_bits %u, "
-		         "out_bits %u, ref_count %u", i->gamma, i->in_bits,
-			 i->out_bits, i->ref_count);
+	if (i) {
+		GP_DEBUG(2, "Found Gamma table %f, in_bits %u, out_bits %u, ref_count %u",
+		         i->gamma, i->in_bits, i->out_bits, i->ref_count);
 		i->ref_count++;
 		return i;
 	}
 
-	GP_DEBUG(2, "Creating Gamma table Gamma %f, in_bits %u, out_bits %u",
+	GP_DEBUG(2, "Creating Gamma table %f, in_bits %u, out_bits %u",
 	         gamma, in_bits, out_bits);
 
 	i = malloc(sizeof(gp_gamma_table) + (1U<<in_bits) * (out_bits > 8 ? 2 : 1));
 
-	if (i == NULL) {
+	if (!i) {
 		GP_WARN("Malloc failed :(");
 		return NULL;
 	}
@@ -85,14 +84,14 @@ static gp_gamma_table *get_table(float gamma, uint8_t in_bits, uint8_t out_bits)
 
 static void put_table(gp_gamma_table *table)
 {
-	if (table == NULL)
+	if (!table)
 		return;
 
 	table->ref_count--;
 
-	GP_DEBUG(2, "Putting gamma table Gamma %f, in_bits %u, out_bits %u, "
-	         "ref_count %u", table->gamma, table->in_bits, table->out_bits,
-		 table->ref_count);
+	GP_DEBUG(4, "Decreasing refcount %u for %s table in_bits=%u out_bits=%u gamma=%f",
+	         table->ref_count, gp_correction_type_name(table->type),
+	         table->in_bits, table->out_bits, table->gamma);
 
 	if (table->ref_count == 0) {
 		GP_DEBUG(2, "Gamma table ref_count == 0, removing...");
@@ -115,45 +114,64 @@ static void put_table(gp_gamma_table *table)
 	}
 }
 
-gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type, float gamma)
+static void ref_table(gp_gamma_table *table)
+{
+	if (!table)
+		return;
+
+	table->ref_count++;
+
+	GP_DEBUG(4, "Increasing refcount %u for %s table in_bits=%u out_bits=%u gamma=%f",
+	         table->ref_count, gp_correction_type_name(table->type),
+	         table->in_bits, table->out_bits, table->gamma);
+}
+
+gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type,
+                           gp_correction_type corr_type, float gamma)
 {
 	GP_CHECK_VALID_PIXELTYPE(pixel_type);
 	int channels = gp_pixel_types[pixel_type].numchannels, i;
 
-	GP_DEBUG(1, "Acquiring Gamma table %s gamma %f", gp_pixel_type_name(pixel_type), gamma);
+	switch (corr_type) {
+	case GP_CORRECTION_GAMMA:
+	break;
+	case GP_CORRECTION_SRGB:
+		gamma = 2.2;
+	break;
+	default:
+		GP_WARN("Invalid correction type %i", corr_type);
+		return NULL;
+	};
 
-	gp_gamma *res = malloc(sizeof(struct gp_gamma) + 2 * channels * sizeof(void*));
+	gamma = roundf(gamma * 1000) / 1000;
 
-	if (res == NULL) {
+	GP_DEBUG(1, "Acquiring %s correction table for %s gamma %f",
+		 gp_correction_type_name(corr_type),
+	         gp_pixel_type_name(pixel_type), gamma);
+
+	gp_gamma *res = malloc(sizeof(struct gp_gamma));
+
+	if (!res) {
 		GP_WARN("Malloc failed :(");
 		return NULL;
 	}
 
-	/* NULL the pointers */
-	for (i = 0; i < 2 * channels; i++)
-		res->tables[i] = NULL;
+	for (i = 0; i < GP_PIXEL_CHANS_MAX; i++) {
+		res->lin[i] = NULL;
+		res->enc[i] = NULL;
+	}
 
 	res->pixel_type = pixel_type;
 	res->ref_count = 1;
 
-	/* Gamma to linear tables n bits -> n + 2 bits */
 	for (i = 0; i < channels; i++) {
 		unsigned int chan_size = gp_pixel_types[pixel_type].channels[i].size;
-		res->tables[i] = get_table(gamma, chan_size, chan_size + 2);
 
-		if (res->tables[i] == NULL) {
-			gp_gamma_release(res);
-			return NULL;
-		}
-	}
+		res->lin[i] = get_table(gamma, chan_size, chan_size + 2);
+		res->enc[i] = get_table(1/gamma, chan_size + 2, chan_size);
 
-	/* And reverse tables, n + 2 bits -> n bits */
-	for (i = 0; i < channels; i++) {
-		unsigned int chan_size = gp_pixel_types[pixel_type].channels[i].size;
-		res->tables[i + channels] = get_table(1/gamma, chan_size + 2, chan_size);
-
-		if (res->tables[i] == NULL) {
-			gp_gamma_release(res);
+		if (!res->lin[i] || !res->enc[i]) {
+			gp_gamma_decref(res);
 			return NULL;
 		}
 	}
@@ -161,28 +179,48 @@ gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type, float gamma)
 	return res;
 }
 
-gp_gamma *gp_gamma_copy(gp_gamma *self)
+gp_gamma *gp_gamma_incref(gp_gamma *self)
 {
+	unsigned int i;
+
+	if (!self)
+		return NULL;
+
+	GP_DEBUG(3, "Increasing refcount for %s table %s gamma %f",
+	         gp_correction_type_name(self->lin[0]->type),
+	         gp_pixel_type_name(self->pixel_type), self->lin[0]->gamma);
+
 	self->ref_count++;
+
+	for (i = 0; i < GP_PIXEL_CHANS_MAX; i++) {
+		ref_table(self->lin[i]);
+		ref_table(self->enc[i]);
+	}
+
 	return self;
 }
 
-void gp_gamma_release(gp_gamma *self)
+void gp_gamma_decref(gp_gamma *self)
 {
-	int channels, i;
+	int i;
 
 	if (!self)
 		return;
 
-	channels = gp_pixel_types[self->pixel_type].numchannels;
+	const char *correction_name = gp_correction_type_name(self->lin[0]->type);
+	const float gamma = self->lin[0]->gamma;
 
-	GP_DEBUG(1, "Releasing Gamma table %s gamma %f", gp_pixel_type_name(self->pixel_type), self->tables[0]->gamma);
+	GP_DEBUG(3, "Decreasing refcount for %s table %s gamma %f",
+	         correction_name, gp_pixel_type_name(self->pixel_type), gamma);
 
-	for (i = 0; i < 2 * channels; i++)
-		put_table(self->tables[i]);
+	for (i = 0; i < GP_PIXEL_CHANS_MAX; i++) {
+		put_table(self->lin[i]);
+		put_table(self->enc[i]);
+	}
 
 	if (--self->ref_count == 0) {
-		GP_DEBUG(2, "Gamma ref_count == 0, releasing...");
+		GP_DEBUG(2, "Freeing %s table %s gamma %f",
+	                 correction_name, gp_pixel_type_name(self->pixel_type), gamma);
 		free(self);
 	}
 }
@@ -192,9 +230,9 @@ static const char *correction_type_names[] = {
 	"sRGB",
 };
 
-static const char *correction_type_name(enum gp_correction_type type)
+const char *gp_correction_type_name(enum gp_correction_type type)
 {
-	if (type > GP_CORRECTION_sRGB)
+	if (type > GP_CORRECTION_SRGB)
 		return "Invalid";
 
 	return correction_type_names[type];
@@ -209,13 +247,13 @@ void gp_gamma_print(const gp_gamma *self)
 	unsigned int i;
 
 	for (i = 0; i < desc->numchannels; i++) {
-		enum gp_correction_type type = self->tables[i]->type;
+		enum gp_correction_type type = self->lin[i]->type;
 
 		printf(" %s: %s", desc->channels[i].name,
-		       correction_type_name(type));
+		       gp_correction_type_name(type));
 
 		if (type == GP_CORRECTION_GAMMA)
-			printf(" gamma = %.2f", self->tables[i]->gamma);
+			printf(" gamma = %.2f", self->lin[i]->gamma);
 
 		printf("\n");
 	}
