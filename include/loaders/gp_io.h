@@ -14,7 +14,7 @@
 
 #include <stdint.h>
 #include <sys/types.h>
-#include <core/gp_seek.h>
+#include <utils/gp_seek.h>
 #include <loaders/gp_types.h>
 
 struct gp_io {

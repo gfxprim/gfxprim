@@ -6,9 +6,9 @@
 #include <math.h>
 #include <errno.h>
 
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_gamma.h>
+#include <core/gp_gamma_correction.h>
 
 #include <core/gp_debug.h>
 

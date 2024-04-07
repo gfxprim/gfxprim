@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
 
-   Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (C) 2020-2024 Cyril Hrubis <metan@ucw.cz>
 
+ */
+
+/**
+ * @file gp_seek.h
+ * @brief Seek contants and transformations.
  */
 
 #ifndef GP_SEEK_H
@@ -11,7 +16,9 @@
 #include <sys/types.h>
 #include <stddef.h>
 
-/*
+/**
+ * @brief Seek constants.
+ *
  * Values are 1:1 with constants passed to lseek()
  */
 enum gp_seek_whence {
@@ -23,10 +30,10 @@ enum gp_seek_whence {
 /**
  * @brief Computes position for a seek like parameters.
  *
- * @whence A whence for offset.
- * @off An offeset to seek to.
- * @cur_pos Pointer to a current postion, set to new offset upon successful exit.
- * @max_pos Maximal reachable offset.
+ * @param whence A whence for offset.
+ * @param off An offeset to seek to.
+ * @param cur_pos Pointer to a current postion, set to new offset upon successful exit.
+ * @param max_pos Maximal reachable offset.
  *
  * @return A zero if new offset is between 0 and max_pos, -1 if new offset is
  *         smaller than zero and 1 if it's greater than max_pos.

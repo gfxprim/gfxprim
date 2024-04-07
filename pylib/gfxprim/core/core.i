@@ -11,6 +11,7 @@
 
 %include "gp_core.h"
 %include "gp_types.h"
+%include "gp_compiler.h"
 %include "gp_transform.h"
 %include "gp_get_set_bits.h"
 
@@ -30,7 +31,7 @@
  * Pixel types
  */
 %include "gp_pixel.h"
-%include "gp_pixel.gen.h" /* Includes enum gp_pixel_type definition */
+%include "gp_pixel.gen.h"
 %include "gp_pixel_alias.h"
 %include "gp_convert.h"
 %import "gp_convert.gen.h"
@@ -55,6 +56,7 @@ const gp_pixel_type_desc *gp_pixel_types_access(gp_pixel_type no)
 %immutable gp_pixmap::h;
 %immutable gp_pixmap::pixel_type;
 %immutable gp_pixmap::bytes_per_row;
+%immutable gp_pixmap::gamma;
 /* Rename "internal" gp_pixmap */
 %rename("_%s") "gp_pixmap::pixels";
 %rename("_%s") "gp_pixmap::offset";

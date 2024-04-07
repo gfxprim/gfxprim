@@ -1,6 +1,6 @@
 @ include header.t
 /*
- * HLine generated header
+ * hline generated header
  *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */

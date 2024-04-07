@@ -7,7 +7,6 @@ debug
 get_put_pixel.gen
 get_set_bits.gen
 pixel
-seek
 write_pixel.gen
 write_pixels2.gen
 sub_pixmap_put_pixel

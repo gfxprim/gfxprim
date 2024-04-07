@@ -12,8 +12,7 @@ HIDE_UNDOC_MEMBERS     = YES
 HIDE_UNDOC_CLASSES     = YES
 CASE_SENSE_NAMES       = YES
 WARN_NO_PARAMDOC       = YES
-INPUT                  = ../include/ \
-                         ../libs/
+INPUT                  = ../include/
 FILE_PATTERNS          = *.h \
                          *.c
 RECURSIVE              = YES

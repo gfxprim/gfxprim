@@ -3,6 +3,11 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_byte_order.h
+ * @brief A byte order (endians) defintions.
+ */
+
 #ifndef CORE_GP_BYTE_ORDER_H
 #define CORE_GP_BYTE_ORDER_H
 

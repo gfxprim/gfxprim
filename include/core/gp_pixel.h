@@ -157,41 +157,71 @@ void gp_pixel_print(gp_pixel pixel, gp_pixel_type type);
  */
 gp_pixel_type gp_pixel_type_by_name(const char *name);
 
-/*
- * Match pixel type to known pixel types.
+/**
+ * @brief Matches a RGB pixel type againts known pixel types.
  *
- * Returns either valid PixelType or GP_PIXEL_UNKNOWN
+ * This is the same as gp_pixel_rgb_lookup() but with masks instead of sizes
+ * and offsets.
+ *
+ * @param rmask A mask for the red channel.
+ * @param gmask A mask for the green channel.
+ * @param bmask A mask for the blue channel.
+ * @param amask A mask for the alpha channel, if set to zero the pixel does not
+ *              have alpha channel.
+ * @param bits_per_pixel The size of the pixel in bits.
+ *
+ * @return Either valid #gp_pixel_type or GP_PIXEL_UNKNOWN.
  */
 gp_pixel_type gp_pixel_rgb_match(gp_pixel rmask, gp_pixel gmask,
                                  gp_pixel bmask, gp_pixel amask,
 			         uint8_t bits_per_pixel);
 
-/*
- * Similar to GP_PixelRGBMatch but works with offsets and sizes
+/**
+ * @brief Looks up a RGB pixel type against know pixel types.
  *
- * Returns either valid PixelType or GP_PIXEL_UNKNOWN
+ * This is the same as gp_pixel_rgb_match() but with sizes and offsets instead
+ * of masks.
+ *
+ * @param rsize A size of the red channel.
+ * @param roff An offset for the red channel.
+ * @param gsize A size of the green channel.
+ * @param goff An offset for the green channel.
+ * @param bsize A size of the blue channel.
+ * @param boff An offset for the blue channel.
+ * @param asize A size of the alpha channel, if set to zero the pixel does not
+ *              have alpha channel.
+ * @param aoff An offset for the alpha channel.
+ *
+ * @param bits_per_pixel The size of the pixel in bits.
+ *
+ * @return Either valid #gp_pixel_type or GP_PIXEL_UNKNOWN.
  */
-gp_pixel_type gp_pixel_rgb_lookup(uint32_t rsize, uint32_t rof,
+gp_pixel_type gp_pixel_rgb_lookup(uint32_t rsize, uint32_t roff,
                                   uint32_t gsize, uint32_t goff,
 			          uint32_t bsize, uint32_t boff,
 			          uint32_t asize, uint32_t aoff,
 			          uint8_t bits_per_pixel);
 
-/*
- * Functions to determine pixel attributes.
+/**
+ * @brief Function to determine pixel attributes.
  *
- * Call as:
+ * @param pixel_type A pixel type to check.
+ * @param flags Bitwise or of attributes to check.
+ * @return True if all flags are present.
  *
+ * Example use:
+ * @code
  * if (gp_pixel_has_flags(pixel_type, GP_PIXEL_IS_RGB | GP_PIXEL_HAS_ALPHA))
  *	...
+ * @endcode
  */
 int gp_pixel_has_flags(gp_pixel_type pixel_type, gp_pixel_flags flags);
 
 /**
  * @brief Returns channel mask for a given pixel type and channel name.
  *
- * @pixel_type A pixel type.
- * @chan_name A channel name, e.g. "R" or "A".
+ * @param pixel_type A pixel type.
+ * @param chan_name A channel name, e.g. "R" or "A".
  *
  * @return A channel mask or zero if channel is not present.
  */
@@ -202,9 +232,9 @@ gp_pixel gp_pixel_chan_mask(gp_pixel_type pixel_type, const char *chan_name);
  *
  * The alpha channel is left untouched.
  *
- * @pixel_type A pixel type.
- * @pixel A pixel value.
- * @add An addition in percets of the maximal channel value.
+ * @param pixel_type A pixel type.
+ * @param pixel A pixel value.
+ * @param add An addition in percets of the maximal channel value.
  *
  * @return A pixel value after addition.
  */

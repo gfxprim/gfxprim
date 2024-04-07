@@ -21,3 +21,4 @@ json_serdes
 balloc
 cbuffer
 heap
+seek

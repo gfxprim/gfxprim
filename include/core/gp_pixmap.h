@@ -9,6 +9,7 @@
 /**
  * @file gp_pixmap.h
  * @brief A pixel buffer.
+ * @defgroup pixmap Pixmap
  */
 
 #ifndef CORE_GP_PIXMAP_H
@@ -20,10 +21,11 @@
 #include <core/gp_common.h>
 #include <core/gp_types.h>
 #include <core/gp_pixel.h>
-#include <core/gp_gamma.h>
+#include <core/gp_gamma_correction.h>
 
 /**
  * @brief A pixmap buffer.
+ * @ingroup pixmap
  *
  * This structure holds all information needed for drawing into an pixel
  * buffer.
@@ -65,7 +67,7 @@ struct gp_pixmap {
 	 *
 	 * If NULL the channel values are considered linear.
 	 */
-	struct gp_gamma *gamma;
+	gp_gamma *gamma;
 
 	/**
 	 * @brief Swaps image x and y axes for drawing.
@@ -120,6 +122,7 @@ struct gp_pixmap {
 
 /**
  * @brief Returns true when pixel is clipped out of pixmap.
+ * @ingroup pixmap
  */
 #define GP_PIXEL_IS_CLIPPED(pixmap, x, y) \
 	((x) < 0 || x >= (typeof(x)) pixmap->w \
@@ -127,6 +130,7 @@ struct gp_pixmap {
 
 /**
  * @brief Allocates a pixmap.
+ * @ingroup pixmap
  *
  * The pixmap consists of two parts, the gp_pixmap structure and pixels array.
  *
@@ -142,6 +146,7 @@ gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type);
 
 /**
  * @brief Sets a correction for the pixmap.
+ * @ingroup pixmap
  *
  * If there was a gamma correction allready set for the pixmap the original
  * correction reference counters are decremented and the correction is replaced
@@ -158,6 +163,7 @@ int gp_pixmap_gamma_set(gp_pixmap *self, gp_correction_type corr_type,
 
 /**
  * @brief Frees a pixmap.
+ * @ingroup pixmap
  *
  * If pixmap->free_pixels is set also free pixel data, this flag is set
  * automatically by gp_pixmap_alloc().
@@ -187,7 +193,7 @@ enum gp_pixmap_init_flags {
  * @param w Pixmap width
  * @param h Pixmap height
  * @param type A pixel type, describes how pixels are organized in the data buffer.
- * @param data A pointer to data buffer with the pixel data.
+ * @param pixels A pointer to a buffer with the pixel data.
  * @param flags A bitmask or of the enum gp_pixmap_init_flags
  *
  * @return Returns pointer to pixmap that is passed as first argument.
@@ -197,18 +203,19 @@ gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
                           enum gp_pixmap_init_flags flags);
 
 /**
- * Creates a pixmap from a buffer allocated by malloc().
+ * @brief Creates a pixmap from a buffer allocated by malloc().
+ * @ingroup pixmap
  *
  * This is actually shorthand for allocating the gp_pixmap structure and
  * calling gp_pixmap_init() on the resulting pointer.
  *
- * BEWARE: The user has to make sure that the pixels array has correct size and
- * format.
+ * @attention The user has to make sure that the pixels array has correct size
+ *            and format.
  *
  * @param w Pixmap width
  * @param h Pixmap height
  * @param type A pixel type, describes how pixels are organized in the data buffer.
- * @param data A pointer to data buffer with the pixel data.
+ * @param pixels A pointer to a buffer with the pixel data.
  * @param flags A bitmask or of the enum gp_pixmap_init_flags
  *
  * @return A newly allocated and initialized pixmap or NULL in a case of a failure.
@@ -285,7 +292,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *src, gp_pixmap *subpixmap,
                          gp_coord x, gp_coord y, gp_size w, gp_size h);
 
 /**
- * @brief Allocate and initalize subpixmap.
+ * @brief Allocate and initalize a subpixmap.
  *
  * The subpixmap has to fit into the source pixmap!
  *
@@ -301,7 +308,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *src, gp_pixmap *subpixmap,
  * @return A newly allocated and initialized subpixmap or NULL in a case of
  *         failure.
  */
-gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *pixmap,
+gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *src,
                                gp_coord x, gp_coord y, gp_size w, gp_size h);
 
 /*
@@ -324,6 +331,8 @@ gp_pixmap *gp_pixmap_convert(const gp_pixmap *src, gp_pixmap *dst);
 
 /**
  * @brief Prints pixmap information into stdout.
+ *
+ * @param self A pixmap to print an info about.
  */
 void gp_pixmap_print_info(const gp_pixmap *self);
 
@@ -353,7 +362,7 @@ void gp_pixmap_rotate_ccw(gp_pixmap *self);
  * @param c1 A pixmap.
  * @param c2 A pixmap.
  *
- * @retrun True if rotation flags are equal.
+ * @return True if rotation flags are equal.
  */
 static inline int gp_pixmap_rotation_equal(const gp_pixmap *c1,
                                            const gp_pixmap *c2)

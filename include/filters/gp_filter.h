@@ -3,12 +3,10 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
-
-  Common filters typedefs and includes.
-
+/**
+ * @file gp_filter.h
+ * @brief Common filter includes.
  */
-
 #ifndef FILTERS_GP_FILTER_H
 #define FILTERS_GP_FILTER_H
 

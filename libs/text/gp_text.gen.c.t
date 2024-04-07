@@ -4,11 +4,12 @@
  *
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
- * Copyright (C) 2009-2022 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_mix_pixels.gen.h>
+#include <core/gp_transform.h>
 
 #include <gfx/gp_hline.h>
 

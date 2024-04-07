@@ -3,9 +3,13 @@
  * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_common.h
+ * @brief Common macros.
+ */
 #ifndef CORE_GP_COMMON_H
 #define CORE_GP_COMMON_H
 
@@ -15,10 +19,14 @@
 #include <unistd.h>
 #include <stddef.h>
 
-#ifndef __cplusplus
+#include <core/gp_compiler.h>
 
-/*
- * Returns a minimum of the two numbers.
+/**
+ * @brief Returns a minimum of the two numbers.
+ *
+ * @param a A number.
+ * @param b A number.
+ * @return A minimum of a and b.
  */
 #define GP_MIN(a, b) ({ \
 	typeof(a) gp_a__ = (a); \
@@ -26,8 +34,13 @@
 	gp_a__ < gp_b__ ? gp_a__ : gp_b__; \
 })
 
-/*
- * Returns maximum from three numbers.
+/**
+ * @brief Returns a minimum of the three numbers.
+ *
+ * @param a A number.
+ * @param b A number.
+ * @param c A number.
+ * @return A minimum of a, b and c.
  */
 #define GP_MIN3(a, b, c) ({ \
 	typeof(a) gp_a__ = (a); \
@@ -36,8 +49,12 @@
 	gp_a__ < gp_b__ ? (gp_a__ < gp_c__ ? gp_a__ : gp_c__) : (gp_b__ < gp_c__ ? gp_b__ : gp_c__); \
 })
 
-/*
- * Returns a maximum of the two numbers.
+/**
+ * @brief Returns a maximum of the two numbers.
+ *
+ * @param a A number.
+ * @param b A number.
+ * @return A maximum of a and b.
  */
 #define GP_MAX(a, b) ({ \
 	typeof(a) gp_a__ = (a); \
@@ -45,8 +62,13 @@
 	gp_a__ > gp_b__ ? gp_a__ : gp_b__; \
 })
 
-/*
- * Returns maximum from three numbers.
+/**
+ * @brief Returns a maximum of the three numbers.
+ *
+ * @param a A number.
+ * @param b A number.
+ * @param c A number.
+ * @return A maximum of a, b and c.
  */
 #define GP_MAX3(a, b, c) ({ \
 	typeof(a) gp_a__ = (a); \
@@ -55,16 +77,24 @@
 	gp_a__ > gp_b__ ? (gp_a__ > gp_c__ ? gp_a__ : gp_c__) : (gp_b__ > gp_c__ ? gp_b__ : gp_c__); \
 })
 
-/*
- * Returns absolute value.
+/**
+ * @brief Returns an absolute value.
+ *
+ * @param a A number.
+ * @return An absolute value of a.
  */
 #define GP_ABS(a) ({ \
 	typeof(a) gp_a__ = a; \
 	gp_a__ > 0 ? gp_a__ : - gp_a__; \
 })
 
-/*
- * Returns absolute value of difference.
+/**
+ * @brief Computes an absolute value of a difference.
+ *
+ * @param a A number.
+ * @param b A number.
+ *
+ * @return An absolute value of a difference between a and b.
  */
 #define GP_ABS_DIFF(a, b) ({ \
 	typeof(a) gp_a__ = a; \
@@ -72,16 +102,24 @@
 	gp_a__ > gp_b__ ? gp_a__ - gp_b__ : gp_b__ - gp_a__; \
 })
 
-/*
- * Aligns value to be even
+/**
+ * @brief Aligns a value to be even.
+ *
+ * @param a An integer number.
+ * @return A value aligned to be divisible by two.
  */
 #define GP_ALIGN2(a) ({ \
 	typeof(a) gp_a__ = a; \
 	gp_a__ + (gp_a__%2); \
 })
 
-/*
- * Swap a and b using an intermediate variable
+/**
+ * @brief Swaps a and b.
+ *
+ * @attention Modifies the variables passed as parameters.
+ *
+ * @param a A value to be swapped.
+ * @param b A value to be swapped.
  */
 #define GP_SWAP(a, b) do { \
 	typeof(b) gp_b__ = b; \
@@ -97,27 +135,26 @@
 	(gp_a__ > 0) ? 1 : ((gp_a__ < 0) ? -1 : 0); \
 })
 
+/**
+ * @brief Computes number of elements of a statically defined array size.
+ *
+ * @param array An array.
+ * @return A number of array elements.
+ */
 #define GP_ARRAY_SIZE(array) (sizeof(array) / sizeof(*array))
 
+/**
+ * @brief Converts from a pointer to a struct field to a pointer to the struct
+ *        itself.
+ *
+ * The inverse functions is part of the C language and is called offsetof().
+ *
+ * @param ptr A pointer to a structure member.
+ * @param structure A structure C type e.g. struct foo.
+ * @param member A structure member name.
+ */
 #define GP_CONTAINER_OF(ptr, structure, member) \
 	((structure *)((char *)(ptr) - offsetof(structure, member)))
-
-#endif /* __cplusplus */
-
-/*
- * The standard likely() and unlikely() used in Kernel
- */
-#ifndef likely
-	#ifdef __GNUC__
-		#define likely(x)       __builtin_expect(!!(x),1)
-		#define unlikely(x)     __builtin_expect(!!(x),0)
-	#else
-		#define likely(x)	x
-		#define unlikely(x)	x
-	#endif
-#endif
-
-#define GP_UNUSED(x) (x)__attribute__ ((unused))
 
 /*
  * Internal macros with common code for GP_ABORT, GP_ASSERT and GP_CHECK.
@@ -146,7 +183,7 @@ void gp_print_abort_info(const char *file, const char *function, unsigned int li
 		         __attribute__ ((format (printf, 5, 6)));
 
 #define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
-	if (unlikely(!(check_cond_))) { \
+	if (GP_UNLIKELY(!(check_cond_))) { \
 		if (#__VA_ARGS__ [0]) \
 			GP_INTERNAL_ABORT(check_message_ #check_cond_, \
 			                  "\n" __VA_ARGS__); \

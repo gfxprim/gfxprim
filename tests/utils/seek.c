@@ -4,7 +4,7 @@
  */
 
 #include <string.h>
-#include <core/gp_seek.h>
+#include <utils/gp_seek.h>
 #include "tst_test.h"
 
 static int test_seek(enum gp_seek_whence whence, ssize_t off, size_t cur_pos,

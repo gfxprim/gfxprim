@@ -13,9 +13,8 @@
 #include <core/gp_transform.h>
 #include <core/gp_pixel.h>
 #include <core/gp_get_put_pixel.h>
-#include <core/gp_gamma.h>
-#include "core/gp_pixmap.h"
 #include <core/gp_blit.h>
+#include <core/gp_pixmap.h>
 
 static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 {

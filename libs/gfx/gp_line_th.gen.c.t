@@ -10,6 +10,7 @@
 #include <core/gp_common.h>
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_pixel_pack.gen.h>
+#include <core/gp_transform.h>
 
 #include <gfx/gp_hline.h>
 #include <gfx/gp_line.h>

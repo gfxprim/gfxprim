@@ -1,30 +1,37 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
- * Copyright (C) 2011-2012 Cyril Hrubis    <metan@ucw.cz>
+ * Copyright (C) 2011-2024 Cyril Hrubis    <metan@ucw.cz>
  */
 
-/*
-
-   These blits automatically converts pixel types, that's good (and fast), but
-   there is a catch. This works rather well when the number of colors per
-   pixel/color channel is increased (the gamma correction is still on TODO).
-   However when the number of colors is decreased it's generally better to use
-   dithering, which will yield into far better (you can use Floyd Steinberg
-   filter for that).
-
-   Also variants without the _raw suffix do honor the rotation flags, that may
-   get a little tricky as the flags for rotation are put together but don't
-   worry althouth there is some algebra involved the result is quite intuitive.
-
+/**
+ * @file gp_blit.h
+ * @brief Pixmap blits.
  */
-
 #ifndef CORE_GP_BLIT_H
 #define CORE_GP_BLIT_H
 
-/*
+/**
+ * @brief Blits a rectangle from src into a dst.
+ * @ingroup gfx
+ *
+ * This blit automatically converts between different #gp_pixel_type, however
+ * they operate on a single pixel value at a time, if you are converting from a
+ * higher bit depths the results are suboptimal, expecially conversions to 1bpp
+ * does not end up as a recognizable image. In these cases an error
+ * distribution dithering #gp_dither_type should be used instead.
+ *
  * Blits rectangle from src defined by x0, y0, x1, y1 (x1, y1 included) to dst
  * starting on x2, y2.
+ *
+ * @param src A source pixmap.
+ * @param x0 A left rectangle corner coordinate in src.
+ * @param y0 A top rectangle corner coordinate in src.
+ * @param x1 A right rectangle corner coordinate in src.
+ * @param y1 A bottom rectangle corner coordinate in src.
+ * @param dst A destination pixmap.
+ * @param x2 A left rectangle corner coordinate in dst.
+ * @param y2 A top rectangle corner coordinate in dst.
  */
 void gp_blit_xyxy(const gp_pixmap *src,
                   gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
@@ -39,9 +46,27 @@ void gp_blit_xyxy_clipped(const gp_pixmap *src,
                           gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
                           gp_pixmap *dst, gp_coord x2, gp_coord y2);
 
-/*
- * Blits rectangle from src defined by x0, y0, w0, h0 (uses w0 x h0 pixels) to
- * dst starting on x2, y2.
+/**
+ * @brief Blits a rectangle from src into a dst.
+ * @ingroup gfx
+ *
+ * This blit automatically converts between different #gp_pixel_type, however
+ * they operate on a single pixel value at a time, if you are converting from a
+ * higher bit depths the results are suboptimal, expecially conversions to 1bpp
+ * does not end up as a recognizable image. In these cases an error
+ * distribution dithering #gp_dither_type should be used instead.
+ *
+ * Blits rectangle from src defined by x0, y0, x1, y1 (x1, y1 included) to dst
+ * starting on x2, y2.
+ *
+ * @param src A source pixmap.
+ * @param x0 A left rectangle corner coordinate in src.
+ * @param y0 A top rectangle corner coordinate in src.
+ * @param w0 A rectangle width.
+ * @param h0 A rectangle height.
+ * @param dst A destination pixmap.
+ * @param x1 A left rectangle corner coordinate in dst.
+ * @param y1 A top rectangle corner coordinate in dst.
  */
 void gp_blit_xywh(const gp_pixmap *src,
                   gp_coord x0, gp_coord y0, gp_size w0, gp_size h0,
@@ -56,7 +81,12 @@ void gp_blit_xywh_clipped(const gp_pixmap *src,
                           gp_coord x0, gp_coord y0, gp_size w0, gp_size h0,
                           gp_pixmap *dst, gp_coord x1, gp_coord y1);
 
-/* The default is _xywh */
+/**
+ * @brief Blits a rectangle from src into a dst.
+ * @ingroup gfx
+ *
+ * An alias for gp_blit_xywh().
+ */
 static inline void gp_blit(const gp_pixmap *src,
                            gp_coord x0, gp_coord y0,
                            gp_size w0, gp_size h0,

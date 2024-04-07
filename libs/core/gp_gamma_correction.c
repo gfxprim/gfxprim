@@ -7,7 +7,7 @@
 
 #include <core/gp_pixel.h>
 #include <core/gp_debug.h>
-#include <core/gp_gamma.h>
+#include <core/gp_gamma_correction.h>
 
 static gp_gamma_table *tables = NULL;
 

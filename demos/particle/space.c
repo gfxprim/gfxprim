@@ -4,6 +4,7 @@
  */
 
 #include <time.h>
+#include <core/gp_fixed_point.h>
 #include "space.h"
 
 struct space *space_create(unsigned int particle_count, int min_w, int min_h,

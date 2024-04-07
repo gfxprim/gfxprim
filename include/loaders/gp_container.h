@@ -14,8 +14,8 @@
 #define LOADERS_GP_CONTAINER_H
 
 #include <core/gp_types.h>
-#include <core/gp_seek.h>
 #include <core/gp_progress_callback.h>
+#include <utils/gp_seek.h>
 #include <loaders/gp_types.h>
 
 #include <loaders/gp_data_storage.h>

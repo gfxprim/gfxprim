@@ -33,6 +33,10 @@ typedef enum gp_pixel_pack {
 
 /**
  * @brief Returns pixel size, e.g. bits per pixel given pixel packing.
+ *
+ * @param pack A pixel packing.
+ *
+ * @return Number of bits used by the pixel.
  */
 uint8_t gp_pixel_bpp_by_pack(enum gp_pixel_pack pack);
 

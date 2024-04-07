@@ -53,7 +53,16 @@
  */
 typedef enum gp_pixel_type {
 @ for pt in pixeltypes:
-	/** @brief Pixel type {{ pt.name }} */
+	/**
+	 * @brief Pixel type {{ pt.name }}
+	 *
+@     if pt.is_unknown():
+	 * Returned when pixel matching functions such as gp_pixel_rgb_lookup()
+	 * when match wasn't found.
+@     else:
+	 * {{ ''.join(pt.bits) }}
+@     endif
+	 */
 	GP_PIXEL_{{ pt.name }},
 @ end
 	/** @brief Last valid pixel type has value GP_PIXEL_MAX-1 */

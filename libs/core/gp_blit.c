@@ -6,7 +6,7 @@
 
 #include <core/gp_pixel.h>
 #include <core/gp_get_put_pixel.h>
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_convert.h>
 #include <core/gp_debug.h>
 #include <core/gp_blit.h>

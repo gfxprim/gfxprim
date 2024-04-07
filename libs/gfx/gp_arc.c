@@ -8,6 +8,7 @@
 
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_pixel_pack.gen.h>
+#include <core/gp_transform.h>
 
 #include <gfx/gp_arc.h>
 

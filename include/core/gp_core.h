@@ -6,12 +6,10 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
-
-  This is header file for public core API.
-
+/**
+ * @file gp_core.h
+ * @brief Includes all core headers.
  */
-
 #ifndef CORE_GP_CORE_H
 #define CORE_GP_CORE_H
 
@@ -20,7 +18,7 @@
 #include <core/gp_common.h>
 #include <core/gp_pixmap.h>
 #include <core/gp_transform.h>
-#include <core/gp_gamma.h>
+#include <core/gp_gamma_correction.h>
 #include <core/gp_pixel.h>
 #include <core/gp_convert.h>
 #include <core/gp_get_put_pixel.h>

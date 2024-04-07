@@ -10,5 +10,4 @@ convert_scale.gen
 blit_conv.gen
 blit_clipped
 debug
-seek
 sub_pixmap_put_pixel

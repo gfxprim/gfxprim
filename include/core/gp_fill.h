@@ -15,9 +15,10 @@
 
 /**
  * @brief Fills pixmap with given pixel value.
+ * @ingroup gfx
  *
  * @param pixmap A pixmap to be filled.
- * @val A pixel value to fill the pixmap with.
+ * @param val A pixel value to fill the pixmap with.
  */
 void gp_fill(gp_pixmap *pixmap, gp_pixel val);
 

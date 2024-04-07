@@ -9,7 +9,7 @@
 #ifndef GP_WIDGET_TBOX_H
 #define GP_WIDGET_TBOX_H
 
-#include <core/gp_seek.h>
+#include <utils/gp_seek.h>
 #include <utils/gp_utf_pos.h>
 
 enum gp_widget_tbox_type {
