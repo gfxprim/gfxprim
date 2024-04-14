@@ -6,17 +6,37 @@
 
  */
 
+/**
+ * @file gp_widget_button.h
+ * @brief A button widget.
+ */
+
 #ifndef GP_WIDGET_BUTTON_H
 #define GP_WIDGET_BUTTON_H
 
 #include <widgets/gp_widget_bool.h>
 
+/**
+ * @brief A button type.
+ *
+ * @image html button_types.png
+ *
+ * Buttons with a specific type include a stock image in the rendered button,
+ * they can have label as well but it's not required.
+ *
+ * @image html button_types_label.png
+ */
 enum gp_widget_button_type {
+	/** Button just with a label */
 	GP_BUTTON_LABEL = 0,
 
+	/** An OK button */
 	GP_BUTTON_OK,
+	/** A Cancel button */
 	GP_BUTTON_CANCEL,
+	/** A Yes button */
 	GP_BUTTON_YES,
+	/** A No button */
 	GP_BUTTON_NO,
 
 	GP_BUTTON_OPEN,
@@ -72,10 +92,10 @@ enum gp_widget_button_type {
 };
 
 /**
- * @brief Allocates a initialize new button widget.
+ * @brief Allocates and initializes a new button widget.
  *
- * @label A button label.
- * @type A button type.
+ * @param label A button label.
+ * @param type A button type.
  *
  * @return A button widget.
  */
@@ -86,10 +106,11 @@ gp_widget *gp_widget_button_new(const char *label,
 /**
  * @brief Allocates a initialize new button widget.
  *
- * @label A button label.
- * @type A button type.
- * @on_event An widget event handler.
- * @priv User private data.
+ * @param label A button label. Optional for buttons with type other than
+ *              GP_BUTTON_LABEL.
+ * @param type A button type.
+ * @param on_event An widget event handler.
+ * @param priv User private data.
  *
  * @return A button widget.
  */
@@ -110,7 +131,7 @@ static inline gp_widget *gp_widget_button_new2(const char *label,
  *
  * The aligment is masked out of the return value.
  *
- * @self A button widget.
+ * @param self A button widget.
  * @return A button type.
  */
 enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self);
@@ -118,8 +139,8 @@ enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self);
 /**
  * @brief Sets a button type.
  *
- * @self A button widget.
- * @type New button type.
+ * @param self A button widget.
+ * @param type New button type.
  */
 void gp_widget_button_type_set(gp_widget *self, enum gp_widget_button_type type);
 

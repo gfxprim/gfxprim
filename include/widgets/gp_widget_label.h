@@ -5,10 +5,18 @@
 
  */
 
+/**
+ * @file gp_widget_label.h
+ * @brief A label widget.
+ *
+ * @image html label.png
+ */
+
 #ifndef GP_WIDGET_LABEL_H
 #define GP_WIDGET_LABEL_H
 
 #include <stdlib.h>
+#include <core/gp_compiler.h>
 
 struct gp_widget_label {
 	/* Text buffer */
@@ -31,7 +39,7 @@ struct gp_widget_label {
 /**
  * @brief Sets the label text.
  *
- * @self A label widget.
+ * @param self A label widget.
  * @param text New widget label text.
  */
 void gp_widget_label_set(gp_widget *self, const char *text);
@@ -41,34 +49,35 @@ void gp_widget_label_set(gp_widget *self, const char *text);
  *
  * The text format may include a variable that can be then set.
  *
- * @self A label widget.
- * @text_fmt A text format.
+ * @param self A label widget.
+ * @param text_fmt A text format.
  */
 void gp_widget_labe_fmt_set(gp_widget *self, const char *text_fmt);
 
 /**
  * @brief Sets label accordingly to text format string.
  *
- * @self A label widget.
- * @fmt Printf-like format
- * @... Printf-like parameters.
+ * @param self A label widget.
+ * @param fmt Printf-like format
+ * @param ... Printf-like parameters.
  */
 void gp_widget_label_fmt_var_set(gp_widget *self, const char *fmt, ...)
-                                 __attribute__ ((format (printf, 2, 3)));
+                                 GP_FMT_PRINTF(2, 3);
 
 /**
  * @brief Appends text to the label.
  *
- * @self A label widget.
+ * @param self A label widget.
  * @param text Text to be appended.
  */
 void gp_widget_label_append(gp_widget *self, const char *text);
 
 /**
  * @brief Printf-like function to set label text.
- * @self A label widget.
- * @param fmt  Printf formatting string.
- * @param ...  Printf parameters.
+ *
+ * @param self A label widget.
+ * @param fmt Printf formatting string.
+ * @param ... Printf parameters.
  * @return Number of characters printed.
  */
 int gp_widget_label_printf(gp_widget *self, const char *fmt, ...)
@@ -76,17 +85,18 @@ int gp_widget_label_printf(gp_widget *self, const char *fmt, ...)
 
 /**
  * @brief VPrintf-like function to set label text.
- * @self A label widget.
- * @param fmt  Printf formatting string.
- * @param ...  Printf parameters.
+ *
+ * @param self A label widget.
+ * @param fmt Printf formatting string.
+ * @param ap Printf parameters.
  */
 void gp_widget_label_vprintf(gp_widget *self, const char *fmt, va_list ap);
 
 /**
  * @brief Changes text attributes.
  *
- * @self A label widget.
- * @tattr New text attributes.
+ * @param self A label widget.
+ * @param tattr New text attributes.
  */
 static inline void gp_widget_label_tattr_set(gp_widget *self, gp_widget_tattr tattr)
 {
@@ -100,8 +110,8 @@ static inline void gp_widget_label_tattr_set(gp_widget *self, gp_widget_tattr ta
 /**
  * @brief Changes widget minimal width.
  *
- * @self Pointer to a label widget.
- * @width New label width, the unit for the width is font characters.
+ * @param self Pointer to a label widget.
+ * @param width New label width, the unit for the width is font characters.
  */
 static inline void gp_widget_label_width_set(gp_widget *self, unsigned int width)
 {

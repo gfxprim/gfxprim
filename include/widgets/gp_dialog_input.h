@@ -6,16 +6,20 @@
 
  */
 
+/**
+ * @file gp_dialog_input.h
+ * @brief A text input dialog.
+ */
+
 #ifndef GP_DIALOG_INPUT_H
 #define GP_DIALOG_INPUT_H
 
 /**
  * @brief Runs an input dialog.
  *
- * @title A dialog title.
- * @msg A dialog message.
+ * @param title A dialog title.
  *
- * @return Returns a new allocated string that should be freed with free().
+ * @return Returns a newly allocated string that should be freed with free().
  */
 char *gp_dialog_input_run(const char *title);
 

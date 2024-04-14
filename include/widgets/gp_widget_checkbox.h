@@ -6,6 +6,13 @@
 
  */
 
+/**
+ * @file gp_widget_checkbox.h
+ * @brief A checkbox widget.
+ *
+ * @image html checkbox.png
+ */
+
 #ifndef GP_WIDGET_CHECKBOX_H
 #define GP_WIDGET_CHECKBOX_H
 
@@ -14,8 +21,8 @@
 /**
  * @brief Allocate and initialize new checkbox widget.
  *
- * @label A checkbox label.
- * @val Initial checkbox value.
+ * @param label A checkbox label.
+ * @param val Initial checkbox value.
  *
  * @return A checkbox widget.
  */
@@ -24,10 +31,10 @@ gp_widget *gp_widget_checkbox_new(const char *label, int val);
 /**
  * @brief Allocate and initialize new checkbox widget.
  *
- * @label A checkbox label.
- * @val Initial checkbox value.
- * @on_event An widget event handler.
- * @priv User private data.
+ * @param label A checkbox label.
+ * @param val Initial checkbox value.
+ * @param on_event An widget event handler.
+ * @param priv User private data.
  *
  * @return A checkbox widget.
  */
@@ -45,15 +52,15 @@ static inline gp_widget *gp_widget_checkbox_new2(const char *label, int val,
 /**
  * @brief Sets a checkbox value.
  *
- * @self A checkbox widget.
- * @val New checkbox value.
+ * @param self A checkbox widget.
+ * @param val New checkbox value.
  */
 void gp_widget_checkbox_set(gp_widget *self, int val);
 
 /**
  * @brief Toggles a checkbox value.
  *
- * @self A checkbox widget.
+ * @param self A checkbox widget.
  */
 void gp_widget_checkbox_toggle(gp_widget *self);
 
@@ -61,7 +68,7 @@ void gp_widget_checkbox_toggle(gp_widget *self);
 /**
  * @brief Returns a checkbox value.
  *
- * @self A checkbox widget.
+ * @param self A checkbox widget.
  *
  * @return Returns checkbox value i.e. 1 or 0. If widget passes as self is not
  *         checkbox -1 is returned.

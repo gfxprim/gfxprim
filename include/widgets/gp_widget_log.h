@@ -5,6 +5,11 @@
 
  */
 
+/**
+ * @file gp_widget_log.h
+ * @brief A text log widget.
+ */
+
 #ifndef GP_WIDGET_LOG_H
 #define GP_WIDGET_LOG_H
 
@@ -23,7 +28,7 @@ struct gp_widget_log {
 /**
  * @brief Appends text to the log.
  *
- * @self A log widget.
+ * @param self A log widget.
  * @param text Text to be appended.
  */
 void gp_widget_log_append(gp_widget *self, const char *text);
@@ -34,10 +39,10 @@ void gp_widget_log_append(gp_widget *self, const char *text);
  * The log widget is a circular buffer of loglines, when size reaches the
  * max_log_lines the oldest message gets removed from the log.
  *
- * @tattr Text attributes
- * @min_width Minimal width in letters
- * @min_lines Minimal number of lines
- * @max_logs Maximal number of log lines stored internally.
+ * @param tattr Text attributes
+ * @param min_width Minimal width in letters
+ * @param min_lines Minimal number of lines
+ * @param max_logs Maximal number of log lines stored internally.
  *
  * @return Newly allocated log widget.
  */

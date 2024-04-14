@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @file gp_dialog.h
+ * @brief Implements dialog windows.
+ */
+
 #ifndef GP_DIALOG_H
 #define GP_DIALOG_H
 
@@ -13,6 +18,11 @@
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_types.h>
 
+/**
+ * @brief A dialog.
+ *
+ * A dialog is a widget layout that is temporarily shown on the top the current layout.
+ */
 struct gp_dialog {
 	/** A wiget layout representing the dialog */
 	gp_widget *layout;
@@ -26,7 +36,7 @@ struct gp_dialog {
 /**
  * @brief Allocates and initializes new dialog.
  *
- * @payload Payload size.
+ * @param payload Payload size.
  * @return A newly allocated dialog.
  */
 gp_dialog *gp_dialog_new(size_t payload);
@@ -36,7 +46,7 @@ gp_dialog *gp_dialog_new(size_t payload);
  *
  * If not NULL the the dialog layout is freed with the gp_widget_free() recursivelly.
  *
- * @self A dialog.
+ * @param self A dialog.
  */
 void gp_dialog_free(gp_dialog *self);
 
@@ -46,10 +56,10 @@ void gp_dialog_free(gp_dialog *self);
  * Looks for the layout in $HOME/.config/ and /etc/ if not found attempts to
  * parse layout from fallback JSON string.
  *
- * @dialog_name Dialog name.
- * @callbacks Structure with NULL terminated array of dialog callbacks.
- * @fallback_json Fallback dialog JSON layout.
- * @uids An pointer to store the has table UIDs to. Must be initialized to NULL.
+ * @param dialog_name Dialog name.
+ * @param callbacks Structure with NULL terminated array of dialog callbacks.
+ * @param fallback_json Fallback dialog JSON layout.
+ * @param uids An pointer to store the has table UIDs to. Must be initialized to NULL.
  *
  * @return A widget layout or NULL in a case of a failure.
  */

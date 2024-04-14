@@ -6,6 +6,13 @@
 
  */
 
+/**
+ * @file gp_widget_bool.h
+ * @brief A bollean widget class.
+ *
+ * Functions to change the value of a boolean class widget.
+ */
+
 #ifndef GP_WIDGET_BOOL_H
 #define GP_WIDGET_BOOL_H
 
@@ -19,7 +26,7 @@ struct gp_widget_bool {
 /**
  * @brief Returns a class bool widget value.
  *
- * @self A bool class widget.
+ * @param self A bool class widget.
  * @return A boolean value.
  */
 int gp_widget_bool_get(gp_widget *self);
@@ -27,15 +34,15 @@ int gp_widget_bool_get(gp_widget *self);
 /**
  * @brief Sets a class bool widget value.
  *
- * @self A bool class widget.
- * @val A boolean value.
+ * @param self A bool class widget.
+ * @param val A boolean value.
  */
 void gp_widget_bool_set(gp_widget *self, int val);
 
 /**
  * @brief Toggles a class bool widget value.
  *
- * @self A bool class widget.
+ * @param self A bool class widget.
  */
 static inline void gp_widget_bool_toggle(gp_widget *self)
 {

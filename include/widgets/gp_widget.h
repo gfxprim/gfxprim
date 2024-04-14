@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -18,12 +18,37 @@
 #include <widgets/gp_widget_types.h>
 
 struct gp_widget {
+	/**
+	 * enum gp_widget_type
+	 *
+	 * Widget type e.g. button or text box. The type is used to locate the
+	 * struct gp_widget_ops in a global widget ops table.
+	 *
+	 * It's also used to assert that we are dealing with a correct widget
+	 * in the API functions, e.g. button functions check that the widget
+	 * type is set to button at the start of each function.
+	 */
 	unsigned int type;
+	/**
+	 * enum gp_widget_class
+	 *
+	 * Widget classes define widgets with exacly same API but different UI
+	 * and implementation. E.g. GP_WIDGET_CLASS_CHOICE can be rendered as a
+	 * radio button or a spin button.
+	 */
 	unsigned int widget_class;
+	/**
+	 * Parent widget in the widget tree.
+	 *
+	 * It's set to NULL unless widget has been inserted into a container
+	 * widget, e.g. grid, tabs, etc.
+	 */
 	gp_widget *parent;
-
-	/*
-	 * Widget event handler.
+	/**
+	 * Widget event handler. This function handles input events such as
+	 * keystrokes or mouse movement.
+	 * @return Returns zero if event wasn't consumed by the widget and
+	 *         non-zero otherwise.
 	 */
 	int (*on_event)(gp_widget_event *);
 
@@ -194,9 +219,9 @@ enum gp_widget_alignment {
 /**
  * @brief Internal function to allocate a widget.
  *
- * @type A widget type.
- * @class A widget class.
- * @payload_size A widet payload size.
+ * @param type A widget type.
+ * @param class A widget class.
+ * @param payload_size A widet payload size.
  *
  * @return Newly allocated and initialized widget.
  */
@@ -234,18 +259,18 @@ gp_widget *gp_widget_new(enum gp_widget_type type,
  *
  *  - if widget has event handler GP_WIDGET_EVENT_FREE is send
  *  - if needed gp_widget_free() is called recursively for all children widgets
- *  - if widget type defines free() in it's ops it's called
+ *  - if widget type defines free() in its struct gp_widget_ops it's called
  *  - widget memory is finally freed
  *
- * @self A widget.
+ * @param self A widget.
  */
 void gp_widget_free(gp_widget *self);
 
 /**
  * @brief Sets widget parent.
  *
- * @self A widget.
- * @parent A parent widget.
+ * @param self A widget.
+ * @param parent A parent widget.
  */
 void gp_widget_set_parent(gp_widget *self, gp_widget *parent);
 
@@ -254,8 +279,7 @@ void gp_widget_set_parent(gp_widget *self, gp_widget *parent);
  *
  * Traverses the widget layout tree to the top and sets the focus accordingly.
  *
- * @self A widget to be focused.
- *
+ * @param self A widget to be focused.
  * @return Zero if focus couldn't be changed, non-zero otherwise.
  */
 int gp_widget_focus_set(gp_widget *self);
@@ -265,7 +289,7 @@ int gp_widget_focus_set(gp_widget *self);
  *
  * A disabled widget does not process any input events and is "grayed out".
  *
- * @self A widget to disable.
+ * @param self A widget to disable.
  */
 void gp_widget_disable(gp_widget *self);
 
@@ -274,7 +298,7 @@ void gp_widget_disable(gp_widget *self);
  *
  * Enables a widget that has been disabled previously.
  *
- * @self A widget to enable.
+ * @param self A widget to enable.
  */
 void gp_widget_enable(gp_widget *self);
 
@@ -283,8 +307,8 @@ void gp_widget_enable(gp_widget *self);
  *
  * A disabled widget does not process any input events and is "grayed out".
  *
- * @self A widget.
- * @disable True to disable widget false to enable it.
+ * @param self A widget.
+ * @param disable True to disable widget false to enable it.
  */
 void gp_widget_disable_set(gp_widget *self, bool disable);
 
@@ -295,7 +319,7 @@ void gp_widget_disable_set(gp_widget *self, bool disable);
  * explicitly. It will return false for child widgets that are disabled because
  * of parent widgets have been disabled.
  *
- * @self A widget.
+ * @param self A widget.
  * @return True if widget is disabled.
  */
 static inline bool gp_widget_disabled(gp_widget *self)
@@ -309,9 +333,9 @@ static inline bool gp_widget_disabled(gp_widget *self)
  * Note that even after setting event handler certain widget events has to be
  * unmasked in order to receive them.
  *
- * @self A widget.
- * @on_event An widget event handler.
- * @priv An user pointer stored in the widget.
+ * @param self A widget.
+ * @param on_event An widget event handler.
+ * @param priv An user pointer stored in the widget.
  */
 void gp_widget_on_event_set(gp_widget *self,
                             int (*on_event)(gp_widget_event *), void *priv);

@@ -6,18 +6,36 @@
 
  */
 
+/**
+ * @file gp_widget_poll.h
+ * @brief Add file descriptors to the widget main loop.
+ */
+
 #ifndef WIDGETS_GP_WIDGET_POLL_H
 #define WIDGETS_GP_WIDGET_POLL_H
 
 #include <utils/gp_poll.h>
 
 /**
- * Inserts an fd into widgets file descriptors
+ * @brief Inserts a file descriptor to the widget main loop.
+ *
+ * @param fd A poll fd structure.
  */
 void gp_widget_poll_add(gp_fd *fd);
 
+/**
+ * @brief Removes a file descriptor from the widget main loop.
+ *
+ * @param fd A poll fd structure.
+ */
 void gp_widget_poll_rem(gp_fd *fd);
 
+/**
+ * @brief Looks up a fd struture by a file descriptor.
+ *
+ * @param fd A file descriptor.
+ * @return A poll fd structure.
+ */
 gp_fd *gp_widget_poll_rem_by_fd(int fd);
 
 #endif /* WIDGETS_GP_WIDGET_POLL_H */

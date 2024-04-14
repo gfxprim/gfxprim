@@ -12,10 +12,10 @@
 /**
  * @brief Allocate and initialize a slider widget.
  *
- * @min Slider minimum.
- * @max Slider maximum.
- * @val Initial slider value.
- * @dir Slider direction.
+ * @param min Slider minimum.
+ * @param max Slider maximum.
+ * @param val Initial slider value.
+ * @param dir Slider direction.
  *
  * @return A slider widget.
  */

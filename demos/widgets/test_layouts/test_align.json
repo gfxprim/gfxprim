@@ -9,43 +9,14 @@
    {
     "align": "fill",
     "widgets": [
-     {
-      "type": "button",
-      "label": "right-bottom",
-      "halign": "right",
-      "valign": "bottom"
-     }
+     {"type": "button", "label": "right-bottom", "halign": "right", "valign": "bottom"}
     ]
    },
-   {
-    "type": "button",
-    "label": "left-bottom",
-    "halign": "left",
-    "valign": "bottom"
-   },
-   {
-    "type": "button",
-    "label": "left-top",
-    "halign": "left",
-    "valign": "top"
-   },
-   {
-    "type": "button",
-    "label": "right-top",
-    "halign": "right",
-    "valign": "top"
-   },
-   {
-    "type": "button",
-    "label": "fill",
-    "align": "fill"
-   },
-   {
-    "type": "button",
-    "label": "vfill-right",
-    "halign": "right",
-    "valign": "fill"
-   }
+   {"type": "button", "label": "left-bottom", "halign": "left", "valign": "bottom"},
+   {"type": "button", "label": "left-top", "halign": "left", "valign": "top"},
+   {"type": "button", "label": "right-top", "halign": "right", "valign": "top"},
+   {"type": "button", "label": "fill", "align": "fill"},
+   {"type": "button", "label": "vfill-right", "halign": "right", "valign": "fill"}
   ]
  }
 }

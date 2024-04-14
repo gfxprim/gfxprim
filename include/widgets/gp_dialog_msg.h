@@ -6,23 +6,52 @@
 
  */
 
-#ifndef GP_DIALOG_MESSAGE_H
-#define GP_DIALOG_MESSAGE_H
+/**
+ * @file gp_dialog_msg.h
+ * @brief A message dialogs.
+ *
+ * An info dialog
+ * @image html dialog_msg_info.png
+ *
+ * A warning dialog
+ * @image html dialog_msg_warn.png
+ *
+ * An error dialog
+ * @image html dialog_msg_err.png
+ *
+ * A question dialog
+ * @image html dialog_question.png
+ */
 
+#ifndef GP_DIALOG_MSG_H
+#define GP_DIALOG_MSG_H
+
+#include <core/gp_compiler.h>
 #include <widgets/gp_widget_types.h>
 
+/**
+ * @brief A message dialog type.
+ */
 enum gp_dialog_msg_type {
+	/** An info dialog */
 	GP_DIALOG_MSG_INFO,
+	/** A warning dialog */
 	GP_DIALOG_MSG_WARN,
+	/** An error dialog */
 	GP_DIALOG_MSG_ERR,
+	/** A yes or no question dialog */
 	GP_DIALOG_MSG_QUESTION,
 };
 
+/**
+ * @brief A dialog return value.
+ */
 enum gp_dialog_retval {
 	/** Generic exit -> no value reported */
 	GP_DIALOG_EXIT = 1,
 	/** Answer to a question dialog */
 	GP_DIALOG_YES = 1,
+	/** Answer to a question dialog */
 	GP_DIALOG_NO = 2,
 	/** Internal error */
 	GP_DIALOG_ERR = 99,
@@ -31,9 +60,9 @@ enum gp_dialog_retval {
 /**
  * @brief Runs a dialog.
  *
- * @type A dialog type - enum gp_dialog_msg_type.
- * @title A dialog title.
- * @msg A dialog message.
+ * @param type A dialog type - enum gp_dialog_msg_type.
+ * @param title A dialog title.
+ * @param msg A dialog message.
  *
  * @return Returns enum gp_dialog_retval.
  */
@@ -43,15 +72,14 @@ int gp_dialog_msg_run(enum gp_dialog_msg_type type,
 /**
  * @brief Runs a dialog.
  *
- * @type A dialog type - enum gp_dialog_msg_type.
- * @title A dialog title.
- * @fmt A printf-like format string for the dialog message.
- * @... A printf-like parameters.
+ * @param type A dialog type - enum gp_dialog_msg_type.
+ * @param title A dialog title.
+ * @param fmt A printf-like format string for the dialog message.
+ * @param ... A printf-like parameters.
  *
  * @return Returns enum gp_dialog_retval.
  */
 int gp_dialog_msg_printf_run(enum gp_dialog_msg_type type, const char *title,
-                             const char *fmt, ...)
-                             __attribute__((format (printf, 3, 4)));
+                             const char *fmt, ...) GP_FMT_PRINTF(3, 4);
 
-#endif /* GP_DIALOG_MESSAGE_H */
+#endif /* GP_DIALOG_MSG_H */

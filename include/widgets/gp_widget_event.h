@@ -7,6 +7,9 @@
  */
 
 /**
+ * @file gp_widget_event.h
+ * @brief Widget event handling
+ *
  * Widget events is an interface between the application and the widget
  * toolkit, typical event is a button press or a text edit. Each widget usually
  * has only one event callback and sends a subset of event types.
@@ -34,7 +37,7 @@ enum gp_widget_event_type {
 	GP_WIDGET_EVENT_INPUT,
 	/** Send by pixmap widget when pixmap has has to be redrawn. */
 	GP_WIDGET_EVENT_REDRAW,
-	/** Send by pixmap widget when pixmap has to be resized */
+	/** Send when widget was resized. */
 	GP_WIDGET_EVENT_RESIZE,
 	/** Color scheme has changed */
 	GP_WIDGET_EVENT_COLOR_SCHEME,
@@ -42,6 +45,7 @@ enum gp_widget_event_type {
 	GP_WIDGET_EVENT_MAX,
 };
 
+/** @brief Default widget event mask */
 #define GP_WIDGET_EVENT_DEFAULT_MASK ( \
 	(1<<GP_WIDGET_EVENT_NEW) |     \
 	(1<<GP_WIDGET_EVENT_FREE) |    \
@@ -53,8 +57,8 @@ enum gp_widget_event_type {
  *
  * Disables widget events.
  *
- * @self The widget
- * @ev_type Event type to disable
+ * @param self The widget
+ * @param ev_type Event type to disable
  */
 void gp_widget_event_mask(gp_widget *self, enum gp_widget_event_type ev_type);
 
@@ -63,8 +67,8 @@ void gp_widget_event_mask(gp_widget *self, enum gp_widget_event_type ev_type);
  *
  * Enables widget events.
  *
- * @self The widget
- * @ev_type Event type to enable
+ * @param self The widget
+ * @param ev_type Event type to enable
  */
 void gp_widget_event_unmask(gp_widget *self, enum gp_widget_event_type ev_type);
 
@@ -77,16 +81,18 @@ void gp_widget_event_unmask(gp_widget *self, enum gp_widget_event_type ev_type);
 const char *gp_widget_event_type_name(enum gp_widget_event_type ev_type);
 
 /**
- * @brief Event structure holds all event parameters.
+ * @brief Event structure passed to widget event handler.
  */
 struct gp_widget_event {
+	/** The widget the event is for */
 	struct gp_widget *self;
-	/* generic event type, i.e. enum gp_widget_event_type */
+	/** Generic event type, i.e. enum gp_widget_event_type */
 	uint16_t type;
-	/* widget specific subtype defined by widgets */
+	/** Widget specific subtype defined by widgets */
 	uint16_t sub_type;
 	/* internal DO NOT TOUCH */
 	const struct gp_widget_render_ctx *ctx;
+	/** Optional pointer/value */
 	union {
 		void *ptr;
 		long val;
@@ -105,8 +111,11 @@ void gp_widget_event_dump(gp_widget_event *ev);
 /**
  * @brief Helper function to send a widget library event to application.
  *
- * @self Pointer to the widget sending this event.
- * @type Event type see gp_widget_event_type enum.
+ * This is called by the widget library when event should be send to the
+ * widget.
+ *
+ * @param self Pointer to the widget sending this event.
+ * @param type Event type see gp_widget_event_type enum.
  * @return The return value from application event handler.
  */
 static inline int gp_widget_send_event(gp_widget *self,
@@ -144,8 +153,11 @@ static inline int gp_widget_send_event(gp_widget *self,
 /**
  * @brief Helper function to send a widget specific event to application.
  *
- * @self Pointer to the widget sending this event.
- * @type Event type as defined by a particular widget.
+ * This is called by the widget library when event should be send to the
+ * widget.
+ *
+ * @param self Pointer to the widget sending this event.
+ * @param type Event type as defined by a particular widget.
  * @return The return value from application event handler.
  */
 static inline int gp_widget_send_widget_event(gp_widget *self,
@@ -173,6 +185,8 @@ static inline int gp_widget_send_widget_event(gp_widget *self,
 /**
  * @brief A helper function to inject key and utf input events to a widget.
  *
+ * Internal function used in widget tests.
+ *
  * This function takes a widget event and if the event type is
  * GP_WIDGET_EVENT_INPUT the input event is injected to the widget input event
  * handler, i.e. the widget will get the input as if it was focused.
@@ -182,8 +196,10 @@ static inline int gp_widget_send_widget_event(gp_widget *self,
  * widget tree, i.e. for any event widget receives the widget top level corner
  * has coordinate [0,0]. Hence these kinds of events are not injected.
  *
- * @self A widget to inject the input event to.
- * @ev A widget event.
+ * @param self A widget to inject the input event to.
+ * @param ev A widget event.
+ *
+ * @return Non-zero if the event was handled, zero otherwise.
  */
 int gp_widget_input_inject(gp_widget *self, gp_widget_event *ev);
 

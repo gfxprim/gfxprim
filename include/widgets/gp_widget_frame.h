@@ -6,6 +6,13 @@
 
  */
 
+/**
+ * @file gp_widget_frame.h
+ * @brief A frame widget.
+ *
+ * @image html frame.png
+ */
+
 #ifndef GP_WIDGET_FRAME_H
 #define GP_WIDGET_FRAME_H
 
@@ -17,11 +24,11 @@ struct gp_widget_frame {
 };
 
 /**
- * @brief Allocates and initializes a new frame label.
+ * @brief Allocates and initializes a new frame widget.
  *
- * @label A frame label.
- * @bold If non-zero frame label test is bold.
- * @child Frame widget child widget.
+ * @param label A frame label.
+ * @param tattr A text attribute monospace/bold/large etc.
+ * @param child Frame widget child widget.
  *
  * @return A frame widget.
  */
@@ -30,16 +37,16 @@ gp_widget *gp_widget_frame_new(const char *title, gp_widget_tattr tattr, gp_widg
 /**
  * @brief Sets a frame title.
  *
- * @label A frame label.
- * @title New title.
+ * @param label A frame label.
+ * @param title New title.
  */
 void gp_widget_frame_title_set(gp_widget *self, const char *title);
 
 /**
  * @brief Puts a child widget into a frame widget.
  *
- * @self A frame widget.
- * @child A child widget.
+ * @param self A frame widget.
+ * @param child A child widget.
  *
  * @return Returns previous frame widget child or NULL if frame had no child.
  */
