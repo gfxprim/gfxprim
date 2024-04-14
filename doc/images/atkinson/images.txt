@@ -1,0 +1,20 @@
+.Original Image; Atkinson Dithering: RGB332, G8, G4, G2, G1
+image:images/orig/lenna_small.png[
+	"Original Image",
+	link="images/orig/lenna.png"]
+image:images/atkinson/atkinson_dithering_lenna_small_9.png[
+	"RGB332",
+	link="images/atkinson/atkinson_dithering_lenna_9.png"]
+image:images/atkinson/atkinson_dithering_lenna_small_20.png[
+	"G8",
+	link="images/atkinson/atkinson_dithering_lenna_20.png"]
+image:images/atkinson/atkinson_dithering_lenna_small_19.png[
+	"G4",
+	link="images/atkinson/atkinson_dithering_lenna_19.png"]
+image:images/atkinson/atkinson_dithering_lenna_small_18.png[
+	"G2",
+	link="images/atkinson/atkinson_dithering_lenna_18.png"]
+image:images/atkinson/atkinson_dithering_lenna_small_17.png[
+	"G1",
+	link="images/atkinson/atkinson_dithering_lenna_17.png"]
+

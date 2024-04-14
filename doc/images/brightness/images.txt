@@ -2,16 +2,16 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/brightness/lenna_small_-0.5.png[
+image:images/brightness/brightness_lenna_small_-0.5.png[
 	"Brightness -0.5",
-	link="images/brightness/lenna_-0.5.png"]
-image:images/brightness/lenna_small_-0.2.png[
+	link="images/brightness/brightness_lenna_-0.5.png"]
+image:images/brightness/brightness_lenna_small_-0.2.png[
 	"Brightness -0.2",
-	link="images/brightness/lenna_-0.2.png"]
-image:images/brightness/lenna_small_0.2.png[
+	link="images/brightness/brightness_lenna_-0.2.png"]
+image:images/brightness/brightness_lenna_small_0.2.png[
 	"Brightness 0.2",
-	link="images/brightness/lenna_0.2.png"]
-image:images/brightness/lenna_small_0.5.png[
+	link="images/brightness/brightness_lenna_0.2.png"]
+image:images/brightness/brightness_lenna_small_0.5.png[
 	"Brightness 0.5",
-	link="images/brightness/lenna_0.5.png"]
+	link="images/brightness/brightness_lenna_0.5.png"]
 

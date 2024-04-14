@@ -2,7 +2,7 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/mirror_h/lenna_small_.png[
+image:images/mirror_h/mirrored_horizontally_lenna_small_.png[
 	"Mirrored Horizontally ",
-	link="images/mirror_h/lenna_.png"]
+	link="images/mirror_h/mirrored_horizontally_lenna_.png"]
 

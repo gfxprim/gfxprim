@@ -2,10 +2,16 @@
 /*
  * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
  */
+@ ditherings = ['floyd_steinberg', 'atkinson', 'sierra', 'sierra_lite', 'hilbert_peano']
 
 /**
  * @file gp_dither.gen.h
  * @brief Dithering algorithms.
+ *
+ * @includedoc images/convert/images.md
+@ for d in ditherings:
+ * @includedoc images/{{ d }}/images.md
+@ end
  */
 #ifndef FILTERS_GP_DITHER_H
 #define FILTERS_GP_DITHER_H
@@ -144,7 +150,7 @@ gp_pixmap *gp_filter_dither_alloc(gp_dither_type type,
                                   gp_pixel_type pixel_type,
                                   gp_progress_cb *callback);
 
-@ for name in ['floyd_steinberg', 'atkinson', 'sierra', 'sierra_lite', 'hilbert_peano']:
+@ for name in ditherings:
 /**
  * @brief Runs {{ name }} dithering from src::pixel_type to dst::pixel_type.
  *

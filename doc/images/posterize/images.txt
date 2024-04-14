@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/posterize/lenna_small_2.png[
+image:images/posterize/posterize_lenna_small_2.png[
 	"Posterize 2",
-	link="images/posterize/lenna_2.png"]
-image:images/posterize/lenna_small_3.png[
+	link="images/posterize/posterize_lenna_2.png"]
+image:images/posterize/posterize_lenna_small_3.png[
 	"Posterize 3",
-	link="images/posterize/lenna_3.png"]
-image:images/posterize/lenna_small_4.png[
+	link="images/posterize/posterize_lenna_3.png"]
+image:images/posterize/posterize_lenna_small_4.png[
 	"Posterize 4",
-	link="images/posterize/lenna_4.png"]
-image:images/posterize/lenna_small_5.png[
+	link="images/posterize/posterize_lenna_4.png"]
+image:images/posterize/posterize_lenna_small_5.png[
 	"Posterize 5",
-	link="images/posterize/lenna_5.png"]
-image:images/posterize/lenna_small_6.png[
+	link="images/posterize/posterize_lenna_5.png"]
+image:images/posterize/posterize_lenna_small_6.png[
 	"Posterize 6",
-	link="images/posterize/lenna_6.png"]
+	link="images/posterize/posterize_lenna_6.png"]
 

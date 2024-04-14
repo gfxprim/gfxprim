@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/sierra/lenna_small_8.png[
+image:images/sierra/sierra_dithering_lenna_small_9.png[
 	"RGB332",
-	link="images/sierra/lenna_8.png"]
-image:images/sierra/lenna_small_19.png[
+	link="images/sierra/sierra_dithering_lenna_9.png"]
+image:images/sierra/sierra_dithering_lenna_small_20.png[
 	"G8",
-	link="images/sierra/lenna_19.png"]
-image:images/sierra/lenna_small_18.png[
+	link="images/sierra/sierra_dithering_lenna_20.png"]
+image:images/sierra/sierra_dithering_lenna_small_19.png[
 	"G4",
-	link="images/sierra/lenna_18.png"]
-image:images/sierra/lenna_small_17.png[
+	link="images/sierra/sierra_dithering_lenna_19.png"]
+image:images/sierra/sierra_dithering_lenna_small_18.png[
 	"G2",
-	link="images/sierra/lenna_17.png"]
-image:images/sierra/lenna_small_16.png[
+	link="images/sierra/sierra_dithering_lenna_18.png"]
+image:images/sierra/sierra_dithering_lenna_small_17.png[
 	"G1",
-	link="images/sierra/lenna_16.png"]
+	link="images/sierra/sierra_dithering_lenna_17.png"]
 

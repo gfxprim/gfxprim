@@ -2,7 +2,7 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/rotate_90/lenna_small_.png[
+image:images/rotate_90/rotated_by_90_degrees_lenna_small_.png[
 	"Rotated by 90 degrees ",
-	link="images/rotate_90/lenna_.png"]
+	link="images/rotate_90/rotated_by_90_degrees_lenna_.png"]
 

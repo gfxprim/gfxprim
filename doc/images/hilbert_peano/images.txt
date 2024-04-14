@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/hilbert_peano/lenna_small_8.png[
+image:images/hilbert_peano/hilbert_peano_dithering_lenna_small_9.png[
 	"RGB332",
-	link="images/hilbert_peano/lenna_8.png"]
-image:images/hilbert_peano/lenna_small_19.png[
+	link="images/hilbert_peano/hilbert_peano_dithering_lenna_9.png"]
+image:images/hilbert_peano/hilbert_peano_dithering_lenna_small_20.png[
 	"G8",
-	link="images/hilbert_peano/lenna_19.png"]
-image:images/hilbert_peano/lenna_small_18.png[
+	link="images/hilbert_peano/hilbert_peano_dithering_lenna_20.png"]
+image:images/hilbert_peano/hilbert_peano_dithering_lenna_small_19.png[
 	"G4",
-	link="images/hilbert_peano/lenna_18.png"]
-image:images/hilbert_peano/lenna_small_17.png[
+	link="images/hilbert_peano/hilbert_peano_dithering_lenna_19.png"]
+image:images/hilbert_peano/hilbert_peano_dithering_lenna_small_18.png[
 	"G2",
-	link="images/hilbert_peano/lenna_17.png"]
-image:images/hilbert_peano/lenna_small_16.png[
+	link="images/hilbert_peano/hilbert_peano_dithering_lenna_18.png"]
+image:images/hilbert_peano/hilbert_peano_dithering_lenna_small_17.png[
 	"G1",
-	link="images/hilbert_peano/lenna_16.png"]
+	link="images/hilbert_peano/hilbert_peano_dithering_lenna_17.png"]
 

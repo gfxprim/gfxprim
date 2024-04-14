@@ -62,6 +62,27 @@ class ImgGen:
         self.f.write('\n')
         self.f.close()
 
+    def write_md_head(self, dst_path, func_name, descs):
+        self.fm = open('../' + dst_path + 'images.md', 'w')
+        fm = self.fm
+
+        fm.write(func_name + '\n')
+        fm.write('-' * len(func_name) + '\n\n')
+
+        headings = [str(x) for x in descs];
+
+        fm.write('| Original Image | ' + ' | '.join(headings) + '\n')
+        fm.write('|----------------|' + '|'.join(['-' * (len(x)+2) for x in headings]) + '|\n')
+        fm.write('| [![](' + self.orig_path + 'lenna_small.png)](../../' + self.orig_path + 'lenna.png)')
+
+    def write_img_md(self, desc, fname, fname_small):
+        f = self.fm
+        f.write(' | [![](' + fname_small + ')](../../' + fname + ')')
+
+    def write_md_tail(self):
+        self.fm.write('\n')
+        self.fm.close()
+
     def gen(self, func, func_param_desc, func_params_arr, dst_path, func_name, descs=None):
 
         print("Generating " + func_name)
@@ -72,8 +93,12 @@ class ImgGen:
 
         if (descs is not None):
             head = func_name + ': ' + ', '.join(descs)
+            md_descs = descs;
+        else:
+            md_descs = func_params_arr;
 
         self.write_asciidoc_head(dst_path, head)
+        self.write_md_head(dst_path, func_name, md_descs)
 
         for i in range(0, len(func_params_arr)):
             params = func_params_arr[i]
@@ -86,10 +111,11 @@ class ImgGen:
 
             print(' > ' + desc)
 
-            fname = dst_path + 'lenna_' + ','.join(str_pars) + '.png'
-            fname_small = dst_path + 'lenna_small_' + ','.join(str_pars) + '.png'
+            fname = dst_path + func_name.lower().replace(' ', '_') + '_lenna_' + '_'.join(str_pars) + '.png'
+            fname_small = dst_path + func_name.lower().replace(' ', '_') + '_lenna_small_' + '_'.join(str_pars) + '.png'
 
             self.write_img_asciidoc(desc, fname, fname_small)
+            self.write_img_md(desc, fname, fname_small)
 
             res = convert(func(self.img, *params))
             loaders.save(res, '../' + fname)
@@ -98,6 +124,7 @@ class ImgGen:
             loaders.save(res, '../' + fname_small)
 
         self.write_asciidoc_tail()
+        self.write_md_tail()
 
 def main():
     imggen = ImgGen('images/orig/')
@@ -207,6 +234,18 @@ def main():
                ],
                'images/floyd_steinberg/',
                'Floyd Steinberg Dithering',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
+    imggen.gen(filters.atkinson_alloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/atkinson/',
+               'Atkinson Dithering',
                ['RGB332', 'G8', 'G4', 'G2', 'G1'])
 
     imggen.gen(filters.sierra_alloc, ['p'],

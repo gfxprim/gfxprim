@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/median/lenna_small_3,3.png[
+image:images/median/median_lenna_small_3_3.png[
 	"Median 3 3",
-	link="images/median/lenna_3,3.png"]
-image:images/median/lenna_small_5,5.png[
+	link="images/median/median_lenna_3_3.png"]
+image:images/median/median_lenna_small_5_5.png[
 	"Median 5 5",
-	link="images/median/lenna_5,5.png"]
-image:images/median/lenna_small_7,7.png[
+	link="images/median/median_lenna_5_5.png"]
+image:images/median/median_lenna_small_7_7.png[
 	"Median 7 7",
-	link="images/median/lenna_7,7.png"]
-image:images/median/lenna_small_9,9.png[
+	link="images/median/median_lenna_7_7.png"]
+image:images/median/median_lenna_small_9_9.png[
 	"Median 9 9",
-	link="images/median/lenna_9,9.png"]
-image:images/median/lenna_small_12,12.png[
+	link="images/median/median_lenna_9_9.png"]
+image:images/median/median_lenna_small_12_12.png[
 	"Median 12 12",
-	link="images/median/lenna_12,12.png"]
+	link="images/median/median_lenna_12_12.png"]
 

@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/convolution/lenna_small_(1,1,1)(1,1,1)(1,1,1),9.png[
+image:images/convolution/convolution_lenna_small_(1,1,1)(1,1,1)(1,1,1)_9.png[
 	"3x3 Box Blur",
-	link="images/convolution/lenna_(1,1,1)(1,1,1)(1,1,1),9.png"]
-image:images/convolution/lenna_small_(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1),25.png[
+	link="images/convolution/convolution_lenna_(1,1,1)(1,1,1)(1,1,1)_9.png"]
+image:images/convolution/convolution_lenna_small_(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)_25.png[
 	"5x5 Box Blur",
-	link="images/convolution/lenna_(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1),25.png"]
-image:images/convolution/lenna_small_(0,-1,0)(-1,4,-1)(0,-1,0),1.png[
+	link="images/convolution/convolution_lenna_(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)(1,1,1,1,1)_25.png"]
+image:images/convolution/convolution_lenna_small_(0,-1,0)(-1,4,-1)(0,-1,0)_1.png[
 	"3x3 Laplacian",
-	link="images/convolution/lenna_(0,-1,0)(-1,4,-1)(0,-1,0),1.png"]
-image:images/convolution/lenna_small_(1,0,-1)(2,0,-2)(1,0,-1),1.png[
+	link="images/convolution/convolution_lenna_(0,-1,0)(-1,4,-1)(0,-1,0)_1.png"]
+image:images/convolution/convolution_lenna_small_(1,0,-1)(2,0,-2)(1,0,-1)_1.png[
 	"3x3 Sobel",
-	link="images/convolution/lenna_(1,0,-1)(2,0,-2)(1,0,-1),1.png"]
-image:images/convolution/lenna_small_(0,0,0)(1,-1,0)(0,0,0),1.png[
+	link="images/convolution/convolution_lenna_(1,0,-1)(2,0,-2)(1,0,-1)_1.png"]
+image:images/convolution/convolution_lenna_small_(0,0,0)(1,-1,0)(0,0,0)_1.png[
 	"3x3 Roberts",
-	link="images/convolution/lenna_(0,0,0)(1,-1,0)(0,0,0),1.png"]
+	link="images/convolution/convolution_lenna_(0,0,0)(1,-1,0)(0,0,0)_1.png"]
 

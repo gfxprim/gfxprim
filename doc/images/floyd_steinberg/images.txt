@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/floyd_steinberg/lenna_small_8.png[
+image:images/floyd_steinberg/floyd_steinberg_dithering_lenna_small_9.png[
 	"RGB332",
-	link="images/floyd_steinberg/lenna_8.png"]
-image:images/floyd_steinberg/lenna_small_19.png[
+	link="images/floyd_steinberg/floyd_steinberg_dithering_lenna_9.png"]
+image:images/floyd_steinberg/floyd_steinberg_dithering_lenna_small_20.png[
 	"G8",
-	link="images/floyd_steinberg/lenna_19.png"]
-image:images/floyd_steinberg/lenna_small_18.png[
+	link="images/floyd_steinberg/floyd_steinberg_dithering_lenna_20.png"]
+image:images/floyd_steinberg/floyd_steinberg_dithering_lenna_small_19.png[
 	"G4",
-	link="images/floyd_steinberg/lenna_18.png"]
-image:images/floyd_steinberg/lenna_small_17.png[
+	link="images/floyd_steinberg/floyd_steinberg_dithering_lenna_19.png"]
+image:images/floyd_steinberg/floyd_steinberg_dithering_lenna_small_18.png[
 	"G2",
-	link="images/floyd_steinberg/lenna_17.png"]
-image:images/floyd_steinberg/lenna_small_16.png[
+	link="images/floyd_steinberg/floyd_steinberg_dithering_lenna_18.png"]
+image:images/floyd_steinberg/floyd_steinberg_dithering_lenna_small_17.png[
 	"G1",
-	link="images/floyd_steinberg/lenna_16.png"]
+	link="images/floyd_steinberg/floyd_steinberg_dithering_lenna_17.png"]
 

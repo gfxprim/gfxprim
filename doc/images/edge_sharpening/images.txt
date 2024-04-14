@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/edge_sharpening/lenna_small_0.1.png[
+image:images/edge_sharpening/edge_sharpening_lenna_small_0.1.png[
 	"Edge Sharpening 0.1",
-	link="images/edge_sharpening/lenna_0.1.png"]
-image:images/edge_sharpening/lenna_small_0.3.png[
+	link="images/edge_sharpening/edge_sharpening_lenna_0.1.png"]
+image:images/edge_sharpening/edge_sharpening_lenna_small_0.3.png[
 	"Edge Sharpening 0.3",
-	link="images/edge_sharpening/lenna_0.3.png"]
-image:images/edge_sharpening/lenna_small_0.5.png[
+	link="images/edge_sharpening/edge_sharpening_lenna_0.3.png"]
+image:images/edge_sharpening/edge_sharpening_lenna_small_0.5.png[
 	"Edge Sharpening 0.5",
-	link="images/edge_sharpening/lenna_0.5.png"]
-image:images/edge_sharpening/lenna_small_0.8.png[
+	link="images/edge_sharpening/edge_sharpening_lenna_0.5.png"]
+image:images/edge_sharpening/edge_sharpening_lenna_small_0.8.png[
 	"Edge Sharpening 0.8",
-	link="images/edge_sharpening/lenna_0.8.png"]
-image:images/edge_sharpening/lenna_small_1.0.png[
+	link="images/edge_sharpening/edge_sharpening_lenna_0.8.png"]
+image:images/edge_sharpening/edge_sharpening_lenna_small_1.0.png[
 	"Edge Sharpening 1.0",
-	link="images/edge_sharpening/lenna_1.0.png"]
+	link="images/edge_sharpening/edge_sharpening_lenna_1.0.png"]
 

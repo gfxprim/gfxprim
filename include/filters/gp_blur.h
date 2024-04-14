@@ -3,10 +3,11 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
-
-   Gaussian blur implementation.
-
+/**
+ * @file gp_blur.h
+ * @brief Gaussian blur.
+ *
+ * @includedoc images/blur/images.md
  */
 
 #ifndef FILTERS_GP_BLUR_H
@@ -14,13 +15,12 @@
 
 #include <filters/gp_filter.h>
 
-/*
+/**
  * Gaussian blur implemented using linear separable convolution.
  *
  * The x_sigma defines the blur size in horizontal direction and y_sigma
  * defines blur on vertical direction.
  */
-
 int gp_filter_gaussian_blur_ex(const gp_pixmap *src,
                                gp_coord x_src, gp_coord y_src,
                                gp_size w_src, gp_size h_src,
