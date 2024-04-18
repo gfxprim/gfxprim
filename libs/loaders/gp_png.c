@@ -67,6 +67,22 @@ static void read_data(png_structp png_ptr, png_bytep data, png_size_t len)
 		png_error(png_ptr, "Read Error");
 }
 
+static const char *srgb_intent_name(int srgb_intent)
+{
+	switch (srgb_intent) {
+	case PNG_sRGB_INTENT_PERCEPTUAL:
+		return "perceptual";
+	case PNG_sRGB_INTENT_RELATIVE:
+		return "relative";
+	case PNG_sRGB_INTENT_SATURATION:
+		return "saturation";
+	case PNG_sRGB_INTENT_ABSOLUTE:
+		return "absolute";
+	default:
+		return "unknown";
+	}
+}
+
 static void load_meta_data(png_structp png, png_infop png_info,
                            gp_storage *storage)
 {
@@ -74,6 +90,7 @@ static void load_meta_data(png_structp png, png_infop png_info,
 	png_uint_32 res_x, res_y, w, h;
 	int unit, depth, color_type, interlace_type, compr_method;
 	const char *type;
+	int srgb_intent;
 
 	png_get_IHDR(png, png_info, &w, &h, &depth,
 	             &color_type, &interlace_type, &compr_method, NULL);
@@ -105,7 +122,12 @@ static void load_meta_data(png_structp png, png_infop png_info,
 			        color_type & PNG_COLOR_MASK_ALPHA ? "Yes" : "No");
 
 	if (png_get_gAMA(png, png_info, &gamma))
-		gp_storage_add_int(storage, NULL, "gamma", gamma * 100000);
+		gp_storage_add_int(storage, NULL, "Gamma", gamma * 100000);
+
+	if (png_get_sRGB(png, png_info, &srgb_intent)) {
+		gp_storage_add_string(storage, NULL, "sRGB intent",
+		                      srgb_intent_name(srgb_intent));
+	}
 
 	if (png_get_pHYs(png, png_info, &res_x, &res_y, &unit)) {
 		gp_storage_add_int(storage, NULL, "X Resolution", res_x);
@@ -176,7 +198,8 @@ static int read_bitmap(gp_pixmap *res, gp_progress_cb *callback,
 }
 
 static int read_convert_bitmap(gp_pixmap *res, gp_progress_cb *callback,
-		               png_structp png, int passes, double gamma)
+		               png_structp png, int passes, int has_srgb,
+			       int has_gamma, double gamma)
 {
 	uint16_t *row;
 
@@ -191,28 +214,30 @@ static int read_convert_bitmap(gp_pixmap *res, gp_progress_cb *callback,
 		return ENOMEM;
 	}
 
-	unsigned int y;
+	/* Convert 16 bit linear samples to sRBG */
+	if (!has_srgb && !has_gamma)
+		gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
 
-	if (gamma < 0.01)
-		gp_pixmap_gamma_set(res, GP_CORRECTION_GAMMA, 2.2);
+	unsigned int y;
 
 	for (y = 0; y < res->h; y++) {
 		png_read_row(png, (void*)row, NULL);
 		uint8_t *rrow = GP_PIXEL_ADDR(res, 0, y);
 		unsigned int x = 0;
 
-
-		if (gamma > 0.1) {
+		/* Samples are non-linear, just scale the values */
+		if (has_srgb || has_gamma) {
 			for (x = 0; x < res->w; x++) {
-				rrow[3*x] = row[3 * x]>>8;
+				rrow[3*x    ] = row[3 * x]>>8;
 				rrow[3*x + 1] = row[3 * x + 1]>>8;
 				rrow[3*x + 2] = row[3 * x + 2]>>8;
 			}
+		/* Linear samples are converted to sRGB */
 		} else {
 			for (x = 0; x < res->w; x++) {
-				rrow[3*x] = gp_linear16_to_gamma8(row[3 * x]);
-				rrow[3*x + 1] = gp_linear16_to_gamma8(row[3 * x + 1]);
-				rrow[3*x + 2] = gp_linear16_to_gamma8(row[3 * x + 2]);
+				rrow[3*x    ] = gp_lin16_to_srgb8(row[3 * x]);
+				rrow[3*x + 1] = gp_lin16_to_srgb8(row[3 * x + 1]);
+				rrow[3*x + 2] = gp_lin16_to_srgb8(row[3 * x + 2]);
 			}
 		}
 
@@ -238,6 +263,8 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	gp_pixmap *res = NULL;
 	int err, passes = 1;
 	double gamma;
+	int srgb_intent;
+	int has_srgb, has_gamma;
 	int convert_16_to_8 = 0;
 
 	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -276,7 +303,8 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	png_get_IHDR(png, png_info, &w, &h, &depth,
 	             &color_type, &interlace_type, NULL, NULL);
 
-	png_get_gAMA(png, png_info, &gamma);
+	has_gamma = png_get_gAMA(png, png_info, &gamma);
+	has_srgb = png_get_sRGB(png, png_info, &srgb_intent);
 
 	GP_DEBUG(2, "Interlace=%s%s %s PNG%s size %ux%u depth %i gamma %.2lf",
 	         interlace_type_name(interlace_type),
@@ -385,8 +413,10 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 		goto err2;
 	}
 
-	if (gamma > 0.1)
-		gp_pixmap_gamma_set(res, GP_CORRECTION_GAMMA, 1 / gamma);
+	if (has_srgb)
+		gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+	else if (has_gamma)
+		gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_GAMMA, 1 / gamma);
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 	/*
@@ -399,7 +429,7 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	}
 #endif
 	if (convert_16_to_8) {
-		if ((err = read_convert_bitmap(res, callback, png, passes, gamma)))
+		if ((err = read_convert_bitmap(res, callback, png, passes, has_srgb, has_gamma, gamma)))
 			goto err3;
 	} else {
 		if ((err = read_bitmap(res, callback, png, passes)))

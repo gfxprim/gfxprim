@@ -140,6 +140,8 @@ int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	WebPIDelete(idec);
 	WebPFreeDecBuffer(&config.output);
 
+	gp_pixmap_gamma_set(out, GP_CORRECTION_TYPE_SRGB, 0);
+
 	*img = out;
 
 	gp_progress_cb_done(callback);

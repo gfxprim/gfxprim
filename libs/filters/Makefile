@@ -12,6 +12,8 @@ POINT_FILTERS=gp_invert.gen.c\
 ARITHMETIC_FILTERS=gp_diff.gen.c gp_add.gen.c gp_min.gen.c\
                    gp_max.gen.c gp_mul.gen.c
 
+$(ARITHMETIC_FILTERS): arithmetic_filter.t
+
 RESAMPLING_FILTERS=gp_resize_nn.gen.c gp_cubic.gen.c gp_resize_cubic.gen.c\
                    gp_resize_linear.gen.c
 

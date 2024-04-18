@@ -87,6 +87,8 @@ gp_pixmap *gp_filter_resize_alloc(const gp_pixmap *src,
 	if (!res)
 		return NULL;
 
+	res->gamma = gp_gamma_incref(src->gamma);
+
 	if (resize(src, res, type, callback)) {
 		gp_pixmap_free(res);
 		return NULL;

@@ -33,6 +33,8 @@ static inline float cubic_float(float x)
 /* Defined in gp_cubic.gen.c */
 extern int16_t gp_cubic_table[];
 
+#define GP_CUBIC_MUL 1024
+
 /*
  * Fixed point version of above.
  *

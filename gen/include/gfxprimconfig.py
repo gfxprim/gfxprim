@@ -2,7 +2,7 @@
 #  gfxprimconfig - Class for (global) GfxPrim configuration
 #
 # 2011      - Tomas Gavenciak <gavento@ucw.cz>
-# 2011-2014 - Cyril Hrubis <metan@ucw.cz>
+# 2011-2024 - Cyril Hrubis <metan@ucw.cz>
 
 import os
 import logging as log

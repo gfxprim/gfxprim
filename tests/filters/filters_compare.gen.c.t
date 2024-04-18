@@ -117,7 +117,7 @@ __attribute__((weak)) void gp_nr_threads_set(unsigned int nr)
 @
 @ def apply_filter(filter):
 @     if 'dst' in filter[1]:
-	dst = gp_pixmap_copy(src, GP_COPY_WITH_PIXELS);
+	dst = gp_pixmap_copy(src, GP_PIXMAP_COPY_PIXELS);
 	if (gp_filter_{{ filter[0] }}({{ arr_to_params(filter[1]) }})) {
 		int err = errno;
 		gp_pixmap_free(dst);

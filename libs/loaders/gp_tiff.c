@@ -558,6 +558,9 @@ int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		goto err1;
 	}
 
+	if (res->pixel_type != GP_PIXEL_G1)
+		gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+
 	if (TIFFScanlineSize(tiff) > res->bytes_per_row) {
 		GP_WARN("ScanlineSize %li > bytes_per_row %i",
 		        TIFFScanlineSize(tiff), res->bytes_per_row);
@@ -627,6 +630,7 @@ static int save_rgb(TIFF *tiff, const gp_pixmap *src,
 
 	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
 	TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 3);
+	//TODO: Set based on the src correction?
 	TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 
 	for (y = 0; y < src->h; y++) {

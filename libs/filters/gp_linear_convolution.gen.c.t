@@ -2,7 +2,7 @@
 /*
  * Linear Convolution
  *
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <errno.h>
@@ -33,10 +33,22 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 	int ikernel[kw], ikern_div;
 	uint32_t size = w_src + kw - 1;
 
-	for (i = 0; i < kw; i++)
-		ikernel[i] = kernel[i] * MUL + 0.5;
+	/* Fetch gamma tables */
+	{@ fetch_gamma_lin(pt, 'src') @}
+	{@ fetch_gamma_enc(pt, 'dst') @}
 
-	ikern_div = kern_div * MUL + 0.5;
+	/* Fetch maximal values for linearized channels */
+	{@ fetch_chan_lin_max(pt, 'src') @}
+
+	ikern_div = 0;
+	(void) kern_div;
+
+	for (i = 0; i < kw; i++) {
+		ikernel[i] = kernel[i] * MUL + 0.5;
+		ikern_div += ikernel[i];
+	}
+
+	GP_ASSERT(ikern_div != 0);
 
 	/* Create temporary buffers */
 	gp_temp_alloc_create(temp, {{ len(pt.chanslist) }} * size * sizeof(int));
@@ -58,7 +70,7 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 		/* Copy border pixel until the source image starts */
 		while (xi <= 0 && i < size) {
 @         for c in pt.chanslist:
-			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @         end
 			i++;
 			xi++;
@@ -69,7 +81,7 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 			pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, yi);
 
 @         for c in pt.chanslist:
-			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @         end
 
 			i++;
@@ -79,7 +91,7 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 		/* Copy the rest the border pixel when we are out again */
 		while (i < size) {
 @         for c in pt.chanslist:
-			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @         end
 
 			i++;
@@ -90,6 +102,7 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 			int32_t {{ c.name }}_sum = MUL/2;
 			int *p{{ c.name }} = {{ c.name }} + x;
 @         end
+
 
 			/* count the pixel value from neighbours weighted by kernel */
 			for (i = 0; i < kw; i++) {
@@ -105,12 +118,14 @@ static int h_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 
 			/* and clamp just to be extra sure */
 @         for c in pt.chanslist:
-			{{ c.name }}_sum = GP_CLAMP({{ c.name }}_sum, 0, {{ c.max }});
+			gp_pixel {{ c.name }}_res = GP_CLAMP({{ c.name }}_sum, 0, (int){@ chan_lin_max(c) @});
 @         end
+
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x_dst + x, y_dst + y,
-			                      GP_PIXEL_CREATE_{{ pt.name }}(
-					      {{ arr_to_params(pt.chan_names, "", "_sum") }}
-					      ));
+				GP_PIXEL_CREATE_{{ pt.name }}_ENC(
+					{{ arr_to_params(pt.chan_names, "", "_res") }},
+					{{ arr_to_params(pt.chan_names, "", "_gamma_enc") }}
+				));
 		}
 
 		if (gp_progress_cb_report(callback, y, h_src, w_src)) {
@@ -136,8 +151,8 @@ int gp_filter_hlinear_convolution_raw(const gp_pixmap *src,
 				      gp_progress_cb *callback)
 {
 	GP_DEBUG(1, "Horizontal linear convolution kernel width %u "
-	            "offset %ix%i rectangle %ux%u",
-		    kw, x_src, y_src, w_src, h_src);
+	            "offset %ix%i rectangle %ux%u src->gamma %p dst->gamma %p",
+		    kw, x_src, y_src, w_src, h_src, src->gamma, dst->gamma);
 
 	switch (src->pixel_type) {
 @ for pt in pixeltypes:
@@ -170,10 +185,22 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 	int ikernel[kh], ikern_div;
 	uint32_t size = h_src + kh - 1;
 
-	for (i = 0; i < kh; i++)
-		ikernel[i] = kernel[i] * MUL + 0.5;
+	/* Fetch gamma tables */
+	{@ fetch_gamma_lin(pt, 'src') @}
+	{@ fetch_gamma_enc(pt, 'dst') @}
 
-	ikern_div = kern_div * MUL + 0.5;
+	/* Fetch maximal values for linearized channels */
+	{@ fetch_chan_lin_max(pt, 'src') @}
+
+	ikern_div = 0;
+	(void) kern_div;
+
+	for (i = 0; i < kh; i++) {
+		ikernel[i] = kernel[i] * MUL + 0.5;
+		ikern_div += ikernel[i];
+	}
+
+	GP_ASSERT(ikern_div != 0);
 
 	/* Create temporary buffers */
 	gp_temp_alloc_create(temp, {{ len(pt.chanslist) }} * size * sizeof(int));
@@ -195,7 +222,7 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 		/* Copy border pixel until the source image starts */
 		while (yi <= 0 && i < size) {
 @         for c in pt.chanslist:
-			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @         end
 
 			i++;
@@ -207,7 +234,7 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 			pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, yi);
 
 @         for c in pt.chanslist:
-			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @         end
 
 			i++;
@@ -217,7 +244,7 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 		/* Copy the rest the border pixel when we are out again */
 		while (i < size) {
 @         for c in pt.chanslist:
-			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+			{{ c.name }}[i] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @         end
 
 			i++;
@@ -225,7 +252,7 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 
 		for (y = 0; y < (gp_coord)h_src; y++) {
 @         for c in pt.chanslist:
-			int32_t {{ c.name }}_sum = MUL/2;
+			int64_t {{ c.name }}_sum = MUL/2;
 			int *p{{ c.name }} = {{ c.name }} + y;
 @         end
 
@@ -243,12 +270,13 @@ static int v_lin_conv_{{ pt.name }}(const gp_pixmap *src,
 
 			/* and clamp just to be extra sure */
 @         for c in pt.chanslist:
-			{{ c.name }}_sum = GP_CLAMP({{ c.name }}_sum, 0, {{ c.max }});
+			gp_pixel {{ c.name }}_res = GP_CLAMP({{ c.name }}_sum, 0, (int){@ chan_lin_max(c) @});
 @         end
 
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x_dst + x, y_dst + y,
-			                      GP_PIXEL_CREATE_{{ pt.name }}(
-					      {{ arr_to_params(pt.chan_names, "", "_sum") }}
+			                      GP_PIXEL_CREATE_{{ pt.name }}_ENC(
+					      {{ arr_to_params(pt.chan_names, "", "_res") }},
+					      {{ arr_to_params(pt.chan_names, "", "_gamma_enc") }}
 					      ));
 		}
 
@@ -307,6 +335,10 @@ static int lin_conv_{{ pt.name }}(const gp_pixmap *src,
 	gp_coord x, y;
 	unsigned int i, j;
 
+	{@ fetch_gamma_lin(pt, "src") @}
+	{@ fetch_gamma_enc(pt, "dst") @}
+	{@ fetch_chan_lin_max(pt, 'src') @}
+
 	/* Do linear convolution */
 	for (y = 0; y < (gp_coord)h_src; y++) {
 @         for c in pt.chanslist:
@@ -326,7 +358,7 @@ static int lin_conv_{{ pt.name }}(const gp_pixmap *src,
 				pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, yi);
 
 @         for c in pt.chanslist:
-				{{ c.name }}[i][j] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+				{{ c.name }}[i][j] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @         end
 			}
 		}
@@ -348,7 +380,7 @@ static int lin_conv_{{ pt.name }}(const gp_pixmap *src,
 				pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, xi, yi);
 
 @         for c in pt.chanslist:
-				{{ c.name }}[idx][j] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+				{{ c.name }}[idx][j] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @         end
 			}
 
@@ -375,10 +407,10 @@ static int lin_conv_{{ pt.name }}(const gp_pixmap *src,
 
 			/* and clamp just to be extra sure */
 @         for c in pt.chanslist:
-			int {{ c.name }}_res = GP_CLAMP((int){{ c.name }}_sum, 0, {{ c.max }});
+			int {{ c.name }}_res = GP_CLAMP((int){{ c.name }}_sum, 0, (int){@ chan_lin_max(c) @});
 @         end
 
-			pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, "", "_res") }});
+			pix = GP_PIXEL_CREATE_{{ pt.name }}_ENC({{ arr_to_params(pt.chan_names, "", "_res") }}, {{ arr_to_params(pt.chan_names, '', '_gamma_enc') }});
 
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x_dst + x, y_dst + y, pix);
 

@@ -16,8 +16,6 @@
 #include <filters/gp_resize.h>
 #include "gp_cubic.h"
 
-#define MUL 1024
-
 #define MUL_I(a, b) ({ \
 	a[0] *= b[0]; \
 	a[1] *= b[1]; \
@@ -43,7 +41,10 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 	            src->w, src->h, dst->w, dst->h,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
-	{@ fetch_gamma_tables(pt, "src") @}
+	{@ fetch_gamma_lin(pt, 'src') @}
+	{@ fetch_gamma_enc(pt, 'dst') @}
+
+	{@ fetch_chan_lin_max(pt, 'src') @}
 
 	/* pre-generate x mapping and constants */
 	int32_t xmap[dst->w][4];
@@ -57,10 +58,10 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 		xmap[i][2] = x + 1;
 		xmap[i][3] = x + 2;
 
-		xmap_c[i][0] = cubic_int((xmap[i][0] - x) * MUL + 0.5);
-		xmap_c[i][1] = cubic_int((xmap[i][1] - x) * MUL + 0.5);
-		xmap_c[i][2] = cubic_int((xmap[i][2] - x) * MUL + 0.5);
-		xmap_c[i][3] = cubic_int((xmap[i][3] - x) * MUL + 0.5);
+		xmap_c[i][0] = cubic_int((xmap[i][0] - x) * GP_CUBIC_MUL + 0.5);
+		xmap_c[i][1] = cubic_int((xmap[i][1] - x) * GP_CUBIC_MUL + 0.5);
+		xmap_c[i][2] = cubic_int((xmap[i][2] - x) * GP_CUBIC_MUL + 0.5);
+		xmap_c[i][3] = cubic_int((xmap[i][3] - x) * GP_CUBIC_MUL + 0.5);
 
 		xmap[i][0] = GP_MAX(xmap[i][0], 0);
 		xmap[i][2] = GP_MIN(xmap[i][2], (int)src->w - 1);
@@ -78,14 +79,14 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 		yi[2] = y + 1;
 		yi[3] = y + 2;
 
-		cvy[0] = cubic_int((yi[0] - y) * MUL + 0.5);
-		cvy[1] = cubic_int((yi[1] - y) * MUL + 0.5);
-		cvy[2] = cubic_int((yi[2] - y) * MUL + 0.5);
-		cvy[3] = cubic_int((yi[3] - y) * MUL + 0.5);
+		cvy[0] = cubic_int((yi[0] - y) * GP_CUBIC_MUL + 0.5);
+		cvy[1] = cubic_int((yi[1] - y) * GP_CUBIC_MUL + 0.5);
+		cvy[2] = cubic_int((yi[2] - y) * GP_CUBIC_MUL + 0.5);
+		cvy[3] = cubic_int((yi[3] - y) * GP_CUBIC_MUL + 0.5);
 
 		yi[0] = GP_MAX(yi[0], 0);
 		yi[2] = GP_MIN(yi[2], (int)src->h - 1);
-		yi[3] = GP_MIN(yi[3], (int)src->h - 1);	
+		yi[3] = GP_MIN(yi[3], (int)src->h - 1);
 
 		/* Generate interpolated row */
 		for (j = 0; j < src->w; j++) {
@@ -100,20 +101,11 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 			pix[3] = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, j, yi[3]);
 
 @         for c in pt.chanslist:
-			{{ c.name }}v[0] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[0]);
-			{{ c.name }}v[1] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[1]);
-			{{ c.name }}v[2] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[2]);
-			{{ c.name }}v[3] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[3]);
+			{{ c.name }}v[0] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix[0], {{ c.name }}_gamma_lin);
+			{{ c.name }}v[1] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix[1], {{ c.name }}_gamma_lin);
+			{{ c.name }}v[2] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix[2], {{ c.name }}_gamma_lin);
+			{{ c.name }}v[3] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix[3], {{ c.name }}_gamma_lin);
 @         end
-
-			if (src->gamma) {
-@         for c in pt.chanslist:
-				{{ c.name }}v[0] = {{ c.name }}_2_LIN[{{ c.name }}v[0]];
-				{{ c.name }}v[1] = {{ c.name }}_2_LIN[{{ c.name }}v[1]];
-				{{ c.name }}v[2] = {{ c.name }}_2_LIN[{{ c.name }}v[2]];
-				{{ c.name }}v[3] = {{ c.name }}_2_LIN[{{ c.name }}v[3]];
-@         end
-			}
 
 @         for c in pt.chanslist:
 			MUL_I({{ c.name }}v, cvy);
@@ -143,23 +135,14 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }} = (SUM_I({{ c.name }}v) + MUL*MUL/2) / MUL / MUL;
+			{{ c.name }} = (SUM_I({{ c.name }}v) + GP_CUBIC_MUL * GP_CUBIC_MUL / 2) / (GP_CUBIC_MUL * GP_CUBIC_MUL);
 @         end
 
-			if (src->gamma) {
 @         for c in pt.chanslist:
-				{{ c.name }} = GP_CLAMP_GENERIC({{ c.name }}, 0, {{ 2 ** (c[2] + 2) - 1 }});
+				{{ c.name }} = GP_CLAMP({{ c.name }}, 0, (int32_t){@ chan_lin_max(c) @});
 @         end
-@         for c in pt.chanslist:
-				{{ c.name }} = {{ c.name }}_2_GAMMA[{{ c.name }}];
-@         end
-			} else {
-@         for c in pt.chanslist:
-				{{ c.name }} = GP_CLAMP_GENERIC({{ c.name }}, 0, {{ 2 ** c[2] - 1 }});
-@         end
-			}
 
-			gp_pixel pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, "(uint8_t)") }});
+			gp_pixel pix = GP_PIXEL_CREATE_{{ pt.name }}_ENC({{ arr_to_params(pt.chan_names) }}, {{ arr_to_params(pt.chan_names, '', '_gamma_enc') }});
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, j, i, pix);
 		}
 

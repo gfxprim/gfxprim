@@ -255,9 +255,11 @@ int gp_pixmap_resize(gp_pixmap *self, gp_size w, gp_size h);
  */
 enum gp_pixmap_copy_flags {
 	/** Copy bitmap pixels too. If not set pixels are uninitalized */
-	GP_COPY_WITH_PIXELS   = 0x01,
+	GP_PIXMAP_COPY_PIXELS   = 0x01,
 	/** Copy image rotation flags. If not set flags are set to (0, 0, 0) */
-	GP_COPY_WITH_ROTATION = 0x02,
+	GP_PIXMAP_COPY_ROTATION = 0x02,
+	/** Copy image gamma. If not the resulting image has linear channes. */
+	GP_PIXMAP_COPY_GAMMA = 0x04,
 };
 
 /**
@@ -310,6 +312,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *src, gp_pixmap *subpixmap,
  */
 gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *src,
                                gp_coord x, gp_coord y, gp_size w, gp_size h);
+
 
 /*
  * Converts pixmap to a different pixel type.

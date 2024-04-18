@@ -5,7 +5,7 @@
  * Copyright (C) 2011-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_pixel.h>
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_gamma_correction.h>
@@ -29,25 +29,6 @@
 @         end
 \
 	GP_PIXEL_CREATE_{{ pt.name }}({{ ', '.join(pt.chan_names) }}); \
-})
-
-/*
- * Mixes two {{ pt.name }} pixels.
- *
- * The percentage is expected as 8 bit unsigned integer [0 .. 255]
- */
-#define GP_MIX_PIXELS_GAMMA_{{ pt.name }}(pix1, pix2, perc) ({ \
-@         for c in pt.chanslist:
-	gp_pixel {{ c[0] }}; \
-\
-	{{ c[0] }}  = gp_gamma{{ c[2] }}_to_linear10(GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(pix1)) * (perc); \
-	{{ c[0] }} += gp_gamma{{ c[2] }}_to_linear10(GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(pix2)) * (255 - (perc)); \
-	{{ c[0] }} = ({{ c[0] }} + 128) / 255; \
-	{{ c[0] }} = gp_linear10_to_gamma{{ c[2] }}({{ c[0] }}); \
-\
-@         end
-\
-	GP_PIXEL_CREATE_{{ pt.name }}({{ ", ".join(pt.chan_names) }}); \
 })
 
 #define GP_MIX_PIXELS_{{ pt.name }}(pix1, pix2, perc) \

@@ -185,7 +185,7 @@ gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, enum gp_pixmap_copy_flags flags)
 
 	new->pixels = pixels;
 
-	if (flags & GP_COPY_WITH_PIXELS)
+	if (flags & GP_PIXMAP_COPY_PIXELS)
 		memcpy(pixels, src->pixels, src->bytes_per_row * src->h);
 
 	new->bytes_per_row = src->bytes_per_row;
@@ -196,12 +196,15 @@ gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, enum gp_pixmap_copy_flags flags)
 
 	new->pixel_type = src->pixel_type;
 
-	if (flags & GP_COPY_WITH_ROTATION)
+	if (flags & GP_PIXMAP_COPY_ROTATION)
 		gp_pixmap_rotation_copy(src, new);
 	else
 		gp_pixmap_rotation_set(new, 0, 0, 0);
 
-	new->gamma = gp_gamma_incref(src->gamma);
+	if (flags & GP_PIXMAP_COPY_GAMMA)
+		new->gamma = gp_gamma_incref(src->gamma);
+	else
+		new->gamma = NULL;
 
 	new->free_pixels = 1;
 

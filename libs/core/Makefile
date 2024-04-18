@@ -2,7 +2,7 @@ TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
 GENSOURCES=gp_pixel.gen.c gp_blit.gen.c gp_convert.gen.c \
-           gp_gamma_correction.gen.c gp_fill.gen.c
+           gp_srgb_correction.gen.c gp_fill.gen.c
 
 ALL_SOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 

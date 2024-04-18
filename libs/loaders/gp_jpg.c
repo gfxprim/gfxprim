@@ -322,10 +322,19 @@ int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
 	ret = gp_pixmap_alloc(cinfo.image_width, cinfo.image_height,
 			      pixel_type);
 
-	if (ret == NULL) {
+	if (!ret) {
 		GP_DEBUG(1, "Malloc failed :(");
 		err = ENOMEM;
 		goto err1;
+	}
+
+	switch (pixel_type) {
+	case GP_PIXEL_BGR888:
+	case GP_PIXEL_G8:
+		gp_pixmap_gamma_set(ret, GP_CORRECTION_TYPE_SRGB, 0);
+	break;
+	default:
+	break;
 	}
 
 	jpeg_start_decompress(&cinfo);

@@ -7,7 +7,8 @@
 
 @ include arithmetic_filter.t
 @
-@ def filter_op(chan_name, chan_size):
+@ def filter_op(chan_name, chan_max):
+(void) {{ chan_max }};
 {{ chan_name }} = GP_ABS({{ chan_name }}_A - {{ chan_name }}_B);
 @ end
 @

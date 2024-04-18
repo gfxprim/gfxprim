@@ -693,7 +693,7 @@ int gp_read_bmp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 
 	pixmap = gp_pixmap_alloc(header.w, GP_ABS(header.h), pixel_type);
 
-	if (pixmap == NULL) {
+	if (!pixmap) {
 		err = ENOMEM;
 		goto err1;
 	}
@@ -702,6 +702,8 @@ int gp_read_bmp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		goto err2;
 
 	*img = pixmap;
+
+	gp_pixmap_gamma_set(pixmap, GP_CORRECTION_TYPE_SRGB, 0);
 
 	return 0;
 err2:

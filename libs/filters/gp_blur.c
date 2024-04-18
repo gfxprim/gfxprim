@@ -23,7 +23,7 @@ static inline float gaussian_kernel_init(float sigma, float *kernel)
 {
 	int i, center = 3 * sigma;
 	int N = 2 * center + 1;
-	float ret = 0;
+	double ret = 0;
 
 	double sigma2 = sigma * sigma;
 
@@ -167,9 +167,9 @@ gp_pixmap *gp_filter_gaussian_blur_ex_alloc(const gp_pixmap *src,
 				             float x_sigma, float y_sigma,
                                              gp_progress_cb *callback)
 {
-	gp_pixmap *dst = gp_pixmap_alloc(w_src, h_src, src->pixel_type);
+	gp_pixmap *dst = gp_pixmap_copy(src, GP_PIXMAP_COPY_ROTATION | GP_PIXMAP_COPY_GAMMA);
 
-	if (dst == NULL)
+	if (!dst)
 		return NULL;
 
 	if (gp_filter_gaussian_blur_raw(src, x_src, y_src, w_src, h_src, dst,

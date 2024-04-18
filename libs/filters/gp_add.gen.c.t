@@ -9,9 +9,9 @@
 
 @ include arithmetic_filter.t
 @
-@ def filter_op(chan_name, chan_size):
+@ def filter_op(chan_name, chan_max):
 {{ chan_name }} = {{ chan_name }}_A + {{ chan_name }}_B;
-GP_CLAMP_GENERIC({{ chan_name }}, 0, {{ 2 ** chan_size - 1 }});
+GP_CLAMP({{ chan_name }}, 0, (int32_t){{ chan_max }});
 @ end
 @
 {@ filter_arithmetic('add', filter_op) @}

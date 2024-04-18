@@ -508,8 +508,6 @@ static int sigma_mean(gp_pixmap **c, const char *params)
 	if (rad_x < 0 || rad_y < 0)
 		return EINVAL;
 
-	(*c)->gamma = gp_gamma_acquire((*c)->pixel_type, GP_CORRECTION_GAMMA, 1.2);
-
 	gp_pixmap *ret = gp_filter_sigma_alloc(*c, rad_x, rad_y, min, sigma, progress_callback);
 
 	if (ret == NULL)

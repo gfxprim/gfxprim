@@ -11,41 +11,41 @@
 @     return ', '.join(res)
 @ end
 @
-@ def gamma_in_bits(size):
-@     if size + 2 > 8:
+@ def gamma_in_bits(c):
+@     if c.lin_size > 8:
 @         return 16
 @     else:
 @         return 8
 @ end
 @
-@ def gamma_out_bits(size):
-@     if size > 8:
+@ def gamma_out_bits(c):
+@     if c.size > 8:
 @         return 16
 @     else:
 @         return 8
 @ end
 @
-@ def fetch_gamma_tables(pt, ctx, pref="", suff=""):
-/* prepare Gamma tables */
+@ def fetch_gamma_lin(pt, pixmap, suffix=''):
 @     for c in pt.chanslist:
-uint{{ gamma_in_bits(c[2]) }}_t *{{ pref + c.name }}_2_LIN{{ suff }} = NULL;
+uint{{ gamma_in_bits(c) }}_t *{{ c.name + suffix}}_gamma_lin = GP_CHAN_TO_LIN_TBL_{{ pt.name }}_{{ c.name }}({{ pixmap }});
 @     end
-@     for c in pt.chanslist:
-uint{{ gamma_out_bits(c[2]) }}_t *{{ pref + c.name }}_2_GAMMA{{ suff }} = NULL;
-@     end
-
-if ({{ ctx }}->gamma) {
-@     i = 0
-@     for c in pt.chanslist:
-	{{ pref + c.name }}_2_LIN{{ suff }} = {{ ctx }}->gamma->lin[{{ i }}]->u{{ gamma_in_bits(c[2]) }};
-@         i = i + 1
-@     i = 0
-@     for c in pt.chanslist:
-	{{ pref + c.name }}_2_GAMMA{{ suff }} = {{ ctx }}->gamma->enc[{{ i }}]->u{{ gamma_out_bits(c[2]) }};
-@         i = i + 1
-@     end
-}
+@ end
 @
+@ def fetch_gamma_enc(pt, pixmap, suffix=''):
+@     for c in pt.chanslist:
+uint{{ gamma_out_bits(c) }}_t *{{ c.name + suffix}}_gamma_enc = GP_CHAN_TO_ENC_TBL_{{ pt.name }}_{{ c.name }}({{ pixmap }});
+@     end
+@ end
+@
+@ def fetch_chan_lin_max(pt, pixmap):
+@     for c in pt.chanslist:
+gp_pixel {{ c.name }}_lin_max = GP_CHAN_LIN_MAX_VAL_{{ pt.name }}_{{ c.name }}({{ pixmap }});
+@     end
+@ end
+@
+@ def chan_lin_max(c):
+{{ c.name }}_lin_max
+@ end
 @ def maybe_opts_r(opts):
 @     if (opts):
 @         return str(opts) + ','

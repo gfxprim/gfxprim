@@ -549,6 +549,8 @@ static int psd_load_rle_rgb(gp_io *rle_io, gp_pixmap *res,
 	unsigned int chans = res->pixel_type == GP_PIXEL_RGB888 ? 3 : 4;
 	uint8_t b[res->w], *bp;
 
+	gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+
 	for (c = 0; c < chans; c++) {
 		switch (c) {
 		case 0:

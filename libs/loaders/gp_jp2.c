@@ -220,6 +220,8 @@ int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_storage *storage,
 		goto err3;
 	}
 
+	gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+
 	for (y = 0; y < res->h; y++) {
 		for (x = 0; x < res->w; x++) {
 			i = y * res->w + x;

@@ -18,7 +18,7 @@
 for (x = 0; x < src->w; x++) {
 	gp_pixel pix = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x, {{ y }});
 @     for c in pt.chanslist:
-	{{ c.name }}[x] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
+	{{ c.name }}[x] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix, {{ c.name }}_gamma_lin);
 @     end
 }
 @ end
@@ -68,6 +68,9 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 	const int DIV=1<<9;
 @         end
 
+	{@ fetch_gamma_lin(pt, "src") @}
+	{@ fetch_gamma_enc(pt, "dst") @}
+
 	/* Pre-compute mapping for interpolation */
 	for (i = 0; i <= dst->w; i++) {
 		xmap[i] = ((uint64_t)i * src->w) / dst->w;
@@ -114,7 +117,8 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 			uint32_t {{ c.name }}_p = ({{ c.name }}_res[x] + div/2) / div;
 @         end
                         gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y,
-				GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, '', '_p') }}));
+				GP_PIXEL_CREATE_{{ pt.name }}_ENC({{ arr_to_params(pt.chan_names, '', '_p') }},
+					{{ arr_to_params(pt.chan_names, '', '_gamma_enc') }}));
 		}
 
 		if (gp_progress_cb_report(callback, y, dst->h, dst->w))
@@ -137,6 +141,9 @@ static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 	uint8_t  xoff[dst->w + 1];
 	uint8_t  yoff[dst->h + 1];
 	uint32_t x, y, i;
+
+	{@ fetch_gamma_lin(pt, "src") @}
+	{@ fetch_gamma_enc(pt, "dst") @}
 
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
 	            src->w, src->h, dst->w, dst->h,
@@ -186,19 +193,19 @@ static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 			pix11 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x1, y1);
 
 @         for c in pt.chanslist:
-			{{ c.name }}0 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix00) * (255 - xoff[x]);
+			{{ c.name }}0 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix00, {{ c.name }}_gamma_lin) * (255 - xoff[x]);
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }}0 += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix10) * xoff[x];
+			{{ c.name }}0 += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix10, {{ c.name }}_gamma_lin) * xoff[x];
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }}1 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix01) * (255 - xoff[x]);
+			{{ c.name }}1 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix01, {{ c.name }}_gamma_lin) * (255 - xoff[x]);
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }}1 += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix11) * xoff[x];
+			{{ c.name }}1 += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix11, {{ c.name }}_gamma_lin) * xoff[x];
 @         end
 
 @         for c in pt.chanslist:
@@ -206,7 +213,7 @@ static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 @         end
 
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y,
-			                      GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }}));
+			                      GP_PIXEL_CREATE_{{ pt.name }}_ENC({{ arr_to_params(pt.chan_names) }}, {{ arr_to_params(pt.chan_names, '', '_gamma_enc') }}));
 		}
 
 		if (gp_progress_cb_report(callback, y, dst->h, dst->w))

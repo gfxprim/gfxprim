@@ -7,11 +7,17 @@
 #include <filters/gp_arithmetic.h>
 
 @     for pt in pixeltypes:
-@         if not pt.is_unknown():
+@         if not pt.is_unknown() and not pt.is_palette():
 static int filter_{{ name }}_{{ pt.name }}(const gp_pixmap *src_a, const gp_pixmap *src_b,
 	gp_pixmap *dst, {{ maybe_opts_r(opts) }}gp_progress_cb *callback)
 {
 	uint32_t x, y, w, h;
+
+	{@ fetch_gamma_lin(pt, 'src_a', '_a') @}
+	{@ fetch_gamma_lin(pt, 'src_b', '_b') @}
+	{@ fetch_gamma_enc(pt, 'dst') @}
+
+	{@ fetch_chan_lin_max(pt, 'src_a') @}
 
 	w = GP_MIN(src_a->w, src_b->w);
 	h = GP_MIN(src_a->h, src_b->h);
@@ -22,17 +28,19 @@ static int filter_{{ name }}_{{ pt.name }}(const gp_pixmap *src_a, const gp_pixm
 			gp_pixel pix_b = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src_b, x, y);
 
 @             for c in pt.chanslist:
-			int32_t {{ c.name }}_A = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix_a);
-			int32_t {{ c.name }}_B = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix_b);
+			int32_t {{ c.name }}_A = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix_a, {{ c.name }}_a_gamma_lin);
+			int32_t {{ c.name }}_B = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix_b, {{ c.name }}_b_gamma_lin);
 @             end
 
 @             for c in pt.chanslist:
 			int32_t {{ c.name }};
-			{@ filter_op(c.name, c.size) @}
+			{@ filter_op(c.name, c.name + '_lin_max') @}
 @             end
 
 			gp_pixel pix;
-			pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }});
+			pix = GP_PIXEL_CREATE_{{ pt.name }}_ENC(
+				{{ arr_to_params(pt.chan_names) }},
+				{{ arr_to_params(pt.chan_names, '', '_gamma_enc') }});
 
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y, pix);
 		}
@@ -54,7 +62,7 @@ int gp_filter_{{ name }}_raw(const gp_pixmap *src_a, const gp_pixmap *src_b,
 
 	switch (src_a->pixel_type) {
 @     for pt in pixeltypes:
-@         if not pt.is_unknown():
+@         if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
 		return filter_{{ name }}_{{ pt.name }}(src_a, src_b, dst{{ maybe_opts_l(params) }}, callback);
 @     end

@@ -9,8 +9,8 @@ import re
 from pixelpack import PixelPack
 
 class PixelChannel(list):
-  def __init__(self, triplet, idx):
-    (name, offset, size) = triplet
+  def __init__(self, quadruplet, idx):
+    (name, offset, size, gamma_shift) = quadruplet
     # Create the list -> backward compatibility with triplets
     self.append(name)
     self.append(offset)
@@ -21,12 +21,17 @@ class PixelChannel(list):
     self.name = name
     self.off = offset
     self.size = size
+    self.lin_size = size + gamma_shift
     # Shift ready to used in C
     self.C_shift = " << " + hex(offset)
     # Maximal channel value as an integer
     self.max = 2 ** size - 1
     # Maximal value as a C string
     self.C_max = hex(self.max)
+    # Maximal linearized channel value as an integer
+    self.lin_max = 2 ** (size + gamma_shift) - 1
+    # Maximal linearized channel value as a C string
+    self.C_lin_max = hex(self.lin_max)
     # Chanel bitmask as int
     self.mask = self.max * (2 ** offset)
     # Channel bitmas as hex string
@@ -40,10 +45,12 @@ class PixelType(object):
   def __init__(self, name, pixelpack, chanslist):
     """`name` must be a valid C identifier
     `pixelpack` is an instance of PixelPack
-    `chanslist` is a list of triplets describing individual channels as
-      [ (`chan_name`, `bit_offset`, `bit_size`) ]
+    `chanslist` is a list of quadruplets describing individual channels as
+      [ (`chan_name`, `bit_offset`, `bit_size`, `gamma_shift`) ]
       where `chan_name` is usually one of: R, G, B,
       V (value, used for grayscale), A (opacity)
+      The gamma_shift says how many bits will a channel size grow when linearized
+      with a gamma function.
     """
     assert re.match('\A[A-Za-z][A-Za-z0-9_]*\Z', name)
     self.name = name

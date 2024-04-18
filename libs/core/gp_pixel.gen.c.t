@@ -43,7 +43,7 @@ const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX] = {
 		.flags       = {{ getflags(pt) }},
 		.channels    = {
 @     for c in pt.chanslist:
-			{ .name = "{{ c[0] }}", .offset = {{ c[1] }}, .size = {{ c[2] }} },
+			{.name = "{{ c.name }}", .offset = {{ c.off }}, .size = {{ c.size }}, .lin_size = {{ c.lin_size }}},
 @     end
 		}
 	},

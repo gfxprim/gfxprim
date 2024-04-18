@@ -24,6 +24,7 @@
 #define GP_PIXEL_BITS (sizeof(gp_pixel) * 8)
 
 #include <core/gp_pixel.gen.h>
+#include <core/gp_pixel_channel.gen.h>
 #include <core/gp_pixel_alias.h>
 #include <core/gp_get_set_bits.h>
 
@@ -47,6 +48,12 @@ typedef struct gp_pixel_channel {
 	uint8_t offset;
 	/** Channel size in bits */
 	uint8_t size;
+	/**
+	 * Channel size after linearized with a gamma lookup table.
+	 *
+	 * If size == lin_size the channel is always linear.
+	 */
+	uint8_t lin_size;
 } gp_pixel_channel;
 
 /**
@@ -116,29 +123,82 @@ static inline uint32_t gp_pixel_size(gp_pixel_type type)
 	return gp_pixel_types[type].size;
 }
 
+/**
+ * @brief Returns a pixel type description for a pixel type enum.
+ *
+ * @param type A pixel type.
+ * @return A pixel type description structure.
+ */
 static inline const gp_pixel_type_desc *gp_pixel_desc(gp_pixel_type type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
 	return &gp_pixel_types[type];
 }
 
+/**
+ * @brief Returns a numbers of pixel channels.
+ *
+ * @param type A pixel type.
+ * @return A number of pixel channels.
+ */
 static inline unsigned int gp_pixel_channel_count(gp_pixel_type type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
 	return gp_pixel_types[type].numchannels;
 }
 
+/**
+ * @brief Returns number of bits for a pixel channel.
+ *
+ * @param type A pixel type.
+ * @param channel A channel index.
+ * @return Number of bits the channel uses.
+ */
 static inline uint8_t gp_pixel_channel_bits(gp_pixel_type type, uint8_t channel)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
 	return gp_pixel_types[type].channels[channel].size;
 }
 
+/**
+ * @brief Returns number of bits for a linearized pixel channel.
+ *
+ * @param type A pixel type.
+ * @param channel A channel index.
+ * @return Number of bits the channel uses after linearized with a gamma function.
+ */
+static inline uint8_t gp_pixel_channel_lin_bits(gp_pixel_type type, uint8_t channel)
+{
+	GP_CHECK_VALID_PIXELTYPE(type);
+	return gp_pixel_types[type].channels[channel].lin_size;
+}
+
+/**
+ * @brief Returns number of bits for a pixel channel.
+ *
+ * @param type A pixel type.
+ * @param channel A channel index.
+ * @return Number of bits the channel uses.
+ */
 static inline const char *gp_pixel_channel_name(gp_pixel_type type,
                                                 uint8_t channel)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
 	return gp_pixel_types[type].channels[channel].name;
+}
+
+/**
+ * @brief Returns true if pixel channel is alpha channel.
+ *
+ * @param type A pixel type.
+ * @param channel A channel index.
+ * @return True if channel is alpha channel.
+ */
+static inline int gp_pixel_channel_is_alpha(gp_pixel_type type,
+                                            uint8_t channel)
+{
+	GP_CHECK_VALID_PIXELTYPE(type);
+	return gp_pixel_types[type].channels[channel].name[0] == 'A';
 }
 
 /*

@@ -541,6 +541,9 @@ int gp_read_pcx_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	if ((err = read_image(io, &header, res, callback)))
 		goto err1;
 
+	if (res->pixel_type != GP_PIXEL_G1)
+		gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+
 	gp_progress_cb_done(callback);
 
 	*img = res;

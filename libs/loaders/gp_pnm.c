@@ -831,6 +831,9 @@ static int read_graymap(struct buf *buf, struct pnm_header *header,
 		goto err1;
 	}
 
+	if (pixel_type != GP_PIXEL_G1)
+		gp_pixmap_gamma_set(ret, GP_CORRECTION_TYPE_SRGB, 0);
+
 	if (header->magic == '5')
 		err = load_bin_graymap(buf, header, ret, callback);
 	else
@@ -952,6 +955,8 @@ static int read_pixmap(struct buf *buf, struct pnm_header *header,
 		err = ENOMEM;
 		goto err0;
 	}
+
+	gp_pixmap_gamma_set(ret, GP_CORRECTION_TYPE_SRGB, 0);
 
 	switch (header->magic) {
 	case '3':

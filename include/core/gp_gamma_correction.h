@@ -30,6 +30,10 @@
  * you need to generate sequence of numbers accordingly to gamma function
  * (the 50% intensity is around 186 for gamma = 2.2 and 8bit grayscale pixel).
  *
+ * For pixel types with transparency only the color channels are nonlinear, the
+ * alpha channel is always linear and defines fractions of the channel values
+ * that should be used to get the desired transparency.
+ *
  * Moreover image formats tend to save data in nonlinear fashion (some formats
  * include gamma value used to for the image) so before you apply filter that
  * manipulates with pixel values, you need to convert it to linear space (adding
@@ -92,9 +96,9 @@
  */
 typedef enum gp_correction_type {
 	/** @brief Classical gamma correction */
-	GP_CORRECTION_GAMMA,
-	/** @brief Standard RGB - gamma = 2.2 linearized near zero */
-	GP_CORRECTION_SRGB,
+	GP_CORRECTION_TYPE_GAMMA,
+	/** @brief Standard RGB */
+	GP_CORRECTION_TYPE_SRGB,
 } gp_correction_type;
 
 /**
@@ -102,7 +106,7 @@ typedef enum gp_correction_type {
  */
 typedef struct gp_gamma_table {
 	/** @brief Correction type */
-	gp_correction_type type;
+	gp_correction_type corr_type;
 	/** @brief Gamma for GP_CORRECTION_GAMMA */
 	float gamma;
 
@@ -117,7 +121,13 @@ typedef struct gp_gamma_table {
 
 	/** @brief Lookup table */
 	union {
+		/**
+		 * @brief 8-bit lookup table pointer
+		 */
 		uint8_t u8[0];
+		/**
+		 * @brief 16-bit lookup table pointer
+		 */
 		uint16_t u16[0];
 	};
 } gp_gamma_table;
@@ -194,5 +204,32 @@ const char *gp_correction_type_name(gp_correction_type type);
  * @param self A gamma table.
  */
 void gp_gamma_print(const gp_gamma *self);
+
+
+/* Generated sRGB lookup tables */
+extern uint16_t gp_srgb8_to_lin10_tbl[256];
+extern uint8_t gp_lin10_to_srgb8_tbl[1024];
+
+/**
+ * @brief Converts 16 bit linear value to 8 bit sRGB.
+ *
+ * @param val A linear 16 bit value.
+ * @return A sRGB 8 bit value.
+ */
+static inline uint8_t gp_lin16_to_srgb8(uint16_t val)
+{
+	return gp_lin10_to_srgb8_tbl[(val + (1<<3))>>6];
+}
+
+/**
+ * @brief Converts 8 bit sRGB to 16 bit linear value.
+ *
+ * @param val A 8 bit sRGB value.
+ * @return A 16 bit linear value.
+ */
+static inline uint16_t gp_srgb8_to_lin16(uint8_t val)
+{
+	return gp_srgb8_to_lin10_tbl[val]<<6;
+}
 
 #endif /* CORE_GP_GAMMA_CORRECTION_H */
