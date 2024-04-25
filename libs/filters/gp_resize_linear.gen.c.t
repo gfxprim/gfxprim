@@ -59,14 +59,8 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 @         end
 	uint32_t x, y;
 	uint32_t i, j;
-@ # Reduce fixed point bits for > 8 bits per channel (fixed 16 bit Grayscale)
-@         if pt.chanslist[0].size > 8:
 	const int MULT=1<<10;
 	const int DIV=1<<6;
-@         else:
-	const int MULT=1<<14;
-	const int DIV=1<<9;
-@         end
 
 	{@ fetch_gamma_lin(pt, "src") @}
 	{@ fetch_gamma_enc(pt, "dst") @}
