@@ -143,7 +143,7 @@ int gp_read_ico_ex(gp_io *io, gp_pixmap **img,
 		return 1;
 	}
 
-	gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+	gp_pixmap_srgb_set(res);
 
 	if (gp_bmp_read_pixels(io, &header, res, callback)) {
 		gp_pixmap_free(res);

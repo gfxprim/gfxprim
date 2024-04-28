@@ -153,13 +153,66 @@ gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type);
  * with a new table.
  *
  * @param self A pixmap.
- * @param corr_type A correction type.
- * @param gamma If applicable the correction gamma.
+ * @param corr_desc A correction description.
  *
  * @return Zero on success. May fail if underlying malloc() has failed.
  */
-int gp_pixmap_gamma_set(gp_pixmap *self, gp_correction_type corr_type,
-                        float gamma);
+int gp_pixmap_correction_set(gp_pixmap *self, gp_correction_desc *corr_desc);
+
+/**
+ * @brief Sets a gamma correction for the pixmap.
+ * @ingroup pixmap
+ *
+ * This is a shorthand for:
+ * @code
+ * gp_correction_desc desc = {
+ *         .corr_type = GP_CORRECTION_TYPE_GAMMA,
+ *         .gamma = gamma;
+ * };
+ *
+ * gp_pixmap_correction_set(self, &desc);
+ * @endcode
+ *
+ * @param self A pixmap.
+ * @param gamma A gamma value.
+ *
+ * @return Zero on success. May fail if underlying malloc() has failed.
+ */
+static inline int gp_pixmap_gamma_set(gp_pixmap *self, float gamma)
+{
+	gp_correction_desc desc = {
+		.corr_type = GP_CORRECTION_TYPE_GAMMA,
+		.gamma = gamma,
+	};
+
+	return gp_pixmap_correction_set(self, &desc);
+}
+
+/**
+ * @brief Sets a sRGB correction for the pixmap.
+ * @ingroup pixmap
+ *
+ * This is a shorthand for:
+ * @code
+ * gp_correction_desc desc = {
+ *         .corr_type = GP_CORRECTION_TYPE_SRGB,
+ * };
+ *
+ * gp_pixmap_correction_set(self, &desc);
+ * @endcode
+ *
+ * @param self A pixmap.
+ *
+ * @return Zero on success. May fail if underlying malloc() has failed.
+ */
+static inline int gp_pixmap_srgb_set(gp_pixmap *self)
+{
+	gp_correction_desc desc = {
+		.corr_type = GP_CORRECTION_TYPE_SRGB,
+	};
+
+	return gp_pixmap_correction_set(self, &desc);
+}
 
 /**
  * @brief Frees a pixmap.

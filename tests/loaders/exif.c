@@ -19,6 +19,7 @@ static int test_load_Exif(struct testcase *test)
 {
 	gp_storage *data = gp_storage_create();
 	gp_io *io;
+	gp_correction_desc corr;
 	int ret = TST_PASSED;
 
 	if (!data) {
@@ -34,7 +35,7 @@ static int test_load_Exif(struct testcase *test)
 		return TST_UNTESTED;
 	}
 
-	if (gp_read_exif(io, data)) {
+	if (gp_read_exif(io, data, &corr)) {
 		tst_msg("Failed to load Exif");
 		ret = TST_FAILED;
 		goto end;

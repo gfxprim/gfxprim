@@ -441,6 +441,9 @@ const char *gp_data_type_name(enum gp_data_type type)
 gp_data_node *gp_storage_add_int(gp_storage *self, gp_data_node *node,
                                  const char *id, long i)
 {
+	if (!self)
+		return NULL;
+
 	gp_data_node data = {
 		.type = GP_DATA_INT,
 		.id = id,
@@ -453,6 +456,9 @@ gp_data_node *gp_storage_add_int(gp_storage *self, gp_data_node *node,
 gp_data_node *gp_storage_add_string(gp_storage *self, gp_data_node *node,
                                     const char *id, const char *str)
 {
+	if (!self)
+		return NULL;
+
 	gp_data_node data = {
 		.type = GP_DATA_STRING,
 		.id = id,
@@ -465,6 +471,9 @@ gp_data_node *gp_storage_add_string(gp_storage *self, gp_data_node *node,
 gp_data_node *gp_storage_add_double(gp_storage *self, gp_data_node *node,
                                     const char *id, double d)
 {
+	if (!self)
+		return NULL;
+
 	gp_data_node data = {
 		.type = GP_DATA_DOUBLE,
 		.id = id,
@@ -477,6 +486,9 @@ gp_data_node *gp_storage_add_double(gp_storage *self, gp_data_node *node,
 gp_data_node *gp_storage_add_rational(gp_storage *self, gp_data_node *node,
                                       const char *id, long num, long den)
 {
+	if (!self)
+		return NULL;
+
 	gp_data_node data = {
 		.type = GP_DATA_RATIONAL,
 		.id = id,
@@ -489,6 +501,9 @@ gp_data_node *gp_storage_add_rational(gp_storage *self, gp_data_node *node,
 gp_data_node *gp_storage_add_dict(gp_storage *self, gp_data_node *node,
                                   const char *id)
 {
+	if (!self)
+		return NULL;
+
 	gp_data_node data = {
 		.type = GP_DATA_DICT,
 		.id = id,

@@ -200,14 +200,14 @@ static void ref_table(gp_gamma_table *table)
 	         table->in_bits, table->out_bits, table->gamma);
 }
 
-gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type,
-                           gp_correction_type corr_type, float gamma)
+gp_gamma *gp_correction_acquire(gp_pixel_type pixel_type,
+                                gp_correction_desc *desc)
 {
 	GP_CHECK_VALID_PIXELTYPE(pixel_type);
 	int channels = gp_pixel_types[pixel_type].numchannels, i;
-	float inv_gamma;
+	float inv_gamma, gamma = desc->gamma;
 
-	switch (corr_type) {
+	switch (desc->corr_type) {
 	case GP_CORRECTION_TYPE_GAMMA:
 		gamma = roundf(gamma * 1000) / 1000;
 		inv_gamma = 1/gamma;
@@ -217,13 +217,13 @@ gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type,
 		inv_gamma = 0;
 	break;
 	default:
-		GP_WARN("Invalid correction type %i", corr_type);
+		GP_WARN("Invalid correction type %i", desc->corr_type);
 		return NULL;
 	};
 
 
 	GP_DEBUG(1, "Acquiring %s correction table for %s gamma %f",
-		 gp_correction_type_name(corr_type),
+		 gp_correction_type_name(desc->corr_type),
 	         gp_pixel_type_name(pixel_type), gamma);
 
 	gp_gamma *res = malloc(sizeof(struct gp_gamma));
@@ -248,8 +248,8 @@ gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type,
 		if (chan_size == chan_lin_size)
 			continue;
 
-		res->lin[i] = get_table(corr_type, gamma, chan_size, chan_lin_size);
-		res->enc[i] = get_table(corr_type, inv_gamma, chan_lin_size, chan_size);
+		res->lin[i] = get_table(desc->corr_type, gamma, chan_size, chan_lin_size);
+		res->enc[i] = get_table(desc->corr_type, inv_gamma, chan_lin_size, chan_size);
 
 		if (!res->lin[i] || !res->enc[i]) {
 			gp_gamma_decref(res);

@@ -180,15 +180,17 @@ static int load_rat(gp_io *io, gp_storage *storage, gp_data_node *node,
 }
 
 static int load_tag(gp_io *io, gp_storage *storage,
-                    gp_data_node* node, const struct IFD_tags *taglist,
+                    gp_data_node* node, gp_correction_desc *correction,
+		    const struct IFD_tags *taglist,
 		    int endian, uint16_t tag, uint16_t format,
                     uint32_t num_comp, uint32_t val)
 {
 	const struct IFD_tag *res = IFD_tag_get(taglist, tag);
+	int used = 0;
 
 	if (res == NULL) {
-		GP_TODO("Skipping unknown IFD tag 0x%02x %s cnt %u in %s block",
-		        tag, IFD_format_name(format), num_comp, taglist->id);
+	//	GP_TODO("Skipping unknown IFD tag 0x%02x %s cnt %u in %s block",
+	//	        tag, IFD_format_name(format), num_comp, taglist->id);
 		return 0;
 	}
 
@@ -209,22 +211,24 @@ static int load_tag(gp_io *io, gp_storage *storage,
 	switch (format) {
 	case IFD_ASCII_STRING:
 		if (load_string(io, storage, node, res->name, num_comp, &val))
-			return 1;
+			used = 1;
 	break;
-	case IFD_SIGNED_LONG:
-	case IFD_UNSIGNED_LONG:
-	case IFD_SIGNED_SHORT:
+	case IFD_UNSIGNED_BYTE:
+	case IFD_SIGNED_BYTE:
 	case IFD_UNSIGNED_SHORT:
-		if (num_comp == 1)
+	case IFD_SIGNED_SHORT:
+	case IFD_UNSIGNED_LONG:
+	case IFD_SIGNED_LONG:
+		if (num_comp == 1) {
 			gp_storage_add_int(storage, node, res->name, val);
-		else
-			goto unused;
+			used = 1;
+		}
 	break;
 
 	case IFD_UNSIGNED_RATIONAL:
 	case IFD_SIGNED_RATIONAL:
 		if (load_rat(io, storage, node, res->name, num_comp, val))
-			return 1;
+			used = 1;
 	break;
 	case IFD_UNDEFINED:
 		switch (res->tag) {
@@ -232,21 +236,48 @@ static int load_tag(gp_io *io, gp_storage *storage,
 		case IFD_FLASH_PIX_VERSION:
 		case IFD_MAKER_NOTE:
 		case IFD_INTEROP_VERSION:
+		case IFD_USER_COMMENT:
 			if (load_string(io, storage, node, res->name, num_comp, &val))
-				return 1;
+				used = 1;
 		break;
 		default:
-			goto unused;
+		break;
 		}
 	break;
+	}
 
-	unused:
+	switch (res->tag) {
+	case IFD_COLOR_SPACE:
+		switch (val) {
+		case GP_EXIF_COLOR_SPACE_SRGB:
+			correction->corr_type = GP_CORRECTION_TYPE_SRGB;
+		break;
+		case GP_EXIF_COLOR_SPACE_UNDEFINED:
+		break;
+		default:
+			GP_WARN("Invalid Exif ColorSpace value %u\n", (unsigned int)val);
+		break;
+		}
+	break;
+	case IFD_IMAGE_GAMMA:
+		if (correction->corr_type != GP_CORRECTION_TYPE_SRGB) {
+			gp_data_node *gamma = gp_storage_get(storage, node, res->name);
+
+			if (gamma && gamma->type == GP_DATA_RATIONAL) {
+				correction->corr_type = GP_CORRECTION_TYPE_GAMMA;
+				correction->gamma = 1.00 * gamma->value.rat.num / gamma->value.rat.den;
+			}
+		}
+	break;
 	default:
+	}
+
+	if (!used) {
 		GP_TODO("Unused record '%s' format '%s' (0x%02x)", res->name,
 			IFD_format_name(format), format);
 	}
 
-	return 0;
+	return used;
 }
 
 struct IFD_subrecord {
@@ -255,15 +286,18 @@ struct IFD_subrecord {
 };
 
 static int load_IFD(gp_io *io, gp_storage *storage, gp_data_node *node,
-                    const struct IFD_tags *taglist, uint32_t IFD_offset,
+                    gp_correction_desc *correction,
+		    const struct IFD_tags *taglist, uint32_t IFD_offset,
                     int endian)
 {
 	uint16_t IFD_entries_count;
 	uint16_t i2 = endian == 'I' ? GP_IO_L2 : GP_IO_B2;
 	unsigned int i;
 
+	/* Offset is counted from the II or MM in the Exif header */
+	gp_io_seek(io, IFD_offset+6, GP_SEEK_SET);
+
 	uint16_t IFD_header[] = {
-		GP_IO_IGN | IFD_offset,
 		i2,
 		GP_IO_END,
 	};
@@ -286,7 +320,7 @@ static int load_IFD(gp_io *io, gp_storage *storage, gp_data_node *node,
 
 	uint16_t *IFD_rec_head = endian == 'I' ? IFD_record_LE : IFD_record_BE;
 
-	if (gp_io_readf(io, IFD_header, &IFD_entries_count) != 2) {
+	if (gp_io_readf(io, IFD_header, &IFD_entries_count) != 1) {
 		GP_DEBUG(1, "Failed to read IFD entries count");
 		return 1;
 	}
@@ -325,7 +359,8 @@ static int load_IFD(gp_io *io, gp_storage *storage, gp_data_node *node,
 			subrec_cnt++;
 		break;
 		default:
-			load_tag(io, storage, node, taglist, endian, tag, format, num_comp, val);
+			load_tag(io, storage, node, correction,
+			         taglist, endian, tag, format, num_comp, val);
 		break;
 		}
 	}
@@ -356,17 +391,15 @@ static int load_IFD(gp_io *io, gp_storage *storage, gp_data_node *node,
 			return 1;
 		}
 
-		/* Offset is counted from the II or MM in the Exif header */
 		if (subrecs[i].offset + 6 < cur_off)
 			GP_DEBUG(1, "Negative offset!");
-
-		load_IFD(io, storage, new_node, tags, subrecs[i].offset + 6 - cur_off, endian);
+		load_IFD(io, storage, new_node, correction, tags, subrecs[i].offset, endian);
 	}
 
 	return 0;
 }
 
-int gp_read_exif(gp_io *io, gp_storage *storage)
+int gp_read_exif(gp_io *io, gp_storage *storage, gp_correction_desc *correction)
 {
 	char b1, b2;
 	uint32_t IFD_offset;
@@ -378,7 +411,7 @@ int gp_read_exif(gp_io *io, gp_storage *storage)
 	};
 
 	if (gp_io_readf(io, exif_header, &b1, &b2, &IFD_offset) != 8) {
-		GP_DEBUG(1, "Failed to read Exif header");
+		GP_WARN("Failed to read Exif header");
 		return 1;
 	}
 
@@ -420,5 +453,5 @@ int gp_read_exif(gp_io *io, gp_storage *storage)
 	gp_data_node *exif_root = gp_storage_add_dict(storage, NULL, "Exif");
 
 	/* The offset starts from the II or MM */
-	return load_IFD(io, storage, exif_root, &IFD_EXIF_tags, IFD_offset - 8, b1);
+	return load_IFD(io, storage, exif_root, correction, &IFD_EXIF_tags, IFD_offset, b1);
 }

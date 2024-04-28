@@ -93,12 +93,11 @@ gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type)
 	return pixmap;
 }
 
-int gp_pixmap_gamma_set(gp_pixmap *self, gp_correction_type corr_type,
-                        float gamma)
+int gp_pixmap_correction_set(gp_pixmap *self, gp_correction_desc *corr_desc)
 {
 	gp_gamma *old_gamma = self->gamma;
 
-	self->gamma = gp_gamma_acquire(self->pixel_type, corr_type, gamma);
+	self->gamma = gp_correction_acquire(self->pixel_type, corr_desc);
 
 	gp_gamma_decref(old_gamma);
 

@@ -102,6 +102,16 @@ typedef enum gp_correction_type {
 } gp_correction_type;
 
 /**
+ * @brief A correction description.
+ */
+typedef struct gp_correction_desc {
+	/** @brief Correction type */
+	gp_correction_type corr_type;
+	/** @brief gamma for GP_CORRECTION_TYPE_GAMMA */
+	float gamma;
+} gp_correction_desc;
+
+/**
  * @brief A lookup gamma table.
  */
 typedef struct gp_gamma_table {
@@ -154,20 +164,15 @@ typedef struct gp_gamma {
 } gp_gamma;
 
 /**
- * @brief Acquires a gamma tables for a given pixel type, correction type and
- *        a gamma value.
- * @ingroup gamma_correction
- *
- * For a GP_CORRECTION_SRGB the gamma value is ignored.
+ * @brief Acquires a gamma, sRGB, ... correction tables for a given pixel type.
  *
  * @param pixel_type A pixel type to build the tables for
- * @param corr_type A correction type.
- * @param gamma A gamma value, rounded to three decimal places internally.
+ * @param corr_desc A correction description.
  *
- * @return A gamma correction tables.
+ * @return Correction tables.
  */
-gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type,
-                           gp_correction_type corr_type, float gamma);
+gp_gamma *gp_correction_acquire(gp_pixel_type pixel_type,
+                                gp_correction_desc *corr_desc);
 
 /**
  * @brief Increases reference counters.
@@ -204,7 +209,6 @@ const char *gp_correction_type_name(gp_correction_type type);
  * @param self A gamma table.
  */
 void gp_gamma_print(const gp_gamma *self);
-
 
 /* Generated sRGB lookup tables */
 extern uint16_t gp_srgb8_to_lin10_tbl[256];

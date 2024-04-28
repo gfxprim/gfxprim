@@ -206,7 +206,7 @@ static inline void init_source_mgr(struct my_source_mgr *src, gp_io *io,
 #define JPEG_COM_MAX 128
 
 static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
-                              gp_storage *storage)
+                              gp_storage *storage, gp_correction_desc *corr_desc)
 {
 	jpeg_saved_marker_ptr marker;
 
@@ -233,14 +233,26 @@ static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
 			GP_TODO("JFIF");
 		break;
 		case JPEG_APP0 + 1: {
+			/*
+			 * Make sure we parse only Exif and not Adobe XMP that
+			 * reuses the same marker.
+			 */
+			if (marker->data[0] != 'E' || marker->data[1] != 'x' ||
+			    marker->data[2] != 'i' || marker->data[3] != 'f')
+				continue;
+
 			gp_io *io = gp_io_mem(marker->data, marker->data_length, NULL);
 			if (!io) {
 				GP_WARN("Failed to create MemIO");
-				return;
+			} else {
+				gp_read_exif(io, storage, corr_desc);
+				gp_io_close(io);
 			}
-			gp_read_exif(io, storage);
-			gp_io_close(io);
-		} break;
+		}
+		break;
+		case JPEG_APP0 + 2:
+			GP_TODO("ICC Profile");
+		break;
 		}
 	}
 }
@@ -251,10 +263,13 @@ static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
 	jpeg_save_markers(cinfo, JPEG_COM, JPEG_COM_MAX);
 
 	/* APP0 marker = JFIF data */
-	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
+	jpeg_save_markers(cinfo, JPEG_APP0, 0xffff);
 
 	/* APP1 marker = Exif data */
 	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
+
+	/* APP2 marker = ICC profile */
+	jpeg_save_markers(cinfo, JPEG_APP0 + 2, 0xffff);
 }
 
 int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
@@ -264,6 +279,7 @@ int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
 	struct my_source_mgr src;
 	struct my_jpg_err my_err;
 	gp_pixmap *ret = NULL;
+	gp_correction_desc corr_desc = {.corr_type = -1};
 	uint8_t buf[1024];
 	int err;
 
@@ -279,8 +295,7 @@ int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
 	init_source_mgr(&src, io, buf, sizeof(buf));
 	cinfo.src = (void*)&src;
 
-	if (storage)
-		save_jpg_markers(&cinfo);
+	save_jpg_markers(&cinfo);
 
 	jpeg_read_header(&cinfo, TRUE);
 
@@ -289,9 +304,7 @@ int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
 	            cinfo.image_width, cinfo.image_height,
 		    cinfo.num_components);
 
-	//TODO: Propagate failure?
-	if (storage)
-		read_jpg_metadata(&cinfo, storage);
+	read_jpg_metadata(&cinfo, storage, &corr_desc);
 
 	if (!img)
 		goto exit;
@@ -331,7 +344,10 @@ int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
 	switch (pixel_type) {
 	case GP_PIXEL_BGR888:
 	case GP_PIXEL_G8:
-		gp_pixmap_gamma_set(ret, GP_CORRECTION_TYPE_SRGB, 0);
+		if (corr_desc.corr_type == -1)
+			corr_desc.corr_type = GP_CORRECTION_TYPE_SRGB;
+
+		gp_pixmap_correction_set(ret, &corr_desc);
 	break;
 	default:
 	break;

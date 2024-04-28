@@ -216,7 +216,7 @@ static int read_convert_bitmap(gp_pixmap *res, gp_progress_cb *callback,
 
 	/* Convert 16 bit linear samples to sRBG */
 	if (!has_srgb && !has_gamma)
-		gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+		gp_pixmap_srgb_set(res);
 
 	unsigned int y;
 
@@ -414,9 +414,9 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	}
 
 	if (has_srgb)
-		gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+		gp_pixmap_srgb_set(res);
 	else if (has_gamma)
-		gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_GAMMA, 1 / gamma);
+		gp_pixmap_gamma_set(res, 1 / gamma);
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 	/*

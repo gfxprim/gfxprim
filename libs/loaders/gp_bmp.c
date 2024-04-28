@@ -703,7 +703,7 @@ int gp_read_bmp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 
 	*img = pixmap;
 
-	gp_pixmap_gamma_set(pixmap, GP_CORRECTION_TYPE_SRGB, 0);
+	gp_pixmap_srgb_set(pixmap);
 
 	return 0;
 err2:

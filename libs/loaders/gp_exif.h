@@ -157,6 +157,9 @@ enum IFD_EXIF_tags {
 	/* Unique in hex string */
 	IFD_IMAGE_UNIQUE_ID = 0xa420,
 
+	/* Rational */
+	IFD_IMAGE_GAMMA = 0xa500,
+
 	/* ??? */
 	IFD_PRINT_IM = 0xc4a5,
 
@@ -255,6 +258,8 @@ static const struct IFD_tag IFD_EXIF_taglist[] = {
 	{IFD_SHARPNESS, "Sharpness", IFD_UNSIGNED_SHORT, 1},
 	{IFD_SUBJECT_DISTANCE_RANGE, "Subject Distance Range", IFD_UNSIGNED_SHORT, 1},
 	{IFD_IMAGE_UNIQUE_ID, "Image Unique ID", IFD_ASCII_STRING, 33},
+	{IFD_IMAGE_GAMMA, "Image gamma", IFD_UNSIGNED_RATIONAL, 1},
+
 	{IFD_PRINT_IM, "Print IM", IFD_UNDEFINED, 0},
 	{IFD_PADDING, "Padding", IFD_UNDEFINED, 0},
 	{IFD_OFFSET_SCHEMA, "Offset Schema", IFD_SIGNED_LONG, 1},
