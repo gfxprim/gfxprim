@@ -59,7 +59,7 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 @         end
 	uint32_t x, y;
 	uint32_t i, j;
-	const int MULT=1<<10;
+	const int MULT=1<<12;
 	const int DIV=1<<6;
 
 	{@ fetch_gamma_lin(pt, "src") @}
@@ -108,7 +108,7 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 
 		for (x = 0; x < dst->w; x++) {
 @         for c in pt.chanslist:
-			uint32_t {{ c.name }}_p = ({{ c.name }}_res[x] + div/2) / div;
+			uint32_t {{ c.name }}_p = ({{ c.name }}_res[x]) / div;
 @         end
                         gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y,
 				GP_PIXEL_CREATE_{{ pt.name }}_ENC({{ arr_to_params(pt.chan_names, '', '_p') }},
