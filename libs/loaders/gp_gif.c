@@ -139,7 +139,7 @@ static inline GifColorType *get_color_from_map(ColorMapObject *map, int idx)
 {
 	if (map->ColorCount <= idx) {
 		GP_DEBUG(1, "Invalid colormap index %i (%i max)",
-		         map->ColorCount, idx);
+		         idx, map->ColorCount);
 		return map->Colors;
 	}
 
@@ -150,13 +150,13 @@ static inline gp_pixel get_color(GifFileType *gf, uint32_t idx)
 {
 	GifColorType *color;
 
-	if (gf->SColorMap) {
-		color = get_color_from_map(gf->SColorMap, idx);
+	if (gf->Image.ColorMap) {
+		color = get_color_from_map(gf->Image.ColorMap, idx);
 		return GP_PIXEL_CREATE_RGB888(color->Red, color->Green, color->Blue);
 	}
 
-	if (gf->Image.ColorMap) {
-		color = get_color_from_map(gf->Image.ColorMap, idx);
+	if (gf->SColorMap) {
+		color = get_color_from_map(gf->SColorMap, idx);
 		return GP_PIXEL_CREATE_RGB888(color->Red, color->Green, color->Blue);
 	}
 
@@ -283,7 +283,7 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 		if (DGifGetImageDesc(gf) != GIF_OK) {
 			//TODO: error handling
 			GP_DEBUG(1, "DGifGetImageDesc() error %s (%i)",
-			         gif_err_name(gif_err(gf)), gif_err(gf)); 
+			         gif_err_name(gif_err(gf)), gif_err(gf));
 			err = EIO;
 			goto err1;
 		}
