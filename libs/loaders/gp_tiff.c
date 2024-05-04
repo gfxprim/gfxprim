@@ -204,6 +204,8 @@ static void fill_metadata(TIFF *tiff, struct tiff_header *header,
 	int flag;
 	uint16_t s;
 	float f;
+	void *data;
+	uint32_t data_len;
 	gp_data_node val;
 
 	gp_storage_add_int(storage, NULL, "Width", header->w);
@@ -277,10 +279,10 @@ static gp_pixel_type match_grayscale_pixel_type(TIFF *tiff,
 
 static gp_pixel_type match_rgb_pixel_type(TIFF *tiff, struct tiff_header *header)
 {
-	uint16_t samples;
+	uint16_t samples, extra, *extra_samples;
 
 	if (!TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &samples)) {
-		GP_DEBUG(1, "Failed to get Samples Per Pixel");
+		GP_WARN("Failed to get Samples Per Pixel");
 		return EINVAL;
 	}
 
@@ -293,6 +295,23 @@ static gp_pixel_type match_rgb_pixel_type(TIFF *tiff, struct tiff_header *header
 		return gp_pixel_rgb_lookup(bps, 0, bps, bps, bps, 2 * bps, 0,
 					   0, 3 * bps);
 
+	if (samples == 4) {
+		if (!TIFFGetField(tiff, TIFFTAG_EXTRASAMPLES, &extra, &extra_samples)) {
+			GP_WARN("Failed to get Extra Samples");
+			return EINVAL;
+		}
+
+		GP_DEBUG(1, "Extra Samples cnt=%u, val[0]=%u",
+		         (unsigned int)extra, (unsigned int)extra_samples[0]);
+
+		if (extra != 1 || extra_samples[0] != EXTRASAMPLE_ASSOCALPHA) {
+			GP_DEBUG(1, "Unimplemented extra samples scheme");
+			return ENOSYS;
+		}
+
+		return GP_PIXEL_RGBA8888;
+	}
+
 	GP_DEBUG(1, "Unsupported");
 	return GP_PIXEL_UNKNOWN;
 }
@@ -302,8 +321,10 @@ static gp_pixel_type match_pixel_type(TIFF *tiff, struct tiff_header *header)
 	if (!TIFFGetField(tiff, TIFFTAG_PHOTOMETRIC, &header->photometric))
 		return GP_PIXEL_UNKNOWN;
 
-	GP_DEBUG(1, "Have photometric %s",
+	GP_DEBUG(2, "Have photometric %s",
 	         photometric_name(header->photometric));
+
+	uint16_t inkset = 0;
 
 	switch (header->photometric) {
 	/* 1-bit or 4, 8-bit grayscale */
@@ -315,6 +336,14 @@ static gp_pixel_type match_pixel_type(TIFF *tiff, struct tiff_header *header)
 	/* The palete is RGB161616 map it to BGR888 for now */
 	case PHOTOMETRIC_PALETTE:
 		return GP_PIXEL_RGB888;
+	case PHOTOMETRIC_SEPARATED:
+		TIFFGetFieldDefaulted(tiff, TIFFTAG_INKSET, &inkset);
+
+		GP_DEBUG(3, "Tiff tag inkset=%u", (unsigned int)inkset);
+
+		if (inkset == INKSET_CMYK && header->bits_per_sample == 8)
+			return GP_PIXEL_CMYK8888;
+	/* fallthrough */
 	default:
 		GP_DEBUG(1, "Unimplemented photometric interpretation %u",
 		         (unsigned) header->photometric);
@@ -464,6 +493,14 @@ static int tiff_read(TIFF *tiff, gp_pixmap *res, struct tiff_header *header,
 			if (header->photometric == PHOTOMETRIC_MINISWHITE)
 				for (i = 0; i < res->bytes_per_row; i++)
 					addr[i] = ~addr[i];
+
+			/* Fix ARGB vs RGBA */
+			if (res->pixel_type == GP_PIXEL_RGBA8888) {
+				for (i = 0; i < res->bytes_per_row/4; i++) {
+					GP_SWAP(addr[4*i], addr[4*i+3]);
+					GP_SWAP(addr[4*i+1], addr[4*i+2]);
+				}
+			}
 		}
 
 		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
@@ -558,7 +595,7 @@ int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		goto err1;
 	}
 
-	if (res->pixel_type != GP_PIXEL_G1)
+	if (res->pixel_type != GP_PIXEL_G1 && res->pixel_type != GP_PIXEL_CMYK8888)
 		gp_pixmap_srgb_set(res);
 
 	if (TIFFScanlineSize(tiff) > res->bytes_per_row) {
@@ -570,6 +607,9 @@ int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	switch (header.photometric) {
 	case PHOTOMETRIC_PALETTE:
 		err = tiff_read_palette(tiff, res, &header, callback);
+	break;
+	case PHOTOMETRIC_SEPARATED:
+		err = tiff_read(tiff, res, &header, callback);
 	break;
 	default:
 		err = tiff_read(tiff, res, &header, callback);
