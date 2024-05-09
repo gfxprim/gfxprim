@@ -137,7 +137,7 @@ static int open_proc_mounts(void)
 	return fd;
 }
 
-static int proc_mounts_event(gp_fd *self)
+static enum gp_poll_event_ret proc_mounts_event(gp_fd *self)
 {
 	gp_widget *layout, *old_layout;
 

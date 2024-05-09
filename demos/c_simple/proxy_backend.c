@@ -215,7 +215,7 @@ to_cli:
 	return 0;
 }
 
-static int client_event(gp_fd *self)
+static enum gp_poll_event_ret client_event(gp_fd *self)
 {
 	if (gp_proxy_cli_read(self->priv, &cli_ops)) {
 		gp_backend_poll_rem(backend, self);
@@ -250,7 +250,7 @@ err0:
 	return 1;
 }
 
-static int server_event(gp_fd *self)
+static enum gp_poll_event_ret server_event(gp_fd *self)
 {
 	int fd;
 
