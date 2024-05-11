@@ -3,19 +3,24 @@
  * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_dpi.h
+ * @brief DPI calculation and conversions.
+ */
+
 #ifndef BACKENDS_GP_DPI_H
 #define BACKENDS_GP_DPI_H
 
 #include <core/gp_debug.h>
 
 /**
- * Calculates DPI from display physical size and resolution.
+ * @brief Calculates DPI from display physical size and resolution.
  *
- * @w Width in pixels.
- * @w_mm Width in mm.
- * @h Height in pixels.
- * @h_mm Height in mm.
- * @return DPI
+ * @param w Width in pixels.
+ * @param w_mm Width in mm.
+ * @param h Height in pixels.
+ * @param h_mm Height in mm.
+ * @return An average DPI.
  */
 static inline unsigned int gp_dpi_from_size(unsigned int w, unsigned int w_mm,
                                             unsigned int h, unsigned int h_mm)
@@ -28,9 +33,9 @@ static inline unsigned int gp_dpi_from_size(unsigned int w, unsigned int w_mm,
 }
 
 /**
- * Converts DPI to dots/pixels per mm.
+ * @brief Converts DPI to dots/pixels per mm.
  *
- * @dpi A DPI usually backend->dpi.
+ * @param dpi A DPI usually backend->dpi.
  * @return A PPMM a number of pixels per mm.
  */
 static inline float gp_dpi_to_ppmm(unsigned int dpi)
@@ -39,10 +44,11 @@ static inline float gp_dpi_to_ppmm(unsigned int dpi)
 }
 
 /**
- * Converts milimeters to pixels.
+ * @brief Converts milimeters to pixels.
  *
- * @mm Size in milimeters.
- * @return Size in pixels.
+ * @param dpi A DPI usually backend->dpi.
+ * @param mm Size in milimeters.
+ * @return Size in pixels rounded to whole pixels.
  */
 static inline gp_size gp_dpi_mm_to_px(unsigned int dpi, float mm)
 {

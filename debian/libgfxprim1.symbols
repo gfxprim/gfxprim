@@ -2,7 +2,6 @@ libgfxprim-backends.so.1 libgfxprim1 #MINVER#
  gp_aalib_init@Base 1.0.0-1
  gp_backend_add_timer@Base 1.0.0-1
  gp_backend_init@Base 1.0.0-1
- gp_backend_is_x11@Base 1.0.0-1
  gp_backend_poll@Base 1.0.0-1
  gp_backend_poll_event@Base 1.0.0-1
  gp_backend_rem_timer@Base 1.0.0-1

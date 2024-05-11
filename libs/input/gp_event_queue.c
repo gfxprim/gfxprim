@@ -14,7 +14,7 @@
 
 void gp_ev_queue_init(gp_ev_queue *self,
                       unsigned int screen_w, unsigned int screen_h,
-                      unsigned int queue_size, int flags)
+                      unsigned int queue_size, enum gp_ev_queue_flags flags)
 {
 	self->screen_w = screen_w;
 	self->screen_h = screen_h;
@@ -321,12 +321,12 @@ void gp_ev_queue_push_utf(gp_ev_queue *self, uint32_t utf_ch,
 }
 
 void gp_ev_queue_push_resize(gp_ev_queue *self,
-                             uint32_t w, uint32_t h, uint64_t time)
+                             uint32_t new_w, uint32_t new_h, uint64_t time)
 {
 	gp_event ev = {
 		.type = GP_EV_SYS,
 		.code = GP_EV_SYS_RESIZE,
-		.sys = {.w = w, .h = h},
+		.sys = {.w = new_w, .h = new_h},
 	};
 
 	set_time(&ev, time);

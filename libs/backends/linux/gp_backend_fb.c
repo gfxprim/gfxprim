@@ -338,7 +338,7 @@ static void fb_update_rect_shadow(gp_backend *self, gp_coord x0, gp_coord y0,
 	}
 }
 
-gp_backend *gp_linux_fb_init(const char *path, int flags)
+gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 {
 	gp_backend *backend;
 	struct fb_priv *fb;

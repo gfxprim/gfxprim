@@ -3,45 +3,49 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef BACKENDS_GP_FRAMEBUFFER_H
-#define BACKENDS_GP_FRAMEBUFFER_H
+/**
+ * @file gp_linux_fb.h
+ * @brief A Linux framebuffer backend.
+ */
+#ifndef BACKENDS_GP_LINUX_FB_H
+#define BACKENDS_GP_LINUX_FB_H
 
 #include <backends/gp_backend.h>
 
+/** @brief Linux framebuffer init flags. */
 enum gp_linux_fb_flags {
-	/*
-	 * Use KBD to get input events
+	/**
+	 * @brief Use KBD to get input events.
+	 *
+	 * Does not support anything but very basic keyboard use
+	 * GP_FB_INPUT_LINUX instead.
 	 */
 	GP_FB_INPUT_KBD = 0x01,
-	/*
-	 * Use shadow framebuffer for drawing.
+	/**
+	 * @brief Use shadow framebuffer for drawing.
+	 *
+	 * Should be enabled unless you are on a very memory constrained hardware.
 	 */
 	GP_FB_SHADOW = 0x02,
-	/*
-	 * Allocate new console, if not set current is used.
+	/**
+	 * @brief Allocate new console, if not set current is used.
 	 */
 	GP_FB_ALLOC_CON = 0x04,
-	/*
-	 * Use Linux input
+	/**
+	 * @brief Use Linux input for keyboards and mouse.
 	 *
-	 * Cannot be enabled together with KBD!
+	 * This is the modern alternative to KBD.
 	 */
 	GP_FB_INPUT_LINUX = 0x08,
 };
 
-/*
- * Initalize framebuffer.
+/**
+ * @brief Linux framebuffer backend initialization.
  *
- * The path should point to framebuffer device eg. "/dev/fb0" for first
- * framebuffer device.
- *
- * The gp_backend structure is allocated and returned, the resources are
- * deinitalized and the structure is freed by backed->Exit(backend); call.
- *
- * Upon failure NULL is returned.
- *
- * If flag is set, the konsole kbd is used to push events into event queue.
+ * @param path A path to a framebuffer device, e.g. "/dev/fb0" for first framebuffer.
+ * @param flags A bitwise combination of framebuffer init flags.
+ * @return A newly allocated and initialized backend or NULL in a case of a failure.
  */
-gp_backend *gp_linux_fb_init(const char *path, int flags);
+gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags);
 
-#endif /* BACKENDS_GP_FRAMEBUFFER_H */
+#endif /* BACKENDS_GP_LINUX_FB_H */

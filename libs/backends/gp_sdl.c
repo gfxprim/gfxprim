@@ -286,8 +286,8 @@ static void sdl_exit(struct gp_backend *self __attribute__((unused)))
 	backend.pixmap = NULL;
 }
 
-gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
-                        const char *caption)
+gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp,
+                        enum gp_sdl_flags flags, const char *caption)
 {
 	/* SDL was already initalized */
 	if (backend.pixmap != NULL)
@@ -381,12 +381,12 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
 
 #else
 
-#include <backends/gp_backend.h>
+#include <backends/gp_sdl.h>
 
 gp_backend *gp_sdl_init(gp_size w __attribute__((unused)),
                         gp_size h __attribute__((unused)),
                         uint8_t bpp __attribute__((unused)),
-                        uint8_t flags __attribute__((unused)),
+                        enum gp_sdl_flags flags __attribute__((unused)),
                         const char *caption __attribute__((unused)))
 {
 	GP_FATAL("Neither of SDL or SDL2 support not compiled in.");

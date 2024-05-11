@@ -3,10 +3,17 @@
  * Copyright (C) 2009-2022 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_event_keys.h
+ * @brief Key event values.
+ */
+
 #ifndef INPUT_GP_EVENT_KEYS_H
 #define INPUT_GP_EVENT_KEYS_H
 
-/*
+/**
+ * @brief A key event values.
+ *
  * This is 1:1 to linux kernel input subsystem.
  */
 enum gp_event_key_value {

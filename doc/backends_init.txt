@@ -153,21 +153,6 @@ the other hand, has its own input queue.
 
 TIP: See multiple windows link:example_x11_windows.html[example].
 
-[source,c]
--------------------------------------------------------------------------------
-#include <gfxprim.h>
-/* or */
-#include <backends/gp_x11.h>
-
-/*
- * Returns non-zero if backend is X11 backend
- */
-int gp_backend_is_x11(gp_backend *self);
--------------------------------------------------------------------------------
-
-The 'gp_backend_is_x11()' returns non-zero if backend is X11 backend, zero
-otherwise.
-
 [[Wayland]]
 Wayland
 -------

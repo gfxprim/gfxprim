@@ -725,8 +725,3 @@ gp_backend *gp_x11_init(const char *GP_UNUSED(display),
 }
 
 #endif /* HAVE_LIBX11 */
-
-int gp_backend_is_x11(gp_backend *self)
-{
-	return !strcmp(self->name, "X11");
-}

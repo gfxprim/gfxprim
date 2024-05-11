@@ -3,11 +3,7 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
- /*
-
-   Simple backend example.
-
-  */
+ /* X11 example with two windows. */
 
 #include <stdio.h>
 #include <gfxprim.h>
@@ -81,7 +77,7 @@ int main(void)
 		return 1;
 	}
 
-	/* Update the backend screen */
+	/* Update the windows */
 	redraw(win_1->pixmap);
 	redraw(win_2->pixmap);
 

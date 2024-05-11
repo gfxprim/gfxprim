@@ -6,20 +6,18 @@
  * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
-
-  The gp_backend is overall structure for API for managing
-  connection/mmaped memory/... to xserver window/framebuffer/... .
-
-  In contrast to other graphics libraries we do not try to create unified
-  initalization interface that would match specialities for every possible
-  backend. Rather than that we are trying to create API that is the same
-  for all backends, once initalization is done.
-
-  So once you initalize, for example, framebuffer driver, the gp_backend
-  structure is returned, which then could be used with generic code for
-  backend drawing.
-
+/**
+ * @file gp_backend.h
+ * @brief An abstraction for display, keyboard and mouse.
+ *
+ * The gp_backend is unified API for managing xserver, framebuffer, waylaynd,
+ * drm, e-ink display, etc. along with support for input devices, e.g. mouse,
+ * keyboard and keymaps.
+ *
+ * In contrast to other graphics libraries we do not try to create unified
+ * initalization interface that would match specialities for every possible
+ * backend. Rather than that we are trying to create API that is the same
+ * for all backends, once initalization is done.
  */
 
 #ifndef BACKENDS_GP_BACKEND_H
@@ -45,36 +43,49 @@ enum gp_backend_attrs {
 	GP_BACKEND_FULLSCREEN,
 };
 
+/**
+ * @brief Cursor types.
+ */
 enum gp_backend_cursors {
-	/* Arrow default cursor type */
+	/** @brief Arrow default cursor type */
 	GP_BACKEND_CURSOR_ARROW,
-	/* Text edit cursor */
+	/** @brief Text edit cursor */
 	GP_BACKEND_CURSOR_TEXT_EDIT,
-	/* Crosshair */
+	/** @brief Crosshair */
 	GP_BACKEND_CURSOR_CROSSHAIR,
-	/* Used typicaly while howering over links */
+	/** @brief Used typicaly while howering over links */
 	GP_BACKEND_CURSOR_HAND,
-	/* Last cursor + 1 */
+	/** @brief Last cursor + 1 */
 	GP_BACKEND_CURSOR_MAX,
 
-	/* Shows cursor */
+	/** @brief Shows cursor */
 	GP_BACKEND_CURSOR_SHOW = 0xc000,
-	/* Hides cursor */
+	/** @brief Hides cursor */
 	GP_BACKEND_CURSOR_HIDE = 0x8000,
 };
 
+/**
+ * @brief A backend.
+ *
+ * This is the main structure that describes a backend API.
+ */
 struct gp_backend {
-	/*
-	 * Pointer to pixmap app should draw to.
+	/**
+	 * @brief Pointer to pixmap app should draw to.
+	 *
+	 * In most cases changes are not propagaged into display until
+	 * gp_backend_flip() or gp_backend_update_rect() is called.
 	 *
 	 * This MAY change upon a flip operation.
 	 */
 	gp_pixmap *pixmap;
 
-	/* Backend name */
+	/** @brief Backend name, e.g. "X11" */
 	const char *name;
 
-	/*
+	/**
+	 * @brief Updates display.
+	 *
 	 * If display is buffered, this copies content
 	 * of pixmap into display.
 	 *
@@ -82,8 +93,8 @@ struct gp_backend {
 	 */
 	void (*flip)(gp_backend *self);
 
-	/*
-	 * Updates display rectangle.
+	/**
+	 * @brief Updates display rectangle.
 	 *
 	 * In contrast to flip operation, the pixmap
 	 * must not change (this is intended for updating very small areas).
@@ -107,6 +118,8 @@ struct gp_backend {
 			const void *vals);
 
 	/**
+	 * @brief Sets cursor shape and/or hides and shows cursor.
+	 *
 	 * If non NULL backend can enable/disable/change cursor.
 	 */
 	int (*set_cursor)(gp_backend *self, enum gp_backend_cursors cursor);
@@ -118,13 +131,13 @@ struct gp_backend {
 	 */
 	int (*resize_ack)(gp_backend *self);
 
-	/*
-	 * Exits the backend.
+	/**
+	 * @brief Exits the backend.
 	 */
 	void (*exit)(gp_backend *self);
 
-	/*
-	 * Non-blocking event loop.
+	/**
+	 * @brief Non-blocking event loop.
 	 *
 	 * Backends that have a file descriptor does not set this function and
 	 * rather insert a file descriptor into the fds array.
@@ -136,8 +149,8 @@ struct gp_backend {
 	 */
 	int (*clipboard)(gp_backend *self, gp_clipboard *op);
 
-	/*
-	 * Blocking event loop. Blocks until events are ready.
+	/**
+	 * @brief Blocking event loop. Blocks until events are ready.
 	 *
 	 * Note that events received by a backend are not necessarily
 	 * translated to input events. So input queue may be empty
@@ -148,22 +161,22 @@ struct gp_backend {
 	 */
 	void (*wait)(gp_backend *self);
 
-	/* File descriptors to poll for */
+	/** @brief File descriptors to poll for. */
 	gp_poll fds;
 
-	/*
-	 * Queue to store input events.
-	 */
+	/* @brief Queue to store input events. */
 	gp_ev_queue *event_queue;
 
-	/* Priority queue for timers. */
+	/** @brief Priority queue for timers. */
 	gp_timer *timers;
 
-	/* Task queue */
+	/** @brief Task queue */
 	gp_task_queue *task_queue;
 
 	/**
-	 * List of input drivers feeding the ev_queue
+	 * @brief List of input drivers feeding the ev_queue
+	 *
+	 * A double linked list #gp_backend_input structures.
 	 *
 	 * The file descriptor has to be registered separatelly to the gp_fds.
 	 */
@@ -172,7 +185,7 @@ struct gp_backend {
 	void *clipboard_data;
 
 	/**
-	 * DPI if unknown it's set to 0.
+	 * @brief A backend DPI if unknown it's set to 0.
 	 */
 	unsigned int dpi;
 
@@ -182,16 +195,51 @@ struct gp_backend {
 
 #define GP_BACKEND_PRIV(backend) ((void*)(backend)->priv)
 
+/**
+ * @brief Copies whole backend pixmap to a display.
+ *
+ * Majority of the backends are double buffered, that means that changes done
+ * to gp_backend::pixmap are not propagated to the display memory buffer unless
+ * they are copied explicitly. This call copies the complete backend pixmap to
+ * the display.
+ *
+ * @param self A backend.
+ */
 static inline void gp_backend_flip(gp_backend *self)
 {
 	if (self->flip)
 		self->flip(self);
 }
 
+/**
+ * @brief Copies a rectangle from backend pixmap to a display.
+ *
+ * Majority of the backends are double buffered, that means that changes done
+ * to gp_backend::pixmap are not propagated to the display memory buffer unless
+ * they are copied explicitly. This call copies a rectanlge from backend pixmap
+ * to the display.
+ *
+ * @param self A backend.
+ * @param x0 First x coordinate of the rectangle.
+ * @param y0 First y coordinate of the rectangle.
+ * @param x1 Last x coordinate of the rectangle.
+ * @param y1 Last y coordinate of the rectangle.
+ */
 void gp_backend_update_rect_xyxy(gp_backend *self,
                                 gp_coord x0, gp_coord y0,
                                 gp_coord x1, gp_coord y1);
 
+/**
+ * @brief Copies a rectangle from backend pixmap to a display.
+ *
+ * This is an alias for gp_backend_update_rect_xyxy().
+ *
+ * @param self A backend.
+ * @param x0 First x coordinate of the rectangle.
+ * @param y0 First y coordinate of the rectangle.
+ * @param x1 Last x coordinate of the rectangle.
+ * @param y1 Last y coordinate of the rectangle.
+ */
 static inline void gp_backend_update_rect(gp_backend *self,
                                           gp_coord x0, gp_coord y0,
                                           gp_coord x1, gp_coord y1)
@@ -199,6 +247,17 @@ static inline void gp_backend_update_rect(gp_backend *self,
 	return gp_backend_update_rect_xyxy(self, x0, y0, x1, y1);
 }
 
+/**
+ * @brief Copies a rectangle from backend pixmap to a display.
+ *
+ * This is a version of gp_backend_update_rect_xyxy() with width and height.
+ *
+ * @param self A backend.
+ * @param x Left x coordinate of the rectangle.
+ * @param y Top y coordinate of the rectangle.
+ * @param w Rectangle width.
+ * @param h Rectangle height.
+ */
 static inline void gp_backend_update_rect_xywh(gp_backend *self,
                                                gp_coord x, gp_coord y,
                                                gp_size w, gp_size h)
@@ -229,6 +288,16 @@ static inline int gp_backend_cursor_set(gp_backend *self, enum gp_backend_cursor
 	return 1;
 }
 
+/**
+ * @brief Exits the backend.
+ *
+ * This functions deinitializes the backend. E.g. closes all file descriptors,
+ * frees memory, etc. It's important to call this before the application exits
+ * since some backends, e.g. framebuffer, cannot be recovered unless we return
+ * the underlying facility to the original state.
+ *
+ * @param self A backend.
+ */
 void gp_backend_exit(gp_backend *self);
 
 /*
@@ -322,16 +391,24 @@ static inline int gp_backend_fullscreen(gp_backend *backend, int val)
 	return backend->set_attr(backend, GP_BACKEND_FULLSCREEN, &val);
 }
 
-/*
- * Resize acknowledge. You must call this right after you application has
- * received resize event.
+/**
+ * @brief Resize acknowledge.
  *
- * This will resize backend buffers. After this call returns the backend width
- * height and pixmap pointer are most likely different.
+ * You must call this right after you application has received resize event.
+ * For a multithreaded application all threads that operate on the backend
+ * pixmap must be stopped first.
  *
- * This function returns zero on succes. Non zero on failure. If it fails the
- * best action to take is to save application data and exit (as the backend
- * may be in undefined state).
+ * After this call returns the backend pixmap has been resized, that means that
+ * at least the width, height, and pixels of gp_backend::pixmap are different
+ * and the content of the gp_pixmap::pixels is undefined.
+ *
+ * This call also resizes the windo/display/screen size in the #gp_ev_queue.
+ *
+ * If the function fails the best action to take is to save application data
+ * and exit as the backend may be in undefined state.
+ *
+ * @param self A backend.
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_backend_resize_ack(gp_backend *self);
 
@@ -341,16 +418,16 @@ int gp_backend_resize_ack(gp_backend *self);
  * Tasks are executed sequentionally and input processing is blocked during
  * task execution.
  *
- * @self A backend.
- * @task A task to be inserted into the task queue.
+ * @param self A backend.
+ * @param task A task to be inserted into the task queue.
  */
 void gp_backend_task_ins(gp_backend *self, gp_task *task);
 
 /**
  * @brief Removes a task from the task queue.
  *
- * @self A backend.
- * @task A task to be removed from the task queue.
+ * @param self A backend.
+ * @param task A task to be removed from the task queue.
  */
 void gp_backend_task_rem(gp_backend *self, gp_task *task);
 
@@ -361,8 +438,8 @@ void gp_backend_task_rem(gp_backend *self, gp_task *task);
  * require a task queue have to allocate and initialize the queue then pass it
  * to the backend with this function.
  *
- * @self A backend.
- * @task_queue A pointer to initialized task_queue.
+ * @param self A backend.
+ * @param task_queue A pointer to initialized task_queue.
  */
 void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue);
 
