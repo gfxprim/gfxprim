@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @file gp_widget.h
+ * @brief A widget implementation base.
+ */
+
 #ifndef GP_WIDGET_H
 #define GP_WIDGET_H
 
@@ -13,16 +18,19 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <core/gp_debug.h>
 #include <utils/gp_types.h>
 #include <widgets/gp_common.h>
 #include <widgets/gp_widget_types.h>
+#include <widgets/gp_widget_disable.h>
 
+/** @brief A widget base. */
 struct gp_widget {
 	/**
-	 * enum gp_widget_type
+	 * @brief A widget type enum #gp_widget_type.
 	 *
 	 * Widget type e.g. button or text box. The type is used to locate the
-	 * struct gp_widget_ops in a global widget ops table.
+	 * struct #gp_widget_ops in a global widget ops table.
 	 *
 	 * It's also used to assert that we are dealing with a correct widget
 	 * in the API functions, e.g. button functions check that the widget
@@ -30,7 +38,7 @@ struct gp_widget {
 	 */
 	unsigned int type;
 	/**
-	 * enum gp_widget_class
+	 * @brief A widget class enum #gp_widget_class.
 	 *
 	 * Widget classes define widgets with exacly same API but different UI
 	 * and implementation. E.g. GP_WIDGET_CLASS_CHOICE can be rendered as a
@@ -38,44 +46,49 @@ struct gp_widget {
 	 */
 	unsigned int widget_class;
 	/**
-	 * Parent widget in the widget tree.
+	 * @brief Parent widget in the widget tree.
 	 *
 	 * It's set to NULL unless widget has been inserted into a container
 	 * widget, e.g. grid, tabs, etc.
 	 */
 	gp_widget *parent;
 	/**
-	 * Widget event handler. This function handles input events such as
-	 * keystrokes or mouse movement.
-	 * @return Returns zero if event wasn't consumed by the widget and
-	 *         non-zero otherwise.
+	 * @brief An application event handler.
+	 *
+	 * This function is supplied by the application. All changes in widget
+	 * state are propagated to the application by this function.
 	 */
 	int (*on_event)(gp_widget_event *);
 
-	/*
-	 * User provided pointer to arbitrary data; useful for event handlers
-	 * and other user defined functions. The library will not access or
-	 * modify the memory pointed to by this.
+	/**
+	 * @brief A pointer to arbitrary application data.
+	 *
+	 * Useful for event handlers and other user defined functions. The
+	 * library will not access or modify the memory pointed to by this.
 	 */
 	void *priv;
 
-	/*
-	 * Relative offset to the parent widget.
+	/**
+	 * @brief A relative offset to the parent widget in pixels.
 	 */
 	unsigned int x, y;
 
-	/*
-	 * Current widget size.
+	/**
+	 * @brief Current widget size in pixels.
 	 */
 	unsigned int w, h;
 
-	/*
-	 * Cached widget minimal size.
+	/**
+	 * @brief Cached widget minimal size in pixel.
 	 */
 	unsigned int min_w, min_h;
 
+	/** @brief Widget alignment in parent container, enum #gp_widget_alignment. */
 	unsigned int align:16;
-	/*
+
+	/**
+	 * @brief Widget no-shrink flag.
+	 *
 	 * If set widget will not shrink, i.e. will be resized only when the
 	 * new minimal size is bigger than the previous one.
 	 *
@@ -83,8 +96,12 @@ struct gp_widget {
 	 */
 	unsigned int no_shrink:1;
 	unsigned int no_resize:1;
-	/*
-	 * If set the widget_ops_render() is called next time layout is repainted.
+
+	/**
+	 * @brief Internal widget repaint flag.
+	 *
+	 * This flag is used internally by the widget code to mark it to be
+	 * repainted.
 	 */
 	unsigned int redraw:1;
 	/*
@@ -96,22 +113,40 @@ struct gp_widget {
 	 * Redraw whole subtree, i.e. all children and their children, etc.
 	 */
 	unsigned int redraw_children:1;
+
+	/**
+	 * @brief Set if widget is focused.
+	 */
 	unsigned int focused:1;
 
-	/* Set by resize w and h functions cleared after event was emitted */
+	/**
+	 * @brief Internal widget resize flag.
+	 *
+	 * If set widget resize is schedulled before we attemp to repaint it.
+	 */
 	unsigned int resized:1;
 
-	/*
-	 * If set the widget cannot get focused and get events even if
-	 * ops->event is implemented.
+	/**
+	 * @brief Internal widget flag.
+	 *
+	 * If set the widget cannot get focused and will not process input
+	 * events even if ops->event is implemented.
 	 */
 	unsigned int no_events:1;
 
-	/*
+	/**
+	 * @brief Internal disabled flag.
+	 *
 	 * If set widget is 'grayed out' and no events are processed.
 	 */
 	unsigned int disabled:1;
 
+	/**
+	 * @brief A mask to enable and disable a widget events.
+	 *
+	 * This mask decides for which kind of enum #gp_widget_event_type will
+	 * be the gp_widget::on_event called.
+	 */
 	uint32_t event_mask;
 
 	union {
@@ -158,11 +193,17 @@ struct gp_widget {
 	char buf[];
 };
 
+/** @brief Widget types. */
 enum gp_widget_type {
+	/** @brief A container widget to create layout. */
 	GP_WIDGET_GRID,
+	/** @brief A tabs widget. */
 	GP_WIDGET_TABS,
+	/** @brief A button widget. */
 	GP_WIDGET_BUTTON,
+	/** @brief A checkbox widget. */
 	GP_WIDGET_CHECKBOX,
+	/** @brief A label widget. */
 	GP_WIDGET_LABEL,
 	GP_WIDGET_PROGRESSBAR,
 	GP_WIDGET_SPINNER,
@@ -183,44 +224,72 @@ enum gp_widget_type {
 	GP_WIDGET_MAX,
 };
 
+/** @brief Widget classes. */
 enum gp_widget_class {
+	/** @brief Widget has no class, most common case. */
 	GP_WIDGET_CLASS_NONE = 0,
+	/** @brief Boolean class, widget has two values, e.g. checkbox */
 	GP_WIDGET_CLASS_BOOL,
+	/** @brief An integer widget with minimum and maximun. */
 	GP_WIDGET_CLASS_INT,
+	/** @brief A widget to choose a single element from a set. */
 	GP_WIDGET_CLASS_CHOICE,
 	GP_WIDGET_CLASS_MAX,
 };
 
 /**
  * @brief Returns widget class name.
+ *
+ * @param widget_class A widget class.
+ *
+ * @return A widget class name.
  */
 const char *gp_widget_class_name(enum gp_widget_class widget_class);
 
+/**
+ * @brief A widget alignment.
+ *
+ * Defines how widget is aligned in the available space.
+ *
+ * The bottom half of the byte defines horizontal alignment, the top half vertical alignment.
+ *
+ * @image html grid.png
+ */
 enum gp_widget_alignment {
-	/** Default overridable alignment. */
-	GP_HCENTER_WEAK = 0x00,
+	/** @brief Center horizontally. */
 	GP_HCENTER = 0x01,
+	/** @brief Align to the left. */
 	GP_LEFT    = 0x02,
+	/** @brief Align to the right. */
 	GP_RIGHT   = 0x03,
+	/** @brief Fill available horizontal space, will strech the widget. */
 	GP_HFILL   = 0x08,
-	/** Default overridable alignment. */
-	GP_VCENTER_WEAK = 0x00,
+
+	/** @brief Center vertically. */
 	GP_VCENTER = 0x10,
+	/** @brief Align to the top. */
 	GP_TOP     = 0x20,
+	/** @brief Align to the bottom. */
 	GP_BOTTOM  = 0x30,
+	/** @brief Fill available vertical space, will strech the widget. */
 	GP_VFILL   = 0x80,
+
+	/** @brief Horizontal alignment mask. */
+	GP_HALIGN_MASK = 0x0f,
+	/** @brief Vertical alignment mask. */
+	GP_VALIGN_MASK = 0xf0,
+	/** @brief Shortcut for setting both hfill and vfill. */
+	GP_FILL = GP_VFILL | GP_HFILL,
+
+	GP_HCENTER_WEAK = 0x00,
+	GP_VCENTER_WEAK = 0x00,
 };
-
-#define GP_FILL (GP_VFILL | GP_HFILL)
-
-#define GP_HALIGN_MASK 0x0f
-#define GP_VALIGN_MASK 0xf0
 
 /**
  * @brief Internal function to allocate a widget.
  *
  * @param type A widget type.
- * @param class A widget class.
+ * @param widget_class A widget class.
  * @param payload_size A widet payload size.
  *
  * @return Newly allocated and initialized widget.
@@ -229,23 +298,53 @@ gp_widget *gp_widget_new(enum gp_widget_type type,
                          enum gp_widget_class widget_class,
                          size_t payload_size);
 
-#define GP_WIDGET_CLASS_ASSERT(self, wclass, ret) do {                  \
-		if (!self) {                                            \
-			GP_BUG("NULL widget!");                         \
-			return ret;                                     \
-		}                                                       \
-                if (self->widget_class != wclass) {                     \
-			GP_BUG("Invalid widget (%p) class %u != %u",    \
-			       self, self->widget_class, wclass);       \
-			return ret;                                     \
-		}                                                       \
-	} while (0)
-
-#define GP_WIDGET_ASSERT(self, wtype, ret) do { \
+/**
+ * @brief Asserts a non NULL widget.
+ *
+ * Prints a warning and exits current function when widget is NULL.
+ *
+ * @param self A widget.
+ * @param ret Value to be returned when assertion fails.
+ */
+#define GP_WIDGET_ASSERT(self, ret) do { \
 		if (!self) {\
 			GP_BUG("NULL widget!"); \
 			return ret; \
-		} else if (self->type != wtype) {\
+		} \
+	} while (0)
+
+/**
+ * @brief Asserts a widget class.
+ *
+ * Prints a warning and exits current function when widget class does not match
+ * expected class.
+ *
+ * @param self A widget.
+ * @param wclass A widget class, enum #gp_widget_class.
+ * @param ret Value to be returned when assertion fails.
+ */
+#define GP_WIDGET_CLASS_ASSERT(self, wclass, ret) do { \
+                GP_WIDGET_ASSERT(self, ret); \
+		if (self->widget_class != wclass) { \
+			GP_BUG("Invalid widget (%p) class %u != %u", \
+			       self, self->widget_class, wclass); \
+			return ret; \
+		} \
+	} while (0)
+
+/**
+ * @brief Asserts a widget type.
+ *
+ * Prints a warning and exits current function when widget type does not match
+ * expected type.
+ *
+ * @param self A widget.
+ * @param wtype A widget type, enum #gp_widget_type.
+ * @param ret Value to be returned when assertion fails.
+ */
+#define GP_WIDGET_TYPE_ASSERT(self, wtype, ret) do { \
+		GP_WIDGET_ASSERT(self, ret); \
+		if (self->type != wtype) {\
 			GP_BUG("Invalid widget type %s != %s", \
 				gp_widget_type_id(self), gp_widget_type_name(wtype)); \
 			return ret; \
@@ -283,49 +382,6 @@ void gp_widget_set_parent(gp_widget *self, gp_widget *parent);
  * @return Zero if focus couldn't be changed, non-zero otherwise.
  */
 int gp_widget_focus_set(gp_widget *self);
-
-/**
- * @brief Disables widget and all its subwidgets.
- *
- * A disabled widget does not process any input events and is "grayed out".
- *
- * @param self A widget to disable.
- */
-void gp_widget_disable(gp_widget *self);
-
-/**
- * @brief Enables widget and all its subwidgets.
- *
- * Enables a widget that has been disabled previously.
- *
- * @param self A widget to enable.
- */
-void gp_widget_enable(gp_widget *self);
-
-/**
- * @brief Sets disabled/enabled widget state.
- *
- * A disabled widget does not process any input events and is "grayed out".
- *
- * @param self A widget.
- * @param disable True to disable widget false to enable it.
- */
-void gp_widget_disable_set(gp_widget *self, bool disable);
-
-/**
- * @brief Returns true if widget is disabled.
- *
- * Note that this function returns true only if particular widget is disabled
- * explicitly. It will return false for child widgets that are disabled because
- * of parent widgets have been disabled.
- *
- * @param self A widget.
- * @return True if widget is disabled.
- */
-static inline bool gp_widget_disabled(gp_widget *self)
-{
-	return self->disabled;
-}
 
 /**
  * @brief Sets widget event handler.

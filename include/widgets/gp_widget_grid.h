@@ -77,7 +77,8 @@ struct gp_widget_grid {
  *
  * @return A widget grid.
  */
-gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows, int flags);
+gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows,
+                              enum gp_widget_grid_flags flags);
 
 /**
  * @brief Puts a child widget into a frame widget.

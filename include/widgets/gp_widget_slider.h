@@ -2,10 +2,17 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
+/**
+ * @file gp_widget_slider.h
+ * @brief A slider widget.
+ *
+ * Slider is an integer class widget, after it's created it's changed by the
+ * class functions such as gp_widget_int_val_set().
+ */
 #ifndef GP_WIDGET_SLIDER_H
 #define GP_WIDGET_SLIDER_H
 

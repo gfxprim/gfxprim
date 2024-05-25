@@ -100,7 +100,7 @@ void gp_widget_label_vprintf(gp_widget *self, const char *fmt, va_list ap);
  */
 static inline void gp_widget_label_tattr_set(gp_widget *self, gp_widget_tattr tattr)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_LABEL, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LABEL, );
 
 	self->label->tattr = tattr;
 

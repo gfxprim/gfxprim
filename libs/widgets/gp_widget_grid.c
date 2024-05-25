@@ -1284,7 +1284,8 @@ static void init_cols(struct gp_widget_grid *grid, unsigned int col, unsigned in
 		grid->col_s[i].fill = 1;
 }
 
-gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows, int flags)
+gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows,
+                              enum gp_widget_grid_flags flags)
 {
 	gp_widget *ret;
 
@@ -1345,7 +1346,7 @@ gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int ro
 	if (!child)
 		return gp_widget_grid_rem(self, col, row);
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, NULL);
 
 	if (assert_col_row(self, col, row))
 		return NULL;
@@ -1362,7 +1363,7 @@ gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int ro
 
 void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int rows)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	struct gp_widget_grid *g = self->grid;
 
@@ -1385,7 +1386,7 @@ void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int row
 
 unsigned int gp_widget_grid_rows_append(gp_widget *self, unsigned int rows)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, (unsigned int)-1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, (unsigned int)-1);
 
 	unsigned int ret = self->grid->rows;
 
@@ -1396,14 +1397,14 @@ unsigned int gp_widget_grid_rows_append(gp_widget *self, unsigned int rows)
 
 void gp_widget_grid_rows_prepend(gp_widget *self, unsigned int rows)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	gp_widget_grid_rows_ins(self, 0, rows);
 }
 
 void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int rows)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	size_t r, c;
 	struct gp_widget_grid *g = self->grid;
@@ -1437,7 +1438,7 @@ void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int row
 
 void gp_widget_grid_cols_ins(gp_widget *self, unsigned int col, unsigned int cols)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	struct gp_widget_grid *g = self->grid;
 
@@ -1460,7 +1461,7 @@ void gp_widget_grid_cols_ins(gp_widget *self, unsigned int col, unsigned int col
 
 unsigned int gp_widget_grid_cols_append(gp_widget *self, unsigned int cols)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, (unsigned int)-1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, (unsigned int)-1);
 
 	unsigned int ret = self->grid->cols;
 
@@ -1471,14 +1472,14 @@ unsigned int gp_widget_grid_cols_append(gp_widget *self, unsigned int cols)
 
 void gp_widget_grid_cols_prepend(gp_widget *self, unsigned int cols)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	gp_widget_grid_cols_ins(self, 0, cols);
 }
 
 void gp_widget_grid_cols_del(gp_widget *self, unsigned int col, unsigned int cols)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	size_t r, c;
 	struct gp_widget_grid *g = self->grid;
@@ -1514,7 +1515,7 @@ gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int ro
 {
 	gp_widget *ret;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, NULL);
 
 	if (assert_col_row(self, col, row))
 		return NULL;
@@ -1537,7 +1538,7 @@ gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int ro
 
 gp_widget *gp_widget_grid_get(gp_widget *self, unsigned int col, unsigned int row)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, NULL);
 
 	if (assert_col_row(self, col, row))
 		return NULL;
@@ -1548,7 +1549,7 @@ gp_widget *gp_widget_grid_get(gp_widget *self, unsigned int col, unsigned int ro
 void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
                                int padd, int fill)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	padd = GP_MIN(padd, (int)UINT8_MAX);
 	fill = GP_MIN(fill, (int)UINT8_MAX);
@@ -1562,7 +1563,7 @@ void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
 
 void gp_widget_grid_col_fill_set(gp_widget *self, unsigned int col, uint8_t fill)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	if (col >= self->grid->cols) {
 		GP_WARN("Invalid grid col %u have %u cols", col, self->grid->cols);
@@ -1574,7 +1575,7 @@ void gp_widget_grid_col_fill_set(gp_widget *self, unsigned int col, uint8_t fill
 
 void gp_widget_grid_row_fill_set(gp_widget *self, unsigned int row, uint8_t fill)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
 
 	if (row >= self->grid->rows) {
 		GP_WARN("Invalid grid row %u have %u rows", row, self->grid->rows);

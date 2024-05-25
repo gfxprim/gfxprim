@@ -156,7 +156,7 @@ static int (*cmp_funcs[])(const void *, const void *) = {
 	[GP_DIR_SORT_DESC | GP_DIR_SORT_BY_MTIME] = cmp_desc_time,
 };
 
-void gp_dir_cache_sort(gp_dir_cache *self, int sort_type)
+void gp_dir_cache_sort(gp_dir_cache *self, gp_dir_cache_sort_type  sort_type)
 {
 	int (*cmp_func)(const void *, const void *) = cmp_funcs[sort_type];
 

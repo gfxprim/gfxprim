@@ -6,6 +6,14 @@
 
  */
 
+/**
+ * @file gp_widget_ops.h
+ * @brief Widget internals.
+ *
+ * You will not need to understand this part of the library unless you need to
+ * add a custom widget types.
+ */
+
 #ifndef GP_WIDGET_OPS_H
 #define GP_WIDGET_OPS_H
 
@@ -15,14 +23,23 @@
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_render.h>
 
+/** @brief Flags to move focus around. */
 enum gp_widget_focus_flag {
+	/** @brief Defocus any focused widget in the layout. */
 	GP_FOCUS_OUT,
+	/** @brief Focus first widget in the layout. */
 	GP_FOCUS_IN,
+	/** @brief Moves focus left. */
 	GP_FOCUS_LEFT,
+	/** @brief Moves focus right. */
 	GP_FOCUS_RIGHT,
+	/** @brief Moves focus up. */
 	GP_FOCUS_UP,
+	/** @brief Moves focus down. */
 	GP_FOCUS_DOWN,
+	/** @brief Focus next widget. */
 	GP_FOCUS_NEXT,
+	/** @brief Focus previous widget. */
 	GP_FOCUS_PREV,
 };
 
@@ -33,30 +50,67 @@ typedef struct gp_offset {
 	gp_coord y;
 } gp_offset;
 
+/** @brief Widget rendering flags. */
 enum gp_widget_render_flags {
+	/**
+	 * @brief Widget needs to be repainted.
+	 *
+	 * Set by the widget to request a repaint next time the main loop
+	 * returns to the library.
+	 */
 	GP_WIDGET_REDRAW = 0x01,
 	GP_WIDGET_REDRAW_CHILDREN = 0x02,
-	/** Passed down when color scheme changed */
+	/**
+	 * @brief A color scheme has changed.
+	 *
+	 * Passed down from the widget render when color scheme changed and
+	 * everything has to be repainted.
+	 */
 	GP_WIDGET_COLOR_SCHEME = 0x04,
-	/** Layout needs to be resized */
+	/**
+	 * @brief Layout needs to be resized.
+	 *
+	 * TODO description.
+	 */
 	GP_WIDGET_RESIZE = 0x08,
-	/** Widget is disabled */
+	/**
+	 * @brief Widget is disabled.
+	 *
+	 * When a widget is disabled all it's children gets this flag passed
+	 * down to their render functions.
+	 */
 	GP_WIDGET_DISABLED = 0x10,
 };
 
+/**
+ * @brief Callbacks that implements a widget.
+ *
+ * Container widgets, i.e. widgets with children, implement callbacks to access
+ * its children that are otherwise NULL. These are mostly functions to move
+ * focus, distribute any leftover size to the layout, and iterate over widgets.
+ * Also most of the callbacks for container widgets are recursive, e.g. the
+ * JSON parser internally calls gp_widget_from_json() to parse it's children.
+ *
+ * @warning Never call these functions directly use the wrappers defined below.
+ */
 struct gp_widget_ops {
 	/**
 	 * @brief Frees any additional memory a widget has allocated.
 	 *
 	 * If defined this function is called before widget itself is freed.
 	 *
-	 * @self A widget.
+	 * @param self A widget.
 	 */
 	void (*free)(gp_widget *self);
 
 	/**
 	 * @brief Widget input event handler.
 	 *
+	 * May be NULL for widgets that do not consume input events.
+	 *
+	 * @param self A widget.
+	 * @param ctx A widget render context.
+	 * @param ev An input event to be processed by the widget.
 	 * @return Returns non-zero if event was handled.
 	 */
 	int (*event)(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev);
@@ -64,15 +118,21 @@ struct gp_widget_ops {
 	/**
 	 * @brief Renders (changes in) widget layout.
 	 *
-	 * @ctx Render configuration.
-	 * @offset Ofset in pixmap to draw to
-	 * @flags Force redraw whole layout.
+	 * @param ctx A widget render context.
+	 * @param offset Ofset in pixmap to draw to
+	 * @param flags Flags enum gp_widget_render_flags.
 	 */
 	void (*render)(gp_widget *self, const gp_offset *offset,
 	               const gp_widget_render_ctx *ctx, int flags);
 
-	/*
-	 * Moves to focused widget.
+	/**
+	 * @brief Moves focus.
+	 *
+	 * Focused widget is a widget that recieves keyboard input.
+	 *
+	 * @param self A widget.
+	 * @param focus_dir An enum gp_widget_focus_flag, a direction to move
+	 *                  the focus to.
 	 */
 	int (*focus)(gp_widget *self, int focus_dir);
 
@@ -82,20 +142,37 @@ struct gp_widget_ops {
 	int (*focus_xy)(gp_widget *self, const gp_widget_render_ctx *ctx,
 	                 unsigned int x, unsigned int y);
 
-	/*
+	/**
 	 * @brief Sets/moves focus to a child specific child widget.
 	 *
-	 * @self A container widget.
-	 * @child A child widget to be focused.
+	 * @param self A container widget.
+	 * @param child A child widget to be focused.
 	 *
 	 * @return Non-zero if widget was focused successfuly.
 	 */
 	int (*focus_child)(gp_widget *self, gp_widget *child);
 
-	/*
-	 * Called once to calculate minimal widget sizes.
+	/**
+	 * @brief Calculates a minimal widget width.
+	 *
+	 * Container widgets call these functions recursively for its children,
+	 * then the minimal children sizes to compute the overall minimal size.
+	 *
+	 * @param self A widget.
+	 * @param ctx A widget rendering context.
+	 * @return A minimal widget width in pixels.
 	 */
 	unsigned int (*min_w)(gp_widget *self, const gp_widget_render_ctx *ctx);
+	/**
+	 * @brief Calculates a minimal widget height.
+	 *
+	 * Container widgets call these functions recursively for its children,
+	 * then the minimal children sizes to compute the overall minimal size.
+	 *
+	 * @param self A widget.
+	 * @param ctx A widget rendering context.
+	 * @return A minimal widget height in pixels.
+	 */
 	unsigned int (*min_h)(gp_widget *self, const gp_widget_render_ctx *ctx);
 
 	/**
@@ -103,9 +180,9 @@ struct gp_widget_ops {
 	 *
 	 * Implemented only for non-leaf widgets.
 	 *
-	 * @self   Widget layout to be distributed.
-	 * @ctx    Render configuration.
-	 * @new_wh Force distribute size on layout size change.
+	 * @param self Widget layout to be distributed.
+	 * @param ctx Render configuration.
+	 * @param new_wh Force distribute size on layout size change.
 	 */
 	void (*distribute_w)(gp_widget *self,
 	                     const gp_widget_render_ctx *ctx,
@@ -118,17 +195,25 @@ struct gp_widget_ops {
 	/**
 	 * @brief A callback to iterate over all widget children.
 	 *
-	 * @self A widget.
-	 * @func A function to be called on each child widget.
+	 * @param self A widget.
+	 * @param func A function to be called on each child widget.
 	 */
 	void (*for_each_child)(gp_widget *self, void (*func)(gp_widget *child));
 
-	/*
-	 * json_object -> widget converter.
+	/**
+	 * @brief A JSON to widget parser.
+	 *
+	 * Reads a serialized widget from JSON.
+	 *
+	 * @param json A JSON reader.
+	 * @param val A JSON value.
+	 * @param ctx A widget JSON parser context.
 	 */
 	gp_widget *(*from_json)(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx);
 
-	/* id used for JSON loader */
+	/**
+	 * @brief A widget id, e.g. "checkbox".
+	 */
 	const char *id;
 };
 
@@ -151,12 +236,12 @@ int gp_widget_input_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_e
 void gp_widget_ops_render(gp_widget *self, const gp_offset *offset,
                           const gp_widget_render_ctx *ctx, int flags);
 
-/*
- * Send event to a widget.
+/**
+ * @brief Send an event to a widget.
  *
- * @self A widget to send the event to.
- * @ctx A render context.
- * @ev An input event.
+ * @param self A widget to send the event to.
+ * @param ctx A render context.
+ * @param ev An input event.
  *
  * @return Zero if event wasn't handled, non-zero otherwise.
  */
@@ -182,8 +267,8 @@ int gp_widget_ops_event_offset(gp_widget *self, const gp_widget_render_ctx *ctx,
 /**
  * @brief Moves focus, if possible, in the direction requested by the focus_dir.
  *
- * @self A widget layout.
- * @focus_dir Direction to move the focus to.
+ * @param self A widget layout.
+ * @param focus_dir Direction to move the focus to.
  *
  * @return Zero if focus couldn't be moved, non-zero otherwise.
  */
@@ -192,10 +277,10 @@ int gp_widget_ops_render_focus(gp_widget *self, int focus_dir);
 /**
  * @brief Tries to focus a widget on a given coordinates in a layout.
  *
- * @self A widget layout.
- * @ctx A render context.
- * @x X coordinate.
- * @y Y coordinate.
+ * @param self A widget layout.
+ * @param ctx A render context.
+ * @param x X coordinate.
+ * @param y Y coordinate.
  *
  * @return Zero if focus wasn't changed, non-zero otherwise.
  */
@@ -207,7 +292,7 @@ int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *c
  *
  * Traverses the widget layout tree to the top and sets the focus accordingly.
  *
- * @self A widget to be focused.
+ * @param self A widget to be focused.
  *
  * @return Zero if focus couldn't be changed, non-zero otherwise.
  */
@@ -224,8 +309,8 @@ void gp_widget_ops_distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx
  *
  * This function is no-op for NULL self and non-leaf widgets.
  *
- * @self A widget.
- * @func A function callback
+ * @param self A widget.
+ * @param func A function callback
  */
 void gp_widget_ops_for_each_child(gp_widget *self, void (*func)(gp_widget *child));
 
@@ -273,31 +358,31 @@ static inline int gp_widget_is_disabled(gp_widget *self, int flags)
  * The size may end up larger than WxH if there is too much widgets or smaller
  * than WxH if align is not set to fill.
  *
- * @layout Widget layout.
- * @ctx    Render context, e.g. fonts, pixel type, padding size, etc.
- * @w      Width we are trying to fit into
- * @h      Height we are trying to fit into
- * @new_wh Force to position widgets on changed layout size
+ * @param layout Widget layout.
+ * @param ctx Render context, e.g. fonts, pixel type, padding size, etc.
+ * @param w Width we are trying to fit into
+ * @param h Height we are trying to fit into
+ * @param new_wh If set the layout size is recalculated, i.e. the layout size has changed.
  */
 void gp_widget_calc_size(gp_widget *layout, const gp_widget_render_ctx *ctx,
                          unsigned int w, unsigned int h, int new_wh);
 
 /**
- * @brief Redraw widget.
+ * @brief Requests widget repaint.
  *
  * Marks widget to be repainted on next update.
  *
- * @self A widget.
+ * @param self A widget.
  */
 void gp_widget_redraw(gp_widget *self);
 
 /**
- * @brief Resize widget.
+ * @brief Requests widget resize.
  *
  * Marks widget to be resized on next update. The resize is propagated in the
  * layout to the top. E.g. if widget has to grow, the whole layout will.
  *
- * @self A widget.
+ * @param self A widget.
  */
 void gp_widget_resize(gp_widget *self);
 
@@ -305,14 +390,18 @@ void gp_widget_resize(gp_widget *self);
  * @brief Redraw all child widgets.
  *
  * Marks all children to be repainted on next update. This is used internally
- * by container widgets when layout has changed, e.g. tab has changed.
+ * by container widgets when layout has changed, e.g. visible tab has changed.
  *
- * @self A container widget.
+ * @param self A container widget.
  */
 void gp_widget_redraw_children(gp_widget *self);
 
-/*
- * Resizes and redraws changed widgets.
+/**
+ * @brief Resizes and redraws changed widgets.
+ *
+ * @param self A widget layout.
+ * @param ctx A rendering context.
+ * @param new_wh If set the layout size is recalculated, i.e. the layout size has changed.
  */
 void gp_widget_render(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh);
 

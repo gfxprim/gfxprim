@@ -2,13 +2,13 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_ops.h>
-#include <widgets/gp_widget_bool.h>
+#include <widgets/gp_widget_class_bool.h>
 
 int gp_widget_bool_get(gp_widget *self)
 {

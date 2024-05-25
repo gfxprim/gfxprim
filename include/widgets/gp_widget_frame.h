@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -26,7 +26,7 @@ struct gp_widget_frame {
 /**
  * @brief Allocates and initializes a new frame widget.
  *
- * @param label A frame label.
+ * @param title A frame title, there is no title if NULL is passed.
  * @param tattr A text attribute monospace/bold/large etc.
  * @param child Frame widget child widget.
  *
@@ -35,10 +35,10 @@ struct gp_widget_frame {
 gp_widget *gp_widget_frame_new(const char *title, gp_widget_tattr tattr, gp_widget *child);
 
 /**
- * @brief Sets a frame title.
+ * @brief Sets a new frame title.
  *
- * @param label A frame label.
- * @param title New title.
+ * @param self A frame widget.
+ * @param title New frame title.
  */
 void gp_widget_frame_title_set(gp_widget *self, const char *title);
 

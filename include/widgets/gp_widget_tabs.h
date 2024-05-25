@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @file gp_widget_tabs.h
+ * @brief A tabs widget.
+ */
+
 #ifndef GP_WIDGET_TABS_H
 #define GP_WIDGET_TABS_H
 
@@ -25,19 +30,22 @@ struct gp_widget_tabs {
 	char payload[];
 };
 
+/** @brief A gp_widget_event::sub_type for a tabs widget. */
 enum gp_widget_tabs_event_type {
-	GP_WIDGET_TABS_DEACTIVATED, /* A tab is deactivated */
-	GP_WIDGET_TABS_ACTIVATED, /* A tab activated */
+	/** @brief A tab is deactivated */
+	GP_WIDGET_TABS_DEACTIVATED,
+	/** @brief A tab activated */
+	GP_WIDGET_TABS_ACTIVATED,
 };
 
 /**
- * @brief Allocate and initialize new tabs widget.
+ * @brief Create tabs widget.
  *
- * @param tabs Number of tabs.
+ * @param tabs_cnt Number of tabs.
  * @param active_tab Initially active tab.
  * @param tab_labels Array of tab labels.
  *
- * @return A tabs widget.
+ * @return A newly allocated and initialized tabs widget.
  */
 gp_widget *gp_widget_tabs_new(unsigned int tabs_cnt, unsigned int active_tab,
                               const char *tab_labels[], int flags);

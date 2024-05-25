@@ -306,7 +306,7 @@ gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt, 
 int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt,
                          int flags, const char *markup_str)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_MARKUP, 1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_MARKUP, 1);
 
 	gp_markup *markup = gp_markup_parse(fmt, markup_str, flags);
 	if (!markup)

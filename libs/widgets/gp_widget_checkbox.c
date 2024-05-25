@@ -220,7 +220,7 @@ struct gp_widget_ops gp_widget_checkbox_ops = {
 
 void gp_widget_checkbox_set(gp_widget *self, int val)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_CHECKBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_CHECKBOX, );
 
 	val = !!val;
 
@@ -232,14 +232,14 @@ void gp_widget_checkbox_set(gp_widget *self, int val)
 
 void gp_widget_checkbox_toggle(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_CHECKBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_CHECKBOX, );
 
 	toggle(self);
 }
 
 int gp_widget_checkbox_get(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_CHECKBOX, -1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_CHECKBOX, -1);
 
 	return self->checkbox->val;
 }

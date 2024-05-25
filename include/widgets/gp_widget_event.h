@@ -43,14 +43,13 @@ enum gp_widget_event_type {
 	GP_WIDGET_EVENT_COLOR_SCHEME,
 	/** The number of events, i.e. last event + 1. */
 	GP_WIDGET_EVENT_MAX,
+	/**
+	 * @brief Default widget event mask
+	 *
+	 */
+	GP_WIDGET_EVENT_DEFAULT_MASK = (1<<GP_WIDGET_EVENT_NEW) | (1<<GP_WIDGET_EVENT_FREE) | (1<<GP_WIDGET_EVENT_WIDGET),
 };
 
-/** @brief Default widget event mask */
-#define GP_WIDGET_EVENT_DEFAULT_MASK ( \
-	(1<<GP_WIDGET_EVENT_NEW) |     \
-	(1<<GP_WIDGET_EVENT_FREE) |    \
-	(1<<GP_WIDGET_EVENT_WIDGET)  \
-)
 
 /**
  * @brief Masks widget events
@@ -84,19 +83,28 @@ const char *gp_widget_event_type_name(enum gp_widget_event_type ev_type);
  * @brief Event structure passed to widget event handler.
  */
 struct gp_widget_event {
-	/** The widget the event is for */
+	/** @brief The widget the event is for. */
 	struct gp_widget *self;
-	/** Generic event type, i.e. enum gp_widget_event_type */
+	/** @brief An event type, enum gp_widget_event_type. */
 	uint16_t type;
-	/** Widget specific subtype defined by widgets */
+	/**
+	 * @brief Widget specific subtype defined by widgets.
+	 *
+	 * For all widget specific events the type is set to
+	 * GP_WIDGET_EVENT_WIDGET and the sub_type is documented for each
+	 * particular widget, e.g. #gp_widget_tbox_event_type.
+	 */
 	uint16_t sub_type;
 	/* internal DO NOT TOUCH */
 	const struct gp_widget_render_ctx *ctx;
-	/** Optional pointer/value */
 	union {
+		/** @brief Optional pointer. */
 		void *ptr;
+		/** @brief Optional integer value. */
 		long val;
+		/** @brief Optional bounding box. */
 		struct gp_bbox *bbox;
+		/** @brief An input event, set for GP_WIDGET_EVENT_INPUT */
 		struct gp_event *input_ev;
 	};
 };
@@ -153,11 +161,16 @@ static inline int gp_widget_send_event(gp_widget *self,
 /**
  * @brief Helper function to send a widget specific event to application.
  *
- * This is called by the widget library when event should be send to the
- * widget.
+ * This is called by the widget library when event should be send from a widget
+ * to the application. This function fills in the #gp_widget_event structure
+ * and then calls the gp_widget::on_event() function.
  *
  * @param self Pointer to the widget sending this event.
- * @param type Event type as defined by a particular widget.
+ *
+ * @param sub_type Event subtype as defined by a particular widget e.g.
+ * #gp_widget_tbox_event_type.
+ * @param ... An optional pointer or long integer value.
+ *
  * @return The return value from application event handler.
  */
 static inline int gp_widget_send_widget_event(gp_widget *self,

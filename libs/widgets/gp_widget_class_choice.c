@@ -99,7 +99,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *alloc_choice(unsigned int widget_type,
+static gp_widget *alloc_choice(enum gp_widget_type widget_type,
                                size_t payload_size, unsigned int choice_cnt)
 {
 	size_t size = sizeof(struct gp_widget_choice) + payload_size;
@@ -124,7 +124,7 @@ static inline void call_set_sel(gp_widget *self, size_t sel)
 	choice->ops->set(self, sel);
 }
 
-static gp_widget *parse_choices(unsigned int widget_type,
+static gp_widget *parse_choices(enum gp_widget_type widget_type,
                                 gp_json_reader *json, gp_json_val *val)
 {
 	gp_json_state state = gp_json_state_start(json);
@@ -183,7 +183,7 @@ static size_t sel_by_str(gp_json_reader *json, gp_widget *choice, const char *se
 	return 0;
 }
 
-gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
+gp_widget *gp_widget_choice_from_json(enum gp_widget_type widget_type,
                                       gp_json_reader *json, gp_json_val *val,
                                       gp_widget_json_ctx *ctx)
 {
@@ -265,7 +265,7 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 	return ret;
 }
 
-gp_widget *gp_widget_choice_new(unsigned int widget_type,
+gp_widget *gp_widget_choice_new(enum gp_widget_type widget_type,
                                 const char *choices[],
                                 size_t choice_cnt,
                                 size_t selected)
@@ -286,9 +286,10 @@ gp_widget *gp_widget_choice_new(unsigned int widget_type,
 	return ret;
 }
 
-gp_widget *gp_widget_choice_arr_new(unsigned int widget_type, const void *array,
+gp_widget *gp_widget_choice_arr_new(enum gp_widget_type widget_type, const void *array,
                                     size_t memb_cnt, uint16_t memb_size,
-                                    uint16_t memb_off, size_t sel, int flags)
+                                    uint16_t memb_off, size_t sel,
+                                    enum gp_widget_choice_flags flags)
 {
 	gp_widget *ret;
 
@@ -320,7 +321,7 @@ gp_widget *gp_widget_choice_arr_new(unsigned int widget_type, const void *array,
 	return ret;
 }
 
-gp_widget *gp_widget_choice_ops_new(unsigned int widget_type,
+gp_widget *gp_widget_choice_ops_new(enum gp_widget_type widget_type,
                                     const struct gp_widget_choice_ops *ops)
 {
 	gp_widget *ret = gp_widget_new(widget_type, GP_WIDGET_CLASS_CHOICE, sizeof(struct gp_widget_choice));

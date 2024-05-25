@@ -2,22 +2,63 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
-#ifndef GP_WIDGET_CHOICE_H
-#define GP_WIDGET_CHOICE_H
+/**
+ * @file gp_widget_class_choice.h
+ * @brief A choice class for widgets.
+ */
+#ifndef GP_WIDGET_CLASS_CHOICE_H
+#define GP_WIDGET_CLASS_CHOICE_H
 
+/**
+ * @brief A choice op for the get callback.
+ */
 enum gp_widget_choice_op {
+	/** @brief Gets index of the selected choice. */
 	GP_WIDGET_CHOICE_OP_SEL,
+	/** @brief Gets the number of choices. */
 	GP_WIDGET_CHOICE_OP_CNT,
 };
 
+/**
+ * @brief A choice widget ops.
+ *
+ * These are callbacks called by the widget implementation to get the choice
+ * values, selected choice and the number of choices.
+ *
+ * The application needs to call gp_widget_choice_refresh() when the state
+ * changes, e.g. choice was added to or removed from the set.
+ */
 typedef struct gp_widget_choice_ops {
+	/**
+	 * @brief Returns a description for a choice.
+	 *
+	 * @param self A choice widget.
+	 * @param idx A choice index.
+	 *
+	 * @return A choice description for a given index.
+	 */
 	const char *(*get_choice)(gp_widget *self, size_t idx);
+	/**
+	 * @brief Returns a selected choice or number of choices.
+	 *
+	 * @param self A choice widget.
+	 * @param op A value to return.
+	 *
+	 * @return A value based on the op, either selected choice or number of
+	 *         choices.
+	 */
 	size_t (*get)(gp_widget *self, enum gp_widget_choice_op op);
-	void (*set)(gp_widget *self, size_t val);
+	/**
+	 * @brief Sets the selected choice.
+	 *
+	 * @param self A choice widget.
+	 * @param sel A selected choice.
+	 */
+	void (*set)(gp_widget *self, size_t sel);
 } gp_widget_choice_ops;
 
 /**
@@ -76,61 +117,66 @@ struct gp_widget_choice {
 /**
  * @brief Allocates and initializes new choice widget.
  *
- * @widget_type A widget type.
- * @choices An array of strings describing available choices.
- * @cnt Size of the choices array.
- * @sel Initially selected choice.
+ * @param widget_type A widget type.
+ * @param choices An array of strings describing available choices.
+ * @param cnt Size of the choices array.
+ * @param sel Initially selected choice.
  *
  * @return A choice widget.
  */
-gp_widget *gp_widget_choice_new(unsigned int widget_type,
+gp_widget *gp_widget_choice_new(enum gp_widget_type widget_type,
                                 const char *choices[],
                                 size_t cnt, size_t sel);
 
 /**
  * @brief Creates a choice widget based on widget ops.
  *
- * @widget_type A widget type.
- * @ops A pointer to the widget ops.
+ * @param widget_type A widget type.
+ * @param ops A pointer to the widget ops.
  *
  * @return A choice widget.
  */
-gp_widget *gp_widget_choice_ops_new(unsigned int widget_type,
+gp_widget *gp_widget_choice_ops_new(enum gp_widget_type widget_type,
                                     const struct gp_widget_choice_ops *ops);
 
 
 /**
  * @brief Creates a choice widget based on a static array.
  *
- * @array A pointer an array.
- * @memb_cnt An array size, i.e. number of elements.
- * @memb_size An array member size, e.g. sizeof(struct foo)
- * @memb_off An offset of the string for the choice in the array, e.g.
- *           offsetof(struct foo, str_elem)
- * @sel A selected choice.
- * @flags If GP_WIDGET_CHOICE_COPY is set the choices are copied into a
- *        separate array, otherwise the original array pointer is stored and used each
- *        time widget is rendered.
+ * @param widget_type A widget type.
+ * @param array A pointer an array.
+ * @param memb_cnt An array size, i.e. number of elements.
+ * @param memb_size An array member size, e.g. sizeof(struct foo)
+ * @param memb_off An offset of the string for the choice in the array, e.g.
+ *                 offsetof(struct foo, str_elem)
+ * @param sel A selected choice.
+ * @param flags A bitwise combination of flags.
  *
  * @return A choice widget.
  */
-gp_widget *gp_widget_choice_arr_new(unsigned int widget_type, const void *array,
+gp_widget *gp_widget_choice_arr_new(enum gp_widget_type widget_type,
+                                    const void *array,
                                     size_t memb_cnt, uint16_t memb_size,
-                                    uint16_t memb_off, size_t sel, int flags);
+                                    uint16_t memb_off, size_t sel,
+                                    enum gp_widget_choice_flags flags);
+
 
 /**
  * @brief Request update after the choices has been changed.
  *
- * @self A choice widget.
+ * Causes the choice widget to be resized and rerendered. Since there are cases
+ * when the widget state is not stored in the widget, but rather feched by the
+ * #gp_widget_choice_ops this call tells the widget to call the callback to
+ * refresh the state.
  *
- * Causes the choice widget to be resized and rerendered.
+ * @param self A choice widget.
  */
 void gp_widget_choice_refresh(gp_widget *self);
 
 /**
  * @brief Returns the number of choices to choose from.
  *
- * @self A choice widget.
+ * @param self A choice widget.
  * @return A number of choices.
  */
 size_t gp_widget_choice_cnt_get(gp_widget *self);
@@ -138,15 +184,16 @@ size_t gp_widget_choice_cnt_get(gp_widget *self);
 /**
  * @brief Sets a selected choice in the choice widget.
  *
- * @self A choice widget.
- * @sel A choice to select.
+ * @param self A choice widget.
+ * @param sel A choice to select.
  */
 void gp_widget_choice_sel_set(gp_widget *self, size_t sel);
 
 /**
  * @brief Returns a selected choice.
  *
- * @self A choice widget.
+ * @param self A choice widget.
+ *
  * @return Currently selected choice widget.
  */
 size_t gp_widget_choice_sel_get(gp_widget *self);
@@ -157,7 +204,8 @@ size_t gp_widget_choice_sel_get(gp_widget *self);
  * The value is valid only after choice was changed from the UI, i.e. can be
  * used in the widget event callback to get the previosly selected choice.
  *
- * @self A choice widget.
+ * @param self A choice widget.
+ *
  * @return A previously selected choice.
  */
 size_t gp_widget_choice_prev_sel_get(gp_widget *self);
@@ -165,8 +213,8 @@ size_t gp_widget_choice_prev_sel_get(gp_widget *self);
 /**
  * @brief Returns a choice value for a given index.
  *
- * @self A choice widget.
- * @idx An choice index.
+ * @param self A choice widget.
+ * @param idx An choice index.
  *
  * @return A choice value.
  */
@@ -175,7 +223,9 @@ const char *gp_widget_choice_name_get(gp_widget *self, size_t idx);
 /**
  * @brief Returns name of selected choice.
  *
- * @self A choice widget.
+ * @param self A choice widget.
+ *
+ * @return A selected choice name.
  */
 static inline const char *gp_widget_choice_sel_name_get(gp_widget *self)
 {
@@ -185,14 +235,15 @@ static inline const char *gp_widget_choice_sel_name_get(gp_widget *self)
 /**
  * @brief Parses JSON into a choice widget.
  *
- * @widget_type A widget type.
- * @json A JSON widget.
- * @uids A pointer to a hash table.
+ * @param widget_type A widget type.
+ * @param json A JSON widget.
+ * @param val A JSON value.
+ * @param ctx A widget JSON loader context.
  *
  * @return A choice widget.
  */
-gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
+gp_widget *gp_widget_choice_from_json(enum gp_widget_type widget_type,
                                       gp_json_reader *json, gp_json_val *val,
                                       gp_widget_json_ctx *ctx);
 
-#endif /* GP_WIDGET_CHOICE_H */
+#endif /* GP_WIDGET_CLASS_CHOICE_H */

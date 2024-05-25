@@ -626,7 +626,7 @@ static int move_y(gp_widget *self, gp_coord y_off)
 
 int gp_widget_scroll_area_move(gp_widget *self, gp_coord x_off, gp_coord y_off)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_SCROLL_AREA, 1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SCROLL_AREA, 1);
 
 	struct gp_widget_scroll_area *area = self->scroll;
 
@@ -652,7 +652,7 @@ int gp_widget_scroll_area_move(gp_widget *self, gp_coord x_off, gp_coord y_off)
 
 gp_widget *gp_widget_scroll_area_put(gp_widget *self, gp_widget *child)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_SCROLL_AREA, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SCROLL_AREA, NULL);
 
 	gp_widget *ret = self->scroll->child;
 

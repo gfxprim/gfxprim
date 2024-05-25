@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @file gp_widget_app.h
+ * @brief Application layout and events.
+ */
+
 #ifndef GP_WIDGET_APP_H
 #define GP_WIDGET_APP_H
 
@@ -16,8 +21,8 @@
  *
  * Looks for the layout in /etc/ and $HOME/.config/
  *
- * @app_name An application name, usually the same as the binary name.
- * @uids An pointer to store the hash table of UIDs to.
+ * @param app_name An application name, usually the same as the binary name.
+ * @param uids An pointer to store the hash table of UIDs to.
  *
  * @return An application widget layout or NULL in a case of failure.
  */
@@ -28,9 +33,9 @@ gp_widget *gp_app_layout_load(const char *app_name, gp_htable **uids);
  *
  * Looks for the layout in /etc/ and $HOME/.config/
  *
- * @app_name An application name, usually the same as the binary name.
- * @callbacks Optional callbacks description, NULL if not used.
- * @uids An pointer to store the hash table of UIDs to.
+ * @param app_name An application name, usually the same as the binary name.
+ * @param callbacks Optional callbacks description, NULL if not used.
+ * @param uids An pointer to store the hash table of UIDs to.
  *
  * @return An application widget layout or NULL in a case of failure.
  */
@@ -43,10 +48,10 @@ gp_widget *gp_app_layout_load2(const char *app_name,
  *
  * Looks for the layout fragment in /etc/ and $HOME/.config/
  *
- * @app_name An application name, usually the same as the binary name.
- * @layout_name A layout name.
- * @callbacks Optional callbacks description, NULL if not used.
- * @uids An pointer to store the hash table of UIDs to.
+ * @param app_name An application name, usually the same as the binary name.
+ * @param layout_name A layout name.
+ * @param callbacks Optional callbacks description, NULL if not used.
+ * @param uids An pointer to store the hash table of UIDs to.
  *
  * @return An application widget layout or NULL in a case of failure.
  */
@@ -60,7 +65,8 @@ gp_widget *gp_app_named_layout_load(const char *app_name, const char *layout_nam
  *
  * The application event handler works the same as a widget handler.
  *
- * @handler An pointer to application event handler or NULL to disable it.
+ * @param on_event An pointer to application event handler or NULL to disable
+ *                 events.
  */
 void gp_app_on_event_set(int (*on_event)(gp_widget_event *ev));
 
@@ -71,14 +77,14 @@ void gp_app_on_event_set(int (*on_event)(gp_widget_event *ev));
 /**
  * @brief Masks out app event.
  *
- * @ev_type An event type to mask out.
+ * @param ev_type An event type to mask out.
  */
 void gp_app_event_mask(enum gp_widget_event_type ev_type);
 
 /**
  * @brief Unmasks an app event.
  *
- * @ev_type An event type to unmask.
+ * @param ev_type An event type to unmask.
  */
 void gp_app_event_unmask(enum gp_widget_event_type ev_type);
 
@@ -94,7 +100,8 @@ extern const struct gp_app *gp_app;
  *
  * This is used internally to send app events.
  *
- * @ev An widget event.
+ * @param ev_type An widget event.
+ * @param ... Optional pointer or long integer.
  *
  * @return Non-zero if event was handled, zero otherwise.
  */

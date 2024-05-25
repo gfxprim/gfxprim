@@ -269,7 +269,7 @@ gp_widget *gp_widget_frame_put(gp_widget *self, gp_widget *child)
 {
 	gp_widget *ret;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_FRAME, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_FRAME, NULL);
 
 	ret = self->frame->child;
 	self->frame->child = child;
@@ -285,7 +285,7 @@ void gp_widget_frame_title_set(gp_widget *self, const char *title)
 {
 	char *dup = NULL;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_FRAME, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_FRAME, );
 
 	if (title) {
 		dup = strdup(title);

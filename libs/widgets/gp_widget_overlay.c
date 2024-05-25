@@ -322,7 +322,7 @@ gp_widget *gp_widget_overlay_new(unsigned int stack_size)
 
 unsigned int gp_widget_overlay_stack_size(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_OVERLAY, 0);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_OVERLAY, 0);
 
 	return gp_vec_len(self->overlay->stack);
 }
@@ -330,7 +330,7 @@ unsigned int gp_widget_overlay_stack_size(gp_widget *self)
 int gp_widget_overlay_stack_pos_by_child(gp_widget *self, gp_widget *child,
                                          unsigned int *stack_pos)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_OVERLAY, 0);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_OVERLAY, 0);
 
 	unsigned int i;
 
@@ -358,7 +358,7 @@ void gp_widget_overlay_hide(gp_widget *self, unsigned int stack_pos)
 {
 	struct gp_widget_overlay *o = self->overlay;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_OVERLAY, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_OVERLAY, );
 
 	if (stack_pos_is_invalid(self, stack_pos))
 		return;
@@ -375,7 +375,7 @@ void gp_widget_overlay_show(gp_widget *self, unsigned int stack_pos)
 {
 	struct gp_widget_overlay *o = self->overlay;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_OVERLAY, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_OVERLAY, );
 
 	if (stack_pos_is_invalid(self, stack_pos))
 		return;
@@ -393,7 +393,7 @@ gp_widget *gp_widget_overlay_put(gp_widget *self, unsigned int stack_pos,
 {
 	gp_widget *ret;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_OVERLAY, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_OVERLAY, NULL);
 
 	if (stack_pos_is_invalid(self, stack_pos))
 		return NULL;

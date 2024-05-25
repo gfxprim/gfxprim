@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @file gp_widget_pixmap.h
+ * @brief A pixmap widget.
+ */
+
 #ifndef GP_WIDGET_PIXMAP_H
 #define GP_WIDGET_PIXMAP_H
 
@@ -22,7 +27,7 @@ struct gp_widget_pixmap {
 };
 
 /**
- * @brief Allocate and initialize a pixmap widget.
+ * @brief Create pixmap widget.
  *
  * If pixmap widget has align set to fill the widget will grow into available
  * space, otherwise it will be always precisely min_w x min_h in size.
@@ -36,10 +41,12 @@ struct gp_widget_pixmap {
  * Or you can leave the pixmap pointer to be NULL in which case the library
  * will fill it just for the duration of redraw event.
  *
- * @min_w Minimal pixmap width
- * @min_h Minimal pixmap height
+ * @param min_w Minimal pixmap width
+ * @param min_h Minimal pixmap height
+ * @param on_event A widget event handler.
+ * @param priv A widget event handler private pointer.
  *
- * @return A pixmap widget
+ * @return A newly allocated and initialized pixmap widget.
  */
 gp_widget *gp_widget_pixmap_new(gp_widget_size min_w, gp_widget_size min_h,
                                 int (*on_event)(gp_widget_event *ev),
@@ -53,11 +60,11 @@ gp_widget *gp_widget_pixmap_new(gp_widget_size min_w, gp_widget_size min_h,
  * called more than once before pixmap update on the screen the areas are merged
  * into one that contains both bounding boxes.
  *
- * @self A pixmap widget.
- * @x An x offset into the pixmap
- * @y An y offset into the pixmap
- * @w A width of a rectangle at offset x,y
- * @h A heigth of a rectangle at offset x,y
+ * @param self A pixmap widget.
+ * @param x An x offset into the pixmap
+ * @param y An y offset into the pixmap
+ * @param w A width of a rectangle at offset x,y
+ * @param h A heigth of a rectangle at offset x,y
  */
 void gp_widget_pixmap_redraw(gp_widget *self,
                              gp_coord x, gp_coord y,
@@ -66,7 +73,8 @@ void gp_widget_pixmap_redraw(gp_widget *self,
 /**
  * @brief Returns pixmap width in pixels.
  *
- * @self A pixmap widget.
+ * @param self A pixmap widget.
+ *
  * @return A pixmap width.
  */
 static inline gp_size gp_widget_pixmap_w(gp_widget *self)
@@ -77,7 +85,8 @@ static inline gp_size gp_widget_pixmap_w(gp_widget *self)
 /**
  * @brief Returns pixmap height in pixels.
  *
- * @self A pixmap widget.
+ * @param self A pixmap widget.
+ *
  * @return A pixmap height.
  */
 static inline gp_size gp_widget_pixmap_h(gp_widget *self)
@@ -88,7 +97,7 @@ static inline gp_size gp_widget_pixmap_h(gp_widget *self)
 /**
  * @brief Marks the whole pixmap to be repainted.
  *
- * @self A pixmap widget.
+ * @param self A pixmap widget.
  */
 void gp_widget_pixmap_redraw_all(gp_widget *self);
 

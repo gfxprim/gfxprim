@@ -24,7 +24,13 @@
 #include <stddef.h>
 #include <core/gp_compiler.h>
 
-typedef struct gp_balloc_pool gp_balloc_pool;
+/** @brief A block allocator block header. */
+typedef struct gp_balloc_pool {
+	/** @brief A pointer to a next block. */
+	struct gp_balloc_pool *next;
+	/** @brief Free space in bytes in the block. */
+	size_t free;
+} gp_balloc_pool;
 
 /**
  * @brief Allocate memory from a block pool.

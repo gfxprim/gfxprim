@@ -430,7 +430,7 @@ static void set_filename(struct file_dialog *dialog, gp_widget_event *ev)
 
 static void enable_disable_open_btn(struct file_dialog *dialog)
 {
-	gp_widget_disable_set(dialog->open_save_btn, cannot_open(dialog));
+	gp_widget_disabled_set(dialog->open_save_btn, cannot_open(dialog));
 }
 
 static int table_on_event(gp_widget_event *ev)
@@ -584,8 +584,8 @@ static int filename_on_event(gp_widget_event *ev)
 		try_save(dialog);
 	break;
 	case GP_WIDGET_TBOX_EDIT:
-		gp_widget_disable_set(dialog->open_save_btn,
-		                      gp_widget_tbox_is_empty(ev->self));
+		gp_widget_disabled_set(dialog->open_save_btn,
+		                       gp_widget_tbox_is_empty(ev->self));
 	break;
 	}
 

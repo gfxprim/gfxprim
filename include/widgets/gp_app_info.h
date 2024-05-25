@@ -2,13 +2,22 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
  * @file gp_app_info.h
  * @brief Application info, license, authors, etc.
+ *
+ * Application info is a structure, that if defined, stores an application
+ * information such as name, licence, description, version and a list of authors.
+ *
+ * The application info is shown as an dialog when 'Ctrl+i' is pressed and
+ * printed into the stdout when application is passed '-i' on the command line.
+ *
+ * @attention The app info structure has to be populated in order to have the
+ *            application name in the window tittle.
  */
 
 #ifndef GP_APP_INFO_H
@@ -20,20 +29,21 @@
  * @brief Description of the app author.
  */
 typedef struct gp_app_info_author {
-	/** Author name */
+	/** @brief Author name */
 	const char *name;
-	/** Author email */
+	/** @brief Author email */
 	const char *email;
-	/** Copyright years */
+	/** @brief Copyright years */
 	const char *years;
 } gp_app_info_author;
 
 /**
  * @brief An application information.
  *
- * Fill in this structure to get the about dialog in the application. The
- * structure has to be called app_info so that it's picked up by the linker
- * automatically.
+ * Fill in this structure to get the about dialog in the application.
+ *
+ * @attention The structure has to be called app_info so that it's picked up by
+ *            the linker automatically.
  *
  * @code
  * struct gp_app_info app_info = {
@@ -48,19 +58,21 @@ typedef struct gp_app_info_author {
  *      }
  * };
  * @endcode
+ *
+ * @image html widgets_app_info.png
  */
 typedef struct gp_app_info {
-	/** Application name */
+	/** @brief Application name */
 	const char *name;
-	/** Short application description */
+	/** @brief Short application description */
 	const char *desc;
-	/** Application version */
+	/** @brief Application version */
 	const char *version;
-	/** Application license */
+	/** @brief Application license */
 	const char *license;
-	/** URL to application website */
+	/** @brief URL to application website */
 	const char *url;
-	/** An {} terminated array of authors */
+	/** @brief An {} terminated array of authors */
 	gp_app_info_author *authors;
 } gp_app_info;
 

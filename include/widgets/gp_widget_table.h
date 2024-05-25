@@ -2,87 +2,190 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
+ */
+
+/**
+ * @file gp_widget_table.h
+ * @brief A table widget.
+ *
+ * The table content is not stored in the widget, instead there are callbacks
+ * that are called to get the cells content when table is being rendered.
+ *
+ * Table example
+ * -------------
+ * @include{c} demos/widgets/table_example.c
+ * @include{json} demos/widgets/table_example.json
+ *
+ * Table JSON attributes
+ * ---------------------
+ *
+ * |  Attribute    |  Type  | Default | Description                    |
+ * |---------------|--------|---------|--------------------------------|
+ * | **col_ops**   | string |         | An column ops id.              |
+ * | **header**    | array  |         | Array of table header objects. |
+ * | **min_rows**  |  int   |         | Minimal number of table rows.  |
+ *
+ * Table Header JSON attributes
+ * ----------------------------
+ *
+ * |  Attribute    |  Type  | Default | Description
+ * |---------------|--------|---------|-----------------------------------------------------------|
+ * |   **fill**    |   int  |    0    | Column fill coeficient.                                   |
+ * |    **id**     | string |         | Column id to match againts #gp_widget_table_col_desc::id. |
+ * |   **label**   | string |         | If set it's the the column header label.                  |
+ * |  **min_size** |   int  |         | Minimal column width in text letters.                     |
+ * |   **order**   | string |         | If column is sortable it can be sorted as asc or desc.    |
+ * |   **tattr**   | tattr  |  bold   | Column header label text attribute see #gp_widget_tattr.  |
  */
 
 #ifndef GP_WIDGET_TABLE_H
 #define GP_WIDGET_TABLE_H
 
+/** @brief Table row operation. */
 enum gp_widget_table_row_op {
-	/** Sets current row to 0 */
+	/** @brief Sets current row to 0, i.e. the first row in the table. */
 	GP_TABLE_ROW_RESET,
-	/** Moves forward by pos parameter */
+	/**
+	 * @brief Moves the current row forward.
+	 *
+	 * Moves the current row by the op parameter elements forward.
+	 *
+	 * Returns non-zero if resulting row is valid and zero if not.
+	 */
 	GP_TABLE_ROW_ADVANCE,
-	/** Returns number of rows or -1 if not implemented */
+	/**
+	 * @brief Returns the number of table rows.
+	 *
+	 * Returns the number of rows in a table i.e. max_index + 1.
+	 *
+	 * May return -1 if the size is unknown.
+	 */
 	GP_TABLE_ROW_MAX
 };
 
+/**
+ * @brief A table cell content.
+ */
 typedef struct gp_widget_table_cell {
+	/** @brief An utf8 string */
 	const char *text;
+	/** @brief A text attribute, font and alignment. */
 	gp_widget_tattr tattr;
 } gp_widget_table_cell;
 
 /**
- * A table column description.
+ * @brief A table column description.
  *
  * Describes:
- * - an human readable id to index mapping
- * - sortable flag, set if column could be sorted by ops->sort()
+ * - An human readable id to index mapping, the human readable id is used by
+ *   the widget JSON parser to match the column in the table header.
+ * - Sortable flag, set if column could be sorted by gp_widget_table_col_ops::sort()
  */
-typedef struct gp_widget_table_col_dsc {
-	/** Column human readable ID */
+typedef struct gp_widget_table_col_desc {
+	/** @brief Column human readable ID */
 	const char *id;
-	/** An index to map the human readable ID to */
+	/** @brief An index to map the human readable ID to */
 	unsigned long idx;
-	/** If sort is not set this describes if column is sortable */
+	/** @brief If sort is not set this describes if column is sortable */
 	int sortable:1;
-} gp_widget_table_col_dsc;
+} gp_widget_table_col_desc;
 
 /**
- * Table operations, defined by the application.
+ * @brief Table operations, defined by the application.
  *
  * This defines operations for all possible columns in the table. The table
  * header then chooses which columns to display based on this description.
  */
 typedef struct gp_widget_table_col_ops {
+	/**
+	 * @brief Seek function for the table rows.
+	 *
+	 * @param self A table widget.
+	 * @param op A seek operation, defines what seek should do.
+	 * @param A position to seek to, is ignored for certain ops.
+	 *
+	 * @return See #gp_widget_table_row_op.
+	 */
 	int (*seek_row)(gp_widget *self, int op, unsigned int pos);
+	/**
+	 * @brief Returns a cell content.
+	 *
+	 * Retrives cells at the current row as set by the seek function.
+	 *
+	 * @param self A table widget.
+	 * @param cell A pointer to structure to store the cell content to.
+	 * @param col_idx An column index.
+	 *
+	 * @return TODO
+	 */
 	int (*get_cell)(gp_widget *self, gp_widget_table_cell *cell, unsigned int col_idx);
+	/**
+	 * @brief Sorts table by a column.
+	 *
+	 * If column is gp_widget_table_col_desc::sortable the table can be
+	 * sorted by this column.
+	 *
+	 * @param self A table widget.
+	 * @param desc If non-zero table is sorted in descending order.
+	 * @param col_idx An column index for the column.
+	 */
 	void (*sort)(gp_widget *self, int desc, unsigned int col_idx);
 
-	/** Optional on_event handler */
+	/**
+	 * @brief Optional on_event handler.
+	 *
+	 * If set the table widget events are routed to this handler.
+	 */
 	int (*on_event)(gp_widget_event *ev);
+	/** @brief Optional on_event handler private pointer. */
 	void *on_event_priv;
 
-	/** NULL id terminated column map array */
-	gp_widget_table_col_dsc col_map[];
+	/**
+	 * @brief NULL id terminated column map array.
+	 *
+	 * Each entry in the map describes a table column. Which columns are
+	 * shown and in what order is defined in the widget table header
+	 * description.
+	 */
+	gp_widget_table_col_desc col_map[];
 } gp_widget_table_col_ops;
 
 /**
- * Table header, defines which coluns are shown to the user.
+ * @brief A table column header.
+ *
+ * Defines a single widget column that is shown on the screen. The table that
+ * is shown in the widget is described by an array of these entries.
  */
 typedef struct gp_widget_table_header {
-	/** Pointer to a table column descriptor */
-	gp_widget_table_col_dsc *col_dsc;
+	/**
+	 * @brief Pointer to a table column descriptor.
+	 *
+	 * This points to a single entry in the
+	 * gp_widget_table_col_ops::col_map which defines which table column is
+	 * choosen for this widget column.
+	 */
+	gp_widget_table_col_desc *col_desc;
 
-	/** Column label, may be NULL */
+	/** @brief Column header label, may be NULL. */
 	char *label;
-
-	/** Label text attributes */
+	/** @brief Column header label text attributes. */
 	gp_widget_tattr tattr;
 
-	/** Column size and fill */
+	/** @brief Column minimal size in text letters. */
 	unsigned int col_min_size;
+	/** @brief Column fill coeficient. */
 	unsigned int col_fill;
 } gp_widget_table_header;
 
-/**
- * Column size and minimal size in pixels
- */
-typedef struct gp_widget_table_col {
+/** @brief Cached column size and minimal size, used internally by the widget. */
+typedef struct gp_widget_table_col_size {
+	/** @brief Current column width in pixels. */
 	unsigned int size;
+	/** @brief Minimal column width in pixels. */
 	unsigned int min_size;
-} gp_widget_table_col;
+} gp_widget_table_col_size;
 
 typedef struct gp_widget_table {
 	unsigned int cols;
@@ -104,7 +207,7 @@ typedef struct gp_widget_table {
 	unsigned int start_row;
 	unsigned int last_rows;
 
-	gp_widget_table_col *cols_w;
+	gp_widget_table_col_size *cols_w;
 
 	void *priv;
 
@@ -119,40 +222,64 @@ typedef struct gp_widget_table {
 	char buf[];
 } gp_widget_table;
 
-/**
- * @brief Event sub_type for table widget events.
- */
+/** @brief A gp_widget_event::sub_type for a table widget. */
 enum gp_widget_table_event_type {
-	/** Emitted on enter or double click presseed */
+	/** Emitted on enter or double click presseed. */
 	GP_WIDGET_TABLE_TRIGGER,
-	/** Emitted when table entry is selected */
+	/** Emitted when table entry is selected. */
 	GP_WIDGET_TABLE_SELECT,
 };
 
+/**
+ * @brief Creates a new table widget.
+ *
+ * @param cols A number of table columns.
+ * @param min_rows A minimal number of rows shown in the widget.
+ * @param col_ops Columns description and callbacks to get retrieve table cells.
+ * @param header Description on which rows and in which order should be shown
+ *               in the widget.
+ *
+ * @return A newly allocated and initialid table widget.
+ */
 gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
                                const gp_widget_table_col_ops *col_ops,
                                const gp_widget_table_header *header);
 
+/**
+ * @brief Sorts a table widget by a column.
+ *
+ * This only works for a sortable columns, if column is not sortable the call
+ * is no-op.
+ *
+ * @param self A table widget.
+ * @param desc If non-zero the table is sorted in descending order.
+ * @param col A column index to sort the table by.
+ */
 void gp_widget_table_sort_by(gp_widget *self, int desc, unsigned int col);
 
-/*
- * Called when table content has changed and table needs to be rerendered.
+/**
+ * @brief Request table widget refres.
+ *
+ * Application calls this when table content has changed and table needs to be
+ * rerendered.
+ *
+ * @param self A table widget.
  */
 void gp_widget_table_refresh(gp_widget *self);
 
-/*
+/**
  * @brief Sets first row that should be shown by the table.
  *
- * @self A table widget.
- * @off A row offset.
+ * @param self A table widget.
+ * @param off A row offset.
  */
 void gp_widget_table_off_set(gp_widget *self, unsigned int off);
 
-/*
+/**
  * @brief Sets selected row.
  *
- * @self A table widget.
- * @off A row.
+ * @param self A table widget.
+ * @param row A row to be selected.
  */
 void gp_widget_table_sel_set(gp_widget *self, unsigned int row);
 

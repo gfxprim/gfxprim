@@ -2,19 +2,19 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
- * @file gp_widget_bool.h
+ * @file gp_widget_class_bool.h
  * @brief A bollean widget class.
  *
  * Functions to change the value of a boolean class widget.
  */
 
-#ifndef GP_WIDGET_BOOL_H
-#define GP_WIDGET_BOOL_H
+#ifndef GP_WIDGET_CLASS_BOOL_H
+#define GP_WIDGET_CLASS_BOOL_H
 
 struct gp_widget_bool {
 	const char *label;
@@ -49,4 +49,4 @@ static inline void gp_widget_bool_toggle(gp_widget *self)
 	gp_widget_bool_set(self, !gp_widget_bool_get(self));
 }
 
-#endif /* GP_WIDGET_BOOL_H */
+#endif /* GP_WIDGET_CLASS_BOOL_H */

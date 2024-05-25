@@ -6,6 +6,15 @@
 
  */
 
+/**
+ * @file gp_widget_json.h
+ * @brief A JSON parser for widget layout.
+ *
+ * Widget layout can be loaded from a JSON description. The application can
+ * resolve widgets by unique id and event handlers are resolved from the
+ * application binary at runtime.
+ */
+
 #ifndef GP_WIDGET_JSON_H
 #define GP_WIDGET_JSON_H
 
@@ -17,6 +26,19 @@ extern const gp_json_obj *gp_widget_json_attrs;
 
 /**
  * @brief A structure to pass widget callbacks.
+ *
+ * The pointers to application callbacks can either be resolved by the dynamic
+ * linker at runtime, or can be explicitly passed in this table. The table has
+ * to be sorted by `id` and NULL `id` terminted.
+ *
+ * Example use:
+ * @code
+ * static const gp_widget_json_addr app_callbacks[] = {
+ *	{.id = "abort", .on_event = abort_on_event},
+ *	{.id = "file_table", .table_col_ops = file_table_ops},
+ *	{}
+ *};
+ * @endcode
  */
 typedef struct gp_widget_json_addr {
 	union {
@@ -73,7 +95,7 @@ struct gp_widget_json_ctx {
  * @brief Loads a widget layout given a JSON object.
  *
  * @param json A json object.
- * @param uids A pointer to a hash table to store widget pointers by UIDs.
+ * @param val A json value.
  * @param ctx A widget JSON loader context, usually passed from our caller.
  *
  * @return A widget layout or a NULL in case of a failure.

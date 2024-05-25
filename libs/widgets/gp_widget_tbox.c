@@ -1062,7 +1062,7 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 	va_list ap;
 	int len;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, -1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, -1);
 
 	sel_clr(self);
 
@@ -1087,7 +1087,7 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 
 void gp_widget_tbox_set(gp_widget *self, const char *str)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	size_t len = strlen(str);
 
@@ -1104,7 +1104,7 @@ void gp_widget_tbox_set(gp_widget *self, const char *str)
 
 void gp_widget_tbox_clear(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	sel_clr(self);
 
@@ -1117,14 +1117,14 @@ void gp_widget_tbox_clear(gp_widget *self)
 
 const char *gp_widget_tbox_text(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, NULL);
 
 	return self->tbox->buf;
 }
 
 gp_utf8_pos gp_widget_tbox_cursor_get(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
 
 	return self->tbox->cur_pos;
 }
@@ -1132,7 +1132,7 @@ gp_utf8_pos gp_widget_tbox_cursor_get(gp_widget *self)
 void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
                                enum gp_seek_whence whence)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	size_t max_pos_chars = gp_utf8_strlen(self->tbox->buf);
 	size_t cur_pos_chars = self->tbox->cur_pos.chars;
@@ -1155,7 +1155,7 @@ void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
 void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
                         enum gp_seek_whence whence, const char *str)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	clear_on_input(self);
 
@@ -1189,7 +1189,7 @@ void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
 void gp_widget_tbox_del(gp_widget *self, ssize_t off,
                         enum gp_seek_whence whence, size_t len)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	sel_clr(self);
 
@@ -1235,7 +1235,7 @@ void gp_widget_tbox_del(gp_widget *self, ssize_t off,
 void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
                             enum gp_seek_whence whence, size_t len)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	if (is_hidden(self->tbox)) {
 		GP_WARN("Attempt to select hidden text!");
@@ -1266,7 +1266,7 @@ void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
 
 void gp_widget_tbox_sel_all(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	if (is_hidden(self->tbox)) {
 		GP_WARN("Attempt to select hidden text!");
@@ -1279,7 +1279,7 @@ void gp_widget_tbox_sel_all(gp_widget *self)
 
 void gp_widget_tbox_sel_clr(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	if (sel_clr(self))
 		gp_widget_redraw(self);
@@ -1287,7 +1287,7 @@ void gp_widget_tbox_sel_clr(gp_widget *self)
 
 void gp_widget_tbox_sel_del(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	if (sel_del(self))
 		gp_widget_redraw(self);
@@ -1295,35 +1295,35 @@ void gp_widget_tbox_sel_del(gp_widget *self)
 
 gp_utf8_pos gp_widget_tbox_sel_len(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
 
 	return gp_utf8_pos_sub(self->tbox->sel_right, self->tbox->sel_left);
 }
 
 gp_utf8_pos gp_widget_tbox_sel_off(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
 
 	return self->tbox->sel_left;
 }
 
 void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	self->tbox->delim = delim;
 }
 
 void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	set_type(self, type);
 }
 
 void gp_widget_tbox_help_set(gp_widget *self, const char *help)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 
 	free(self->tbox->help);
 
@@ -1332,6 +1332,6 @@ void gp_widget_tbox_help_set(gp_widget *self, const char *help)
 
 void gp_widget_tbox_clear_on_input(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 	self->tbox->clear_on_input = 1;
 }

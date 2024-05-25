@@ -16,7 +16,7 @@
 #ifndef GP_WIDGET_CHECKBOX_H
 #define GP_WIDGET_CHECKBOX_H
 
-#include <widgets/gp_widget_bool.h>
+#include <widgets/gp_widget_class_bool.h>
 
 /**
  * @brief Allocate and initialize new checkbox widget.

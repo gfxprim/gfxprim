@@ -57,8 +57,7 @@ gp_widget *gp_widget_new(enum gp_widget_type type,
 
 void gp_widget_set_parent(gp_widget *self, gp_widget *parent)
 {
-	if (!self)
-		return;
+	GP_WIDGET_ASSERT(self, );
 
 	//TODO: reparent?
 	if (self->parent)
@@ -87,8 +86,7 @@ void gp_widget_free(gp_widget *self)
 
 void gp_widget_disable(gp_widget *self)
 {
-	if (!self)
-		return;
+	GP_WIDGET_ASSERT(self, );
 
 	if (self->disabled)
 		return;
@@ -101,8 +99,7 @@ void gp_widget_disable(gp_widget *self)
 
 void gp_widget_enable(gp_widget *self)
 {
-	if (!self)
-		return;
+	GP_WIDGET_ASSERT(self, );
 
 	if (!self->disabled)
 		return;
@@ -113,21 +110,25 @@ void gp_widget_enable(gp_widget *self)
 	gp_widget_redraw_children(self);
 }
 
-void gp_widget_disable_set(gp_widget *self, bool disable)
+void gp_widget_disabled_set(gp_widget *self, bool disabled)
 {
-	if (disable)
+	if (disabled)
 		gp_widget_disable(self);
 	else
 		gp_widget_enable(self);
 }
 
+bool gp_widget_disabled_get(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, false);
+
+	return self->disabled;
+}
+
 void gp_widget_on_event_set(gp_widget *self,
                             int (*on_event)(gp_widget_event *), void *priv)
 {
-	if (!self) {
-		GP_WARN("Setting on_event for NULL widget");
-		return;
-	}
+	GP_WIDGET_ASSERT(self, );
 
 	self->on_event = on_event;
 	self->priv = priv;

@@ -41,7 +41,9 @@ struct gp_task_queue {
 /**
  * @brief A task.
  *
- * Task is a callback with some more information such as priority.
+ * Task is a callback with some more information such as priority. Tasks are
+ * queued in the #gp_task_queue and executed sequentially accordingly to the
+ * priorities.
  */
 struct gp_task {
 	/** @brief A pointers to the linked list. */

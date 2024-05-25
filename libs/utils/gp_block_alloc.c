@@ -14,11 +14,6 @@
 #include <core/gp_debug.h>
 #include <utils/gp_block_alloc.h>
 
-struct gp_balloc_pool {
-	struct gp_balloc_pool *next;
-	size_t free;
-};
-
 static size_t block_size;
 
 static size_t align(size_t size)

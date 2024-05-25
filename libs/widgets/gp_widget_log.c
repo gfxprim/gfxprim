@@ -201,7 +201,7 @@ struct gp_widget_ops gp_widget_log_ops = {
 
 void gp_widget_log_append(gp_widget *self, const char *text)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_LOG, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LOG, );
 	char *str;
 
 	GP_DEBUG(3, "Appending to log widget (%p) '%s'", self, text);

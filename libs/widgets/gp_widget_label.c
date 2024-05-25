@@ -215,7 +215,7 @@ static void redraw_resize(gp_widget *self)
 
 void gp_widget_label_set(gp_widget *self, const char *text)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_LABEL, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LABEL, );
 
 	GP_DEBUG(3, "Setting widget label (%p) text '%s' -> '%s'",
 		 self, self->label->text, text);
@@ -233,7 +233,7 @@ void gp_widget_label_fmt_set(gp_widget *self, const char *text_fmt)
 
 void gp_widget_label_fmt_var_set(gp_widget *self, const char *fmt, ...)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_LABEL, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LABEL, );
 
 	if (!self->label->text_fmt) {
 		GP_WARN("Label (%p) format not set1", self);
@@ -284,7 +284,7 @@ void gp_widget_label_fmt_var_set(gp_widget *self, const char *fmt, ...)
 
 void gp_widget_label_append(gp_widget *self, const char *text)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_LABEL, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LABEL, );
 
 	GP_DEBUG(3, "Appending to label widget (%p) '%s' += '%s'",
 		 self, self->label->text, text);

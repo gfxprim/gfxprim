@@ -248,7 +248,7 @@ void gp_widget_pixmap_redraw(gp_widget *self,
                              gp_coord x, gp_coord y,
                              gp_size w, gp_size h)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_PIXMAP, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PIXMAP, );
 
 	if (self->pixmap->redraw_all)
 		return;
@@ -270,7 +270,7 @@ exit:
 
 void gp_widget_pixmap_redraw_all(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_PIXMAP, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PIXMAP, );
 
 	self->pixmap->redraw_all = 1;
 	self->pixmap->bbox_set = 0;

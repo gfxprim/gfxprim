@@ -345,7 +345,7 @@ static void set(gp_widget *self)
 
 	gp_widget_redraw(self);
 
-	gp_widget_send_widget_event(self, 0);
+	gp_widget_send_widget_event(self, GP_WIDGET_BUTTON_TRIGGER);
 }
 
 static void click(gp_widget *self, gp_event *ev)
@@ -560,14 +560,14 @@ gp_widget *gp_widget_button_new(const char *label,
 
 enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_BUTTON, 0);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_BUTTON, 0);
 
 	return GP_BUTTON_TYPE_MASK & self->button->type;
 }
 
 void gp_widget_button_type_set(gp_widget *self, enum gp_widget_button_type type)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_BUTTON, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_BUTTON, );
 
 	self->button->type = type;
 

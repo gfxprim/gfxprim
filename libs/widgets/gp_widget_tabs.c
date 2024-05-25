@@ -683,7 +683,7 @@ err:
 
 unsigned int gp_widget_tabs_cnt(gp_widget *self)
 {
-		GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, 0);
+		GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, 0);
 
 	return gp_vec_len(self->tabs->tabs);
 }
@@ -691,7 +691,7 @@ unsigned int gp_widget_tabs_cnt(gp_widget *self)
 gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
                               gp_widget *child)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
 
 	if (tab >= gp_vec_len(self->tabs->tabs)) {
 		GP_WARN("Invalid tabs index %u", tab);
@@ -714,7 +714,7 @@ gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
 
 gp_widget *gp_widget_tabs_child_get(gp_widget *self, unsigned int tab)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
 
 	if (tab >= gp_vec_len(self->tabs->tabs)) {
 		GP_WARN("Invalid tabs index %u", tab);
@@ -727,7 +727,7 @@ gp_widget *gp_widget_tabs_child_get(gp_widget *self, unsigned int tab)
 void gp_widget_tabs_tab_ins(gp_widget *self, unsigned int tab,
                             const char *label, gp_widget *child)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, );
 
 	GP_DEBUG(3, "Adding tab '%s' child %p at offset %u, tabs widget %p",
 	         label, child, tab, self);
@@ -760,7 +760,7 @@ void gp_widget_tabs_tab_ins(gp_widget *self, unsigned int tab,
 unsigned int gp_widget_tabs_tab_append(gp_widget *self,
                                        const char *label, gp_widget *child)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, (unsigned int)-1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, (unsigned int)-1);
 
 	unsigned int ret = gp_vec_len(self->tabs->tabs);
 
@@ -800,7 +800,7 @@ static gp_widget *tab_rem(gp_widget *self, unsigned int tab)
 
 gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
 
 	if (tab >= gp_vec_len(self->tabs->tabs)) {
 		GP_BUG("Invalid tab index %u tabs (%p) count %zu",
@@ -813,14 +813,14 @@ gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
 
 unsigned int gp_widget_tabs_active_get(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, 0);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, 0);
 
 	return self->tabs->active_tab;
 }
 
 gp_widget *gp_widget_tabs_active_child_get(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
 
 	if (!gp_vec_len(self->tabs->tabs))
 		return NULL;
@@ -830,7 +830,7 @@ gp_widget *gp_widget_tabs_active_child_get(gp_widget *self)
 
 void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, );
 
 	if (tab == self->tabs->active_tab)
 		return;
@@ -845,7 +845,7 @@ void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)
 
 void gp_widget_tabs_active_set_rel(gp_widget *self, int dir, int wrap_around)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, );
 
 	if (wrap_around > 1) {
 		GP_BUG("Invalid wrap_around value!");
@@ -898,14 +898,14 @@ static int child_to_tab(gp_widget *self, gp_widget *child)
 
 int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, -1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, -1);
 
 	return child_to_tab(self, child);
 }
 
 int gp_widget_tabs_tab_rem_by_child(gp_widget *self, gp_widget *child)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, -1);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, -1);
 
 	int tab = child_to_tab(self, child);
 
@@ -919,7 +919,7 @@ int gp_widget_tabs_tab_rem_by_child(gp_widget *self, gp_widget *child)
 
 const char *gp_widget_tabs_label_get(gp_widget *self, unsigned int tab)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
 
 	if (tab >= gp_vec_len(self->tabs->tabs)) {
 		GP_WARN("Invalid tab index %u tabs (%p) count %zu",
@@ -932,7 +932,7 @@ const char *gp_widget_tabs_label_get(gp_widget *self, unsigned int tab)
 
 const char *gp_widget_tabs_active_label_get(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
 
 	if (!gp_vec_len(self->tabs->tabs))
 		return NULL;

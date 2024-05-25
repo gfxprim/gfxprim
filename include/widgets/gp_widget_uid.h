@@ -6,6 +6,14 @@
 
  */
 
+/**
+ * @file gp_widget_uid.h
+ * @brief Widget by unique id lookup.
+ *
+ * In the JSON layout widgets can have an unique name. All widgets with unique
+ * name are put into a hash table when JSON layout is loaded and can be later
+ * looked up by these functions once layout has been loaded.
+ */
 #ifndef GP_WIDGET_UID_H
 #define GP_WIDGET_UID_H
 
@@ -30,9 +38,9 @@ void gp_widgets_by_uids(gp_htable *uids, gp_widget_uid_map *uid_map, void *struc
 /**
  * @brief Gets a widget pointer given UIDs hash, an id and type.
  *
- * @uids And UIDs hash filled in the JSON parser.
- * @id A widget ID.
- * @type Widget type.
+ * @param uids And UIDs hash filled in the JSON parser.
+ * @param uid A widget unique id.
+ * @param type Widget type.
  *
  * @return A widget pointer or NULL if not found.
  */
@@ -41,9 +49,9 @@ gp_widget *gp_widget_by_uid(gp_htable *uids, const char *uid, enum gp_widget_typ
 /**
  * @brief Gets a widget pointer given UIDs hash, an id and widget_class.
  *
- * @uids And UIDs hash filled in the JSON parser.
- * @id A widget ID.
- * @widget_class Widget class.
+ * @param uids And UIDs hash filled in the JSON parser.
+ * @param uid A widget unique id.
+ * @param widget_class Widget class.
  *
  * @return A widget pointer or NULL if not found.
  */

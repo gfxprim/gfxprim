@@ -331,7 +331,7 @@ static void new_min_max(struct gp_widget_graph *graph)
 
 void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
 	if (style >= GP_WIDGET_GRAPH_STYLE_MAX) {
@@ -349,7 +349,7 @@ void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style
 
 void gp_widget_graph_point_add(gp_widget *self, double x, double y)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
 	size_t pos = gp_cbuffer_append(&graph->data_idx);
@@ -364,7 +364,7 @@ void gp_widget_graph_point_add(gp_widget *self, double x, double y)
 
 void gp_widget_graph_yrange_set(gp_widget *self, double min_y, double max_y)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
 	graph->min_y = min_y;
@@ -376,7 +376,7 @@ void gp_widget_graph_yrange_set(gp_widget *self, double min_y, double max_y)
 
 void gp_widget_graph_ymin_set(gp_widget *self, double min_y)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
 	graph->min_y = min_y;
@@ -386,7 +386,7 @@ void gp_widget_graph_ymin_set(gp_widget *self, double min_y)
 
 void gp_widget_graph_ymax_set(gp_widget *self, double max_y)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
 	graph->max_y = max_y;
@@ -396,7 +396,7 @@ void gp_widget_graph_ymax_set(gp_widget *self, double max_y)
 
 void gp_widget_graph_yrange_clear(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
 	graph->min_y_fixed = 0;
@@ -407,7 +407,7 @@ void gp_widget_graph_yrange_clear(gp_widget *self)
 
 void gp_widget_graph_color_set(gp_widget *self, enum gp_widgets_color color)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_GRAPH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
 	struct gp_widget_graph *graph = self->graph;
 
 	graph->color = color;

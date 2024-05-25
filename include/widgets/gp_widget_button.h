@@ -2,22 +2,16 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
  * @file gp_widget_button.h
  * @brief A button widget.
- */
-
-#ifndef GP_WIDGET_BUTTON_H
-#define GP_WIDGET_BUTTON_H
-
-#include <widgets/gp_widget_bool.h>
-
-/**
- * @brief A button type.
+ *
+ * Button types
+ * ------------
  *
  * @image html button_types.png
  *
@@ -25,30 +19,59 @@
  * they can have label as well but it's not required.
  *
  * @image html button_types_label.png
+ *
+ * Button widget JSON attributes
+ * -----------------------------
+ *
+ * |   Attribute    |  Type  | Default |    Description    |
+ * |----------------|--------|---------|-------------------|
+ * |   **label**    | string |         | Button label      |
+ * |   **btype**    | string | "label" | Button type       |
+ * | **text_align** | string | depends | Button text align |
+ *
+ * The 'text_align' can be either 'left' or 'right' and the default value
+ * depends on the 'btype'.
+ */
+
+#ifndef GP_WIDGET_BUTTON_H
+#define GP_WIDGET_BUTTON_H
+
+#include <widgets/gp_widget_class_bool.h>
+
+/**
+ * @brief A button type.
  */
 enum gp_widget_button_type {
-	/** Button just with a label */
+	/** @brief Button with a label without specific type. */
 	GP_BUTTON_LABEL = 0,
 
-	/** An OK button */
+	/** @brief An OK button. */
 	GP_BUTTON_OK,
-	/** A Cancel button */
+	/** @brief A Cancel button. */
 	GP_BUTTON_CANCEL,
-	/** A Yes button */
+	/** @brief A Yes button. */
 	GP_BUTTON_YES,
-	/** A No button */
+	/** @brief A No button. */
 	GP_BUTTON_NO,
 
+	/** @brief An open file or directory button. */
 	GP_BUTTON_OPEN,
+	/** @brief A save file button. */
 	GP_BUTTON_SAVE,
+	/** @brief A create new directory button. */
 	GP_BUTTON_NEW_DIR,
 
+	/** @brief A previous button. */
 	GP_BUTTON_PREV,
+	/** @brief A next button. */
 	GP_BUTTON_NEXT,
-
+	/** @brief A first button. */
 	GP_BUTTON_FIRST,
+	/** @brief A last button. */
 	GP_BUTTON_LAST,
+	/** @brief A top button. */
 	GP_BUTTON_TOP,
+	/** @brief A bottom button. */
 	GP_BUTTON_BOTTOM,
 
 	GP_BUTTON_PLAY,
@@ -89,6 +112,12 @@ enum gp_widget_button_type {
 	GP_BUTTON_ALIGN_MASK = 0x8000,
 	GP_BUTTON_TEXT_LEFT = 0x8000,
 	GP_BUTTON_TEXT_RIGHT = 0x0000,
+};
+
+/** @brief A gp_widget_event::sub_type for a button widget. */
+enum gp_widget_button_event_type {
+	/** @brief Emitted when button is pressed. */
+	GP_WIDGET_BUTTON_TRIGGER,
 };
 
 /**
