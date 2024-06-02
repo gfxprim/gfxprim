@@ -21,6 +21,7 @@
 #include <core/gp_debug.h>
 
 #include <loaders/gp_exif.h>
+#include <loaders/gp_icc.h>
 #include <loaders/gp_line_convert.h>
 #include <loaders/gp_loaders.gen.h>
 
@@ -250,9 +251,27 @@ static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
 			}
 		}
 		break;
-		case JPEG_APP0 + 2:
-			GP_TODO("ICC Profile");
-		break;
+		case JPEG_APP0 + 2: {
+			if (marker->data_length <= 14) {
+				GP_DEBUG(1, "APP2 block unexpectedly short.");
+				continue;
+			}
+
+			if (memcmp(marker->data, "ICC_PROFILE", 12)) {
+				GP_DEBUG(1, "APP2 block does not start with ICC_PROFILE");
+				continue;
+			}
+
+			printf("%x %x\n", marker->data[12], marker->data[13]);
+
+			gp_io *io = gp_io_mem(marker->data + 14, marker->data_length - 14, NULL);
+			if (!io) {
+				GP_WARN("Failed to create MemIO");
+			} else {
+				gp_read_icc(io, storage);
+				gp_io_close(io);
+			}
+		} break;
 		}
 	}
 }

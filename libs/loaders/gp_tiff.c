@@ -21,6 +21,7 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_debug.h>
 
+#include <loaders/gp_icc.h>
 #include <loaders/gp_loaders.gen.h>
 
 #define TIFF_HEADER_LITTLE "II\x2a\0"
@@ -242,6 +243,13 @@ static void fill_metadata(TIFF *tiff, struct tiff_header *header,
 			gp_storage_add(storage, NULL, &val);
 			flag = 0;
 		}
+	}
+
+	if (TIFFGetField(tiff, TIFFTAG_ICCPROFILE, &data_len, &data)) {
+		gp_io *io = gp_io_mem(data, data_len, NULL);
+		if (io)
+			gp_read_icc(io, storage);
+		gp_io_close(io);
 	}
 }
 
