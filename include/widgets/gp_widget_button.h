@@ -74,38 +74,64 @@ enum gp_widget_button_type {
 	/** @brief A bottom button. */
 	GP_BUTTON_BOTTOM,
 
+	/** @brief A play button. */
 	GP_BUTTON_PLAY,
+	/** @brief A pause button. */
 	GP_BUTTON_PAUSE,
+	/** @brief A stop button. */
 	GP_BUTTON_STOP,
+	/** @brief A record button. */
 	GP_BUTTON_REC,
+	/** @brief A fast forward button. */
 	GP_BUTTON_FFORWARD,
+	/** @brief A fast backward button. */
 	GP_BUTTON_FBACKWARD,
+	/** @brief A step forward button. */
 	GP_BUTTON_STEP_FORWARD,
+	/** @brief A step backward button. */
 	GP_BUTTON_STEP_BACKWARD,
 
+	/** @brief A randomize button. */
 	GP_BUTTON_RANDOMIZE,
 
+	/** @brief An arrow up button. */
 	GP_BUTTON_UP,
+	/** @brief An arrow down button. */
 	GP_BUTTON_DOWN,
+	/** @brief An arrow left button. */
 	GP_BUTTON_LEFT,
+	/** @brief An arrow right button. */
 	GP_BUTTON_RIGHT,
 
+	/** @brief An add button. */
 	GP_BUTTON_ADD,
+	/** @brief A remove button. */
 	GP_BUTTON_REM,
 
+	/** @brief A clear button. */
 	GP_BUTTON_CLEAR,
+	/** @brief A backspace button. */
 	GP_BUTTON_BACKSPACE,
 
+	/** @brief A zoom in button. */
 	GP_BUTTON_ZOOM_IN,
+	/** @brief A zoom out button. */
 	GP_BUTTON_ZOOM_OUT,
+	/** @brief A zoom fit button. */
 	GP_BUTTON_ZOOM_FIT,
+	/** @brief A zoom normal button. */
 	GP_BUTTON_ZOOM_NORMAL,
 
+	/** @brief A rotate clockwise button. */
 	GP_BUTTON_ROTATE_CW,
+	/** @brief A rotate counter clockwise button. */
 	GP_BUTTON_ROTATE_CCW,
 
+	/** @brief A settings button. */
 	GP_BUTTON_SETTINGS,
+	/** @brief A home (directory) button. */
 	GP_BUTTON_HOME,
+	/** @brief A download button. */
 	GP_BUTTON_DOWNLOAD,
 
 	GP_BUTTON_TYPE_MASK = 0x7fff,

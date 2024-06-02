@@ -19,7 +19,7 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_key_repeat_timer.h>
 #include <widgets/gp_dialog.h>
-#include <widgets/gp_widget_app.h>
+#include <widgets/gp_app_event.h>
 #include <widgets/gp_widgets_task.h>
 #include <widgets/gp_widget_keys.h>
 #include <widgets/gp_app_info.h>

@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -11,8 +11,8 @@
  * @brief Widget event handling
  *
  * Widget events is an interface between the application and the widget
- * toolkit, typical event is a button press or a text edit. Each widget usually
- * has only one event callback and sends a subset of event types.
+ * toolkit, typical event is a button press or a text edit. Each widget can
+ * have only one event callback and sends a subset of event types.
  */
 
 #ifndef GP_WIDGET_EVENT_H
@@ -27,34 +27,88 @@
  * We have 32bit mask so the maximal number of possible events is 32.
  */
 enum gp_widget_event_type {
-	/** Send right after widget has been allocated and initalized. */
+	/**
+	 * @brief Widget was created and initialized.
+	 *
+	 * This event is send right after widget has been allocated and
+	 * initalized in the JSON parser. The intended purpose is to be able to
+	 * be able to check parameters or finish initialization of widgets
+	 * loaded from a JSON layout.
+	 */
 	GP_WIDGET_EVENT_NEW,
-	/** Send before widget is freed. */
+	/**
+	 * @brief Widget is about to be freed.
+	 *
+	 * See gp_widget_free() for details.
+	 */
 	GP_WIDGET_EVENT_FREE,
-	/** Widget specific event e.g. button has been pressed, details in sub_type */
+	/**
+	 * @brief Widget specific event.
+	 *
+	 * E.g. button has been pressed, each widget defines its enum of events
+	 * and these are passed in the #gp_widget_event::sub_type.
+	 */
 	GP_WIDGET_EVENT_WIDGET,
-	/** Raw user input event such as mouse movement or keypress. */
+	/**
+	 * @brief An input event.
+	 *
+	 * Raw #gp_event input event such as mouse movement or keypress.
+	 *
+	 * @attention The #gp_event::st cursor position is normalized so that
+	 *            0,0 is top left corner of the widget.
+	 *
+	 * The event handler must return non-zero if the event was used and
+	 * non-zero otherwise.
+	 */
 	GP_WIDGET_EVENT_INPUT,
-	/** Send by pixmap widget when pixmap has has to be redrawn. */
+	/**
+	 * @brief Pixmap redraw event.
+	 *
+	 * TODO: Move to pixmap specific event?
+	 *
+	 * Send by pixmap widget when pixmap has has to be redrawn.
+	 */
 	GP_WIDGET_EVENT_REDRAW,
-	/** Send when widget was resized. */
+	/**
+	 * @brief Widget was resized.
+	 *
+	 * Send when widget was resized.
+	 */
 	GP_WIDGET_EVENT_RESIZE,
-	/** Color scheme has changed */
+	/**
+	 * @brief A color scheme has changed.
+	 *
+	 * See #gp_widgets_color_scheme and gp_widgets_color_scheme_set() for
+	 * details.
+	 */
 	GP_WIDGET_EVENT_COLOR_SCHEME,
 	/** The number of events, i.e. last event + 1. */
 	GP_WIDGET_EVENT_MAX,
 	/**
-	 * @brief Default widget event mask
+	 * @brief Default widget event mask.
 	 *
+	 * This is the default mask for newly created widgets.
 	 */
 	GP_WIDGET_EVENT_DEFAULT_MASK = (1<<GP_WIDGET_EVENT_NEW) | (1<<GP_WIDGET_EVENT_FREE) | (1<<GP_WIDGET_EVENT_WIDGET),
 };
 
+/**
+ * @brief Sets a widget event handler.
+ *
+ * Note that even after setting event handler certain widget events has to be
+ * unmasked with gp_widget_event_unmask() in order to receive them.
+ *
+ * @param self A widget.
+ * @param on_event An widget event handler.
+ * @param priv An user pointer stored in the widget.
+ */
+void gp_widget_on_event_set(gp_widget *self,
+                            int (*on_event)(gp_widget_event *), void *priv);
 
 /**
- * @brief Masks widget events
+ * @brief Masks widget event.
  *
- * Disables widget events.
+ * Disables a widget event.
  *
  * @param self The widget
  * @param ev_type Event type to disable
@@ -62,9 +116,9 @@ enum gp_widget_event_type {
 void gp_widget_event_mask(gp_widget *self, enum gp_widget_event_type ev_type);
 
 /**
- * @brief Unmasks widget events
+ * @brief Unmasks widget event.
  *
- * Enables widget events.
+ * Enables a widget events.
  *
  * @param self The widget
  * @param ev_type Event type to enable
@@ -84,7 +138,7 @@ const char *gp_widget_event_type_name(enum gp_widget_event_type ev_type);
  */
 struct gp_widget_event {
 	/** @brief The widget the event is for. */
-	struct gp_widget *self;
+	gp_widget *self;
 	/** @brief An event type, enum gp_widget_event_type. */
 	uint16_t type;
 	/**

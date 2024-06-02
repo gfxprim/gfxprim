@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -20,6 +20,16 @@ static const char *ev_names[] = {
 	[GP_WIDGET_EVENT_RESIZE] = "resize",
 	[GP_WIDGET_EVENT_COLOR_SCHEME] = "color_scheme",
 };
+
+void gp_widget_on_event_set(gp_widget *self,
+                            int (*on_event)(gp_widget_event *), void *priv)
+{
+	GP_WIDGET_ASSERT(self, );
+
+	self->on_event = on_event;
+	self->priv = priv;
+	self->no_events = 0;
+}
 
 void gp_widget_event_mask(gp_widget *self, enum gp_widget_event_type ev_type)
 {

@@ -48,7 +48,8 @@
 #include <widgets/gp_widget_log.h>
 #include <widgets/gp_widget_graph.h>
 
-#include <widgets/gp_widget_app.h>
+#include <widgets/gp_app_layout.h>
+#include <widgets/gp_app_event.h>
 #include <widgets/gp_app_info.h>
 
 #include <widgets/gp_widget_tattr.h>

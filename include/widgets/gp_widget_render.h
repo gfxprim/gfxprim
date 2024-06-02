@@ -2,10 +2,14 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
+/**
+ * @file gp_widget_render.h
+ * @brief Widget rendering.
+ */
 #ifndef GP_WIDGET_RENDER_H
 #define GP_WIDGET_RENDER_H
 
@@ -18,14 +22,25 @@
 #include <widgets/gp_widget_types.h>
 #include <widgets/gp_widgets_color_scheme.h>
 
+/**
+ * @brief Global widget (rendering) context.
+ */
 struct gp_widget_render_ctx {
+	/** @brief A pixmap to render the widget to. */
 	gp_pixmap *buf;
 
+	/** @brief Active color scheme. */
 	enum gp_widgets_color_scheme color_scheme;
 
-	/* colors */
+	/** @brief Currently active colors. */
 	union {
+		/** @brief Currrently active colors as an array. */
 		gp_pixel colors[GP_WIDGETS_THEME_COLORS + 16];
+		/**
+		 * @brief Currently active colors with names.
+		 *
+		 * The order _MUST_ match the enum #gp_widgets_color.
+		 */
 		struct {
 			gp_pixel text_color;
 			gp_pixel fg_color;
@@ -57,26 +72,29 @@ struct gp_widget_render_ctx {
 		} __attribute__((packed));
 	};
 
-	/* fonts */
+	/** @brief Default font. */
 	gp_text_style *font;
+	/** @brief Default bold font. */
 	gp_text_style *font_bold;
-
+	/** @brief Default big font. */
 	gp_text_style *font_big;
+	/** @brief Default big bold font. */
 	gp_text_style *font_big_bold;
-
+	/** @brief Default monospace font. */
 	gp_text_style *font_mono;
+	/** @brief Default monospace bold font. */
 	gp_text_style *font_mono_bold;
 
-	/* pixel type used for drawing */
+	/** @brief Pixel type used for drawing. */
 	gp_pixel_type pixel_type;
 
-	/* padding between widgets */
+	/** @brief Padding between widgets */
 	uint8_t padd;
-	/* frame thickness 0 == 1px */
+	/** @brief Frame thickness 0 == 1px */
 	uint8_t fr_thick;
-	/* frame roundness */
+	/** @brief Frame roundness. */
 	uint8_t fr_round;
-	/* cursor thickness 0 == 1px */
+	/** @brief Text cursor thickness 0 == 1px */
 	uint8_t cur_thick;
 	/* font size */
 	uint8_t font_size;

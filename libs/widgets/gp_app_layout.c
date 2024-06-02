@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -10,7 +10,7 @@
 #include <core/gp_debug.h>
 #include <utils/gp_vec_str.h>
 #include <widgets/gp_widget_json.h>
-#include <widgets/gp_widget_app.h>
+#include <widgets/gp_app_layout.h>
 
 static gp_widget *try_load_layout(const char *pathname,
                                   const gp_widget_json_callbacks *const callbacks,
@@ -85,30 +85,9 @@ gp_widget *gp_app_layout_load2(const char *app_name,
 	return layout_load(app_name, "layout", callbacks, uids);
 }
 
-gp_widget *gp_app_named_layout_load(const char *app_name, const char *layout_name,
-                                    const gp_widget_json_callbacks *const callbacks,
-                                    gp_htable **uids)
+gp_widget *gp_app_layout_fragment_load(const char *app_name, const char *layout_name,
+                                       const gp_widget_json_callbacks *const callbacks,
+                                       gp_htable **uids)
 {
 	return layout_load(app_name, layout_name, callbacks, uids);
-}
-
-static struct gp_app app = {
-	.ev_mask = GP_APP_DEFAULT_EVENT_MASK,
-};
-
-const struct gp_app *gp_app = &app;
-
-void gp_app_event_mask(enum gp_widget_event_type ev_type)
-{
-	app.ev_mask &= ~(1<<ev_type);
-}
-
-void gp_app_event_unmask(enum gp_widget_event_type ev_type)
-{
-	app.ev_mask |= (1<<ev_type);
-}
-
-void gp_app_on_event_set(int (*on_event)(gp_widget_event *ev))
-{
-	app.on_event = on_event;
 }

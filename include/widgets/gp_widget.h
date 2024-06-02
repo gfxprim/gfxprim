@@ -55,7 +55,7 @@ struct gp_widget {
 	/**
 	 * @brief An application event handler.
 	 *
-	 * This function is supplied by the application. All changes in widget
+	 * This function is supplied by the application. Changes in widget
 	 * state are propagated to the application by this function.
 	 */
 	int (*on_event)(gp_widget_event *);
@@ -205,22 +205,39 @@ enum gp_widget_type {
 	GP_WIDGET_CHECKBOX,
 	/** @brief A label widget. */
 	GP_WIDGET_LABEL,
+	/** @brief A progress bar widget. */
 	GP_WIDGET_PROGRESSBAR,
+	/** @brief A spinner widget. */
 	GP_WIDGET_SPINNER,
+	/** @brief A slider widget. */
 	GP_WIDGET_SLIDER,
+	/** @brief A textbox widget. */
 	GP_WIDGET_TBOX,
+	/** @brief A radiobutton widget. */
 	GP_WIDGET_RADIOBUTTON,
+	/** @brief A spinnbutton widget. */
 	GP_WIDGET_SPINBUTTON,
+	/** @brief A table widget. */
 	GP_WIDGET_TABLE,
+	/** @brief A pixmap widget. */
 	GP_WIDGET_PIXMAP,
+	/** @brief A stock image widget. */
 	GP_WIDGET_STOCK,
+	/** @brief A scroll area widget. */
 	GP_WIDGET_SCROLL_AREA,
+	/** @brief A frame widget. */
 	GP_WIDGET_FRAME,
+	/** @brief A markup widget. */
 	GP_WIDGET_MARKUP,
+	/** @brief A layout switch widget. */
 	GP_WIDGET_SWITCH,
+	/** @brief An overlay widget. */
 	GP_WIDGET_OVERLAY,
+	/** @brief A widget log widget. */
 	GP_WIDGET_LOG,
+	/** @brief A graph widget. */
 	GP_WIDGET_GRAPH,
+	/** @brief A numeber of widgets. */
 	GP_WIDGET_MAX,
 };
 
@@ -249,11 +266,80 @@ const char *gp_widget_class_name(enum gp_widget_class widget_class);
 /**
  * @brief A widget alignment.
  *
- * Defines how widget is aligned in the available space.
+ * Defines a widget alignment in the parent container, the bottom half of the
+ * byte defines horizontal alignment, the top half vertical alignment.
  *
- * The bottom half of the byte defines horizontal alignment, the top half vertical alignment.
+ * The widgets are organized in a two dimensional tree where each widget/layer
+ * is an rectangle in a plane. The rectanles on a given tree layer are distinct
+ * and the rectanle on an upper layer contains all rectangles on lower layer.
  *
- * @image html grid.png
+ * The widget layout is computed in two steps, first minimal size is computed
+ * recursively from the top level widget down to the leaf widgets, then if the
+ * window is bigger than the minimal needed size, the leftover space is being
+ * distributed between the widgets.
+ *
+ * In order for a widget to take more space than the minimal size, i.e. be
+ * resizable the horizontal and/or vertical alignment has to be set to fill.
+ * Which especially means that layout can be resized only and only if the top
+ * level layout widget is resizable. Apart from fill each widget can be set to
+ * be positioned top/center/bottom vertically as well as left/center/right
+ * horizontally.
+ *
+ * Examples
+ * --------
+ * Grid horizontal and vertical alignment set to fill button to center
+ *
+ * @image html grid_fill_button_center.png
+ *
+ * Widget layout in JSON:
+ * @code{.json}
+ * {
+ *  "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ *  "layout": {
+ *   "align": "fill",
+ *   "widgets": [
+ *    {"type": "button", "label": "Button", "align": "center"}
+ *   ]
+ *  }
+ * }
+ * @endcode
+ *
+ * Horizontal and vertical alignment set to fill for both
+ *
+ * @image html grid_fill_button_fill.png
+ *
+ * Widget layout in JSON:
+ * @code{.json}
+ * {
+ *  "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ *  "layout": {
+ *   "align": "fill",
+ *   "widgets": [
+ *    {"type": "button", "label": "Button", "align": "fill"}
+ *   ]
+ *  }
+ * }
+ * @endcode
+ *
+ * Horizontal and vertical alignment set to center for grid
+ *
+ * The button alignment does not matter in this case, since it exaclty fits its
+ * assigned space.
+ *
+ * @image html grid_center_button.png
+ *
+ * Widget layout in JSON:
+ * @code{json}
+ * {
+ *  "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ *  "layout": {
+ *   "align": "center",
+ *   "widgets": [
+ *    {"type": "button", "label": "Button"}
+ *   ]
+ *  }
+ * }
+ * @endcode
  */
 enum gp_widget_alignment {
 	/** @brief Center horizontally. */
@@ -356,10 +442,45 @@ gp_widget *gp_widget_new(enum gp_widget_type type,
  *
  * Following actions are done when widget is being freed:
  *
- *  - if widget has event handler GP_WIDGET_EVENT_FREE is send
- *  - if needed gp_widget_free() is called recursively for all children widgets
- *  - if widget type defines free() in its struct gp_widget_ops it's called
+ *  - if widget has gp_widget::on_event() event handler set,
+ *    #GP_WIDGET_EVENT_FREE event is send
+ *  - if widget has children gp_widget_free() is called recursively for all
+ *    children widgets
+ *  - if widget type defines gp_widget_ops::free() it's called
  *  - widget memory is finally freed
+ *
+ * Example user widget free event handling
+ * ---------------------------------------
+ *
+ * @code
+ * static int event_handler(gp_widget_event *ev)
+ * {
+ *	if (ev->type == GP_WIDGET_FREE) {
+ *		free(ev->self->priv);
+ *		return 0;
+ *	}
+ *
+ *	...
+ * }
+ *
+ * int main(void)
+ * {
+ *	...
+ *
+ *	void *data = malloc(...);
+ *
+ *	...
+ *
+ *	gp_widget_on_event_set(widget, event_handler, data);
+ *
+ *	...
+ *
+ *	// the event handler calls free on data from this function
+ *	gp_widget_free(widget);
+ *
+ *	...
+ * }
+ * @endcode
  *
  * @param self A widget.
  */
@@ -382,19 +503,6 @@ void gp_widget_set_parent(gp_widget *self, gp_widget *parent);
  * @return Zero if focus couldn't be changed, non-zero otherwise.
  */
 int gp_widget_focus_set(gp_widget *self);
-
-/**
- * @brief Sets widget event handler.
- *
- * Note that even after setting event handler certain widget events has to be
- * unmasked in order to receive them.
- *
- * @param self A widget.
- * @param on_event An widget event handler.
- * @param priv An user pointer stored in the widget.
- */
-void gp_widget_on_event_set(gp_widget *self,
-                            int (*on_event)(gp_widget_event *), void *priv);
 
 #include <widgets/gp_widget_event.h>
 

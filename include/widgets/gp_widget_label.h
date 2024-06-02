@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -9,7 +9,38 @@
  * @file gp_widget_label.h
  * @brief A label widget.
  *
+ * A label widget is a single line of a text.
+ *
  * @image html label.png
+ *
+ * A note about the widget size
+ * ----------------------------
+ *
+ * Unless widget 'size' is set the widget grows its size to fit the content
+ * without any limitations, which is only useful for cases where the label
+ * text is under your control and all possible values are known in advance.
+ *
+ * If you have a label whose text is outside of your control, e.g. the value is
+ * a result of some system call, RPC call, etc, it's important to set the label
+ * size so that the label will not grow undefinitelly. The most useful
+ * combination is to set both label 'size' along with 'hfill' alignment in
+ * which case the label will fill all available horizontal space and the 'size'
+ * will function as a minimal widget size. The text inside of the label widget
+ * can be aligned with #gp_widget_tattr text attributes.
+ *
+ * Label JSON attributes
+ * ---------------------
+ *
+ * |     Attribute      |  Type  | Default | Description                                   |
+ * |--------------------|--------|---------|-----------------------------------------------|
+ * |    **text**        | string |         | Label text                                    |
+ * |    **tattr**       |  tattr |    0    | Text attributes #gp_widget_tattr, e.g. bold   |
+ * |    **width**       |   int  |    0    | Label text size                               |
+ * |    **frame**       |  bool  |  false  | Draw frame around label, implies min padd = 1 |
+ * |    **padd**        |   int  |    0    | Padd inside label on left and right           |
+ * |    **bg_color**    | string |   "bg"  | Background #gp_widgets_color                  |
+ * |   **text_color**   | string | "text"  | Text #gp_widgets_color                        |
+ * | **reverse_colors** |  bool  |  false  | Reverse background and text color             |
  */
 
 #ifndef GP_WIDGET_LABEL_H

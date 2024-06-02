@@ -8,8 +8,42 @@
 
 /**
  * @file gp_widgets_color_scheme.h
- * @brief Color scheme.
+ * @brief Colors and color scheme.
+ *
+ * Color theme provies a mapping from an abstract color names such as text
+ * color or background color to indexes into a global color table
+ * #gp_widget_render_ctx::colors.
+ *
+ * JSON Theme colors
+ * -----------------
+ *
+ * | Color name  | Color definition                 |
+ * |-------------|----------------------------------|
+ * | "text"      | Text color                       |
+ * | "fg"        | Foreground color                 |
+ * | "bg         | Background color                 |
+ * | "highlight" | Highlighted background           |
+ * | "alert"     | Alert (error) color, usually red |
+ * | "warn"      | Warning color, usually yellow    |
+ * | "accept"    | Accept color, usually green      |
+ *
+ * JSON 16 colors names
+ * --------------------
+ *
+ * | Color names    |                  |                |                 |
+ * |----------------|------------------|----------------|-----------------|
+ * | "black"        | "red"            | "green"        | "yellow"        |
+ * | "blue"         | "magenta"        | "cyan"         | "gray"          |
+ * | "bright black" | "bright red"     | "bright green" | "bright yellow" |
+ * | "bright blue"  | "bright magenta" | "bright cyan"  | "white"         |
+ *
+ * Label colors example
+ * --------------------
+ *
+ * @image html label_colors.png
+ * @include{json} demos/widgets/test_layouts/label_colors.json
  */
+
 #ifndef GP_WIDGETS_COLOR_SCHEME_H
 #define GP_WIDGETS_COLOR_SCHEME_H
 
@@ -31,58 +65,112 @@ enum gp_widgets_color_scheme {
 	GP_WIDGET_COLOR_SCHEME_DARK,
 };
 
+/**
+ * @brief Widget theme colors.
+ *
+ * The first 10 colors are theme colors, such as default text color, foreground
+ * and background color and the next are standard 16 colors.
+ */
 enum gp_widgets_color {
-	/* theme colors */
-	GP_WIDGETS_COL_TEXT,
-	GP_WIDGETS_COL_FG,
-	GP_WIDGETS_COL_BG,
-	GP_WIDGETS_COL_HIGHLIGHT,
-	GP_WIDGETS_COL_SELECT,
-	GP_WIDGETS_COL_ALERT,
-	GP_WIDGETS_COL_WARN,
-	GP_WIDGETS_COL_ACCEPT,
-	GP_WIDGETS_COL_FILL,
-	GP_WIDGETS_COL_DISABLED,
-	GP_WIDGETS_THEME_COLORS,
+	/**
+	 * @brief Default text color.
+	 *
+	 * Text color is also used for widget frames.
+	 */
+	GP_WIDGETS_COL_TEXT = 0,
+	/**
+	 * @brief Default foreground color.
+	 *
+	 * Foreground is usually used to paint inner parts of the widgets.
+	 */
+	GP_WIDGETS_COL_FG = 1,
+	/**
+	 * @brief Default background color.
+	 *
+	 * Background is used to fill in areas between widgets.
+	 */
+	GP_WIDGETS_COL_BG = 2,
+	/**
+	 * @brief Default highlighted color.
+	 */
+	GP_WIDGETS_COL_HIGHLIGHT = 3,
+	/**
+	 * @brief Default selection color.
+	 *
+	 * Selected text, active widget, etc.
+	 */
+	GP_WIDGETS_COL_SELECT = 4,
+	/**
+	 * @brief Default alert color.
+	 *
+	 * Used to highlight errors, usually red.
+	 */
+	GP_WIDGETS_COL_ALERT = 5,
+	/**
+	 * @brief Default warning color.
+	 *
+	 * Used to highlight warnings, usually yelow.
+	 */
+	GP_WIDGETS_COL_WARN = 6,
+	/**
+	 * @brief Default accept color.
+	 *
+	 * Used to highlight accepted input, agreement etc., usually green.
+	 */
+	GP_WIDGETS_COL_ACCEPT = 7,
+	/**
+	 * @brief Default fill color.
+	 *
+	 * This is used to fill in background when application is smaller than backend.
+	 */
+	GP_WIDGETS_COL_FILL = 8,
+	/**
+	 * @brief Default disabled widget color.
+	 *
+	 * This color replaces text color when widget is disabled.
+	 */
+	GP_WIDGETS_COL_DISABLED = 9,
+	/** @brief The number of theme colors. */
+	GP_WIDGETS_THEME_COLORS =  10,
 
-	/* 16 colors */
-	GP_WIDGETS_COL_BLACK = GP_WIDGETS_THEME_COLORS,
-	GP_WIDGETS_COL_RED,
-	GP_WIDGETS_COL_GREEN,
-	GP_WIDGETS_COL_YELLOW,
-	GP_WIDGETS_COL_BLUE,
-	GP_WIDGETS_COL_MAGENTA,
-	GP_WIDGETS_COL_CYAN,
-	GP_WIDGETS_COL_GRAY,
-	GP_WIDGETS_COL_BR_BLACK,
-	GP_WIDGETS_COL_BR_RED,
-	GP_WIDGETS_COL_BR_GREEN,
-	GP_WIDGETS_COL_BR_YELLOW,
-	GP_WIDGETS_COL_BR_BLUE,
-	GP_WIDGETS_COL_BR_MAGENTA,
-	GP_WIDGETS_COL_BR_CYAN,
-	GP_WIDGETS_COL_WHITE,
+	/** @brief Black in standard 16 colors. */
+	GP_WIDGETS_COL_BLACK = 10,
+	/** @brief Red in standard 16 colors. */
+	GP_WIDGETS_COL_RED = 11,
+	/** @brief Green in standard 16 colors. */
+	GP_WIDGETS_COL_GREEN = 12,
+	/** @brief Yellow in standard 16 colors. */
+	GP_WIDGETS_COL_YELLOW = 13,
+	/** @brief Blue in standard 16 colors. */
+	GP_WIDGETS_COL_BLUE = 14,
+	/** @brief Magenta in standard 16 colors. */
+	GP_WIDGETS_COL_MAGENTA = 15,
+	/** @brief Cyan in standard 16 colors. */
+	GP_WIDGETS_COL_CYAN = 16,
+	/** @brief Gray in standard 16 colors. */
+	GP_WIDGETS_COL_GRAY = 17,
+	/** @brief Bright black in standard 16 colors. */
+	GP_WIDGETS_COL_BR_BLACK = 18,
+	/** @brief Bright red in standard 16 colors. */
+	GP_WIDGETS_COL_BR_RED = 19,
+	/** @brief Bright green in standard 16 colors. */
+	GP_WIDGETS_COL_BR_GREEN = 20,
+	/** @brief Bright yellow in standard 16 colors. */
+	GP_WIDGETS_COL_BR_YELLOW = 21,
+	/** @brief Bright blue in standard 16 colors. */
+	GP_WIDGETS_COL_BR_BLUE = 22,
+	/** @brief Bright magenta in standard 16 colors. */
+	GP_WIDGETS_COL_BR_MAGENTA = 23,
+	/** @brief Bright cyan in standard 16 colors. */
+	GP_WIDGETS_COL_BR_CYAN = 24,
+	/** @brief White in standard 16 colors. */
+	GP_WIDGETS_COL_WHITE = 25,
+	/** @brief The number of widget colors. */
 	GP_WIDGETS_COL_CNT,
 };
 
 /**
  * @brief Converts a color name into a color index.
- *
- * Widget theme color names:
- *
- * - "fg"
- * - "bg"
- * - "text"
- * - "highlight"
- * - "alert"
- * - "warn",
- * - "accept",
- *
- * 16 colors names:
- *
- * "black", "red", "green", "yellow", "blue", "magenta", "cyan", "gray",
- * "bright black", "bright red", "bright green", "bright yellow",
- * "bright blue", "bright magenta", "bright cyan", "white"
  *
  * @param name a color name
  *

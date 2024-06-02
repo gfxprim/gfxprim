@@ -124,13 +124,3 @@ bool gp_widget_disabled_get(gp_widget *self)
 
 	return self->disabled;
 }
-
-void gp_widget_on_event_set(gp_widget *self,
-                            int (*on_event)(gp_widget_event *), void *priv)
-{
-	GP_WIDGET_ASSERT(self, );
-
-	self->on_event = on_event;
-	self->priv = priv;
-	self->no_events = 0;
-}
