@@ -702,7 +702,7 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 		gp_widget_disable(dialog->open_save_btn);
 
 	gp_widget_on_event_set(dialog->file_table, table_on_event, dialog);
-	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
+	gp_widget_events_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
 
 	gp_htable_free(uids);
 
@@ -767,7 +767,7 @@ gp_dialog *gp_dialog_file_open_new(const char *path,
 		gp_widget_disable(dialog->open_save_btn);
 
 	gp_widget_on_event_set(dialog->file_table, table_on_event, dialog);
-	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
+	gp_widget_events_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
 
 	gp_htable_free(uids);
 

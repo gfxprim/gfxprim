@@ -160,9 +160,9 @@ int main(int argc, char *argv[])
 
 	gp_widget *pixmap = gp_widget_by_uid(uids, "pixmap", GP_WIDGET_PIXMAP);
 
-	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_RESIZE);
-	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_INPUT);
-	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_COLOR_SCHEME);
+	gp_widget_events_unmask(pixmap, GP_WIDGET_EVENT_RESIZE |
+	                                GP_WIDGET_EVENT_INPUT |
+	                                GP_WIDGET_EVENT_COLOR_SCHEME);
 
 	gp_widgets_main_loop(layout, NULL, argc, argv);
 

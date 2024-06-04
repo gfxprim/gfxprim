@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
 	tmr.priv = pixmap;
 
-	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_REDRAW);
+	gp_widget_events_unmask(pixmap, GP_WIDGET_EVENT_REDRAW);
 
 	gp_widgets_timer_ins(&tmr);
 

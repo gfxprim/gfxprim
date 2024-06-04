@@ -35,20 +35,20 @@ enum gp_widget_event_type {
 	 * be able to check parameters or finish initialization of widgets
 	 * loaded from a JSON layout.
 	 */
-	GP_WIDGET_EVENT_NEW,
+	GP_WIDGET_EVENT_NEW = 0x01,
 	/**
 	 * @brief Widget is about to be freed.
 	 *
 	 * See gp_widget_free() for details.
 	 */
-	GP_WIDGET_EVENT_FREE,
+	GP_WIDGET_EVENT_FREE = 0x02,
 	/**
 	 * @brief Widget specific event.
 	 *
 	 * E.g. button has been pressed, each widget defines its enum of events
 	 * and these are passed in the #gp_widget_event::sub_type.
 	 */
-	GP_WIDGET_EVENT_WIDGET,
+	GP_WIDGET_EVENT_WIDGET = 0x04,
 	/**
 	 * @brief An input event.
 	 *
@@ -60,7 +60,7 @@ enum gp_widget_event_type {
 	 * The event handler must return non-zero if the event was used and
 	 * non-zero otherwise.
 	 */
-	GP_WIDGET_EVENT_INPUT,
+	GP_WIDGET_EVENT_INPUT = 0x08,
 	/**
 	 * @brief Pixmap redraw event.
 	 *
@@ -68,28 +68,26 @@ enum gp_widget_event_type {
 	 *
 	 * Send by pixmap widget when pixmap has has to be redrawn.
 	 */
-	GP_WIDGET_EVENT_REDRAW,
+	GP_WIDGET_EVENT_REDRAW = 0x10,
 	/**
 	 * @brief Widget was resized.
 	 *
 	 * Send when widget was resized.
 	 */
-	GP_WIDGET_EVENT_RESIZE,
+	GP_WIDGET_EVENT_RESIZE = 0x20,
 	/**
 	 * @brief A color scheme has changed.
 	 *
 	 * See #gp_widgets_color_scheme and gp_widgets_color_scheme_set() for
 	 * details.
 	 */
-	GP_WIDGET_EVENT_COLOR_SCHEME,
-	/** The number of events, i.e. last event + 1. */
-	GP_WIDGET_EVENT_MAX,
+	GP_WIDGET_EVENT_COLOR_SCHEME = 0x40,
 	/**
 	 * @brief Default widget event mask.
 	 *
 	 * This is the default mask for newly created widgets.
 	 */
-	GP_WIDGET_EVENT_DEFAULT_MASK = (1<<GP_WIDGET_EVENT_NEW) | (1<<GP_WIDGET_EVENT_FREE) | (1<<GP_WIDGET_EVENT_WIDGET),
+	GP_WIDGET_EVENT_DEFAULT_MASK = GP_WIDGET_EVENT_NEW | GP_WIDGET_EVENT_FREE | GP_WIDGET_EVENT_WIDGET,
 };
 
 /**
@@ -108,30 +106,30 @@ void gp_widget_on_event_set(gp_widget *self,
 /**
  * @brief Masks widget event.
  *
- * Disables a widget event.
+ * Disables a widget event(s).
  *
- * @param self The widget
- * @param ev_type Event type to disable
+ * @param self A widget.
+ * @param evs A bitmask of events to disable.
  */
-void gp_widget_event_mask(gp_widget *self, enum gp_widget_event_type ev_type);
+void gp_widget_events_mask(gp_widget *self, enum gp_widget_event_type evs);
 
 /**
  * @brief Unmasks widget event.
  *
- * Enables a widget events.
+ * Enables a widget event(s).
  *
- * @param self The widget
- * @param ev_type Event type to enable
+ * @param self A widget.
+ * @param evs A bitmask of events to enable.
  */
-void gp_widget_event_unmask(gp_widget *self, enum gp_widget_event_type ev_type);
+void gp_widget_events_unmask(gp_widget *self, enum gp_widget_event_type evs);
 
 /**
  * @brief Returns string name for a given event type.
  *
- * @param ev_type Widget event type.
+ * @param ev Widget event type.
  * @return Widget event type name.
  */
-const char *gp_widget_event_type_name(enum gp_widget_event_type ev_type);
+const char *gp_widget_event_type_name(enum gp_widget_event_type ev);
 
 /**
  * @brief Event structure passed to widget event handler.
@@ -187,7 +185,7 @@ static inline int gp_widget_send_event(gp_widget *self,
 	if (!self->on_event)
 		return 0;
 
-	if (!(self->event_mask & (1<<type)))
+	if (!(self->event_mask & type))
 		return 0;
 
 	const struct gp_widget_render_ctx *ctx = NULL;

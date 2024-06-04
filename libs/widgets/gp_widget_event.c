@@ -11,16 +11,6 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_event.h>
 
-static const char *ev_names[] = {
-	[GP_WIDGET_EVENT_NEW] = "new",
-	[GP_WIDGET_EVENT_FREE] = "free",
-	[GP_WIDGET_EVENT_WIDGET] = "widget",
-	[GP_WIDGET_EVENT_INPUT] = "input",
-	[GP_WIDGET_EVENT_REDRAW] = "redraw",
-	[GP_WIDGET_EVENT_RESIZE] = "resize",
-	[GP_WIDGET_EVENT_COLOR_SCHEME] = "color_scheme",
-};
-
 void gp_widget_on_event_set(gp_widget *self,
                             int (*on_event)(gp_widget_event *), void *priv)
 {
@@ -31,35 +21,40 @@ void gp_widget_on_event_set(gp_widget *self,
 	self->no_events = 0;
 }
 
-void gp_widget_event_mask(gp_widget *self, enum gp_widget_event_type ev_type)
+void gp_widget_events_mask(gp_widget *self, enum gp_widget_event_type evs)
 {
-	if (!self) {
-		GP_WARN("NULL widget!");
-		return;
-	}
+	GP_WIDGET_ASSERT(self, );
 
-	self->event_mask &= ~(1<<ev_type);
+	self->event_mask &= ~evs;
 }
 
-void gp_widget_event_unmask(gp_widget *self, enum gp_widget_event_type ev_type)
+void gp_widget_events_unmask(gp_widget *self, enum gp_widget_event_type evs)
 {
-	if (!self) {
-		GP_WARN("NULL widget!");
-		return;
-	}
+	GP_WIDGET_ASSERT(self, );
 
-	self->event_mask |= (1<<ev_type);
+	self->event_mask |= evs;
 }
 
 const char *gp_widget_event_type_name(enum gp_widget_event_type ev_type)
 {
-	if (ev_type >= GP_WIDGET_EVENT_MAX)
+	switch (ev_type) {
+	case GP_WIDGET_EVENT_NEW:
+		return "new";
+	case GP_WIDGET_EVENT_FREE:
+		return "free";
+	case GP_WIDGET_EVENT_WIDGET:
+		return "widget";
+	case GP_WIDGET_EVENT_INPUT:
+		return "input";
+	case GP_WIDGET_EVENT_REDRAW:
+		return "redraw";
+	case GP_WIDGET_EVENT_RESIZE:
+		return "resize";
+	case GP_WIDGET_EVENT_COLOR_SCHEME:
+		return "color_scheme";
+	default:
 		return "invalid";
-
-	if (ev_type < 0)
-		return "invalid";
-
-	return ev_names[ev_type];
+	}
 }
 
 void gp_widget_event_dump(gp_widget_event *ev)

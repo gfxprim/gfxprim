@@ -83,9 +83,7 @@ int main(int argc, char *argv[])
 	                                         GP_WIDGET_SIZE(h, 0, 0),
 	                                         pixmap_on_event, NULL);
 
-	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_REDRAW);
-
-	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_RESIZE);
+	gp_widget_events_unmask(pixmap, GP_WIDGET_EVENT_REDRAW | GP_WIDGET_EVENT_RESIZE);
 
 	gp_widget_scroll_area_put(area, pixmap);
 
