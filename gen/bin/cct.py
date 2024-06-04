@@ -61,14 +61,14 @@ def transform(filename, lines, include_dirs, startindent, indent_depth):
         if l == '@':
             continue;
 
-        if re.match('\s*@\s.*', l):
+        if re.match(r'\s*@\s.*', l):
             padd = l[:len(l) - len(l.lstrip())]
             l = l.lstrip()
             # lines with '@ end' ends intent block by setting new indent
-            if re.match('@\s*end\s*', l):
+            if re.match(r'@\s*end\s*', l):
                 lastindent = len(l[2:]) - len(l[2:].lstrip())
-            elif re.match('@\s*include.*', l):
-                include_filename = re.sub('@\s*include\s*', '', l)
+            elif re.match(r'@\s*include.*', l):
+                include_filename = re.sub(r'@\s*include\s*', '', l)
                 include_path = ''
 
                 if not include_filename:
@@ -97,7 +97,7 @@ def transform(filename, lines, include_dirs, startindent, indent_depth):
             else:
                 code = re.sub('\t', '        ', l[2:]).rstrip()
                 # full-line comments do not change last indent
-                if code and not re.match('^[ ]*#', code):
+                if code and not re.match(r'^[ ]*#', code):
                     if code.endswith(':'):
                         lastindent = len(code) - len(code.lstrip()) + indent_depth
                 if (padd):
