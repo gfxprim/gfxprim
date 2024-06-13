@@ -270,6 +270,7 @@ static int load_tag(gp_io *io, gp_storage *storage,
 		}
 	break;
 	default:
+	break;
 	}
 
 	if (!used) {
