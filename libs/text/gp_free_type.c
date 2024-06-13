@@ -310,7 +310,7 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 		if (load_and_render_glyph(priv->face, i))
 			goto err5;
 
-		gp_glyph *glyph_bitmap = gp_get_glyph(font, i);
+		gp_glyph *glyph_bitmap = gp_glyph_get(font, i);
 
 		copy_glyph(priv->face, glyph_bitmap);
 

@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_font.h
+ * @brief An in-memory font description.
+ */
 #ifndef TEXT_GP_FONT_H
 #define TEXT_GP_FONT_H
 
@@ -11,8 +15,8 @@
 
 #define GP_FONT_NAME_MAX 64
 
-/*
- * Data describing single Glyph.
+/**
+ * @brief A data describing single Glyph.
  *
  * Note that glyph do not necessarily correspond to one character (for example
  * ligature is a glyph but corresponds to at least two characters).
@@ -25,62 +29,66 @@
  * aligned.
  */
 typedef struct gp_glyph {
-	/*
-	 * Bitmap width in pixels.
-	 */
+	/** @brief Bitmap width in pixels. */
 	uint8_t width;
 
-	/*
-	 * Bitmap heigth in pixels.
-	 */
+	/** @brief Bitmap heigth in pixels. */
 	uint8_t height;
 
-	/*
-	 * X offset to be applied before we start drawing.
-	 */
+	/** @brief An X offset to be applied before we start drawing. */
 	int8_t bearing_x;
 
-	/*
-	 * Y offset from baseline to the top of the bitmap.
-	 */
+	/** @brief An Y offset from baseline to the top of the bitmap. */
 	int8_t bearing_y;
 
-	/*
-	 * Offset to be applied after drawing, defines
-	 * basepoint for next glyph.
+	/**
+	 * @brief An offset to be applied after drawing.
+	 *
+	 * This defines a basepoint for next glyph.
 	 */
 	uint8_t advance_x;
 
-	/*
-	 * Character bitmap, byte aligned bitmap.
-	 */
+	/**
+	 * @brief A character bitmap.
+	 *
+	 * This is width * height * depth bits rounded up to closest whole
+	 * byte.
+         */
 	uint8_t bitmap[];
 } gp_glyph;
 
-/*
- * Glyph bitmap data format.
+/**
+ * @brief Glyph bitmap data format.
  *
- * The bitmap is byte aligned and for 1BPP the number of bytes per row is
- * rounted to bytes.
- *
+ * Defines depth for the gp_glyph::bitmap.
  */
 typedef enum gp_font_bitmap_format {
 	GP_FONT_BITMAP_1BPP,
 	GP_FONT_BITMAP_8BPP,
 } gp_font_bitmap_format;
 
-/*
- * Font style bitflags.
+/**
+ * @brief Font style bitflags.
+ *
+ * The monospace and regular font flags can be bitwise combined with bold and
+ * italic.
  */
 typedef enum gp_font_style {
+	/** @brief Regular font. */
 	GP_FONT_REGULAR = 0x00,
+	/** @brief Monospace font. */
 	GP_FONT_MONO = 0x01,
+	/** @brief Bold font. */
 	GP_FONT_BOLD = 0x02,
+	/** @brief Italic font. */
 	GP_FONT_ITALIC = 0x04,
+	/** @brief Font style mask */
 	GP_FONT_STYLE_MASK = 0x0f,
-	/*
-	 * If passed make sure we return something
-	 * possibly the default compiled-in font
+	/**
+	 * @brief A fallback flag.
+	 *
+	 * If passed the font lookup functions always return some font possibly
+	 * the default compiled-in font
 	 */
 	GP_FONT_FALLBACK = 0x10,
 } gp_font_style;
@@ -90,83 +98,115 @@ typedef enum gp_font_style {
 typedef uint32_t gp_glyph_offset;
 #define GP_NOGLYPH UINT32_MAX
 
+/**
+ * @brief An unicode glyphs block.
+ */
 typedef struct gp_glyphs {
-	/* Pointer to glyph bitmap buffer */
+	/**
+	 * @brief Pointer to glyph bitmap buffer.
+	 *
+	 * This is a buffer with all glyph pixmaps.
+	 */
 	void *glyphs;
 
-	/*
-	 * Offsets to the glyph data.
+	/**
+	 * @brief Offsets to the glyph data.
 	 *
 	 * If offsets is NULL offset is the same for all glyphs and saved in
-	 * offset instead.
+	 * gp_glyphs::offset instead.
 	 */
 	gp_glyph_offset *offsets;
+	/**
+	 * @brief An offset to the glyph data.
+	 *
+	 * If all offsets are the same gp_glyphs::offsets is NULL and the
+	 * glyphs are stored at multiples of this offset.
+	 */
 	gp_glyph_offset offset;
 
-	/*
-	 * First and last character in glyphs table
+	/**
+	 * @brief First character in glyphs table.
 	 *
-	 * For table 0 which is ASCII this is set to 0x20 and 0x7f
+	 * For table 0 which is ASCII this is set to 0x20.
 	 */
 	uint32_t min_glyph;
+	/**
+	 * @brief Last character in glyphs table.
+	 *
+	 * For table 0 which is ASCII this is set to 0x7f.
+	 */
 	uint32_t max_glyph;
 } gp_glyphs;
 
 typedef struct gp_font_face gp_font_face;
 
 /**
- * font may introduce a "lazy" loader that will load glyphs 'on demand'.
+ * @brief Font loader callback.
+ *
+ * When TrueType font is loaded the ASCII part is pre-rendered into the memory,
+ * any other characters are loaded on-demand when needed.
  */
 typedef struct gp_font_face_ops {
 	gp_glyph *(*glyph_load)(const gp_font_face *self, uint32_t ch);
 	void (*font_free)(gp_font_face *self);
 } gp_font_face_ops;
 
+/**
+ * @brief A font face.
+ *
+ * A group of unicode blocks for a given font.
+ */
 struct gp_font_face {
-	/* Font family name - eg. Sans, Serif ... */
+	/** @brief Font family name - eg. Sans, Serif ... */
 	char family_name[GP_FONT_NAME_MAX];
 
-	/* Font style flags */
+	/** @brief A #gp_font_style flags. */
 	uint8_t style;
 
-	/* Size of the glyphs array */
+	/**
+	 * @brief A number of glyph tables in this font.
+	 *
+	 * The size of gp_font_face::glyphs array.
+	 */
 	uint8_t glyph_tables;
 
-	/* Maximal height of font glyph from baseline to the top. */
+	/** @brief Maximal height of font glyph from baseline to the top. */
 	uint16_t ascend;
 
-	/* Maximal length of font glyph from baseline to the bottom. */
+	/** @brief Maximal length of font glyph from baseline to the bottom. */
 	uint16_t descend;
 
-	/*
-	 * Maximal width of font glyph.
+	/**
+	 * @brief Maximal width of font glyph.
 	 *
-	 * (basically max from glyph->width + glyph->bearing_x)
+	 * Basically maximum of glyph->width + glyph->bearing_x for all font
+	 * glyphs.
 	 */
 	uint16_t max_glyph_width;
 
-	/*
-	 * Maximal glyph advance.
+	/**
+	 * @brief Maximal glyph advance.
 	 */
 	uint16_t max_glyph_advance;
 
-	/*
-	 * Average glyph advance.
+	/**
+	 * @brief An average glyph advance.
 	 */
 	uint16_t avg_glyph_advance;
 
-	/*
-	 * Bitmap format for all glyphs
+	/**
+	 * @brief Bitmap format for all glyphs.
 	 */
 	gp_font_bitmap_format glyph_bitmap_format;
 
-	/*
-	 * "Lazy" loader used for non-ascii unicode glyphs
+	/**
+	 * @brief On demand loader used for non-ASCII unicode glyphs.
 	 */
 	const gp_font_face_ops *ops;
 	void *priv;
 
-	/* Glyphs tables
+	/**
+	 * @brief Glyph tables.
 	 *
 	 * NULL terminated array of glyph tables sorted by the max_glyph, i.e.
 	 * the ASCII which ends at 0x7f should be first.
@@ -174,37 +214,43 @@ struct gp_font_face {
 	gp_glyphs glyphs[];
 };
 
-/*
+/**
+ * @brief Unicode block ids.
+ *
  * All fonts must include LATIN_BASIC and it has to be the first table
  * in the font.
  */
 typedef enum gp_font_ucode_block {
-	/* 0x20 - 0x7f */
+	/** @brief ASCII block 0x20 - 0x7f */
 	GP_UCODE_LATIN_BASIC = 0x0001,
-	/* 0xa0 - 0xff */
+	/** @brief Latin suplement 0xa0 - 0xff */
 	GP_UCODE_LATIN_SUP = 0x0002,
-	/* 0x100 - 0x17e */
+	/** @brief Latin extended A 0x100 - 0x17e */
 	GP_UCODE_LATIN_EXT_A = 0x0004,
-	/* 0x384 - 0x3ce */
+	/** @brief Greek 0x384 - 0x3ce */
 	GP_UCODE_GREEK = 0x0008,
-	/* 0x340 - 0x45f */
+	/** @brief Cyrilic 0x340 - 0x45f */
 	GP_UCODE_CYRILIC = 0x0010,
-	/* 0x3041 - 0x3096 */
+	/** @brief Hiragan 0x3041 - 0x3096 */
 	GP_UCODE_HIRAGANA= 0x0020,
-	/* 0x30a0 - 0x30aff */
+	/** @brief Katakana 0x30a0 - 0x30aff */
 	GP_UCODE_KATAKANA = 0x0030,
 } gp_font_ucode_block;
 
-/*
- * Font family is a group of fonts of the same family and size but different
- * style i.e. monospace, bold, italic...
+/**
+ * @brief A font family.
+ *
+ * Font family is a group of font faces of the same family and size but
+ * different style i.e. monospace, bold, italic...
  *
  * The fonts array is NULL terminated.
  */
 typedef struct gp_font_family {
+	/** @brief A font family name. */
 	const char *family_name;
-	/* Bitmask of unicode blocks included in the font */
+	/** @brief A bitmask of unicode blocks included in the font faces. */
 	uint32_t ucode_blocks;
+	/** Array of font faces in the font family. */
 	const gp_font_face *const fonts[];
 } gp_font_family;
 
@@ -252,18 +298,50 @@ static inline const char *gp_font_family_name(const gp_font_face *font)
 
 const char *gp_font_style_name(uint8_t style);
 
-/*
- * Returns glyph mapping
+/**
+ * @brief Looks up a glyph in a font.
+ *
+ * @param font A font face.
+ * @param ch An unicode glyph.
+ *
+ * @return A glyph structure.
  */
-gp_glyph *gp_get_glyph(const gp_font_face *font, uint32_t ch);
+gp_glyph *gp_glyph_get(const gp_font_face *font, uint32_t ch);
 
-/* Loads font face from file  */
+/**
+ * @brief Load a font face from a file.
+ *
+ * Loads a font using FreeType library. Only one of the width and height should
+ * be non-zero, to keep the correct aspect ratio for the glyph.
+ *
+ * @param path A path to a font file.
+ * @param width A requested width.
+ * @param height A requested height.
+ *
+ * @return A font or NULL in a case of a failure.
+ */
 gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t height);
 
-/* Uses fontconfig to lookup font file */
+/**
+ * @brief Uses fontconfig to lookup font file.
+ *
+ * Looks up a font path given a font name and loads it with gp_font_face_load().
+ *
+ * @param name A font name such as "Arial".
+ * @param width A width passed to the gp_font_face_load().
+ * @param height A height passed to the gp_font_face_load().
+ *
+ * @return A font or NULL in a case of a failure.
+ */
 gp_font_face *gp_font_face_fc_load(const char *name, uint32_t width, uint32_t height);
 
-/* Free the font face memory */
+/**
+ * @brief Frees the font face memory.
+ *
+ * Frees the font face memory, closes FreeType hanles, etc.
+ *
+ * @param self A font face.
+ */
 void gp_font_face_free(gp_font_face *self);
 
 #endif /* TEXT_GP_FONT_H */

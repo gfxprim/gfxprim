@@ -20,7 +20,7 @@ static unsigned int multiply_width(const gp_text_style *style, unsigned int w)
 
 static gp_size glyph_advance_x(const gp_text_style *style, uint32_t ch)
 {
-	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+	const gp_glyph *glyph = gp_glyph_get(style->font, ch);
 
 	return multiply_width(style, glyph->advance_x);
 }
@@ -32,7 +32,7 @@ gp_size gp_glyph_advance_x(const gp_text_style *style, uint32_t ch)
 
 gp_ssize gp_glyph_bearing_x(const gp_text_style *style, uint32_t ch)
 {
-	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+	const gp_glyph *glyph = gp_glyph_get(style->font, ch);
 
 	return multiply_width(style, glyph->bearing_x);
 }
@@ -59,7 +59,7 @@ static unsigned int glyph_width(const gp_text_style *style, uint32_t ch)
 {
 	unsigned int size, advance;
 
-	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+	const gp_glyph *glyph = gp_glyph_get(style->font, ch);
 
 	advance = multiply_width(style, glyph->advance_x - glyph->bearing_x);
 	size    = multiply_width(style, glyph->width);
@@ -81,7 +81,7 @@ static unsigned int last_glyph_width(const gp_text_style *style, uint32_t ch)
 {
 	unsigned int size, advance;
 
-	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+	const gp_glyph *glyph = gp_glyph_get(style->font, ch);
 
 	advance = multiply_width(style, glyph->advance_x);
 	size = multiply_width(style, glyph->width + glyph->bearing_x);
@@ -98,7 +98,7 @@ static unsigned int last_glyph_width(const gp_text_style *style, uint32_t ch)
  */
 static unsigned int first_glyph_width(const gp_text_style *style, uint32_t ch)
 {
-	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+	const gp_glyph *glyph = gp_glyph_get(style->font, ch);
 
 	return multiply_width(style, glyph->advance_x - glyph->bearing_x);
 }

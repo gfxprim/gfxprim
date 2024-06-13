@@ -24,7 +24,7 @@ static gp_glyph *get_glyph_from_table(const gp_glyphs *glyphs, uint32_t pos)
 	return (gp_glyph*)(glyphs->glyphs + offset);
 }
 
-static gp_glyph *get_glyph(const gp_font_face *font, uint32_t c)
+static gp_glyph *glyph_get(const gp_font_face *font, uint32_t c)
 {
 	uint8_t i;
 
@@ -42,9 +42,9 @@ static gp_glyph *get_glyph(const gp_font_face *font, uint32_t c)
 	return NULL;
 }
 
-gp_glyph *gp_get_glyph(const gp_font_face *font, uint32_t ch)
+gp_glyph *gp_glyph_get(const gp_font_face *font, uint32_t ch)
 {
-	gp_glyph *glyph = get_glyph(font, ch);
+	gp_glyph *glyph = glyph_get(font, ch);
 
 	if (!glyph && font->ops && font->ops->glyph_load)
 		glyph = font->ops->glyph_load(font, ch);
@@ -53,11 +53,11 @@ gp_glyph *gp_get_glyph(const gp_font_face *font, uint32_t ch)
 		uint32_t fb = gp_utf_fallback(ch);
 
 		if (fb != ch)
-			glyph = get_glyph(font, fb);
+			glyph = glyph_get(font, fb);
 	}
 
 	if (!glyph)
-		glyph = get_glyph(font, '?');
+		glyph = glyph_get(font, '?');
 
 	return glyph;
 }

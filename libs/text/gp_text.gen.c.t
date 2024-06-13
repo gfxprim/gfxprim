@@ -111,7 +111,7 @@ static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style 
                     style->pixel_xspace == 0 && style->pixel_yspace == 0;
 
 	for (pos = 0; pos < max_chars && (ch = gp_utf8_next(&str)); pos++) {
-		const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+		const gp_glyph *glyph = gp_glyph_get(style->font, ch);
 
 		gp_coord gx = x;
 
@@ -209,7 +209,7 @@ static void draw_8BPP_glyph{{ bg }}_{{ pt.name }}(gp_pixmap *pixmap, const gp_te
 	unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
 
 	for (pos = 0; pos < max_chars && (ch = gp_utf8_next(&str)); pos++) {
-		const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+		const gp_glyph *glyph = gp_glyph_get(style->font, ch);
 		gp_coord gx = x;
 
 		if (!bearing && !pos)
@@ -367,7 +367,7 @@ gp_size gp_glyph_draw(gp_pixmap *pixmap, const gp_text_style *style,
 {
 	uint8_t bearing = flags & GP_TEXT_BEARING;
 
-	const gp_glyph *g = gp_get_glyph(style->font, glyph);
+	const gp_glyph *g = gp_glyph_get(style->font, glyph);
 
 	gp_coord gx = x;
 	gp_coord bearing_x = 0;

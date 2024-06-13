@@ -3,7 +3,12 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ */
+
+/**
+ * @file gp_text.h
+ * @brief A text drawing functions.
  */
 
 #ifndef TEXT_GP_TEXT_H
@@ -16,33 +21,40 @@
 #include <text/gp_text_metric.h>
 #include <text/gp_fonts.h>
 
-/* How the rendered text should be aligned.
- * For gp_text(), the alignment is relative to the specified point:
+/**
+ * @brief Text attributes, mostly alignment.
  *
- *   - GP_ALIGN_LEFT draws the text to the left of the point,
- *   - GP_ALIGN_CENTER centers it at the point horizontally,
- *   - GP_ALIGN_RIGHT draws the text to the right of the point
- *   - GP_TEXT_BEARING apply bearing at the start of the string
- *   - GP_VALIGN_ABOVE (or TOP) draws the text above the point
- *   - GP_VALIGN_CENTER centers the text vertically at the point
- *   - GP_VALIGN_BASELINE places the text baseline at the point
- *   - GP_VALIGN_BELOW (or BOTTOM) draws the text below the point
- *   - GP_TEXT_NOBG mix the alpha pixels with data read from the pixmap
- *                  rather than mixing them with bg_color
- *                  (which is slightly slower)
+ * For gp_text(), the alignment is relative to a specified point.
  */
 typedef enum gp_text_attr {
+	/** @brief Draws the text to the left of the point. */
 	GP_ALIGN_LEFT = 0x01,
+	/** @brief Centers the text at the point horizontally. */
 	GP_ALIGN_CENTER = 0x02,
+	/** @brief Draws the text to the right of the point. */
 	GP_ALIGN_RIGHT = 0x03,
+	/** @brief Horizontal alignment mask. */
 	GP_ALIGN_HORIZ = 0x03,
+	/** @brief Apply bearing before start of the string. */
 	GP_TEXT_BEARING = 0x04,
+	/** @brief Draws the text above the point. */
 	GP_VALIGN_ABOVE = 0x10,
+	/** @brief Alias for GP_VALIGN_ABOVE. */
 	GP_VALIGN_TOP = GP_VALIGN_ABOVE,
+	/** @brief Centers the text vertically at the point. */
 	GP_VALIGN_CENTER = 0x20,
+	/** @brief Places the text baseline at the point. */
 	GP_VALIGN_BASELINE = 0x30,
+	/** @brief Draws the text below the point. */
 	GP_VALIGN_BELOW = 0x40,
+	/** @brief Alias for GP_VALIGN_BELOW. */
 	GP_VALIGN_BOTTOM = GP_VALIGN_BELOW,
+	/**
+	 * @brief Use pixmap background.
+	 *
+	 * Mix the alpha pixels with data read from the pixmap rather than
+	 * mixing them with bg_color (which is slightly slower)
+	 */
 	GP_TEXT_NOBG = 0x80,
 } gp_text_attr;
 
@@ -57,8 +69,8 @@ gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
                     gp_pixel fg_color, gp_pixel bg_color,
                     const char *str, size_t max_chars);
 
-/*
- * Draws a string.
+/**
+ * @brief Draws a string.
  *
  * The string is rendered to pixmap (horizontally) with defined text style.
  * The x and y coordinates determines point defined by aligment flags.
@@ -78,15 +90,15 @@ gp_size gp_text(gp_pixmap *pixmap, const gp_text_style *style,
  * Usually first letter in a line is rendered without bearing and the rest of
  * them is rendered with bearing.
  *
- * @pixmap A pixmap to draw the glyph into.
- * @style A text font and style.
- * @x An x coordinate inside the pixmap.
- * @y An y coordinate inside the pixmap.
- * @flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG and
+ * @param pixmap A pixmap to draw the glyph into.
+ * @param style A text font and style.
+ * @param x An x coordinate inside the pixmap.
+ * @param y An y coordinate inside the pixmap.
+ * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG and
  *         GP_VALIGN_*
- * @fg_color Text color.
- * @bg_color Background color.
- * @glyph And unicode glypth to draw.
+ * @param fg_color Text color.
+ * @param bg_color Background color.
+ * @param glyph And unicode glypth to draw.
  *
  * @return Returns glyhp advance plus any style extra spacing, i.e. how much
  *         should x move for the next glyph.

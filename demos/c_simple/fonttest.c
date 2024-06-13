@@ -58,7 +58,7 @@ static const char *glyph_bitmap_format_name(const gp_font_bitmap_format format)
 
 static void print_character_metadata(const gp_font_face *font, int c)
 {
-	const gp_glyph *glyph = gp_get_glyph(font, c);
+	const gp_glyph *glyph = gp_glyph_get(font, c);
 	fprintf(stderr, "Properties of the character '%c':\n", c);
 
 	if (glyph) {

@@ -6,6 +6,11 @@
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_text_style.h
+ * @brief A text style.
+ */
+
 #ifndef TEXT_GP_TEXTSTYLE_H
 #define TEXT_GP_TEXTSTYLE_H
 
@@ -13,23 +18,47 @@
 
 extern const gp_font_face gp_default_font;
 
-/*
- * This structure describes how a text should be rendered.
- * It includes a font, and its various variants and transformations.
+/**
+ * @brief A text style.
+ *
+ * This structure describes how a text should be rendered.  It includes a font,
+ * and a few transformations.
  */
 typedef struct gp_text_style {
+	/** @brief A font face. */
 	const gp_font_face *font;
 
-	/* Spacing between pixels (0 is the default, no spacing). */
-	int pixel_xspace, pixel_yspace;
+	/**
+	 * @brief Spacing between glyph pixels.
+	 *
+	 * Default spacing is 0 i.e. no spacing.
+	 */
+	int pixel_xspace;
+	/**
+	 * @brief Spacing between glyph pixels.
+	 *
+	 * Default spacing is 0 i.e. no spacing.
+	 */
+	int pixel_yspace;
 
-	/* Multiplier of pixel width/height (1 is default). */
-	int pixel_xmul, pixel_ymul;
+	/**
+	 * @brief An x multiplier of glyps pixels i.e. width (1 is default).
+	 */
+	int pixel_xmul;
+	/**
+	 * @brief An y multiplier of glyps pixels height (1 is default).
+	 */
+	int pixel_ymul;
 
-	/* Extra spacing (in pixels) between characters. */
+	/**
+	 * @brief Extra spacing (in pixels) between characters.
+	 */
 	int char_xspace;
 } gp_text_style;
 
+/**
+ * @brief A default text style initializer.
+ */
 #define GP_DEFAULT_TEXT_STYLE { \
 	.font = &gp_default_font, \
 	.pixel_xspace = 0, \
@@ -39,6 +68,13 @@ typedef struct gp_text_style {
 	.char_xspace = 0 \
 }
 
+/**
+ * @brief Sets normal text style flags.
+ *
+ * @param style A text style to intialize.
+ * @param font A font face to use in the style.
+ * @param mul A text style pixel multiplier.
+ */
 static inline void gp_text_style_normal(gp_text_style *style, const gp_font_face *font, int mul)
 {
 	style->pixel_xspace = 0;
@@ -48,8 +84,14 @@ static inline void gp_text_style_normal(gp_text_style *style, const gp_font_face
 	style->font = font;
 }
 
-/*
+/**
+ * @brief Sets style flags to embold a font.
+ *
  * Creates a bold variant of a bitmap font on the expense of slower rendering.
+ *
+ * @param style A text style to intialize.
+ * @param font A font face to use in the style.
+ * @param mul A text style pixel multiplier.
  */
 static inline void gp_text_style_embold(gp_text_style *style, const gp_font_face *font, int mul)
 {
