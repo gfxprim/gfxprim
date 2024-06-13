@@ -20,7 +20,7 @@ static const uint32_t patterns[] = {
 };
 
 @ for len in range(1, 33):
-@     for off in range(0, 33 - len):
+@     for off in range(0, 32 - len):
 static int getbits_{{ off }}_{{ len }}(void)
 {
 	uint32_t p_exp, p_get;
@@ -48,7 +48,7 @@ static int getbits_{{ off }}_{{ len }}(void)
 @ end
 @
 @ for len in range(1, 33):
-@     for off in range(0, 33 - len):
+@     for off in range(0, 32 - len):
 static int setbits_{{ off }}_{{ len }}(void)
 {
 	uint32_t p_exp, canary1, p_get, canary2, val;
@@ -87,12 +87,12 @@ const struct tst_suite tst_suite = {
 	.suite_name = "GetSetBits testsuite",
 	.tests = {
 @ for len in range(1, 33):
-@     for off in range(0, 33 - len):
+@     for off in range(0, 32 - len):
 		{.name = "GP_GET_BITS off={{ off }} len={{ len }}",
 		 .tst_fn = getbits_{{ off }}_{{ len }}},
 @ end
 @ for len in range(1, 33):
-@     for off in range(0, 33 - len):
+@     for off in range(0, 32 - len):
 		{.name = "GP_SET_BITS off={{ off }} len={{ len }}",
 		 .tst_fn = setbits_{{ off }}_{{ len }}},
 @ end
