@@ -1017,7 +1017,7 @@ gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
 		return NULL;
 
 	if (text && max_len)
-		max_len = GP_MAX(max_len, strlen(text));
+		max_len = GP_MAX(max_len, gp_utf8_strlen(text));
 
 	ret->tbox->max_size = max_len;
 	ret->tbox->size = len ? len : strlen(text);
