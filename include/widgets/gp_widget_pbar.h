@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -20,8 +20,8 @@
  * for unit display will be `max - val` instead of `val`. The default unit is
  * `percents`.
  *
- * If progressbar has an event handler set it's seekable, i.e. the user can
- * change it's value and the `on_event` handler is called for each value
+ * If progressbar has an gp_widget::on_event() handler set it's seekable, i.e.
+ * the user can change it's value and the handler is called for each value
  * change.
  *
  * Progress bar widget JSON attributes

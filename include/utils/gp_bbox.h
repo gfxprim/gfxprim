@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -21,9 +21,13 @@
  * @brief A bounding box.
  */
 typedef struct gp_bbox {
+	/** @brief A left bbox corner coordinate. */
 	gp_coord x;
+	/** @brief A top bbox corner coordinate. */
 	gp_coord y;
+	/** @brief A bbox width. */
 	gp_size w;
+	/** @brief A bbox height. */
 	gp_size h;
 } gp_bbox;
 

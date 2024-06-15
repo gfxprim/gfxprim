@@ -23,11 +23,11 @@
  * Button widget JSON attributes
  * -----------------------------
  *
- * |   Attribute    |  Type  | Default |    Description    |
- * |----------------|--------|---------|-------------------|
- * |   **label**    | string |         | Button label      |
- * |   **btype**    | string | "label" | Button type       |
- * | **text_align** | string | depends | Button text align |
+ * |   Attribute    |  Type  | Default | Description                                                    |
+ * |----------------|--------|---------|----------------------------------------------------------------|
+ * |   **label**    | string |         | A button label.                                                |
+ * |   **btype**    | string | "label" | Button type, #gp_widget_button_type.                           |
+ * | **text_align** | string | depends | Button text alignment, "left" or "right" from the stock image. |
  *
  * The 'text_align' can be either 'left' or 'right' and the default value
  * depends on the 'btype'.

@@ -33,14 +33,14 @@
  *
  * |     Attribute      |  Type  | Default | Description                                   |
  * |--------------------|--------|---------|-----------------------------------------------|
- * |    **text**        | string |         | Label text                                    |
- * |    **tattr**       |  tattr |    0    | Text attributes #gp_widget_tattr, e.g. bold   |
- * |    **width**       |   int  |    0    | Label text size                               |
+ * |    **text**        | string |         | A label text.                                 |
+ * |    **tattr**       | string | normal  | Text attributes #gp_widget_tattr, e.g. bold.  |
+ * |    **width**       |  uint  |    0    | Label text size in characters.                |
  * |    **frame**       |  bool  |  false  | Draw frame around label, implies min padd = 1 |
- * |    **padd**        |   int  |    0    | Padd inside label on left and right           |
- * |    **bg_color**    | string |   "bg"  | Background #gp_widgets_color                  |
- * |   **text_color**   | string | "text"  | Text #gp_widgets_color                        |
- * | **reverse_colors** |  bool  |  false  | Reverse background and text color             |
+ * |    **padd**        |  uint  |    0    | Padd inside label on left and right.          |
+ * |    **bg_color**    | string |  "bg"   | Background #gp_widgets_color.                 |
+ * |   **text_color**   | string | "text"  | Text #gp_widgets_color.                       |
+ * | **reverse_colors** |  bool  |  false  | Reverse background and text color.            |
  */
 
 #ifndef GP_WIDGET_LABEL_H

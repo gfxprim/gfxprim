@@ -10,7 +10,7 @@
  * @file gp_widget_hvbox.h
  * @brief A horizontal and vertical box widget.
  *
- * Hbox and vbox widgets are one-dimensional gp_widget_grid_new() widgets
+ * Hbox and vbox widgets are one-dimensional gp_widget_grid.h widgets
  * with rows=1, cols=1 respectively and with a simplified JSON attribute list.
  *
  * Hbox example buttons apart
@@ -62,7 +62,7 @@
  * |   **padd**    | string | (cnt+1) x **1** | Padding sizes between cells.  |
  * |  **frame**    |  bool  |      false      | Draws a frame around the box. |
  * | **uniform**   |  bool  |      false      | All cells have the same size. |
- * | **widgets**   |  array |                 | Array of widgets.             |
+ * | **widgets**   |  array |                 | Array of widget objects.      |
  */
 #ifndef GP_WIDGET_HVBOX_H
 #define GP_WIDGET_HVBOX_H

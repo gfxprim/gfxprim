@@ -2,13 +2,24 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
  * @file gp_widget_graph.h
  * @brief An XY graph.
+ *
+ * Graph widget JSON attributes
+ * ----------------------------
+ *
+ * |      Attribute      |  Type  | Default | Description                                               |
+ * |---------------------|--------|---------|-----------------------------------------------------------|
+ * |     **color**       | string | "text"  | A graph color, parsed by gp_widgets_color_name_idx().     |
+ * | **max_data_points** |  uint  |   100   | Maximal number of graph data points.                      |
+ * |     **min_h**       | string |         | Minimal height, parsed by gp_widget_size_units_parse().   |
+ * |     **min_w**       | string |         | Minimal width, parsed by gp_widget_size_units_parse().    |
+ * |     **style**       | string |         | One of "point", "line" or "fill", #gp_widget_graph_style. |
  */
 
 #ifndef GP_WIDGET_GRAPH_H
@@ -22,13 +33,25 @@
  * @brief A graph drawing style.
  */
 enum gp_widget_graph_style {
-	/** Point graph */
+	/**
+	 * @brief Point graph.
+	 *
+	 * Graph is drawn using individual points.
+	 */
 	GP_WIDGET_GRAPH_POINT,
-	/** Points connected by line */
+	/**
+	 * @brief Points connected by line.
+	 *
+	 * The graph points are connected by a line.
+	 */
 	GP_WIDGET_GRAPH_LINE,
-	/** Area below graph is filled */
+	/**
+	 * @brief Area below graph is filled.
+	 *
+	 * The area bellow the line created by the graph points is filled.
+	 */
 	GP_WIDGET_GRAPH_FILL,
-	/** Maximal number of styles */
+	/** @brief Maximal number of styles */
 	GP_WIDGET_GRAPH_STYLE_MAX,
 };
 
@@ -41,7 +64,10 @@ extern const char *gp_widget_graph_style_names[GP_WIDGET_GRAPH_STYLE_MAX];
  * @brief A graph point.
  */
 struct gp_widget_graph_point {
-	double x, y;
+	/** @brief An x value. */
+	double x;
+	/** @brief An y value. */
+	double y;
 };
 
 struct gp_widget_graph {
@@ -67,6 +93,17 @@ struct gp_widget_graph {
 	struct gp_widget_graph_point *data;
 };
 
+/**
+ * @brief Allocates and initializes a new graph widget.
+ *
+ * @param min_w A minimal width.
+ * @param min_h A minimal height.
+ * @param x_label A label for the x axis.
+ * @param y_label A label for the y axis.
+ * @param max_data_points A maximal number of graph data points.
+ *
+ * @return A graph widget.
+ */
 gp_widget *gp_widget_graph_new(gp_widget_size min_w, gp_widget_size min_h,
                                const char *x_label, const char *y_label,
                                size_t max_data_points);

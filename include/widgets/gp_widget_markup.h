@@ -1,10 +1,22 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
+/**
+ * @file gp_widget_markup.h
+ * @brief A text markup widget.
+ *
+ * Markup widget JSON attributes
+ * ------------------------------
+ *
+ * | Attribute |  Type  |  Default  | Description                          |
+ * |-----------|--------|-----------|--------------------------------------|
+ * |  **fmt**  | string | "gfxprim" | A markup format enum #gp_markup_fmt. |
+ * | **text**  | string |           | Markup text.                         |
+ */
 #ifndef GP_WIDGET_MARKUP_H
 #define GP_WIDGET_MARKUP_H
 
@@ -21,9 +33,9 @@ struct gp_widget_markup {
 /**
  * @brief Allocates and initializes a markup widget.
  *
- * @markup A markup string.
- * @fmt A markup format.
- * @flags Markup parser flags, depends on the markup format.
+ * @param markup A markup string.
+ * @param fmt A markup format.
+ * @param flags Markup parser flags, depends on the markup format.
  *
  * @return A markup widget.
  */
@@ -32,10 +44,10 @@ gp_widget *gp_widget_markup_new(const char *markup, enum gp_markup_fmt fmt, int 
 /**
  * @brief Sets new markup string.
  *
- * @self A markup widget.
- * @fmt A markup format.
- * @flags Markup parser flags, depends on the markup format.
- * @markup_str New markup string.
+ * @param self A markup widget.
+ * @param fmt A markup format.
+ * @param flags Markup parser flags, depends on the markup format.
+ * @param markup_str New markup string.
  *
  * @return Zero on success non-zero on a failure.
  */

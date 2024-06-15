@@ -11,6 +11,15 @@
  * @brief A frame widget.
  *
  * @image html frame.png
+ *
+ * Frame widget JSON attributes
+ * ----------------------------
+ *
+ * |   Attribute    |  Type  | Default | Description                                                |
+ * |----------------|--------|---------|------------------------------------------------------------|
+ * |   **title**    | string |         | A frame title.                                             |
+ * |   **tattr**    | string | "bold"  | A title text attribute, parsed by gp_widget_tattr_parse(). |
+ * |   **widget**   | object |         | A frame child widget.                                      |
  */
 
 #ifndef GP_WIDGET_FRAME_H

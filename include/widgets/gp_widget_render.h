@@ -14,6 +14,7 @@
 #define GP_WIDGET_RENDER_H
 
 #include <core/gp_core.h>
+#include <core/gp_compiler.h>
 #include <gfx/gp_gfx.h>
 #include <text/gp_text.h>
 #include <utils/gp_timer.h>
@@ -42,15 +43,25 @@ struct gp_widget_render_ctx {
 		 * The order _MUST_ match the enum #gp_widgets_color.
 		 */
 		struct {
+			/** @brief A text color. */
 			gp_pixel text_color;
+			/** @brief A foreground color. */
 			gp_pixel fg_color;
+			/** @brief A background color. */
 			gp_pixel bg_color;
+			/** @brief A highlight color. */
 			gp_pixel hl_color;
+			/** @brief A selection color. */
 			gp_pixel sel_color;
+			/** @brief An alert color. */
 			gp_pixel alert_color;
+			/** @brief A warning color. */
 			gp_pixel warn_color;
+			/** @brief An accept color. */
 			gp_pixel accept_color;
+			/** @brief A fill color. */
 			gp_pixel fill_color;
+			/** @brief A disabled widget color. */
 			gp_pixel col_disabled;
 			/* 16 colors */
 			gp_pixel black;
@@ -69,7 +80,7 @@ struct gp_widget_render_ctx {
 			gp_pixel br_magenta;
 			gp_pixel br_cyan;
 			gp_pixel white;
-		} __attribute__((packed));
+		} GP_PACKED;
 	};
 
 	/** @brief Default font. */

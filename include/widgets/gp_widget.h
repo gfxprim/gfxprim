@@ -241,15 +241,33 @@ enum gp_widget_type {
 	GP_WIDGET_MAX,
 };
 
-/** @brief Widget classes. */
+/**
+ * @brief Widget classes.
+ *
+ * Class widgets are operated on by a class functions rather than widget specific functions.
+ */
 enum gp_widget_class {
 	/** @brief Widget has no class, most common case. */
 	GP_WIDGET_CLASS_NONE = 0,
-	/** @brief Boolean class, widget has two values, e.g. checkbox */
+	/**
+	 * @brief Boolean class.
+	 *
+	 * The widget has two values, e.g. checkbox.
+	 *
+	 * See gp_widget_class_bool.h for the list of functions.
+	 */
 	GP_WIDGET_CLASS_BOOL,
-	/** @brief An integer widget with minimum and maximun. */
+	/**
+	 * @brief An integer widget with minimum and maximun.
+	 *
+	 * See gp_widget_class_int.h for the list of functions.
+	 */
 	GP_WIDGET_CLASS_INT,
-	/** @brief A widget to choose a single element from a set. */
+	/**
+	 * @brief A widget to choose a single element from a set.
+	 *
+	 * See gp_widget_class_choice.h for the list of functions.
+	 */
 	GP_WIDGET_CLASS_CHOICE,
 	GP_WIDGET_CLASS_MAX,
 };

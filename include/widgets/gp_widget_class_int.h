@@ -17,8 +17,13 @@
 #ifndef GP_WIDGET_CLASS_INT_H
 #define GP_WIDGET_CLASS_INT_H
 
+/**
+ * @brief A widget int direction.
+ */
 enum gp_widget_int_flags {
+	/** @brief Widget is horizontal. */
 	GP_WIDGET_HORIZ = 0,
+	/** @brief Widget is vertical. */
 	GP_WIDGET_VERT = 1
 };
 

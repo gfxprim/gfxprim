@@ -2,25 +2,13 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
  * @file gp_dialog_msg.h
  * @brief A message dialogs.
- *
- * An info dialog
- * @image html dialog_msg_info.png
- *
- * A warning dialog
- * @image html dialog_msg_warn.png
- *
- * An error dialog
- * @image html dialog_msg_err.png
- *
- * A question dialog
- * @image html dialog_question.png
  */
 
 #ifndef GP_DIALOG_MSG_H
@@ -33,13 +21,29 @@
  * @brief A message dialog type.
  */
 enum gp_dialog_msg_type {
-	/** An info dialog */
+	/**
+	 * @brief An info dialog.
+	 *
+         * @image html dialog_msg_info.png
+	 */
 	GP_DIALOG_MSG_INFO,
-	/** A warning dialog */
+	/**
+	 * @brief A warning dialog.
+	 *
+	 * @image html dialog_msg_warn.png
+	 */
 	GP_DIALOG_MSG_WARN,
-	/** An error dialog */
+	/**
+	 * @brief An error dialog.
+	 *
+	 * @image html dialog_msg_err.png
+	 */
 	GP_DIALOG_MSG_ERR,
-	/** A yes or no question dialog */
+	/**
+	 * @brief A yes or no question dialog.
+	 *
+	 * @image html dialog_question.png
+	 */
 	GP_DIALOG_MSG_QUESTION,
 };
 

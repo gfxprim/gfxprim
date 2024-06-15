@@ -1,13 +1,23 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
  * @file gp_widget_log.h
  * @brief A text log widget.
+ *
+ * Log widget JSON attributes
+ * --------------------------
+ *
+ * |   Attribute    |  Type  | Default | Description                                                      |
+ * |----------------|--------|---------|------------------------------------------------------------------|
+ * |  **max_logs**  |  uint  |         | A maximal number of log lines the widget can store.              |
+ * |  **min_lines** |  uint  |         | A minimal number of log lines visible on the screen.             |
+ * |  **min_width** |  uint  |         | A minimal widget width in text characters.                       |
+ * |    **tattr**   | string | normal  | Log text attributes #gp_widget_tattr, e.g. `mono` for monospace. |
  */
 
 #ifndef GP_WIDGET_LOG_H

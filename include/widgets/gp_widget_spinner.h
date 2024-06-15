@@ -12,6 +12,15 @@
  *
  * Spinner is an integer class widget, after it's created it's changed by the
  * class functions such as gp_widget_int_val_set().
+ *
+ * Spinner widget JSON attributes
+ * ------------------------------
+ *
+ * | Attribute |  Type  |    Default     | Description                 |
+ * |-----------|--------|----------------|-----------------------------|
+ * |   **max** |  int64 |       0        | A slider maximum.           |
+ * |   **min** |  int64 |       0        | A slider minimum.           |
+ * |   **val** |  int64 |       0        | A slider value.             |
  */
 #ifndef GP_WIDGET_SPINNER_H
 #define GP_WIDGET_SPINNER_H

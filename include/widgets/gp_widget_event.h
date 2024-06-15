@@ -142,21 +142,45 @@ struct gp_widget_event {
 	/**
 	 * @brief Widget specific subtype defined by widgets.
 	 *
-	 * For all widget specific events the type is set to
-	 * GP_WIDGET_EVENT_WIDGET and the sub_type is documented for each
-	 * particular widget, e.g. #gp_widget_tbox_event_type.
+	 * For all widget specific events the gp_widget_event::type is set to
+	 * GP_WIDGET_EVENT_WIDGET and the gp_widget_event::sub_type is
+	 * documented for each particular widget, e.g.
+	 * #gp_widget_tbox_event_type.
 	 */
 	uint16_t sub_type;
 	/* internal DO NOT TOUCH */
 	const struct gp_widget_render_ctx *ctx;
+	/** A payload. */
 	union {
-		/** @brief Optional pointer. */
+		/**
+		 * @brief Optional pointer.
+		 */
 		void *ptr;
-		/** @brief Optional integer value. */
+		/**
+		 * @brief Optional integer value.
+		 *
+		 * This is used by widgets to pass an integer value, e.g. by a
+		 * tbox widget to send an unicode characters for
+		 * gp_widget_event::sub_type set to
+		 * GP_WIDGET_EVENT_TBOX_PRE_FILTER from
+		 * #gp_widget_tbox_event_type.
+		 */
 		long val;
-		/** @brief Optional bounding box. */
+		/**
+		 * @brief Optional bounding box.
+		 *
+		 * The bounding box is passed in the case of a pixmap widget
+		 * repaint event.
+		 */
 		struct gp_bbox *bbox;
-		/** @brief An input event, set for GP_WIDGET_EVENT_INPUT */
+		/**
+		 * @brief An input event.
+		 *
+		 * Points to an input event when gp_widget_event::type is set
+		 * to GP_WIDGET_EVENT_INPUT. If a widget wants to process input
+		 * events these have to be unmasked first by
+		 * gp_widget_events_unmask().
+		 */
 		struct gp_event *input_ev;
 	};
 };

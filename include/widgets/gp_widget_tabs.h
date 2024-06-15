@@ -2,13 +2,22 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
  * @file gp_widget_tabs.h
  * @brief A tabs widget.
+ *
+ * Tabs widget JSON attributes
+ * ----------------------------
+ *
+ * |  Attribute  | Type  | Default | Description                                                |
+ * |-------------|-------|---------|------------------------------------------------------------|
+ * | **labels**  | array |         | Array of string labels.                                    |
+ * | **widgets** | array |         | Array of child widgets.                                    |
+ * | **active**  | uint  |    0    | Active tab, index into the labels and widgets array.       |
  */
 
 #ifndef GP_WIDGET_TABS_H
@@ -39,13 +48,14 @@ enum gp_widget_tabs_event_type {
 };
 
 /**
- * @brief Create tabs widget.
+ * @brief Allocates and initializes a new tabs widget.
  *
  * @param tabs_cnt Number of tabs.
  * @param active_tab Initially active tab.
  * @param tab_labels Array of tab labels.
+ * @param flags Currently unused, must be 0.
  *
- * @return A newly allocated and initialized tabs widget.
+ * @return A tabs widget.
  */
 gp_widget *gp_widget_tabs_new(unsigned int tabs_cnt, unsigned int active_tab,
                               const char *tab_labels[], int flags);

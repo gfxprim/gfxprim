@@ -13,13 +13,10 @@
  * Stock widget JSON attributes
  * -----------------------------
  *
- * |   Attribute    |  Type  |   Default   |    Description     |
- * |----------------|--------|-------------|--------------------|
- * |   **stock**    | string |             | Stock type         |
- * |  **min_size**  | string | 2*pad + asc | Minimal stock size |
- *
- * See #gp_widget_size and gp_widget_size_units_parse() for details on the
- * **min_size** format.
+ * |   Attribute    |  Type  |   Default   | Description                                                |
+ * |----------------|--------|-------------|------------------------------------------------------------|
+ * |   **stock**    | string |             | Stock type, #gp_widget_stock_type.                         |
+ * |  **min_size**  | string | 2*pad + asc | Minimal stock size parsed by gp_widget_size_units_parse(). |
  */
 
 #ifndef GP_WIDGET_STOCK_H

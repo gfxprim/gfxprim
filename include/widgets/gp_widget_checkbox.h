@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -11,6 +11,14 @@
  * @brief A checkbox widget.
  *
  * @image html checkbox.png
+ *
+ * Checkbox widget JSON attributes
+ * -------------------------------
+ *
+ * | Attribute |  Type  | Default | Description                                     |
+ * |-----------|--------|---------|-------------------------------------------------|
+ * | **label** | string |         | A checkbox label, can be NULL if there is none. |
+ * |  **set**  |  bool  |  False  | Initial checkbox value.                         |
  */
 
 #ifndef GP_WIDGET_CHECKBOX_H
@@ -63,7 +71,6 @@ void gp_widget_checkbox_set(gp_widget *self, int val);
  * @param self A checkbox widget.
  */
 void gp_widget_checkbox_toggle(gp_widget *self);
-
 
 /**
  * @brief Returns a checkbox value.

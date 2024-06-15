@@ -2,13 +2,26 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
  * @file gp_widget_tbox.h
  * @brief A textbox widget.
+ *
+ * Tbox widget JSON attributes
+ * ---------------------------
+ *
+ * |   Attribute    |  Type  |   Default   | Description                                                                   |
+ * |----------------|--------|-------------|-------------------------------------------------------------------------------|
+ * |   **text**     | string |     ""      | Initial textbox text.                                                         |
+ * |   **help**     | string |     ""      | Help text, shown when textbox is empty.                                       |
+ * |  **ttype**     | string |   "none"    | One of "none", "hidden", "URL", "path", "filename". See #gp_widget_tbox_type. |
+ * |   **len**      |  uint  |             | Number of characters the texbox should be able to fit to display.             |
+ * | **max_len**    |  uint  |             | Maximal number of unicode characters the textbox can hold.                    |
+ * |  **tattr**     | string |    normal   | A text attribute, parsed by gp_widget_tattr_parse().                          |
+ * | **sel_delim**  | string | whitespaces | If set any character from the string is selection delimiter.                  |
  */
 
 #ifndef GP_WIDGET_TBOX_H

@@ -12,6 +12,16 @@
  *
  * Slider is an integer class widget, after it's created it's changed by the
  * class functions such as gp_widget_int_val_set().
+ *
+ * Slider widget JSON attributes
+ * -----------------------------
+ *
+ * | Attribute |  Type  |    Default     | Description                 |
+ * |-----------|--------|----------------|-----------------------------|
+ * |   **max** |  int64 |       0        | A slider maximum.           |
+ * |   **min** |  int64 |       0        | A slider minimum.           |
+ * |   **val** |  int64 |       0        | A slider value.             |
+ * |   **dir** | string | GP_WIDGET_VERT | Either "horiz" or "vert".   |
  */
 #ifndef GP_WIDGET_SLIDER_H
 #define GP_WIDGET_SLIDER_H

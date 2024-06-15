@@ -10,8 +10,26 @@
  * @file gp_widget_radiobutton.h
  * @brief A radio button widget.
  *
- * Radio button is a choice class widget, after it's created it's changed by the
+ * Radio button is a choice class widget, after it's created it's acessed by the
  * class functions such as gp_widget_choice_sel_set().
+ *
+ * @image html radiobutton.png
+ *
+ * Choice class JSON attributes
+ * ----------------------------
+ *
+ * |  Attribute   |  Type            | Default | Description                                                    |
+ * |--------------|------------------|---------|----------------------------------------------------------------|
+ * | **choices**  | array of strings |         | List of choices.                                               |
+ * |   **ops**    |     string       |         | The #gp_widget_choice_ops structure id.                        |
+ * | **selected** |  uint or string  |    0    | Currently selected choice name or index.                       |
+ *
+ * Only one of the **choices** or **ops** can be present for a widget. If
+ * **choices** is present all the choices are statically defined in the widget
+ * JSON description. If **ops** is set it points to a #gp_widget_choice_ops
+ * structure with callbacks to retrieve the choices at a runtime, this is usally
+ * used when the choices are produced by another library e.g. hardware
+ * discovery.
  */
 
 #ifndef GP_WIDGET_RADIOBUTTON_H
@@ -37,7 +55,7 @@ static inline gp_widget *gp_widget_radiobutton_new(const char *choices[],
 /**
  * @brief Creates a radiobutton widget based on widget ops.
  *
- * @param ops A pointer to the widget ops.
+ * @param ops A pointer to the choice widget ops.
  *
  * @return A radio button widget.
  */
@@ -49,6 +67,27 @@ gp_widget_radiobutton_ops_new(const struct gp_widget_choice_ops *ops)
 
 /**
  * @brief Creates a radiobutton widget based on a static array.
+ *
+ * Example use:
+ *
+ * @code
+ * static struct unit {
+ *	const char *name;
+ *	const int mul;
+ * } choices[] = {
+ *	...
+ *	{.name = "km", .mul = 1000},
+ *	{.name = "m", .mul = 1},
+ *	...
+ * };
+ *
+ * ...
+ *
+ * gp_widget *choice = gp_widget_choice_arr_new(GP_WIDGET_RADIOBUTTON,
+ *                                              choices, GP_ARRAY_SIZE(choices),
+ *                                              sizeof(struct unit), offsetof(struct unit, name),
+ *                                              0, 0);
+ * @endcode
  *
  * @param array A pointer an array.
  * @param memb_cnt An array size, i.e. number of elements.

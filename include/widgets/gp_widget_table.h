@@ -25,19 +25,19 @@
  * |---------------|--------|---------|--------------------------------|
  * | **col_ops**   | string |         | An column ops id.              |
  * | **header**    | array  |         | Array of table header objects. |
- * | **min_rows**  |  int   |         | Minimal number of table rows.  |
+ * | **min_rows**  |  uint  |         | Minimal number of table rows.  |
  *
  * Table Header JSON attributes
  * ----------------------------
  *
  * |  Attribute    |  Type  | Default | Description
  * |---------------|--------|---------|-----------------------------------------------------------|
- * |   **fill**    |   int  |    0    | Column fill coeficient.                                   |
+ * |   **fill**    |  uint  |    0    | Column fill coeficient.                                   |
  * |    **id**     | string |         | Column id to match againts #gp_widget_table_col_desc::id. |
  * |   **label**   | string |         | If set it's the the column header label.                  |
- * |  **min_size** |   int  |         | Minimal column width in text letters.                     |
+ * |  **min_size** |  uint  |         | Minimal column width in text letters.                     |
  * |   **order**   | string |         | If column is sortable it can be sorted as asc or desc.    |
- * |   **tattr**   | tattr  |  bold   | Column header label text attribute see #gp_widget_tattr.  |
+ * |   **tattr**   | string |  bold   | Column header label text attribute see #gp_widget_tattr.  |
  */
 
 #ifndef GP_WIDGET_TABLE_H

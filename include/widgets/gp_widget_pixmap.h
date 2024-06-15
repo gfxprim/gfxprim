@@ -2,13 +2,74 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
  * @file gp_widget_pixmap.h
  * @brief A pixmap widget.
+ *
+ * Pixmap repaint modes
+ * ====================
+ *
+ * The pixmap widget is allocated as an empty container and there are two
+ * different repaint strategies for pixmap widget.
+ *
+ * Buffered mode
+ * -------------
+ *
+ * In this mode a pixmap of the size of the widget is allocated, by the
+ * application, before any drawing is done. The content of the pixmap is
+ * preserved i.e. not modified by the library.
+ *
+ * The allocation is deffered for when the application has been started and the
+ * pixel format, we are using for drawing, is known. Only then the library will
+ * call the pixmap event handler with a resize event and
+ * #gp_widget_render_ctx pointer, which could be used to allocate right
+ * backing #gp_pixmap and set the pixmap pointer in the struct
+ * gp_widget_pixmap.
+ *
+ * @note The pixmap has to be resized properly on each resize event as well.
+ *
+ * @attention The `GP_WIDGET_EVENT_RESIZE` has to be unmasked by
+ *            gp_widget_events_unmask() before the application starts.
+ *
+ * @include{c} demos/widgets/pixmap_example.c
+ * @include{json} demos/widgets/pixmap_example.json
+ *
+ * Unbuffered mode
+ * ---------------
+ *
+ * In this mode the application is passed a temporary buffer in the size of the
+ * widget and a #gp_bbox that describes an inner rectangle that has to be
+ * repainted. To pass the pointer the `pixmap` member in `struct
+ * gp_widget_pixmap` is set temporarily, for the duration of the event handler,
+ * and the #gp_bbox is passed down in the #gp_widget_event::bbox.
+ *
+ * The application is free to ignore the bounding box and repaint the whole
+ * pixmap.
+ *
+ * @note In this mode the content of the pixmap buffer is not preserved between
+ *       events so this is mostly useful when pixmap is repainted periodically
+ *       and the data is not worth caching.
+ *
+ * @attention The `GP_WIDGET_EVENT_REDRAW` has to be unmasked by
+ *            gp_widget_events_unmask() before the application starts.
+ *
+ * The `GP_WIDGET_EVENT_RESIZE` can be unmasked as well if you want to be
+ * notified when the pixmap is resized, but it's not strictly required in this
+ * mode.
+ *
+ * @include{c} demos/widgets/clock.c
+ *
+ * Pixmap widget JSON attributes
+ * -----------------------------
+ *
+ * | Attribute |  Type  |   Default   | Description                                                   |
+ * |-----------|--------|-------------|---------------------------------------------------------------|
+ * |   **w**   |  uint  |             | Minimal pixmap width parsed by gp_widget_size_units_parse().  |
+ * |   **h**   |  uint  |             | Minimal pixmap height parsed by gp_widget_size_units_parse(). |
  */
 
 #ifndef GP_WIDGET_PIXMAP_H

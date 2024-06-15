@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -10,8 +10,72 @@
  * @file gp_widget_grid.h
  * @brief A grid to position widgets.
  *
+ * By far the most complex widget is the grid widget which is basically a table
+ * to organize widgets.
+ *
+ * Grid widget distributes the space into columns and rows, i.e. all cells in a
+ * given row have the same height as well as all cells in a given column have
+ * the same width.  The grid can have border around it and padding between
+ * cells. The border and padding consists of a constant part called padd and
+ * resizable part called fill.  The constant padding is accounted for in the
+ * grid widget minimal size, while the resizable fill is accounted for when
+ * leftover space is being distributed.
+ *
+ * @note See gp_widget_hvbox.h for one dimensional variants.
+ *
+ * Grid JSON Example
+ * -----------------
+ *
  * @image html grid.png
+ *
  * @include{json} demos/widgets/test_layouts/test_align.json
+ *
+ * @note Pass '-d layout' on application command line to highlight grid columns
+ *       and rows.
+ *
+ * Grid JSON attributes
+ * --------------------
+ *
+ * |  Attribute  |  Type  | Default | Description                                                    |
+ * |-------------|--------|---------|----------------------------------------------------------------|
+ * |  **cols**   |  uint  |   `1`   | Number of columns.                                             |
+ * |  **rows**   |  uint  |   `1`   | Number of rows.                                                |
+ * |  **border** | string | all `1` | See below.                                                     |
+ * |  **cpad**   | string | all `1` | Horizontal border and padding size multiples.                  |
+ * |  **rpad**   | string | all `1` | Vertical border and padding size multiples.                    |
+ * |  **cpadf**  | string | all `0` | Horizontal border and padding fill coeficients.                |
+ * |  **rpadf**  | string | all `0` | Vertical border and padding fill coeficients.                  |
+ * |  **cfill**  | string | all `1` | Horizontal cell fill coeficients.                              |
+ * |  **rfill**  | string | all `1` | Vertical cell fill coeficients.                                |
+ * |   **pad**   |  uint  |   `1`   | Horizontal and vertical padding size multiples.                |
+ * |  **frame**  |  bool  |  false  | Draws frame around grid.                                       |
+ * | **uniform** |  bool  |  false  | The minimal sizes are distributed uniformly.                   |
+ * | **widgets** | array  |         | Array of `cols` * `rows` widget objects.                       |
+ *
+ * The **pad** attribute is set before the **cpad** and **rpad**.
+ *
+ * Border
+ * ------
+ *
+ * The boder can be one of `none`, `all`, `horiz`, `vert`, `top`, `bottom`,
+ * `left`, `right` and can be combined with `"border": uint`.
+ *
+ * ### Border examples
+ *
+ * | JSON border                | Description                                             |
+ * |----------------------------|---------------------------------------------------------|
+ * | "border": "none"           | Sets all border padds to 0                              |
+ * | "border": 4                | Sets all border padds to 4.                             |
+ * | "border": "vert"           | Sets vertical border to 1 and clears horizontal border. |
+ * | "border": top, "border": 4 | Sets top border to 4 clears rest of the borders.        |
+ *
+ * Padding and fill
+ * ----------------
+ *
+ * - Numbers are divided with comma (,)
+ * - Repetition can be done with number and asterisk (*)
+ *
+ * For example `1, 1, 1` is the same as `3 * 1`
  */
 
 #ifndef GP_WIDGET_GRID_H
@@ -71,6 +135,8 @@ struct gp_widget_grid {
 /**
  * @brief Allocates and initializes a widget grid.
  *
+ * Both the `cols` and `rows` could be 0 as the grid can be resized later.
+ *
  * @param cols Number of grid columns.
  * @param rows Number of grid rows.
  * @param flags Bitwise or of the enum gp_widget_grid_flags.
@@ -82,6 +148,10 @@ gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows,
 
 /**
  * @brief Puts a child widget into a frame widget.
+ *
+ * Inserts a child widget at specified column and row into the grid and returns
+ * previous child occupying the slot. Passing a NULL `child` pointer makes the
+ * call equivalent to the gp_widget_grid_rem().
  *
  * @param self A grid widget.
  * @param col Grid column.
@@ -316,7 +386,7 @@ void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
 /**
  * @brief Disables grid padd and fill.
  *
- * Shortcut for gp_widget_grid_border_set(self, GP_WIDGET_BORDER_ALL, 0, 0)
+ * Shortcut for gp_widget_grid_border_set(self, GP_WIDGET_BORDER_ALL, 0, 0).
  *
  * @param self A grid widget.
  */
@@ -328,6 +398,12 @@ static inline void gp_widget_grid_no_border(gp_widget *self)
 /**
  * @brief Sets grid cell column fill coeficient.
  *
+ * Sets cell column fill coeficient. When fill is set to 0 the respective
+ * column or row is always set to its minimal width. When greater than zero the
+ * coeficient describes how aggresively is any leftover space allocated, the
+ * higher the coeficient the more space is allocated. When grid is created all
+ * column and row fill coeficients are set to 1.
+ *
  * @param self A grid widget.
  * @param col A column.
  * @param fill A fill coeficient.
@@ -336,6 +412,12 @@ void gp_widget_grid_col_fill_set(gp_widget *self, unsigned int col, uint8_t fill
 
 /**
  * @brief Sets grid cell row fill coeficient.
+ *
+ * Sets cell row fill coeficient. When fill is set to 0 the respective column
+ * or row is always set to its minimal height. When greater than zero the
+ * coeficient describes how aggresively is any leftover space allocated, the
+ * higher the coeficient the more space is allocated. When grid is created all
+ * column and row fill coeficients are set to 1.
  *
  * @param self A grid widget.
  * @param row A row.
