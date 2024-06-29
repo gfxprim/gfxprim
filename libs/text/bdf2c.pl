@@ -74,7 +74,7 @@ sub load_glyph
 
 sub load_font
 {
-	my ($path, $ascend) = @_;
+	my ($path, $ascent) = @_;
 	my @glyphs;
 	my %font;
 	my $run = 1;
@@ -94,7 +94,7 @@ sub load_font
 			$glyphs[$glyph->{"code"}] = $glyph;
 		}
 
-		$font{"ascend"} = $1 if ($line =~ /FONT_ASCENT\s(\d*)/);
+		$font{"ascent"} = $1 if ($line =~ /FONT_ASCENT\s(\d*)/);
 		$font{"descent"} = $1 if ($line =~ /FONT_DESCENT\s(\d*)/);
 		$font{"registry"} = $1 if ($line =~ /CHARSET_REGISTRY\s"(.*)"/);
 		$font{"encoding"} = $1 if ($line =~ /CHARSET_ENCODING\s"(.*)"/);
@@ -102,7 +102,7 @@ sub load_font
 
 	$font{"glyphs"} = \@glyphs;
 
-	$font{"ascend"} = $ascend if $ascend;
+	$font{"ascent"} = $ascent if $ascent;
 
 	return \%font;
 }
@@ -442,8 +442,8 @@ sub convert_font
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $katakana);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $hiragana);
 
-	printf("\t.ascend = %i,\n", $font->{'ascend'});
-	printf("\t.descend = %i,\n", $font->{'descent'});
+	printf("\t.ascent = %i,\n", $font->{'ascent'});
+	printf("\t.descent = %i,\n", $font->{'descent'});
 	print("\t.max_glyph_width = $max_width,\n");
 	print("\t.max_glyph_advance = $max_advance,\n");
 	print("\t.glyph_tables = $glyph_tables,\n");

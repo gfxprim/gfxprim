@@ -44,7 +44,7 @@ static void draw_1BPP_glyph_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style
 	unsigned int y_mul = style->pixel_ymul + style->pixel_yspace;
 
 	x += glyph->bearing_x * x_mul;
-	y -= (glyph->bearing_y - style->font->ascend) * y_mul;
+	y -= (glyph->bearing_y - gp_font_ascent(style->font)) * y_mul;
 
 	for (j = 0; j < glyph->height; j++) {
 		for (i = 0; i < glyph->width; i++) {
@@ -77,7 +77,7 @@ static void draw_1BPP_glyph_nomul_{{ pt.name }}(gp_pixmap *pixmap, const gp_text
 	unsigned int bpp = WIDTH_TO_1BPP_BPP(glyph->width);
 
 	x += glyph->bearing_x;
-	y -= (glyph->bearing_y - style->font->ascend);
+	y -= (glyph->bearing_y - gp_font_ascent(style->font));
 
 	for (j = 0; j < glyph->height; j++) {
 		for (i = 0; i < glyph->width; i++) {
@@ -164,7 +164,7 @@ static void draw_8BPP_glyph{{ bg }}_{{ pt.name }}(gp_pixmap *pixmap, const gp_te
 	unsigned int y_mul = style->pixel_ymul + style->pixel_yspace;
 
 	x += glyph->bearing_x * x_mul;
-	y -= (glyph->bearing_y - style->font->ascend) * y_mul;
+	y -= (glyph->bearing_y - gp_font_ascent(style->font)) * y_mul;
 
 	gp_coord x0 = x;
 
@@ -283,7 +283,7 @@ static void text_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
 }
 
 gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
-                    gp_coord x, gp_coord y, uint8_t flags,
+                    gp_coord x, gp_coord y, gp_text_flags flags,
                     gp_pixel fg, gp_pixel bg,
                     const char *str, size_t max_chars)
 {

@@ -6,6 +6,8 @@
 /**
  * @file gp_fonts.h
  * @brief A font lookup functions.
+ *
+ * Functions to lookup compiled-in fonts.
  */
 #ifndef TEXT_GP_FONTS_H
 #define TEXT_GP_FONTS_H

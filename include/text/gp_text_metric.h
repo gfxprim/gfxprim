@@ -98,8 +98,8 @@ gp_size gp_text_width(const gp_text_style *style, enum gp_text_len_type type, co
 /**
  * @brief Calculates bounding box width of the string drawn in the given style.
  *
- * @style A text style + font formatting.
- * @str A string.
+ * @param style A text style + font formatting.
+ * @param str A string.
  *
  * @return Width in pixels.
  */
@@ -111,8 +111,8 @@ static inline gp_size gp_text_wbbox(const gp_text_style *style, const char *str)
 /**
  * @brief Counts maximal width for len characters.
  *
- * @style A text style + font formatting.
- * @len A number of glyphs to draw.
+ * @param style A text style + font formatting.
+ * @param len A number of glyphs to draw.
  *
  * @return Width in pixels.
  */
@@ -121,23 +121,23 @@ gp_size gp_text_max_width(const gp_text_style *style, unsigned int len);
 /**
  * @brief Counts average width for len characters.
  *
- * @style A text style + font formatting.
- * @len A number of glyphs to draw.
+ * @param style A text style + font formatting.
+ * @param len A number of glyphs to draw.
  *
  * @return Width in pixels.
  */
 gp_size gp_text_avg_width(const gp_text_style *style, unsigned int len);
 
 /**
- * Returns maximal width for text written with len characters from str.
+ * @brief Returns maximal width for text written with len characters from str.
  *
  * First we find maximal width of an character from the given string, then we
  * use that to compute maximal width. Note that first and last character needs
  * special handling due to bearing and advance.
  *
- * @style A text style + font formatting.
- * @chars An UTF8 string.
- * @len A number of glyphs to draw.
+ * @param style A text style + font formatting.
+ * @param chars An UTF8 string.
+ * @param len A number of glyphs to draw.
  *
  * @return Width in pixels.
  */
@@ -147,7 +147,7 @@ gp_size gp_text_max_width_chars(const gp_text_style *style, const char *chars,
 /**
  * @brief Returns maximal text height.
  *
- * @style A text style + font formatting.
+ * @param style A text style + font formatting.
  *
  * @return Height in pixels.
  */
@@ -181,7 +181,7 @@ gp_size gp_text_descent(const gp_text_style *style);
  * @brief Counts how many characters will fit into a width pixels.
  *
  * @param style A text style.
- * @param chars An UTF8 string.
+ * @param str An UTF-8 string.
  * @param width Width in pixels.
  *
  * @return How many characters from the string will fit the space.

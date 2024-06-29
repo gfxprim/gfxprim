@@ -299,8 +299,8 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 	font->max_glyph_width = 0;
 	font->max_glyph_advance = 0;
-	font->ascend  = 0;
-	font->descend = 0;
+	font->ascent  = 0;
+	font->descent = 0;
 
 	uint64_t avg_advance = 0;
 
@@ -325,8 +325,8 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 			font->max_glyph_width = width;
 	}
 
-	font->ascend = (priv->face->size->metrics.ascender + 32) >> 6;
-	font->descend = ((priv->face->size->metrics.height + 32) >> 6) - font->ascend;
+	font->ascent = (priv->face->size->metrics.ascender + 32) >> 6;
+	font->descent = ((priv->face->size->metrics.height + 32) >> 6) - font->ascent;
 
 	avg_advance = (((avg_advance + 32)>>6) + 47) / 95;
 	font->avg_glyph_advance = (avg_advance + (avg_advance+5)/10);

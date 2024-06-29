@@ -6,6 +6,8 @@
 /**
  * @file gp_font.h
  * @brief An in-memory font description.
+ *
+ * @image html images/fonts/glyph_metrics.png
  */
 #ifndef TEXT_GP_FONT_H
 #define TEXT_GP_FONT_H
@@ -63,7 +65,9 @@ typedef struct gp_glyph {
  * Defines depth for the gp_glyph::bitmap.
  */
 typedef enum gp_font_bitmap_format {
+	/** @brief 1 bit per pixel. */
 	GP_FONT_BITMAP_1BPP,
+	/** @brief 8 bit per pixel. */
 	GP_FONT_BITMAP_8BPP,
 } gp_font_bitmap_format;
 
@@ -147,7 +151,20 @@ typedef struct gp_font_face gp_font_face;
  * any other characters are loaded on-demand when needed.
  */
 typedef struct gp_font_face_ops {
+	/**
+	 * @brief Callback to load a glyph.
+	 *
+	 * @param self A font face.
+	 * @param ch An unicode glyph.
+	 *
+	 * @return A pointer to loaded glyph or NULL if it's not in a font.
+	 */
 	gp_glyph *(*glyph_load)(const gp_font_face *self, uint32_t ch);
+	/**
+	 * @brief Callback to free a font.
+	 *
+	 * @param self A font face.
+	 */
 	void (*font_free)(gp_font_face *self);
 } gp_font_face_ops;
 
@@ -171,10 +188,10 @@ struct gp_font_face {
 	uint8_t glyph_tables;
 
 	/** @brief Maximal height of font glyph from baseline to the top. */
-	uint16_t ascend;
+	uint16_t ascent;
 
 	/** @brief Maximal length of font glyph from baseline to the bottom. */
-	uint16_t descend;
+	uint16_t descent;
 
 	/**
 	 * @brief Maximal width of font glyph.
@@ -254,34 +271,91 @@ typedef struct gp_font_family {
 	const gp_font_face *const fonts[];
 } gp_font_family;
 
-/*
- * Returns font height eg. ascend + descend
+/**
+ * @brief Returns font height.
+ *
+ * @attention This call returns font height, the rendered text height may be
+ *            different due to #gp_text_style. In most cases you should use
+ *            gp_text_height() instead.
+ *
+ * @param font A font face.
+ *
+ * @return A font height, eg. ascent + descent.
  */
 static inline unsigned int gp_font_height(const gp_font_face *font)
 {
-	return font->ascend + font->descend;
+	return font->ascent + font->descent;
 }
 
-static inline unsigned int gp_font_ascend(const gp_font_face *font)
+/**
+ * @brief Returns font ascent.
+ *
+ * @attention This call returns font ascent, the rendered text height may be
+ *            different due to #gp_text_style. In most cases you should use
+ *            gp_text_ascent() instead.
+ *
+ * @param font A font face.
+ *
+ * @return A font ascent.
+ */
+static inline unsigned int gp_font_ascent(const gp_font_face *font)
 {
-	return font->ascend;
+	return font->ascent;
 }
 
-static inline unsigned int gp_font_descend(const gp_font_face *font)
+/**
+ * @brief Returns font ascent.
+ *
+ * @attention This call returns font descent, the rendered text height may be
+ *            different due to #gp_text_style. In most cases you should use
+ *            gp_text_descent() instead.
+ *
+ * @param font A font face.
+ *
+ * @return A font ascent.
+ */
+static inline unsigned int gp_font_descent(const gp_font_face *font)
 {
-	return font->descend;
+	return font->descent;
 }
 
+/**
+ * @brief Returns maximal glyph width.
+ *
+ * For monospace fonts all letter widths are the same.
+ *
+ * @param font A font face.
+ *
+ * @return A maximal glyph width.
+ */
 static inline unsigned int gp_font_max_width(const gp_font_face *font)
 {
 	return font->max_glyph_width;
 }
 
+/**
+ * @brief Returns maximal glyph advance.
+ *
+ * For monospace fonts all advances are the same.
+ *
+ * @param font A font face.
+ *
+ * @return A maximal glyph width.
+ */
 static inline unsigned int gp_font_max_advance_x(const gp_font_face *font)
 {
 	return font->max_glyph_advance;
 }
 
+/**
+ * @brief Returns average glyph advance.
+ *
+ * For monospace fonts all advances are the same.
+ *
+ * @param font A font face.
+ *
+ * @return A maximal glyph width.
+ */
 static inline unsigned int gp_font_avg_advance_x(const gp_font_face *font)
 {
 	if (font->avg_glyph_advance)
@@ -291,12 +365,29 @@ static inline unsigned int gp_font_avg_advance_x(const gp_font_face *font)
 	return font->max_glyph_advance;
 }
 
+/**
+ * @brief Returns font family name.
+ *
+ * @param font A font face.
+ *
+ * @return A font family name.
+ */
 static inline const char *gp_font_family_name(const gp_font_face *font)
 {
 	return font->family_name;
 }
 
-const char *gp_font_style_name(uint8_t style);
+/**
+ * @brief Returns font style name.
+ *
+ * Returns font style name for a bitwise combination of the GP_FONT_STYLE_MASK
+ * bits.
+ *
+ * @param style A font style.
+ *
+ * @return A font style name.
+ */
+const char *gp_font_style_name(gp_font_style style);
 
 /**
  * @brief Looks up a glyph in a font.

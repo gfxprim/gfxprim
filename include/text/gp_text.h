@@ -17,16 +17,17 @@
 #include <stdarg.h>
 
 #include <core/gp_types.h>
+#include <core/gp_compiler.h>
 #include <text/gp_text_style.h>
 #include <text/gp_text_metric.h>
 #include <text/gp_fonts.h>
 
 /**
- * @brief Text attributes, mostly alignment.
+ * @brief Text flags, mostly alignment.
  *
- * For gp_text(), the alignment is relative to a specified point.
+ * The alignment is relative to a specified point.
  */
-typedef enum gp_text_attr {
+typedef enum gp_text_flags {
 	/** @brief Draws the text to the left of the point. */
 	GP_ALIGN_LEFT = 0x01,
 	/** @brief Centers the text at the point horizontally. */
@@ -49,23 +50,41 @@ typedef enum gp_text_attr {
 	GP_VALIGN_BELOW = 0x40,
 	/** @brief Alias for GP_VALIGN_BELOW. */
 	GP_VALIGN_BOTTOM = GP_VALIGN_BELOW,
+	/** @brief Vertical alignment mask. */
+	GP_VALIGN_VERT = 0x70,
 	/**
 	 * @brief Use pixmap background.
 	 *
 	 * Mix the alpha pixels with data read from the pixmap rather than
-	 * mixing them with bg_color (which is slightly slower)
+	 * mixing them with bg_color (which is slightly slower). This has
+	 * no effect for 1bpp fonts.
 	 */
 	GP_TEXT_NOBG = 0x80,
-} gp_text_attr;
+} gp_text_flags;
 
-/*
- * Raw version, doesn't use Text aligment.
+/**
+ * @brief Draws a string.
  *
- * If flags are set to GP_TEXT_NOBG the the bg_color is ignored and
- * the pixmap pixels are used for alpha mixing.
+ * @attention Raw version that doesn't use text aligment. Use gp_text() or
+ *            gp_printf() instead.
+ *
+ * @param pixmap A pixmap to draw the glyph into.
+ * @param style A text font and style.
+ * @param x An x coordinate inside the pixmap.
+ * @param y An y coordinate inside the pixmap.
+ * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG
+ *              and GP_VALIGN_*.
+ * @param fg_color Text color.
+ * @param bg_color Background color. The background color is ignored for 1bpp
+ *                 font formats.
+ * @param str An UTF-8 string.
+ * @param max_chars A maximum number of characters to draw, can be used to
+ *                  limit the number of characters to draw from str.
+ *
+ * @return A width of the rendered text.
  */
 gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
-                    gp_coord x, gp_coord y, uint8_t flags,
+                    gp_coord x, gp_coord y, gp_text_flags flags,
                     gp_pixel fg_color, gp_pixel bg_color,
                     const char *str, size_t max_chars);
 
@@ -75,10 +94,21 @@ gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
  * The string is rendered to pixmap (horizontally) with defined text style.
  * The x and y coordinates determines point defined by aligment flags.
  *
- * The background color is ignored for 1bpp font formats.
+ * @param pixmap A pixmap to draw the glyph into.
+ * @param style A text font and style.
+ * @param x An x coordinate inside the pixmap.
+ * @param y An y coordinate inside the pixmap.
+ * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG and
+ *         GP_VALIGN_*
+ * @param fg_color Text color.
+ * @param bg_color Background color. The background color is ignored for 1bpp
+ *                 font formats.
+ * @param str An UTF-8 string.
+ *
+ * @return A width of the rendered text.
  */
 gp_size gp_text(gp_pixmap *pixmap, const gp_text_style *style,
-                gp_coord x, gp_coord y, int align,
+                gp_coord x, gp_coord y, gp_text_flags flags,
                 gp_pixel fg_color, gp_pixel bg_color, const char *str);
 
 /**
@@ -94,10 +124,11 @@ gp_size gp_text(gp_pixmap *pixmap, const gp_text_style *style,
  * @param style A text font and style.
  * @param x An x coordinate inside the pixmap.
  * @param y An y coordinate inside the pixmap.
- * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG and
- *         GP_VALIGN_*
+ * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG
+ *              and GP_VALIGN_*
  * @param fg_color Text color.
- * @param bg_color Background color.
+ * @param bg_color Background color. The background color is ignored for 1bpp
+ *                 font formats.
  * @param glyph And unicode glypth to draw.
  *
  * @return Returns glyhp advance plus any style extra spacing, i.e. how much
@@ -108,12 +139,28 @@ gp_size gp_glyph_draw(gp_pixmap *pixmap, const gp_text_style *style,
                       gp_pixel fg_color, gp_pixel bg_color,
                       uint32_t glyph);
 
-/*
+/**
+ * @brief Draws a string.
+ *
  * Aligns a string between x1 and x2 based ond horizontal aligment flags. The
  * caller must make sure that the string will fit horizontally between x1 and x2.
+ *
+ * @param pixmap A pixmap to draw the glyph into.
+ * @param style A text font and style.
+ * @param x1 An x1 coordinate inside the pixmap.
+ * @param x2 An x2 coordinate inside the pixmap.
+ * @param y An y coordinate inside the pixmap.
+ * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG
+ *              and GP_VALIGN_*.
+ * @param fg_color Text color.
+ * @param bg_color Background color. The background color is ignored for 1bpp
+ *                 font formats.
+ * @param str An UTF-8 string.
+ *
+ * @return A width of the rendered text.
  */
 static inline gp_size gp_text_xxy(gp_pixmap *pixmap, const gp_text_style *style,
-                                  gp_coord x1, gp_coord x2, gp_coord y, int align,
+                                  gp_coord x1, gp_coord x2, gp_coord y, gp_text_flags flags,
                                   gp_pixel fg_color, gp_pixel bg_color, const char *str)
 {
 	gp_coord x, len;
@@ -126,52 +173,109 @@ static inline gp_size gp_text_xxy(gp_pixmap *pixmap, const gp_text_style *style,
 		len = x1 - x2;
 	}
 
-	int halign = align & GP_ALIGN_HORIZ;
+	int halign = flags & GP_ALIGN_HORIZ;
 
-	align &= ~GP_ALIGN_HORIZ;
+	flags &= ~GP_ALIGN_HORIZ;
 
 	switch (halign) {
 	case GP_ALIGN_LEFT:
-		align |= GP_ALIGN_RIGHT;
+		flags |= GP_ALIGN_RIGHT;
 	break;
 	case GP_ALIGN_CENTER:
 		x += len/2;
-		align |= GP_ALIGN_CENTER;
+		flags |= GP_ALIGN_CENTER;
 	break;
 	case GP_ALIGN_RIGHT:
 		x += len;
-		align |= GP_ALIGN_LEFT;
+		flags |= GP_ALIGN_LEFT;
 	break;
 	}
 
-	return gp_text(pixmap, style, x, y, align, fg_color, bg_color, str);
+	return gp_text(pixmap, style, x, y, flags, fg_color, bg_color, str);
 }
 
 /*
  * Same as the gp_text() but the number of characters can be limited.
  */
 gp_size gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
-                    gp_coord x, gp_coord y, int align,
+                    gp_coord x, gp_coord y, gp_text_flags flags,
                     gp_pixel fg_color, gp_pixel bg_color,
                     const char *str, size_t max_chars);
 
-/*
- * Same as above, but printf like and returns text width in pixels.
+/**
+ * @brief Draws a string.
+ *
+ * This is the same as gp_text() only with a printf() like format and
+ * parameters.
+ *
+ * @param pixmap A pixmap to draw the glyph into.
+ * @param style A text font and style.
+ * @param x An x coordinate inside the pixmap.
+ * @param y An y coordinate inside the pixmap.
+ * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG and
+ *         GP_VALIGN_*
+ * @param fg_color Text color.
+ * @param bg_color Background color. The background color is ignored for 1bpp
+ *                 font formats.
+ * @param fmt A printf like format.
+ * @param ... A printf like parameters.
+ *
+ * @return A width of the rendered text.
  */
 gp_size gp_print(gp_pixmap *pixmap, const gp_text_style *style,
-                 gp_coord x, gp_coord y, int align,
+                 gp_coord x, gp_coord y, gp_text_flags flags,
 	         gp_pixel fg_color, gp_pixel bg_color, const char *fmt, ...)
-	         __attribute__ ((format (printf, 8, 9)));
+                 GP_FMT_PRINTF(8, 9);
 
-
+/**
+ * @brief Draws a string.
+ *
+ * This is va_arg variant of gp_print().
+ *
+ * @param pixmap A pixmap to draw the glyph into.
+ * @param style A text font and style.
+ * @param x An x coordinate inside the pixmap.
+ * @param y An y coordinate inside the pixmap.
+ * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG and
+ *         GP_VALIGN_*
+ * @param fg_color Text color.
+ * @param bg_color Background color. The background color is ignored for 1bpp
+ *                 font formats.
+ * @param fmt A printf like format.
+ * @param va A printf like parameters.
+ *
+ * @return A width of the rendered text.
+ */
 gp_size gp_vprint(gp_pixmap *pixmap, const gp_text_style *style,
-                  gp_coord x, gp_coord y, int align,
+                  gp_coord x, gp_coord y, gp_text_flags flags,
 	          gp_pixel fg_color, gp_pixel bg_color,
-                  const char *fmt, va_list va);
+                  const char *fmt, va_list va)
+                  GP_FMT_PRINTF(8, 0);
 
-__attribute__ ((format (printf, 9, 10)))
+/**
+ * @brief Draws a string.
+ *
+ * This is the same as gp_text_xxy() only with a printf() like format and
+ * parameters.
+ *
+ * @param pixmap A pixmap to draw the glyph into.
+ * @param style A text font and style.
+ * @param x1 An x1 coordinate inside the pixmap.
+ * @param x2 An x2 coordinate inside the pixmap.
+ * @param y An y coordinate inside the pixmap.
+ * @param flags Either 0 or any combination of GP_TEXT_BEARING and GP_TEXT_NOBG
+ *              and GP_VALIGN_*.
+ * @param fg_color Text color.
+ * @param bg_color Background color. The background color is ignored for 1bpp
+ *                 font formats.
+ * @param fmt A printf like format.
+ * @param ... A printf like parameters.
+ *
+ * @return A width of the rendered text.
+ */
+GP_FMT_PRINTF(9, 10)
 static inline gp_size gp_print_xxy(gp_pixmap *pixmap, const gp_text_style *style,
-                                   gp_coord x1, gp_coord x2, gp_coord y, int align,
+                                   gp_coord x1, gp_coord x2, gp_coord y, gp_text_flags flags,
 				   gp_pixel fg_color, gp_pixel bg_color, const char *fmt, ...)
 {
 	gp_coord x, len;
@@ -186,43 +290,49 @@ static inline gp_size gp_print_xxy(gp_pixmap *pixmap, const gp_text_style *style
 		len = x1 - x2;
 	}
 
-	int halign = align & GP_ALIGN_HORIZ;
+	int halign = flags & GP_ALIGN_HORIZ;
 
-	align &= ~GP_ALIGN_HORIZ;
+	flags &= ~GP_ALIGN_HORIZ;
 
 	switch (halign) {
 	case GP_ALIGN_LEFT:
-		align |= GP_ALIGN_RIGHT;
+		flags |= GP_ALIGN_RIGHT;
 	break;
 	case GP_ALIGN_CENTER:
 		x += len/2;
-		align |= GP_ALIGN_CENTER;
+		flags |= GP_ALIGN_CENTER;
 	break;
 	case GP_ALIGN_RIGHT:
 		x += len;
-		align |= GP_ALIGN_LEFT;
+		flags |= GP_ALIGN_LEFT;
 	break;
 	}
 
 	va_start(va, fmt);
-	ret = gp_vprint(pixmap, style, x, y, align, fg_color, bg_color, fmt, va);
+	ret = gp_vprint(pixmap, style, x, y, flags, fg_color, bg_color, fmt, va);
 	va_end(va);
 
 	return ret;
 }
 
-/*
- * Clears rectangle that would be used to draw text of size pixels.
+/**
+ * @brief Clears a rectangle that would be used to draw text of size pixels.
+ *
+ * @param pixmap A pixmap to draw the glyph into.
+ * @param style A text font and style.
+ * @param x An x coordinate inside the pixmap.
+ * @param y An y coordinate inside the pixmap.
+ *
  */
 void gp_text_clear(gp_pixmap *pixmap, const gp_text_style *style,
-                   gp_coord x, gp_coord y, int align,
+                   gp_coord x, gp_coord y, gp_text_flags flags,
 		   gp_pixel bg_color, gp_size size);
 
 /*
  * Dtto, but with string.
  */
 void gp_text_clear_str(gp_pixmap *pixmap, const gp_text_style *style,
-                       gp_coord x, gp_coord y, int align,
+                       gp_coord x, gp_coord y, gp_text_flags flags,
 		       gp_pixel bg_color, const char *str);
 
 #endif /* TEXT_GP_TEXT_H */

@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -21,8 +21,20 @@ extern const gp_font_face gp_default_font;
 /**
  * @brief A text style.
  *
- * This structure describes how a text should be rendered.  It includes a font,
+ * This structure describes how a text should be rendered. It includes a font,
  * and a few transformations.
+ *
+ * Default font
+ *
+ * @image html images/fonts/default_console_font.png
+ *
+ * Default font xspace=1, yspace=2, xmul=2, ymul=2
+ *
+ * @image html images/fonts/default_console_font_big.png
+ *
+ * Default font xspace=-1, yspace=-1, xmul=2, ymul=2 (embolding)
+ *
+ * @image html images/fonts/default_console_font_embolding.png
  */
 typedef struct gp_text_style {
 	/** @brief A font face. */

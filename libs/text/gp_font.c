@@ -62,7 +62,7 @@ gp_glyph *gp_glyph_get(const gp_font_face *font, uint32_t ch)
 	return glyph;
 }
 
-const char *gp_font_style_name(uint8_t style)
+const char *gp_font_style_name(gp_font_style style)
 {
 	switch (GP_FONT_STYLE(style)) {
 	case GP_FONT_REGULAR:

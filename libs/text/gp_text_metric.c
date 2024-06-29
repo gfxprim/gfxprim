@@ -220,7 +220,7 @@ gp_size gp_text_height(const gp_text_style *style)
 {
 	style = assert_style(style);
 
-	unsigned int height = style->font->ascend + style->font->descend;
+	unsigned int height = gp_font_ascent(style->font) + gp_font_descent(style->font);
 
 	return multiply_height(style, height);
 }
@@ -229,14 +229,14 @@ gp_size gp_text_ascent(const gp_text_style *style)
 {
 	style = assert_style(style);
 
-	return multiply_height(style, style->font->ascend);
+	return multiply_height(style, style->font->ascent);
 }
 
 gp_size gp_text_descent(const gp_text_style *style)
 {
 	style = assert_style(style);
 
-	return multiply_height(style, style->font->descend);
+	return multiply_height(style, gp_font_descent(style->font));
 }
 
 size_t gp_text_fit_width(const gp_text_style *style, const char *str,

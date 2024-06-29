@@ -77,8 +77,8 @@ static void print_font_properties(const gp_font_face *font)
 {
 	fprintf(stderr, "Font '%s %s' properties:\n",
 	                gp_font_family_name(font), gp_font_style_name(font->style));
-	fprintf(stderr, "    Height: ascend: %d, descend: %d\n",
-			gp_font_ascend(font), gp_font_descend(font));
+	fprintf(stderr, "    Height: ascent: %d, descent: %d\n",
+			gp_font_ascent(font), gp_font_descent(font));
 	fprintf(stderr, "    Max advance_x: %u\n",
 	                gp_font_max_advance_x(font));
 	fprintf(stderr, "    Average advance_x: %u\n",
@@ -130,7 +130,7 @@ void redraw_screen(void)
 			blue_pixel);
 
 		gp_hline_xyw(win->pixmap, 15,
-		             SPACING*i + 15 + gp_font_ascend(style.font),
+		             SPACING*i + 15 + gp_font_ascent(style.font),
 		             gp_text_max_width(&style, gp_utf8_strlen(test_string)) + 1,
 		             blue_pixel);
 
