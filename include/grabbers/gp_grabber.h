@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @file gp_grabber.h
+ * @brief A video grabbers.
+ */
 #ifndef GP_GRABBERS_GRABBER_H
 #define GP_GRABBERS_GRABBER_H
 
@@ -10,34 +14,48 @@
 
 typedef struct gp_grabber gp_grabber;
 
+/** @brief A grabber. */
 struct gp_grabber {
-	/*
-	 * Pixmap with current frame.
-	 */
+	/** @brief Pixmap with current frame. */
 	struct gp_pixmap *frame;
 
-	/*
-	 * Returns 0 if there are no images in queue and 1 otherwise.
+	/**
+	 * @brief A grabber polling function.
+	 *
+	 * This function can be either called in a loop.
+	 *
+	 * @param self A grabber.
+	 * @return Zero if there is non new frame and 1 otherwise.
 	 */
 	int (*poll)(gp_grabber *self);
 
-	/*
-	 * Grabber fd, may be set -1 if grabber doesn't have one.
-	 */
+	/** @brief Grabber fd suitable for polling. */
 	int fd;
 
-	/*
-	 * starts the actuall grabbing. May be NULL if not needed.
+	/**
+	 * @brief Starts the actuall grabbing.
+	 *
+	 * @param self A grabber.
+	 *
+	 * May be NULL if not needed.
 	 */
 	int (*start)(gp_grabber *self);
 
-	/*
-	 * stops the grabbing. May be NULL if not needed.
+	/**
+	 * @brief Stops the grabbing.
+	 *
+	 * @param self A grabber.
+	 *
+	 * May be NULL if not needed.
 	 */
 	int (*stop)(gp_grabber *self);
 
-	/*
-	 * exit functions. Closes fd, frees memory.
+	/**
+	 * @brief Destroys grabber.
+	 *
+	 * @param self A grabber.
+	 *
+	 * Closes fd, frees memory, etc.
 	 */
 	void (*exit)(gp_grabber *self);
 

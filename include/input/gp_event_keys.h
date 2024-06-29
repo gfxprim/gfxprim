@@ -15,95 +15,182 @@
  * @brief A key event values.
  *
  * This is 1:1 to linux kernel input subsystem.
+ *
+ * @image html keyboard.svg
  */
 enum gp_event_key_value {
+	/** @brief Key escape */
 	GP_KEY_ESC            =  1,
+	/** @brief Key 1 */
 	GP_KEY_1              =  2,
+	/** @brief Key 2 */
 	GP_KEY_2              =  3,
+	/** @brief Key 3 */
 	GP_KEY_3              =  4,
+	/** @brief Key 4 */
 	GP_KEY_4              =  5,
+	/** @brief Key 5 */
 	GP_KEY_5              =  6,
+	/** @brief Key 6 */
 	GP_KEY_6              =  7,
+	/** @brief Key 7 */
 	GP_KEY_7              =  8,
+	/** @brief Key 8 */
 	GP_KEY_8              =  9,
+	/** @brief Key 9 */
 	GP_KEY_9              = 10,
+	/** @brief Key 0 */
 	GP_KEY_0              = 11,
+	/** @brief Key minus */
 	GP_KEY_MINUS          = 12,
+	/** @brief Key equal */
 	GP_KEY_EQUAL          = 13,
+	/** @brief Key backspace */
 	GP_KEY_BACKSPACE      = 14,
+	/** @brief Key tab */
 	GP_KEY_TAB            = 15,
+	/** @brief Key Q */
 	GP_KEY_Q              = 16,
+	/** @brief Key W */
 	GP_KEY_W              = 17,
+	/** @brief Key E */
 	GP_KEY_E              = 18,
+	/** @brief Key R */
 	GP_KEY_R              = 19,
+	/** @brief Key T */
 	GP_KEY_T              = 20,
+	/** @brief Key Y */
 	GP_KEY_Y              = 21,
+	/** @brief Key U */
 	GP_KEY_U              = 22,
+	/** @brief Key I */
 	GP_KEY_I              = 23,
+	/** @brief Key O */
 	GP_KEY_O              = 24,
+	/** @brief Key P */
 	GP_KEY_P              = 25,
+	/** @brief Key Left Brace */
 	GP_KEY_LEFT_BRACE     = 26,
+	/** @brief Key Right Brace */
 	GP_KEY_RIGHT_BRACE    = 27,
+	/** @brief Enter */
 	GP_KEY_ENTER          = 28,
+	/** @brief Key Left Ctrl */
 	GP_KEY_LEFT_CTRL      = 29,
+	/** @brief Key A */
 	GP_KEY_A              = 30,
+	/** @brief Key S */
 	GP_KEY_S              = 31,
+	/** @brief Key D */
 	GP_KEY_D              = 32,
+	/** @brief Key F */
 	GP_KEY_F              = 33,
+	/** @brief Key G */
 	GP_KEY_G              = 34,
+	/** @brief Key H */
 	GP_KEY_H              = 35,
+	/** @brief Key J */
 	GP_KEY_J              = 36,
+	/** @brief Key K */
 	GP_KEY_K              = 37,
+	/** @brief Key L */
 	GP_KEY_L              = 38,
+	/** @brief Key Semicolon */
 	GP_KEY_SEMICOLON      = 39,
+	/** @brief Key Apostrophe */
 	GP_KEY_APOSTROPHE     = 40,
+	/** @brief Key Grave */
 	GP_KEY_GRAVE          = 41,
+	/** @brief Key Left Shift */
 	GP_KEY_LEFT_SHIFT     = 42,
+	/** @brief Key Back Slash */
 	GP_KEY_BACKSLASH      = 43,
+	/** @brief Key Z */
 	GP_KEY_Z              = 44,
+	/** @brief Key X */
 	GP_KEY_X              = 45,
+	/** @brief Key C */
 	GP_KEY_C              = 46,
+	/** @brief Key V */
 	GP_KEY_V              = 47,
+	/** @brief Key B */
 	GP_KEY_B              = 48,
+	/** @brief Key N */
 	GP_KEY_N              = 49,
+	/** @brief Key M */
 	GP_KEY_M              = 50,
+	/** @brief Key Comma */
 	GP_KEY_COMMA          = 51,
+	/** @brief Key Dot */
 	GP_KEY_DOT            = 52,
+	/** @brief Key Slash */
 	GP_KEY_SLASH          = 53,
+	/** @brief Key Right Shift */
 	GP_KEY_RIGHT_SHIFT    = 54,
+	/** @brief Key Asterisk */
 	GP_KEY_KP_ASTERISK    = 55,
+	/** @brief Key Left Alt */
 	GP_KEY_LEFT_ALT       = 56,
+	/** @brief Key Space */
 	GP_KEY_SPACE          = 57,
+	/** @brief Key Caps Lock */
 	GP_KEY_CAPS_LOCK      = 58,
+	/** @brief Key F1 */
 	GP_KEY_F1             = 59,
+	/** @brief Key F2 */
 	GP_KEY_F2             = 60,
+	/** @brief Key F3 */
 	GP_KEY_F3             = 61,
+	/** @brief Key F4 */
 	GP_KEY_F4             = 62,
+	/** @brief Key F5 */
 	GP_KEY_F5             = 63,
+	/** @brief Key F6 */
 	GP_KEY_F6             = 64,
+	/** @brief Key F7 */
 	GP_KEY_F7             = 65,
+	/** @brief Key F8 */
 	GP_KEY_F8             = 66,
+	/** @brief Key F9 */
 	GP_KEY_F9             = 67,
+	/** @brief Key F10 */
 	GP_KEY_F10            = 68,
+	/** @brief Key Num Lock */
 	GP_KEY_NUM_LOCK       = 69,
+	/** @brief Key Scroll Lock */
 	GP_KEY_SCROLL_LOCK    = 70,
+	/** @brief Key Keypad 7 */
 	GP_KEY_KP_7           = 71,
+	/** @brief Key Keypad 8 */
 	GP_KEY_KP_8           = 72,
+	/** @brief Key Keypad 9 */
 	GP_KEY_KP_9           = 73,
+	/** @brief Key Keypad Minus */
 	GP_KEY_KP_MINUS       = 74,
+	/** @brief Key Keypad 4 */
 	GP_KEY_KP_4           = 75,
+	/** @brief Key Keypad 5 */
 	GP_KEY_KP_5           = 76,
+	/** @brief Key Keypad 6 */
 	GP_KEY_KP_6           = 77,
+	/** @brief Key Keypad Plus */
 	GP_KEY_KP_PLUS        = 78,
+	/** @brief Key Keypad 1 */
 	GP_KEY_KP_1           = 79,
+	/** @brief Key Keypad 2 */
 	GP_KEY_KP_2           = 80,
+	/** @brief Key Keypad 3 */
 	GP_KEY_KP_3           = 81,
+	/** @brief Key Keypad 0 */
 	GP_KEY_KP_0           = 82,
+	/** @brief Key Keypad Dot */
 	GP_KEY_KP_DOT         = 83,
 
 	GP_KEY_ZENKAKUHANKAKU = 85,
 	GP_KEY_102ND          = 86,
+	/** @brief Key F11 */
 	GP_KEY_F11            = 87,
+	/** @brief Key F12 */
 	GP_KEY_F12            = 88,
 	GP_KEY_RO             = 89,
 	GP_KEY_KATAKANA       = 90,
@@ -113,35 +200,55 @@ enum gp_event_key_value {
 	GP_KEY_MUHENKAN       = 94,
 	GP_KEY_KP_JPCOMMA     = 95,
 	GP_KEY_KP_ENTER       = 96,
+	/** @brief Key Right Ctrl */
 	GP_KEY_RIGHT_CTRL     = 97,
+	/** @brief Key Keypad Slash */
 	GP_KEY_KP_SLASH       = 98,
+	/** @brief Key System Request */
 	GP_KEY_SYSRQ          = 99,
+	/** @brief Key Right Alt */
 	GP_KEY_RIGHT_ALT      = 100,
 	GP_KEY_LINEFEED       = 101,
+	/** @brief Key Home */
 	GP_KEY_HOME           = 102,
+	/** @brief Key Up */
 	GP_KEY_UP             = 103,
+	/** @brief Key Page Up */
 	GP_KEY_PAGE_UP        = 104,
+	/** @brief Key Left */
 	GP_KEY_LEFT           = 105,
+	/** @brief Key Right */
 	GP_KEY_RIGHT          = 106,
+	/** @brief Key End */
 	GP_KEY_END            = 107,
+	/** @brief Key Down */
 	GP_KEY_DOWN           = 108,
+	/** @brief Key Page Down */
 	GP_KEY_PAGE_DOWN      = 109,
+	/** @brief Key Insert */
 	GP_KEY_INSERT         = 110,
+	/** @brief Key Delete */
 	GP_KEY_DELETE         = 111,
 	GP_KEY_MACRO          = 112,
 	GP_KEY_MUTE           = 113,
 	GP_KEY_VOLUME_DOWN    = 114,
 	GP_KEY_VOLUME_UP      = 115,
 	GP_KEY_POWER          = 116,
+	/** @brief Key Keypad Equal */
 	GP_KEY_KP_EQUAL       = 117,
+	/** @brief Key Keypad Plus Minus */
 	GP_KEY_KP_PLUS_MINUS  = 118,
+	/** @brief Key Pause */
 	GP_KEY_PAUSE          = 119,
 	GP_KEY_SCALE          = 120,
+	/** @brief Key Keypad Comma */
 	GP_KEY_KP_COMMA       = 121,
 	GP_KEY_HANGEUL        = 122,
 	GP_KEY_HANJA          = 123,
 	GP_KEY_YEN            = 124,
+	/** @brief Key Left Meta */
 	GP_KEY_LEFT_META      = 125,
+	/** @brief Key Right Meta */
 	GP_KEY_RIGHT_META     = 126,
 	GP_KEY_COMPOSE        = 127,
 	GP_KEY_STOP           = 128,
@@ -284,13 +391,19 @@ enum gp_event_key_value {
 	GP_BTN_8              = 0x108,
 	GP_BTN_9              = 0x109,
 
-	/* Mouse Buttons */
+	/** @brief Left Mouse Button */
 	GP_BTN_LEFT           = 0x110,
+	/** @brief Right Mouse Button */
 	GP_BTN_RIGHT          = 0x111,
+	/** @brief Middle Mouse Button */
 	GP_BTN_MIDDLE         = 0x112,
+	/** @brief Side Mouse Button */
 	GP_BTN_SIDE           = 0x113,
+	/** @brief Extra Mouse Button */
 	GP_BTN_EXTRA          = 0x114,
+	/** @brief Forward Mouse Button */
 	GP_BTN_FORWARD        = 0x115,
+	/** @brief Back Mouse Button */
 	GP_BTN_BACK           = 0x116,
 	GP_BTN_TASK           = 0x117,
 
@@ -334,7 +447,11 @@ enum gp_event_key_value {
 	GP_BTN_TOOL_LENS      = 0x147,
 	GP_BTN_TOOL_QUINT_TAP = 0x148,
 	GP_BTN_STYLUS3        = 0x149,
-	/* Formerly GP_BTN_PEN */
+	/**
+	 * @brief A touch screen touched event.
+	 *
+	 * Formerly GP_BTN_PEN.
+	 */
 	GP_BTN_TOUCH          = 0x14a,
 	GP_BTN_STYLUS         = 0x14b,
 	GP_BTN_STYLUS2        = 0x14c,
@@ -342,6 +459,7 @@ enum gp_event_key_value {
 	GP_BTN_TOOL_TRIPLE_TAP = 0x14e,
 	GP_BTN_TOOL_QUAD_TAP  = 0x14f,
 
+	/** @brief Mouse Wheel Button */
 	GP_BTN_WHEEL          = 0x150,
 	GP_BTN_GEAR_UP        = 0x151,
 

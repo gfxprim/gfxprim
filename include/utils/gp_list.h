@@ -16,33 +16,117 @@
 
 #include <core/gp_common.h>
 
+/**
+ * @brief A linked list header.
+ *
+ * This is embedded in the structures that are going to be inserted into a list.
+ */
 typedef struct gp_list_head {
+	/** @brief Pointer to next list element. */
 	struct gp_list_head *next;
 } gp_list_head;
 
+/**
+ * @brief A double linked list header.
+ *
+ * This is embedded in the structures that are going to be inserted into a list.
+ */
 typedef struct gp_dlist_head {
+	/** @brief Pointer to next list element. */
 	struct gp_dlist_head *next;
+	/** @brief Pointer to previous list element. */
 	struct gp_dlist_head *prev;
 } gp_dlist_head;
 
+/**
+ * @brief A linked list pointers.
+ */
 typedef struct gp_list {
+	/** @brief A pointer to list head. */
 	gp_list_head *head;
+	/** @brief A pointer to list tail. */
 	gp_list_head *tail;
+	/** @brief A number of elements in the list. */
 	size_t cnt;
 } gp_list;
 
+/**
+ * @brief A double linked list pointers.
+ */
 typedef struct gp_dlist {
+	/** @brief A pointer to list head. */
 	gp_dlist_head *head;
+	/** @brief A pointer to list tail. */
 	gp_dlist_head *tail;
+	/** @brief A number of elements in the list. */
 	size_t cnt;
 } gp_dlist;
 
+/**
+ * @brief Converts between list pointer and structure pointer.
+ *
+ * @param ptr A list head pointer.
+ * @param structure A structure the list head pointer is embedded into.
+ * @param member A name of the list head in the structure.
+ */
 #define GP_LIST_ENTRY(ptr, structure, member) \
 	GP_CONTAINER_OF(ptr, structure, member)
 
+/**
+ * @brief A for loop over all list entries.
+ *
+ * Example:
+ * @code
+ * struct foo {
+ *	gp_list_head lh;
+ * };
+ *
+ * static gp_list foos;
+ *
+ * ...
+ *	gp_list_head *i;
+ *
+ *	GP_LIST_FOREACH(&foos, i) {
+ *		struct foo *f = GP_LIST_ENTRY(i, struct foo, lh);
+ *		...
+ *	}
+ * ...
+ *
+ * @endcode
+ *
+ * @param list A #gp_list or #gp_dlist.
+ * @param entry An iterator entry a pointer to #gp_list_head or #gp_dlist_head.
+ */
 #define GP_LIST_FOREACH(list, entry) \
 	for (entry = (list)->head; entry; entry = entry->next)
 
+/**
+ * @brief A reverse for loop over all list entries.
+ *
+ * Works only for double linked lists since it uses gp_dlist_head::prev pointers.
+ *
+ * Example:
+ * @code
+ * struct foo {
+ *	gp_dlist_head lh;
+ * };
+ *
+ * static gp_dlist foos;
+ *
+ * ...
+ *	gp_dlist_head *i;
+ *
+ *	GP_DLIST_REV_FOREACH(&foos, i) {
+ *		struct foo *f = GP_LIST_ENTRY(i, struct foo, lh);
+ *		...
+ *	}
+ * ...
+ *
+ * @endcode
+ *
+ * @param list A #gp_dlist.
+ * @param entry An iterator entry a pointer to #gp_dlist_head.
+ */
 #define GP_DLIST_REV_FOREACH(list, entry) \
 	for (entry = (list)->tail; entry; entry = entry->prev)
 

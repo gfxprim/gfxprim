@@ -76,9 +76,17 @@ struct gp_fd {
 	 * This callback is called for events on the fd.
 	 */
 	enum gp_poll_event_ret (*event)(gp_fd *self);
-	/** @brief Epoll events to watch. */
+	/**
+	 * @brief Epoll events to watch.
+	 *
+	 * See enum #gp_poll_events.
+	 */
 	uint32_t events;
-	/** @brief Events returned from epoll */
+	/**
+	 * @brief Events returned from epoll.
+	 *
+	 * See enum #gp_poll_events.
+	 */
 	uint32_t revents;
 	/** @brief A file descriptor. */
 	int fd;

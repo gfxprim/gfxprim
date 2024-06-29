@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 /**
  * @file gp_circle.h.
@@ -48,16 +48,34 @@ void gp_fill_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 void gp_fill_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
                         gp_size r, gp_pixel pixel);
 
-/* Ring */
-
+/**
+ * @brief Draws a ring.
+ * @ingroup gfx
+ *
+ * @param pixmap A pixmap to draw into.
+ * @param xcenter A circle center coordinate.
+ * @param ycenter A circle center coordinate.
+ * @param r1 A first circle radius, r=0 draws a single pixel.
+ * @param r2 A second circle radius, r=0 draws a single pixel.
+ * @param pixel A pixel value to be used for the drawing.
+ */
 void gp_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
              gp_size r1, gp_size r2, gp_pixel pixel);
 
 void gp_ring_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
                  gp_size r1, gp_size r2, gp_pixel pixel);
 
-/* Filled Ring */
-
+/**
+ * @brief Draws a filled ring.
+ * @ingroup gfx
+ *
+ * @param pixmap A pixmap to draw into.
+ * @param xcenter A circle center coordinate.
+ * @param ycenter A circle center coordinate.
+ * @param r1 A first circle radius, r=0 draws a single pixel.
+ * @param r2 A second circle radius, r=0 draws a single pixel.
+ * @param pixel A pixel value to be used for the drawing.
+ */
 void gp_fill_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
                   gp_size r1, gp_size r2, gp_pixel pixel);
 
