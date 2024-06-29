@@ -225,6 +225,13 @@ void gp_widget_label_set(gp_widget *self, const char *text)
 	redraw_resize(self);
 }
 
+const char *gp_widget_label_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LABEL, NULL);
+
+	return self->label->text;
+}
+
 void gp_widget_label_fmt_set(gp_widget *self, const char *text_fmt)
 {
 	free(self->label->text_fmt);

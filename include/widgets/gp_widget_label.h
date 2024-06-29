@@ -76,6 +76,14 @@ struct gp_widget_label {
 void gp_widget_label_set(gp_widget *self, const char *text);
 
 /**
+ * @brief Gets the label text.
+ *
+ * @param self A label widget.
+ * @return A label text.
+ */
+const char *gp_widget_label_get(gp_widget *self);
+
+/**
  * @brief Sets the label text format.
  *
  * The text format may include a variable that can be then set.
