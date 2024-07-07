@@ -14,6 +14,7 @@
 #ifndef GP_APP_CFG_H
 #define GP_APP_CFG_H
 
+#include <stdlib.h>
 #include <core/gp_compiler.h>
 
 /**

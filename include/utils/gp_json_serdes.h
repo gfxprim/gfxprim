@@ -43,6 +43,8 @@
 #include <stdint.h>
 #include <limits.h>
 
+#include <utils/gp_json_common.h>
+
 /** @brief Value types, the complete type is determinted by both value and size. */
 enum json_serdes_type {
 	GP_JSON_SERDES_STR,

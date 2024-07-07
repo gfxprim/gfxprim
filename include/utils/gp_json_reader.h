@@ -51,7 +51,7 @@ struct gp_json_reader {
 /**
  * @brief A parsed JSON key value pair.
  */
-typedef struct gp_json_val {
+struct gp_json_val {
 	enum gp_json_type type;
 
 	/** An user supplied buffer and size to store a string values to. */
@@ -74,7 +74,7 @@ typedef struct gp_json_val {
 	char id[GP_JSON_ID_MAX];
 
 	char buf__[];
-} gp_json_val;
+};
 
 /**
  * @brief Allocates a JSON value.

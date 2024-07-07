@@ -43,5 +43,6 @@ void gp_json_err_handler(void *print_priv, const char *line);
 
 typedef struct gp_json_reader gp_json_reader;
 typedef struct gp_json_writer gp_json_writer;
+typedef struct gp_json_val gp_json_val;
 
 #endif /* GP_JSON_COMMON_H */
