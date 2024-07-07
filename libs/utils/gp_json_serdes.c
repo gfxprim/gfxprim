@@ -71,12 +71,24 @@ static int str_dup(const gp_json_struct *desc, gp_json_val *val, void *baseptr)
 	return *dsc == NULL;
 }
 
+static int null_store(const gp_json_struct *desc, void *baseptr)
+{
+	void **dsc = baseptr + desc->offset;
+
+	*dsc = NULL;
+
+	return 0;
+}
+
 static int str_store(const gp_json_struct *desc, gp_json_val *val, void *baseptr)
 {
 	if (desc->type_size)
 		return str_cpy(desc, val, baseptr);
 
-	return str_dup(desc, val, baseptr);
+	if (val->type == GP_JSON_STR)
+		return str_dup(desc, val, baseptr);
+	else
+		return null_store(desc, baseptr);
 }
 
 static int int8_store(gp_json_reader *json, const gp_json_struct *desc,
@@ -330,6 +342,46 @@ static int float_check(gp_json_reader *json, const gp_json_struct *desc,
 static int memb_store(gp_json_reader *json, const gp_json_struct *desc,
                       gp_json_val *val, void *baseptr)
 {
+	enum json_serdes_type type = GP_JSON_SERDES_TYPE(desc->type);
+
+	switch (val->type) {
+	case GP_JSON_ARR:
+		gp_json_warn(json, "Array deserialization is not supported.");
+		return 1;
+	case GP_JSON_OBJ:
+		gp_json_warn(json, "Object deserialization is unsupported.");
+		return 1;
+	case GP_JSON_VOID:
+		return 0;
+	case GP_JSON_BOOL:
+		gp_json_warn(json, "Bool deserialization is unsupported.");
+		return 1;
+	case GP_JSON_INT:
+		if (type != GP_JSON_SERDES_INT && type != GP_JSON_SERDES_UINT && type != GP_JSON_SERDES_FLOAT) {
+			gp_json_warn(json, "Invalid value type expected number");
+			return 1;
+		}
+	break;
+	case GP_JSON_FLOAT:
+		if (type != GP_JSON_SERDES_FLOAT) {
+			gp_json_warn(json, "Invalid value type expected float");
+			return 1;
+		}
+	break;
+	case GP_JSON_STR:
+		if (type != GP_JSON_SERDES_STR) {
+			gp_json_warn(json, "Invalid value type expected string");
+			return 1;
+		}
+	break;
+	case GP_JSON_NULL:
+		if (type != GP_JSON_SERDES_STR || desc->type_size) {
+			gp_json_warn(json, "NULL can be only stored into a pointer");
+			return 1;
+		}
+	break;
+	}
+
 	switch (GP_JSON_SERDES_TYPE(desc->type)) {
 	case GP_JSON_SERDES_STR:
 		return str_store(desc, val, baseptr);
@@ -483,6 +535,7 @@ int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
 {
 	const gp_json_struct *i;
 	int err = 0;
+	const char *str;
 
 	err |= gp_json_obj_start(json, id);
 
@@ -498,7 +551,11 @@ int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
 			gp_json_float_add(json, i->id, float_val(i, baseptr));
 		break;
 		case GP_JSON_SERDES_STR:
-			gp_json_str_add(json, i->id, str_ptr(i, baseptr));
+			str = str_ptr(i, baseptr);
+			if (str)
+				gp_json_str_add(json, i->id, str);
+			else
+				gp_json_null_add(json, i->id);
 		break;
 		}
 	}
