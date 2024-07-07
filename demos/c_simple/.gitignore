@@ -40,6 +40,7 @@ SDL2_glue
 bbox
 backend_tasks_example
 json_writer
+json_writer_file
 drm_test
 draw_glyph
 dpi_check

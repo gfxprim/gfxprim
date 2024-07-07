@@ -507,3 +507,19 @@ int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
 
 	return err;
 }
+
+int gp_json_save_struct(const char *path,
+                        const gp_json_struct *desc, void *baseptr)
+{
+	gp_json_writer *json = gp_json_writer_file_open(path);
+
+	if (!json)
+		return 1;
+
+	gp_json_write_struct(json, desc, NULL, baseptr);
+
+	if (!gp_json_writer_file_close(json))
+		return 1;
+
+	return 0;
+}

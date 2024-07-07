@@ -589,4 +589,17 @@ int gp_json_load_struct(const char *path,
 int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
                          const char *id, void *baseptr);
 
+/**
+ * @brief Serializes a C structure to JSON and saves the result into a file.
+ *
+ * This is a simplified interface that saves just a single structure to a file.
+ *
+ * @param path A path to a file.
+ * @param desc An alphabetically sorted by id and NULL id terminatred array of
+ *       structure member descriptions.
+ * @param baseptr A pointer to the serialized C structure.
+ */
+int gp_json_save_struct(const char *path,
+                        const gp_json_struct *desc, void *baseptr);
+
 #endif /* GP_JSON_SERDES_H */

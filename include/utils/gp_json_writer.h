@@ -74,6 +74,28 @@ static inline char *gp_json_writer_vec(gp_json_writer *self)
 }
 
 /**
+ * @brief Allocates a JSON file writer.
+ *
+ * The call may fail either when file cannot be opened for writing or if
+ * allocation has failed. In all cases errno should be set correctly.
+ *
+ * @param path A path to the file, file is opened for writing and created if it
+ *             does not exist.
+ *
+ * @return A gp_json_writer pointer or NULL in a case of failure.
+ */
+gp_json_writer *gp_json_writer_file_open(const char *path);
+
+/**
+ * @brief Closes and frees a JSON file writer.
+ *
+ * @param self A gp_json_writer file writer.
+ *
+ * @return Zero on success, 1 on a failure and errno is set.
+ */
+int gp_json_writer_file_close(gp_json_writer *self);
+
+/**
  * @brief Returns true if writer error happened.
  *
  * @return True if error has happened.

@@ -5,6 +5,9 @@
 
 #include <string.h>
 #include <stdarg.h>
+#include <fcntl.h>
+#include <errno.h>
+
 #include <utils/gp_json_writer.h>
 #include <utils/gp_vec_str.h>
 
@@ -422,3 +425,112 @@ void gp_json_writer_vec_free(gp_json_writer *self)
 	gp_vec_free(self->out_priv);
 	free(self);
 }
+
+struct json_writer_file {
+	int fd;
+	size_t buf_used;
+	char buf[1024];
+};
+
+static int out_writer_file_write(gp_json_writer *self, int fd, const char *buf, ssize_t buf_len)
+{
+	do {
+		ssize_t ret = write(fd, buf, buf_len);
+		if (ret <= 0) {
+			err(self, "Failed to write to a file");
+			return 1;
+		}
+
+		if (ret > buf_len) {
+			err(self, "Wrote more bytes than requested?!");
+			return 1;
+		}
+
+		buf_len -= ret;
+	} while (buf_len);
+
+	return 0;
+}
+
+static int out_writer_file(gp_json_writer *self, const char *buf, size_t buf_len)
+{
+	struct json_writer_file *writer_file = self->out_priv;
+	size_t buf_size = sizeof(writer_file->buf);
+	size_t buf_avail = buf_size - writer_file->buf_used;
+
+	if (buf_len > buf_size/4)
+		return out_writer_file_write(self, writer_file->fd, buf, buf_len);
+
+	if (buf_len >= buf_avail) {
+		if (out_writer_file_write(self, writer_file->fd,
+		                          writer_file->buf, writer_file->buf_used))
+			return 1;
+
+		memcpy(writer_file->buf, buf, buf_len);
+		writer_file->buf_used = buf_len;
+		return 0;
+	}
+
+	memcpy(writer_file->buf + writer_file->buf_used, buf, buf_len);
+	writer_file->buf_used += buf_len;
+
+	return 0;
+}
+
+int gp_json_writer_file_close(gp_json_writer *self)
+{
+	struct json_writer_file *writer_file = self->out_priv;
+	int saved_errno = 0;
+
+	if (writer_file->buf_used) {
+		if (out_writer_file_write(self, writer_file->fd,
+		                          writer_file->buf, writer_file->buf_used))
+
+			saved_errno = errno;
+	}
+
+	if (close(writer_file->fd)) {
+		if (!saved_errno)
+			saved_errno = errno;
+	}
+
+	free(self);
+
+	if (saved_errno) {
+		errno = saved_errno;
+		return 1;
+	}
+
+	return 0;
+}
+
+gp_json_writer *gp_json_writer_file_open(const char *path)
+{
+	gp_json_writer *ret;
+	struct json_writer_file *writer_file;
+
+	ret = malloc(sizeof(gp_json_writer) + sizeof(struct json_writer_file));
+	if (!ret)
+		return NULL;
+
+	writer_file = (void*)ret + sizeof(gp_json_writer);
+
+	writer_file->fd = open(path, O_CREAT | O_WRONLY, 0664);
+	if (!writer_file->fd) {
+		free(ret);
+		return NULL;
+	}
+
+	writer_file->buf_used = 0;
+
+	memset(ret, 0, sizeof(*ret));
+
+	ret->err_print = GP_JSON_ERR_PRINT;
+	ret->err_print_priv = GP_JSON_ERR_PRINT_PRIV;
+	ret->out = out_writer_file;
+	ret->out_priv = writer_file;
+
+	return ret;
+}
+
+
