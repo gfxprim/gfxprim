@@ -57,4 +57,14 @@ enum gp_mkpath_flags {
 int gp_mkpath(const char *base_path, const char *path,
               enum gp_mkpath_flags flags, int mode);
 
-#endif /* GP_USER_PATH_H */
+/**
+ * @brief Returns directory component of a path in a newly allocated buffer.
+ *
+ * @param path A path.
+ * @return A newly allocated buffer with a directory component of the path.
+ *         Returns NULL if path haven't included a directory component or
+ *         if an allocation has failed.
+ */
+char *gp_dirname(const char *path);
+
+#endif /* GP_PATH_H */

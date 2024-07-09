@@ -88,6 +88,25 @@ exit:
 	return ret;
 }
 
+char *gp_dirname(const char *path)
+{
+	const char *end = path;
+	const char *slash = NULL;
+
+	while (*end) {
+		if (*end == '/')
+			slash = end;
+		end++;
+	}
+
+	if (!slash)
+		return NULL;
+
+	size_t size = slash - path + 1;
+
+	return strndup(path, size);
+}
+
 __attribute__((weak))
 int gp_mkpath(const char *base_path, const char *path,
               enum gp_mkpath_flags flags, int mode)

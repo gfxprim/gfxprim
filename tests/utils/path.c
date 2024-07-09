@@ -158,6 +158,44 @@ static int mkpath_03(void)
 	return TST_PASSED;
 }
 
+static int dirname_01(void)
+{
+	const char *path = "just_file.ext";
+	char *ret;
+
+	ret = gp_dirname(path);
+
+	if (ret) {
+		tst_msg("Returned non NULL path for filename");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+static int dirname_02(void)
+{
+	const char *path = "dir1/dir2/filename.ext";
+	const char *dir = "dir1/dir2/";
+	char *ret;
+
+	ret = gp_dirname(path);
+
+	if (!ret) {
+		tst_msg("Returned NULL path");
+		return TST_FAILED;
+	}
+
+	if (strcmp(ret, dir)) {
+		tst_msg("Returned wrong path '%s' expected '%s'", ret, dir);
+		free(ret);
+		return TST_FAILED;
+	}
+
+	free(ret);
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "path testsuite",
 	.tests = {
@@ -188,6 +226,14 @@ const struct tst_suite tst_suite = {
 		{.name = "mkpath 03",
 		 .tst_fn = mkpath_03,
 		 .flags = TST_CHECK_MALLOC | TST_TMPDIR},
+
+		{.name = "dirname 01",
+		 .tst_fn = dirname_01,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "dirname 02",
+		 .tst_fn = dirname_02,
+		 .flags = TST_CHECK_MALLOC},
 
 		{},
 	}
