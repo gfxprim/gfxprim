@@ -507,6 +507,8 @@ void gp_widget_free(gp_widget *self);
 /**
  * @brief Sets widget parent.
  *
+ * The function is no-op for NULL self widget.
+ *
  * @param self A widget.
  * @param parent A parent widget.
  */

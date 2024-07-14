@@ -57,7 +57,8 @@ gp_widget *gp_widget_new(enum gp_widget_type type,
 
 void gp_widget_set_parent(gp_widget *self, gp_widget *parent)
 {
-	GP_WIDGET_ASSERT(self, );
+	if (!self)
+		return;
 
 	//TODO: reparent?
 	if (self->parent)
