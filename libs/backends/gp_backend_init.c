@@ -195,8 +195,11 @@ static int parse_fb_params(char *params, int *flags, const char **fb)
 	int kbd = 0;
 	int none = 0;
 
-	if (!params)
+	if (!params) {
+		*flags |= GP_FB_INPUT_LINUX;
+		GP_DEBUG(1, "Enabling input=linux");
 		return 0;
+	}
 
 	do {
 		param = params;
@@ -243,11 +246,19 @@ static int parse_fb_params(char *params, int *flags, const char **fb)
 		return 1;
 	}
 
-	if (kbd)
+	if (kbd) {
 		*flags |= GP_FB_INPUT_KBD;
-	else if (!none)
-		*flags |= GP_FB_INPUT_LINUX;
+		GP_DEBUG(1, "Enabling input=kbd");
+		return 0;
+	}
 
+	if (!none) {
+		*flags |= GP_FB_INPUT_LINUX;
+		GP_DEBUG(1, "Enabling input=linux");
+		return 0;
+	}
+
+	GP_DEBUG(1, "Enabling input=none");
 	return 0;
 }
 
