@@ -35,8 +35,6 @@ static int input_walk(gp_backend *backend)
 		return 1;
 	}
 
-	errno = 0;
-
 	while ((dir_ent = readdir(dir)) != NULL) {
 		if (!strncmp(dir_ent->d_name, "event", 5)) {
 			snprintf(dev, BUF_LEN, "%s%s", DEV_PATH,
@@ -44,10 +42,13 @@ static int input_walk(gp_backend *backend)
 			if (gp_linux_input_new(dev, backend))
 				return 1;
 		}
+		errno = 0;
 	}
 
-	if (errno)
+	if (errno) {
+		GP_WARN("readdir() failed with '%s'", strerror(errno));
 		return 1;
+	}
 
 	return 0;
 }
