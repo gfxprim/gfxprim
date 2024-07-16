@@ -900,6 +900,28 @@ static void render_stock_shuffle_on(gp_pixmap *pix,
 	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
 }
 
+static void render_stock_filter(gp_pixmap *pix,
+                                gp_coord x, gp_coord y,
+                                gp_size w, gp_size h, gp_pixel bg_col,
+                                const gp_widget_render_ctx *ctx)
+{
+	gp_coord cx = x + w/2;
+	gp_size pp = GP_MIN(w, h)/8;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_coord poly[] = {
+		x, y,
+		x + w-1, y,
+		cx + pp, y + h/2,
+		cx + pp, y+h-1,
+		cx - pp, y+h-1 - pp,
+		cx - pp, y + h/2,
+	};
+
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+}
+
 static void render_stock_day(gp_pixmap *pix,
                              gp_coord x, gp_coord y,
                              gp_size w, gp_size h, gp_pixel bg_col,
@@ -1108,6 +1130,9 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	case GP_WIDGET_STOCK_SHUFFLE_OFF:
 		render_stock_shuffle_off(pix, x, y, w, h, bg_col, ctx);
 	break;
+	case GP_WIDGET_STOCK_FILTER:
+		render_stock_filter(pix, x, y, w, h, bg_col, ctx);
+	break;
 	case GP_WIDGET_STOCK_DAY:
 		render_stock_day(pix, x, y, w, h, bg_col, type, ctx);
 	break;
@@ -1202,6 +1227,7 @@ static struct stock_types {
 
 	{"shuffle_on", GP_WIDGET_STOCK_SHUFFLE_ON},
 	{"shuffle_off", GP_WIDGET_STOCK_SHUFFLE_OFF},
+	{"filter", GP_WIDGET_STOCK_FILTER},
 
 	{"arrow_up", GP_WIDGET_STOCK_ARROW_UP},
 	{"arrow_down", GP_WIDGET_STOCK_ARROW_DOWN},

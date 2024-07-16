@@ -46,7 +46,7 @@
    {"type": "stock", "stock": "home"},
    {"type": "stock", "stock": "refresh"},
    {"type": "stock", "stock": "close"},
-   {},
+   {"type": "stock", "stock": "filter"},
    {},
 
    {"type": "label", "text": "STOCK_HARDWARE", "halign": "left"},
@@ -55,7 +55,7 @@
    {"type": "label", "text": "STOCK_HOME", "halign": "left"},
    {"type": "label", "text": "STOCK_REFRESH", "halign": "left"},
    {"type": "label", "text": "STOCK_CLOSE", "halign": "left"},
-   {},
+   {"type": "label", "text": "STOCK_FILTER", "halign": "left"},
    {},
 
    {"type": "stock", "stock": "save"},

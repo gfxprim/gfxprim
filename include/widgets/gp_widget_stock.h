@@ -74,6 +74,8 @@ enum gp_widget_stock_type {
 	GP_WIDGET_STOCK_SHUFFLE_ON,
 	/** @brief A shuffle off icon. */
 	GP_WIDGET_STOCK_SHUFFLE_OFF,
+	/** @brief A filter stock icon. */
+	GP_WIDGET_STOCK_FILTER,
 
 	/** @brief Arrow up. */
 	GP_WIDGET_STOCK_ARROW_UP,
