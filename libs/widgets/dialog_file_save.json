@@ -4,12 +4,11 @@
   "rows": 3,
   "widgets": [
     {
-      "cols": 4,
+      "cols": 3,
       "halign": "fill",
       "border": "none",
-      "cfill": "0, 1, 0, 0",
+      "cfill": "1, 0, 0",
       "widgets": [
-	{"type": "label", "text": "Directory:"},
 	{"type": "tbox", "len": 75, "halign": "fill", "uid": "path", "ttype": "path", "on_event": "path"},
 	{"type": "button", "btype": "home", "on_event": "home"},
 	{"type": "button", "btype": "new_dir", "on_event": "new_dir"}

@@ -4,12 +4,11 @@
   "rows": 3,
   "widgets": [
     {
-      "cols": 3,
+      "cols": 2,
       "halign": "fill",
       "border": "none",
-      "cfill": "0, 1, 0",
+      "cfill": "1, 0",
       "widgets": [
-        {"type": "label", "text": "Directory:"},
         {"type": "tbox", "len": 75, "halign": "fill", "uid": "path", "on_event": "path", "ttype": "path"},
 	{"type": "button", "btype": "home", "on_event": "home"}
       ]
@@ -34,7 +33,7 @@
       "cfill": "0, 8, 0, 0, 0",
       "cpadf": "0, 0, 1, 1, 0, 0",
       "widgets": [
-        {"type": "label", "text": "Filter:"},
+        {"type": "stock", "stock": "filter", "min_size": "1asc 1pad"},
         {"type": "tbox", "len": 20, "uid": "filter", "halign": "fill", "on_event": "filter"},
         {"type": "checkbox", "label": "Show Hidden", "uid": "hidden"},
         {"type": "button", "label": "Cancel", "btype": "cancel", "on_event": "cancel"},
