@@ -10,20 +10,24 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_class_bool.h>
 
-int gp_widget_bool_get(gp_widget *self)
+bool gp_widget_bool_get(gp_widget *self)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_BOOL, 0);
+	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
 
-	return self->b->val;
+	return b->val;
 }
 
-void gp_widget_bool_set(gp_widget *self, int val)
+void gp_widget_bool_set(gp_widget *self, bool val)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_BOOL, );
+	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
 
-	if (self->b->val == val)
+	if (b->val == val)
 		return;
 
-	self->b->val = val;
+	b->val = val;
+
 	gp_widget_redraw(self);
+	gp_widget_send_widget_event(self, 0);
 }

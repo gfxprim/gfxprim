@@ -30,18 +30,18 @@ static int checkbox_json_load(struct tcase *t)
 	}
 
 	if (t->label) {
-		if (strcmp(t->label, checkbox->checkbox->label)) {
+		if (strcmp(t->label, gp_widget_checkbox_label_get(checkbox))) {
 			tst_msg("Wrong checkbox label!");
 			return TST_FAILED;
 		}
 	} else {
-		if (checkbox->checkbox->label) {
+		if (gp_widget_checkbox_label_get(checkbox)) {
 			tst_msg("Non-NULL label!");
 			return TST_FAILED;
 		}
 	}
 
-	if (t->val != checkbox->checkbox->val) {
+	if (t->val != gp_widget_bool_get(checkbox)) {
 		tst_msg("Wrong checkbox type!");
 		return TST_FAILED;
 	}

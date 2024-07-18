@@ -16,12 +16,21 @@
 #ifndef GP_WIDGET_CLASS_BOOL_H
 #define GP_WIDGET_CLASS_BOOL_H
 
-struct gp_widget_bool {
-	const char *label;
-	int val;
-	int type;
+typedef struct gp_widget_bool {
+	/** @brief A boolean value of the widget. */
+	bool val;
+	/** @brief Points to the widget private data. */
 	char payload[];
-};
+} gp_widget_class_bool;
+
+/**
+ * @brief A macro to get widget payload for a bool class widget.
+ *
+ * @warning This is internal API do not use in applications!
+ *
+ * @warning The caller must make sure that the widget is bool class!
+ */
+#define GP_WIDGET_CLASS_BOOL(widget) (((gp_widget_class_bool *)GP_WIDGET_PAYLOAD(widget)))
 
 /**
  * @brief Returns a class bool widget value.
@@ -29,7 +38,7 @@ struct gp_widget_bool {
  * @param self A bool class widget.
  * @return A boolean value.
  */
-int gp_widget_bool_get(gp_widget *self);
+bool gp_widget_bool_get(gp_widget *self);
 
 /**
  * @brief Sets a class bool widget value.
@@ -37,7 +46,7 @@ int gp_widget_bool_get(gp_widget *self);
  * @param self A bool class widget.
  * @param val A boolean value.
  */
-void gp_widget_bool_set(gp_widget *self, int val);
+void gp_widget_bool_set(gp_widget *self, bool val);
 
 /**
  * @brief Toggles a class bool widget value.

@@ -154,8 +154,6 @@ struct gp_widget {
 		struct gp_widget_tabs *tabs;
 
 		struct gp_widget_bool *b;
-		struct gp_widget_bool *button;
-		struct gp_widget_bool *checkbox;
 
 		struct gp_widget_label *label;
 
@@ -190,8 +188,24 @@ struct gp_widget {
 
 		void *payload;
 	};
-	char buf[];
+	/**
+	 * @brief Private widget data area.
+	 *
+	 * If widget is a class widget this points to the class structure, e.g.
+	 * gp_widget_class_bool, otherwise it points to the widget private
+	 * data.
+	 *
+         * @warning This is internal API do not use in applications!
+	 */
+	char payload_data[];
 };
+
+/**
+ * @brief An internal macro to get widget specific data pointer.
+ *
+ * @warning This is internal API do not use in applications!
+ */
+#define GP_WIDGET_PAYLOAD(self) (void*)((self)->payload_data)
 
 /** @brief Widget types. */
 enum gp_widget_type {

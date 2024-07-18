@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -12,14 +12,22 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
+struct checkbox_priv {
+	char *label;
+	char data[];
+};
+
+#define CHECKBOX_PRIV(widget) ((struct checkbox_priv *)(GP_WIDGET_CLASS_BOOL(widget)->payload))
+
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	struct checkbox_priv *priv = CHECKBOX_PRIV(self);
 	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
 	unsigned int text_a = gp_text_ascent(font);
 	unsigned int text_w = 0;
 
-	if (self->b->label)
-		text_w = gp_text_wbbox(font, self->b->label) + ctx->padd;
+	if (priv->label)
+		text_w = gp_text_wbbox(font, priv->label) + ctx->padd;
 
 	return text_a + text_w;
 }
@@ -80,6 +88,8 @@ static void cross(gp_pixmap *buf, unsigned int x, unsigned int y,
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
+	struct checkbox_priv *priv = CHECKBOX_PRIV(self);
+	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
 	unsigned int text_a = gp_text_ascent(ctx->font);
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
@@ -98,32 +108,18 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, text_a, text_a, ctx->bg_color, ctx->fg_color, fr_color);
 
-	if (self->b->val) {
+	if (b->val) {
 		cross(ctx->buf, x, y,
 		      text_a, text_a, ctx->text_color);
 	}
 
-	if (!self->b->label)
+	if (!priv->label)
 		return;
 
 	gp_text(ctx->buf, font,
 		x + text_a + ctx->padd, y,
 		GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-		text_color, ctx->bg_color, self->b->label);
-}
-
-static void set(gp_widget *self, int val)
-{
-	self->b->val = val;
-
-	gp_widget_redraw(self);
-
-	gp_widget_send_widget_event(self, 0);
-}
-
-static void toggle(gp_widget *self)
-{
-	set(self, !self->b->val);
+		text_color, ctx->bg_color, priv->label);
 }
 
 static void click(gp_widget *self, unsigned int padd, gp_event *ev)
@@ -138,7 +134,7 @@ static void click(gp_widget *self, unsigned int padd, gp_event *ev)
 	if (ev->st->cursor_y < min_y || ev->st->cursor_y > max_y)
 		return;
 
-	toggle(self);
+	gp_widget_bool_toggle(self);
 }
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
@@ -154,7 +150,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		switch (ev->val) {
 		case GP_KEY_ENTER:
 		case GP_KEY_SPACE:
-			toggle(self);
+			gp_widget_bool_toggle(self);
 			return 1;
 		break;
 		case GP_BTN_TOUCH:
@@ -218,36 +214,10 @@ struct gp_widget_ops gp_widget_checkbox_ops = {
 	.id = "checkbox",
 };
 
-void gp_widget_checkbox_set(gp_widget *self, int val)
-{
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_CHECKBOX, );
-
-	val = !!val;
-
-	if (self->checkbox->val == val)
-		return;
-
-	set(self, val);
-}
-
-void gp_widget_checkbox_toggle(gp_widget *self)
-{
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_CHECKBOX, );
-
-	toggle(self);
-}
-
-int gp_widget_checkbox_get(gp_widget *self)
-{
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_CHECKBOX, -1);
-
-	return self->checkbox->val;
-}
-
-gp_widget *gp_widget_checkbox_new(const char *label, int val)
+gp_widget *gp_widget_checkbox_new(const char *label, bool val)
 {
 	gp_widget *ret;
-	size_t size = sizeof(struct gp_widget_bool);
+	size_t size = sizeof(gp_widget_class_bool) + sizeof(struct checkbox_priv);
 
 	size += label ? strlen(label) + 1 : 0;
 
@@ -255,12 +225,24 @@ gp_widget *gp_widget_checkbox_new(const char *label, int val)
 	if (!ret)
 		return NULL;
 
+	struct checkbox_priv *priv = CHECKBOX_PRIV(ret);
+
 	if (label) {
-		ret->b->label = ret->b->payload;
-		strcpy(ret->b->payload, label);
+		priv->label = priv->data;
+		strcpy(priv->label, label);
 	}
 
-	ret->b->val = !!val;
+	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(ret);
+
+	b->val = val;
 
 	return ret;
+}
+
+const char *gp_widget_checkbox_label_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_CHECKBOX, NULL);
+	struct checkbox_priv *priv = CHECKBOX_PRIV(self);
+
+	return priv->label;
 }

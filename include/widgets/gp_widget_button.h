@@ -199,4 +199,13 @@ enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self);
  */
 void gp_widget_button_type_set(gp_widget *self, enum gp_widget_button_type type);
 
+/**
+ * @brief Gets a button label.
+ *
+ * @param self A button widget.
+ *
+ * @return A button label or NULL if there is none.
+ */
+const char *gp_widget_button_label_get(gp_widget *self);
+
 #endif /* GP_WIDGET_BUTTON_H */

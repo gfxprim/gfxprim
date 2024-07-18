@@ -13,18 +13,28 @@
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_widget_json.h>
 
+struct button_priv {
+	int type;
+	int set;
+	char *label;
+	char data[];
+};
+
+#define BUTTON_PRIV(self) ((struct button_priv *)GP_WIDGET_PAYLOAD(self))
+
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int ret = 2 * ctx->padd;
 	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
+	struct button_priv *b = BUTTON_PRIV(self);
 
-	if (self->b->label)
-		ret += gp_text_wbbox(font, self->b->label);
+	if (b->label)
+		ret += gp_text_wbbox(font, b->label);
 
-	if (self->b->type & GP_BUTTON_TYPE_MASK)
+	if (b->type & GP_BUTTON_TYPE_MASK)
 		ret += GP_ODD_UP(gp_text_ascent(font));
 
-	if (self->b->label && self->b->type & GP_BUTTON_TYPE_MASK)
+	if (b->label && b->type & GP_BUTTON_TYPE_MASK)
 		ret += gp_text_wbbox(font, " ");
 
 	return ret;
@@ -72,6 +82,7 @@ static void backspace(gp_pixmap *pix, gp_coord cx, gp_coord cy,
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
+	struct button_priv *b = BUTTON_PRIV(self);
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
@@ -80,7 +91,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	const gp_text_style *font = gp_widget_focused_font(ctx, self->focused);
 	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
 	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
-	gp_pixel bg_color = self->b->val ? ctx->bg_color : ctx->fg_color;
+	gp_pixel bg_color = b->set ? ctx->bg_color : ctx->fg_color;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
@@ -93,12 +104,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int cy = y + self->h/2;
 	unsigned int i, spc;
 
-	if (self->b->label) {
+	if (b->label) {
 		unsigned int tcx = cx, len;
 		unsigned int spc = gp_text_wbbox(ctx->font, " ");
 
-		if (self->b->type & GP_BUTTON_TYPE_MASK) {
-			if (self->b->type & GP_BUTTON_TEXT_LEFT)
+		if (b->type & GP_BUTTON_TYPE_MASK) {
+			if (b->type & GP_BUTTON_TEXT_LEFT)
 				tcx -= asc/2 + spc/2;
 			else
 				tcx += asc/2 + spc/2;
@@ -106,9 +117,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		len = gp_text(ctx->buf, font,
 			tcx, cy-(asc-asc_half), GP_ALIGN_CENTER|GP_VALIGN_BELOW,
-			text_color, bg_color, self->b->label);
+			text_color, bg_color, b->label);
 
-		if (self->b->type & GP_BUTTON_TEXT_LEFT)
+		if (b->type & GP_BUTTON_TEXT_LEFT)
 			cx += len/2 + spc/2;
 		else
 			cx -= len/2 + spc/2;
@@ -120,7 +131,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_size sx = cx - sw/2;
 	gp_coord sy = cy - (sh+1)/2;
 
-	switch (self->b->type & GP_BUTTON_TYPE_MASK) {
+	switch (b->type & GP_BUTTON_TYPE_MASK) {
 	case GP_BUTTON_LABEL:
 	break;
 	case GP_BUTTON_YES:
@@ -332,16 +343,18 @@ static void render(gp_widget *self, const gp_offset *offset,
 	break;
 	}
 
-	if (self->b->val)
+	if (b->set)
 		gp_widget_render_timer(self, 0, ctx->feedback_ms);
 }
 
 static void set(gp_widget *self)
 {
-	if (self->b->val)
+	struct button_priv *b = BUTTON_PRIV(self);
+
+	if (b->set)
 		return;
 
-	self->b->val = 1;
+	b->set = 1;
 
 	gp_widget_redraw(self);
 
@@ -362,6 +375,7 @@ static void click(gp_widget *self, gp_event *ev)
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	(void) ctx;
+	struct button_priv *b = BUTTON_PRIV(self);
 
 	switch (ev->type) {
 	case GP_EV_KEY:
@@ -383,7 +397,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		}
 	break;
 	case GP_EV_TMR:
-		self->b->val = 0;
+		b->set = 0;
 		gp_widget_redraw(self);
 		return 1;
 	break;
@@ -539,7 +553,7 @@ gp_widget *gp_widget_button_new(const char *label,
                                 enum gp_widget_button_type type)
 {
 	gp_widget *ret;
-	size_t size = sizeof(struct gp_widget_bool);
+	size_t size = sizeof(struct gp_widget_bool) + sizeof(struct button_priv);
 
 	if (label)
 		size += strlen(label) + 1;
@@ -548,12 +562,14 @@ gp_widget *gp_widget_button_new(const char *label,
 	if (!ret)
 		return NULL;
 
+	struct button_priv *b = BUTTON_PRIV(ret);
+
 	if (label) {
-		ret->button->label = ret->button->payload;
-		strcpy(ret->button->payload, label);
+		b->label = b->data;
+		strcpy(b->label, label);
 	}
 
-	ret->button->type = align_for_type(type);
+	b->type = align_for_type(type);
 
 	return ret;
 }
@@ -561,15 +577,26 @@ gp_widget *gp_widget_button_new(const char *label,
 enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_BUTTON, 0);
+	struct button_priv *b = BUTTON_PRIV(self);
 
-	return GP_BUTTON_TYPE_MASK & self->button->type;
+	return GP_BUTTON_TYPE_MASK & b->type;
+}
+
+const char *gp_widget_button_label_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_BUTTON, 0);
+	struct button_priv *b = BUTTON_PRIV(self);
+
+	return b->label;
 }
 
 void gp_widget_button_type_set(gp_widget *self, enum gp_widget_button_type type)
 {
+	struct button_priv *b = BUTTON_PRIV(self);
+
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_BUTTON, );
 
-	self->button->type = type;
+	b->type = type;
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);

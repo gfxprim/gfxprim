@@ -11,7 +11,7 @@
 struct tcase {
 	const char *json;
 	const char *label;
-	int type;
+	unsigned int type;
 };
 
 static int button_json_load(struct tcase *t)
@@ -30,18 +30,18 @@ static int button_json_load(struct tcase *t)
 	}
 
 	if (t->label) {
-		if (strcmp(t->label, button->button->label)) {
+		if (strcmp(t->label, gp_widget_button_label_get(button))) {
 			tst_msg("Wrong button label!");
 			return TST_FAILED;
 		}
 	} else {
-		if (button->button->label) {
+		if (gp_widget_button_label_get(button)) {
 			tst_msg("Non-NULL label!");
 			return TST_FAILED;
 		}
 	}
 
-	if (t->type != button->button->type) {
+	if ((t->type & GP_BUTTON_TYPE_MASK) != gp_widget_button_type_get(button)) {
 		tst_msg("Wrong button type!");
 		return TST_FAILED;
 	}

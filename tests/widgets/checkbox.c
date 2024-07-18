@@ -36,6 +36,13 @@ static int ev_handler(gp_widget_event *ev)
 	return 0;
 }
 
+static bool checkbox_val(gp_widget *self)
+{
+	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
+
+	return b->val;
+}
+
 static int checkbox_event_set(void)
 {
 	int flag = 0;
@@ -43,19 +50,19 @@ static int checkbox_event_set(void)
 
 	chbox = gp_widget_checkbox_new2(NULL, 0, ev_handler, &flag);
 
-	if (chbox->checkbox->val != 0) {
+	if (checkbox_val(chbox) != 0) {
 		tst_msg("Wrong checkbox value");
 		return TST_FAILED;
 	}
 
-	gp_widget_checkbox_set(chbox, 1);
+	gp_widget_bool_set(chbox, 1);
 
 	if (!flag) {
 		tst_msg("Did not get event!");
 		return TST_FAILED;
 	}
 
-	if (chbox->checkbox->val != 1) {
+	if (checkbox_val(chbox) != 1) {
 		tst_msg("Wrong checkbox value");
 		return TST_FAILED;
 	}
@@ -70,32 +77,32 @@ static int checkbox_event_toggle(void)
 
 	chbox = gp_widget_checkbox_new2(NULL, 1, ev_handler, &flag);
 
-	if (chbox->checkbox->val != 1) {
+	if (checkbox_val(chbox) != 1) {
 		tst_msg("Wrong checkbox value");
 		return TST_FAILED;
 	}
 
-	gp_widget_checkbox_toggle(chbox);
+	gp_widget_bool_toggle(chbox);
 
 	if (!flag) {
 		tst_msg("Did not get event!");
 		return TST_FAILED;
 	}
 
-	if (chbox->checkbox->val != 0) {
+	if (checkbox_val(chbox) != 0) {
 		tst_msg("Wrong checkbox value");
 		return TST_FAILED;
 	}
 
 	flag = 0;
-	gp_widget_checkbox_toggle(chbox);
+	gp_widget_bool_toggle(chbox);
 
 	if (!flag) {
 		tst_msg("Did not get event!");
 		return TST_FAILED;
 	}
 
-	if (chbox->checkbox->val != 1) {
+	if (checkbox_val(chbox) != 1) {
 		tst_msg("Wrong checkbox value");
 		return TST_FAILED;
 	}
@@ -117,7 +124,7 @@ static int checkbox_event_key(void)
 		return TST_FAILED;
 	}
 
-	if (chbox->checkbox->val != 1) {
+	if (checkbox_val(chbox) != 1) {
 		tst_msg("Wrong checkbox value");
 		return TST_FAILED;
 	}

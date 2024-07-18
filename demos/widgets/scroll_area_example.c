@@ -20,7 +20,7 @@ int button_event(gp_widget_event *ev)
 	gp_coord dx = 0;
 	gp_coord dy = 0;
 
-	switch (ev->self->button->type) {
+	switch (gp_widget_button_type_get(ev->self)) {
 	case GP_BUTTON_UP:
 		dy = -1;
 	break;
@@ -32,6 +32,8 @@ int button_event(gp_widget_event *ev)
 	break;
 	case GP_BUTTON_RIGHT:
 		dx = 1;
+	break;
+	default:
 	break;
 	}
 
