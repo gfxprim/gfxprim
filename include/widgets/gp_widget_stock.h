@@ -10,6 +10,10 @@
  * @file gp_widget_stock.h
  * @brief A stock image widget.
  *
+ * Stock can either be used as widget to render a stock image in the
+ * application layout. Or stock image can be embedded into other widgets, e.g.
+ * button with a stock image.
+ *
  * Stock widget JSON attributes
  * -----------------------------
  *
@@ -27,7 +31,20 @@
 /**
  * @brief Stock image type.
  */
-enum gp_widget_stock_type {
+typedef enum gp_widget_stock_type {
+	/**
+	 * @brief No stock image.
+	 *
+	 * Used in widgets to disable stock image.
+	 */
+	GP_WIDGET_STOCK_NONE = 0,
+	/**
+	 * @brief Empty stock.
+	 *
+	 * This is rendered as an empty i.e. background color rectangle.
+	 */
+	GP_WIDGET_STOCK_EMPTY,
+
 	/** @brief Error message. */
 	GP_WIDGET_STOCK_ERR,
 	/** @brief Warning message. */
@@ -105,12 +122,16 @@ enum gp_widget_stock_type {
 	GP_WIDGET_STOCK_ZOOM_OUT,
 	/** @brief A zoom fit icon. */
 	GP_WIDGET_STOCK_ZOOM_FIT,
+	/** @brief First unused stock type. */
+	GP_WIDGET_STOCK_TYPE_MAX,
+	/** @brief Invalid stock type, used by a gp_widget_stock_by_name(). */
+	GP_WIDGET_STOCK_TYPE_INVALID = GP_WIDGET_STOCK_TYPE_MAX,
 
 	/** @brief A stock focused flag, combined bitwise with type. */
 	GP_WIDGET_STOCK_FOCUSED = 0x8000,
 	/** @brief A type mask. */
 	GP_WIDGET_STOCK_TYPE_MASK = (~(GP_WIDGET_STOCK_FOCUSED)),
-};
+} gp_widget_stock_type;
 
 /**
  * @brief Masks out the stock type.
@@ -157,5 +178,23 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size mi
  * @param type A new stock image type.
  */
 void gp_widget_stock_type_set(gp_widget *self, enum gp_widget_stock_type type);
+
+/**
+ * @brief Checks for stock type validity.
+ *
+ * @param type A stock type.
+ *
+ * @return True if stock type is valid.
+ */
+bool gp_widget_stock_type_valid(gp_widget_stock_type type);
+
+/**
+ * @brief Parses stock type from a name.
+ *
+ * @param name A stock type name.
+ *
+ * @return A stock type id or GP_WIDGET_STOCK_TYPE_INVALID if name wasn't matched.
+ */
+gp_widget_stock_type gp_widget_stock_type_by_name(const char *name);
 
 #endif /* GP_WIDGET_STOCK_H */

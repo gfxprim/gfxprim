@@ -1248,16 +1248,16 @@ static struct stock_types {
 	{"zoom_fit", GP_WIDGET_STOCK_ZOOM_FIT},
 };
 
-static int gp_widget_stock_type_from_str(const char *type)
+gp_widget_stock_type gp_widget_stock_type_by_name(const char *name)
 {
 	unsigned int i;
 
 	for (i = 0; i < GP_ARRAY_SIZE(stock_types); i++) {
-		if (!strcmp(type, stock_types[i].str_type))
+		if (!strcmp(name, stock_types[i].str_type))
 			return stock_types[i].type;
 	}
 
-	return -1;
+	return GP_WIDGET_STOCK_TYPE_INVALID;
 }
 
 static const char *gp_widget_stock_type_name(enum gp_widget_stock_type type)
@@ -1301,8 +1301,8 @@ static gp_widget *json_to_stock(gp_json_reader *json, gp_json_val *val, gp_widge
 				gp_json_warn(json, "Invalid size string!");
 		break;
 		case STOCK:
-			type = gp_widget_stock_type_from_str(val->val_str);
-			if (type < 0)
+			type = gp_widget_stock_type_by_name(val->val_str);
+			if (type == GP_WIDGET_STOCK_TYPE_INVALID)
 				gp_json_warn(json, "Unknown stock type!");
 		break;
 		}
@@ -1349,12 +1349,17 @@ struct gp_widget_ops gp_widget_stock_ops = {
 	.id = "stock",
 };
 
+bool gp_widget_stock_type_valid(gp_widget_stock_type type)
+{
+	return type < GP_WIDGET_STOCK_TYPE_MAX;
+}
+
 gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size min_size)
 {
 	const gp_widget_render_ctx *ctx = gp_widgets_render_ctx();
 	gp_widget *ret;
 
-	if (!gp_widget_stock_type_name(type)) {
+	if (!gp_widget_stock_type_valid(type)) {
 		GP_WARN("Invalid stock type %u", type);
 		return NULL;
 	}
