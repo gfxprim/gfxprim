@@ -8,7 +8,7 @@ example2
 grid_move_widget
 tabs_example
 markup_example
-switch_example
+layout_switch_example
 overlay_example
 showimage
 scroll_area_example

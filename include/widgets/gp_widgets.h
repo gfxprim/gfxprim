@@ -43,7 +43,7 @@
 #include <widgets/gp_widget_scroll_area.h>
 #include <widgets/gp_widget_frame.h>
 #include <widgets/gp_widget_markup.h>
-#include <widgets/gp_widget_switch.h>
+#include <widgets/gp_widget_layout_switch.h>
 #include <widgets/gp_widget_overlay.h>
 #include <widgets/gp_widget_log.h>
 #include <widgets/gp_widget_graph.h>

@@ -180,7 +180,7 @@ struct gp_widget {
 
 		struct gp_widget_markup *markup;
 
-		struct gp_widget_switch *switch_;
+		struct gp_widget_layout_switch *layout_switch;
 
 		struct gp_widget_overlay *overlay;
 

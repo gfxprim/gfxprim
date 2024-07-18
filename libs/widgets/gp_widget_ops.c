@@ -32,7 +32,7 @@ extern struct gp_widget_ops gp_widget_pixmap_ops;
 extern struct gp_widget_ops gp_widget_scroll_area_ops;
 extern struct gp_widget_ops gp_widget_frame_ops;
 extern struct gp_widget_ops gp_widget_markup_ops;
-extern struct gp_widget_ops gp_widget_switch_ops;
+extern struct gp_widget_ops gp_widget_layout_switch_ops;
 extern struct gp_widget_ops gp_widget_overlay_ops;
 extern struct gp_widget_ops gp_widget_stock_ops;
 extern struct gp_widget_ops gp_widget_log_ops;
@@ -56,7 +56,7 @@ static struct gp_widget_ops *widget_ops[] = {
 	[GP_WIDGET_SCROLL_AREA] = &gp_widget_scroll_area_ops,
 	[GP_WIDGET_FRAME]       = &gp_widget_frame_ops,
 	[GP_WIDGET_MARKUP]      = &gp_widget_markup_ops,
-	[GP_WIDGET_SWITCH]      = &gp_widget_switch_ops,
+	[GP_WIDGET_SWITCH]      = &gp_widget_layout_switch_ops,
 	[GP_WIDGET_OVERLAY]     = &gp_widget_overlay_ops,
 	[GP_WIDGET_LOG]         = &gp_widget_log_ops,
 	[GP_WIDGET_GRAPH]       = &gp_widget_graph_ops,
