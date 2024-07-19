@@ -40,7 +40,7 @@ static inline gp_pixel gp_widget_frame_color(gp_widget *self,
                                              const gp_widget_render_ctx *ctx,
                                              int render_flags)
 {
-	gp_pixel frame_color = ctx->text_color;
+	gp_pixel frame_color = gp_widget_text_color(self, ctx, render_flags);
 
 	(void) render_flags;
 
