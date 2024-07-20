@@ -110,7 +110,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	if (b->val) {
 		cross(ctx->buf, x, y,
-		      text_a, text_a, ctx->text_color);
+		      text_a, text_a, text_color);
 	}
 
 	if (!priv->label)

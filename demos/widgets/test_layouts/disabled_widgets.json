@@ -1,0 +1,41 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout":
+ {"type": "tabs", "disabled": true,
+  "labels": ["Disabled", "Unreachable"],
+  "widgets": [
+   {"type": "vbox",
+    "widgets": [
+     {"type": "frame", "title": "Frame",
+      "widget":{
+       "type": "vbox", "disabled": true,
+       "widgets": [
+        {"type": "hbox", "border": "none",
+         "widgets": [
+          {"type": "checkbox", "label": "Checkbox", "set": false},
+          {"type": "checkbox", "label": "Checkbox", "set": true}
+         ]
+        },
+        {"type": "hbox", "border": "none",
+         "widgets": [
+          {"type": "button", "label": "Button"},
+          {"type": "button", "btype": "cancel", "label": "Cancel"}
+         ]
+        },
+        {"type": "radiobutton", "choices": ["Choice A", "Choice B", "Choice C"]},
+        {"type": "tbox", "text": "Text!"},
+        {"type": "label", "text": "Disabled label"},
+        {"type": "markup", "text": "Test markup,\n~another line~.\nThird line.", "halign": "center"},
+        {"type": "pbar", "max": 100, "val": 50, "halign": "fill"},
+        {"type": "spinner", "max": 100, "min": 0, "val": 50, "halign": "center"},
+        {"type": "spinbutton", "choices": ["Choice A", "Choice B"]},
+        {"type": "slider", "min": 0, "max": 100, "val": 50}
+       ]
+      }
+     }
+    ]
+   },
+   {}
+  ]
+ }
+}

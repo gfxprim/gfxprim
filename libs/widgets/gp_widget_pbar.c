@@ -49,7 +49,7 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 	gp_pixel text_color = ctx->text_color;
-	gp_pixel frame_color = self->focused ? ctx->sel_color : ctx->text_color;
+	gp_pixel frame_color = gp_widget_frame_color(self, ctx, flags);
 
 	if (gp_widget_is_disabled(self, flags))
 		text_color = ctx->col_disabled;
@@ -92,12 +92,14 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	gp_pixmap p;
 
 	int is_1bpp = gp_pixel_size(ctx->pixel_type) == 1;
+	int is_disabled = gp_widget_is_disabled(self, flags);
+	gp_pixel pbar_color = is_disabled ? ctx->col_disabled : ctx->hl_color;
 
 	gp_sub_pixmap(ctx->buf, &p, x, y, wd, h);
 	if (p.w > 0) {
 		gp_fill_rrect_xywh_focused(&p, 0, 0, w, h, ctx->bg_color,
-		                           ctx->hl_color, frame_color, self->focused);
-		if (is_1bpp) {
+		                           pbar_color, frame_color, self->focused);
+		if (is_1bpp || is_disabled) {
 			gp_print(&p, ctx->font, w/2, ctx->padd,
 			         GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
 			         ctx->fg_color, ctx->hl_color, "%s", buf);
@@ -108,14 +110,14 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	if (p.w > 0) {
 		gp_fill_rrect_xywh_focused(&p, -wd, 0, w, h, ctx->bg_color,
 		                           ctx->fg_color, frame_color, self->focused);
-		if (is_1bpp) {
+		if (is_1bpp || is_disabled) {
 			gp_print(&p, ctx->font, w/2 -wd, ctx->padd,
 			         GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
 			         ctx->text_color, ctx->fg_color, "%s", buf);
 		}
 	}
 
-	if (!is_1bpp) {
+	if (!is_1bpp && !is_disabled) {
 		gp_print(ctx->buf, ctx->font, x + w/2, y + ctx->padd,
 		         GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
 		         text_color, ctx->fg_color, "%s", buf);
