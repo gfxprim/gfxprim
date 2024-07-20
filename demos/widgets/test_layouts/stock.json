@@ -2,7 +2,7 @@
  "info": {"version": 1, "license": "GPL-2.0-or-later"},
  "layout": {
   "cols": 10,
-  "rows": 8,
+  "rows": 10,
   "widgets": [
    {"type": "stock", "stock": "err"},
    {"type": "stock", "stock": "warn"},
@@ -12,6 +12,8 @@
    {"type": "stock", "stock": "zoom_in"},
    {"type": "stock", "stock": "zoom_out"},
    {"type": "stock", "stock": "zoom_fit"},
+   null,
+   null,
 
    {"type": "label", "text": "STOCK_ERR", "halign": "left"},
    {"type": "label", "text": "STOCK_WARN", "halign": "left"},
@@ -21,6 +23,8 @@
    {"type": "label", "text": "STOCK_ZOOM_IN", "halign": "left"},
    {"type": "label", "text": "STOCK_ZOOM_OUT", "halign": "left"},
    {"type": "label", "text": "STOCK_ZOOM_FIT", "halign": "left"},
+   null,
+   null,
 
    {"type": "stock", "stock": "speaker_min"},
    {"type": "stock", "stock": "speaker_mid"},
@@ -28,8 +32,10 @@
    {"type": "stock", "stock": "speaker_mute"},
    {"type": "stock", "stock": "speaker_inc"},
    {"type": "stock", "stock": "speaker_dec"},
-   {},
-   {},
+   null,
+   null,
+   null,
+   null,
 
    {"type": "label", "text": "STOCK_SPEAKER_MIN", "halign": "left"},
    {"type": "label", "text": "STOCK_SPEAKER_MID", "halign": "left"},
@@ -37,8 +43,10 @@
    {"type": "label", "text": "STOCK_SPEAKER_MUTE", "halign": "left"},
    {"type": "label", "text": "STOCK_SPEAKER_INC", "halign": "left"},
    {"type": "label", "text": "STOCK_SPEAKER_DEC", "halign": "left"},
-   {},
-   {},
+   null,
+   null,
+   null,
+   null,
 
    {"type": "stock", "stock": "hardware"},
    {"type": "stock", "stock": "software"},
@@ -47,7 +55,9 @@
    {"type": "stock", "stock": "refresh"},
    {"type": "stock", "stock": "close"},
    {"type": "stock", "stock": "filter"},
-   {},
+   null,
+   null,
+   null,
 
    {"type": "label", "text": "STOCK_HARDWARE", "halign": "left"},
    {"type": "label", "text": "STOCK_SOFTWARE", "halign": "left"},
@@ -56,7 +66,9 @@
    {"type": "label", "text": "STOCK_REFRESH", "halign": "left"},
    {"type": "label", "text": "STOCK_CLOSE", "halign": "left"},
    {"type": "label", "text": "STOCK_FILTER", "halign": "left"},
-   {},
+   null,
+   null,
+   null,
 
    {"type": "stock", "stock": "save"},
    {"type": "stock", "stock": "file"},
@@ -65,7 +77,9 @@
    {"type": "stock", "stock": "day"},
    {"type": "stock", "stock": "night"},
    {"type": "stock", "stock": "star"},
-   {},
+   {"type": "stock", "stock": "on"},
+   {"type": "stock", "stock": "off"},
+   null,
 
    {"type": "label", "text": "STOCK_SAVE", "halign": "left"},
    {"type": "label", "text": "STOCK_FILE", "halign": "left"},
@@ -74,7 +88,9 @@
    {"type": "label", "text": "STOCK_DAY", "halign": "left"},
    {"type": "label", "text": "STOCK_NIGHT", "halign": "left"},
    {"type": "label", "text": "STOCK_STAR", "halign": "left"},
-   {},
+   null,
+   null,
+   null,
 
    {"type": "stock", "stock": "arrow_up"},
    {"type": "stock", "stock": "arrow_down"},
@@ -82,6 +98,8 @@
    {"type": "stock", "stock": "arrow_right"},
    {"type": "stock", "stock": "shuffle_on"},
    {"type": "stock", "stock": "shuffle_off"},
+   {"type": "stock", "stock": "repeat_on"},
+   {"type": "stock", "stock": "repeat_off"},
    {"type": "stock", "stock": "rotate_cw"},
    {"type": "stock", "stock": "rotate_ccw"},
 
@@ -91,6 +109,8 @@
    {"type": "label", "text": "STOCK_ARROW_RIGHT", "halign": "left"},
    {"type": "label", "text": "STOCK_SHUFFLE_ON", "halign": "left"},
    {"type": "label", "text": "STOCK_SHUFFLE_OFF", "halign": "left"},
+   {"type": "label", "text": "STOCK_REPEAT_ON", "halign": "left"},
+   {"type": "label", "text": "STOCK_REPEAT_OFF", "halign": "left"},
    {"type": "label", "text": "STOCK_ROTATE_CW", "halign": "left"},
    {"type": "label", "text": "STOCK_ROTATE_CCW", "halign": "left"}
   ]

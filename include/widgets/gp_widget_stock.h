@@ -91,6 +91,11 @@ typedef enum gp_widget_stock_type {
 	GP_WIDGET_STOCK_SHUFFLE_ON,
 	/** @brief A shuffle off icon. */
 	GP_WIDGET_STOCK_SHUFFLE_OFF,
+	/** @brief Repeat on icon. */
+	GP_WIDGET_STOCK_REPEAT_ON,
+	/** @brief Repeat off icon. */
+	GP_WIDGET_STOCK_REPEAT_OFF,
+
 	/** @brief A filter stock icon. */
 	GP_WIDGET_STOCK_FILTER,
 
@@ -123,6 +128,12 @@ typedef enum gp_widget_stock_type {
 	/** @brief A zoom fit icon. */
 	GP_WIDGET_STOCK_ZOOM_FIT,
 	/** @brief First unused stock type. */
+
+	/** @brief Switch ON stock. */
+	GP_WIDGET_STOCK_ON,
+	/** @brief Switch OFF stock. */
+	GP_WIDGET_STOCK_OFF,
+
 	GP_WIDGET_STOCK_TYPE_MAX,
 	/** @brief Invalid stock type, used by a gp_widget_stock_by_name(). */
 	GP_WIDGET_STOCK_TYPE_INVALID = GP_WIDGET_STOCK_TYPE_MAX,

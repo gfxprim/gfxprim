@@ -900,6 +900,65 @@ static void render_stock_shuffle_on(gp_pixmap *pix,
 	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
 }
 
+static void render_stock_repeat(gp_pixmap *pix,
+                                gp_coord x, gp_coord y,
+                                gp_size w, gp_size h, gp_pixel bg_col,
+                                const gp_widget_render_ctx *ctx, int on)
+{
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+
+	gp_size wh = w/3;
+
+	gp_size th = GP_MIN(w, h)/16;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_size yd = h/4;
+
+	gp_coord poly_1[] = {
+		-wh-3*th, yd+th,
+		-wh-3*th, yd-th -4*th,
+		-wh-3*th+2*th, yd-th -4*th,
+		-wh-3*th+2*th, yd-th,
+
+		 wh-th, yd-th,
+		 wh-th, yd-3*th,
+		 wh, yd-3*th,
+		 wh+3*th, yd,
+		 wh, yd+3*th,
+		 wh-th, yd+3*th,
+		 wh-th, yd+th,
+	};
+
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+
+	gp_coord poly_2[] = {
+		 wh+3*th-2*th, -yd+th,
+		 wh+3*th-2*th, -yd+th + 4*th,
+		 wh+3*th, -yd+th + 4*th,
+		 wh+3*th, -yd-th,
+
+		 -wh+th, -yd-th,
+		 -wh+th, -yd-3*th,
+		 -wh, -yd-3*th,
+		 -wh-3*th, -yd,
+		 -wh, -yd+3*th,
+		 -wh+th, -yd+3*th,
+		 -wh+th, -yd+th,
+	};
+
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
+
+	if (on)
+		return;
+
+	th=(th+1)/2;
+	gp_size cross_r = GP_MIN(w/2, h/2) - 2*th;
+
+	gp_line_th(pix, cx-cross_r, cy+cross_r, cx+cross_r, cy-cross_r, th, ctx->alert_color);
+}
+
 static void render_stock_filter(gp_pixmap *pix,
                                 gp_coord x, gp_coord y,
                                 gp_size w, gp_size h, gp_pixel bg_col,
@@ -1057,6 +1116,31 @@ static void render_stock_zoom(gp_pixmap *pix, enum gp_widget_stock_type type,
 	gp_fill_circle(pix, cx+ch, cy+ch, th, ctx->text_color);
 }
 
+static void render_stock_on(gp_pixmap *pix,
+                            gp_coord x, gp_coord y,
+                            gp_size w, gp_size h, gp_pixel bg_col,
+                            const gp_widget_render_ctx *ctx)
+{
+	gp_size th = GP_MIN(w, h)/12;
+	gp_size sh = (h-2)/2;
+
+	gp_fill_rect_xyxy(pix, x + w/2 + (th-th/2), y + h/2-sh, x + w/2 - th/2, y + h/2+sh, ctx->text_color);
+}
+
+static void render_stock_off(gp_pixmap *pix,
+                             gp_coord x, gp_coord y,
+                             gp_size w, gp_size h, gp_pixel bg_col,
+                             const gp_widget_render_ctx *ctx)
+{
+	gp_size th = GP_MIN(w, h)/12;
+	gp_size r = w/3;
+
+	gp_fill_ring_seg(pix, x + w/2, y + r, r, r-th, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG2,  ctx->text_color);
+	gp_fill_rect_xyxy(pix, x + w/2+r-th, y + r, x+w/2+r, y + h - r - 1, ctx->text_color);
+	gp_fill_rect_xyxy(pix, x + w/2-r+th, y + r, x+w/2-r, y + h - r - 1, ctx->text_color);
+	gp_fill_ring_seg(pix, x + w/2, y + h - r - 1, r, r-th, GP_CIRCLE_SEG3 | GP_CIRCLE_SEG4,  ctx->text_color);
+}
+
 static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
                                 gp_coord x, gp_coord y, gp_size w, gp_size h,
                                 gp_pixel bg_col, const gp_widget_render_ctx *ctx)
@@ -1130,6 +1214,12 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	case GP_WIDGET_STOCK_SHUFFLE_OFF:
 		render_stock_shuffle_off(pix, x, y, w, h, bg_col, ctx);
 	break;
+	case GP_WIDGET_STOCK_REPEAT_ON:
+		render_stock_repeat(pix, x, y, w, h, bg_col, ctx, 1);
+	break;
+	case GP_WIDGET_STOCK_REPEAT_OFF:
+		render_stock_repeat(pix, x, y, w, h, bg_col, ctx, 0);
+	break;
 	case GP_WIDGET_STOCK_FILTER:
 		render_stock_filter(pix, x, y, w, h, bg_col, ctx);
 	break;
@@ -1147,6 +1237,12 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	case GP_WIDGET_STOCK_ZOOM_OUT:
 	case GP_WIDGET_STOCK_ZOOM_FIT:
 		render_stock_zoom(pix, type, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_ON:
+		render_stock_on(pix, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_OFF:
+		render_stock_off(pix, x, y, w, h, bg_col, ctx);
 	break;
 	}
 
@@ -1227,6 +1323,9 @@ static struct stock_types {
 
 	{"shuffle_on", GP_WIDGET_STOCK_SHUFFLE_ON},
 	{"shuffle_off", GP_WIDGET_STOCK_SHUFFLE_OFF},
+	{"repeat_on", GP_WIDGET_STOCK_REPEAT_ON},
+	{"repeat_off", GP_WIDGET_STOCK_REPEAT_OFF},
+
 	{"filter", GP_WIDGET_STOCK_FILTER},
 
 	{"arrow_up", GP_WIDGET_STOCK_ARROW_UP},
@@ -1246,6 +1345,9 @@ static struct stock_types {
 	{"zoom_in", GP_WIDGET_STOCK_ZOOM_IN},
 	{"zoom_out", GP_WIDGET_STOCK_ZOOM_OUT},
 	{"zoom_fit", GP_WIDGET_STOCK_ZOOM_FIT},
+
+	{"on", GP_WIDGET_STOCK_ON},
+	{"off", GP_WIDGET_STOCK_OFF},
 };
 
 gp_widget_stock_type gp_widget_stock_type_by_name(const char *name)
@@ -1367,8 +1469,6 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size mi
 	ret = gp_widget_new(GP_WIDGET_STOCK, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_stock));
 	if (!ret)
 		return NULL;
-
-	GP_ODD_UP(gp_text_ascent(ctx->font) + 2 * ctx->padd);
 
 	if (GP_WIDGET_SIZE_EQ(min_size, GP_WIDGET_SIZE_DEFAULT))
 		ret->stock->min_size = GP_WIDGET_SIZE(0, 2, 1);
