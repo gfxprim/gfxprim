@@ -1,0 +1,12 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout":
+ {"type": "vbox",
+  "widgets": [
+   {"type": "stock_switch", "on_stock": "day", "off_stock": "night", "min_size": "4asc"},
+   {"type": "stock_switch", "on_stock": "shuffle_on", "off_stock": "shuffle_off"},
+   {"type": "stock_switch", "on_stock": "speaker_max", "off_stock": "speaker_mute"},
+   {"type": "stock_switch", "on_stock": "repeat_on", "off_stock": "repeat_off"}
+  ]
+ }
+}

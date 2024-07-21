@@ -1,0 +1,16 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout":
+ {"type": "vbox",
+  "widgets": [
+   {"type": "switch", "align": "fill"},
+   {"type": "switch", "halign": "left"},
+   {"type": "switch", "on_stock": "shuffle_on", "off_stock": "shuffle_off", "halign": "left"},
+   {"type": "switch", "on_stock": "speaker_max", "off_stock": "speaker_max", "on_label": "on", "off_label": "off", "halign": "left"},
+   {"type": "switch", "on_label": "on label", "off_label": "off label", "halign": "left", "set": true},
+   {"type": "switch", "label": "My test switch"},
+   {"type": "switch", "on_label": "on disabled", "off_label": "off disabled", "disabled": true, "halign": "left"},
+   {"type": "switch", "on_label": "on disabled", "off_label": "off disabled", "set": true, "disabled": true, "halign": "left"}
+  ]
+ }
+}

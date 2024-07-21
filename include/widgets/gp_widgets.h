@@ -22,15 +22,19 @@
 #include <widgets/gp_widget_grid.h>
 #include <widgets/gp_widget_hvbox.h>
 #include <widgets/gp_widget_tabs.h>
-#include <widgets/gp_widget_class_bool.h>
 #include <widgets/gp_widget_button.h>
-#include <widgets/gp_widget_checkbox.h>
 #include <widgets/gp_widget_label.h>
 #include <widgets/gp_widget_class_int.h>
 #include <widgets/gp_widget_slider.h>
 #include <widgets/gp_widget_spinner.h>
 #include <widgets/gp_widget_tbox.h>
 #include <widgets/gp_widget_tbox.h>
+
+/* Bool widget and subclasses */
+#include <widgets/gp_widget_class_bool.h>
+#include <widgets/gp_widget_checkbox.h>
+#include <widgets/gp_widget_switch.h>
+#include <widgets/gp_widget_stock_switch.h>
 
 /* Choice widget and subclasses */
 #include <widgets/gp_widget_class_choice.h>

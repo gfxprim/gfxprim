@@ -244,13 +244,17 @@ enum gp_widget_type {
 	/** @brief A markup widget. */
 	GP_WIDGET_MARKUP,
 	/** @brief A layout switch widget. */
-	GP_WIDGET_SWITCH,
+	GP_WIDGET_LAYOUT_SWITCH,
 	/** @brief An overlay widget. */
 	GP_WIDGET_OVERLAY,
 	/** @brief A widget log widget. */
 	GP_WIDGET_LOG,
 	/** @brief A graph widget. */
 	GP_WIDGET_GRAPH,
+	/** @brief A switch widget. */
+	GP_WIDGET_SWITCH,
+	/** @brief A stock switch widget. */
+	GP_WIDGET_STOCK_SWITCH,
 	/** @brief A numeber of widgets. */
 	GP_WIDGET_MAX,
 };

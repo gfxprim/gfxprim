@@ -208,7 +208,7 @@ gp_widget *gp_widget_layout_switch_new(unsigned int layouts)
 {
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_SWITCH, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_layout_switch));
+	ret = gp_widget_new(GP_WIDGET_LAYOUT_SWITCH, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_layout_switch));
 	if (!ret)
 		return NULL;
 
@@ -225,21 +225,21 @@ gp_widget *gp_widget_layout_switch_new(unsigned int layouts)
 
 gp_widget *gp_widget_layout_switch_active(gp_widget *self)
 {
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SWITCH, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LAYOUT_SWITCH, NULL);
 
 	return self->layout_switch->layouts[self->layout_switch->active_layout];
 }
 
 unsigned int gp_widget_layout_switch_layouts(gp_widget *self)
 {
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SWITCH, 0);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LAYOUT_SWITCH, 0);
 
 	return gp_vec_len(self->layout_switch->layouts);
 }
 
 void gp_widget_layout_switch_move(gp_widget *self, int where)
 {
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SWITCH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LAYOUT_SWITCH, );
 	int layouts = gp_vec_len(self->layout_switch->layouts);
 
 	int switch_to = ((int)self->layout_switch->active_layout + where) % layouts;
@@ -255,7 +255,7 @@ gp_widget *gp_widget_layout_switch_put(gp_widget *self, unsigned int layout_nr,
 {
 	gp_widget *ret;
 
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SWITCH, NULL);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LAYOUT_SWITCH, NULL);
 
 	if (layout_nr >= gp_widget_layout_switch_layouts(self))
 		return NULL;
@@ -274,7 +274,7 @@ void gp_widget_layout_switch_layout(gp_widget *self, unsigned int layout_nr)
 {
 	struct gp_widget_layout_switch *s = self->layout_switch;
 
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SWITCH, );
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LAYOUT_SWITCH, );
 
 	if (layout_nr >= gp_widget_layout_switch_layouts(self)) {
 		GP_WARN("Invalid layout nr %i", layout_nr);
