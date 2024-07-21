@@ -9,6 +9,7 @@
 	"u64": 4,
 	"val": 2,
 	"greeting": "json",
-	"str2": "test"
+	"str2": "test",
+	"bval": false
 }
 

@@ -339,6 +339,14 @@ static int float_check(gp_json_reader *json, const gp_json_struct *desc,
 	return 0;
 }
 
+static int bool_store(const gp_json_struct *desc, gp_json_val *val,
+                      void *baseptr)
+{
+	*(bool*)(baseptr+desc->offset) = val->val_bool;
+
+	return 0;
+}
+
 static int memb_store(gp_json_reader *json, const gp_json_struct *desc,
                       gp_json_val *val, void *baseptr)
 {
@@ -354,8 +362,15 @@ static int memb_store(gp_json_reader *json, const gp_json_struct *desc,
 	case GP_JSON_VOID:
 		return 0;
 	case GP_JSON_BOOL:
-		gp_json_warn(json, "Bool deserialization is unsupported.");
-		return 1;
+		if (type != GP_JSON_SERDES_BOOL) {
+			gp_json_warn(json, "Invalid value type expected bool");
+			return 1;
+		}
+		if (desc->type_size) {
+			gp_json_warn(json, "Non-zero desc size for bool value.");
+			return 1;
+		}
+		return bool_store(desc, val, baseptr);
 	case GP_JSON_INT:
 		if (type != GP_JSON_SERDES_INT && type != GP_JSON_SERDES_UINT && type != GP_JSON_SERDES_FLOAT) {
 			gp_json_warn(json, "Invalid value type expected number");
@@ -530,6 +545,11 @@ static float float_val(const gp_json_struct *desc, void *baseptr)
 	return 0;
 }
 
+static bool bool_val(const gp_json_struct *desc, void *baseptr)
+{
+	return *(bool*)(baseptr + desc->offset);
+}
+
 int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
                          const char *id, void *baseptr)
 {
@@ -556,6 +576,9 @@ int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
 				gp_json_str_add(json, i->id, str);
 			else
 				gp_json_null_add(json, i->id);
+		break;
+		case GP_JSON_SERDES_BOOL:
+			gp_json_bool_add(json, i->id, bool_val(i, baseptr));
 		break;
 		}
 	}

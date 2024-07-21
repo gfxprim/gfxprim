@@ -22,9 +22,11 @@ struct test_struct {
 	int32_t i32;
 	int16_t i16;
 	int8_t i8;
+	bool bval;
 };
 
 static const gp_json_struct test_struct_desc[] = {
+	GP_JSON_SERDES_BOOL(struct test_struct, bval, 0),
 	GP_JSON_SERDES_STR_DUP(struct test_struct, str1, GP_JSON_SERDES_OPTIONAL, 1024, "greeting"),
 	GP_JSON_SERDES_INT16(struct test_struct, i16, 0, -100, 100),
 	GP_JSON_SERDES_INT32(struct test_struct, i32, 0, -100, 100),
@@ -62,6 +64,7 @@ static int json_write_read_struct(void)
 		.i16 = -16,
 		.u8 = 8,
 		.i8 = -8,
+		.bval = true,
 	};
 	struct test_struct des = {};
 	int ret;
@@ -117,6 +120,11 @@ static int json_write_read_struct(void)
 	COMPARE_INT(ser.u32, des.u32, "u32");
 	COMPARE_INT(ser.i64, des.i64, "i64");
 	COMPARE_INT(ser.u64, des.u64, "u64");
+
+	if (ser.bval != des.bval) {
+		tst_msg("Wrong bool value %s", des.bval ? "true" : "false");
+		return TST_FAILED;
+	}
 
 	return TST_PASSED;
 }

@@ -41,6 +41,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <limits.h>
 
 #include <utils/gp_json_common.h>
@@ -51,6 +52,7 @@ enum json_serdes_type {
 	GP_JSON_SERDES_UINT,
 	GP_JSON_SERDES_INT,
 	GP_JSON_SERDES_FLOAT,
+	GP_JSON_SERDES_BOOL,
 
 	/** If set parameter does not have to be present */
 	GP_JSON_SERDES_OPTIONAL = 0x80,
@@ -545,6 +547,36 @@ typedef struct gp_json_struct {
 	 .type = GP_JSON_SERDES_FLOAT | flags, \
 	 .type_size = sizeof(double), \
 	 .lim_float = {min, max}}
+
+/**
+ * @brief Defines an bool.
+ *
+ * The memb has to be an bool type.
+ *
+ * @param struct A structure type.
+ * @param memb An bool member of the structure.
+ * @param flags Can be GP_JSON_SERDES_OPTIONAL if value does not have to be present.
+ * @param ... Optional JSON id, if not set the member name is used instead.
+ *
+ * Example use:
+ * @code
+ * struct foo {
+ *         ...
+ *         bool b_var;
+ *         ...
+ * };
+ *
+ * static const gp_json_struct struct_desc[] = {
+ *         ...
+ *         GP_JSON_SERDES_BOOL(struct foo, b_var);
+ *         ...
+ * };
+ * @endcode
+ */
+#define GP_JSON_SERDES_BOOL(struct, memb, flags, ...) \
+	{.id = GP_2(dummy, ##__VA_ARGS__, #memb), \
+	 .offset = offsetof(struct, memb), \
+	 .type = GP_JSON_SERDES_BOOL | flags}
 
 /**
  * @brief Deserializes a JSON object into a C structure
