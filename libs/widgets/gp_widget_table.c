@@ -723,7 +723,7 @@ static gp_widget_table_header *parse_header(gp_json_reader *json, gp_json_val *v
                                             gp_widget_table_col_desc *col_map,
                                             int *cols, int *sort_by_col, int *desc)
 {
-	gp_json_state state = gp_json_state_start(json);
+	gp_json_reader_state state = gp_json_reader_state_save(json);
 	gp_widget_table_header *header;
 	int cnt = 0;
 
@@ -754,7 +754,7 @@ static gp_widget_table_header *parse_header(gp_json_reader *json, gp_json_val *v
 
 	memset(header, 0, sizeof(*header) * (*cols));
 
-	gp_json_state_load(json, state);
+	gp_json_reader_state_load(json, state);
 
 	cnt = 0;
 
@@ -765,7 +765,7 @@ static gp_widget_table_header *parse_header(gp_json_reader *json, gp_json_val *v
 
 		header[cnt].tattr = GP_TATTR_BOLD;
 
-		GP_JSON_OBJ_FILTER(json, val, &header_obj_filter, NULL) {
+		GP_JSON_OBJ_FOREACH_FILTER(json, val, &header_obj_filter, NULL) {
 			switch (val->idx) {
 			case FILL:
 				header[cnt].col_fill = val->val_int;
@@ -832,7 +832,7 @@ static gp_widget *json_to_table(gp_json_reader *json, gp_json_val *val, gp_widge
 
 	(void)ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case COL_OPS:
 			col_ops = gp_widget_struct_addr(val->val_str, ctx);

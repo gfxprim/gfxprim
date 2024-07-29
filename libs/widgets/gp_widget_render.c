@@ -249,7 +249,7 @@ static void render_ctx_init(gp_backend *backend)
 	if (!json)
 		return;
 
-	gp_json_reset(json);
+	gp_json_reader_reset(json);
 	gp_json_read_struct(json, &val, render_ctx_desc, &ctx);
 	gp_json_reader_finish(json);
 	gp_json_reader_free(json);

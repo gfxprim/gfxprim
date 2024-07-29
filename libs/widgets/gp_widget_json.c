@@ -25,7 +25,7 @@ static gp_widget *color_scheme_switch_from_json(gp_json_reader *json, gp_json_va
 {
 	(void) ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, NULL, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, NULL, gp_widget_json_attrs) {
 	}
 
 	return gp_widget_color_scheme_switch();
@@ -228,14 +228,14 @@ gp_widget *gp_widget_from_json(gp_json_reader *json, gp_json_val *val, gp_widget
 		return NULL;
 	}
 
-	gp_json_state obj_start = gp_json_state_start(json);
+	gp_json_reader_state obj_start = gp_json_reader_state_save(json);
 
 	if (!gp_json_obj_first(json, val))
 		return NULL;
 
-	gp_json_state_load(json, obj_start);
+	gp_json_reader_state_load(json, obj_start);
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, NULL) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, NULL) {
 		switch (val->idx) {
 		case ALIGN:
 			if (!strcmp(val->val_str, "center")) {
@@ -340,7 +340,7 @@ gp_widget *gp_widget_from_json(gp_json_reader *json, gp_json_val *val, gp_widget
 	if (gp_json_reader_err(json))
 		return NULL;
 
-	gp_json_state_load(json, obj_start);
+	gp_json_reader_state_load(json, obj_start);
 
 	if (!from_json)
 		return NULL;
@@ -390,7 +390,7 @@ ret:
 
 	return wid;
 skip:
-	gp_json_state_load(json, obj_start);
+	gp_json_reader_state_load(json, obj_start);
 	gp_json_obj_skip(json);
 	return NULL;
 }
@@ -443,7 +443,7 @@ static long parse_info_block(gp_json_reader *json, gp_json_val *val)
 	long version = -1;
 	int license_set = 0;
 
-	GP_JSON_OBJ_FILTER(json, val, &info_obj_filter, NULL) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &info_obj_filter, NULL) {
 		switch (val->idx) {
 		case INFO_AUTHOR:
 			GP_DEBUG(1, "Layout author: %s", val->val_str);

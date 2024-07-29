@@ -505,7 +505,7 @@ static gp_widget *json_to_button(gp_json_reader *json, gp_json_val *val, gp_widg
 
 	(void)ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case BTYPE:
 			t = type_from_str(val->val_str);

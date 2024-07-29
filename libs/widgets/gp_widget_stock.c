@@ -1396,7 +1396,7 @@ static gp_widget *json_to_stock(gp_json_reader *json, gp_json_val *val, gp_widge
 
 	(void)ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case MIN_SIZE:
 			if (gp_widget_size_units_parse(val->val_str, &min_size))

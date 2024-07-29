@@ -45,7 +45,7 @@ static void parse_obj(gp_json_reader *buf, gp_json_val *val)
 
 static void parse(gp_json_reader *buf, gp_json_val *val)
 {
-	switch (gp_json_start(buf)) {
+	switch (gp_json_reader_start(buf)) {
 	case GP_JSON_OBJ:
 		parse_obj(buf, val);
 	break;
@@ -81,7 +81,7 @@ static int json_recursion_limit(const char *str)
 
 	tst_msg("Got: '%s' %u", json.err, json.depth);
 
-	gp_json_reset(&json);
+	gp_json_reader_reset(&json);
 
 	json.max_depth = 5;
 

@@ -176,7 +176,7 @@ static gp_widget *json_to_frame(gp_json_reader *json, gp_json_val *val, gp_widge
 	gp_widget *child = NULL;
 	int light_bg = 0;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case BG:
 			if (!strcmp(val->val_str, "light"))

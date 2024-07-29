@@ -127,7 +127,7 @@ static inline void call_set_sel(gp_widget *self, size_t sel)
 static gp_widget *parse_choices(enum gp_widget_type widget_type,
                                 gp_json_reader *json, gp_json_val *val)
 {
-	gp_json_state state = gp_json_state_start(json);
+	gp_json_reader_state state = gp_json_reader_state_save(json);
 	gp_widget *ret;
 	size_t size = 0;
 	unsigned int cnt = 0;
@@ -145,7 +145,7 @@ static gp_widget *parse_choices(enum gp_widget_type widget_type,
 	if (!ret)
 		return NULL;
 
-	gp_json_state_load(json, state);
+	gp_json_reader_state_load(json, state);
 
 	char *save = val->buf;
 
@@ -195,7 +195,7 @@ gp_widget *gp_widget_choice_from_json(enum gp_widget_type widget_type,
 
 	(void)ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case CHOICES:
 			if (ret) {

@@ -11,33 +11,51 @@
 #ifndef GP_JSON_COMMON_H
 #define GP_JSON_COMMON_H
 
+/** @brief Maximal error message length. */
 #define GP_JSON_ERR_MAX 128
+/** @brief Maximal id string lenght including terminating null element. */
 #define GP_JSON_ID_MAX 64
-
+/** @brief Maximal recursion depth allowed. */
 #define GP_JSON_RECURSION_MAX 128
-
-/**
- * @brief A JSON data type.
- */
-enum gp_json_type {
-	GP_JSON_VOID = 0,
-	GP_JSON_INT,
-	GP_JSON_FLOAT,
-	GP_JSON_BOOL,
-	GP_JSON_NULL,
-	GP_JSON_STR,
-	GP_JSON_OBJ,
-	GP_JSON_ARR,
-};
 
 #define GP_JSON_ERR_PRINT gp_json_err_handler
 #define GP_JSON_ERR_PRINT_PRIV stderr
 
 /**
- * @brief default error print handler
+ * @brief A JSON data type.
+ */
+enum gp_json_type {
+	/** @brief No type. Returned when parser finishes. */
+	GP_JSON_VOID = 0,
+	/** @brief An integer. */
+	GP_JSON_INT,
+	/** @brief A floating point. */
+	GP_JSON_FLOAT,
+	/** @brief A boolean. */
+	GP_JSON_BOOL,
+	/** @brief NULL */
+	GP_JSON_NULL,
+	/** @brief A string. */
+	GP_JSON_STR,
+	/** @brief A JSON object. */
+	GP_JSON_OBJ,
+	/** @brief A JSON array. */
+	GP_JSON_ARR,
+};
+
+/**
+ * @brief Returns type name.
  *
- * @print_priv A json buffer print_priv pointer.
- * @line A line of output to be printed.
+ * @param type A json type.
+ * @return A type name.
+ */
+const char *gp_json_type_name(enum gp_json_type type);
+
+/**
+ * @brief Default error print handler.
+ *
+ * @param print_priv A json buffer print_priv pointer.
+ * @param line A line to be printed.
  */
 void gp_json_err_handler(void *print_priv, const char *line);
 

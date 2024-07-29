@@ -171,7 +171,7 @@ static gp_widget *json_to_pbar(gp_json_reader *json, gp_json_val *val, gp_widget
 
 	(void)ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case INVERSE:
 			inverse = val->val_bool;

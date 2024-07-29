@@ -225,7 +225,7 @@ static struct map *load_map_keys(gp_json_reader *json, gp_json_val *val)
 	int key;
 	uint32_t utf_ch;
 
-	gp_json_state map_start = gp_json_state_start(json);
+	gp_json_reader_state map_start = gp_json_reader_state_save(json);
 
 	GP_JSON_ARR_FOREACH(json, val) {
 		switch (val->type) {
@@ -261,7 +261,7 @@ static struct map *load_map_keys(gp_json_reader *json, gp_json_val *val)
 
 	memset(ret, 0, map_size);
 
-	gp_json_state_load(json, map_start);
+	gp_json_reader_state_load(json, map_start);
 
 	GP_JSON_ARR_FOREACH(json, val) {
 		get_key_char(json, val, &key, &utf_ch);
@@ -348,7 +348,7 @@ static struct map *load_map(gp_json_reader *json, gp_json_val *val, struct mods 
 	struct map *ret = NULL;
 	struct map_mods map_mods = {};
 
-	GP_JSON_OBJ_FILTER(json, val, &map_obj_filter, NULL) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &map_obj_filter, NULL) {
 		switch (val->idx) {
 		case MAP_KEYS:
 			if (ret) {
@@ -398,9 +398,9 @@ static struct mods *load_mods(gp_json_reader *json, gp_json_val *val)
 	unsigned int mods_cnt = 0, i = 0;
 	struct mods *ret;
 
-	gp_json_state mods_start = gp_json_state_start(json);
+	gp_json_reader_state mods_start = gp_json_reader_state_save(json);
 
-	GP_JSON_OBJ_FILTER(json, val, &mods_obj_filter, NULL) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &mods_obj_filter, NULL) {
 		switch (val->idx) {
 		case MODS_DEAD:
 		case MODS_MOD:
@@ -431,12 +431,12 @@ static struct mods *load_mods(gp_json_reader *json, gp_json_val *val)
 		return NULL;
 	}
 
-	gp_json_state_load(json, mods_start);
+	gp_json_reader_state_load(json, mods_start);
 
 	ret->cnt = mods_cnt;
 	ret->state = 0;
 
-	GP_JSON_OBJ_FILTER(json, val, &mods_obj_filter, NULL) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &mods_obj_filter, NULL) {
 		ret->mods[i].type = val->idx;
 		ret->mods[i].key = gp_ev_key_val(val->val_str);
 
@@ -473,7 +473,7 @@ static int load_keymap(gp_json_reader *json, struct map **rmaps, struct mods **r
 	struct map *maps = NULL, *tmp;
 	struct mods *mods = NULL;
 
-	GP_JSON_OBJ_FILTER(json, &val, &keymap_obj_filter, NULL) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, &val, &keymap_obj_filter, NULL) {
 		switch (val.idx) {
 		case MAP:
 			if (!mods) {

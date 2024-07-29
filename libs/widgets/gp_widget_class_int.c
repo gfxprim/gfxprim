@@ -184,7 +184,7 @@ static gp_widget *json_to_int(enum gp_widget_type type, gp_json_reader *json,
 
 	(void)ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case DIR:
 			if (!strcmp(val->val_str, "horiz"))

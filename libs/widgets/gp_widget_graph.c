@@ -195,7 +195,7 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 
 	(void)ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case COLOR:
 			color = gp_widgets_color_name_idx(val->val_str);

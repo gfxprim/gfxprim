@@ -357,7 +357,7 @@ int gp_json_float_add(gp_json_writer *self, const char *id, double val)
 	return out_str(self, buf);
 }
 
-int gp_json_finish(gp_json_writer *self)
+int gp_json_writer_finish(gp_json_writer *self)
 {
 	if (is_err(self))
 		goto err;

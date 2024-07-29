@@ -404,30 +404,6 @@ static int get_null(gp_json_reader *buf)
 	return 0;
 }
 
-const char *gp_json_type_name(enum gp_json_type type)
-{
-	switch (type) {
-	case GP_JSON_VOID:
-		return "void";
-	case GP_JSON_INT:
-		return "integer";
-	case GP_JSON_FLOAT:
-		return "float";
-	case GP_JSON_BOOL:
-		return "boolean";
-	case GP_JSON_NULL:
-		return "null";
-	case GP_JSON_STR:
-		return "string";
-	case GP_JSON_OBJ:
-		return "object";
-	case GP_JSON_ARR:
-		return "array";
-	default:
-		return "invalid";
-	}
-}
-
 int gp_json_obj_skip(gp_json_reader *buf)
 {
 	struct gp_json_val res = {};
@@ -525,7 +501,7 @@ enum gp_json_type gp_json_next_type(gp_json_reader *buf)
 	}
 }
 
-enum gp_json_type gp_json_start(gp_json_reader *buf)
+enum gp_json_type gp_json_reader_start(gp_json_reader *buf)
 {
 	enum gp_json_type type = gp_json_next_type(buf);
 
@@ -1054,7 +1030,7 @@ void gp_json_reader_finish(gp_json_reader *self)
 {
 	if (gp_json_reader_err(self))
 		gp_json_err_print(self);
-	else if (!gp_json_empty(self))
+	else if (!gp_json_reader_consumed(self))
 		gp_json_warn(self, "Garbage after JSON string!");
 }
 

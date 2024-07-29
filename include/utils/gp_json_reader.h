@@ -5,7 +5,13 @@
 
 /**
  * @file gp_json_reader.h
- * @brief A JSON parser.
+ * @brief A recursive descend JSON parser.
+ *
+ * All the function that parse JSON return zero on success and non-zero on a
+ * failure. Once an error has happened all subsequent attempts to parse more
+ * return with non-zero exit status immediatelly. This is designed so that we
+ * can parse several values without checking each return value and only check
+ * if error has happened at the end of the sequence.
  */
 
 #ifndef GP_JSON_READER_H
@@ -15,6 +21,14 @@
 #include <core/gp_compiler.h>
 #include <utils/gp_json_common.h>
 
+/**
+ * @brief A gp_json_reader initializer with default values.
+ *
+ * @param buf A pointer to a buffer with JSON data.
+ * @param buf_len A JSON data buffer lenght.
+ *
+ * @return A gp_json_reader initialized with default values.
+ */
 #define GP_JSON_READER_INIT(buf, buf_len) { \
 	.max_depth = GP_JSON_RECURSION_MAX, \
 	.err_print = GP_JSON_ERR_PRINT, \
@@ -52,25 +66,44 @@ struct gp_json_reader {
  * @brief A parsed JSON key value pair.
  */
 struct gp_json_val {
+	/**
+	 * @brief A value type.
+	 *
+	 * GP_JSON_VALUE_VOID means that no value was parsed.
+	 */
 	enum gp_json_type type;
 
 	/** An user supplied buffer and size to store a string values to. */
 	char *buf;
 	size_t buf_size;
 
-	/** An index to attribute list, set by the foo_obj_filter() functions */
+	/**
+	 * An index to attribute list.
+	 *
+	 * This is set by the gp_json_obj_first_filter() and
+         * gp_json_obj_next_filter() functions.
+	 */
 	size_t idx;
 
 	/** An union to store the parsed value into. */
 	union {
+		/** @brief A boolean value. */
 		int val_bool;
+		/** @brief An integer value. */
 		long long val_int;
+		/** @brief A string value. */
 		const char *val_str;
 	};
 
+	/**
+	 * @brief A floating point value.
+	 *
+	 * Since integer values are subset of floating point values val_float
+	 * is always set when val_int was set.
+	 */
 	double val_float;
 
-	/** An ID for object values */
+	/** @brief An ID for object values */
 	char id[GP_JSON_ID_MAX];
 
 	char buf__[];
@@ -92,12 +125,15 @@ gp_json_val *gp_json_val_alloc(size_t buf_size);
 void gp_json_val_free(gp_json_val *self);
 
 /**
- * @brief Returns type name.
+ * @brief Checks is result has valid type.
  *
- * @param type A json type.
- * @return A type name.
+ * @param res A gp_json value.
+ * @return Zero if result is not valid, non-zero otherwise.
  */
-const char *gp_json_type_name(enum gp_json_type type);
+static inline int gp_json_val_valid(struct gp_json_val *res)
+{
+	return !!res->type;
+}
 
 /**
  * @brief Fills the reader error.
@@ -105,7 +141,7 @@ const char *gp_json_type_name(enum gp_json_type type);
  * Once buffer error is set all parsing functions return immediatelly with type
  * set to GP_JSON_VOID.
  *
- * @param self An gp_json_reader
+ * @param self A gp_json_reader
  * @param fmt A printf like format string
  * @param ... A printf like parameters
  */
@@ -149,17 +185,6 @@ static inline int gp_json_reader_err(gp_json_reader *self)
 }
 
 /**
- * @brief Checks is result has valid type.
- *
- * @param res An gp_json value.
- * @return Zero if result is not valid, non-zero otherwise.
- */
-static inline int gp_json_valid(struct gp_json_val *res)
-{
-	return !!res->type;
-}
-
-/**
  * @brief Returns the type of next element in buffer.
  *
  * @param self A gp_json_reader
@@ -173,19 +198,46 @@ enum gp_json_type gp_json_next_type(gp_json_reader *self);
  * @param self A gp_json_reader
  * @return On success returns GP_JSON_OBJ or GP_JSON_ARR. On failure GP_JSON_VOID.
  */
-enum gp_json_type gp_json_start(gp_json_reader *self);
+enum gp_json_type gp_json_reader_start(gp_json_reader *self);
 
 /**
- * @brief Starts parsing of an JSON object.
+ * @brief Starts parsing of a JSON object.
  *
- * @param self A gp_json_reader
- * @res An gp_json result.
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the parsed value to.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_obj_first(gp_json_reader *self, struct gp_json_val *res);
+
+/**
+ * @brief Parses next value from a JSON object.
+ *
+ * If the res->type is GP_JSON_OBJ or GP_JSON_ARR it has to be parsed or
+ * skipped before next call to this function.
+ *
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the parsed value to.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
 int gp_json_obj_next(gp_json_reader *self, struct gp_json_val *res);
 
-#define GP_JSON_OBJ_FOREACH(buf, res) \
-	for (gp_json_obj_first(buf, res); gp_json_valid(res); gp_json_obj_next(buf, res))
+/**
+ * @brief A loop over a JSON object.
+ *
+ * @code
+ * GP_JSON_OBJ_FOREACH(reader, val) {
+ *      printf("Got value id '%s' type '%s'", val->id, gp_json_type_name(val->type));
+ *      ...
+ * }
+ * @endcode
+ *
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the parsed value to.
+ */
+#define GP_JSON_OBJ_FOREACH(self, res) \
+	for (gp_json_obj_first(self, res); gp_json_val_valid(res); gp_json_obj_next(self, res))
 
 /**
  * @brief Utility function for log(n) lookup in a sorted array.
@@ -200,14 +252,28 @@ size_t gp_json_lookup(const void *arr, size_t memb_size, size_t list_len,
 
 /** @brief A JSON object attribute description i.e. key and type */
 typedef struct gp_json_obj_attr {
+	/** @brief A JSON object key name. */
 	const char *key;
+	/**
+	 * @brief A JSON object value type.
+	 *
+	 * Note that because integer numbers are subset of floating point
+	 * numbers if requested type was GP_JSON_FLOAT it will match if parsed
+	 * type was GP_JSON_INT and the val_float will be set in addition to
+	 * val_int.
+	 */
 	enum gp_json_type type;
 } gp_json_obj_attr;
 
 /** @brief A JSON object description */
 typedef struct gp_json_obj {
-	/** Attributes we are looking for for these the val->idx is set */
+	/**
+	 * @brief A list of object attributes.
+	 *
+	 * Attributes we are looking for, the parser sets the val->idx for these.
+	 */
 	const gp_json_obj_attr *attrs;
+	/** @brief A size of attrs array. */
 	size_t attr_cnt;
 } gp_json_obj;
 
@@ -216,46 +282,123 @@ static inline size_t gp_json_obj_lookup(const gp_json_obj *obj, const char *key)
 	return gp_json_lookup(obj->attrs, sizeof(*obj->attrs), obj->attr_cnt, key);
 }
 
+/** @brief A gp_json_obj_attr initializer. */
 #define GP_JSON_OBJ_ATTR(keyv, typev) \
 	{.key = keyv, .type = typev}
 
 /**
- * @brief Object parsing functions with with attribute list.
+ * @brief Starts parsing of a JSON object with attribute lists.
  *
- * These functions allows you to efficiently filter a set of keys
- * for a given object passed in gp_json_obj.
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the parsed value to.
+ * @param obj A gp_json_obj object description.
+ * @param ign A list of keys to ignore.
  *
- * @param self A gp_json_reader
- * @param res An gp_json result.
- * @param obj An gp_json_obj object description.
- * @param f A file to print warnings to.
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_obj_first_filter(gp_json_reader *self, struct gp_json_val *res,
                              const struct gp_json_obj *obj, const struct gp_json_obj *ign);
+
+/**
+ * @brief Parses next value from a JSON object with attribute lists.
+ *
+ * If the res->type is GP_JSON_OBJ or GP_JSON_ARR it has to be parsed or skipped
+ * before next call to this function.
+ *
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the parsed value to.
+ * @param obj A gp_json_obj object description.
+ * @param ign A list of keys to ignore.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
 int gp_json_obj_next_filter(gp_json_reader *self, struct gp_json_val *res,
                             const struct gp_json_obj *obj, const struct gp_json_obj *ign);
 
-#define GP_JSON_OBJ_FILTER(buf, res, obj, ign) \
-	for (gp_json_obj_first_filter(buf, res, obj, ign); gp_json_valid(res); gp_json_obj_next_filter(buf, res, obj, ign))
+/**
+ * @brief A loop over a JSON object with a pre-defined list of expected attributes.
+ *
+ * @code
+ * static struct gp_json_obj_attr attrs[] = {
+ *	GP_JSON_OBJ_ATTR("bool", GP_JSON_BOOL),
+ *	GP_JSON_OBJ_ATTR("number", GP_JSON_INT),
+ * };
+ *
+ * static struct gp_json_obj obj = {
+ *	attrs = filter_attrs,
+ *	.attr_cnt = GP_JSON_ARRAY_SIZE(filter_attrs)
+ * };
+ *
+ * GP_JSON_OBJ_FOREACH_FILTER(reader, val, &obj, NULL) {
+ *	printf("Got value id '%s' type '%s'",
+ *	       attrs[val->idx].id, gp_json_type_name(val->type));
+ *      ...
+ * }
+ * @endcode
+ *
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the next parsed value to.
+ * @param obj A gp_json_obj with a description of attributes to parse.
+ * @param ign A gp_json_obj with a description of attributes to ignore.
+ */
+#define GP_JSON_OBJ_FOREACH_FILTER(self, res, obj, ign) \
+	for (gp_json_obj_first_filter(self, res, obj, ign); \
+	     gp_json_val_valid(res); \
+	     gp_json_obj_next_filter(self, res, obj, ign))
 
 /**
- * @brief Skips parsing of an JSON object.
+ * @brief Skips parsing of a JSON object.
  *
- * @param self A gp_json_reader
+ * @param self A gp_json_reader.
+ *
  * @return Zero on success, non-zero otherwise.
  */
 int gp_json_obj_skip(gp_json_reader *self);
 
+/**
+ * @brief Starts parsing of a JSON array.
+ *
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the parsed value to.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
 int gp_json_arr_first(gp_json_reader *self, struct gp_json_val *res);
-int gp_json_arr_next(gp_json_reader *self, struct gp_json_val *res);
-
-#define GP_JSON_ARR_FOREACH(buf, res) \
-	for (gp_json_arr_first(buf, res); gp_json_valid(res); gp_json_arr_next(buf, res))
 
 /**
- * @brief Skips parsing of an JSON array.
+ * @brief Parses next value from a JSON array.
  *
- * @param self A gp_json_reader
+ * If the res->type is GP_JSON_OBJ or GP_JSON_ARR it has to be parsed or
+ * skipped before next call to this function.
+ *
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the parsed value to.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
+int gp_json_arr_next(gp_json_reader *self, struct gp_json_val *res);
+
+/**
+ * @brief A loop over a JSON array.
+ *
+ * @code
+ * GP_JSON_ARR_FOREACH(reader, val) {
+ *      printf("Got value type '%s'", gp_json_type_name(val->type));
+ *      ...
+ * }
+ * @endcode
+ *
+ * @param self A gp_json_reader.
+ * @param res A gp_json_val to store the next parsed value to.
+ */
+#define GP_JSON_ARR_FOREACH(self, res) \
+	for (gp_json_arr_first(self, res); gp_json_val_valid(res); gp_json_arr_next(self, res))
+
+/**
+ * @brief Skips parsing of a JSON array.
+ *
+ * @param self A gp_json_reader.
+ *
  * @return Zero on success, non-zero otherwise.
  */
 int gp_json_arr_skip(gp_json_reader *self);
@@ -263,10 +406,10 @@ int gp_json_arr_skip(gp_json_reader *self);
 /**
  * @brief A JSON parser state.
  */
-typedef struct gp_json_state {
+typedef struct gp_json_reader_state {
 	size_t off;
 	unsigned int depth;
-} gp_json_state;
+} gp_json_reader_state;
 
 /**
  * @brief Returns a parser state at the start of current object/array.
@@ -277,9 +420,9 @@ typedef struct gp_json_state {
  * @param self A gp_json_reader
  * @return A state that points to a start of the last object or array.
  */
-static inline struct gp_json_state gp_json_state_start(gp_json_reader *self)
+static inline gp_json_reader_state gp_json_reader_state_save(gp_json_reader *self)
 {
-	struct gp_json_state ret = {
+	struct gp_json_reader_state ret = {
 		.off = self->sub_off,
 		.depth = self->depth,
 	};
@@ -291,12 +434,12 @@ static inline struct gp_json_state gp_json_state_start(gp_json_reader *self)
  * @brief Returns the parser to a saved state.
  *
  * This function could be used for the parser to return to the start of
- * object or array saved by t the gp_json_state_get() function.
+ * object or array saved by t the gp_json_reader_state_get() function.
  *
  * @param self A gp_json_reader
- * @param state An parser state as returned by the gp_json_state_get().
+ * @param state An parser state as returned by the gp_json_reader_state_get().
  */
-static inline void gp_json_state_load(gp_json_reader *self, struct gp_json_state state)
+static inline void gp_json_reader_state_load(gp_json_reader *self, gp_json_reader_state state)
 {
 	self->off = state.off;
 	self->sub_off = state.off;
@@ -308,7 +451,7 @@ static inline void gp_json_state_load(gp_json_reader *self, struct gp_json_state
  *
  * @param self A gp_json_reader
  */
-static inline void gp_json_reset(gp_json_reader *self)
+static inline void gp_json_reader_reset(gp_json_reader *self)
 {
 	self->off = 0;
 	self->sub_off = 0;
@@ -329,7 +472,7 @@ gp_json_reader *gp_json_reader_load(const char *path);
 /**
  * @brief Frees an gp_json_reader buffer.
  *
- * @param self A gp_json_reader allocated by gp_json_load() function.
+ * @param self A gp_json_reader allocated by gp_json_reader_load() function.
  */
 void gp_json_reader_free(gp_json_reader *self);
 
@@ -338,8 +481,9 @@ void gp_json_reader_free(gp_json_reader *self);
  *
  * Checks if self->err is set and prints the error with gp_json_reader_err()
  *
- * Checks if there is any text left after the parser has finished and prints
- * a warning if so.
+ * Checks if there is any text left after the parser has finished with
+ * gp_json_reader_consumed() and prints a warning if there were any
+ * non-whitespace characters left.
  *
  * @param self A gp_json_reader
  */
@@ -351,7 +495,7 @@ void gp_json_reader_finish(gp_json_reader *self);
  * @param self A gp_json_reader.
  * @return Non-zero if whole buffer was consumed.
  */
-static inline int gp_json_empty(gp_json_reader *self)
+static inline int gp_json_reader_consumed(gp_json_reader *self)
 {
 	return self->off >= self->len;
 }

@@ -187,7 +187,7 @@ static gp_widget *json_to_checkbox(gp_json_reader *json, gp_json_val *val, gp_wi
 
 	(void)ctx;
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case LABEL:
 			label = strdup(val->val_str);

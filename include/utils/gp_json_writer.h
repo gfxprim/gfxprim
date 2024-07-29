@@ -7,7 +7,7 @@
  * @file gp_json_writer.h
  * @brief A JSON writer.
  *
- * All the function that add values return 0 on success and non-zero on a
+ * All the function that add values return zero on success and non-zero on a
  * failure. Once an error has happened all subsequent attempts to add more
  * values return with non-zero exit status immediatelly. This is designed
  * so that we can add several values without checking each return value
@@ -42,11 +42,19 @@ struct gp_json_writer {
 	void *out_priv;
 };
 
-#define GP_JSON_WRITER_INIT(out_, out_priv_) { \
+/**
+ * @brief A gp_json_writer initializer with default values.
+ *
+ * @param vout A pointer to function to write out the data.
+ * @param vout_priv An user pointer passed to the out function.
+ *
+ * @return A gp_json_writer initialized with default values.
+ */
+#define GP_JSON_WRITER_INIT(vout, vout_priv) { \
 	.err_print = GP_JSON_ERR_PRINT, \
 	.err_print_priv = GP_JSON_ERR_PRINT_PRIV, \
-	.out = out_, \
-	.out_priv = out_priv_ \
+	.out = vout, \
+	.out_priv = vout_priv \
 }
 
 /**
@@ -65,6 +73,8 @@ void gp_json_writer_vec_free(gp_json_writer *self);
 
 /**
  * @brief Returns a pointer to a vector storage.
+ *
+ * @param self A JSON writer.
  *
  * @return A pointer to the vector storage.
  */
@@ -91,12 +101,14 @@ gp_json_writer *gp_json_writer_file_open(const char *path);
  *
  * @param self A gp_json_writer file writer.
  *
- * @return Zero on success, 1 on a failure and errno is set.
+ * @return Zero on success, non-zero on a failure and errno is set.
  */
 int gp_json_writer_file_close(gp_json_writer *self);
 
 /**
  * @brief Returns true if writer error happened.
+ *
+ * @param self A JSON writer.
  *
  * @return True if error has happened.
  */
@@ -106,72 +118,121 @@ static inline int gp_json_writer_err(gp_json_writer *self)
 }
 
 /**
- * @brief Starts an JSON object.
+ * @brief Starts a JSON object.
+ *
+ * For a top level object the id must be NULL, every other object has to have
+ * non-NULL id. The call will also fail if maximal recursion depth
+ * GP_JSON_RECURSION_MAX has been reached.
  *
  * @param self A JSON writer.
  * @param id An object name.
+ *
+ * @return Zero on a success, non-zero otherwise.
  */
 int gp_json_obj_start(gp_json_writer *self, const char *id);
 
 /**
  * @brief Finishes a JSON object.
  *
+ * The call will fail if we are currenlty not writing out an object.
+ *
  * @param self A JSON writer.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_obj_finish(gp_json_writer *self);
 
 /**
- * @brief Starts an json array.
+ * @brief Starts a JSON array.
+ *
+ * For a top level array the id must be NULL, every other array has to have
+ * non-NULL id. The call will also fail if maximal recursion depth
+ * GP_JSON_RECURSION_MAX has been reached.
  *
  * @param self A JSON writer.
  * @param id An array name.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_arr_start(gp_json_writer *self, const char *id);
 
 /**
  * @brief Finishes a JSON array.
  *
+ * The call will fail if we are currenlty not writing out an array.
+ *
  * @param self A JSON writer.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_arr_finish(gp_json_writer *self);
 
 /**
  * @brief Adds a null value.
  *
+ * The id must be NULL inside of an array, and must be non-NULL inside of an
+ * object.
+ *
  * @param self A JSON writer.
  * @param id A null value name.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_null_add(gp_json_writer *self, const char *id);
 
 /**
  * @brief Adds an integer value.
  *
+ * The id must be NULL inside of an array, and must be non-NULL inside of an
+ * object.
+ *
  * @param self A JSON writer.
  * @param id An integer value name.
+ * @param val An integer value.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_int_add(gp_json_writer *self, const char *id, long val);
 
 /**
  * @brief Adds a bool value.
  *
+ * The id must be NULL inside of an array, and must be non-NULL inside of an
+ * object.
+ *
  * @param self A JSON writer.
  * @param id An boolean value name.
+ * @param val A boolean value.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_bool_add(gp_json_writer *self, const char *id, int val);
 
 /**
  * @brief Adds a float value.
  *
+ * The id must be NULL inside of an array, and must be non-NULL inside of an
+ * object.
+ *
  * @param self A JSON writer.
  * @param id A floating point value name.
+ * @param val A floating point value.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_float_add(gp_json_writer *self, const char *id, double val);
 
 /**
  * @brief Adds a string value.
  *
+ * The id must be NULL inside of an array, and must be non-NULL inside of an
+ * object.
+ *
  * @param self A JSON writer.
  * @param id A string value name.
+ * @param str A UTF8 string value.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_json_str_add(gp_json_writer *self, const char *id, const char *str);
 
@@ -184,6 +245,6 @@ int gp_json_str_add(gp_json_writer *self, const char *id, const char *str);
  * @param self A JSON writer.
  * @return Overall error value.
  */
-int gp_json_finish(gp_json_writer *self);
+int gp_json_writer_finish(gp_json_writer *self);
 
 #endif /* GP_JSON_WRITER_H */

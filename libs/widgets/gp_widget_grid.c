@@ -1086,9 +1086,9 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 	gp_widget *grid = NULL;
 	struct border border = {.border = GP_WIDGET_BORDER_NONE, .val = -1};
 
-	gp_json_state obj_start = gp_json_state_start(json);
+	gp_json_reader_state obj_start = gp_json_reader_state_save(json);
 
-	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case BORDER:
 			parse_border(json, val, &border);
@@ -1215,7 +1215,7 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 free_skip:
 	gp_widget_free(grid);
 skip:
-	gp_json_state_load(json, obj_start);
+	gp_json_reader_state_load(json, obj_start);
 	gp_json_obj_skip(json);
 	return NULL;
 }
@@ -1630,7 +1630,7 @@ static gp_widget *get_widgets(gp_json_reader *json, gp_json_val *val, gp_widget_
 	unsigned int cnt = 0;
 	gp_widget *ret, *tmp;
 
-	gp_json_state arr_start = gp_json_state_start(json);
+	gp_json_reader_state arr_start = gp_json_reader_state_save(json);
 
 	GP_JSON_ARR_FOREACH(json, val) {
 		switch (val->type) {
@@ -1653,7 +1653,7 @@ static gp_widget *get_widgets(gp_json_reader *json, gp_json_val *val, gp_widget_
 	if (!ret)
 		return NULL;
 
-	gp_json_state_load(json, arr_start);
+	gp_json_reader_state_load(json, arr_start);
 	cnt = 0;
 	unsigned int padd, fill;
 
@@ -1718,7 +1718,7 @@ static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widge
 
 	gp_widget *ret = NULL;
 
-	GP_JSON_OBJ_FILTER(json, val, &box_obj_filter, gp_widget_json_attrs) {
+	GP_JSON_OBJ_FOREACH_FILTER(json, val, &box_obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case BOX_BORDER:
 			parse_border(json, val, &border);

@@ -83,7 +83,7 @@ static void transform_obj(gp_json_reader *reader, gp_json_writer *writer, gp_jso
 
 static void transform(gp_json_reader *reader, gp_json_writer *writer, gp_json_val *val)
 {
-	switch (gp_json_start(reader)) {
+	switch (gp_json_reader_start(reader)) {
 	case GP_JSON_OBJ:
 		transform_obj(reader, writer, val, NULL);
 	break;
@@ -94,7 +94,7 @@ static void transform(gp_json_reader *reader, gp_json_writer *writer, gp_json_va
 	break;
 	}
 
-	gp_json_finish(writer);
+	gp_json_writer_finish(writer);
 }
 
 static int json_read_write_test(const char *fname)

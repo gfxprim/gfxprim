@@ -27,7 +27,7 @@ static int json_finalize_err_obj(void)
 		return TST_FAILED;
 	}
 
-	if (!gp_json_finish(&writer)) {
+	if (!gp_json_writer_finish(&writer)) {
 		tst_msg("Finish didn't fail with unfinished object");
 		return TST_FAILED;
 	}
@@ -44,7 +44,7 @@ static int json_finalize_err_arr(void)
 		return TST_FAILED;
 	}
 
-	if (!gp_json_finish(&writer)) {
+	if (!gp_json_writer_finish(&writer)) {
 		tst_msg("Finish didn't fail with unfinished object");
 		return TST_FAILED;
 	}
