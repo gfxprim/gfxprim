@@ -624,6 +624,9 @@ size_t gp_json_lookup(const void *arr, size_t memb_size, size_t list_len,
 	size_t r = list_len-1;
 	size_t mid = -1;
 
+	if (!list_len)
+		return (size_t)-1;
+
 	while (r - l > 1) {
 		mid = (l+r)/2;
 
