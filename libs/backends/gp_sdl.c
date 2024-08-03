@@ -133,6 +133,8 @@ static void sdl_wait(struct gp_backend *self)
 #if LIBSDL_VERSION == 2
 static int sdl_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
 {
+	(void) self;
+
 	switch (cursor) {
 	case GP_BACKEND_CURSOR_HIDE:
 		SDL_ShowCursor(SDL_DISABLE);
@@ -326,6 +328,8 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp,
 
 	SDL_EnableUNICODE(1);
 #elif LIBSDL_VERSION == 2
+	(void) bpp;
+
 	window = SDL_CreateWindow(caption, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, sdl_flags);
 	if (!window) {
 		GP_WARN("SDL_CreateWindow: %s", SDL_GetError());

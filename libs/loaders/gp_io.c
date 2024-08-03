@@ -69,7 +69,7 @@ static int file_close(gp_io *self)
 
 gp_io *gp_io_file(const char *path, enum gp_io_file_mode mode)
 {
-	int err, flags;
+	int err, flags = 0;
 	gp_io *io;
 	struct file_io *file_io;
 

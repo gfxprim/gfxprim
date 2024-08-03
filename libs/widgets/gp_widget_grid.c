@@ -539,6 +539,8 @@ static int try_focus(gp_widget *self, unsigned int col, unsigned int row, int se
 {
 	gp_widget *w = widget_grid_get(self, col, row);
 
+	(void) sel;
+
 	GP_DEBUG(4, "Trying to focus widget %p (%s) %ux%u",
 		 w, gp_widget_type_id(w), col, row);
 

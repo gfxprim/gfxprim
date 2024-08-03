@@ -1124,6 +1124,8 @@ static void render_stock_on(gp_pixmap *pix,
 	gp_size th = GP_MIN(w, h)/12;
 	gp_size sh = (h-2)/2;
 
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
 	gp_fill_rect_xyxy(pix, x + w/2 + (th-th/2), y + h/2-sh, x + w/2 - th/2, y + h/2+sh, ctx->text_color);
 }
 
@@ -1134,6 +1136,8 @@ static void render_stock_off(gp_pixmap *pix,
 {
 	gp_size th = GP_MIN(w, h)/12;
 	gp_size r = w/3;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_fill_ring_seg(pix, x + w/2, y + r, r, r-th, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG2,  ctx->text_color);
 	gp_fill_rect_xyxy(pix, x + w/2+r-th, y + r, x+w/2+r, y + h - r - 1, ctx->text_color);
@@ -1266,6 +1270,8 @@ static void stock_render(gp_widget *self, const gp_offset *offset,
 	gp_coord h = self->h;
 
 	gp_size off;
+
+	(void) flags;
 
 	switch (self->stock->type) {
 	case GP_WIDGET_STOCK_ARROW_UP:
@@ -1458,7 +1464,6 @@ bool gp_widget_stock_type_valid(gp_widget_stock_type type)
 
 gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size min_size)
 {
-	const gp_widget_render_ctx *ctx = gp_widgets_render_ctx();
 	gp_widget *ret;
 
 	if (!gp_widget_stock_type_valid(type)) {

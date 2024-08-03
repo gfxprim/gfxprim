@@ -82,7 +82,7 @@ static void toggle(gp_widget *self)
 	set(self, !self->b->val);
 }
 
-static void click(gp_widget *self, unsigned int padd, gp_event *ev)
+static void click(gp_widget *self, gp_event *ev)
 {
 	unsigned int max_x = self->w;
 	unsigned int max_y = self->h;
@@ -98,6 +98,8 @@ static void click(gp_widget *self, unsigned int padd, gp_event *ev)
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
+	(void) ctx;
+
 	if (gp_widget_key_mod_pressed(ev))
 		return 0;
 
@@ -114,7 +116,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		break;
 		case GP_BTN_TOUCH:
 		case GP_BTN_LEFT:
-			click(self, ctx->padd, ev);
+			click(self, ev);
 			return 1;
 		break;
 		}

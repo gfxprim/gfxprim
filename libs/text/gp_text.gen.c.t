@@ -307,7 +307,7 @@ gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
 }
 
 static void glyph_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
-                       gp_coord x, gp_coord y, uint8_t bearing,
+                       gp_coord x, gp_coord y,
                        gp_pixel fg, const gp_glyph *glyph)
 {
 	int nomul = style->pixel_xmul == 1 && style->pixel_ymul == 1 &&
@@ -329,7 +329,7 @@ static void glyph_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
 }
 
 static void glyph_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
-                       gp_coord x, gp_coord y, uint8_t bearing,
+                       gp_coord x, gp_coord y,
                        gp_pixel fg, gp_pixel bg, const gp_glyph *glyph)
 {
 	switch (pixmap->pixel_type) {
@@ -345,7 +345,7 @@ static void glyph_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
 }
 
 static void glyph_8BPP_bg(gp_pixmap *pixmap, const gp_text_style *style,
-                          gp_coord x, gp_coord y, uint8_t bearing,
+                          gp_coord x, gp_coord y,
                           gp_pixel fg, gp_pixel bg, const gp_glyph *glyph)
 {
 	switch (pixmap->pixel_type) {
@@ -394,13 +394,13 @@ gp_size gp_glyph_draw(gp_pixmap *pixmap, const gp_text_style *style,
 
 	switch (style->font->glyph_bitmap_format) {
 	case GP_FONT_BITMAP_1BPP:
-		glyph_1BPP(pixmap, style, gx, y, bearing, fg_color, g);
+		glyph_1BPP(pixmap, style, gx, y, fg_color, g);
 	break;
 	case GP_FONT_BITMAP_8BPP:
 		if (flags & GP_TEXT_NOBG)
-			glyph_8BPP(pixmap, style, gx, y, bearing, fg_color, bg_color, g);
+			glyph_8BPP(pixmap, style, gx, y, fg_color, bg_color, g);
 		else
-			glyph_8BPP_bg(pixmap, style, gx, y, bearing, fg_color, bg_color, g);
+			glyph_8BPP_bg(pixmap, style, gx, y, fg_color, bg_color, g);
 	break;
 	default:
 		GP_ABORT("Invalid font glyph bitmap format");

@@ -144,7 +144,7 @@ static gp_size max_line_ascend(const gp_widget_render_ctx *ctx, const gp_markup_
 	return ret;
 }
 
-static gp_size render_line(const gp_markup_line *line, gp_widget *self,
+static gp_size render_line(const gp_markup_line *line,
                            const gp_widget_render_ctx *ctx, int is_disabled,
                            gp_size cur_x, gp_size cur_y)
 {
@@ -213,7 +213,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		return;
 
 	for (i = 0; i < lines->lines_cnt; i++) {
-		cur_y += render_line(&lines->lines[i], self, ctx, is_disabled, x, cur_y);
+		cur_y += render_line(&lines->lines[i], ctx, is_disabled, x, cur_y);
 
 		if (!lines->lines[i].first && lines->lines[i].last->fmt & GP_MARKUP_STRIKE) {
 			unsigned int line_h = gp_text_height(ctx->font)/25 + 1;
