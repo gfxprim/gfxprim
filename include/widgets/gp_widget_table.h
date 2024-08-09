@@ -203,6 +203,9 @@ typedef struct gp_widget_table {
 	int needs_header:1;
 
 	uint64_t last_click;
+	gp_coord click_y;
+	int in_drag_scroll:1;
+	int did_drag_scroll:1;
 
 	unsigned int start_row;
 	unsigned int last_rows;

@@ -579,12 +579,55 @@ ret:
 	return 1;
 }
 
+static int drag_scroll(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
+{
+	gp_widget_table *tbl = self->tbl;
+	int diff = tbl->click_y - ev->st->cursor_y;
+	int h = row_h(ctx);
+	int scroll_rows = (diff+h/2)/h;
+
+	if (scroll_rows == 0)
+		return 0;
+
+	tbl->did_drag_scroll = 1;
+
+	if (scroll_rows < 0)
+		scroll_up(self, -scroll_rows);
+	else
+		scroll_down(self, ctx, scroll_rows);
+
+	tbl->click_y -= scroll_rows * h;
+
+	return 1;
+}
+
 static int click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	if (ev->st->cursor_y <= header_h(self, ctx))
-		return header_click(self, ctx, ev->st->cursor_x);
+	if (ev->st->cursor_y <= header_h(self, ctx)) {
+		if (ev->code == GP_EV_KEY_UP)
+			return 0;
 
-	return row_click(self, ctx, ev);
+		return header_click(self, ctx, ev->st->cursor_x);
+	}
+
+	switch (ev->code) {
+	case GP_EV_KEY_DOWN:
+		self->tbl->click_y = ev->st->cursor_y;
+		self->tbl->in_drag_scroll = 1;
+		return 1;
+	break;
+	case GP_EV_KEY_UP:
+		self->tbl->in_drag_scroll = 0;
+		if (self->tbl->did_drag_scroll) {
+			self->tbl->did_drag_scroll = 0;
+			return 1;
+		}
+
+		return row_click(self, ctx, ev);
+	break;
+	}
+
+	return 0;
 }
 
 static int enter(gp_widget *self)
@@ -603,6 +646,13 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	switch (ev->type) {
 	case GP_EV_KEY:
+		switch (ev->val) {
+		case GP_BTN_LEFT:
+		case GP_BTN_TOUCH:
+			return click(self, ctx, ev);
+		break;
+		}
+
 		if (ev->code == GP_EV_KEY_UP)
 			return 0;
 
@@ -633,8 +683,6 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			return move_last(self, ctx);
 		case GP_KEY_HOME:
 			return move_first(self);
-		case GP_BTN_LEFT:
-			return click(self, ctx, ev);
 		case GP_KEY_ENTER:
 			return enter(self);
 		}
@@ -643,13 +691,19 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		if (gp_widget_key_mod_pressed(ev))
 			return 0;
 
-		if (ev->code != GP_EV_REL_WHEEL)
-			return 0;
-
-		if (ev->val < 0)
-			scroll_down(self, ctx, -ev->val);
-		else
-			scroll_up(self, ev->val);
+		switch (ev->code) {
+		case GP_EV_REL_WHEEL:
+			if (ev->val < 0)
+				scroll_down(self, ctx, -ev->val);
+			else
+				scroll_up(self, ev->val);
+		break;
+		case GP_EV_REL_POS:
+			if (self->tbl->in_drag_scroll &&
+			    gp_ev_any_key_pressed(ev, GP_BTN_LEFT, GP_BTN_TOUCH))
+				drag_scroll(self, ctx, ev);
+		break;
+		}
 	break;
 	}
 
