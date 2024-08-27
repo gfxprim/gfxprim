@@ -617,6 +617,9 @@ static int click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		return 1;
 	break;
 	case GP_EV_KEY_UP:
+		if (!self->tbl->in_drag_scroll)
+			return 0;
+
 		self->tbl->in_drag_scroll = 0;
 		if (self->tbl->did_drag_scroll) {
 			self->tbl->did_drag_scroll = 0;
