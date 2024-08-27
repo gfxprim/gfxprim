@@ -297,6 +297,9 @@ static int cannot_open(struct file_dialog *dialog)
 	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 	gp_widget *table = dialog->file_table;
 
+	if (!cache)
+		return 0;
+
 	if (!table->tbl->row_selected)
 		return 1;
 
