@@ -1515,3 +1515,11 @@ void gp_widget_stock_type_set(gp_widget *self, enum gp_widget_stock_type type)
 	stock->type = type;
 	gp_widget_redraw(self);
 }
+
+enum gp_widget_stock_type gp_widget_stock_type_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_STOCK, GP_WIDGET_STOCK_NONE);
+	struct gp_widget_stock *stock = GP_WIDGET_PAYLOAD(self);
+
+	return stock->type;
+}

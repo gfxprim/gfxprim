@@ -186,6 +186,14 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size mi
 void gp_widget_stock_type_set(gp_widget *self, enum gp_widget_stock_type type);
 
 /**
+ * @brief Gets stock image type.
+ *
+ * @param self A stock widget.
+ * @return A stock image type.
+ */
+enum gp_widget_stock_type gp_widget_stock_type_get(gp_widget *self);
+
+/**
  * @brief Checks for stock type validity.
  *
  * @param type A stock type.
