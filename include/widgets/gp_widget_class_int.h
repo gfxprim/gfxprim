@@ -93,12 +93,28 @@ void gp_widget_int_val_set(gp_widget *self, int64_t val);
 void gp_widget_int_max_set(gp_widget *self, int64_t max);
 
 /**
+ * @brief Gets an integer class widget maximum.
+ *
+ * @param self An integer class widget.
+ * @return An integer class widget maximum.
+ */
+int64_t gp_widget_int_max_get(gp_widget *self);
+
+/**
  * @brief Sets an integer class widget minimum.
  *
  * @param self An integer class widget.
  * @param min New integer class widget minimum.
  */
 void gp_widget_int_min_set(gp_widget *self, int64_t min);
+
+/**
+ * @brief Gets an integer class widget minimum.
+ *
+ * @param self An integer class widget.
+ * @return An integer class widget minimun.
+ */
+int64_t gp_widget_int_min_get(gp_widget *self);
 
 /**
  * @brief Sets an integer class widget limits.

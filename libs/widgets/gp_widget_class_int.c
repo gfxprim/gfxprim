@@ -125,6 +125,14 @@ void gp_widget_int_max_set(gp_widget *self, int64_t max)
 	gp_widget_redraw(self);
 }
 
+int64_t gp_widget_int_max_get(gp_widget *self)
+{
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, 0);
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
+
+	return i->max;
+}
+
 void gp_widget_int_min_set(gp_widget *self, int64_t min)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
@@ -144,6 +152,14 @@ void gp_widget_int_min_set(gp_widget *self, int64_t min)
 	//TODO: Event?
 
 	gp_widget_redraw(self);
+}
+
+int64_t gp_widget_int_min_get(gp_widget *self)
+{
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, 0);
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
+
+	return i->min;
 }
 
 void gp_widget_int_range_set(gp_widget *self, int64_t min, int64_t max)
