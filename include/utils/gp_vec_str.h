@@ -36,7 +36,7 @@ static inline char *gp_vec_str_new(void)
  *
  * @return Returns string vector length.
  */
-static inline size_t gp_vec_strlen(char *self)
+static inline size_t gp_vec_strlen(const char *self)
 {
 	return gp_vec_len(self) - 1;
 }
@@ -48,7 +48,7 @@ static inline size_t gp_vec_strlen(char *self)
  *
  * @return Returns string vector size i.e. length + 1.
  */
-static inline size_t gp_vec_strsize(char *self)
+static inline size_t gp_vec_strsize(const char *self)
 {
 	return gp_vec_len(self);
 }
