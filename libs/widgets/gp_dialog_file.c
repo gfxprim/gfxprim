@@ -57,30 +57,30 @@ static int dialog_show_hidden(struct file_dialog *dialog)
 	return gp_widget_bool_get(dialog->show_hidden);
 }
 
-static char *dialog_filter(struct file_dialog *dialog)
+static const char *dialog_filter(struct file_dialog *dialog)
 {
 	if (!dialog->filter)
 		return "";
 
-	return dialog->filter->tbox->buf;
+	return gp_widget_tbox_text(dialog->filter);
 }
 
 static int find_next(gp_widget *self)
 {
-	gp_widget_table *tbl = self->tbl;
-	gp_dir_cache *cache = tbl->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(self);
+	gp_dir_cache *cache = tbl_priv->priv;
 	int show_hidden = dialog_show_hidden(self->priv);
-	char *str = dialog_filter(self->priv);
+	const char *str = dialog_filter(self->priv);
 	size_t str_len = strlen(str);
 	gp_dir_entry *entry;
 
 	for (;;) {
 		int filter = 0;
 
-		if (tbl->row_idx >= cache->used)
+		if (tbl_priv->row_idx >= cache->used)
 			return 0;
 
-		entry = gp_dir_cache_get(cache, tbl->row_idx);
+		entry = gp_dir_cache_get(cache, tbl_priv->row_idx);
 
 		if ((str_len) && !strstr(entry->name, str))
 			filter = 1;
@@ -89,10 +89,10 @@ static int find_next(gp_widget *self)
 			filter = 1;
 
 		if (filter) {
-			gp_dir_cache_set_filter(cache, tbl->row_idx, 1);
-			tbl->row_idx++;
+			gp_dir_cache_set_filter(cache, tbl_priv->row_idx, 1);
+			tbl_priv->row_idx++;
 		} else {
-			gp_dir_cache_set_filter(cache, tbl->row_idx, 0);
+			gp_dir_cache_set_filter(cache, tbl_priv->row_idx, 0);
 			return 1;
 		}
 	}
@@ -101,8 +101,9 @@ static int find_next(gp_widget *self)
 static enum gp_poll_event_ret notify_callback(gp_fd *self)
 {
 	struct file_dialog *dialog = self->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(dialog->file_table);
 
-	if (gp_dir_cache_notify(dialog->file_table->tbl->priv))
+	if (gp_dir_cache_notify(tbl_priv->priv))
 		gp_widget_redraw(dialog->file_table);
 
 	return 0;
@@ -113,7 +114,7 @@ static gp_dir_cache *load_dir_cache(struct file_dialog *dialog)
 	gp_dir_cache *cache;
 	gp_fd *notify_fd;
 
-	cache = gp_dir_cache_new(dialog->dir_path->tbox->buf);
+	cache = gp_dir_cache_new(gp_widget_tbox_text(dialog->dir_path));
 	if (!cache)
 		return NULL;
 
@@ -130,7 +131,8 @@ static gp_dir_cache *load_dir_cache(struct file_dialog *dialog)
 static void free_dir_cache(struct file_dialog *dialog)
 {
 	gp_fd *notify_fd;
-	gp_dir_cache *self = dialog->file_table->tbl->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(dialog->file_table);
+	gp_dir_cache *self = tbl_priv->priv;
 
 	if (!self)
 		return;
@@ -141,28 +143,29 @@ static void free_dir_cache(struct file_dialog *dialog)
 
 	gp_dir_cache_destroy(self);
 
-	dialog->file_table->tbl->priv = NULL;
+	tbl_priv->priv = NULL;
 }
 
 static int files_seek_row(gp_widget *self, int op, unsigned int pos)
 {
-	gp_dir_cache *cache = self->tbl->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(self);
+	gp_dir_cache *cache = tbl_priv->priv;
 	unsigned int i;
 
 	if (!cache)
-		cache = self->tbl->priv = load_dir_cache(self->priv);
+		cache = tbl_priv->priv = load_dir_cache(self->priv);
 
 	if (!cache)
 		return 0;
 
 	switch (op) {
 	case GP_TABLE_ROW_RESET:
-		self->tbl->row_idx = 0;
+		tbl_priv->row_idx = 0;
 		find_next(self);
 	break;
 	case GP_TABLE_ROW_ADVANCE:
 		for (i = 0; i < pos; i++) {
-			self->tbl->row_idx++;
+			tbl_priv->row_idx++;
 			if (!find_next(self))
 				return 0;
 		}
@@ -171,7 +174,7 @@ static int files_seek_row(gp_widget *self, int op, unsigned int pos)
 		return -1;
 	}
 
-	if (self->tbl->row_idx < cache->used)
+	if (tbl_priv->row_idx < cache->used)
 		return 1;
 
 	return 0;
@@ -186,9 +189,10 @@ enum file_attr {
 static int files_get_cell(gp_widget *self, gp_widget_table_cell *cell, unsigned int col)
 {
 	static char buf[100];
-	gp_dir_cache *cache = self->tbl->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(self);
+	gp_dir_cache *cache = tbl_priv->priv;
 
-	gp_dir_entry *ent = gp_dir_cache_get(cache, self->tbl->row_idx);
+	gp_dir_entry *ent = gp_dir_cache_get(cache, tbl_priv->row_idx);
 
 	if (!ent)
 		return 0;
@@ -213,6 +217,7 @@ static int files_get_cell(gp_widget *self, gp_widget_table_cell *cell, unsigned 
 
 static void files_sort(gp_widget *self, int desc, unsigned int col)
 {
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(self);
 	int sort_type = 0;
 
 	switch (col) {
@@ -232,13 +237,14 @@ static void files_sort(gp_widget *self, int desc, unsigned int col)
 	else
 		sort_type |= GP_DIR_SORT_ASC;
 
-	gp_dir_cache_sort(self->tbl->priv, sort_type);
+	gp_dir_cache_sort(tbl_priv->priv, sort_type);
 }
 
 static void exit_dialog(struct file_dialog *dialog, int retval)
 {
 	gp_dialog *wd = GP_CONTAINER_OF(dialog, gp_dialog, payload);
-	gp_dir_cache *cache = dialog->file_table->tbl->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(dialog->file_table);
+	gp_dir_cache *cache = tbl_priv->priv;
 	gp_widget *table = dialog->file_table;
 	gp_widget *path = dialog->dir_path;
 
@@ -249,8 +255,8 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 		goto exit;
 
 	/* Append selected entry to the directory -> file_open */
-	if (!dialog->filename && table->tbl->row_selected) {
-		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, table->tbl->selected_row);
+	if (!dialog->filename && gp_widget_table_sel_has(table)) {
+		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, gp_widget_table_sel_get(table));
 
 		gp_widget_tbox_append(path, "/");
 		gp_widget_tbox_append(path, entry->name);
@@ -294,17 +300,18 @@ exit:
 
 static int cannot_open(struct file_dialog *dialog)
 {
-	gp_dir_cache *cache = dialog->file_table->tbl->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(dialog->file_table);
+	gp_dir_cache *cache = tbl_priv->priv;
 	gp_widget *table = dialog->file_table;
 
 	if (!cache)
 		return 0;
 
-	if (!table->tbl->row_selected)
+	if (!gp_widget_table_sel_has(table))
 		return 1;
 
 	if (dialog->opts) {
-		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, table->tbl->selected_row);
+		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, gp_widget_table_sel_get(table));
 
 		if (!entry)
 			return 1;
@@ -371,10 +378,12 @@ static void set_path(struct file_dialog *dialog, const char *path)
 	if (access(path, X_OK))
 		return;
 
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(dialog->file_table);
+
 	gp_widget_tbox_printf(dialog->dir_path, "%s", path);
 
 	free_dir_cache(dialog);
-	dialog->file_table->tbl->priv = load_dir_cache(dialog);
+	tbl_priv->priv = load_dir_cache(dialog);
 	if (dialog->filter)
 		gp_widget_tbox_clear(dialog->filter);
 	gp_widget_table_off_set(dialog->file_table, 0);
@@ -382,14 +391,14 @@ static void set_path(struct file_dialog *dialog, const char *path)
 
 static void table_event(gp_widget *self)
 {
-	struct gp_widget_table *tbl = self->tbl;
 	struct file_dialog *dialog = self->priv;
-	gp_dir_cache *cache = tbl->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(self);
+	gp_dir_cache *cache = tbl_priv->priv;
 
 	if (!cache)
 		return;
 
-	gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, tbl->selected_row);
+	gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, gp_widget_table_sel_get(self));
 
 	if (!entry) {
 		GP_BUG("Empty entry!");
@@ -401,7 +410,7 @@ static void table_event(gp_widget *self)
 		return;
 	}
 
-	char *dpath = gp_aprintf("%s/%s", dialog->dir_path->tbox->buf, entry->name);
+	char *dpath = gp_aprintf("%s/%s", gp_widget_tbox_text(dialog->dir_path), entry->name);
 	char *dir = realpath(dpath, NULL);
 
 	free(dpath);
@@ -418,7 +427,8 @@ static inline int is_file_open(struct file_dialog *dialog)
 
 static void set_filename(struct file_dialog *dialog, gp_widget_event *ev)
 {
-	gp_dir_cache *cache = dialog->file_table->tbl->priv;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(dialog->file_table);
+	gp_dir_cache *cache = tbl_priv->priv;
 
 	if (!cache)
 		return;
@@ -539,13 +549,15 @@ static int file_save_input_event(gp_dialog *self, gp_event *ev)
 static int new_dir_on_event(gp_widget_event *ev)
 {
 	struct file_dialog *dialog = ev->self->priv;
-	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 	char *dir_name;
 	unsigned int pos;
 	int err;
 
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
+
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(dialog->file_table);
+	gp_dir_cache *cache = tbl_priv->priv;
 
 	dir_name = gp_dialog_input_run("Enter directory name");
 	if (!dir_name)
@@ -598,14 +610,16 @@ static int filename_on_event(gp_widget_event *ev)
 static int filter_on_event(gp_widget_event *ev)
 {
 	struct file_dialog *dialog = ev->self->priv;
-	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(dialog->file_table);
+	gp_dir_cache *cache = tbl_priv->priv;
+
 	switch (ev->sub_type) {
 	case GP_WIDGET_TBOX_POST_FILTER:
-		return !gp_dir_cache_entry_name_contains(cache, ev->self->tbox->buf);
+		return !gp_dir_cache_entry_name_contains(cache, gp_widget_tbox_text(ev->self));
 	break;
 	case GP_WIDGET_TBOX_EDIT:
 		gp_widget_redraw(dialog->file_table);

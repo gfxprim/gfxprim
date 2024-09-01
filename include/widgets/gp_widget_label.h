@@ -49,22 +49,10 @@
 #include <stdlib.h>
 #include <core/gp_compiler.h>
 
-struct gp_widget_label {
-	/* Text buffer */
-	char *text;
-	/* Text format */
-	char *text_fmt;
-	/* widget size hints */
-	const char *set;
-	uint8_t width;
-	/* attributes */
-	uint8_t padd;
-	uint16_t frame:1;
-	/* colors */
-	uint8_t text_color;
-	uint8_t bg_color;
-	/* text attributes */
-	gp_widget_tattr tattr;
+/** @brief A label flags. */
+enum gp_widget_label_flags {
+	/** @brief Draws a frame around the label. */
+	GP_WIDGET_LABEL_FRAME=0x01,
 };
 
 /**
@@ -137,26 +125,48 @@ void gp_widget_label_vprintf(gp_widget *self, const char *fmt, va_list ap);
  * @param self A label widget.
  * @param tattr New text attributes.
  */
-static inline void gp_widget_label_tattr_set(gp_widget *self, gp_widget_tattr tattr)
-{
-	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LABEL, );
+void gp_widget_label_tattr_set(gp_widget *self, gp_widget_tattr tattr);
 
-	self->label->tattr = tattr;
-
-	gp_widget_redraw(self);
-}
+/**
+ * @brief Gets text attributes.
+ *
+ * @param self A label widget.
+ * @return A label text attributes.
+ */
+gp_widget_tattr gp_widget_label_tattr_get(gp_widget *self);
 
 /**
  * @brief Changes widget minimal width.
  *
  * @param self Pointer to a label widget.
- * @param width New label width, the unit for the width is font characters.
+ * @param width New label width, the unit for the width is font average characters.
  */
-static inline void gp_widget_label_width_set(gp_widget *self, unsigned int width)
-{
-	self->label->width = width;
-	gp_widget_resize(self);
-}
+void gp_widget_label_width_set(gp_widget *self, unsigned int width);
+
+/**
+ * @brief Returns widget minimal width.
+ *
+ * @param self Pointer to a label widget.
+ * @return Label width, the unit for the width is font average characters.
+ * Return zero if minimal size is not set.
+ */
+unsigned int gp_widget_label_width_get(gp_widget *self);
+
+/**
+ * @brief Sets frame flags.
+ *
+ * @param self A label widget.
+ * @param flags A new label flags.
+ */
+void gp_widget_label_flags_set(gp_widget *self, enum gp_widget_label_flags flags);
+
+/**
+ * @brief Gets frame flags.
+ *
+ * @param self A label widget.
+ * @return A label flags.
+ */
+enum gp_widget_label_flags gp_widget_label_flags_get(gp_widget *self);
 
 /**
  * @brief Allocates a label widget.

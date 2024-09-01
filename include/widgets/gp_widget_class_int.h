@@ -27,7 +27,7 @@ enum gp_widget_int_flags {
 	GP_WIDGET_VERT = 1
 };
 
-struct gp_widget_int {
+typedef struct gp_widget_int {
 	int64_t min;
 	int64_t max;
 	int64_t val;
@@ -36,7 +36,26 @@ struct gp_widget_int {
 	int dir:2;
 
 	char payload[];
-};
+} gp_widget_class_int;
+
+/**
+ * @brief A macro to get a int class widget.
+ *
+ * @warning This is internal API do not use in applications!
+ *
+ * @warning The caller must make sure that the widget is bool class!
+ */
+#define GP_WIDGET_CLASS_INT(widget) ((gp_widget_class_int *)GP_WIDGET_PAYLOAD(widget))
+
+/**
+ * @brief A macro to get a int class widget payload.
+ *
+ * @warning This is internal API do not use in applications!
+ *
+ * @warning The caller must make sure that the widget is bool class!
+ */
+#define GP_WIDGET_CLASS_INT_PAYLOAD(widget) \
+	((void*)(((gp_widget_class_int *)GP_WIDGET_PAYLOAD(widget))->payload))
 
 /**
  * @brief Returns an integer class widget value.

@@ -19,7 +19,7 @@ int button_on_event(gp_widget_event *ev)
 	gp_widget *pass = gp_widget_by_uid(uids, "passwd", GP_WIDGET_TBOX);
 
 	if (pass)
-		printf("Password: %s\n", pass->tbox->buf);
+		printf("Password: %s\n", gp_widget_tbox_text(pass));
 
 	return 1;
 }
@@ -29,10 +29,10 @@ int slider_event(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	printf("Slider value=%"PRIi64"\n", ev->self->slider->val);
+	printf("Slider value=%"PRIi64"\n", gp_widget_int_val_get(ev->self));
 
 	if (pbar)
-		gp_widget_pbar_val_set(pbar, ev->self->slider->val);
+		gp_widget_pbar_val_set(pbar, gp_widget_pbar_val_get(ev->self));
 
 	return 0;
 }
@@ -43,7 +43,7 @@ int pbar_event(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	printf("Progress bar value %"PRIu64"\n", ev->self->pbar->val);
+	printf("Progress bar value %"PRIu64"\n", gp_widget_pbar_val_get(ev->self));
 
 	return 0;
 }

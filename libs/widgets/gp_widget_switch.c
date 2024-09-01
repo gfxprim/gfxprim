@@ -12,7 +12,7 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
-struct switch_priv {
+struct switch_payload {
 	const char *on_label;
 	const char *off_label;
 	gp_widget_stock_type on_stock;
@@ -21,12 +21,10 @@ struct switch_priv {
 	char data[];
 };
 
-#define SWITCH_PRIV(widget) ((struct switch_priv *)(GP_WIDGET_CLASS_BOOL(widget)->payload))
-
 /*
  * Calculate how much space will be take by a stock image, if any. Includes padding before the stock.
  */
-static gp_size stock_width(struct switch_priv *priv, const gp_widget_render_ctx *ctx)
+static gp_size stock_width(struct switch_payload *priv, const gp_widget_render_ctx *ctx)
 {
 	if (!priv->on_stock && !priv->off_stock)
 		return 0;
@@ -36,7 +34,7 @@ static gp_size stock_width(struct switch_priv *priv, const gp_widget_render_ctx 
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct switch_priv *priv = SWITCH_PRIV(self);
+	struct switch_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(self);
 	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
 	unsigned int text_a = gp_text_ascent(font);
 	unsigned int on_text_w = 0;
@@ -63,7 +61,7 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 /*
  * Returns current label.
  */
-static const char *current_label(gp_widget_class_bool *b, struct switch_priv *priv)
+static const char *current_label(gp_widget_class_bool *b, struct switch_payload *priv)
 {
 	return b->val ? priv->on_label : priv->off_label;
 }
@@ -73,7 +71,7 @@ static const char *current_label(gp_widget_class_bool *b, struct switch_priv *pr
  *
  * The label width is cached in the min_w() callback.
  */
-static gp_size label_width(struct switch_priv *priv)
+static gp_size label_width(struct switch_payload *priv)
 {
 	if (!priv->max_label_width)
 		return 0;
@@ -85,7 +83,7 @@ static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
 	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
-	struct switch_priv *priv = SWITCH_PRIV(self);
+	struct switch_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(self);
 	unsigned int text_a = gp_text_ascent(ctx->font);
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
@@ -168,7 +166,9 @@ static void set(gp_widget *self, int val)
 
 static void toggle(gp_widget *self)
 {
-	set(self, !self->b->val);
+	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
+
+	set(self, !b->val);
 }
 
 static void click(gp_widget *self, gp_event *ev)
@@ -314,7 +314,7 @@ gp_widget *gp_widget_switch_new(const char *on_label, gp_widget_stock_type on_st
 				bool set)
 {
 	gp_widget *ret;
-	size_t size = sizeof(gp_widget_class_bool) + sizeof(struct switch_priv);
+	size_t size = sizeof(gp_widget_class_bool) + sizeof(struct switch_payload);
 
 	size += off_label ? strlen(off_label) + 1 : 0;
 	size += on_label ? strlen(on_label) + 1 : 0;
@@ -323,7 +323,7 @@ gp_widget *gp_widget_switch_new(const char *on_label, gp_widget_stock_type on_st
 	if (!ret)
 		return NULL;
 
-	struct switch_priv *priv = SWITCH_PRIV(ret);
+	struct switch_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(ret);
 
 	priv->off_label = NULL;
 	priv->off_stock = off_stock;

@@ -24,12 +24,6 @@
 #include <utils/gp_markup_parser.h>
 #include <utils/gp_markup_justify.h>
 
-struct gp_widget_markup {
-	unsigned int min_size_em;
-	gp_markup_lines *lines;
-	gp_markup *markup;
-};
-
 /**
  * @brief Allocates and initializes a markup widget.
  *

@@ -77,16 +77,6 @@
 
 #include <widgets/gp_widget_size_units.h>
 
-struct gp_widget_pixmap {
-	gp_widget_size min_w;
-	gp_widget_size min_h;
-	gp_pixmap *pixmap;
-	int bbox_set:1;
-	int redraw_all:1;
-	/** Bounding box */
-	gp_bbox bbox;
-};
-
 /**
  * @brief Create pixmap widget.
  *
@@ -161,5 +151,33 @@ static inline gp_size gp_widget_pixmap_h(gp_widget *self)
  * @param self A pixmap widget.
  */
 void gp_widget_pixmap_redraw_all(gp_widget *self);
+
+/**
+ * @brief Returns a pointer to the current backing pixmap.
+ *
+ * @param self A pixmap widget.
+ * @return A pointer to the backing pixmap.
+ */
+gp_pixmap *gp_widget_pixmap_get(gp_widget *self);
+
+/**
+ * @brief Sets new backing pixmap.
+ *
+ * By setting a backing pixmap the widget switches to a buffered mode. I.e. the
+ * pixmap is repainted on when the content should change or when the pixmap is
+ * resized.
+ *
+ * The pixmap pixel type must match #gp_widget_render_ctx::pixel_type and the
+ * size must match the widget size.  Use gp_widget_pixmap_w() and
+ * gp_widget_pixmap_h() to determine the size before allocation.
+ *
+ * The pixmap has to be resized on #GP_WIDGET_EVENT_RESIZE and freed on
+ * #GP_WIDGET_EVENT_FREE.
+ *
+ * @param self A pixmap widget.
+ * @param pixmap A new backing pixmap.
+ * @return A pointer to the old backing pixmap.
+ */
+gp_pixmap *gp_widget_pixmap_set(gp_widget *self, gp_pixmap *pixmap);
 
 #endif /* GP_WIDGET_PIXMAP_H */

@@ -16,16 +16,6 @@
 #ifndef GP_WIDGET_OVERLAY_H
 #define GP_WIDGET_OVERLAY_H
 
-struct gp_widget_overlay_elem {
-	int hidden:1;
-	gp_widget *widget;
-};
-
-struct gp_widget_overlay {
-	int focused;
-	struct gp_widget_overlay_elem *stack;
-};
-
 /**
  * @brief Allocates new overlay widget.
  *

@@ -25,18 +25,20 @@ enum tbl_ids {
 
 static int tbl_seek_row(gp_widget *self, int op, unsigned int pos)
 {
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(self);
+
 	switch (op) {
 	case GP_TABLE_ROW_RESET:
-		self->tbl->row_idx = 0;
+		tbl_priv->row_idx = 0;
 	break;
 	case GP_TABLE_ROW_ADVANCE:
-		self->tbl->row_idx += pos;
+		tbl_priv->row_idx += pos;
 	break;
 	case GP_TABLE_ROW_MAX:
 		return TABLE_ROWS;
 	}
 
-	if (self->tbl->row_idx >= TABLE_ROWS)
+	if (tbl_priv->row_idx >= TABLE_ROWS)
 		return 0;
 
 	return 1;
@@ -44,17 +46,17 @@ static int tbl_seek_row(gp_widget *self, int op, unsigned int pos)
 
 static int tbl_get_cell(gp_widget *self, gp_widget_table_cell *cell, unsigned int col_id)
 {
-	unsigned int row = self->tbl->row_idx;
+	gp_widget_table_priv *tbl_priv = gp_widget_table_priv_get(self);
 
 	switch (col_id) {
 	case OBJECT:
-		cell->text = table_data[row][0];
+		cell->text = table_data[tbl_priv->row_idx][0];
 	break;
 	case IS_FRUIT:
-		cell->text = table_data[row][1];
+		cell->text = table_data[tbl_priv->row_idx][1];
 	break;
 	case NUMBER:
-		cell->text = table_data[row][2];
+		cell->text = table_data[tbl_priv->row_idx][2];
 	break;
 	}
 
@@ -77,7 +79,7 @@ int table_on_event(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	printf("Selected row %u\n", ev->self->tbl->selected_row);
+	printf("Selected row %u\n", gp_widget_table_sel_get(ev->self));
 
 	return 1;
 }

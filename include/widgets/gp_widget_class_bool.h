@@ -24,13 +24,23 @@ typedef struct gp_widget_bool {
 } gp_widget_class_bool;
 
 /**
- * @brief A macro to get widget payload for a bool class widget.
+ * @brief A macro to get a bool class widget.
  *
  * @warning This is internal API do not use in applications!
  *
  * @warning The caller must make sure that the widget is bool class!
  */
-#define GP_WIDGET_CLASS_BOOL(widget) (((gp_widget_class_bool *)GP_WIDGET_PAYLOAD(widget)))
+#define GP_WIDGET_CLASS_BOOL(widget) ((gp_widget_class_bool *)GP_WIDGET_PAYLOAD(widget))
+
+/**
+ * @brief A macro to get a bool class widget payload.
+ *
+ * @warning This is internal API do not use in applications!
+ *
+ * @warning The caller must make sure that the widget is bool class!
+ */
+#define GP_WIDGET_CLASS_BOOL_PAYLOAD(widget) \
+	((void*)(((gp_widget_class_bool *)GP_WIDGET_PAYLOAD(widget))->payload))
 
 /**
  * @brief Returns a class bool widget value.

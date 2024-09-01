@@ -67,58 +67,6 @@ enum gp_widget_tbox_type {
 	GP_WIDGET_TBOX_MAX,
 };
 
-struct gp_widget_tbox {
-	/* Text buffer */
-	char *buf;
-	size_t size;
-
-	/* Help text shown when tbox is empty */
-	char *help;
-
-	/*
-	 * If not NULL the tbox can contain only characters from this
-	 * string, this is used as a hint when minimal tbox size is
-	 * accounted for.
-	 */
-	const char *filter;
-
-	/*
-	 * Delimiter list for double click selection.
-	 *
-	 * If NULL defaults to whitespaces.
-	 *
-	 * This is set automatically by a certain tbox types.
-	 */
-	const char *delim;
-
-	/* enum gp_widget_tbox_type */
-	uint16_t type;
-
-	uint16_t alert:1;
-	uint16_t clear_on_input:1;
-
-	size_t max_size;
-
-	/* Cursor position */
-	gp_utf8_pos cur_pos;
-	gp_utf8_pos cur_pos_saved;
-	/* Offset on left size, part of a string that is not shown */
-	gp_utf8_pos off_left;
-
-	/* Selection */
-	gp_utf8_pos sel_left;
-	gp_utf8_pos sel_right;
-
-	gp_widget_tattr tattr;
-
-
-	//TODO: Move to event state
-	uint64_t last_click;
-	uint32_t click_cursor_x;
-
-	char payload[];
-};
-
 /**
  * @brief A gp_widget_event::sub_type for tbox widget events.
  */
@@ -230,7 +178,6 @@ void gp_widget_tbox_clear(gp_widget *self);
  * @return Texbox widget string.
  */
 const char *gp_widget_tbox_text(gp_widget *self);
-
 
 /**
  * @brief Returns true if tbox is empty.
@@ -424,5 +371,16 @@ void gp_widget_tbox_help_set(gp_widget *self, const char *help);
  * @param self A tbox widget.
  */
 void gp_widget_tbox_clear_on_input(gp_widget *self);
+
+/**
+ * @brief Sets a textbox filter string.
+ *
+ * If filter string is set only characters from the filter can be entered into
+ * the textbox.
+ *
+ * @param self A textbox widget.
+ * @param filter A filter string.
+ */
+void gp_widget_tbox_filter_set(gp_widget *self, const char *filter);
 
 #endif /* GP_WIDGET_TBOX_H */

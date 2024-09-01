@@ -79,9 +79,9 @@ static int grid_ins_rem_rows(void)
 	/* Insert row and check if everything is fine */
 	gp_widget_grid_rows_ins(grid, 1, 1);
 
-	if (grid->grid->rows != 3) {
+	if (gp_widget_grid_rows_get(grid) != 3) {
 		tst_msg("Wrong number of rows after insert %u expected 3",
-		        grid->grid->rows);
+		        gp_widget_grid_rows_get(grid));
 		return TST_FAILED;
 	}
 
@@ -107,9 +107,9 @@ static int grid_ins_rem_rows(void)
 	/* Delete the inserted row & free the widget put into the row */
 	gp_widget_grid_rows_del(grid, 1, 1);
 
-	if (grid->grid->rows != 2) {
+	if (gp_widget_grid_rows_get(grid) != 2) {
 		tst_msg("Wrong number of rows after insert %u expected 2",
-		        grid->grid->rows);
+		        gp_widget_grid_rows_get(grid));
 		return TST_FAILED;
 	}
 
@@ -126,7 +126,7 @@ static int grid_ins_rem_rows(void)
 
 			snprintf(buf, sizeof(buf), "Label %ux%u", c, r);
 
-			if (strcmp(l->label->text, buf)) {
+			if (strcmp(gp_widget_label_get(l), buf)) {
 				tst_msg("Wrong widget at %u,%u", c, r);
 				return TST_FAILED;
 			}
@@ -167,9 +167,9 @@ static int grid_ins_rem_cols(void)
 	/* Insert column and check if everything is fine */
 	gp_widget_grid_cols_ins(grid, 1, 1);
 
-	if (grid->grid->cols != 3) {
+	if (gp_widget_grid_cols_get(grid) != 3) {
 		tst_msg("Wrong number of rows after insert %u expected 3",
-		        grid->grid->cols);
+		        gp_widget_grid_cols_get(grid));
 		return TST_FAILED;
 	}
 
@@ -195,9 +195,9 @@ static int grid_ins_rem_cols(void)
 	/* Delete the inserted row & free the widget put into the row */
 	gp_widget_grid_cols_del(grid, 1, 1);
 
-	if (grid->grid->cols != 2) {
+	if (gp_widget_grid_cols_get(grid) != 2) {
 		tst_msg("Wrong number of rows after insert %u expected 2",
-		        grid->grid->cols);
+		        gp_widget_grid_cols_get(grid));
 		return TST_FAILED;
 	}
 
@@ -214,7 +214,7 @@ static int grid_ins_rem_cols(void)
 
 			snprintf(buf, sizeof(buf), "Label %ux%u", c, r);
 
-			if (strcmp(l->label->text, buf)) {
+			if (strcmp(gp_widget_label_get(l), buf)) {
 				tst_msg("Wrong widget at %u,%u", c, r);
 				return TST_FAILED;
 			}
@@ -295,17 +295,17 @@ static int grid_put_get_rem_del(void)
 
 static int check_hborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 {
-	struct gp_widget_grid_border *b = grid->grid->row_b;
+	const gp_widget_grid_gap *g = gp_widget_grid_rows_gaps_get(grid);
 
-	if (b[0].fill != exp_fill || b[2].fill != exp_fill) {
+	if (g[0].fill != exp_fill || g[2].fill != exp_fill) {
 		tst_msg("Wrong column border fill %u %u expected %u %u",
-		        b[0].fill, b[2].fill, exp_fill, exp_fill);
+		        g[0].fill, g[2].fill, exp_fill, exp_fill);
 		return TST_FAILED;
 	}
 
-	if (b[0].padd != exp_padd || b[2].padd != exp_padd) {
+	if (g[0].padd != exp_padd || g[2].padd != exp_padd) {
 		tst_msg("Wrong column border padd %u %u expected %u %u",
-		        b[0].padd, b[2].padd, exp_padd, exp_padd);
+		        g[0].padd, g[2].padd, exp_padd, exp_padd);
 		return TST_FAILED;
 	}
 
@@ -314,17 +314,17 @@ static int check_hborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 
 static int check_vborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
 {
-	struct gp_widget_grid_border *b = grid->grid->col_b;
+	const gp_widget_grid_gap *g = gp_widget_grid_cols_gaps_get(grid);
 
-	if (b[0].fill != exp_fill || b[2].fill != exp_fill) {
+	if (g[0].fill != exp_fill || g[2].fill != exp_fill) {
 		tst_msg("Wrong row border fill %u %u expected %u %u",
-		        b[0].fill, b[2].fill, exp_fill, exp_fill);
+		        g[0].fill, g[2].fill, exp_fill, exp_fill);
 		return TST_FAILED;
 	}
 
-	if (b[0].padd != exp_padd || b[2].padd != exp_padd) {
+	if (g[0].padd != exp_padd || g[2].padd != exp_padd) {
 		tst_msg("Wrong row border padd %u %u expected %u %u",
-		        b[0].padd, b[2].padd, exp_padd, exp_padd);
+		        g[0].padd, g[2].padd, exp_padd, exp_padd);
 		return TST_FAILED;
 	}
 

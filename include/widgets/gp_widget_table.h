@@ -187,6 +187,25 @@ typedef struct gp_widget_table_col_size {
 	unsigned int min_size;
 } gp_widget_table_col_size;
 
+/**
+ * @brief A structure to store data for the users of this widget.
+ */
+typedef struct gp_widget_table_priv {
+	/**
+	 * @brief A pointer to a data structure with the table data.
+	 */
+	void *priv;
+	/**
+	 * An index to store current row index for the iterator based API.
+	 */
+	union {
+		/** @brief A current row pointer. */
+		void *row_priv;
+		/** @brief A current row index. */
+		unsigned long row_idx;
+	};
+} gp_widget_table_priv;
+
 typedef struct gp_widget_table {
 	unsigned int cols;
 	unsigned int min_rows;
@@ -212,13 +231,7 @@ typedef struct gp_widget_table {
 
 	gp_widget_table_col_size *cols_w;
 
-	void *priv;
-
-	/* iterator based API */
-	union {
-		void *row_priv;
-		unsigned long row_idx;
-	};
+	gp_widget_table_priv priv;
 
 	void *free;
 
@@ -285,5 +298,32 @@ void gp_widget_table_off_set(gp_widget *self, unsigned int off);
  * @param row A row to be selected.
  */
 void gp_widget_table_sel_set(gp_widget *self, unsigned int row);
+
+/**
+ * @brief Gets a selected row.
+ *
+ * Return valid result only if a row is selected, i.e.
+ * gp_widget_table_sel_has() returns True.
+ *
+ * @param self A table widget.
+ * @return A selected row index.
+ */
+unsigned int gp_widget_table_sel_get(gp_widget *self);
+
+/**
+ * @brief Returns if table has a fow selected.
+ *
+ * @param self A table widget.
+ * @return True if table has a selected row.
+ */
+bool gp_widget_table_sel_has(gp_widget *self);
+
+/**
+ * @brief Returns a pointer to user data.
+ *
+ * @param self A table widget.
+ * @return A pointer to user data storage for the iterator based API.
+ */
+gp_widget_table_priv *gp_widget_table_priv_get(gp_widget *self);
 
 #endif /* GP_WIDGET_TABLE_H */

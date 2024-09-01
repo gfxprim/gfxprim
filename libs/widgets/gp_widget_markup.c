@@ -17,6 +17,13 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
+struct gp_widget_markup {
+	unsigned int min_size_em;
+	gp_markup_lines *lines;
+	gp_markup *markup;
+};
+
+
 static const gp_text_style *get_font(const gp_widget_render_ctx *ctx, int attrs)
 {
 	if (attrs & GP_MARKUP_LARGE) {
@@ -41,7 +48,8 @@ static const gp_text_style *get_font(const gp_widget_render_ctx *ctx, int attrs)
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int res = GP_MAX(self->markup->min_size_em, 20u);
+	struct gp_widget_markup *markup = GP_WIDGET_PAYLOAD(self);
+	unsigned int res = GP_MAX(markup->min_size_em, 20u);
 
 	return gp_text_avg_width(ctx->font, res);
 }
@@ -105,15 +113,16 @@ static unsigned int line_height(const gp_markup_line *line, const gp_widget_rend
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int i, height = 0;
+	struct gp_widget_markup *markup = GP_WIDGET_PAYLOAD(self);
 
-	free(self->markup->lines);
+	free(markup->lines);
 
-	self->markup->lines = gp_markup_justify(self->markup->markup, self->w, markup_width_cb, ctx);
-	if (!self->markup->lines)
+	markup->lines = gp_markup_justify(markup->markup, self->w, markup_width_cb, ctx);
+	if (!markup->lines)
 		return height;
 
-	for (i = 0; i < self->markup->lines->lines_cnt; i++)
-		height += line_height(&(self->markup->lines->lines[i]), ctx);
+	for (i = 0; i < markup->lines->lines_cnt; i++)
+		height += line_height(&(markup->lines->lines[i]), ctx);
 
 	return height;
 }
@@ -195,6 +204,7 @@ static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
 	(void) flags;
+	struct gp_widget_markup *markup = GP_WIDGET_PAYLOAD(self);
 
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
@@ -207,7 +217,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	unsigned int i;
 	gp_coord cur_y = y;
-	const gp_markup_lines *lines = self->markup->lines;
+	const gp_markup_lines *lines = markup->lines;
 
 	if (!lines)
 		return;
@@ -302,7 +312,9 @@ gp_widget *gp_widget_markup_new(const char *markup_str, enum gp_markup_fmt fmt, 
 		return NULL;
 	}
 
-	ret->markup->markup = markup;
+	struct gp_widget_markup *wmarkup = GP_WIDGET_PAYLOAD(ret);
+
+	wmarkup->markup = markup;
 
 	return ret;
 }
@@ -316,9 +328,11 @@ int gp_widget_markup_set(gp_widget *self, enum gp_markup_fmt fmt,
 	if (!markup)
 		return 1;
 
-	gp_markup_free(self->markup->markup);
+	struct gp_widget_markup *wmarkup = GP_WIDGET_PAYLOAD(self);
 
-	self->markup->markup = markup;
+	gp_markup_free(wmarkup->markup);
+
+	wmarkup->markup = markup;
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);

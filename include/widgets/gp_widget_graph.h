@@ -70,29 +70,6 @@ struct gp_widget_graph_point {
 	double y;
 };
 
-struct gp_widget_graph {
-	gp_widget_size min_w;
-	gp_widget_size min_h;
-
-	const char *x_label;
-	const char *y_label;
-
-	long min_y_fixed:1;
-	long max_y_fixed:1;
-
-	/* Graph scaling window */
-	double min_x;
-	double max_x;
-	double min_y;
-	double max_y;
-
-	/* Graph data */
-	enum gp_widget_graph_style graph_style;
-	enum gp_widgets_color color;
-	gp_cbuffer data_idx;
-	struct gp_widget_graph_point *data;
-};
-
 /**
  * @brief Allocates and initializes a new graph widget.
  *

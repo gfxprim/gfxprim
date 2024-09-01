@@ -149,45 +149,6 @@ struct gp_widget {
 	 */
 	uint32_t event_mask;
 
-	union {
-		struct gp_widget_grid *grid;
-		struct gp_widget_tabs *tabs;
-
-		struct gp_widget_bool *b;
-
-		struct gp_widget_label *label;
-
-		struct gp_widget_int *i;
-		struct gp_widget_pbar *pbar;
-		struct gp_widget_int *spin;
-		struct gp_widget_int *slider;
-
-		struct gp_widget_tbox *tbox;
-
-		struct gp_widget_choice *choice;
-
-		struct gp_widget_table *tbl;
-
-		struct gp_widget_pixmap *pixmap;
-
-		struct gp_widget_stock *stock;
-
-		struct gp_widget_scroll_area *scroll;
-
-		struct gp_widget_frame *frame;
-
-		struct gp_widget_markup *markup;
-
-		struct gp_widget_layout_switch *layout_switch;
-
-		struct gp_widget_overlay *overlay;
-
-		struct gp_widget_log *log;
-
-		struct gp_widget_graph *graph;
-
-		void *payload;
-	};
 	/**
 	 * @brief Private widget data area.
 	 *

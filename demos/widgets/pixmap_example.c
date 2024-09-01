@@ -24,7 +24,7 @@ static void draw(gp_widget *pixmap, gp_event *ev)
 	gp_coord x = ev->st->cursor_x;
 	gp_coord y = ev->st->cursor_y;
 
-	gp_pixmap *p = pixmap->pixmap->pixmap;
+	gp_pixmap *p = gp_widget_pixmap_get(pixmap);
 
 	gp_pixel col = gp_rgb_to_pixmap_pixel((fg_rgb >> 16) & 0xff, (fg_rgb >> 8) & 0xff, fg_rgb & 0xff, p);
 
@@ -45,11 +45,12 @@ static void allocate_backing_pixmap(gp_widget_event *ev)
 {
 	gp_widget *w = ev->self;
 
-	gp_pixmap_free(w->pixmap->pixmap);
+	gp_pixmap *new_pix = gp_pixmap_alloc(w->w, w->h, ev->ctx->pixel_type);
 
-	w->pixmap->pixmap = gp_pixmap_alloc(w->w, w->h, ev->ctx->pixel_type);
+	gp_pixmap_free(gp_widget_pixmap_set(w, new_pix));
 
-	fill_pixmap(w->pixmap->pixmap);
+
+	fill_pixmap(new_pix);
 }
 
 int pixmap_on_event(gp_widget_event *ev)
@@ -85,7 +86,7 @@ int set_fg_color(gp_widget_event *ev)
 
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_NEW:
-		ev->self->tbox->filter = GP_TBOX_FILTER_HEX;
+		gp_widget_tbox_filter_set(ev->self, GP_TBOX_FILTER_HEX);
 		set_color(&fg_rgb, gp_widget_tbox_text(ev->self), "fg_color");
 	break;
 	case GP_WIDGET_EVENT_WIDGET:
@@ -108,7 +109,7 @@ int set_bg_color(gp_widget_event *ev)
 
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_NEW:
-		ev->self->tbox->filter = GP_TBOX_FILTER_HEX;
+		gp_widget_tbox_filter_set(ev->self, GP_TBOX_FILTER_HEX);
 		set_color(&bg_rgb, gp_widget_tbox_text(ev->self), "bg_color");
 	break;
 	case GP_WIDGET_EVENT_WIDGET:
@@ -120,7 +121,7 @@ int set_bg_color(gp_widget_event *ev)
 			pixmap = gp_widget_by_uid(uids, "pixmap", GP_WIDGET_PIXMAP);
 
 			if (pixmap) {
-				fill_pixmap(pixmap->pixmap->pixmap);
+				fill_pixmap(gp_widget_pixmap_get(pixmap));
 				gp_widget_redraw(pixmap);
 			}
 		break;
@@ -145,7 +146,7 @@ int button_on_event(gp_widget_event *ev)
 	(void)ev;
 
 	if (pixmap) {
-		fill_pixmap(pixmap->pixmap->pixmap);
+		fill_pixmap(gp_widget_pixmap_get(pixmap));
 		gp_widget_redraw(pixmap);
 	}
 

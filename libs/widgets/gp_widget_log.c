@@ -14,18 +14,29 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
+struct gp_widget_log {
+	gp_widget_tattr tattr;
+	unsigned int min_width;
+	unsigned int min_lines;
+
+	gp_cbuffer log;
+	char **logs;
+};
+
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	const gp_text_style *font = gp_widget_tattr_font(self->log->tattr, ctx);
+	struct gp_widget_log *log = GP_WIDGET_PAYLOAD(self);
+	const gp_text_style *font = gp_widget_tattr_font(log->tattr, ctx);
 
-	return gp_text_avg_width(font, self->log->min_width) + 2 * ctx->padd;
+	return gp_text_avg_width(font, log->min_width) + 2 * ctx->padd;
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	const gp_text_style *font = gp_widget_tattr_font(self->log->tattr, ctx);
+	struct gp_widget_log *log = GP_WIDGET_PAYLOAD(self);
+	const gp_text_style *font = gp_widget_tattr_font(log->tattr, ctx);
 
-	return self->log->min_lines * (ctx->padd + gp_text_ascent(font)) + ctx->padd;
+	return log->min_lines * (ctx->padd + gp_text_ascent(font)) + ctx->padd;
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
@@ -33,14 +44,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 {
 	(void) flags;
 
-	struct gp_widget_log *log = self->log;
+	struct gp_widget_log *log = GP_WIDGET_PAYLOAD(self);
 
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 
-	const gp_text_style *font = gp_widget_tattr_font(self->log->tattr, ctx);
+	const gp_text_style *font = gp_widget_tattr_font(log->tattr, ctx);
 
 	unsigned int line_h = gp_text_ascent(font) + ctx->padd;
 	unsigned int line_w = w - 2 * ctx->padd;
@@ -179,15 +190,16 @@ static gp_widget *json_to_log(gp_json_reader *json, gp_json_val *val, gp_widget_
 
 static void free_(gp_widget *self)
 {
+	struct gp_widget_log *log = GP_WIDGET_PAYLOAD(self);
 	gp_cbuffer_iter iter;
 
-	if (!self->log->logs)
+	if (!log->logs)
 		return;
 
-	GP_CBUFFER_FOREACH(&self->log->log, &iter)
-		free(self->log->logs[iter.idx]);
+	GP_CBUFFER_FOREACH(&log->log, &iter)
+		free(log->logs[iter.idx]);
 
-	free(self->log->logs);
+	free(log->logs);
 }
 
 struct gp_widget_ops gp_widget_log_ops = {
@@ -202,6 +214,7 @@ struct gp_widget_ops gp_widget_log_ops = {
 void gp_widget_log_append(gp_widget *self, const char *text)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LOG, );
+	struct gp_widget_log *log = GP_WIDGET_PAYLOAD(self);
 	char *str;
 
 	GP_DEBUG(3, "Appending to log widget (%p) '%s'", self, text);
@@ -212,10 +225,10 @@ void gp_widget_log_append(gp_widget *self, const char *text)
 		return;
 	}
 
-	size_t idx = gp_cbuffer_append(&self->log->log);
+	size_t idx = gp_cbuffer_append(&log->log);
 
-	free(self->log->logs[idx]);
-	self->log->logs[idx] = str;
+	free(log->logs[idx]);
+	log->logs[idx] = str;
 
 	gp_widget_redraw(self);
 }
@@ -240,18 +253,20 @@ gp_widget *gp_widget_log_new(gp_widget_tattr tattr,
 	if (!ret)
 		return NULL;
 
-	ret->log->tattr = tattr;
-	ret->log->min_width = min_width;
-	ret->log->min_lines = min_lines;
-	ret->log->logs = malloc(sizeof(char **) * max_logs);
+	struct gp_widget_log *log = GP_WIDGET_PAYLOAD(ret);
 
-	if (!ret->log->logs) {
+	log->tattr = tattr;
+	log->min_width = min_width;
+	log->min_lines = min_lines;
+	log->logs = malloc(sizeof(char **) * max_logs);
+
+	if (!log->logs) {
 		gp_widget_free(ret);
 		return NULL;
 	}
 
-	memset(ret->log->logs, 0, sizeof(char **) * max_logs);
-	gp_cbuffer_init(&ret->log->log, max_logs);
+	memset(log->logs, 0, sizeof(char **) * max_logs);
+	gp_cbuffer_init(&log->log, max_logs);
 
 	return ret;
 }

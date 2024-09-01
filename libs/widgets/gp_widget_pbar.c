@@ -12,6 +12,13 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
+struct gp_widget_pbar {
+	uint64_t max;
+	uint64_t val;
+	int32_t step;
+	enum gp_widget_pbar_unit unit;
+};
+
 static unsigned int pbar_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	(void)self;
@@ -44,6 +51,8 @@ static unsigned int val_to_hours(uint64_t sec)
 static void pbar_render(gp_widget *self, const gp_offset *offset,
                         const gp_widget_render_ctx *ctx, int flags)
 {
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
+
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
@@ -56,22 +65,22 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	unsigned int wd = 1.00 * self->pbar->val * w / self->pbar->max;
+	unsigned int wd = 1.00 * pbar->val * w / pbar->max;
 
 	char buf[64] = {};
-	uint64_t val = self->pbar->val;
+	uint64_t val = pbar->val;
 
 	unsigned int hours, mins, secs;
 
-	if (self->pbar->unit & GP_WIDGET_PBAR_INVERSE)
-		val = self->pbar->max - val;
+	if (pbar->unit & GP_WIDGET_PBAR_INVERSE)
+		val = pbar->max - val;
 
-	switch (self->pbar->unit & GP_WIDGET_PBAR_UNIT_MASK) {
+	switch (pbar->unit & GP_WIDGET_PBAR_UNIT_MASK) {
 	case GP_WIDGET_PBAR_NONE:
 		break;
 	case GP_WIDGET_PBAR_PERCENTS:
 		snprintf(buf, sizeof(buf), "%.2f%%",
-		         100.00 * val / self->pbar->max);
+		         100.00 * val / pbar->max);
 	break;
 	case GP_WIDGET_PBAR_SECONDS:
 		hours = val_to_hours(val);
@@ -209,7 +218,7 @@ static gp_widget *json_to_pbar(gp_json_reader *json, gp_json_val *val, gp_widget
 
 static int pbar_val_add(gp_widget *self, float val)
 {
-	struct gp_widget_pbar *pbar = self->pbar;
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
 
 	if (val == 0)
 		return 0;
@@ -242,7 +251,7 @@ static int pbar_val_add(gp_widget *self, float val)
 
 static int pbar_val_set(gp_widget *self, float val)
 {
-	struct gp_widget_pbar *pbar = self->pbar;
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
 
 	if (pbar->val == val)
 		return 0;
@@ -257,7 +266,7 @@ static int pbar_val_set(gp_widget *self, float val)
 
 static int pbar_coord_to_val(gp_widget *self, const gp_widget_render_ctx *ctx, int coord)
 {
-	struct gp_widget_pbar *pbar = self->pbar;
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
 
 	float new_val = pbar->max * (coord - ctx->fr_thick) / (self->w - 2*ctx->fr_thick);
 
@@ -273,6 +282,8 @@ static int pbar_coord_to_val(gp_widget *self, const gp_widget_render_ctx *ctx, i
 static int pbar_event(gp_widget *self, const gp_widget_render_ctx *ctx,
                       gp_event *ev)
 {
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
+
 	switch (ev->type) {
 	case GP_EV_ABS:
 		if (ev->code == GP_EV_ABS_POS)
@@ -292,13 +303,13 @@ static int pbar_event(gp_widget *self, const gp_widget_render_ctx *ctx,
 		case GP_BTN_LEFT:
 			return pbar_coord_to_val(self, ctx, ev->st->cursor_x);
 		case GP_KEY_RIGHT:
-			return pbar_val_add(self, self->pbar->step);
+			return pbar_val_add(self, pbar->step);
 		case GP_KEY_LEFT:
-			return pbar_val_add(self, -self->pbar->step);
+			return pbar_val_add(self, -pbar->step);
 		case GP_KEY_HOME:
 			return pbar_val_set(self, 0);
 		case GP_KEY_END:
-			return pbar_val_set(self, self->pbar->max);
+			return pbar_val_set(self, pbar->max);
 		}
 	break;
 	}
@@ -327,10 +338,12 @@ gp_widget *gp_widget_pbar_new(uint64_t val, uint64_t max, enum gp_widget_pbar_un
 	if (!ret)
 		return NULL;
 
-	ret->pbar->val = val;
-	ret->pbar->unit = unit;
-	ret->pbar->max = max;
-	ret->pbar->step = 1;
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(ret);
+
+	pbar->val = val;
+	pbar->unit = unit;
+	pbar->max = max;
+	pbar->step = 1;
 
 	ret->no_events = 1;
 
@@ -340,17 +353,18 @@ gp_widget *gp_widget_pbar_new(uint64_t val, uint64_t max, enum gp_widget_pbar_un
 void gp_widget_pbar_val_set(gp_widget *self, uint64_t val)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PROGRESSBAR, );
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
 
 	GP_DEBUG(3, "Setting widget (%p) progressbar val %"PRIu64" -> %"PRIu64,
-		 self, self->pbar->val, val);
+		 self, pbar->val, val);
 
-	if (check_val(val, self->pbar->max))
+	if (check_val(val, pbar->max))
 		return;
 
-	if (self->pbar->val == val)
+	if (pbar->val == val)
 		return;
 
-	self->pbar->val = val;
+	pbar->val = val;
 
 	gp_widget_redraw(self);
 }
@@ -358,12 +372,13 @@ void gp_widget_pbar_val_set(gp_widget *self, uint64_t val)
 void gp_widget_pbar_max_set(gp_widget *self, uint64_t max)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PROGRESSBAR, );
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
 
 	GP_DEBUG(3, "Setting widget (%p) progressbar max %"PRIu64" -> %"PRIu64,
-		 self, self->pbar->max, max);
+		 self, pbar->max, max);
 
-	self->pbar->val = GP_MIN(self->pbar->val, max);
-	self->pbar->max = max;
+	pbar->val = GP_MIN(pbar->val, max);
+	pbar->max = max;
 
 	gp_widget_redraw(self);
 }
@@ -371,13 +386,15 @@ void gp_widget_pbar_max_set(gp_widget *self, uint64_t max)
 uint64_t gp_widget_pbar_val_get(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PROGRESSBAR, 0);
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
 
-	return self->pbar->val;
+	return pbar->val;
 }
 
 uint64_t gp_widget_pbar_max_get(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PROGRESSBAR, 0);
+	struct gp_widget_pbar *pbar = GP_WIDGET_PAYLOAD(self);
 
-	return self->pbar->max;
+	return pbar->max;
 }

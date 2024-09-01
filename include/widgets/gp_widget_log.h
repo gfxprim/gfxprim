@@ -26,15 +26,6 @@
 #include <stdlib.h>
 #include <utils/gp_cbuffer.h>
 
-struct gp_widget_log {
-	gp_widget_tattr tattr;
-	unsigned int min_width;
-	unsigned int min_lines;
-
-	gp_cbuffer log;
-	char **logs;
-};
-
 /**
  * @brief Appends text to the log.
  *

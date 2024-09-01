@@ -40,24 +40,26 @@ static int grid_json_load(struct tcase *t)
 		return TST_FAILED;
 	}
 
-	if (grid->grid->cols != t->cols) {
+	if (gp_widget_grid_cols_get(grid) != t->cols) {
 		tst_msg("Wrong number of columns %u, expected %u\n",
-			grid->grid->cols, t->cols);
+			gp_widget_grid_cols_get(grid), t->cols);
 		return TST_FAILED;
 	}
 
-	if (grid->grid->rows != t->rows) {
+	if (gp_widget_grid_rows_get(grid) != t->rows) {
 		tst_msg("Wrong number of columns %u, expected %u\n",
-			grid->grid->rows, t->rows);
+			gp_widget_grid_rows_get(grid), t->rows);
 		return TST_FAILED;
 	}
 
-	if (t->frame != !!grid->grid->frame) {
+	enum gp_widget_grid_flags flags = gp_widget_grid_flags_get(grid);
+
+	if (t->frame != !!(flags & GP_WIDGET_GRID_FRAME)) {
 		tst_msg("Wrong frame flag expected %i", t->frame);
 		return TST_FAILED;
 	}
 
-	if (t->uniform != !!grid->grid->uniform) {
+	if (t->uniform != !!(flags & GP_WIDGET_GRID_UNIFORM)) {
 		tst_msg("Wrong uniform flag expected %i", t->uniform);
 		return TST_FAILED;
 	}
@@ -88,28 +90,31 @@ static int grid_json_load(struct tcase *t)
 		}
 	}
 
-	tst_msg("padd top %i bottom %i left %i right %i",
-		(int)grid->grid->row_b[0].padd,
-		(int)grid->grid->row_b[grid->grid->rows].padd,
-		(int)grid->grid->col_b[0].padd,
-		(int)grid->grid->col_b[grid->grid->cols].padd);
+	const struct gp_widget_grid_gap *row_g = gp_widget_grid_rows_gaps_get(grid);
+	const struct gp_widget_grid_gap *col_g = gp_widget_grid_cols_gaps_get(grid);
 
-	if (grid->grid->row_b[0].padd != t->border_padd_top) {
+	tst_msg("padd top %i bottom %i left %i right %i",
+		(int)row_g[0].padd,
+		(int)row_g[gp_widget_grid_rows_get(grid)].padd,
+		(int)col_g[0].padd,
+		(int)col_g[gp_widget_grid_cols_get(grid)].padd);
+
+	if (row_g[0].padd != t->border_padd_top) {
 		tst_msg("Wrong border top padd expected %i", t->border_padd_top);
 		return TST_FAILED;
 	}
 
-	if (grid->grid->row_b[grid->grid->rows].padd != t->border_padd_bottom) {
+	if (row_g[gp_widget_grid_rows_get(grid)].padd != t->border_padd_bottom) {
 		tst_msg("Wrong border bottom padd expected %i", t->border_padd_bottom);
 		return TST_FAILED;
 	}
 
-	if (grid->grid->col_b[0].padd != t->border_padd_left) {
+	if (col_g[0].padd != t->border_padd_left) {
 		tst_msg("Wrong border left padd expected %i", t->border_padd_left);
 		return TST_FAILED;
 	}
 
-	if (grid->grid->col_b[grid->grid->cols].padd != t->border_padd_right) {
+	if (col_g[gp_widget_grid_cols_get(grid)].padd != t->border_padd_right) {
 		tst_msg("Wrong border right padd expected %i", t->border_padd_right);
 		return TST_FAILED;
 	}

@@ -48,9 +48,11 @@ static gp_widget *widget_int_new(enum gp_widget_type type,
 	if (!ret)
 		return NULL;
 
-	ret->i->min = min;
-	ret->i->max = max;
-	ret->i->val = val;
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(ret);
+
+	i->min = min;
+	i->max = max;
+	i->val = val;
 
 	return ret;
 }
@@ -58,8 +60,9 @@ static gp_widget *widget_int_new(enum gp_widget_type type,
 void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
 
-	if (self->i->min == min && self->i->max == max && self->i->val == val)
+	if (i->min == min && i->max == max && i->val == val)
 		return;
 
 	if (CHECK_RANGE(self, self->type, min, max))
@@ -68,9 +71,9 @@ void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val)
 	if (CHECK_VAL(self, self->type, min, max, val))
 		return;
 
-	self->i->min = min;
-	self->i->max = max;
-	self->i->val = val;
+	i->min = min;
+	i->max = max;
+	i->val = val;
 
 	//TODO: Resize on bounds change?
 	gp_widget_redraw(self);
@@ -79,14 +82,15 @@ void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val)
 void gp_widget_int_val_set(gp_widget *self, int64_t val)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
 
-	if (self->i->val == val)
+	if (i->val == val)
 		return;
 
-	if (CHECK_VAL(self, self->type, self->i->min, self->i->max, val))
+	if (CHECK_VAL(self, self->type, i->min, i->max, val))
 		return;
 
-	self->i->val = val;
+	i->val = val;
 	gp_widget_redraw(self);
 
 	//TODO: On event?
@@ -95,24 +99,26 @@ void gp_widget_int_val_set(gp_widget *self, int64_t val)
 int64_t gp_widget_int_val_get(gp_widget *self)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, 0);
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
 
-	return self->i->val;
+	return i->val;
 }
 
 void gp_widget_int_max_set(gp_widget *self, int64_t max)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
 
-	if (self->i->max == max)
+	if (i->max == max)
 		return;
 
-	if (CHECK_RANGE(self, self->type, self->i->min, max))
+	if (CHECK_RANGE(self, self->type, i->min, max))
 		return;
 
-	self->i->max = max;
+	i->max = max;
 
-	if (self->i->val > max)
-		self->i->val = max;
+	if (i->val > max)
+		i->val = max;
 
 	//TODO: Event?
 
@@ -122,17 +128,18 @@ void gp_widget_int_max_set(gp_widget *self, int64_t max)
 void gp_widget_int_min_set(gp_widget *self, int64_t min)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
 
-	if (self->i->min == min)
+	if (i->min == min)
 		return;
 
-	if (CHECK_RANGE(self, self->type, min, self->i->max))
+	if (CHECK_RANGE(self, self->type, min, i->max))
 		return;
 
-	self->i->min = min;
+	i->min = min;
 
-	if (self->i->val < min)
-		self->i->val = min;
+	if (i->val < min)
+		i->val = min;
 
 	//TODO: Event?
 
@@ -142,18 +149,19 @@ void gp_widget_int_min_set(gp_widget *self, int64_t min)
 void gp_widget_int_range_set(gp_widget *self, int64_t min, int64_t max)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
 
-	if (self->i->min == min && self->i->max == max)
+	if (i->min == min && i->max == max)
 		return;
 
 	if (CHECK_RANGE(self, self->type, min, max))
 		return;
 
-	self->i->min = min;
-	self->i->max = max;
+	i->min = min;
+	i->max = max;
 
-	self->i->val = GP_MIN(self->i->val, min);
-	self->i->val = GP_MAX(self->i->val, max);
+	i->val = GP_MIN(i->val, min);
+	i->val = GP_MAX(i->val, max);
 }
 
 enum keys {
@@ -228,10 +236,12 @@ static gp_widget *json_to_int(enum gp_widget_type type, gp_json_reader *json,
 	if (!ret)
 		return NULL;
 
-	ret->i->min = min;
-	ret->i->max = max;
-	ret->i->val = ival;
-	ret->i->dir = dir;
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(ret);
+
+	i->min = min;
+	i->max = max;
+	i->val = ival;
+	i->dir = dir;
 
 	return ret;
 }
@@ -243,9 +253,10 @@ static unsigned int spin_buttons_width(const gp_widget_render_ctx *ctx)
 
 static unsigned int spin_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
 	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
-	unsigned int min_digits = snprintf(NULL, 0, "%"PRIi64, self->spin->min);
-	unsigned int max_digits = snprintf(NULL, 0, "%"PRIi64, self->spin->max);
+	unsigned int min_digits = snprintf(NULL, 0, "%"PRIi64, spin->min);
+	unsigned int max_digits = snprintf(NULL, 0, "%"PRIi64, spin->max);
 
 	unsigned int ret = 2 * ctx->padd;
 
@@ -267,6 +278,8 @@ static unsigned int spin_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 static void spin_render(gp_widget *self, const gp_offset *offset,
                         const gp_widget_render_ctx *ctx, int flags)
 {
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
+
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
@@ -274,7 +287,6 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	unsigned int s = spin_buttons_width(ctx);
 	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
 	unsigned int sx = 2 * sy;
-	struct gp_widget_int *spin = self->spin;
 
 	const gp_text_style *font = gp_widget_focused_font(ctx, self->focused);
 	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
@@ -309,18 +321,22 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 
 static void schedule_alert(gp_widget *self)
 {
-	self->spin->alert = 1;
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
+
+	spin->alert = 1;
 	gp_widget_redraw(self);
 }
 
 static void spin_inc(gp_widget *self)
 {
-	if (self->spin->val >= self->spin->max) {
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
+
+	if (spin->val >= spin->max) {
 		schedule_alert(self);
 		return;
 	}
 
-	self->spin->val++;
+	spin->val++;
 
 	gp_widget_send_widget_event(self, 0);
 	gp_widget_redraw(self);
@@ -328,12 +344,14 @@ static void spin_inc(gp_widget *self)
 
 static void spin_dec(gp_widget *self)
 {
-	if (self->spin->val <= self->spin->min) {
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
+
+	if (spin->val <= spin->min) {
 		schedule_alert(self);
 		return;
 	}
 
-	self->spin->val--;
+	spin->val--;
 
 	gp_widget_send_widget_event(self, 0);
 	gp_widget_redraw(self);
@@ -341,13 +359,15 @@ static void spin_dec(gp_widget *self)
 
 static void spin_add(gp_widget *self, int val)
 {
-	if (self->spin->val + val < self->spin->min ||
-	    self->spin->val + val > self->spin->max) {
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
+
+	if (spin->val + val < spin->min ||
+	    spin->val + val > spin->max) {
 		schedule_alert(self);
 		return;
 	}
 
-	self->spin->val += val;
+	spin->val += val;
 
 	gp_widget_send_widget_event(self, 0);
 	gp_widget_redraw(self);
@@ -375,20 +395,26 @@ static void spin_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_even
 
 static void spin_min(gp_widget *self)
 {
-	self->spin->val = self->spin->min;
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
+
+	spin->val = spin->min;
 	gp_widget_send_widget_event(self, 0);
 	gp_widget_redraw(self);
 }
 
 static void spin_max(gp_widget *self)
 {
-	self->spin->val = self->spin->max;
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
+
+	spin->val = spin->max;
 	gp_widget_send_widget_event(self, 0);
 	gp_widget_redraw(self);
 }
 
 static int spin_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
+	gp_widget_class_int *spin = GP_WIDGET_CLASS_INT(self);
+
 	switch (ev->type) {
 	case GP_EV_KEY:
 		if (ev->code == GP_EV_KEY_UP)
@@ -422,7 +448,7 @@ static int spin_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 			spin_add(self, ev->val);
 	break;
 	case GP_EV_TMR:
-		self->spin->alert = 0;
+		spin->alert = 0;
 		gp_widget_redraw(self);
 		return 1;
 	break;
@@ -454,15 +480,19 @@ gp_widget *gp_widget_spinner_new(int64_t min, int64_t max, int64_t val)
 
 static unsigned int ssteps(gp_widget *self)
 {
-	return self->slider->max - self->slider->min;
+	gp_widget_class_int *slider = GP_WIDGET_CLASS_INT(self);
+
+	return slider->max - slider->min;
 }
 
 static unsigned int slider_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	gp_widget_class_int *slider = GP_WIDGET_CLASS_INT(self);
+
 	unsigned int steps = ssteps(self);
 	unsigned int asc = gp_text_ascent(ctx->font) + 4;
 
-	switch (self->slider->dir) {
+	switch (slider->dir) {
 	case GP_WIDGET_HORIZ:
 		return asc + steps;
 	case GP_WIDGET_VERT:
@@ -474,10 +504,12 @@ static unsigned int slider_min_w(gp_widget *self, const gp_widget_render_ctx *ct
 
 static unsigned int slider_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	gp_widget_class_int *slider = GP_WIDGET_CLASS_INT(self);
+
 	unsigned int steps = ssteps(self);
 	unsigned int asc = gp_text_ascent(ctx->font) + 4;
 
-	switch (self->slider->dir) {
+	switch (slider->dir) {
 	case GP_WIDGET_HORIZ:
 		return asc;
 	case GP_WIDGET_VERT:
@@ -490,6 +522,8 @@ static unsigned int slider_min_h(gp_widget *self, const gp_widget_render_ctx *ct
 static void slider_render(gp_widget *self, const gp_offset *offset,
                           const gp_widget_render_ctx *ctx, int flags)
 {
+	gp_widget_class_int *slider = GP_WIDGET_CLASS_INT(self);
+
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
@@ -497,7 +531,7 @@ static void slider_render(gp_widget *self, const gp_offset *offset,
 
 	unsigned int steps = ssteps(self);
 	unsigned int asc = gp_text_ascent(ctx->font);
-	int val = GP_ABS(self->slider->val);
+	int val = GP_ABS(slider->val);
 
 	gp_pixel text_color = gp_widget_text_color(self, ctx, flags);
 	gp_pixel fr_color = gp_widget_frame_color(self, ctx, flags);
@@ -508,7 +542,7 @@ static void slider_render(gp_widget *self, const gp_offset *offset,
 
 	gp_size fr_thick = ctx->fr_thick+1;
 
-	switch (self->slider->dir) {
+	switch (slider->dir) {
 	case GP_WIDGET_HORIZ:
 		w = asc;
 		x = x + (self->w - w - 2 * fr_thick) * val / steps + fr_thick;
@@ -517,7 +551,7 @@ static void slider_render(gp_widget *self, const gp_offset *offset,
 	break;
 	case GP_WIDGET_VERT:
 		//TODO!
-		val = self->i->max - val;
+		val = slider->max - val;
 		h = asc;
 		y = y + (self->h - h - 2 * fr_thick) * val / steps + fr_thick;
 		x += fr_thick;
@@ -539,6 +573,8 @@ static int coord_to_val(gp_widget *self, int coord,
 
 static void slider_set_val(gp_widget *self, unsigned int ascent, gp_event *ev)
 {
+	gp_widget_class_int *slider = GP_WIDGET_CLASS_INT(self);
+
 	int val = 0;
 	int coord;
 
@@ -551,7 +587,7 @@ static void slider_set_val(gp_widget *self, unsigned int ascent, gp_event *ev)
 	if (ev->st->cursor_y > self->h)
 		return;
 
-	switch (self->slider->dir) {
+	switch (slider->dir) {
 	case GP_WIDGET_HORIZ:
 		coord = (int)ev->st->cursor_x;
 		val = coord_to_val(self, coord, ascent, self->w);
@@ -562,13 +598,13 @@ static void slider_set_val(gp_widget *self, unsigned int ascent, gp_event *ev)
 	break;
 	}
 
-	if (val > self->i->max)
-		val = self->i->max;
+	if (val > slider->max)
+		val = slider->max;
 
-	if (val < self->i->min)
-		val = self->i->min;
+	if (val < slider->min)
+		val = slider->min;
 
-	self->i->val = val;
+	slider->val = val;
 
 	gp_widget_send_widget_event(self, 0);
 
@@ -648,7 +684,9 @@ gp_widget *gp_widget_slider_new(int64_t min, int64_t max, int64_t val, int dir)
 	if (!ret)
 		return NULL;
 
-	ret->i->dir = dir;
+	gp_widget_class_int *slider = GP_WIDGET_CLASS_INT(ret);
+
+	slider->dir = dir;
 
 	return ret;
 }

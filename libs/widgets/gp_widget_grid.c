@@ -17,6 +17,8 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_json.h>
 
+#include "gp_widget_grid_priv.h"
+
 static gp_widget *widget_grid_grid_get(struct gp_widget_grid *grid,
                                        unsigned int col, unsigned int row)
 {
@@ -26,31 +28,36 @@ static gp_widget *widget_grid_grid_get(struct gp_widget_grid *grid,
 static gp_widget *widget_grid_get(gp_widget *self,
                                   unsigned int col, unsigned int row)
 {
-	return widget_grid_grid_get(self->grid, col, row);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	return widget_grid_grid_get(grid, col, row);
 }
 
 static gp_widget *widget_grid_focused(gp_widget *self)
 {
-	if (!self->grid->cols || !self->grid->rows)
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	if (!grid->cols || !grid->rows)
 		return NULL;
 
-	return widget_grid_get(self,
-	                       self->grid->focused_col,
-	                       self->grid->focused_row);
+	return widget_grid_get(self, grid->focused_col, grid->focused_row);
 }
 
-static void widget_grid_focused_offset(gp_widget *self,
-                                       gp_offset *offset)
+static void widget_grid_focused_offset(gp_widget *self, gp_offset *offset)
 {
-	offset->x = self->grid->col_s[self->grid->focused_col].off;
-	offset->y = self->grid->row_s[self->grid->focused_row].off;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	offset->x = grid->col_s[grid->focused_col].off;
+	offset->y = grid->row_s[grid->focused_row].off;
 }
 
-static int widget_grid_child_pos(gp_widget *self, gp_widget *child,
-                                 unsigned int *col, unsigned int *row)
+static int widget_grid_child_lookup(gp_widget *self, gp_widget *child,
+                                    unsigned int *col, unsigned int *row)
 {
-	for (*col = 0; *col < self->grid->cols; (*col)++) {
-		for (*row = 0; *row < self->grid->rows; (*row)++) {
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	for (*col = 0; *col < grid->cols; (*col)++) {
+		for (*row = 0; *row < grid->rows; (*row)++) {
 			if (child == widget_grid_get(self, *col, *row))
 				return 1;
 		}
@@ -63,12 +70,12 @@ static int widget_grid_child_pos(gp_widget *self, gp_widget *child,
 static struct gp_widget *widget_grid_put(gp_widget *self, gp_widget *new,
 		                         unsigned int x, unsigned int y)
 {
-	struct gp_widget_grid *g = self->grid;
-	size_t idx = gp_matrix_idx(g->rows, x, y);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+	size_t idx = gp_matrix_idx(grid->rows, x, y);
 
-	gp_widget *ret = g->widgets[idx];
+	gp_widget *ret = grid->widgets[idx];
 
-	g->widgets[idx] = new;
+	grid->widgets[idx] = new;
 
 	gp_widget_set_parent(new, self);
 
@@ -82,7 +89,7 @@ static unsigned int padd_size(const gp_widget_render_ctx *ctx, int padd)
 
 static unsigned int min_w_uniform(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int x, sum_min_w = padd_size(ctx, grid->col_b[0].padd);
 	unsigned int max_cols_w = 0;
 
@@ -102,7 +109,7 @@ static unsigned int min_w_uniform(gp_widget *self, const gp_widget_render_ctx *c
 
 static unsigned int min_w_(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int x, sum_min_w = padd_size(ctx, grid->col_b[0].padd);
 
 	for (x = 0; x < grid->cols; x++) {
@@ -122,7 +129,9 @@ static unsigned int min_w_(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	if (self->grid->uniform)
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	if (grid->flags & GP_WIDGET_GRID_UNIFORM)
 		return min_w_uniform(self, ctx);
 
 	return min_w_(self, ctx);
@@ -130,7 +139,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static unsigned int min_h_uniform(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int y, sum_min_h = padd_size(ctx, grid->row_b[0].padd);
 	unsigned int max_rows_h = 0;
 
@@ -150,7 +159,7 @@ static unsigned int min_h_uniform(gp_widget *self, const gp_widget_render_ctx *c
 
 static unsigned int min_h_(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int y, sum_min_h = padd_size(ctx, grid->row_b[0].padd);
 
 	for (y = 0; y < grid->rows; y++) {
@@ -170,7 +179,9 @@ static unsigned int min_h_(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	if (self->grid->uniform)
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	if (grid->flags & GP_WIDGET_GRID_UNIFORM)
 		return min_h_uniform(self, ctx);
 
 	return min_h_(self, ctx);
@@ -213,8 +224,8 @@ static void compute_rows_min_h(struct gp_widget_grid *grid,
 static void compute_cols_min_uniform_w(struct gp_widget_grid *grid,
                                        const gp_widget_render_ctx *ctx)
 {
-	unsigned int x, y;
 	unsigned int min_cols_w = 0;
+	unsigned int x, y;
 
 	for (y = 0; y < grid->rows; y++) {
 		for (x = 0; x < grid->cols; x++) {
@@ -231,8 +242,8 @@ static void compute_cols_min_uniform_w(struct gp_widget_grid *grid,
 static void compute_rows_min_uniform_h(struct gp_widget_grid *grid,
                                        const gp_widget_render_ctx *ctx)
 {
-	unsigned int x, y;
 	unsigned int min_rows_h = 0;
+	unsigned int x, y;
 
 	for (y = 0; y < grid->rows; y++) {
 		for (x = 0; x < grid->cols; x++) {
@@ -248,10 +259,10 @@ static void compute_rows_min_uniform_h(struct gp_widget_grid *grid,
 
 static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int x, y;
 
-	if (grid->uniform)
+	if (grid->flags & GP_WIDGET_GRID_UNIFORM)
 		compute_cols_min_uniform_w(grid, ctx);
 	else
 		compute_cols_min_w(grid, ctx);
@@ -302,10 +313,10 @@ static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int n
 
 static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int x, y;
 
-	if (grid->uniform)
+	if (grid->flags & GP_WIDGET_GRID_UNIFORM)
 		compute_rows_min_uniform_h(grid, ctx);
 	else
 		compute_rows_min_h(grid, ctx);
@@ -358,7 +369,7 @@ static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx, int n
 static void fill_padding(gp_widget *self, const gp_offset *offset,
                          const gp_widget_render_ctx *ctx)
 {
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
 	GP_DEBUG(3, "Filling grid %p padding", self);
 
@@ -435,7 +446,7 @@ static void fill_unused(gp_widget *widget, const gp_widget_render_ctx *ctx,
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	gp_coord cur_x, cur_y;
 	unsigned int x, y;
 
@@ -484,7 +495,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		}
 	}
 
-	if (grid->frame) {
+	if (grid->flags & GP_WIDGET_GRID_FRAME) {
 		gp_rrect_xywh(ctx->buf, self->x + offset->x, self->y + offset->y,
 			      self->w, self->h, ctx->text_color);
 	}
@@ -537,6 +548,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 static int try_focus(gp_widget *self, unsigned int col, unsigned int row, int sel)
 {
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	gp_widget *w = widget_grid_get(self, col, row);
 
 	(void) sel;
@@ -549,16 +561,18 @@ static int try_focus(gp_widget *self, unsigned int col, unsigned int row, int se
 
 	gp_widget_ops_render_focus(widget_grid_focused(self), GP_FOCUS_OUT);
 
-	self->grid->focused_col = col;
-	self->grid->focused_row = row;
+	grid->focused_col = col;
+	grid->focused_row = row;
 
 	return 1;
 }
 
 static int focus_left(gp_widget *self, int sel)
 {
-	unsigned int col = self->grid->focused_col;
-	unsigned int row = self->grid->focused_row;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	unsigned int col = grid->focused_col;
+	unsigned int row = grid->focused_row;
 
 	for (;;) {
 		if (col == 0)
@@ -571,11 +585,13 @@ static int focus_left(gp_widget *self, int sel)
 
 static int focus_right(gp_widget *self, int sel)
 {
-	unsigned int col = self->grid->focused_col;
-	unsigned int row = self->grid->focused_row;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	unsigned int col = grid->focused_col;
+	unsigned int row = grid->focused_row;
 
 	for (;;) {
-		if (++col >= self->grid->cols)
+		if (++col >= grid->cols)
 			return 0;
 
 		if (try_focus(self, col, row, sel))
@@ -585,8 +601,10 @@ static int focus_right(gp_widget *self, int sel)
 
 static int focus_up(gp_widget *self, int sel)
 {
-	unsigned int col = self->grid->focused_col;
-	unsigned int row = self->grid->focused_row;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	unsigned int col = grid->focused_col;
+	unsigned int row = grid->focused_row;
 
 	for (;;) {
 		if (row == 0)
@@ -599,11 +617,13 @@ static int focus_up(gp_widget *self, int sel)
 
 static int focus_down(gp_widget *self, int sel)
 {
-	unsigned int col = self->grid->focused_col;
-	unsigned int row = self->grid->focused_row;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	unsigned int col = grid->focused_col;
+	unsigned int row = grid->focused_row;
 
 	for (;;) {
-		if (++row >= self->grid->rows)
+		if (++row >= grid->rows)
 			return 0;
 
 		if (try_focus(self, col, row, sel))
@@ -613,15 +633,17 @@ static int focus_down(gp_widget *self, int sel)
 
 static int focus_prev(gp_widget *self, int sel)
 {
-	unsigned int col = self->grid->focused_col;
-	unsigned int row = self->grid->focused_row;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	unsigned int col = grid->focused_col;
+	unsigned int row = grid->focused_row;
 
 	for (;;) {
 		if (col > 0) {
 			col--;
 		} else if (row > 0) {
 			row--;
-			col = self->grid->cols - 1;
+			col = grid->cols - 1;
 		} else {
 			return 0;
 		}
@@ -633,13 +655,15 @@ static int focus_prev(gp_widget *self, int sel)
 
 static int focus_next(gp_widget *self, int sel)
 {
-	unsigned int col = self->grid->focused_col;
-	unsigned int row = self->grid->focused_row;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	unsigned int col = grid->focused_col;
+	unsigned int row = grid->focused_row;
 
 	for (;;) {
-		if (col + 1 < self->grid->cols) {
+		if (col + 1 < grid->cols) {
 			col++;
-		} else if (row + 1 < self->grid->rows) {
+		} else if (row + 1 < grid->rows) {
 			col = 0;
 			row++;
 		} else {
@@ -653,10 +677,12 @@ static int focus_next(gp_widget *self, int sel)
 
 static int focus_in(gp_widget *self, int sel)
 {
-	if (!self->grid->focused)
-		return self->grid->focused = focus_next(self, sel);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	return try_focus(self, self->grid->focused_col, self->grid->focused_row, sel);
+	if (!grid->focused)
+		return grid->focused = focus_next(self, sel);
+
+	return try_focus(self, grid->focused_col, grid->focused_row, sel);
 }
 
 static int focus(gp_widget *self, int sel)
@@ -708,7 +734,7 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
                     unsigned int x, unsigned int y)
 {
 	int col, row;
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
 	col = coord_search(x + self->x, grid->col_s, grid->cols);
 	row = coord_search(y + self->y, grid->row_s, grid->rows);
@@ -716,8 +742,8 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 	if (col < 0 || row < 0)
 		return 0;
 
-	x -= self->grid->col_s[col].off - self->x;
-	y -= self->grid->row_s[row].off - self->y;
+	x -= grid->col_s[col].off - self->x;
+	y -= grid->row_s[row].off - self->y;
 
 	if (!gp_widget_ops_render_focus_xy(widget_grid_get(self, col, row), ctx, x, y))
 		return 0;
@@ -733,10 +759,10 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 
 static int focus_child(gp_widget *self, gp_widget *child)
 {
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int col, row;
-	struct gp_widget_grid *grid = self->grid;
 
-	if (!widget_grid_child_pos(self, child, &col, &row))
+	if (!widget_grid_child_lookup(self, child, &col, &row))
 		return 0;
 
 	if (grid->focused_col == col && grid->focused_row == row)
@@ -752,17 +778,19 @@ static int focus_child(gp_widget *self, gp_widget *child)
 
 static void set_border_padd(gp_widget *self, enum gp_widget_border border, uint8_t padd)
 {
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
 	if (border & GP_WIDGET_BORDER_LEFT)
-		self->grid->col_b[0].padd = padd;
+		grid->col_b[0].padd = padd;
 
 	if (border & GP_WIDGET_BORDER_RIGHT)
-		self->grid->col_b[self->grid->cols].padd = padd;
+		grid->col_b[grid->cols].padd = padd;
 
 	if (border & GP_WIDGET_BORDER_TOP)
-		self->grid->row_b[0].padd = padd;
+		grid->row_b[0].padd = padd;
 
 	if (border & GP_WIDGET_BORDER_BOTTOM)
-		self->grid->row_b[self->grid->rows].padd = padd;
+		grid->row_b[grid->rows].padd = padd;
 
 	if (!(border & GP_WIDGET_BORDER_CLEAR))
 		return;
@@ -770,62 +798,66 @@ static void set_border_padd(gp_widget *self, enum gp_widget_border border, uint8
 	border = ~border;
 
 	if (border & GP_WIDGET_BORDER_LEFT)
-		self->grid->col_b[0].padd = 0;
+		grid->col_b[0].padd = 0;
 
 	if (border & GP_WIDGET_BORDER_RIGHT)
-		self->grid->col_b[self->grid->cols].padd = 0;
+		grid->col_b[grid->cols].padd = 0;
 
 	if (border & GP_WIDGET_BORDER_TOP)
-		self->grid->row_b[0].padd = 0;
+		grid->row_b[0].padd = 0;
 
 	if (border & GP_WIDGET_BORDER_BOTTOM)
-		self->grid->row_b[self->grid->rows].padd = 0;
+		grid->row_b[grid->rows].padd = 0;
 }
 
 static void set_border_fill(gp_widget *self, enum gp_widget_border border, uint8_t fill)
 {
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
 	if (border & GP_WIDGET_BORDER_LEFT)
-		self->grid->col_b[0].fill = fill;
+		grid->col_b[0].fill = fill;
 
 	if (border & GP_WIDGET_BORDER_RIGHT)
-		self->grid->col_b[self->grid->cols].fill = fill;
+		grid->col_b[grid->cols].fill = fill;
 
 	if (border & GP_WIDGET_BORDER_TOP)
-		self->grid->row_b[0].fill = fill;
+		grid->row_b[0].fill = fill;
 
 	if (border & GP_WIDGET_BORDER_BOTTOM)
-		self->grid->row_b[self->grid->rows].fill = fill;
+		grid->row_b[grid->rows].fill = fill;
 
 	if (!(border & GP_WIDGET_BORDER_CLEAR))
 		return;
 
 	if ((~border) & GP_WIDGET_BORDER_LEFT)
-		self->grid->col_b[0].fill = 0;
+		grid->col_b[0].fill = 0;
 
 	if ((~border) & GP_WIDGET_BORDER_RIGHT)
-		self->grid->col_b[self->grid->cols].fill = 0;
+		grid->col_b[grid->cols].fill = 0;
 
 	if ((~border) & GP_WIDGET_BORDER_TOP)
-		self->grid->row_b[0].fill = 0;
+		grid->row_b[0].fill = 0;
 
 	if ((~border) & GP_WIDGET_BORDER_BOTTOM)
-		self->grid->row_b[self->grid->rows].fill = 0;
+		grid->row_b[grid->rows].fill = 0;
 }
 
 static void set_rpad(gp_widget *self, uint8_t pad)
 {
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int i;
 
-	for (i = 1; i < self->grid->rows; i++)
-		self->grid->row_b[i].padd = pad;
+	for (i = 1; i < grid->rows; i++)
+		grid->row_b[i].padd = pad;
 }
 
 static void set_cpad(gp_widget *self, uint8_t pad)
 {
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int i;
 
-	for (i = 1; i < self->grid->cols; i++)
-		self->grid->col_b[i].padd = pad;
+	for (i = 1; i < grid->cols; i++)
+		grid->col_b[i].padd = pad;
 }
 
 static void set_pad(gp_widget *self, uint8_t pad)
@@ -960,26 +992,28 @@ static void put_grid_cell_fill(void *array, unsigned int pos, uint8_t val)
 
 static void put_grid_border_fill(void *array, unsigned int pos, uint8_t val)
 {
-	struct gp_widget_grid_border *border = array;
+	struct gp_widget_grid_gap *gap = array;
 
-	border[pos].fill = val;
+	gap[pos].fill = val;
 }
 
 static void put_grid_border_padd(void *array, unsigned int pos, uint8_t val)
 {
-	struct gp_widget_grid_border *border = array;
+	struct gp_widget_grid_gap *gap = array;
 
-	border[pos].padd = val;
+	gap[pos].padd = val;
 }
 
-static int alloc_grid(gp_widget **grid, unsigned int cols, unsigned int rows)
+static int alloc_grid(gp_widget **widget, struct gp_widget_grid **grid, unsigned int cols, unsigned int rows)
 {
-	if (*grid)
+	if (*widget)
 		return 0;
 
-	*grid = gp_widget_grid_new(cols, rows, 0);
-	if (!*grid)
+	*widget = gp_widget_grid_new(cols, rows, 0);
+	if (!*widget)
 		return 1;
+
+	*grid = GP_WIDGET_PAYLOAD(*widget);
 
 	return 0;
 }
@@ -1084,8 +1118,9 @@ static const gp_json_obj obj_filter = {
 static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int cols = 1, rows = 1;
-	int frame = 0, uniform = 0;
-	gp_widget *grid = NULL;
+	gp_widget *ret = NULL;
+	struct gp_widget_grid *grid = NULL;
+	enum gp_widget_grid_flags flags = 0;
 	struct border border = {.border = GP_WIDGET_BORDER_NONE, .val = -1};
 
 	gp_json_reader_state obj_start = gp_json_reader_state_save(json);
@@ -1096,10 +1131,10 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 			parse_border(json, val, &border);
 		break;
 		case CFILL:
-			if (alloc_grid(&grid, cols, rows))
+			if (alloc_grid(&ret, &grid, cols, rows))
 				goto skip;
 
-			parse_strarray(val->val_str, grid->grid->col_s, cols, put_grid_cell_fill, "Grid cfill");
+			parse_strarray(val->val_str, grid->col_s, cols, put_grid_cell_fill, "Grid cfill");
 		break;
 		case COLS:
 			if (val->val_int < 0) {
@@ -1115,34 +1150,35 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 			cols = val->val_int;
 		break;
 		case CPAD:
-			if (alloc_grid(&grid, cols, rows))
+			if (alloc_grid(&ret, &grid, cols, rows))
 				goto skip;
 
-			parse_strarray(val->val_str, grid->grid->col_b, cols+1, put_grid_border_padd, "Grid cpad");
+			parse_strarray(val->val_str, grid->col_b, cols+1, put_grid_border_padd, "Grid cpad");
 		break;
 		case CPADF:
-			if (alloc_grid(&grid, cols, rows))
+			if (alloc_grid(&ret, &grid, cols, rows))
 				goto skip;
 
-			parse_strarray(val->val_str, grid->grid->col_b, cols+1, put_grid_border_fill, "Grid cpadf");
+			parse_strarray(val->val_str, grid->col_b, cols+1, put_grid_border_fill, "Grid cpadf");
 		break;
 		case FRAME:
-			frame = val->val_bool;
+			if (val->val_bool)
+				flags |= GP_WIDGET_GRID_FRAME;
 		break;
 		case PAD:
-			if (alloc_grid(&grid, cols, rows))
+			if (alloc_grid(&ret, &grid, cols, rows))
 				goto skip;
 
 			if (val->val_int < 0)
 				gp_json_warn(json, "padd must be >= 0!");
 			else
-				set_pad(grid, val->val_int);
+				set_pad(ret, val->val_int);
 		break;
 		case RFILL:
-			if (alloc_grid(&grid, cols, rows))
+			if (alloc_grid(&ret, &grid, cols, rows))
 				goto skip;
 
-			parse_strarray(val->val_str, grid->grid->row_s, rows, put_grid_cell_fill, "Grid rfill");
+			parse_strarray(val->val_str, grid->row_s, rows, put_grid_cell_fill, "Grid rfill");
 		break;
 		case ROWS:
 			if (val->val_int < 0) {
@@ -1158,22 +1194,23 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 			rows = val->val_int;
 		break;
 		case RPAD:
-			if (alloc_grid(&grid, cols, rows))
+			if (alloc_grid(&ret, &grid, cols, rows))
 				goto skip;
 
-			parse_strarray(val->val_str, grid->grid->row_b, rows+1, put_grid_border_padd, "Grid rpad");
+			parse_strarray(val->val_str, grid->row_b, rows+1, put_grid_border_padd, "Grid rpad");
 		break;
 		case RPADF:
-			if (alloc_grid(&grid, cols, rows))
+			if (alloc_grid(&ret, &grid, cols, rows))
 				goto skip;
 
-			parse_strarray(val->val_str, grid->grid->row_b, rows+1, put_grid_border_fill, "Grid rpadf");
+			parse_strarray(val->val_str, grid->row_b, rows+1, put_grid_border_fill, "Grid rpadf");
 		break;
 		case UNIFORM:
-			uniform = val->val_bool;
+			if (val->val_bool)
+				flags |= GP_WIDGET_GRID_UNIFORM;
 		break;
 		case WIDGETS:
-			if (alloc_grid(&grid, cols, rows))
+			if (alloc_grid(&ret, &grid, cols, rows))
 				goto skip;
 
 			if (val->type != GP_JSON_ARR) {
@@ -1194,7 +1231,7 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 				}
 
 				gp_widget *child = gp_widget_from_json(json, val, ctx);
-				gp_widget_grid_put(grid, widgets/rows, widgets%rows, child);
+				gp_widget_grid_put(ret, widgets/rows, widgets%rows, child);
 
 				widgets++;
 			}
@@ -1205,17 +1242,16 @@ static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget
 		}
 	}
 
-	if (alloc_grid(&grid, cols, rows))
+	if (alloc_grid(&ret, &grid, cols, rows))
 		goto skip;
 
-	grid->grid->uniform = uniform;
-	grid->grid->frame = frame;
+	grid->flags = flags;
 
-	gp_widget_grid_border_set(grid, border.border, border.val, -1);
+	gp_widget_grid_border_set(ret, border.border, border.val, -1);
 
-	return grid;
+	return ret;
 free_skip:
-	gp_widget_free(grid);
+	gp_widget_free(ret);
 skip:
 	gp_json_reader_state_load(json, obj_start);
 	gp_json_obj_skip(json);
@@ -1224,19 +1260,21 @@ skip:
 
 static void free_(gp_widget *self)
 {
-	gp_matrix_free(self->grid->widgets);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	gp_vec_free(self->grid->col_b);
-	gp_vec_free(self->grid->row_b);
+	gp_matrix_free(grid->widgets);
 
-	gp_vec_free(self->grid->col_s);
-	gp_vec_free(self->grid->row_s);
+	gp_vec_free(grid->col_b);
+	gp_vec_free(grid->row_b);
+
+	gp_vec_free(grid->col_s);
+	gp_vec_free(grid->row_s);
 }
 
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
 {
 	unsigned int x, y;
-	struct gp_widget_grid *grid = self->grid;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
 	for (y = 0; y < grid->rows; y++) {
 		for (x = 0; x < grid->cols; x++) {
@@ -1300,40 +1338,96 @@ gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows,
 	if (!ret)
 		return NULL;
 
-	if (flags & GP_WIDGET_GRID_FRAME)
-		ret->grid->frame = 1;
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(ret);
 
-	if (flags & GP_WIDGET_GRID_UNIFORM)
-		ret->grid->uniform = 1;
+	grid->flags = flags;
 
-	ret->grid->cols = cols;
-	ret->grid->rows = rows;
+	grid->cols = cols;
+	grid->rows = rows;
 
-	ret->grid->widgets = gp_matrix_new(cols, rows, sizeof(gp_widget*));
+	grid->widgets = gp_matrix_new(cols, rows, sizeof(gp_widget*));
 
-	ret->grid->col_s = gp_vec_new(cols, sizeof(struct gp_widget_grid_cell));
-	ret->grid->row_s = gp_vec_new(rows, sizeof(struct gp_widget_grid_cell));
+	grid->col_s = gp_vec_new(cols, sizeof(struct gp_widget_grid_cell));
+	grid->row_s = gp_vec_new(rows, sizeof(struct gp_widget_grid_cell));
 
-	ret->grid->col_b = gp_vec_new(cols + 1, sizeof(struct gp_widget_grid_border));
-	ret->grid->row_b = gp_vec_new(rows + 1, sizeof(struct gp_widget_grid_border));
+	grid->col_b = gp_vec_new(cols + 1, sizeof(struct gp_widget_grid_gap));
+	grid->row_b = gp_vec_new(rows + 1, sizeof(struct gp_widget_grid_gap));
 
-	init_cols(ret->grid, 0, cols, 1);
-	init_rows(ret->grid, 0, rows, 1);
+	init_cols(grid, 0, cols, 1);
+	init_rows(grid, 0, rows, 1);
 
 	return ret;
 }
 
+unsigned int gp_widget_grid_cols_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, 0);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	return grid->cols;
+}
+
+unsigned int gp_widget_grid_rows_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, 0);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	return grid->rows;
+}
+
+enum gp_widget_grid_flags gp_widget_grid_flags_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, 0);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	return grid->flags;
+}
+
+void gp_widget_grid_flags_set(gp_widget *self, enum gp_widget_grid_flags flags)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	if (flags & ~(GP_WIDGET_GRID_FRAME | GP_WIDGET_GRID_UNIFORM)) {
+		GP_WARN("Invalid flags 0x%x", flags);
+		return;
+	}
+
+	grid->flags = flags;
+
+	gp_widget_resize(self);
+}
+
+const gp_widget_grid_gap *gp_widget_grid_cols_gaps_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, 0);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	return grid->col_b;
+}
+
+const gp_widget_grid_gap *gp_widget_grid_rows_gaps_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, 0);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	return grid->row_b;
+}
+
 static int assert_col_row(gp_widget *self, unsigned int col, unsigned int row)
 {
-	if (col >= self->grid->cols) {
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, 0);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	if (col >= grid->cols) {
 		GP_BUG("Invalid column index %u Grid %p %ux%u",
-			col, self, self->grid->cols, self->grid->rows);
+			col, self, grid->cols, grid->rows);
 		return 1;
 	}
 
-	if (row >= self->grid->rows) {
+	if (row >= grid->rows) {
 		GP_BUG("Invalid row index %u Grid %p %ux%u",
-			row, self, self->grid->cols, self->grid->rows);
+			row, self, grid->cols, grid->rows);
 		return 1;
 	}
 
@@ -1366,22 +1460,21 @@ gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int ro
 void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int rows)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	struct gp_widget_grid *g = self->grid;
-
-	if (row > g->rows) {
-		GP_WARN("Row %u out of grid (%p rows %u)", row, self, g->rows);
+	if (row > grid->rows) {
+		GP_WARN("Row %u out of grid (%p rows %u)", row, self, grid->rows);
 		return;
 	}
 
-	g->widgets = gp_matrix_rows_ins(g->widgets, g->cols, g->rows, row, rows);
+	grid->widgets = gp_matrix_rows_ins(grid->widgets, grid->cols, grid->rows, row, rows);
 
-	g->row_s = gp_vec_ins(g->row_s, row, rows);
-	g->row_b = gp_vec_ins(g->row_b, row, rows);
+	grid->row_s = gp_vec_ins(grid->row_s, row, rows);
+	grid->row_b = gp_vec_ins(grid->row_b, row, rows);
 
-	init_rows(g, row, rows, 0);
+	init_rows(grid, row, rows, 0);
 
-	g->rows += rows;
+	grid->rows += rows;
 
 	gp_widget_resize(self);
 }
@@ -1389,10 +1482,11 @@ void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int row
 unsigned int gp_widget_grid_rows_append(gp_widget *self, unsigned int rows)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, (unsigned int)-1);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	unsigned int ret = self->grid->rows;
+	unsigned int ret = grid->rows;
 
-	gp_widget_grid_rows_ins(self, self->grid->rows, rows);
+	gp_widget_grid_rows_ins(self, grid->rows, rows);
 
 	return ret;
 }
@@ -1407,32 +1501,31 @@ void gp_widget_grid_rows_prepend(gp_widget *self, unsigned int rows)
 void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int rows)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
-
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	size_t r, c;
-	struct gp_widget_grid *g = self->grid;
 
-	if (row >= g->rows) {
-		GP_WARN("Row %u out of grid (%p rows %u)", row, self, g->rows);
+	if (row >= grid->rows) {
+		GP_WARN("Row %u out of grid (%p rows %u)", row, self, grid->rows);
 		return;
 	}
 
-	if (row + rows > g->rows) {
+	if (row + rows > grid->rows) {
 		GP_WARN("Block %u at row %u out of grid (%p rows %u)",
-		        rows, row, self, g->rows);
+		        rows, row, self, grid->rows);
 		return;
 	}
 
 	for (r = 0; r < rows; r++) {
-		for (c = 0; c < g->cols; c++)
-			gp_widget_free(g->widgets[gp_matrix_idx(g->rows, c, r + row)]);
+		for (c = 0; c < grid->cols; c++)
+			gp_widget_free(grid->widgets[gp_matrix_idx(grid->rows, c, r + row)]);
 	}
 
-	g->widgets = gp_matrix_rows_del(g->widgets, g->cols, g->rows, row, rows);
+	grid->widgets = gp_matrix_rows_del(grid->widgets, grid->cols, grid->rows, row, rows);
 
-	g->row_s = gp_vec_del(g->row_s, row, rows);
-	g->row_b = gp_vec_del(g->row_b, row, rows);
+	grid->row_s = gp_vec_del(grid->row_s, row, rows);
+	grid->row_b = gp_vec_del(grid->row_b, row, rows);
 
-	g->rows -= rows;
+	grid->rows -= rows;
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);
@@ -1441,22 +1534,21 @@ void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int row
 void gp_widget_grid_cols_ins(gp_widget *self, unsigned int col, unsigned int cols)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	struct gp_widget_grid *g = self->grid;
-
-	if (col > g->cols) {
-		GP_WARN("Col %u out of grid (%p cols %u)", col, self, g->cols);
+	if (col > grid->cols) {
+		GP_WARN("Col %u out of grid (%p cols %u)", col, self, grid->cols);
 		return;
 	}
 
-	g->widgets = gp_matrix_cols_ins(g->widgets, g->rows, col, cols);
+	grid->widgets = gp_matrix_cols_ins(grid->widgets, grid->rows, col, cols);
 
-	g->col_s = gp_vec_ins(g->col_s, col, cols);
-	g->col_b = gp_vec_ins(g->col_b, col, cols);
+	grid->col_s = gp_vec_ins(grid->col_s, col, cols);
+	grid->col_b = gp_vec_ins(grid->col_b, col, cols);
 
-	init_cols(g, col, cols, 0);
+	init_cols(grid, col, cols, 0);
 
-	g->cols += cols;
+	grid->cols += cols;
 
 	gp_widget_resize(self);
 }
@@ -1464,10 +1556,11 @@ void gp_widget_grid_cols_ins(gp_widget *self, unsigned int col, unsigned int col
 unsigned int gp_widget_grid_cols_append(gp_widget *self, unsigned int cols)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, (unsigned int)-1);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	unsigned int ret = self->grid->cols;
+	unsigned int ret = grid->cols;
 
-	gp_widget_grid_cols_ins(self, self->grid->cols, cols);
+	gp_widget_grid_cols_ins(self, grid->cols, cols);
 
 	return ret;
 }
@@ -1482,32 +1575,31 @@ void gp_widget_grid_cols_prepend(gp_widget *self, unsigned int cols)
 void gp_widget_grid_cols_del(gp_widget *self, unsigned int col, unsigned int cols)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
-
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	size_t r, c;
-	struct gp_widget_grid *g = self->grid;
 
-	if (col >= g->cols) {
-		GP_WARN("Col %u out of grid (%p cols %u)", col, self, g->cols);
+	if (col >= grid->cols) {
+		GP_WARN("Col %u out of grid (%p cols %u)", col, self, grid->cols);
 		return;
 	}
 
-	if (col + cols > g->cols) {
+	if (col + cols > grid->cols) {
 		GP_WARN("Block %u at col %u out of grid (%p cols %u)",
-		        cols, col, self, g->cols);
+		        cols, col, self, grid->cols);
 		return;
 	}
 
 	for (c = 0; c < cols; c++) {
-		for (r = 0; r < g->rows; r++)
-			gp_widget_free(g->widgets[gp_matrix_idx(g->rows, c + col, r)]);
+		for (r = 0; r < grid->rows; r++)
+			gp_widget_free(grid->widgets[gp_matrix_idx(grid->rows, c + col, r)]);
 	}
 
-	g->widgets = gp_matrix_cols_del(g->widgets, g->rows, col, cols);
+	grid->widgets = gp_matrix_cols_del(grid->widgets, grid->rows, col, cols);
 
-	g->col_s = gp_vec_del(g->col_s, col, cols);
-	g->col_b = gp_vec_del(g->col_b, col, cols);
+	grid->col_s = gp_vec_del(grid->col_s, col, cols);
+	grid->col_b = gp_vec_del(grid->col_b, col, cols);
 
-	g->cols -= cols;
+	grid->cols -= cols;
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);
@@ -1515,9 +1607,9 @@ void gp_widget_grid_cols_del(gp_widget *self, unsigned int col, unsigned int col
 
 gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int row)
 {
-	gp_widget *ret;
-
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, NULL);
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+	gp_widget *ret;
 
 	if (assert_col_row(self, col, row))
 		return NULL;
@@ -1526,10 +1618,10 @@ gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int ro
 	if (ret)
 		ret->parent = NULL;
 
-	if (self->grid->focused_col == col && self->grid->focused_row == row) {
-		self->grid->focused_col = 0;
-		self->grid->focused_row = 0;
-		self->grid->focused = 0;
+	if (grid->focused_col == col && grid->focused_row == row) {
+		grid->focused_col = 0;
+		grid->focused_row = 0;
+		grid->focused = 0;
 	}
 
 	gp_widget_resize(self);
@@ -1566,25 +1658,27 @@ void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
 void gp_widget_grid_col_fill_set(gp_widget *self, unsigned int col, uint8_t fill)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	if (col >= self->grid->cols) {
-		GP_WARN("Invalid grid col %u have %u cols", col, self->grid->cols);
+	if (col >= grid->cols) {
+		GP_WARN("Invalid grid col %u have %u cols", col, grid->cols);
 		return;
 	}
 
-	self->grid->col_s[col].fill = fill;
+	grid->col_s[col].fill = fill;
 }
 
 void gp_widget_grid_row_fill_set(gp_widget *self, unsigned int row, uint8_t fill)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	if (row >= self->grid->rows) {
-		GP_WARN("Invalid grid row %u have %u rows", row, self->grid->rows);
+	if (row >= grid->rows) {
+		GP_WARN("Invalid grid row %u have %u rows", row, grid->rows);
 		return;
 	}
 
-	self->grid->row_s[row].fill = fill;
+	grid->row_s[row].fill = fill;
 }
 
 /*
@@ -1655,11 +1749,13 @@ static gp_widget *get_widgets(gp_json_reader *json, gp_json_val *val, gp_widget_
 	if (!ret)
 		return NULL;
 
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(ret);
+
 	gp_json_reader_state_load(json, arr_start);
 	cnt = 0;
 	unsigned int padd, fill;
 
-	struct gp_widget_grid_border *border = horiz ? ret->grid->col_b : ret->grid->row_b;
+	struct gp_widget_grid_gap *gap = horiz ? grid->col_b : grid->row_b;
 
 	GP_JSON_ARR_FOREACH(json, val) {
 		switch (val->type) {
@@ -1675,8 +1771,8 @@ static gp_widget *get_widgets(gp_json_reader *json, gp_json_val *val, gp_widget_
 		break;
 		case GP_JSON_ARR:
 			if (get_padd_fill(json, val, &padd, &fill)) {
-				border[cnt].padd = padd;
-				border[cnt].fill = fill;
+				gap[cnt].padd = padd;
+				gap[cnt].fill = fill;
 			}
 		break;
 		default:
@@ -1714,11 +1810,10 @@ static const gp_json_obj box_obj_filter = {
 
 static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx, int horiz)
 {
-	int uniform = 0;
-	int frame = 0;
 	struct border border = {.border = GP_WIDGET_BORDER_NONE, .val = -1};
-
+	enum gp_widget_grid_flags flags = 0;
 	gp_widget *ret = NULL;
+	struct gp_widget_grid *grid = NULL;
 
 	GP_JSON_OBJ_FOREACH_FILTER(json, val, &box_obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
@@ -1731,12 +1826,13 @@ static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widge
 				continue;
 			}
 			if (horiz)
-				parse_strarray(val->val_str, ret->grid->col_s, ret->grid->cols, put_grid_cell_fill, "Cell fill");
+				parse_strarray(val->val_str, grid->col_s, grid->cols, put_grid_cell_fill, "Cell fill");
 			else
-				parse_strarray(val->val_str, ret->grid->row_s, ret->grid->rows, put_grid_cell_fill, "Cell fill");
+				parse_strarray(val->val_str, grid->row_s, grid->rows, put_grid_cell_fill, "Cell fill");
 		break;
 		case BOX_FRAME:
-			frame = val->val_bool;
+			if (val->val_bool)
+				flags |= GP_WIDGET_GRID_FRAME;
 		break;
 		case BOX_PADD:
 			if (!ret) {
@@ -1744,9 +1840,9 @@ static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widge
 				continue;
 			}
 			if (horiz)
-				parse_strarray(val->val_str, ret->grid->col_b, ret->grid->cols+1, put_grid_border_padd, "Padd");
+				parse_strarray(val->val_str, grid->col_b, grid->cols+1, put_grid_border_padd, "Padd");
 			else
-				parse_strarray(val->val_str, ret->grid->row_b, ret->grid->rows+1, put_grid_border_padd, "Padd");
+				parse_strarray(val->val_str, grid->row_b, grid->rows+1, put_grid_border_padd, "Padd");
 		break;
 		case BOX_PADD_FILL:
 			if (!ret) {
@@ -1754,15 +1850,17 @@ static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widge
 				continue;
 			}
 			if (horiz)
-				parse_strarray(val->val_str, ret->grid->col_b, ret->grid->cols+1, put_grid_border_fill, "Padd fill");
+				parse_strarray(val->val_str, grid->col_b, grid->cols+1, put_grid_border_fill, "Padd fill");
 			else
-				parse_strarray(val->val_str, ret->grid->row_b, ret->grid->rows+1, put_grid_border_fill, "Padd fill");
+				parse_strarray(val->val_str, grid->row_b, grid->rows+1, put_grid_border_fill, "Padd fill");
 		break;
 		case BOX_UNIFORM:
-			uniform = 1;
+			if (val->val_bool)
+				flags |= GP_WIDGET_GRID_UNIFORM;
 		break;
 		case BOX_WIDGETS:
 			ret = get_widgets(json, val, ctx, horiz);
+			grid = GP_WIDGET_PAYLOAD(ret);
 		break;
 		}
 	}
@@ -1770,10 +1868,7 @@ static gp_widget *box_from_json(gp_json_reader *json, gp_json_val *val, gp_widge
 	if (!ret)
 		return NULL;
 
-	if (uniform)
-		ret->grid->uniform = 1;
-
-	ret->grid->frame = frame;
+	grid->flags = flags;
 
 	gp_widget_grid_border_set(ret, border.border, border.val, -1);
 

@@ -86,13 +86,6 @@ enum gp_widget_pbar_event_type {
 	GP_WIDGET_PBAR_VAL_CHANGED,
 };
 
-struct gp_widget_pbar {
-	uint64_t max;
-	uint64_t val;
-	int32_t step;
-	enum gp_widget_pbar_unit unit;
-};
-
 /**
  * @brief Allocate and initialize new progress bar widget.
  *

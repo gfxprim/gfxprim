@@ -12,8 +12,8 @@ struct tcase {
 	const char *json;
 	const char *text;
 	gp_widget_tattr tattr;
-	int frame;
-	int width;
+	enum gp_widget_label_flags flags;
+	unsigned int width;
 };
 
 static int label_json_load(struct tcase *t)
@@ -31,23 +31,23 @@ static int label_json_load(struct tcase *t)
 		return TST_FAILED;
 	}
 
-	if (strcmp(t->text, label->label->text)) {
+	if (strcmp(t->text, gp_widget_label_get(label))) {
 		tst_msg("Wrong label text!");
 		return TST_FAILED;
 	}
 
-	if (t->frame != !!label->label->frame) {
-		tst_msg("Wrong frame expected %i!", t->frame);
+	if (t->flags != gp_widget_label_flags_get(label)) {
+		tst_msg("Wrong flags expected %02x!", t->flags);
 		return TST_FAILED;
 	}
 
-	if (t->tattr != label->label->tattr) {
+	if (t->tattr != gp_widget_label_tattr_get(label)) {
 		tst_msg("Wrong label tattr!");
 		return TST_FAILED;
 	}
 
-	if (t->width != label->label->width) {
-		tst_msg("Wrong width %u expected %i", label->label->width, t->width);
+	if (t->width != gp_widget_label_width_get(label)) {
+		tst_msg("Wrong width %u expected %i", gp_widget_label_width_get(label), t->width);
 		return TST_FAILED;
 	}
 
@@ -73,7 +73,7 @@ static struct tcase label_frame = {
 	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
 	        "\"layout\": {\"type\": \"label\", \"frame\": true, \"text\": \"Label!\"}}",
 	.text = "Label!",
-	.frame = 1,
+	.flags = GP_WIDGET_LABEL_FRAME,
 };
 
 static struct tcase label_align = {

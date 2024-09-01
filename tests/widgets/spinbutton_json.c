@@ -31,7 +31,7 @@ static int spinbutton_json_load(struct tcase *t)
 		return TST_FAILED;
 	}
 
-	if (t->sel != spinbutton->choice->sel) {
+	if (t->sel != gp_widget_choice_sel_get(spinbutton)) {
 		tst_msg("Wrong choice selected!");
 		return TST_FAILED;
 	}
@@ -84,14 +84,18 @@ static const char *get_choice(gp_widget *self, size_t idx)
 
 static void set(gp_widget *self, size_t val)
 {
-	self->choice->sel = val;
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
+
+	choice->sel = val;
 }
 
 static size_t get(gp_widget *self, enum gp_widget_choice_op op)
 {
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
+
 	switch (op) {
 	case GP_WIDGET_CHOICE_OP_SEL:
-		return self->choice->sel;
+		return choice->sel;
 	case GP_WIDGET_CHOICE_OP_CNT:
 		return 2;
 	}

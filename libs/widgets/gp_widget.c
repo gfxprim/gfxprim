@@ -46,7 +46,6 @@ gp_widget *gp_widget_new(enum gp_widget_type type,
 	}
 
 	memset(ret, 0, size);
-	ret->payload = ret->payload_data;
 	ret->type = type;
 	ret->widget_class = widget_class;
 

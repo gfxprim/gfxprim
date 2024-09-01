@@ -13,18 +13,40 @@
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_widget_json.h>
 
+struct scroll_area_payload {
+	/* offset for the layout inside */
+	gp_coord x_off;
+	gp_coord y_off;
+
+	/*
+	 * If non-zero the widget minimal size is set into the stone
+	 * and the content scrolls if the inner widget size is bigger.
+	 */
+	gp_size min_w;
+	gp_size min_h;
+
+	int scrollbar_x:1;
+	int scrollbar_y:1;
+	int area_focused:1;
+	int child_focused:1;
+
+	gp_widget *child;
+};
+
 static gp_size scroll_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 	(void)ctx;
 	//TODO: units!
-	return self->scroll->min_w;
+	return scroll->min_w;
 }
 
 static gp_size scroll_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 	(void)ctx;
 	//TODO: units!
-	return self->scroll->min_h;
+	return scroll->min_h;
 }
 
 static gp_size scrollbar_size(const gp_widget_render_ctx *ctx)
@@ -34,46 +56,51 @@ static gp_size scrollbar_size(const gp_widget_render_ctx *ctx)
 
 static unsigned int scrolls_x(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	if (!self->scroll->min_w)
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	if (!scroll->min_w)
 		return 0;
 
-	gp_size min_w = gp_widget_min_w(self->scroll->child, ctx);
+	gp_size min_w = gp_widget_min_w(scroll->child, ctx);
 	gp_size scroll_w = scroll_min_w(self, ctx);
 
 	if (min_w > scroll_w) {
-		self->scroll->scrollbar_y = 1;
+		scroll->scrollbar_y = 1;
 		GP_DEBUG(4, "Scroll area %p scrolls horizontally", self);
 		return 1;
 	}
 
-	self->scroll->scrollbar_y = 0;
+	scroll->scrollbar_y = 0;
 	return 0;
 }
 
 static unsigned int scrolls_y(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	if (!self->scroll->min_h)
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	if (!scroll->min_h)
 		return 0;
 
-	gp_size min_h = gp_widget_min_h(self->scroll->child, ctx);
+	gp_size min_h = gp_widget_min_h(scroll->child, ctx);
 	gp_size scroll_h = scroll_min_h(self, ctx);
 
 	if (min_h > scroll_h) {
-		self->scroll->scrollbar_x = 1;
+		scroll->scrollbar_x = 1;
 		GP_DEBUG(4, "Scroll area %p scrolls vertically", self);
 		return 1;
 	}
 
-	self->scroll->scrollbar_x = 0;
+	scroll->scrollbar_x = 0;
 	return 0;
 }
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	gp_size min_w;
-	gp_size widget_min_w = gp_widget_min_w(self->scroll->child, ctx);
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+	gp_size widget_min_w = gp_widget_min_w(scroll->child, ctx);
 
-	if (!self->scroll->min_w)
+	if (!scroll->min_w)
 		min_w = widget_min_w;
 	else
 		min_w = GP_MIN(scroll_min_w(self, ctx), widget_min_w);
@@ -87,9 +114,10 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	gp_size min_h;
-	gp_size widget_min_h = gp_widget_min_w(self->scroll->child, ctx);
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+	gp_size widget_min_h = gp_widget_min_w(scroll->child, ctx);
 
-	if (!self->scroll->min_h)
+	if (!scroll->min_h)
 		min_h = widget_min_h;
 	else
 		min_h = GP_MIN(scroll_min_h(self, ctx), widget_min_h);
@@ -102,9 +130,9 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static gp_size scrollbar_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (area->scrollbar_x && area->scrollbar_y)
+	if (scroll->scrollbar_x && scroll->scrollbar_y)
 		return self->w - scrollbar_size(ctx);
 
 	return self->w;
@@ -112,9 +140,9 @@ static gp_size scrollbar_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static gp_size scrollbar_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (area->scrollbar_x && area->scrollbar_y)
+	if (scroll->scrollbar_x && scroll->scrollbar_y)
 		return self->h - scrollbar_size(ctx);
 
 	return self->h;
@@ -122,24 +150,28 @@ static gp_size scrollbar_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static gp_coord max_x_off(gp_widget *self)
 {
-	if (self->w > self->scroll->child->w)
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	if (self->w > scroll->child->w)
 		return 0;
 
-	return self->scroll->child->w - self->w;
+	return scroll->child->w - self->w;
 }
 
 static gp_coord max_y_off(gp_widget *self)
 {
-	if (self->h > self->scroll->child->h)
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	if (self->h > scroll->child->h)
 		return 0;
 
-	return self->scroll->child->h - self->h;
+	return scroll->child->h - self->h;
 }
 
 static void draw_vert_scroll_bar(gp_widget *self, const gp_widget_render_ctx *ctx,
                                  gp_coord x, gp_coord y, gp_size h, gp_size size, gp_pixel color)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 	gp_size asc = gp_text_ascent(ctx->font);
 
 	gp_fill_rect_xywh(ctx->buf, x, y, size, h, ctx->bg_color);
@@ -149,9 +181,9 @@ static void draw_vert_scroll_bar(gp_widget *self, const gp_widget_render_ctx *ct
 	gp_vline_xyh(ctx->buf, x + ctx->padd + asc/2, y, sh, color);
 
 	gp_size max_off = max_y_off(self);
-	gp_coord pos = ((sh - asc) * area->y_off + max_off/2) / max_off;
+	gp_coord pos = ((sh - asc) * scroll->y_off + max_off/2) / max_off;
 
-	gp_pixel col = area->area_focused ? ctx->sel_color : color;
+	gp_pixel col = scroll->area_focused ? ctx->sel_color : color;
 
 	gp_fill_rrect_xywh(ctx->buf, x + ctx->padd, y + pos, asc, asc, ctx->bg_color, ctx->fg_color, col);
 }
@@ -159,7 +191,7 @@ static void draw_vert_scroll_bar(gp_widget *self, const gp_widget_render_ctx *ct
 static void draw_horiz_scroll_bar(gp_widget *self, const gp_widget_render_ctx *ctx,
                                   gp_coord x, gp_coord y, gp_size w, gp_size size, gp_pixel color)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 	gp_size asc = gp_text_ascent(ctx->font);
 
 	gp_fill_rect_xywh(ctx->buf, x, y, w, size, ctx->bg_color);
@@ -169,9 +201,9 @@ static void draw_horiz_scroll_bar(gp_widget *self, const gp_widget_render_ctx *c
 	gp_hline_xyw(ctx->buf, x, y + ctx->padd + asc/2, sw, color);
 
 	gp_size max_off = max_x_off(self);
-	gp_coord pos = ((sw - asc) * area->x_off + max_off/2) / max_off;
+	gp_coord pos = ((sw - asc) * scroll->x_off + max_off/2) / max_off;
 
-	gp_pixel col = area->area_focused ? ctx->sel_color : color;
+	gp_pixel col = scroll->area_focused ? ctx->sel_color : color;
 
 	gp_fill_rrect_xywh(ctx->buf, x + pos, y + ctx->padd, asc, asc, ctx->bg_color, ctx->fg_color, col);
 }
@@ -179,12 +211,12 @@ static void draw_horiz_scroll_bar(gp_widget *self, const gp_widget_render_ctx *c
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 	gp_widget_render_ctx child_ctx = *ctx;
 	gp_pixmap child_buf;
 	gp_offset child_offset = {
-		.x = -area->x_off,
-		.y = -area->y_off,
+		.x = -scroll->x_off,
+		.y = -scroll->y_off,
 	};
 	gp_pixel text_color = ctx->text_color;
 
@@ -198,12 +230,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_size h = self->h;
 	gp_size size = scrollbar_size(ctx);
 
-	if (area->scrollbar_x) {
+	if (scroll->scrollbar_x) {
 		w -= size;
 		draw_vert_scroll_bar(self, ctx, self->x + offset->x + w, self->y + offset->y, h, size, text_color);
 	}
 
-	if (area->scrollbar_y) {
+	if (scroll->scrollbar_y) {
 		h -= size;
 		draw_horiz_scroll_bar(self, ctx, self->x + offset->x, self->y + offset->y + h, w, size, text_color);
 	}
@@ -221,15 +253,15 @@ static void render(gp_widget *self, const gp_offset *offset,
 	//TODO: Propagate flip
 	child_ctx.flip = NULL;
 
-	gp_widget_ops_render(area->child, &child_offset, &child_ctx, flags);
+	gp_widget_ops_render(scroll->child, &child_offset, &child_ctx, flags);
 	gp_rect_xywh(ctx->buf, self->x + offset->x, self->y + offset->y, w, h, text_color);
 }
 
 static int is_in_scrollbar_x(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int x)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (area->scrollbar_x) {
+	if (scroll->scrollbar_x) {
 		if (x > self->x + self->w - scrollbar_size(ctx))
 			return 1;
 	}
@@ -239,9 +271,9 @@ static int is_in_scrollbar_x(gp_widget *self, const gp_widget_render_ctx *ctx, u
 
 static int is_in_scrollbar_y(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int y)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (area->scrollbar_y) {
+	if (scroll->scrollbar_y) {
 		if (y > self->y + self->h - scrollbar_size(ctx))
 			return 1;
 	}
@@ -251,6 +283,8 @@ static int is_in_scrollbar_y(gp_widget *self, const gp_widget_render_ctx *ctx, u
 
 static void set_y_off(gp_widget *self, int y_off)
 {
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
 	if (y_off < 0) {
 		GP_WARN("y_off < 0");
 		return;
@@ -261,10 +295,10 @@ static void set_y_off(gp_widget *self, int y_off)
 		return;
 	}
 
-	if (self->scroll->y_off == y_off)
+	if (scroll->y_off == y_off)
 		return;
 
-	self->scroll->y_off = y_off;
+	scroll->y_off = y_off;
 
 	gp_widget_redraw(self);
 	gp_widget_redraw_children(self);
@@ -272,6 +306,8 @@ static void set_y_off(gp_widget *self, int y_off)
 
 static void set_x_off(gp_widget *self, int x_off)
 {
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
 	if (x_off < 0) {
 		GP_WARN("x_off < 0");
 		return;
@@ -282,10 +318,10 @@ static void set_x_off(gp_widget *self, int x_off)
 		return;
 	}
 
-	if (self->scroll->x_off == x_off)
+	if (scroll->x_off == x_off)
 		return;
 
-	self->scroll->x_off = x_off;
+	scroll->x_off = x_off;
 
 	gp_widget_redraw(self);
 	gp_widget_redraw_children(self);
@@ -323,7 +359,7 @@ static void scrollbar_event_x(gp_widget *self, const gp_widget_render_ctx *ctx, 
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
 	if (is_in_scrollbar_y(self, ctx, ev->st->cursor_y)) {
 		if (gp_ev_key_pressed(ev, GP_BTN_LEFT) ||
@@ -341,7 +377,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		}
 	}
 
-	if (area->area_focused) {
+	if (scroll->area_focused) {
 		if (ev->type != GP_EV_KEY)
 			return 0;
 
@@ -350,35 +386,35 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 		switch (ev->val) {
 		case GP_KEY_LEFT:
-			set_x_off(self, GP_MAX(0, area->x_off - 10));
+			set_x_off(self, GP_MAX(0, scroll->x_off - 10));
 		break;
 		case GP_KEY_RIGHT:
-			set_x_off(self, GP_MIN(max_x_off(self), area->x_off + 10));
+			set_x_off(self, GP_MIN(max_x_off(self), scroll->x_off + 10));
 		break;
 		case GP_KEY_UP:
-			set_y_off(self, GP_MAX(0, area->y_off - 10));
+			set_y_off(self, GP_MAX(0, scroll->y_off - 10));
 		break;
 		case GP_KEY_DOWN:
-			set_y_off(self, GP_MIN(max_y_off(self), area->y_off + 10));
+			set_y_off(self, GP_MIN(max_y_off(self), scroll->y_off + 10));
 		break;
 		}
 
 		return 0;
 	}
 
-	return gp_widget_ops_event_offset(area->child, ctx, ev, area->x_off, area->y_off);
+	return gp_widget_ops_event_offset(scroll->child, ctx, ev, scroll->x_off, scroll->y_off);
 }
 
 static int focus_scrollbar(gp_widget *self)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (area->area_focused)
+	if (scroll->area_focused)
 		return 1;
 
-	area->area_focused = 1;
-        gp_widget_ops_render_focus(area->child, GP_FOCUS_OUT);
-	area->child_focused = 0;
+	scroll->area_focused = 1;
+        gp_widget_ops_render_focus(scroll->child, GP_FOCUS_OUT);
+	scroll->child_focused = 0;
 
 	gp_widget_redraw(self);
 
@@ -387,10 +423,10 @@ static int focus_scrollbar(gp_widget *self)
 
 static void focus_out(gp_widget *self)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (area->area_focused) {
-		area->area_focused = 0;
+	if (scroll->area_focused) {
+		scroll->area_focused = 0;
 		gp_widget_redraw(self);
 	}
 }
@@ -398,14 +434,14 @@ static void focus_out(gp_widget *self)
 static int focus_widget(gp_widget *self, const gp_widget_render_ctx *ctx,
                          unsigned int x, unsigned int y)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (!gp_widget_ops_render_focus_xy(area->child, ctx, x + area->x_off, y + area->y_off))
+	if (!gp_widget_ops_render_focus_xy(scroll->child, ctx, x + scroll->x_off, y + scroll->y_off))
 		return 0;
 
 	focus_out(self);
 
-	area->child_focused = 1;
+	scroll->child_focused = 1;
 	return 1;
 }
 
@@ -421,8 +457,10 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 
 static int focus(gp_widget *self, int sel)
 {
-	if (self->scroll->child_focused) {
-		if (gp_widget_ops_render_focus(self->scroll->child, sel))
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	if (scroll->child_focused) {
+		if (gp_widget_ops_render_focus(scroll->child, sel))
 			return 1;
 	}
 
@@ -437,7 +475,9 @@ static int focus(gp_widget *self, int sel)
 
 static int focus_child(gp_widget *self, gp_widget *child)
 {
-	if (self->scroll->child != child)
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	if (scroll->child != child)
 		return 0;
 
 	focus_out(self);
@@ -446,52 +486,52 @@ static int focus_child(gp_widget *self, gp_widget *child)
 
 static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	gp_size child_min_w = gp_widget_min_w(area->child, ctx);
+	gp_size child_min_w = gp_widget_min_w(scroll->child, ctx);
 	gp_size w = self->w;
 
-	if (area->scrollbar_x)
+	if (scroll->scrollbar_x)
 		w -= scrollbar_size(ctx);
 
 	gp_size child_w = GP_MAX(child_min_w, w);
 
 	gp_coord x_off = max_x_off(self);
 
-	if (area->x_off > x_off)
-		area->x_off = x_off;
+	if (scroll->x_off > x_off)
+		scroll->x_off = x_off;
 
 	if (x_off == 0)
-		area->scrollbar_y = 0;
+		scroll->scrollbar_y = 0;
 	else
-		area->scrollbar_y = 1;
+		scroll->scrollbar_y = 1;
 
-	gp_widget_ops_distribute_w(area->child, ctx, child_w, new_wh);
+	gp_widget_ops_distribute_w(scroll->child, ctx, child_w, new_wh);
 }
 
 static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	gp_size child_min_h = gp_widget_min_h(area->child, ctx);
+	gp_size child_min_h = gp_widget_min_h(scroll->child, ctx);
 	gp_size h = self->h;
 
-	if (area->scrollbar_y)
+	if (scroll->scrollbar_y)
 		h -= scrollbar_size(ctx);
 
 	gp_size child_h = GP_MAX(child_min_h, h);
 
 	gp_coord y_off = max_y_off(self);
 
-	if (area->y_off > y_off)
-		area->y_off = y_off;
+	if (scroll->y_off > y_off)
+		scroll->y_off = y_off;
 
 	if (y_off == 0)
-		area->scrollbar_x = 0;
+		scroll->scrollbar_x = 0;
 	else
-		area->scrollbar_x = 1;
+		scroll->scrollbar_x = 1;
 
-	gp_widget_ops_distribute_h(area->child, ctx, child_h, new_wh);
+	gp_widget_ops_distribute_h(scroll->child, ctx, child_h, new_wh);
 }
 
 enum keys {
@@ -571,14 +611,16 @@ gp_widget *gp_widget_scroll_area_new(gp_size min_w, gp_size min_h, gp_widget *ch
 {
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_SCROLL_AREA, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_scroll_area));
+	ret = gp_widget_new(GP_WIDGET_SCROLL_AREA, GP_WIDGET_CLASS_NONE, sizeof(struct scroll_area_payload));
 	if (!ret)
 		return NULL;
 
-	ret->scroll->min_w = min_w;
-	ret->scroll->min_h = min_h;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(ret);
 
-	ret->scroll->child = child;
+	scroll->min_w = min_w;
+	scroll->min_h = min_h;
+
+	scroll->child = child;
 	gp_widget_set_parent(child, ret);
 
 	return ret;
@@ -586,19 +628,19 @@ gp_widget *gp_widget_scroll_area_new(gp_size min_w, gp_size min_h, gp_widget *ch
 
 static int move_x(gp_widget *self, gp_coord x_off)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	gp_coord old_x_off = area->x_off;
+	gp_coord old_x_off = scroll->x_off;
 
-	area->x_off += x_off;
+	scroll->x_off += x_off;
 
-	if (area->x_off < 0)
-		area->x_off = 0;
+	if (scroll->x_off < 0)
+		scroll->x_off = 0;
 
-	if (area->x_off + self->w > area->child->w)
-		area->x_off = area->child->w - self->w;
+	if (scroll->x_off + self->w > scroll->child->w)
+		scroll->x_off = scroll->child->w - self->w;
 
-	if (area->x_off == old_x_off)
+	if (scroll->x_off == old_x_off)
 		return 0;
 
 	return 1;
@@ -606,19 +648,19 @@ static int move_x(gp_widget *self, gp_coord x_off)
 
 static int move_y(gp_widget *self, gp_coord y_off)
 {
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	gp_coord old_y_off = area->y_off;
+	gp_coord old_y_off = scroll->y_off;
 
-	area->y_off += y_off;
+	scroll->y_off += y_off;
 
-	if (area->y_off < 0)
-		area->y_off = 0;
+	if (scroll->y_off < 0)
+		scroll->y_off = 0;
 
-	if (area->y_off + self->h > area->child->h)
-		area->y_off = area->child->h - self->h;
+	if (scroll->y_off + self->h > scroll->child->h)
+		scroll->y_off = scroll->child->h - self->h;
 
-	if (area->y_off == old_y_off)
+	if (scroll->y_off == old_y_off)
 		return 0;
 
 	return 1;
@@ -628,17 +670,17 @@ int gp_widget_scroll_area_move(gp_widget *self, gp_coord x_off, gp_coord y_off)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SCROLL_AREA, 1);
 
-	struct gp_widget_scroll_area *area = self->scroll;
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (!area->child)
+	if (!scroll->child)
 		return 1;
 
 	int ret = 0;
 
-	if (area->scrollbar_y)
+	if (scroll->scrollbar_y)
 		ret |= move_x(self, x_off);
 
-	if (area->scrollbar_x)
+	if (scroll->scrollbar_x)
 		ret |= move_y(self, y_off);
 
 	if (!ret)
@@ -653,10 +695,11 @@ int gp_widget_scroll_area_move(gp_widget *self, gp_coord x_off, gp_coord y_off)
 gp_widget *gp_widget_scroll_area_put(gp_widget *self, gp_widget *child)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_SCROLL_AREA, NULL);
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	gp_widget *ret = self->scroll->child;
+	gp_widget *ret = scroll->child;
 
-	self->scroll->child = child;
+	scroll->child = child;
 	gp_widget_set_parent(child, self);
 
 	gp_widget_resize(self);

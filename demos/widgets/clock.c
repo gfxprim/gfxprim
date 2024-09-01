@@ -12,8 +12,8 @@
 
 static void draw(gp_widget *pixmap, const gp_widget_render_ctx *ctx, gp_size line_w)
 {
-	gp_pixmap *pix = pixmap->pixmap->pixmap;
-	gp_pixel red   = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, pix);
+	gp_pixmap *pix = gp_widget_pixmap_get(pixmap);
+	gp_pixel red = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, pix);
 	gp_pixel fg = ctx->text_color;
 
 	gp_fill(pix, ctx->bg_color);
@@ -86,7 +86,7 @@ int pixmap_on_event(gp_widget_event *ev)
 static uint32_t timer_callback(gp_timer *self)
 {
 	gp_widget *pixmap = self->priv;
-	gp_widget_redraw(pixmap);
+	gp_widget_pixmap_redraw_all(pixmap);
 	return 1000;
 }
 

@@ -70,7 +70,7 @@ static int max_y_on_event(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	graph->graph->max_y = gp_widget_int_val_get(ev->self);
+	gp_widget_graph_ymax_set(graph, gp_widget_int_val_get(ev->self));
 	gp_widget_redraw(graph);
 
 	return 0;
@@ -83,7 +83,7 @@ static int min_y_on_event(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	graph->graph->min_y = gp_widget_int_val_get(ev->self);
+	gp_widget_graph_ymin_set(graph, gp_widget_int_val_get(ev->self));
 	gp_widget_redraw(graph);
 
 	return 0;
@@ -131,8 +131,7 @@ int main(int argc, char *argv[])
 	graph->align = GP_FILL;
 
 	gp_widget_graph_yrange_set(graph, 0, 5);
-
-	graph->graph->color = GP_WIDGETS_COL_BLUE;
+	gp_widget_graph_color_set(graph, GP_WIDGETS_COL_BLUE);
 
 	gp_widget_on_event_set(pause_btn, play_pause_on_event, NULL);
 	gp_widget_on_event_set(graph_type, graph_type_on_event, graph);

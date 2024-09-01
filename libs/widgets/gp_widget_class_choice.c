@@ -13,19 +13,19 @@
 
 static const char *get_choice(gp_widget *self, size_t idx)
 {
-	struct gp_widget_choice *choice = self->choice;
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
 
 	if (idx >= choice->cnt) {
 		GP_WARN("Choice idx %zu out of %zu", idx, choice->cnt);
 		return NULL;
 	}
 
-	return self->choice->choices[idx];
+	return choice->choices[idx];
 }
 
 static const char *get_arr_choice(gp_widget *self, size_t idx)
 {
-	struct gp_widget_choice *choice = self->choice;
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
 	const char *const *res;
 
 	if (idx >= choice->arr->memb_cnt) {
@@ -40,11 +40,13 @@ static const char *get_arr_choice(gp_widget *self, size_t idx)
 
 static size_t get(gp_widget *self, enum gp_widget_choice_op op)
 {
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
+
 	switch (op) {
 	case GP_WIDGET_CHOICE_OP_SEL:
-		return self->choice->sel;
+		return choice->sel;
 	case GP_WIDGET_CHOICE_OP_CNT:
-		return self->choice->cnt;
+		return choice->cnt;
 	}
 
 	return 0;
@@ -52,14 +54,16 @@ static size_t get(gp_widget *self, enum gp_widget_choice_op op)
 
 static size_t get_arr(gp_widget *self, enum gp_widget_choice_op op)
 {
-	if (!self->choice->arr)
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
+
+	if (!choice->arr)
 		return 0;
 
 	switch (op) {
 	case GP_WIDGET_CHOICE_OP_SEL:
-		return self->choice->sel;
+		return choice->sel;
 	case GP_WIDGET_CHOICE_OP_CNT:
-		return self->choice->arr->memb_cnt;
+		return choice->arr->memb_cnt;
 	}
 
 	return 0;
@@ -67,7 +71,9 @@ static size_t get_arr(gp_widget *self, enum gp_widget_choice_op op)
 
 static void set(gp_widget *self, size_t val)
 {
-	self->choice->sel = val;
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
+
+	choice->sel = val;
 }
 
 static const struct gp_widget_choice_ops choice_ops = {
@@ -109,17 +115,19 @@ static gp_widget *alloc_choice(enum gp_widget_type widget_type,
 	if (!ret)
 		return NULL;
 
-	ret->choice->choices = (void*)ret->choice->payload;
-	ret->choice->ops = &choice_ops;
-	ret->choice->cnt = choice_cnt;
-	ret->choice->sel = 0;
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(ret);
+
+	choice->choices = (void*)choice->payload;
+	choice->ops = &choice_ops;
+	choice->cnt = choice_cnt;
+	choice->sel = 0;
 
 	return ret;
 }
 
 static inline void call_set_sel(gp_widget *self, size_t sel)
 {
-	struct gp_widget_choice *choice = self->choice;
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
 
 	choice->ops->set(self, sel);
 }
@@ -145,11 +153,13 @@ static gp_widget *parse_choices(enum gp_widget_type widget_type,
 	if (!ret)
 		return NULL;
 
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(ret);
+
 	gp_json_reader_state_load(json, state);
 
 	char *save = val->buf;
 
-	val->buf = (void*)ret->choice->payload + cnt * sizeof(void*);
+	val->buf = (void*)choice->payload + cnt * sizeof(void*);
 
 	cnt = 0;
 
@@ -157,7 +167,7 @@ static gp_widget *parse_choices(enum gp_widget_type widget_type,
 		if (val->type != GP_JSON_STR)
 			continue;
 
-		ret->choice->choices[cnt++] = val->buf;
+		choice->choices[cnt++] = val->buf;
 		val->buf += strlen(val->buf) + 1;
 	}
 
@@ -218,7 +228,10 @@ gp_widget *gp_widget_choice_from_json(enum gp_widget_type widget_type,
 			}
 
 			ret = gp_widget_choice_ops_new(widget_type, desc->ops);
-			ret->choice->ops_priv = desc->ops_priv;
+			if (ret) {
+				struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(ret);
+				choice->ops_priv = desc->ops_priv;
+			}
 		break;
 		case SELECTED:
 			if (sel_set) {
@@ -276,12 +289,14 @@ gp_widget *gp_widget_choice_new(enum gp_widget_type widget_type,
 	if (!ret)
 		return NULL;
 
-	gp_string_arr_copy(choices, choice_cnt, ret->choice->payload);
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(ret);
+
+	gp_string_arr_copy(choices, choice_cnt, choice->payload);
 
 	if (selected >= choice_cnt)
 		GP_WARN("Invalid selected choice %zu, max=%zu", selected, choice_cnt);
 	else
-		ret->choice->sel = selected;
+		choice->sel = selected;
 
 	return ret;
 }
@@ -304,19 +319,21 @@ gp_widget *gp_widget_choice_arr_new(enum gp_widget_type widget_type, const void 
 	if (!ret)
 		return NULL;
 
-	ret->choice->arr = (void*)ret->choice->payload;
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(ret);
 
-	ret->choice->arr->memb_cnt = memb_cnt;
-	ret->choice->arr->memb_size = memb_size;
-	ret->choice->arr->memb_off = memb_off;
-	ret->choice->arr->ptr = array;
+	choice->arr = (void*)choice->payload;
+
+	choice->arr->memb_cnt = memb_cnt;
+	choice->arr->memb_size = memb_size;
+	choice->arr->memb_off = memb_off;
+	choice->arr->ptr = array;
 
 	if (sel >= memb_cnt)
 		GP_WARN("Invalid selected choice %zu, max=%zu", sel, memb_cnt);
 	else
-		ret->choice->sel = sel;
+		choice->sel = sel;
 
-	ret->choice->ops = &gp_widget_choice_arr_ops;
+	choice->ops = &gp_widget_choice_arr_ops;
 
 	return ret;
 }
@@ -329,7 +346,9 @@ gp_widget *gp_widget_choice_ops_new(enum gp_widget_type widget_type,
 	if (!ret)
 		return NULL;
 
-	ret->choice->ops = ops;
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(ret);
+
+	choice->ops = ops;
 
 	size_t cnt = call_get_cnt(ret);
 	size_t sel = call_get_sel(ret);
@@ -370,6 +389,7 @@ __attribute__((visibility ("hidden")))
 void gp_widget_choice_sel_set_(gp_widget *self, size_t sel)
 {
 	size_t cnt = call_get_cnt(self);
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
 
 	if (sel >= cnt) {
 		GP_WARN("Selected choice %zu >= cnt %zu!", sel, cnt);
@@ -381,7 +401,7 @@ void gp_widget_choice_sel_set_(gp_widget *self, size_t sel)
 	if (cur_sel == sel)
 		return;
 
-	self->choice->prev_sel = cur_sel;
+	choice->prev_sel = cur_sel;
 
 	call_set_sel(self, sel);
 }
@@ -405,6 +425,7 @@ size_t gp_widget_choice_sel_get(gp_widget *self)
 size_t gp_widget_choice_prev_sel_get(gp_widget *self)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_CHOICE, 0);
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
 
-	return self->choice->prev_sel;
+	return choice->prev_sel;
 }

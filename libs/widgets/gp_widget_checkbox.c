@@ -12,16 +12,14 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
-struct checkbox_priv {
+struct checkbox_payload {
 	char *label;
 	char data[];
 };
 
-#define CHECKBOX_PRIV(widget) ((struct checkbox_priv *)(GP_WIDGET_CLASS_BOOL(widget)->payload))
-
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct checkbox_priv *priv = CHECKBOX_PRIV(self);
+	struct checkbox_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(self);
 	const gp_text_style *font = gp_widget_focused_font(ctx, 1);
 	unsigned int text_a = gp_text_ascent(font);
 	unsigned int text_w = 0;
@@ -88,7 +86,7 @@ static void cross(gp_pixmap *buf, unsigned int x, unsigned int y,
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
-	struct checkbox_priv *priv = CHECKBOX_PRIV(self);
+	struct checkbox_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(self);
 	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
 	unsigned int text_a = gp_text_ascent(ctx->font);
 	unsigned int x = self->x + offset->x;
@@ -217,7 +215,7 @@ struct gp_widget_ops gp_widget_checkbox_ops = {
 gp_widget *gp_widget_checkbox_new(const char *label, bool val)
 {
 	gp_widget *ret;
-	size_t size = sizeof(gp_widget_class_bool) + sizeof(struct checkbox_priv);
+	size_t size = sizeof(gp_widget_class_bool) + sizeof(struct checkbox_payload);
 
 	size += label ? strlen(label) + 1 : 0;
 
@@ -225,7 +223,7 @@ gp_widget *gp_widget_checkbox_new(const char *label, bool val)
 	if (!ret)
 		return NULL;
 
-	struct checkbox_priv *priv = CHECKBOX_PRIV(ret);
+	struct checkbox_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(ret);
 
 	if (label) {
 		priv->label = priv->data;
@@ -242,7 +240,7 @@ gp_widget *gp_widget_checkbox_new(const char *label, bool val)
 const char *gp_widget_checkbox_label_get(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_CHECKBOX, NULL);
-	struct checkbox_priv *priv = CHECKBOX_PRIV(self);
+	struct checkbox_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(self);
 
 	return priv->label;
 }

@@ -100,37 +100,25 @@ struct gp_widget_grid_cell {
 	uint8_t fill;
 };
 
-/* row/column border padding and fill coefs */
-struct gp_widget_grid_border {
+/** @brief Describes a row or a column border or a gap between cells. */
+typedef struct gp_widget_grid_gap {
+	/**
+	 * @brief A padding, static part of the border/gap.
+	 *
+	 * This is a size in an unspecified unit of the border/gap that is
+	 * accounted for when minimal size of the grid is calculated.
+	 */
 	uint8_t padd;
+	/**
+	 * @brief A dynamic part of the border/gap.
+	 *
+	 * If widget alignment is set to fill in either horizontal or vertical
+	 * direction any leftover space may need to be distributed based on the
+	 * fill coeficients for the cells and borders/gaps. The higher the fill
+	 * coeficient is the more leftover space will be allocated.
+	 */
 	uint8_t fill;
-};
-
-struct gp_widget_grid {
-	unsigned int cols, rows;
-
-	unsigned int focused_col;
-	unsigned int focused_row;
-
-	/* if set a widget in a grid is focused */
-	int focused:1;
-	/* if set frame is rendered around the grid */
-	int frame:1;
-	/* if set the grid all columns and all rows have the same size */
-	int uniform:1;
-
-	/* cell column sizes offsets and fill coefs */
-	struct gp_widget_grid_cell *col_s;
-	/* cell row sizes offsets and fill coefs */
-	struct gp_widget_grid_cell *row_s;
-
-	/* column border padding and fill coefs */
-	struct gp_widget_grid_border *col_b;
-	/* row border padding and fill coefs */
-	struct gp_widget_grid_border *row_b;
-
-	gp_widget **widgets;
-};
+} gp_widget_grid_gap;
 
 /**
  * @brief Allocates and initializes a widget grid.
@@ -145,6 +133,68 @@ struct gp_widget_grid {
  */
 gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows,
                               enum gp_widget_grid_flags flags);
+
+/**
+ * @brief Returns number of grid columns.
+ *
+ * @param self A grid widget.
+ * @return A number of grid columns.
+ */
+unsigned int gp_widget_grid_cols_get(gp_widget *self);
+
+/**
+ * @brief Returns number of grid rows.
+ *
+ * @param self A grid widget.
+ * @return A number of grid rows.
+ */
+unsigned int gp_widget_grid_rows_get(gp_widget *self);
+
+/**
+ * @brief Returns a widget grid horizontal borders.
+ *
+ * Returns a pointer to an array that describes the outher border and gaps
+ * between grid cells.
+ *
+ * The size of the array is columns + 1 and the first and last element of the
+ * array describes grid left and right border while the inner elements describe
+ * the gaps between columns.
+ *
+ * @param self A grid widget.
+ * @return An array of columns + 1.
+ */
+const gp_widget_grid_gap *gp_widget_grid_cols_gaps_get(gp_widget *self);
+
+/**
+ * @brief Returns a widget grid vertical borders.
+ *
+ * Returns a pointer to an array that describes the outher border and gaps
+ * between grid cells.
+ *
+ * The size of the array is rows + 1 and the first and last element of the
+ * array describes grid top and bottom border while the inner elements describe the gaps
+ * between rows.
+ *
+ * @param self A grid widget.
+ * @return An array of rows + 1.
+ */
+const gp_widget_grid_gap *gp_widget_grid_rows_gaps_get(gp_widget *self);
+
+/**
+ * Returns widget grid flags.
+ *
+ * @param self A grid widget.
+ * @return Widget grid flags.
+ */
+enum gp_widget_grid_flags gp_widget_grid_flags_get(gp_widget *self);
+
+/**
+ * Sets widget grid flags.
+ *
+ * @param self A grid widget.
+ * @param flags Widget grid flags.
+ */
+void gp_widget_grid_flags_set(gp_widget *self, enum gp_widget_grid_flags flags);
 
 /**
  * @brief Puts a child widget into a frame widget.

@@ -151,11 +151,6 @@ typedef enum gp_widget_stock_type {
  */
 #define GP_WIDGET_STOCK_TYPE(type) ((type) & GP_WIDGET_STOCK_TYPE_MASK)
 
-struct gp_widget_stock {
-	enum gp_widget_stock_type type;
-	gp_widget_size min_size;
-};
-
 /**
  * @brief Renders a stock image into a pixmap.
  *

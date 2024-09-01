@@ -14,7 +14,7 @@ static gp_pixmap *image;
 static void redraw(gp_widget_event *ev)
 {
 	gp_widget *pixmap = ev->self;
-	gp_pixmap *dst = pixmap->pixmap->pixmap;
+	gp_pixmap *dst = gp_widget_pixmap_get(pixmap);
 	gp_offset *offset = ev->ptr;
 
 	if (image)
@@ -32,8 +32,7 @@ static void alloc_and_blit(gp_widget_event *ev)
 	if (image)
 		gp_blit_xywh(image, 0, 0, p->w, p->h, p, 0, 0);
 
-	gp_pixmap_free(w->pixmap->pixmap);
-	w->pixmap->pixmap = p;
+	gp_pixmap_free(gp_widget_pixmap_set(w, p));
 }
 
 int pixmap_on_event(gp_widget_event *ev)

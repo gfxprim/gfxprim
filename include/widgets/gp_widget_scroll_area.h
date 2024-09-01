@@ -9,27 +9,6 @@
 #ifndef GP_WIDGET_SCROLL_AREA_H
 #define GP_WIDGET_SCROLL_AREA_H
 
-struct gp_widget_scroll_area {
-	/* offset for the layout inside */
-	gp_coord x_off;
-	gp_coord y_off;
-
-	/*
-	 * If non-zero the widget minimal size is set into the stone
-	 * and the content scrolls if the inner widget size is bigger.
-	 */
-	gp_size min_w;
-	gp_size min_h;
-
-	/* Internal do not touch */
-	int scrollbar_x:1;
-	int scrollbar_y:1;
-	int area_focused:1;
-	int child_focused:1;
-
-	gp_widget *child;
-};
-
 /**
  * @brief Allocate and initialize a scroll area widget.
  *

@@ -261,7 +261,7 @@ static int tbox_del(void)
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
 	if (cur_pos.chars != 5 || cur_pos.bytes != 5) {
 		tst_msg("Wrong cursor position %zu %zu expected 5 '%s'",
-		        cur_pos.chars, cur_pos.bytes, tbox->tbox->buf);
+		        cur_pos.chars, cur_pos.bytes, gp_widget_tbox_text(tbox));
 		return TST_FAILED;
 	}
 

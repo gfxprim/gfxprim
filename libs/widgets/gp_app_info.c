@@ -158,8 +158,8 @@ void gp_app_info_dialog_run(void)
 	w = gp_widget_by_uid(uids, "app_info", GP_WIDGET_GRID);
 	if (w) {
 		if (app_info.authors) {
-			gp_widget_grid_row_append(w);
-			gp_widget_grid_put(w, 0, w->grid->rows-1, authors(app_info.authors));
+			unsigned int row = gp_widget_grid_row_append(w);
+			gp_widget_grid_put(w, 0, row, authors(app_info.authors));
 		}
 	}
 

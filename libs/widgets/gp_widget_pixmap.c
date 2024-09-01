@@ -13,14 +13,29 @@
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_widget_json.h>
 
+struct pixmap_payload {
+	gp_widget_size min_w;
+	gp_widget_size min_h;
+	gp_pixmap *pixmap;
+	int bbox_set:1;
+	int redraw_all:1;
+	/** Bounding box */
+	gp_bbox bbox;
+};
+
+
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	return gp_widget_size_units_get(&self->pixmap->min_w, ctx);
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
+
+	return gp_widget_size_units_get(&pixmap->min_w, ctx);
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	return gp_widget_size_units_get(&self->pixmap->min_h, ctx);
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
+
+	return gp_widget_size_units_get(&pixmap->min_h, ctx);
 }
 
 static inline void redraw_passthrough(gp_widget *self,
@@ -28,6 +43,7 @@ static inline void redraw_passthrough(gp_widget *self,
                                       gp_coord x, gp_coord y,
                                       gp_size w, gp_size h)
 {
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
 	gp_pixmap sub_pix;
 
 	/*
@@ -43,9 +59,9 @@ static inline void redraw_passthrough(gp_widget *self,
 
 	gp_sub_pixmap(ctx->buf, &sub_pix, x, y, w, h);
 
-	self->pixmap->pixmap = &sub_pix;
+	pixmap->pixmap = &sub_pix;
 	int ret = gp_widget_send_event(self, GP_WIDGET_EVENT_REDRAW, ctx, &sub_box);
-	self->pixmap->pixmap = NULL;
+	pixmap->pixmap = NULL;
 
 	/*
 	 * Request full/partial update based on return value from the handler.
@@ -62,21 +78,22 @@ static inline void redraw_buffered(gp_widget *self,
                                    gp_coord x, gp_coord y, gp_size w, gp_size h,
 				   int flags)
 {
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
 	gp_bbox box = {};
 
 	GP_DEBUG(2, "Blitting buffered pixmap %ux%u",
-		 self->pixmap->pixmap->w, self->pixmap->pixmap->h);
+		 pixmap->pixmap->w, pixmap->pixmap->h);
 
 	/* Complete redraw requested by the application */
-	if (self->pixmap->redraw_all) {
+	if (pixmap->redraw_all) {
 		box = gp_bbox_pack(x, y, w, h);
 		goto redraw;
 	}
 
 	/* Partial redraw requested by the application */
-	if (self->pixmap->bbox_set) {
+	if (pixmap->bbox_set) {
 		/* Move the bouding box since the application box is relative to widget */
-		box = gp_bbox_move(self->pixmap->bbox, x, y);
+		box = gp_bbox_move(pixmap->bbox, x, y);
 		//TODO check where this comes from
 		box.w += 1;
 		box.h += 1;
@@ -115,7 +132,7 @@ static inline void redraw_buffered(gp_widget *self,
 	box = gp_bbox_intersection(box, gp_bbox_pack(x, y, w, h));
 
 redraw:
-	gp_blit_xywh(self->pixmap->pixmap, box.x - x, box.y - y,
+	gp_blit_xywh(pixmap->pixmap, box.x - x, box.y - y,
 	             box.w, box.h,
 	             ctx->buf, box.x, box.y);
 
@@ -125,6 +142,8 @@ redraw:
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
+
 	gp_coord x = self->x + offset->x;
 	gp_coord y = self->y + offset->y;
 	gp_size w = self->w;
@@ -133,13 +152,13 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (flags & GP_WIDGET_COLOR_SCHEME)
 		gp_widget_send_event(self, GP_WIDGET_EVENT_COLOR_SCHEME, ctx);
 
-	if (!self->pixmap->pixmap)
+	if (!pixmap->pixmap)
 		redraw_passthrough(self, ctx, x, y, w, h);
 	else
 		redraw_buffered(self, ctx, x, y, w, h, flags);
 
-	self->pixmap->redraw_all = 0;
-	self->pixmap->bbox_set = 0;
+	pixmap->redraw_all = 0;
+	pixmap->bbox_set = 0;
 }
 
 /*
@@ -231,15 +250,17 @@ gp_widget *gp_widget_pixmap_new(gp_widget_size w, gp_widget_size h,
 {
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_PIXMAP, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_pixmap));
+	ret = gp_widget_new(GP_WIDGET_PIXMAP, GP_WIDGET_CLASS_NONE, sizeof(struct pixmap_payload));
 	if (!ret)
 		return NULL;
 
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(ret);
+
 	ret->on_event = on_event;
 	ret->priv = priv;
-	ret->pixmap->min_w = w;
-	ret->pixmap->min_h = h;
-	ret->pixmap->pixmap = NULL;
+	pixmap->min_w = w;
+	pixmap->min_h = h;
+	pixmap->pixmap = NULL;
 
 	return ret;
 }
@@ -249,33 +270,55 @@ void gp_widget_pixmap_redraw(gp_widget *self,
                              gp_size w, gp_size h)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PIXMAP, );
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
 
-	if (self->pixmap->redraw_all)
+	if (pixmap->redraw_all)
 		return;
 
 	gp_bbox box = gp_bbox_pack(x, y, w, h);
-	if (self->pixmap->bbox_set) {
-		self->pixmap->bbox = gp_bbox_merge(self->pixmap->bbox, box);
+	if (pixmap->bbox_set) {
+		pixmap->bbox = gp_bbox_merge(pixmap->bbox, box);
 		goto exit;
 	}
 
-	self->pixmap->bbox_set = 1;
-	self->pixmap->bbox = box;
+	pixmap->bbox_set = 1;
+	pixmap->bbox = box;
 
 	gp_widget_redraw(self);
 exit:
 	GP_DEBUG(2, "Schedulling partiall " GP_BBOX_FMT " pixmap (%p) update",
-	         GP_BBOX_PARS(self->pixmap->bbox), self);
+	         GP_BBOX_PARS(pixmap->bbox), self);
 }
 
 void gp_widget_pixmap_redraw_all(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PIXMAP, );
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
 
-	self->pixmap->redraw_all = 1;
-	self->pixmap->bbox_set = 0;
+	pixmap->redraw_all = 1;
+	pixmap->bbox_set = 0;
 
 	GP_DEBUG(2, "Schedulling pixmap (%p) update", self);
 
 	gp_widget_redraw(self);
+}
+
+gp_pixmap *gp_widget_pixmap_get(gp_widget *self)
+{
+
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PIXMAP, NULL);
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
+
+	return pixmap->pixmap;
+}
+
+gp_pixmap *gp_widget_pixmap_set(gp_widget *self, gp_pixmap *pix)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_PIXMAP, NULL);
+	struct pixmap_payload *pixmap = GP_WIDGET_PAYLOAD(self);
+	gp_pixmap *ret = pixmap->pixmap;
+
+	pixmap->pixmap = pix;
+
+	return ret;
 }

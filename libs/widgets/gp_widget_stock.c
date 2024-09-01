@@ -10,14 +10,23 @@
 
 #include <widgets/gp_widgets.h>
 
+struct gp_widget_stock {
+	enum gp_widget_stock_type type;
+	gp_widget_size min_size;
+};
+
 static unsigned int stock_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	return GP_ODD_UP(gp_widget_size_units_get(&self->stock->min_size, ctx));
+	struct gp_widget_stock *stock = GP_WIDGET_PAYLOAD(self);
+
+	return GP_ODD_UP(gp_widget_size_units_get(&stock->min_size, ctx));
 }
 
 static unsigned int stock_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	return GP_ODD_UP(gp_widget_size_units_get(&self->stock->min_size, ctx));
+	struct gp_widget_stock *stock = GP_WIDGET_PAYLOAD(self);
+
+	return GP_ODD_UP(gp_widget_size_units_get(&stock->min_size, ctx));
 }
 
 static void render_stock_err_warn(gp_pixmap *pix,
@@ -1264,6 +1273,8 @@ void gp_widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 static void stock_render(gp_widget *self, const gp_offset *offset,
                          const gp_widget_render_ctx *ctx, int flags)
 {
+	struct gp_widget_stock *stock = GP_WIDGET_PAYLOAD(self);
+
 	gp_coord x = self->x + offset->x;
 	gp_coord y = self->y + offset->y;
 	gp_coord w = self->w;
@@ -1273,7 +1284,7 @@ static void stock_render(gp_widget *self, const gp_offset *offset,
 
 	(void) flags;
 
-	switch (self->stock->type) {
+	switch (stock->type) {
 	case GP_WIDGET_STOCK_ARROW_UP:
 	case GP_WIDGET_STOCK_ARROW_DOWN:
 	case GP_WIDGET_STOCK_ARROW_LEFT:
@@ -1285,7 +1296,7 @@ static void stock_render(gp_widget *self, const gp_offset *offset,
 	break;
 	}
 
-	enum gp_widget_stock_type type = self->stock->type;
+	enum gp_widget_stock_type type = stock->type;
 
 	if (self->focused)
 		type |= GP_WIDGET_STOCK_FOCUSED;
@@ -1475,12 +1486,14 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size mi
 	if (!ret)
 		return NULL;
 
-	if (GP_WIDGET_SIZE_EQ(min_size, GP_WIDGET_SIZE_DEFAULT))
-		ret->stock->min_size = GP_WIDGET_SIZE(0, 2, 1);
-	else
-		ret->stock->min_size = min_size;
+	struct gp_widget_stock *stock = GP_WIDGET_PAYLOAD(ret);
 
-	ret->stock->type = type;
+	if (GP_WIDGET_SIZE_EQ(min_size, GP_WIDGET_SIZE_DEFAULT))
+		stock->min_size = GP_WIDGET_SIZE(0, 2, 1);
+	else
+		stock->min_size = min_size;
+
+	stock->type = type;
 	ret->no_events = 1;
 
 	return ret;
@@ -1489,8 +1502,9 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size mi
 void gp_widget_stock_type_set(gp_widget *self, enum gp_widget_stock_type type)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_STOCK, );
+	struct gp_widget_stock *stock = GP_WIDGET_PAYLOAD(self);
 
-	if (self->stock->type == type)
+	if (stock->type == type)
 		return;
 
 	if (!gp_widget_stock_type_name(type)) {
@@ -1498,6 +1512,6 @@ void gp_widget_stock_type_set(gp_widget *self, enum gp_widget_stock_type type)
 		return;
 	}
 
-	self->stock->type = type;
+	stock->type = type;
 	gp_widget_redraw(self);
 }

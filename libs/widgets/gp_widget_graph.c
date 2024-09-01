@@ -13,14 +13,41 @@
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_widget_json.h>
 
+struct gp_widget_graph {
+	gp_widget_size min_w;
+	gp_widget_size min_h;
+
+	const char *x_label;
+	const char *y_label;
+
+	long min_y_fixed:1;
+	long max_y_fixed:1;
+
+	/* Graph scaling window */
+	double min_x;
+	double max_x;
+	double min_y;
+	double max_y;
+
+	/* Graph data */
+	enum gp_widget_graph_style graph_style;
+	enum gp_widgets_color color;
+	gp_cbuffer data_idx;
+	struct gp_widget_graph_point *data;
+};
+
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	return gp_widget_size_units_get(&self->graph->min_w, ctx);
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	return gp_widget_size_units_get(&graph->min_w, ctx);
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	return gp_widget_size_units_get(&self->graph->min_h, ctx);
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	return gp_widget_size_units_get(&graph->min_h, ctx);
 }
 
 static gp_coord transform_x(struct gp_widget_graph *graph, double x, gp_coord w)
@@ -117,7 +144,7 @@ static void render_fill_graph(struct gp_widget_graph *graph,
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
-	struct gp_widget_graph *graph = self->graph;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 	gp_coord x = self->x + offset->x;
 	gp_coord y = self->y + offset->y;
 	gp_size w = self->w;
@@ -255,10 +282,12 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 	if (!ret)
 		return NULL;
 
-	if (style != GP_WIDGET_GRAPH_STYLE_MAX)
-		ret->graph->graph_style = style;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(ret);
 
-	ret->graph->color = color;
+	if (style != GP_WIDGET_GRAPH_STYLE_MAX)
+		graph->graph_style = style;
+
+	graph->color = color;
 
 	return ret;
 }
@@ -281,22 +310,24 @@ gp_widget *gp_widget_graph_new(gp_widget_size min_w, gp_widget_size min_h,
 	if (!ret)
 		return NULL;
 
-	ret->graph->data = malloc(sizeof(struct gp_widget_graph_point) * max_data_points);
-	if (!ret) {
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(ret);
+
+	graph->data = malloc(sizeof(struct gp_widget_graph_point) * max_data_points);
+	if (!graph->data) {
 		free(ret);
 		return NULL;
 	}
 
 	if (x_label)
-		ret->graph->x_label = strdup(x_label);
+		graph->x_label = strdup(x_label);
 
 	if (y_label)
-		ret->graph->y_label = strdup(y_label);
+		graph->y_label = strdup(y_label);
 
-	ret->graph->min_w = min_w;
-	ret->graph->min_h = min_h;
+	graph->min_w = min_w;
+	graph->min_h = min_h;
 
-	gp_cbuffer_init(&ret->graph->data_idx, max_data_points);
+	gp_cbuffer_init(&graph->data_idx, max_data_points);
 
 	return ret;
 }
@@ -332,7 +363,7 @@ static void new_min_max(struct gp_widget_graph *graph)
 void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
-	struct gp_widget_graph *graph = self->graph;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 
 	if (style >= GP_WIDGET_GRAPH_STYLE_MAX) {
 		GP_WARN("Invalid graph style %i\n", style);
@@ -350,7 +381,7 @@ void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style
 void gp_widget_graph_point_add(gp_widget *self, double x, double y)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
-	struct gp_widget_graph *graph = self->graph;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 
 	size_t pos = gp_cbuffer_append(&graph->data_idx);
 
@@ -365,7 +396,7 @@ void gp_widget_graph_point_add(gp_widget *self, double x, double y)
 void gp_widget_graph_yrange_set(gp_widget *self, double min_y, double max_y)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
-	struct gp_widget_graph *graph = self->graph;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 
 	graph->min_y = min_y;
 	graph->max_y = max_y;
@@ -377,7 +408,7 @@ void gp_widget_graph_yrange_set(gp_widget *self, double min_y, double max_y)
 void gp_widget_graph_ymin_set(gp_widget *self, double min_y)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
-	struct gp_widget_graph *graph = self->graph;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 
 	graph->min_y = min_y;
 
@@ -387,7 +418,7 @@ void gp_widget_graph_ymin_set(gp_widget *self, double min_y)
 void gp_widget_graph_ymax_set(gp_widget *self, double max_y)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
-	struct gp_widget_graph *graph = self->graph;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 
 	graph->max_y = max_y;
 
@@ -397,7 +428,7 @@ void gp_widget_graph_ymax_set(gp_widget *self, double max_y)
 void gp_widget_graph_yrange_clear(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
-	struct gp_widget_graph *graph = self->graph;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 
 	graph->min_y_fixed = 0;
 	graph->max_y_fixed = 0;
@@ -408,7 +439,7 @@ void gp_widget_graph_yrange_clear(gp_widget *self)
 void gp_widget_graph_color_set(gp_widget *self, enum gp_widgets_color color)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
-	struct gp_widget_graph *graph = self->graph;
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 
 	graph->color = color;
 }

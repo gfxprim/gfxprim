@@ -15,12 +15,63 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
+struct tbox_payload {
+	/* Text buffer */
+	char *buf;
+	/* How many characters should the textbox fit. */
+	size_t size;
+	/* Help text shown when tbox is empty */
+	char *help;
+
+	/*
+	 * If not NULL the tbox can contain only characters from this
+	 * string, this is used as a hint when minimal tbox size is
+	 * accounted for.
+	 */
+	const char *filter;
+
+	/*
+	 * Delimiter list for double click selection.
+	 *
+	 * If NULL defaults to whitespaces.
+	 *
+	 * This is set automatically by a certain tbox types.
+	 */
+	const char *delim;
+
+	/* enum gp_widget_tbox_type */
+	uint16_t type;
+
+	uint16_t alert:1;
+	uint16_t clear_on_input:1;
+
+	/* Maximal number of unicode characters the textbox can hold. */
+	size_t max_size;
+
+	/* Cursor position */
+	gp_utf8_pos cur_pos;
+	gp_utf8_pos cur_pos_saved;
+	/* Offset on left size, part of a string that is not shown */
+	gp_utf8_pos off_left;
+
+	/* Selection */
+	gp_utf8_pos sel_left;
+	gp_utf8_pos sel_right;
+
+	gp_widget_tattr tattr;
+
+	//TODO: Move to event state
+	uint64_t last_click;
+	uint32_t click_cursor_x;
+};
+
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 	unsigned int ret = 2 * ctx->padd;
-	const char *filter = self->tbox->filter;
-	size_t text_len = self->tbox->size;
-	const gp_text_style *font = gp_widget_tattr_font(self->tbox->tattr, ctx);
+	const char *filter = tbox->filter;
+	size_t text_len = tbox->size;
+	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
 
 	if (filter)
 		ret += gp_text_max_width_chars(font, filter, text_len);
@@ -32,7 +83,8 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	const gp_text_style *font = gp_widget_tattr_font(self->tbox->tattr, ctx);
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
 
 	return 2 * ctx->padd + gp_text_ascent(font);
 }
@@ -48,17 +100,17 @@ static const char *hidden_str(const char *buf)
 	return s + sizeof(s) - len - 1;
 }
 
-static int is_sel(gp_widget *self)
+static int is_sel(struct tbox_payload *tbox)
 {
-	return self->tbox->sel_left.bytes < self->tbox->sel_right.bytes;
+	return tbox->sel_left.bytes < tbox->sel_right.bytes;
 }
 
-static int is_hidden(struct gp_widget_tbox *tbox)
+static int is_hidden(struct tbox_payload *tbox)
 {
 	return tbox->type == GP_WIDGET_TBOX_HIDDEN;
 }
 
-static const char *tbox_visible_str(struct gp_widget_tbox *tbox)
+static const char *tbox_visible_str(struct tbox_payload *tbox)
 {
 	if (is_hidden(tbox))
 		return hidden_str(tbox->buf);
@@ -69,8 +121,8 @@ static const char *tbox_visible_str(struct gp_widget_tbox *tbox)
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
-	const gp_text_style *font = gp_widget_tattr_font(self->tbox->tattr, ctx);
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
@@ -88,13 +140,13 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, fr_color);
 
-	if (!(*self->tbox->buf) && !self->focused) {
-		if (!self->tbox->help)
+	if (!(*tbox->buf) && !self->focused) {
+		if (!tbox->help)
 			return;
 
 		gp_text_fit(ctx->buf, font, x + ctx->padd, y + ctx->padd,
 		            w - 2 * ctx->padd, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
-		            ctx->col_disabled, ctx->bg_color, self->tbox->help);
+		            ctx->col_disabled, ctx->bg_color, tbox->help);
 		return;
 	}
 
@@ -138,7 +190,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_line(ctx->buf, cx+s, cy, cx, cy+s, text_color);
 	}
 
-	if (self->focused && !is_sel(self)) {
+	if (self->focused && !is_sel(tbox)) {
 		unsigned int cursor_x = x + ctx->padd;
 		cursor_x += gp_text_wbbox_len(font, str + left.bytes,
 		                              tbox->cur_pos.chars - left.chars);
@@ -153,7 +205,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		    GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 		    text_color, ctx->bg_color, str, right.chars - left.chars);
 
-	if (!is_sel(self))
+	if (!is_sel(tbox))
 		return;
 
 	gp_utf8_pos sel_left = gp_utf8_pos_max(tbox->sel_left, left);
@@ -183,15 +235,19 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 static void schedule_alert(gp_widget *self)
 {
-	self->tbox->alert = 1;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	tbox->alert = 1;
 	gp_widget_redraw(self);
 }
 
 static void clear_alert(gp_widget *self)
 {
-	if (self->tbox->alert) {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	if (tbox->alert) {
 		gp_widget_render_timer_cancel(self);
-		self->tbox->alert = 0;
+		tbox->alert = 0;
 	}
 }
 
@@ -222,21 +278,25 @@ static int filter(const char *filter, char ch)
 
 static int sel_clr(gp_widget *self)
 {
-	if (!is_sel(self))
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	if (!is_sel(tbox))
 		return 0;
 
-	self->tbox->sel_left = gp_utf8_pos_first();
-	self->tbox->sel_right = gp_utf8_pos_first();
+	tbox->sel_left = gp_utf8_pos_first();
+	tbox->sel_right = gp_utf8_pos_first();
 
 	return 1;
 }
 
 static int sel_clr_left(gp_widget *self)
 {
-	if (!is_sel(self))
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	if (!is_sel(tbox))
 		return 0;
 
-	self->tbox->cur_pos = self->tbox->sel_left;
+	tbox->cur_pos = tbox->sel_left;
 	sel_clr(self);
 
 	return 1;
@@ -244,10 +304,12 @@ static int sel_clr_left(gp_widget *self)
 
 static int sel_clr_right(gp_widget *self)
 {
-	if (!is_sel(self))
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	if (!is_sel(tbox))
 		return 0;
 
-	self->tbox->cur_pos = self->tbox->sel_right;
+	tbox->cur_pos = tbox->sel_right;
 	sel_clr(self);
 
 	return 1;
@@ -255,12 +317,14 @@ static int sel_clr_right(gp_widget *self)
 
 static int sel_del(gp_widget *self)
 {
-	if (!is_sel(self))
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	if (!is_sel(tbox))
 		return 0;
 
 	//TODO: Optimize? we have the right offsets at hand, we can simply cut the string
-	gp_widget_tbox_del(self, self->tbox->sel_left.chars,
-	                   GP_SEEK_SET, self->tbox->sel_right.chars - self->tbox->sel_left.chars);
+	gp_widget_tbox_del(self, tbox->sel_left.chars,
+	                   GP_SEEK_SET, tbox->sel_right.chars - tbox->sel_left.chars);
 	sel_clr(self);
 
 	return 1;
@@ -268,37 +332,45 @@ static int sel_del(gp_widget *self)
 
 static int cursor_at_end(gp_widget *self)
 {
-	return self->tbox->cur_pos.bytes == gp_vec_strlen(self->tbox->buf);
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	return tbox->cur_pos.bytes == gp_vec_strlen(tbox->buf);
 }
 
 static int cursor_at_home(gp_widget *self)
 {
-	return !self->tbox->cur_pos.bytes;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	return !tbox->cur_pos.bytes;
 }
 
 static int is_all_sel(gp_widget *self)
 {
-	return self->tbox->sel_left.bytes == 0 &&
-	       self->tbox->sel_right.bytes == gp_vec_strlen(self->tbox->buf);
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	return tbox->sel_left.bytes == 0 &&
+	       tbox->sel_right.bytes == gp_vec_strlen(tbox->buf);
 }
 
 static int sel_all(gp_widget *self)
 {
-	if (is_hidden(self->tbox))
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	if (is_hidden(tbox))
 		return 0;
 
 	if (is_all_sel(self))
 		return 0;
 
-	self->tbox->sel_left = gp_utf8_pos_first();
-	self->tbox->sel_right = gp_utf8_pos_last(self->tbox->buf);
+	tbox->sel_left = gp_utf8_pos_first();
+	tbox->sel_right = gp_utf8_pos_last(tbox->buf);
 
 	return 1;
 }
 
 static int sel_end(gp_widget *self)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	if (is_hidden(tbox))
 		return 0;
@@ -306,24 +378,24 @@ static int sel_end(gp_widget *self)
 	if (cursor_at_end(self))
 		return 0;
 
-	if (!is_sel(self))
+	if (!is_sel(tbox))
 		tbox->sel_left = tbox->cur_pos;
 	else if (gp_utf8_pos_eq(tbox->sel_left, tbox->cur_pos))
 		tbox->sel_left = tbox->sel_right;
 
 	//TODO: pos move to end?
-	tbox->sel_right = gp_utf8_pos_last(self->tbox->buf);
+	tbox->sel_right = gp_utf8_pos_last(tbox->buf);
 	return 1;
 }
 
 static int sel_right(gp_widget *self)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	if (is_hidden(tbox))
 		return 0;
 
-	if (!is_sel(self)) {
+	if (!is_sel(tbox)) {
 		if (cursor_at_end(self))
 			return 0;
 
@@ -331,25 +403,25 @@ static int sel_right(gp_widget *self)
 
 		//TODO: Simplify?
 		tbox->sel_right = tbox->sel_left;
-		gp_utf8_pos_move(self->tbox->buf, &tbox->sel_right, 1);
+		gp_utf8_pos_move(tbox->buf, &tbox->sel_right, 1);
 
 		return 1;
 	}
 
 	if (gp_utf8_pos_eq(tbox->cur_pos, tbox->sel_left)) {
-		gp_utf8_pos_move(self->tbox->buf, &tbox->sel_left, 1);
+		gp_utf8_pos_move(tbox->buf, &tbox->sel_left, 1);
 		return 1;
 	}
 
-	if (gp_utf8_pos_at_end(self->tbox->buf, self->tbox->sel_right))
+	if (gp_utf8_pos_at_end(tbox->buf, tbox->sel_right))
 		return 0;
 
-	return gp_utf8_pos_move(self->tbox->buf, &tbox->sel_right, 1);
+	return gp_utf8_pos_move(tbox->buf, &tbox->sel_right, 1);
 }
 
 static int sel_home(gp_widget *self)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	if (is_hidden(tbox))
 		return 0;
@@ -357,7 +429,7 @@ static int sel_home(gp_widget *self)
 	if (cursor_at_home(self))
 		return 0;
 
-	if (!is_sel(self))
+	if (!is_sel(tbox))
 		tbox->sel_right = tbox->cur_pos;
 	else if (!gp_utf8_pos_eq(tbox->cur_pos, tbox->sel_left))
 		tbox->sel_right = tbox->sel_left;
@@ -368,46 +440,48 @@ static int sel_home(gp_widget *self)
 
 static int sel_left(gp_widget *self)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	if (is_hidden(tbox))
 		return 0;
 
-	if (!is_sel(self)) {
+	if (!is_sel(tbox)) {
 		if (gp_utf8_pos_at_home(tbox->cur_pos))
 			return 0;
 
 		tbox->sel_right = tbox->cur_pos;
 		tbox->sel_left = tbox->sel_right;
 		//TODO: Simplify?
-		gp_utf8_pos_move(self->tbox->buf, &tbox->sel_left, -1);
+		gp_utf8_pos_move(tbox->buf, &tbox->sel_left, -1);
 		return 1;
 	}
 
 	if (gp_utf8_pos_eq(tbox->cur_pos, tbox->sel_right)) {
-		gp_utf8_pos_move(self->tbox->buf, &tbox->sel_right, -1);
+		gp_utf8_pos_move(tbox->buf, &tbox->sel_right, -1);
 		return 1;
 	}
 
-	if (gp_utf8_pos_at_home(self->tbox->sel_left))
+	if (gp_utf8_pos_at_home(tbox->sel_left))
 		return 0;
 
-	gp_utf8_pos_move(self->tbox->buf, &tbox->sel_left, -1);
+	gp_utf8_pos_move(tbox->buf, &tbox->sel_left, -1);
 	return 1;
 }
 
 static int utf_key(gp_widget *self, uint32_t ch)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 	int ret;
+
 	sel_del(self);
 
-	if (self->tbox->max_size &&
-	    gp_utf8_strlen(self->tbox->buf) >= self->tbox->max_size) {
+	if (tbox->max_size &&
+	    gp_utf8_strlen(tbox->buf) >= tbox->max_size) {
 		schedule_alert(self);
 		return 1;
 	}
 
-	if (filter(self->tbox->filter, ch)) {
+	if (filter(tbox->filter, ch)) {
 		schedule_alert(self);
 		return 1;
 	}
@@ -418,20 +492,20 @@ static int utf_key(gp_widget *self, uint32_t ch)
 		return 1;
 	}
 
-	char *tmp = gp_vec_ins_utf8(self->tbox->buf, self->tbox->cur_pos.bytes, ch);
+	char *tmp = gp_vec_ins_utf8(tbox->buf, tbox->cur_pos.bytes, ch);
 	if (!tmp)
 		return 1;
 
-	self->tbox->buf = tmp;
+	tbox->buf = tmp;
 
 	ret = gp_widget_send_widget_event(self, GP_WIDGET_TBOX_POST_FILTER, (long)ch);
 	if (ret) {
-		self->tbox->buf = gp_vec_del(self->tbox->buf, self->tbox->cur_pos.bytes, gp_utf8_bytes(ch));
+		tbox->buf = gp_vec_del(tbox->buf, tbox->cur_pos.bytes, gp_utf8_bytes(ch));
 		schedule_alert(self);
 		return 1;
 	}
 
-	gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, 1);
+	gp_utf8_pos_move(tbox->buf, &tbox->cur_pos, 1);
 
 	send_edit_event(self);
 	gp_widget_redraw(self);
@@ -441,17 +515,19 @@ static int utf_key(gp_widget *self, uint32_t ch)
 
 static void key_backspace(gp_widget *self)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
 	if (sel_del(self))
 		goto ret;
 
-	if (gp_utf8_pos_at_home(self->tbox->cur_pos)) {
+	if (gp_utf8_pos_at_home(tbox->cur_pos)) {
 		schedule_alert(self);
 		return;
 	}
 
-	size_t bytes = self->tbox->cur_pos.bytes;
-	gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, -1);
-	self->tbox->buf = gp_vec_del(self->tbox->buf, self->tbox->cur_pos.bytes, bytes - self->tbox->cur_pos.bytes);
+	size_t bytes = tbox->cur_pos.bytes;
+	gp_utf8_pos_move(tbox->buf, &tbox->cur_pos, -1);
+	tbox->buf = gp_vec_del(tbox->buf, tbox->cur_pos.bytes, bytes - tbox->cur_pos.bytes);
 ret:
 	send_edit_event(self);
 	gp_widget_redraw(self);
@@ -459,6 +535,8 @@ ret:
 
 static void key_delete(gp_widget *self)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
 	if (sel_del(self))
 		goto ret;
 
@@ -467,13 +545,13 @@ static void key_delete(gp_widget *self)
 		return;
 	}
 
-	size_t off = self->tbox->cur_pos.bytes;
-	int8_t len = gp_utf8_next_chsz(self->tbox->buf, off);
+	size_t off = tbox->cur_pos.bytes;
+	int8_t len = gp_utf8_next_chsz(tbox->buf, off);
 
 	if (len <= 0)
 		return;
 
-	self->tbox->buf = gp_vec_del(self->tbox->buf, off, len);
+	tbox->buf = gp_vec_del(tbox->buf, off, len);
 ret:
 	send_edit_event(self);
 	gp_widget_redraw(self);
@@ -481,6 +559,8 @@ ret:
 
 static void key_left(gp_widget *self, int shift)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
 	if (!shift && sel_clr_left(self))
 		goto redraw;
 
@@ -490,7 +570,7 @@ static void key_left(gp_widget *self, int shift)
 	if (shift)
 		sel_left(self);
 
-	gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, -1);
+	gp_utf8_pos_move(tbox->buf, &tbox->cur_pos, -1);
 
 redraw:
 	gp_widget_redraw(self);
@@ -500,6 +580,8 @@ exit:
 
 static void key_right(gp_widget *self, int shift)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
 	if (!shift && sel_clr_right(self))
 		goto redraw;
 
@@ -509,7 +591,7 @@ static void key_right(gp_widget *self, int shift)
 	if (shift)
 		sel_right(self);
 
-	gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, 1);
+	gp_utf8_pos_move(tbox->buf, &tbox->cur_pos, 1);
 redraw:
 	gp_widget_redraw(self);
 exit:
@@ -518,23 +600,27 @@ exit:
 
 static void key_home(gp_widget *self, int shift)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
 	if (!shift && sel_clr(self))
 		goto exit;
 
-	if (gp_utf8_pos_at_home(self->tbox->cur_pos))
+	if (gp_utf8_pos_at_home(tbox->cur_pos))
 		return;
 
 	if (shift && !sel_home(self))
 		return;
 
 exit:
-	self->tbox->cur_pos = gp_utf8_pos_first();
+	tbox->cur_pos = gp_utf8_pos_first();
 	gp_widget_redraw(self);
 	clear_alert(self);
 }
 
 static void key_end(gp_widget *self, int shift)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
 	if (!shift && sel_clr(self))
 		goto exit;
 
@@ -545,16 +631,16 @@ static void key_end(gp_widget *self, int shift)
 		return;
 
 exit:
-	self->tbox->cur_pos = gp_utf8_pos_last(self->tbox->buf);
+	tbox->cur_pos = gp_utf8_pos_last(tbox->buf);
 	gp_widget_redraw(self);
 	clear_alert(self);
 }
 
 static void selection_to_clipboard(gp_widget *self)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	if (!is_sel(self))
+	if (!is_sel(tbox))
 		return;
 
 	gp_widgets_clipboard_set(tbox->buf + tbox->sel_left.bytes,
@@ -563,8 +649,10 @@ static void selection_to_clipboard(gp_widget *self)
 
 static void clear_on_input(gp_widget *self)
 {
-	if (self->tbox->clear_on_input) {
-		self->tbox->clear_on_input = 0;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	if (tbox->clear_on_input) {
+		tbox->clear_on_input = 0;
 		gp_widget_tbox_clear(self);
 	}
 }
@@ -593,7 +681,7 @@ static void clipboard_event(gp_widget *self)
 	free(clip);
 }
 
-static int is_delim(struct gp_widget_tbox *tbox, char c)
+static int is_delim(struct tbox_payload *tbox, char c)
 {
 	if (tbox->delim)
 		return !filter(tbox->delim, c);
@@ -603,8 +691,8 @@ static int is_delim(struct gp_widget_tbox *tbox, char c)
 
 static void sel_substr_cycle(gp_widget *self, gp_utf8_pos cur_pos, int cur_save_restore)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 	gp_utf8_pos left = cur_pos, right = cur_pos;
-	struct gp_widget_tbox *tbox = self->tbox;
 
 	if (is_hidden(tbox))
 		return;
@@ -620,7 +708,7 @@ static void sel_substr_cycle(gp_widget *self, gp_utf8_pos cur_pos, int cur_save_
 		return;
 	}
 
-	if (is_sel(self)) {
+	if (is_sel(tbox)) {
 		sel_all(self);
 		return;
 	}
@@ -642,7 +730,7 @@ static void sel_substr_cycle(gp_widget *self, gp_utf8_pos cur_pos, int cur_save_
 
 static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, int shift, gp_event *ev)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
 	const char *str = tbox_visible_str(tbox);
 	size_t cur_pos_chars;
@@ -658,7 +746,7 @@ static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, int shi
 		if (shift) {
 			gp_utf8_pos sel_origin;
 
-			if (!is_sel(self)) {
+			if (!is_sel(tbox)) {
 				sel_origin = tbox->cur_pos;
 			} else {
 				if (gp_utf8_pos_eq(tbox->cur_pos, tbox->sel_left))
@@ -685,7 +773,7 @@ static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, int shi
 
 static int mouse_drag(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
 	const char *str = tbox_visible_str(tbox);
 	size_t cur_pos_chars;
@@ -711,9 +799,12 @@ static int mouse_drag(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	(void)ctx;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
 	int shift = gp_ev_any_key_pressed(ev, GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT);
 	int ctrl = gp_ev_any_key_pressed(ev, GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL);
+
+	(void)ctx;
 
 	switch (ev->type) {
 	case GP_EV_KEY:
@@ -786,7 +877,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		break;
 		case GP_KEY_SPACE:
 			if (shift) {
-				sel_substr_cycle(self, self->tbox->cur_pos, 1);
+				sel_substr_cycle(self, tbox->cur_pos, 1);
 				gp_widget_redraw(self);
 				return 1;
 			}
@@ -795,7 +886,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 	break;
 	case GP_EV_TMR:
-		self->tbox->alert = 0;
+		tbox->alert = 0;
 		gp_widget_redraw(self);
 		return 1;
 	break;
@@ -935,7 +1026,10 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 			free(sel_delim);
 	}
 
-	ret->tbox->help = help;
+	if (ret) {
+		struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(ret);
+		tbox->help = help;
+	}
 
 	free(text);
 
@@ -944,11 +1038,13 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 
 static void free_(gp_widget *self)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
 	gp_widgets_clipboard_request_cancel(self);
 
-	free(self->tbox->help);
+	free(tbox->help);
 
-	gp_vec_free(self->tbox->buf);
+	gp_vec_free(tbox->buf);
 }
 
 struct gp_widget_ops gp_widget_tbox_ops = {
@@ -983,7 +1079,7 @@ static const char *type_name(enum gp_widget_tbox_type type)
 
 static void set_type(gp_widget *self, enum gp_widget_tbox_type type)
 {
-	struct gp_widget_tbox *tbox = self->tbox;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	switch (type) {
 	case GP_WIDGET_TBOX_HIDDEN:
@@ -1012,31 +1108,33 @@ gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
                               unsigned int len, unsigned int max_len,
                               const char *filter, enum gp_widget_tbox_type type)
 {
-	gp_widget *ret = gp_widget_new(GP_WIDGET_TBOX, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_tbox));
+	gp_widget *ret = gp_widget_new(GP_WIDGET_TBOX, GP_WIDGET_CLASS_NONE, sizeof(struct tbox_payload));
 	if (!ret)
 		return NULL;
+
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(ret);
 
 	if (text && max_len)
 		max_len = GP_MAX(max_len, gp_utf8_strlen(text));
 
-	ret->tbox->max_size = max_len;
-	ret->tbox->size = len ? len : strlen(text);
-	ret->tbox->filter = filter;
-	ret->tbox->tattr = tattr;
+	tbox->max_size = max_len;
+	tbox->size = len ? len : strlen(text);
+	tbox->filter = filter;
+	tbox->tattr = tattr;
 
 	set_type(ret, type);
 
 	if (text) {
-		ret->tbox->buf = gp_vec_strdup(text);
+		tbox->buf = gp_vec_strdup(text);
 
-		if (!ret->tbox->buf)
+		if (!tbox->buf)
 			goto err;
 
-		ret->tbox->cur_pos = gp_utf8_pos_last(text);
+		tbox->cur_pos = gp_utf8_pos_last(text);
 	} else {
-		ret->tbox->buf = gp_vec_str_new();
+		tbox->buf = gp_vec_str_new();
 
-		if (!ret->tbox->buf)
+		if (!tbox->buf)
 			goto err;
 	}
 
@@ -1048,17 +1146,20 @@ err:
 
 static int resize_buffer(gp_widget *self, size_t len)
 {
-	char *new_buf = gp_vec_resize(self->tbox->buf, len+1);
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	char *new_buf = gp_vec_resize(tbox->buf, len+1);
 	if (!new_buf)
 		return 1;
 
-	self->tbox->buf = new_buf;
+	tbox->buf = new_buf;
 
 	return 0;
 }
 
 int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 {
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 	va_list ap;
 	int len;
 
@@ -1074,10 +1175,10 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 		return -1;
 
 	va_start(ap, fmt);
-	vsprintf(self->tbox->buf, fmt, ap);
+	vsprintf(tbox->buf, fmt, ap);
 	va_end(ap);
 
-	self->tbox->cur_pos = gp_utf8_pos_last(self->tbox->buf);
+	tbox->cur_pos = gp_utf8_pos_last(tbox->buf);
 
 	send_set_event(self);
 	gp_widget_redraw(self);
@@ -1088,15 +1189,16 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 void gp_widget_tbox_set(gp_widget *self, const char *str)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	size_t len = strlen(str);
 
 	if (resize_buffer(self, len))
 		return;
 
-	strcpy(self->tbox->buf, str);
+	strcpy(tbox->buf, str);
 
-	self->tbox->cur_pos = gp_utf8_pos_last(self->tbox->buf);
+	tbox->cur_pos = gp_utf8_pos_last(tbox->buf);
 
 	send_set_event(self);
 	gp_widget_redraw(self);
@@ -1105,11 +1207,12 @@ void gp_widget_tbox_set(gp_widget *self, const char *str)
 void gp_widget_tbox_clear(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	sel_clr(self);
 
-	self->tbox->buf = gp_vec_strclr(self->tbox->buf);
-	self->tbox->cur_pos = gp_utf8_pos_first();
+	tbox->buf = gp_vec_strclr(tbox->buf);
+	tbox->cur_pos = gp_utf8_pos_first();
 
 	send_set_event(self);
 	gp_widget_redraw(self);
@@ -1118,24 +1221,27 @@ void gp_widget_tbox_clear(gp_widget *self)
 const char *gp_widget_tbox_text(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, NULL);
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	return self->tbox->buf;
+	return tbox->buf;
 }
 
 gp_utf8_pos gp_widget_tbox_cursor_get(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	return self->tbox->cur_pos;
+	return tbox->cur_pos;
 }
 
 void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
                                enum gp_seek_whence whence)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	size_t max_pos_chars = gp_utf8_strlen(self->tbox->buf);
-	size_t cur_pos_chars = self->tbox->cur_pos.chars;
+	size_t max_pos_chars = gp_utf8_strlen(tbox->buf);
+	size_t cur_pos_chars = tbox->cur_pos.chars;
 
 	sel_clr(self);
 
@@ -1144,9 +1250,9 @@ void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
 		return;
 	}
 
-	self->tbox->cur_pos = gp_utf8_pos_first();
+	tbox->cur_pos = gp_utf8_pos_first();
 
-	gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, cur_pos_chars);
+	gp_utf8_pos_move(tbox->buf, &tbox->cur_pos, cur_pos_chars);
 
 	if (self->focused)
 		gp_widget_redraw(self);
@@ -1156,11 +1262,12 @@ void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
                         enum gp_seek_whence whence, const char *str)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	clear_on_input(self);
 
-	size_t max_pos = gp_utf8_strlen(self->tbox->buf);
-	size_t ins_pos = self->tbox->cur_pos.chars;
+	size_t max_pos = gp_utf8_strlen(tbox->buf);
+	size_t ins_pos = tbox->cur_pos.chars;
 
 	sel_clr(self);
 
@@ -1170,17 +1277,17 @@ void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
 	}
 
 	gp_utf8_pos cur_pos = gp_utf8_pos_first();
-	gp_utf8_pos_move(self->tbox->buf, &cur_pos, ins_pos);
+	gp_utf8_pos_move(tbox->buf, &cur_pos, ins_pos);
 
-	char *new_buf = gp_vec_strins(self->tbox->buf, cur_pos.bytes, str);
+	char *new_buf = gp_vec_strins(tbox->buf, cur_pos.bytes, str);
 
 	if (!new_buf)
 		return;
 
-	self->tbox->buf = new_buf;
+	tbox->buf = new_buf;
 
-	if (ins_pos <= self->tbox->cur_pos.chars)
-		gp_utf8_pos_move(self->tbox->buf, &self->tbox->cur_pos, gp_utf8_strlen(str));
+	if (ins_pos <= tbox->cur_pos.chars)
+		gp_utf8_pos_move(tbox->buf, &tbox->cur_pos, gp_utf8_strlen(str));
 
 	send_set_event(self);
 	gp_widget_redraw(self);
@@ -1190,11 +1297,12 @@ void gp_widget_tbox_del(gp_widget *self, ssize_t off,
                         enum gp_seek_whence whence, size_t len)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	sel_clr(self);
 
-	size_t max_pos_chars = gp_utf8_strlen(self->tbox->buf);
-	size_t del_pos_chars = self->tbox->cur_pos.chars;
+	size_t max_pos_chars = gp_utf8_strlen(tbox->buf);
+	size_t del_pos_chars = tbox->cur_pos.chars;
 	size_t del_size_chars;
 
 	if (gp_seek_off(off, whence, &del_pos_chars, max_pos_chars)) {
@@ -1205,28 +1313,28 @@ void gp_widget_tbox_del(gp_widget *self, ssize_t off,
 	del_size_chars = GP_MIN(len, max_pos_chars - del_pos_chars);
 
 	gp_utf8_pos del_pos = gp_utf8_pos_first();
-	gp_utf8_pos_move(self->tbox->buf, &del_pos, del_pos_chars);
+	gp_utf8_pos_move(tbox->buf, &del_pos, del_pos_chars);
 	size_t del_pos_bytes = del_pos.bytes;
 	//TODO: gp_utf8_chars_to_bytes(const char *string, size_t off, size_t chars)
 	gp_utf8_pos end_pos = del_pos;
-	gp_utf8_pos_move(self->tbox->buf, &end_pos, del_size_chars);
+	gp_utf8_pos_move(tbox->buf, &end_pos, del_size_chars);
 	size_t del_len_bytes = end_pos.bytes - del_pos_bytes;
 
-	gp_utf8_pos cur_pos = self->tbox->cur_pos;
+	gp_utf8_pos cur_pos = tbox->cur_pos;
 
 	if (del_pos_chars < cur_pos.chars) {
 		if (cur_pos.chars < del_pos_chars + del_size_chars)
 			cur_pos = del_pos;
 		else
-			gp_utf8_pos_move(self->tbox->buf, &cur_pos, -(ssize_t)del_size_chars);
+			gp_utf8_pos_move(tbox->buf, &cur_pos, -(ssize_t)del_size_chars);
 	}
 
-	char *new_buf = gp_vec_del(self->tbox->buf, del_pos_bytes, del_len_bytes);
+	char *new_buf = gp_vec_del(tbox->buf, del_pos_bytes, del_len_bytes);
 	if (!new_buf)
 		return;
 
-	self->tbox->buf = new_buf;
-	self->tbox->cur_pos = cur_pos;
+	tbox->buf = new_buf;
+	tbox->cur_pos = cur_pos;
 
 	send_set_event(self);
 	gp_widget_redraw(self);
@@ -1236,14 +1344,15 @@ void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
                             enum gp_seek_whence whence, size_t len)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	if (is_hidden(self->tbox)) {
+	if (is_hidden(tbox)) {
 		GP_WARN("Attempt to select hidden text!");
 		return;
 	}
 
-	size_t max_pos = gp_utf8_strlen(self->tbox->buf);
-	size_t sel_pos = self->tbox->cur_pos.chars;
+	size_t max_pos = gp_utf8_strlen(tbox->buf);
+	size_t sel_pos = tbox->cur_pos.chars;
 
 	if (gp_seek_off(off, whence, &sel_pos, max_pos)) {
 		GP_WARN("Selection start out of tbox text!");
@@ -1255,11 +1364,11 @@ void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
 		return;
 	}
 
-	self->tbox->sel_left = gp_utf8_pos_first();
-	gp_utf8_pos_move(self->tbox->buf, &self->tbox->sel_left, sel_pos);
-	self->tbox->sel_right = self->tbox->sel_left;
-	gp_utf8_pos_move(self->tbox->buf, &self->tbox->sel_right, len);
-	self->tbox->cur_pos = self->tbox->sel_right;
+	tbox->sel_left = gp_utf8_pos_first();
+	gp_utf8_pos_move(tbox->buf, &tbox->sel_left, sel_pos);
+	tbox->sel_right = tbox->sel_left;
+	gp_utf8_pos_move(tbox->buf, &tbox->sel_right, len);
+	tbox->cur_pos = tbox->sel_right;
 
 	gp_widget_redraw(self);
 }
@@ -1267,8 +1376,9 @@ void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
 void gp_widget_tbox_sel_all(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	if (is_hidden(self->tbox)) {
+	if (is_hidden(tbox)) {
 		GP_WARN("Attempt to select hidden text!");
 		return;
 	}
@@ -1296,22 +1406,25 @@ void gp_widget_tbox_sel_del(gp_widget *self)
 gp_utf8_pos gp_widget_tbox_sel_len(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	return gp_utf8_pos_sub(self->tbox->sel_right, self->tbox->sel_left);
+	return gp_utf8_pos_sub(tbox->sel_right, tbox->sel_left);
 }
 
 gp_utf8_pos gp_widget_tbox_sel_off(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, (gp_utf8_pos){});
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	return self->tbox->sel_left;
+	return tbox->sel_left;
 }
 
 void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	self->tbox->delim = delim;
+	tbox->delim = delim;
 }
 
 void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type)
@@ -1324,14 +1437,25 @@ void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type)
 void gp_widget_tbox_help_set(gp_widget *self, const char *help)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	free(self->tbox->help);
+	free(tbox->help);
 
-	self->tbox->help = help ? strdup(help) : NULL;
+	tbox->help = help ? strdup(help) : NULL;
 }
 
 void gp_widget_tbox_clear_on_input(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
-	self->tbox->clear_on_input = 1;
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	tbox->clear_on_input = 1;
+}
+
+void gp_widget_tbox_filter_set(gp_widget *self, const char *filter)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	tbox->filter = filter;
 }

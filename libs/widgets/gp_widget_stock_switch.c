@@ -12,24 +12,22 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
-struct switch_priv {
+struct switch_payload {
 	gp_widget_size min_size;
 	gp_widget_stock_type on_stock;
 	gp_widget_stock_type off_stock;
 };
 
-#define SWITCH_PRIV(widget) ((struct switch_priv *)(GP_WIDGET_CLASS_BOOL(widget)->payload))
-
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct switch_priv *priv = SWITCH_PRIV(self);
+	struct switch_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(self);
 
 	return GP_ODD_UP(gp_widget_size_units_get(&priv->min_size, ctx));
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct switch_priv *priv = SWITCH_PRIV(self);
+	struct switch_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(self);
 
 	return GP_ODD_UP(gp_widget_size_units_get(&priv->min_size, ctx));
 }
@@ -38,7 +36,7 @@ static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
 	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
-	struct switch_priv *priv = SWITCH_PRIV(self);
+	struct switch_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(self);
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
@@ -79,7 +77,9 @@ static void set(gp_widget *self, int val)
 
 static void toggle(gp_widget *self)
 {
-	set(self, !self->b->val);
+	gp_widget_class_bool *b = GP_WIDGET_CLASS_BOOL(self);
+
+	set(self, !b->val);
 }
 
 static void click(gp_widget *self, gp_event *ev)
@@ -200,13 +200,13 @@ gp_widget *gp_widget_stock_switch_new(gp_widget_stock_type on_stock,
 				      bool set)
 {
 	gp_widget *ret;
-	size_t size = sizeof(gp_widget_class_bool) + sizeof(struct switch_priv);
+	size_t size = sizeof(gp_widget_class_bool) + sizeof(struct switch_payload);
 
 	ret = gp_widget_new(GP_WIDGET_STOCK_SWITCH, GP_WIDGET_CLASS_BOOL, size);
 	if (!ret)
 		return NULL;
 
-	struct switch_priv *priv = SWITCH_PRIV(ret);
+	struct switch_payload *priv = GP_WIDGET_CLASS_BOOL_PAYLOAD(ret);
 
 	priv->off_stock = off_stock;
 	priv->on_stock = on_stock;

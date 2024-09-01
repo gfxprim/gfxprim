@@ -19,7 +19,7 @@ int callback(gp_widget_event *ev)
 			return 0;
 
 		if (ev->sub_type == GP_WIDGET_TBOX_EDIT)
-			printf("Text box edit '%s'\n", ev->self->tbox->buf);
+			printf("Text box edit '%s'\n", gp_widget_tbox_text(ev->self));
 
 		if (ev->sub_type == GP_WIDGET_TBOX_TRIGGER)
 			printf("Text box enter\n");

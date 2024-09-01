@@ -19,10 +19,10 @@ int login_callback(gp_widget_event *ev)
 	gp_widget *uname = gp_widget_by_uid(uids, "uname", GP_WIDGET_TBOX);
 
 	if (uname)
-		printf("Username: '%s'\n", uname->tbox->buf);
+		printf("Username: '%s'\n", gp_widget_tbox_text(uname));
 
 	if (pass)
-		printf("Password: '%s'\n", pass->tbox->buf);
+		printf("Password: '%s'\n", gp_widget_tbox_text(pass));
 
 	return 0;
 }
@@ -39,7 +39,7 @@ int show_password(gp_widget_event *ev)
 {
 	gp_widget *pass = gp_widget_by_uid(uids, "pass", GP_WIDGET_TBOX);
 
-	if (ev->self->b->val)
+	if (gp_widget_bool_get(ev->self))
 		gp_widget_tbox_type_set(pass, GP_WIDGET_TBOX_NONE);
 	else
 		gp_widget_tbox_type_set(pass, GP_WIDGET_TBOX_HIDDEN);

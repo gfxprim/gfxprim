@@ -19,20 +19,20 @@ static int label_new_free(void)
 		return TST_FAILED;
 	}
 
-	if (strcmp(label->label->text, text)) {
+	if (strcmp(gp_widget_label_get(label), text)) {
 		tst_msg("Wrong label text");
 		return TST_FAILED;
 	}
 
-	if (label->label->tattr != 0) {
+	if (gp_widget_label_tattr_get(label) != 0) {
 		tst_msg("Wrong label text attribute %i expected 0",
-		         label->label->tattr);
+		         gp_widget_label_tattr_get(label));
 		return TST_FAILED;
 	}
 
-	if (label->label->width != 0) {
+	if (gp_widget_label_width_get(label) != 0) {
 		tst_msg("Wrong label width %u expected 0",
-			label->label->width);
+			gp_widget_label_width_get(label));
 		return TST_FAILED;
 	}
 
@@ -52,20 +52,20 @@ static int label_printf_new_free(void)
 		return TST_FAILED;
 	}
 
-	if (strcmp(label->label->text, text)) {
+	if (strcmp(gp_widget_label_get(label), text)) {
 		tst_msg("Wrong label text");
 		return TST_FAILED;
 	}
 
-	if (label->label->tattr != GP_TATTR_MONO) {
+	if (gp_widget_label_tattr_get(label) != GP_TATTR_MONO) {
 		tst_msg("Wrong label text attribute %i expected %i",
-		         label->label->tattr, GP_TATTR_MONO);
+		         gp_widget_label_tattr_get(label), GP_TATTR_MONO);
 		return TST_FAILED;
 	}
 
-	if (label->label->width != 0) {
+	if (gp_widget_label_width_get(label) != 0) {
 		tst_msg("Wrong label width %u expected 0",
-			label->label->width);
+			gp_widget_label_width_get(label));
 		return TST_FAILED;
 	}
 
@@ -88,34 +88,34 @@ static int label_append_set_printf(void)
 
 	gp_widget_label_append(label, "world!");
 
-	if (strcmp(label->label->text, "Hello world!")) {
+	if (strcmp(gp_widget_label_get(label), "Hello world!")) {
 		tst_msg("Wrong label text after append");
 		return TST_FAILED;
 	}
 
 	gp_widget_label_set(label, set_text);
 
-	if (strcmp(label->label->text, set_text)) {
+	if (strcmp(gp_widget_label_get(label), set_text)) {
 		tst_msg("Wrong label text after set");
 		return TST_FAILED;
 	}
 
 	gp_widget_label_printf(label, "%s", print_text);
 
-	if (strcmp(label->label->text, print_text)) {
+	if (strcmp(gp_widget_label_get(label), print_text)) {
 		tst_msg("Wrong label text after printf");
 		return TST_FAILED;
 	}
 
-	if (label->label->tattr != 0) {
+	if (gp_widget_label_tattr_get(label) != 0) {
 		tst_msg("Wrong label text attribute %i expected 0",
-		         label->label->tattr);
+		         gp_widget_label_tattr_get(label));
 		return TST_FAILED;
 	}
 
-	if (label->label->width != 0) {
+	if (gp_widget_label_width_get(label) != 0) {
 		tst_msg("Wrong label width %u expected 0",
-			label->label->width);
+			gp_widget_label_width_get(label));
 		return TST_FAILED;
 	}
 
@@ -134,9 +134,9 @@ static int label_tattr_set(void)
 		return TST_FAILED;
 	}
 
-	if (label->label->tattr != 0) {
+	if (gp_widget_label_tattr_get(label) != 0) {
 		tst_msg("Wrong label text attribute %i expected 0",
-		         label->label->tattr);
+		         gp_widget_label_tattr_get(label));
 		return TST_FAILED;
 	}
 
@@ -144,9 +144,9 @@ static int label_tattr_set(void)
 
 	gp_widget_label_tattr_set(label, attr);
 
-	if (label->label->tattr != attr) {
+	if (gp_widget_label_tattr_get(label) != attr) {
 		tst_msg("Wrong label text attribute %i expected %i",
-		         label->label->tattr, attr);
+		         gp_widget_label_tattr_get(label), attr);
 		return TST_FAILED;
 	}
 

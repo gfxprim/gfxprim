@@ -8,11 +8,6 @@
 #ifndef GP_WIDGET_LAYOUT_SWITCH_H
 #define GP_WIDGET_LAYOUT_SWITCH_H
 
-struct gp_widget_layout_switch {
-	unsigned int active_layout;
-	gp_widget **layouts;
-};
-
 /**
  * @brief Allocates a initializes a switch widget.
  *

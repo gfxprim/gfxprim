@@ -16,20 +16,38 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_string.h>
 
+struct gp_widget_tab {
+	char *label;
+	gp_widget *widget;
+};
+
+struct gp_widget_tabs {
+	unsigned int active_tab;
+
+	int title_focused:1;
+	int widget_focused:1;
+
+	struct gp_widget_tab *tabs;
+
+	char payload[];
+};
+
 static gp_size tab_w(gp_widget *self, const gp_widget_render_ctx *ctx,
                      unsigned int tab)
 {
-	const char *label = self->tabs->tabs[tab].label;
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+	const char *label = tabs->tabs[tab].label;
 
 	return gp_text_wbbox(ctx->font_bold, label) + 2 * ctx->padd;
 }
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	unsigned int i, max_min_w = 0, tabs_width = 0;
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
-		unsigned int min_w = gp_widget_min_w(self->tabs->tabs[i].widget, ctx);
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
+		unsigned int min_w = gp_widget_min_w(tabs->tabs[i].widget, ctx);
 		max_min_w = GP_MAX(max_min_w, min_w);
 
 		tabs_width += tab_w(self, ctx, i);
@@ -47,10 +65,11 @@ static gp_size title_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	unsigned int i, max_min_h = 0;
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
-		unsigned int min_h = gp_widget_min_h(self->tabs->tabs[i].widget, ctx);
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
+		unsigned int min_h = gp_widget_min_h(tabs->tabs[i].widget, ctx);
 
 		max_min_h = GP_MAX(max_min_h, min_h);
 	}
@@ -81,11 +100,12 @@ static gp_size payload_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx,
                          int new_wh)
 {
-	unsigned int i;
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	unsigned int w = payload_w(self, ctx);
+	unsigned int i;
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
-		gp_widget *widget = self->tabs->tabs[i].widget;
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
+		gp_widget *widget = tabs->tabs[i].widget;
 
 		if (!widget)
 			continue;
@@ -97,11 +117,12 @@ static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx,
 static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx,
                          int new_wh)
 {
-	unsigned int i;
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	unsigned int h = payload_h(self, ctx);
+	unsigned int i;
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
-		gp_widget *widget = self->tabs->tabs[i].widget;
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
+		gp_widget *widget = tabs->tabs[i].widget;
 
 		if (!widget)
 			continue;
@@ -112,25 +133,31 @@ static void distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx,
 
 static int active_first(gp_widget *self)
 {
-	return self->tabs->active_tab == 0;
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	return tabs->active_tab == 0;
 }
 
 static gp_widget *active_tab_widget(gp_widget *self)
 {
-	if (!gp_vec_len(self->tabs->tabs))
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	if (!gp_vec_len(tabs->tabs))
 		return NULL;
 
-	return self->tabs->tabs[self->tabs->active_tab].widget;
+	return tabs->tabs[tabs->active_tab].widget;
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
-	unsigned int i;
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int tab_h = title_h(self, ctx);
 	unsigned int act_x = 0, act_w = 0;
+	unsigned int i;
 	gp_pixel text_color = ctx->text_color;
 
 	if (gp_widget_is_disabled(self, flags))
@@ -139,7 +166,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (self->redraw)
 		gp_widget_ops_blit(ctx, x, y, self->w, self->h);
 
-	if (!gp_vec_len(self->tabs->tabs)) {
+	if (!gp_vec_len(tabs->tabs)) {
 		gp_fill_rect_xywh(ctx->buf, x, y,
 				  self->w, self->h, ctx->bg_color);
 		return;
@@ -158,9 +185,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	unsigned int cur_x = x;
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
-		const char *label = self->tabs->tabs[i].label;
-		int is_active = self->tabs->active_tab == i;
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
+		const char *label = tabs->tabs[i].label;
+		int is_active = tabs->active_tab == i;
 		gp_text_style *font = is_active ? ctx->font_bold : ctx->font;
 
 		unsigned int w = gp_text_wbbox(ctx->font_bold, label) + 2 * ctx->padd;
@@ -170,7 +197,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 			act_w = w;
 		}
 
-		if (is_active && self->tabs->title_focused) {
+		if (is_active && tabs->title_focused) {
 			gp_fill_rect_xywh(ctx->buf,
 				    cur_x + ctx->padd/2,
 				    y + tab_h - ctx->padd + 1,
@@ -224,11 +251,13 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 static void set_tab(gp_widget *self, unsigned int tab)
 {
-	if (tab == self->tabs->active_tab)
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	if (tab == tabs->active_tab)
 		return;
 
 	gp_widget_send_widget_event(self, GP_WIDGET_TABS_DEACTIVATED);
-	self->tabs->active_tab = tab;
+	tabs->active_tab = tab;
 	gp_widget_send_widget_event(self, GP_WIDGET_TABS_ACTIVATED);
 
 	gp_widget_redraw(self);
@@ -237,22 +266,26 @@ static void set_tab(gp_widget *self, unsigned int tab)
 
 static void tab_left(gp_widget *self)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	unsigned int tab;
 
-	if (self->tabs->active_tab > 0)
-		tab = self->tabs->active_tab - 1;
+	if (tabs->active_tab > 0)
+		tab = tabs->active_tab - 1;
 	else
-		tab = gp_vec_len(self->tabs->tabs) - 1;
+		tab = gp_vec_len(tabs->tabs) - 1;
 
 	set_tab(self, tab);
 }
 
 static void tab_right(gp_widget *self)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	unsigned int tab;
 
-	if (self->tabs->active_tab + 1 < gp_vec_len(self->tabs->tabs))
-		tab = self->tabs->active_tab + 1;
+	if (tabs->active_tab + 1 < gp_vec_len(tabs->tabs))
+		tab = tabs->active_tab + 1;
 	else
 		tab = 0;
 
@@ -261,14 +294,16 @@ static void tab_right(gp_widget *self)
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	if (self->tabs->widget_focused) {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	if (tabs->widget_focused) {
 		unsigned int px = payload_x(self, ctx) - self->x;
 		unsigned int py = payload_y(self, ctx) - self->y;
 
 		return gp_widget_ops_event_offset(active_tab_widget(self), ctx, ev, px, py);
 	}
 
-	if (!self->tabs->title_focused)
+	if (!tabs->title_focused)
 		return 0;
 
 	switch (ev->type) {
@@ -297,11 +332,13 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 static int focus_out(gp_widget *self)
 {
-	if (self->tabs->widget_focused)
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	if (tabs->widget_focused)
 		return gp_widget_ops_render_focus(active_tab_widget(self), GP_FOCUS_OUT);
 
-	if (self->tabs->title_focused) {
-		self->tabs->title_focused = 0;
+	if (tabs->title_focused) {
+		tabs->title_focused = 0;
 		gp_widget_redraw(self);
 	}
 
@@ -310,15 +347,17 @@ static int focus_out(gp_widget *self)
 
 static int focus_prev(gp_widget *self)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	gp_widget *w = active_tab_widget(self);
 
-	if (self->tabs->title_focused)
+	if (tabs->title_focused)
 		return 0;
 
-	if (self->tabs->widget_focused) {
+	if (tabs->widget_focused) {
 		gp_widget_ops_render_focus(w, GP_FOCUS_OUT);
-		self->tabs->widget_focused = 0;
-		self->tabs->title_focused = 1;
+		tabs->widget_focused = 0;
+		tabs->title_focused = 1;
 		gp_widget_redraw(self);
 		return 1;
 	}
@@ -326,37 +365,41 @@ static int focus_prev(gp_widget *self)
 	if (gp_widget_ops_render_focus(w, GP_FOCUS_IN))
 		return 1;
 
-	self->tabs->title_focused = 1;
+	tabs->title_focused = 1;
 	gp_widget_redraw(self);
 	return 1;
 }
 
 static int focus_next(gp_widget *self)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	gp_widget *w = active_tab_widget(self);
 
-	if (self->tabs->title_focused) {
+	if (tabs->title_focused) {
 		if (!gp_widget_ops_render_focus(w, GP_FOCUS_IN))
 			return 0;
-		self->tabs->title_focused = 0;
-		self->tabs->widget_focused = 1;
+		tabs->title_focused = 0;
+		tabs->widget_focused = 1;
 		gp_widget_redraw(self);
 		return 1;
 	}
 
-	if (self->tabs->widget_focused)
+	if (tabs->widget_focused)
 		return 0;
 
-	self->tabs->title_focused = 1;
+	tabs->title_focused = 1;
 	gp_widget_redraw(self);
 	return 1;
 }
 
 static int focus(gp_widget *self, int sel)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	gp_widget *w = active_tab_widget(self);
 
-	if (self->tabs->widget_focused) {
+	if (tabs->widget_focused) {
 		if (gp_widget_ops_render_focus(w, sel))
 			return 1;
 	}
@@ -383,9 +426,11 @@ static int focus(gp_widget *self, int sel)
 static void focus_tab(gp_widget *self, const gp_widget_render_ctx *ctx,
                        unsigned int x)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	unsigned int i, cx = 0;
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
 		unsigned int w = tab_w(self, ctx, i);
 
 		if (x <= cx + w)
@@ -394,7 +439,7 @@ static void focus_tab(gp_widget *self, const gp_widget_render_ctx *ctx,
 		cx += w;
 	}
 
-	if (i == gp_vec_len(self->tabs->tabs))
+	if (i == gp_vec_len(tabs->tabs))
 		return;
 
 	set_tab(self, i);
@@ -404,11 +449,13 @@ static void focus_tab(gp_widget *self, const gp_widget_render_ctx *ctx,
 static int focus_title(gp_widget *self, const gp_widget_render_ctx *ctx,
                         unsigned int x)
 {
-	self->tabs->title_focused = 1;
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	if (self->tabs->widget_focused) {
+	tabs->title_focused = 1;
+
+	if (tabs->widget_focused) {
 		gp_widget_ops_render_focus(active_tab_widget(self), GP_FOCUS_OUT);
-		self->tabs->widget_focused = 0;
+		tabs->widget_focused = 0;
 	}
 
 	focus_tab(self, ctx, x);
@@ -418,34 +465,40 @@ static int focus_title(gp_widget *self, const gp_widget_render_ctx *ctx,
 
 static void unfocus_title(gp_widget *self)
 {
-	if (!self->tabs->title_focused)
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	if (!tabs->title_focused)
 		return;
 
-	self->tabs->title_focused = 0;
+	tabs->title_focused = 0;
 	gp_widget_redraw(self);
 }
 
 static int focus_widget(gp_widget *self, const gp_widget_render_ctx *ctx,
                          unsigned int x, unsigned int y)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	if (!gp_widget_ops_render_focus_xy(active_tab_widget(self), ctx, x, y))
 		return 0;
 
 	unfocus_title(self);
-	self->tabs->widget_focused = 1;
+	tabs->widget_focused = 1;
 
 	return 1;
 }
 
 static int focus_child(gp_widget *self, gp_widget *child)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
 	gp_widget *active = active_tab_widget(self);
 
 	if (child != active)
 		return 0;
 
 	unfocus_title(self);
-	self->tabs->widget_focused = 1;
+	tabs->widget_focused = 1;
 	return 1;
 }
 
@@ -468,18 +521,20 @@ static void tabs_free(struct gp_widget_tab *tabs)
 	}
 }
 
-static gp_widget *tabs_new(struct gp_widget_tab *tabs, unsigned int active_tab)
+static gp_widget *tabs_new(struct gp_widget_tab *tabs_arr, unsigned int active_tab)
 {
 	size_t size = sizeof(struct gp_widget_tabs);
 
 	gp_widget *ret = gp_widget_new(GP_WIDGET_TABS, GP_WIDGET_CLASS_NONE, size);
 	if (!ret) {
-		tabs_free(tabs);
+		tabs_free(tabs_arr);
 		return NULL;
 	}
 
-	ret->tabs->tabs = tabs;
-	ret->tabs->active_tab = active_tab;
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(ret);
+
+	tabs->tabs = tabs_arr;
+	tabs->active_tab = active_tab;
 
 	gp_widget_send_widget_event(ret, GP_WIDGET_TABS_ACTIVATED);
 
@@ -612,10 +667,11 @@ free:
 
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	size_t i;
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
-		gp_widget *child = self->tabs->tabs[i].widget;
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
+		gp_widget *child = tabs->tabs[i].widget;
 
 		if (child)
 			func(child);
@@ -624,12 +680,13 @@ static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
 
 static void free_(gp_widget *self)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	size_t i;
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++)
-		free(self->tabs->tabs[i].label);
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++)
+		free(tabs->tabs[i].label);
 
-	gp_vec_free(self->tabs->tabs);
+	gp_vec_free(tabs->tabs);
 }
 
 struct gp_widget_ops gp_widget_tabs_ops = {
@@ -683,26 +740,28 @@ err:
 
 unsigned int gp_widget_tabs_cnt(gp_widget *self)
 {
-		GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, 0);
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, 0);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	return gp_vec_len(self->tabs->tabs);
+	return gp_vec_len(tabs->tabs);
 }
 
 gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
                               gp_widget *child)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	if (tab >= gp_vec_len(self->tabs->tabs)) {
+	if (tab >= gp_vec_len(tabs->tabs)) {
 		GP_WARN("Invalid tabs index %u", tab);
 		return NULL;
 	}
 
-	gp_widget *ret = self->tabs->tabs[tab].widget;
+	gp_widget *ret = tabs->tabs[tab].widget;
 	if (ret)
 		ret->parent = NULL;
 
-	self->tabs->tabs[tab].widget = child;
+	tabs->tabs[tab].widget = child;
 
 	gp_widget_set_parent(child, self);
 
@@ -715,45 +774,47 @@ gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
 gp_widget *gp_widget_tabs_child_get(gp_widget *self, unsigned int tab)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	if (tab >= gp_vec_len(self->tabs->tabs)) {
+	if (tab >= gp_vec_len(tabs->tabs)) {
 		GP_WARN("Invalid tabs index %u", tab);
 		return NULL;
 	}
 
-	return self->tabs->tabs[tab].widget;
+	return tabs->tabs[tab].widget;
 }
 
 void gp_widget_tabs_tab_ins(gp_widget *self, unsigned int tab,
                             const char *label, gp_widget *child)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, );
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
 	GP_DEBUG(3, "Adding tab '%s' child %p at offset %u, tabs widget %p",
 	         label, child, tab, self);
 
-	struct gp_widget_tab *tabs = gp_vec_ins(self->tabs->tabs, tab, 1);
-	if (!tabs)
+	struct gp_widget_tab *tabs_arr = gp_vec_ins(tabs->tabs, tab, 1);
+	if (!tabs_arr)
 		return;
 
-	self->tabs->tabs = tabs;
+	tabs->tabs = tabs_arr;
 
-	self->tabs->tabs[tab].label = strdup(label);
-	if (!self->tabs->tabs[tab].label) {
-		self->tabs->tabs = gp_vec_del(self->tabs->tabs, tab, 1);
+	tabs->tabs[tab].label = strdup(label);
+	if (!tabs->tabs[tab].label) {
+		tabs->tabs = gp_vec_del(tabs->tabs, tab, 1);
 		return;
 	}
 
-	self->tabs->tabs[tab].widget = child;
+	tabs->tabs[tab].widget = child;
 
 	gp_widget_set_parent(child, self);
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);
 
-	if (self->tabs->active_tab >= tab &&
-	    gp_vec_len(self->tabs->tabs) > self->tabs->active_tab + 1) {
-		self->tabs->active_tab++;
+	if (tabs->active_tab >= tab &&
+	    gp_vec_len(tabs->tabs) > tabs->active_tab + 1) {
+		tabs->active_tab++;
 	}
 }
 
@@ -761,8 +822,9 @@ unsigned int gp_widget_tabs_tab_append(gp_widget *self,
                                        const char *label, gp_widget *child)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, (unsigned int)-1);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	unsigned int ret = gp_vec_len(self->tabs->tabs);
+	unsigned int ret = gp_vec_len(tabs->tabs);
 
 	gp_widget_tabs_tab_ins(self, ret, label, child);
 
@@ -771,23 +833,25 @@ unsigned int gp_widget_tabs_tab_append(gp_widget *self,
 
 static gp_widget *tab_rem(gp_widget *self, unsigned int tab)
 {
-	gp_widget *ret = self->tabs->tabs[tab].widget;
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	gp_widget *ret = tabs->tabs[tab].widget;
 
 	GP_DEBUG(3, "Removing tab %u (%s) child %p, tabs widget %p",
-	         tab, self->tabs->tabs[tab].label, ret, self);
+	         tab, tabs->tabs[tab].label, ret, self);
 
-	free(self->tabs->tabs[tab].label);
+	free(tabs->tabs[tab].label);
 
-	self->tabs->tabs = gp_vec_del(self->tabs->tabs, tab, 1);
+	tabs->tabs = gp_vec_del(tabs->tabs, tab, 1);
 
-	int was_active = self->tabs->active_tab == tab;
+	int was_active = tabs->active_tab == tab;
 
 	if (was_active)
 		gp_widget_send_widget_event(self, GP_WIDGET_TABS_DEACTIVATED);
 
-	if (self->tabs->active_tab &&
-	    self->tabs->active_tab >= tab) {
-		self->tabs->active_tab--;
+	if (tabs->active_tab &&
+	    tabs->active_tab >= tab) {
+		tabs->active_tab--;
 	}
 
 	if (was_active)
@@ -801,10 +865,11 @@ static gp_widget *tab_rem(gp_widget *self, unsigned int tab)
 gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	if (tab >= gp_vec_len(self->tabs->tabs)) {
+	if (tab >= gp_vec_len(tabs->tabs)) {
 		GP_BUG("Invalid tab index %u tabs (%p) count %zu",
-		       tab, self, gp_vec_len(self->tabs->tabs));
+		       tab, self, gp_vec_len(tabs->tabs));
 		return NULL;
 	}
 
@@ -814,15 +879,17 @@ gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
 unsigned int gp_widget_tabs_active_get(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, 0);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	return self->tabs->active_tab;
+	return tabs->active_tab;
 }
 
 gp_widget *gp_widget_tabs_active_child_get(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	if (!gp_vec_len(self->tabs->tabs))
+	if (!gp_vec_len(tabs->tabs))
 		return NULL;
 
 	return active_tab_widget(self);
@@ -831,13 +898,14 @@ gp_widget *gp_widget_tabs_active_child_get(gp_widget *self)
 void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, );
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	if (tab == self->tabs->active_tab)
+	if (tab == tabs->active_tab)
 		return;
 
-	if (tab >= gp_vec_len(self->tabs->tabs)) {
+	if (tab >= gp_vec_len(tabs->tabs)) {
 		GP_BUG("Invalid tab index %u tabs (%p) count %zu",
-		       tab, self, gp_vec_len(self->tabs->tabs));
+		       tab, self, gp_vec_len(tabs->tabs));
 	}
 
 	set_tab(self, tab);
@@ -846,29 +914,30 @@ void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)
 void gp_widget_tabs_active_set_rel(gp_widget *self, int dir, int wrap_around)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, );
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
 	if (wrap_around > 1) {
 		GP_BUG("Invalid wrap_around value!");
 		return;
 	}
 
-	int64_t tab = (int64_t)self->tabs->active_tab + dir;
-	int64_t tabs = gp_vec_len(self->tabs->tabs);
+	int64_t tab = (int64_t)tabs->active_tab + dir;
+	int64_t tabs_cnt = gp_vec_len(tabs->tabs);
 
 	if (tab < 0) {
 		if (wrap_around) {
-			tab %= tabs;
-			tab += tabs;
+			tab %= tabs_cnt;
+			tab += tabs_cnt;
 		} else {
 			tab = 0;
 		}
 	}
 
-	if (tab >= tabs) {
+	if (tab >= tabs_cnt) {
 		if (wrap_around)
-			tab %= tabs;
+			tab %= tabs_cnt;
 		else
-			tab = tabs - 1;
+			tab = tabs_cnt - 1;
 	}
 
 	set_tab(self, tab);
@@ -876,6 +945,7 @@ void gp_widget_tabs_active_set_rel(gp_widget *self, int dir, int wrap_around)
 
 static int child_to_tab(gp_widget *self, gp_widget *child)
 {
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	unsigned int i;
 
 	if (!child) {
@@ -888,8 +958,8 @@ static int child_to_tab(gp_widget *self, gp_widget *child)
 			child, child->parent, self);
 	}
 
-	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
-		if (self->tabs->tabs[i].widget == child)
+	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
+		if (tabs->tabs[i].widget == child)
 			return i;
 	}
 
@@ -920,22 +990,24 @@ int gp_widget_tabs_tab_rem_by_child(gp_widget *self, gp_widget *child)
 const char *gp_widget_tabs_label_get(gp_widget *self, unsigned int tab)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	if (tab >= gp_vec_len(self->tabs->tabs)) {
+	if (tab >= gp_vec_len(tabs->tabs)) {
 		GP_WARN("Invalid tab index %u tabs (%p) count %zu",
-			tab, self, gp_vec_len(self->tabs->tabs));
+			tab, self, gp_vec_len(tabs->tabs));
 		return NULL;
 	}
 
-	return self->tabs->tabs[tab].label;
+	return tabs->tabs[tab].label;
 }
 
 const char *gp_widget_tabs_active_label_get(gp_widget *self)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABS, NULL);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	if (!gp_vec_len(self->tabs->tabs))
+	if (!gp_vec_len(tabs->tabs))
 		return NULL;
 
-	return self->tabs->tabs[self->tabs->active_tab].label;
+	return tabs->tabs[tabs->active_tab].label;
 }

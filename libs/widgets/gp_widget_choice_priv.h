@@ -13,17 +13,23 @@ void gp_widget_choice_sel_set_(gp_widget *self, size_t sel) __attribute__((visib
 
 static inline size_t call_get_sel(gp_widget *self)
 {
-	return self->choice->ops->get(self, GP_WIDGET_CHOICE_OP_SEL);
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
+
+	return choice->ops->get(self, GP_WIDGET_CHOICE_OP_SEL);
 }
 
 static inline size_t call_get_cnt(gp_widget *self)
 {
-	return self->choice->ops->get(self, GP_WIDGET_CHOICE_OP_CNT);
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
+
+	return choice->ops->get(self, GP_WIDGET_CHOICE_OP_CNT);
 }
 
 static inline const char *call_get_choice(gp_widget *self, size_t idx)
 {
-	return self->choice->ops->get_choice(self, idx);
+	struct gp_widget_choice *choice = GP_WIDGET_PAYLOAD(self);
+
+	return choice->ops->get_choice(self, idx);
 }
 
 #endif /* GP_WIDGET_CHOICE_PRIV_H */

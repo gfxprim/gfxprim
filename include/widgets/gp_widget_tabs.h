@@ -23,22 +23,6 @@
 #ifndef GP_WIDGET_TABS_H
 #define GP_WIDGET_TABS_H
 
-struct gp_widget_tab {
-	char *label;
-	gp_widget *widget;
-};
-
-struct gp_widget_tabs {
-	unsigned int active_tab;
-
-	int title_focused:1;
-	int widget_focused:1;
-
-	struct gp_widget_tab *tabs;
-
-	char payload[];
-};
-
 /** @brief A gp_widget_event::sub_type for a tabs widget. */
 enum gp_widget_tabs_event_type {
 	/** @brief A tab is deactivated */

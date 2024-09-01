@@ -24,7 +24,8 @@ static int col_is_sortable(gp_widget_table *tbl, unsigned int head_idx)
 
 static void sort_by_col(gp_widget *self, int desc, unsigned int head_idx)
 {
-	gp_widget_table_col_desc *col = self->tbl->header[head_idx].col_desc;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+	gp_widget_table_col_desc *col = tbl->header[head_idx].col_desc;
 
 	if (!col)
 		return;
@@ -32,22 +33,25 @@ static void sort_by_col(gp_widget *self, int desc, unsigned int head_idx)
 	if (!col->sortable)
 		return;
 
-	self->tbl->col_ops.sort(self, desc, col->idx);
+	tbl->col_ops.sort(self, desc, col->idx);
 }
 
 static inline int get_cell(gp_widget *self, gp_widget_table_cell *ret, unsigned int head_idx)
 {
-	gp_widget_table_col_desc *col = self->tbl->header[head_idx].col_desc;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+	gp_widget_table_col_desc *col = tbl->header[head_idx].col_desc;
 
 	if (!col)
 		return 0;
 
-	return self->tbl->col_ops.get_cell(self, ret, col->idx);
+	return tbl->col_ops.get_cell(self, ret, col->idx);
 }
 
 static inline int seek_row(gp_widget *self, int op, unsigned int pos)
 {
-	return self->tbl->col_ops.seek_row(self, op, pos);
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+
+	return tbl->col_ops.seek_row(self, op, pos);
 }
 
 static unsigned int header_min_w(gp_widget_table *tbl,
@@ -69,7 +73,7 @@ static unsigned int header_min_w(gp_widget_table *tbl,
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	struct gp_widget_table *tbl = self->tbl;
+	struct gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	unsigned int i, sum_cols_w = 0;
 
 	if (tbl->header) {
@@ -96,8 +100,9 @@ static unsigned int header_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	//TODO: Proper font handling!
 	unsigned int text_a = gp_text_ascent(ctx->font);
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
-	if (!self->tbl->needs_header)
+	if (!tbl->needs_header)
 		return 0;
 
 	return text_a + 2 * ctx->padd;
@@ -112,9 +117,10 @@ static unsigned int row_h(const gp_widget_render_ctx *ctx)
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int h = row_h(ctx) * self->tbl->min_rows;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+	unsigned int h = row_h(ctx) * tbl->min_rows;
 
-	if (self->tbl->header)
+	if (tbl->header)
 		h += header_h(self, ctx);
 
 	return h;
@@ -133,7 +139,7 @@ static unsigned int display_rows(gp_widget *self, const gp_widget_render_ctx *ct
 
 static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	unsigned int i, sum_cols_w = 0, sum_fills = 0;
 
 	(void)new_wh;
@@ -157,14 +163,14 @@ static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int n
 static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
                                   const gp_widget_render_ctx *ctx)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	const gp_widget_table_header *header = tbl->header;
 	unsigned int text_a = gp_text_ascent(ctx->font);
 	unsigned int cx = x + ctx->padd;
 	unsigned int cy = y + ctx->padd;
 	unsigned int i;
 
-	if (!self->tbl->needs_header)
+	if (!tbl->needs_header)
 		return 0;
 
 	for (i = 0; i < tbl->cols; i++) {
@@ -260,7 +266,7 @@ static void render_cell(gp_widget_table_cell *cell, const gp_widget_render_ctx *
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
-	struct gp_widget_table *tbl = self->tbl;
+	struct gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	unsigned int text_a = gp_text_ascent(ctx->font);
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
@@ -359,7 +365,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 static int move_down(gp_widget *self, const gp_widget_render_ctx *ctx,
                      unsigned int rows)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
 	if (!tbl->row_selected) {
 		tbl->row_selected = 1;
@@ -394,7 +400,7 @@ redraw:
 
 static int move_first(gp_widget *self)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
 	tbl->row_selected = 1;
 	tbl->selected_row = 0;
@@ -408,7 +414,7 @@ static int move_first(gp_widget *self)
 
 static int move_last(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
 	tbl->row_selected = 1;
 	tbl->selected_row = last_row(self);
@@ -423,7 +429,7 @@ static int move_last(gp_widget *self, const gp_widget_render_ctx *ctx)
 static int scroll_down(gp_widget *self, const gp_widget_render_ctx *ctx,
                        unsigned int rows)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	unsigned int disp_rows = display_rows(self, ctx);
 
 	if (tbl->last_rows < disp_rows)
@@ -445,7 +451,7 @@ static int scroll_down(gp_widget *self, const gp_widget_render_ctx *ctx,
 
 static int scroll_up(gp_widget *self, unsigned int rows)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
 	if (!tbl->start_row)
 		return 0;
@@ -461,7 +467,7 @@ static int scroll_up(gp_widget *self, unsigned int rows)
 
 static int move_up(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int rows)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
 	if (!tbl->row_selected) {
 		tbl->row_selected = 1;
@@ -493,7 +499,7 @@ redraw:
 
 static int header_click(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int x)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	unsigned int i, cx = 0;
 
 	//TODO: inverval division?
@@ -522,7 +528,7 @@ void gp_widget_table_sort_by(gp_widget *self, int desc, unsigned int col)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABLE, );
 
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
 	int sort = 0;
 
@@ -554,7 +560,7 @@ void gp_widget_table_sort_by(gp_widget *self, int desc, unsigned int col)
 
 static int row_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	unsigned int row = ev->st->cursor_y - header_h(self, ctx);
 
 	row /= row_h(ctx);
@@ -581,7 +587,7 @@ ret:
 
 static int drag_scroll(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	int diff = tbl->click_y - ev->st->cursor_y;
 	int h = row_h(ctx);
 	int scroll_rows = (diff+h/2)/h;
@@ -603,6 +609,8 @@ static int drag_scroll(gp_widget *self, const gp_widget_render_ctx *ctx, gp_even
 
 static int click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+
 	if (ev->st->cursor_y <= header_h(self, ctx)) {
 		if (ev->code == GP_EV_KEY_UP)
 			return 0;
@@ -612,17 +620,17 @@ static int click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 	switch (ev->code) {
 	case GP_EV_KEY_DOWN:
-		self->tbl->click_y = ev->st->cursor_y;
-		self->tbl->in_drag_scroll = 1;
+		tbl->click_y = ev->st->cursor_y;
+		tbl->in_drag_scroll = 1;
 		return 1;
 	break;
 	case GP_EV_KEY_UP:
-		if (!self->tbl->in_drag_scroll)
+		if (!tbl->in_drag_scroll)
 			return 0;
 
-		self->tbl->in_drag_scroll = 0;
-		if (self->tbl->did_drag_scroll) {
-			self->tbl->did_drag_scroll = 0;
+		tbl->in_drag_scroll = 0;
+		if (tbl->did_drag_scroll) {
+			tbl->did_drag_scroll = 0;
 			return 1;
 		}
 
@@ -635,7 +643,7 @@ static int click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 static int enter(gp_widget *self)
 {
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
 	if (!tbl->row_selected)
 		return 0;
@@ -647,6 +655,8 @@ static int enter(gp_widget *self)
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+
 	switch (ev->type) {
 	case GP_EV_KEY:
 		switch (ev->val) {
@@ -702,7 +712,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 				scroll_up(self, ev->val);
 		break;
 		case GP_EV_REL_POS:
-			if (self->tbl->in_drag_scroll &&
+			if (tbl->in_drag_scroll &&
 			    gp_ev_any_key_pressed(ev, GP_BTN_LEFT, GP_BTN_TOUCH))
 				drag_scroll(self, ctx, ev);
 		break;
@@ -940,7 +950,9 @@ static gp_widget *json_to_table(gp_json_reader *json, gp_json_val *val, gp_widge
 	if (!table)
 		goto err;
 
-	table->tbl->free = table_header;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(table);
+
+	tbl->free = table_header;
 
 	if (sort_by_col >= 0)
 		gp_widget_table_sort_by(table, desc, sort_by_col);
@@ -953,10 +965,12 @@ err:
 
 static void free_(gp_widget *self)
 {
-	if (!self->tbl->free)
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+
+	if (!tbl->free)
 		return;
 
-	free_header(self->tbl->free, self->tbl->cols);
+	free_header(tbl->free, tbl->cols);
 }
 
 struct gp_widget_ops gp_widget_table_ops = {
@@ -972,18 +986,19 @@ struct gp_widget_ops gp_widget_table_ops = {
 
 static void set_header_flag(gp_widget *self)
 {
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 	unsigned int i;
 
-	self->tbl->needs_header = 0;
+	tbl->needs_header = 0;
 
-	for (i = 0; i < self->tbl->cols; i++) {
-		if (self->tbl->header[i].label) {
-			self->tbl->needs_header = 1;
+	for (i = 0; i < tbl->cols; i++) {
+		if (tbl->header[i].label) {
+			tbl->needs_header = 1;
 			break;
 		}
 
-		if (col_is_sortable(self->tbl, i)) {
-			self->tbl->needs_header = 1;
+		if (col_is_sortable(tbl, i)) {
+			tbl->needs_header = 1;
 			break;
 		}
 	}
@@ -1002,15 +1017,17 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	if (!ret)
 		return NULL;
 
-	ret->tbl->cols = cols;
-	ret->tbl->min_rows = min_rows;
-	ret->tbl->start_row = 0;
-	ret->tbl->header = header;
-	ret->tbl->cols_w = (void*)ret->tbl->buf;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(ret);
 
-	ret->tbl->col_ops.sort = col_ops->sort;
-	ret->tbl->col_ops.get_cell = col_ops->get_cell;
-	ret->tbl->col_ops.seek_row = col_ops->seek_row;
+	tbl->cols = cols;
+	tbl->min_rows = min_rows;
+	tbl->start_row = 0;
+	tbl->header = header;
+	tbl->cols_w = (void*)tbl->buf;
+
+	tbl->col_ops.sort = col_ops->sort;
+	tbl->col_ops.get_cell = col_ops->get_cell;
+	tbl->col_ops.seek_row = col_ops->seek_row;
 
 	if (col_ops->on_event)
 		gp_widget_on_event_set(ret, col_ops->on_event, col_ops->on_event_priv);
@@ -1028,8 +1045,9 @@ void gp_widget_table_refresh(gp_widget *self)
 void gp_widget_table_off_set(gp_widget *self, unsigned int off)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABLE, );
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
-	self->tbl->start_row = off;
+	tbl->start_row = off;
 
 	gp_widget_redraw(self);
 }
@@ -1037,8 +1055,7 @@ void gp_widget_table_off_set(gp_widget *self, unsigned int off)
 void gp_widget_table_sel_set(gp_widget *self, unsigned int row)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABLE, );
-
-	gp_widget_table *tbl = self->tbl;
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
 
 	tbl->selected_row = row;
 	if (!tbl->row_selected)
@@ -1047,4 +1064,28 @@ void gp_widget_table_sel_set(gp_widget *self, unsigned int row)
 	gp_widget_send_widget_event(self, GP_WIDGET_TABLE_SELECT, (long)tbl->selected_row);
 
 	gp_widget_redraw(self);
+}
+
+unsigned int gp_widget_table_sel_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABLE, 0);
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+
+	return tbl->selected_row;
+}
+
+bool gp_widget_table_sel_has(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABLE, 0);
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+
+	return tbl->row_selected;
+}
+
+gp_widget_table_priv *gp_widget_table_priv_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TABLE, 0);
+	gp_widget_table *tbl = GP_WIDGET_PAYLOAD(self);
+
+	return &tbl->priv;
 }
