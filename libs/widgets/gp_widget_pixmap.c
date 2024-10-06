@@ -179,8 +179,8 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("h", GP_JSON_VOID),
-	GP_JSON_OBJ_ATTR("w", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR_IDX(H, "h", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR_IDX(W, "w", GP_JSON_VOID),
 };
 
 static const gp_json_obj obj_filter = {

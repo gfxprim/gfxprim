@@ -64,7 +64,7 @@ static void *json_loader_by_type(const char *type)
 enum keys {
 	ALIGN,
 	DISABLED,
-	FOCUS,
+	FOCUSED,
 	HALIGN,
 	ON_EVENT,
 	SHRINK,
@@ -74,15 +74,15 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("align", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("disabled", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("focused", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("halign", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("on_event", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("shrink", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("type", GP_JSON_VOID),
-	GP_JSON_OBJ_ATTR("uid", GP_JSON_VOID),
-	GP_JSON_OBJ_ATTR("valign", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(ALIGN, "align", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(DISABLED, "disabled", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(FOCUSED, "focused", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(HALIGN, "halign", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(ON_EVENT, "on_event", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(SHRINK, "shrink", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(TYPE, "type", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR_IDX(UID, "uid", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR_IDX(VALIGN, "valign", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {
@@ -257,7 +257,7 @@ gp_widget *gp_widget_from_json(gp_json_reader *json, gp_json_val *val, gp_widget
 		case DISABLED:
 			disabled = val->val_bool;
 		break;
-		case FOCUS:
+		case FOCUSED:
 			focus = val->val_bool;
 		break;
 		case HALIGN:
@@ -428,9 +428,9 @@ enum info_keys {
 };
 
 static const gp_json_obj_attr info_attrs[] = {
-	GP_JSON_OBJ_ATTR("author", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("license", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("version", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(INFO_AUTHOR, "author", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(INFO_LICENSE, "license", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(INFO_VERSION, "version", GP_JSON_INT),
 };
 
 static const gp_json_obj info_obj_filter = {

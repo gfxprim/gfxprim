@@ -286,6 +286,10 @@ static inline size_t gp_json_obj_lookup(const gp_json_obj *obj, const char *key)
 #define GP_JSON_OBJ_ATTR(keyv, typev) \
 	{.key = keyv, .type = typev}
 
+/** @brief gp_json_obj_attr intializer with an array index. */
+#define GP_JSON_OBJ_ATTR_IDX(key_idx, keyv, typev) \
+        [key_idx] = {.key = keyv, .type = typev}
+
 /**
  * @brief Starts parsing of a JSON object with attribute lists.
  *

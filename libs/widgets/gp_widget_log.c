@@ -133,10 +133,10 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("max_logs", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("min_lines", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("min_width", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(MAX_LOGS, "max_logs", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(MIN_LINES, "min_lines", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(MIN_WIDTH, "min_width", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(TATTR, "tattr", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {

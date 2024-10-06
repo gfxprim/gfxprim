@@ -162,14 +162,14 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("set", GP_JSON_BOOL),
-};
-
 enum keys {
 	LABEL,
 	SET,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR_IDX(LABEL, "label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(SET, "set", GP_JSON_BOOL),
 };
 
 static const gp_json_obj obj_filter = {

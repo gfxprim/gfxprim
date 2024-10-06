@@ -1397,8 +1397,8 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("min_size", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("stock", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(MIN_SIZE, "min_size", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(STOCK, "stock", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {

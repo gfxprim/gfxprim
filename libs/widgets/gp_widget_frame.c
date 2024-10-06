@@ -177,10 +177,10 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("bg", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("title", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("widget", GP_JSON_OBJ),
+	GP_JSON_OBJ_ATTR_IDX(BG, "bg", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TATTR, "tattr", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TITLE, "title", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(WIDGET, "widget", GP_JSON_OBJ),
 };
 
 static const gp_json_obj obj_filter = {

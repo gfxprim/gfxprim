@@ -125,18 +125,18 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("min_size", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("off_stock", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("on_stock", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("set", GP_JSON_BOOL),
-};
-
 enum keys {
 	MIN_SIZE,
 	OFF_STOCK,
 	ON_STOCK,
 	SET,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR_IDX(MIN_SIZE, "min_size", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(OFF_STOCK, "off_stock", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(ON_STOCK, "on_stock", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(SET, "set", GP_JSON_BOOL),
 };
 
 static const gp_json_obj obj_filter = {

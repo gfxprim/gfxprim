@@ -121,15 +121,15 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("bg_color", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("fmt", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("padd", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("reverse_colors", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("text_color", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("width", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(BG_COLOR, "bg_color", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(FMT, "fmt", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(FRAME, "frame", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(PADD, "padd", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(REVERSE_COLORS, "reverse_colors", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(TATTR, "tattr", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TEXT, "text", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TEXT_COLOR, "text_color", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(WIDTH, "width", GP_JSON_INT),
 };
 
 static const gp_json_obj obj_filter = {

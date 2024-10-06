@@ -541,9 +541,9 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("min_h", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("min_w", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("widget", GP_JSON_OBJ),
+	GP_JSON_OBJ_ATTR_IDX(MIN_H, "min_h", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(MIN_W, "min_w", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(WIDGET, "widget", GP_JSON_OBJ),
 };
 
 static const gp_json_obj obj_filter = {

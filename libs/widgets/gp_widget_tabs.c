@@ -548,9 +548,9 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("active", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("labels", GP_JSON_ARR),
-	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR_IDX(ACTIVE, "active", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(LABELS, "labels", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR_IDX(WIDGETS, "widgets", GP_JSON_ARR),
 };
 
 static const gp_json_obj obj_filter = {

@@ -1095,19 +1095,19 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("border", GP_JSON_VOID),
-	GP_JSON_OBJ_ATTR("cfill", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("cols", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("cpad", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("cpadf", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("pad", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("rfill", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("rows", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("rpad", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("rpadf", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("uniform", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR_IDX(BORDER, "border", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR_IDX(CFILL, "cfill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(COLS, "cols", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(CPAD, "cpad", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(CPADF, "cpadf", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(FRAME, "frame", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(PAD, "pad", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(RFILL, "rfill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(ROWS,"rows", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(RPAD, "rpad", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(RPADF, "rpadf", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(UNIFORM, "uniform", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(WIDGETS, "widgets", GP_JSON_ARR),
 };
 
 static const gp_json_obj obj_filter = {
@@ -1794,13 +1794,13 @@ enum box_keys {
 };
 
 static const gp_json_obj_attr box_attrs[] = {
-	GP_JSON_OBJ_ATTR("border", GP_JSON_VOID),
-	GP_JSON_OBJ_ATTR("cell-fill", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("padd", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("padd-fill", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("uniform", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR_IDX(BOX_BORDER, "border", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR_IDX(BOX_CELL_FILL, "cell-fill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(BOX_FRAME, "frame", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(BOX_PADD, "padd", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(BOX_PADD_FILL, "padd-fill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(BOX_UNIFORM, "uniform", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR_IDX(BOX_WIDGETS, "widgets", GP_JSON_ARR),
 };
 
 static const gp_json_obj box_obj_filter = {

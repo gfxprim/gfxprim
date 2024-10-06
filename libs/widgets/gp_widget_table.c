@@ -739,17 +739,16 @@ enum header_keys {
 	LABEL,
 	MIN_SIZE,
 	ORDER,
-	SORT,
 	TATTR
 };
 
 static const gp_json_obj_attr header_attrs[] = {
-	GP_JSON_OBJ_ATTR("fill", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("id", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("min_size", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("order", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(FILL, "fill", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(ID, "id", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(LABEL, "label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(MIN_SIZE, "min_size", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(ORDER, "order", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TATTR, "tattr", GP_JSON_STR),
 };
 
 static int parse_order(gp_json_reader *json, gp_json_val *val, int *desc)
@@ -878,10 +877,10 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("col_ops", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("cols", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("header", GP_JSON_ARR),
-	GP_JSON_OBJ_ATTR("min_rows", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(COL_OPS, "col_ops", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(COLS, "cols", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(HEADER, "header", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR_IDX(MIN_ROWS, "min_rows", GP_JSON_INT),
 };
 
 static const gp_json_obj obj_filter = {

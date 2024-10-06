@@ -276,19 +276,19 @@ static struct map *load_map_keys(gp_json_reader *json, gp_json_val *val)
 	return ret;
 }
 
+enum map_keys {
+	MAP_KEYS,
+	MAP_MODS,
+};
+
 static struct gp_json_obj_attr map_attrs[] = {
-	GP_JSON_OBJ_ATTR("keys", GP_JSON_ARR),
-	GP_JSON_OBJ_ATTR("mods", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR_IDX(MAP_KEYS, "keys", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR_IDX(MAP_MODS, "mods", GP_JSON_ARR),
 };
 
 static struct gp_json_obj map_obj_filter = {
 	.attrs = map_attrs,
 	.attr_cnt = GP_ARRAY_SIZE(map_attrs),
-};
-
-enum map_keys {
-	MAP_KEYS,
-	MAP_MODS,
 };
 
 static uint32_t parse_mod_state(gp_json_reader *json, gp_json_val *val, struct mods *mods)
@@ -383,9 +383,9 @@ static void free_maps(struct map *maps)
 }
 
 static struct gp_json_obj_attr mods_attrs[] = {
-	GP_JSON_OBJ_ATTR("dead", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("lock", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("mod", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(MODS_DEAD, "dead", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(MODS_LOCK, "lock", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(MODS_MOD, "mod", GP_JSON_STR),
 };
 
 static struct gp_json_obj mods_obj_filter = {
@@ -448,19 +448,19 @@ static struct mods *load_mods(gp_json_reader *json, gp_json_val *val)
 	return ret;
 }
 
+enum keymap_keys {
+	MAP,
+	MODS,
+};
+
 static struct gp_json_obj_attr keymap_attrs[] = {
-	GP_JSON_OBJ_ATTR("map", GP_JSON_OBJ),
-	GP_JSON_OBJ_ATTR("mods", GP_JSON_OBJ),
+	GP_JSON_OBJ_ATTR_IDX(MAP, "map", GP_JSON_OBJ),
+	GP_JSON_OBJ_ATTR_IDX(MODS, "mods", GP_JSON_OBJ),
 };
 
 static struct gp_json_obj keymap_obj_filter = {
 	.attrs = keymap_attrs,
 	.attr_cnt = GP_ARRAY_SIZE(keymap_attrs),
-};
-
-enum keymap_keys {
-	MAP,
-	MODS,
 };
 
 static int load_keymap(gp_json_reader *json, struct map **rmaps, struct mods **rmods)

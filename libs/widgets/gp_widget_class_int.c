@@ -188,10 +188,10 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("dir", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("max", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("min", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("val", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(DIR, "dir", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(MAX, "max", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(MIN, "min", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(VAL, "val", GP_JSON_INT),
 };
 
 static const gp_json_obj obj_filter = {

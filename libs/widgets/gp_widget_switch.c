@@ -214,15 +214,6 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("off_label", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("off_stock", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("on_label", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("on_stock", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("set", GP_JSON_BOOL),
-};
-
 enum keys {
 	LABEL,
 	OFF_LABEL,
@@ -230,6 +221,15 @@ enum keys {
 	ON_LABEL,
 	ON_STOCK,
 	SET,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR_IDX(LABEL, "label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(OFF_LABEL, "off_label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(OFF_STOCK, "off_stock", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(ON_LABEL, "on_label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(ON_STOCK, "on_stock", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(SET, "set", GP_JSON_BOOL),
 };
 
 static const gp_json_obj obj_filter = {

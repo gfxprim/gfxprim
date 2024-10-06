@@ -486,9 +486,9 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("btype", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("text_align", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(BTYPE, "btype", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(LABEL, "label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TEXT_ALIGN, "text_align", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {

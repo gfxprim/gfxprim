@@ -241,8 +241,8 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("fmt", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(FMT, "fmt", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TEXT, "text", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {

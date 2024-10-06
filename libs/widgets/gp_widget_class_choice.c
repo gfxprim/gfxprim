@@ -95,9 +95,9 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("choices", GP_JSON_ARR),
-	GP_JSON_OBJ_ATTR("desc", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("selected", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR_IDX(CHOICES, "choices", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR_IDX(DESC, "desc", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(SELECTED, "selected", GP_JSON_VOID),
 };
 
 static const gp_json_obj obj_filter = {

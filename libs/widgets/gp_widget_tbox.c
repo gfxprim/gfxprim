@@ -949,13 +949,13 @@ enum keys {
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("help", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("len", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("max_len", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("sel_delim", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("ttype", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(HELP, "help", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(LEN, "len", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(MAX_LEN, "max_len", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR_IDX(SEL_DELIM, "sel_delim", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TATTR, "tattr", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TEXT, "text", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(TTYPE, "ttype", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {
