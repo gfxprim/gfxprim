@@ -46,3 +46,4 @@ draw_glyph
 dpi_check
 unicodetest
 backend_cursor
+elf_note
