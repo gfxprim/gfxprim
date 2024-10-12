@@ -34,11 +34,14 @@ INCLUDED_BY_GRAPH      = NO
 GRAPHICAL_HIERARCHY    = NO
 DIRECTORY_GRAPH        = NO
 
-
 # Where to take images from
 IMAGE_PATH = .
 # The paths to examples start at root directory
 EXAMPLE_PATH = ../
+
+# Main page
+INPUT += ../README.md
+USE_MDFILE_AS_MAINPAGE = ../README.md
 
 # Awesome doxygen style 
 DISABLE_INDEX = NO
