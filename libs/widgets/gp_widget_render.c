@@ -222,7 +222,7 @@ static void init_fonts(gp_backend *backend)
 	update_ctx_sizes();
 }
 
-struct gp_json_struct render_ctx_desc[] = {
+static struct gp_json_struct render_ctx_desc[] = {
 	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, cur_thick, GP_JSON_SERDES_OPTIONAL, 1, 255, "cursor_thickness"),
 	GP_JSON_SERDES_UINT16(struct gp_widget_render_ctx, dclick_ms, GP_JSON_SERDES_OPTIONAL, 100, 10000, "double_click_ms"),
 	GP_JSON_SERDES_UINT8(struct gp_widget_render_ctx, font_size, GP_JSON_SERDES_OPTIONAL, 10, 100, "font_size"),
