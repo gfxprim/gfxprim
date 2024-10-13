@@ -30,6 +30,7 @@ get_symbols()
 	# Remove compiler and glibc symbols
 	#
 	sed -i '/^.init$/d' "$2"
+	sed -i '/^.data$/d' "$2"
 	sed -i '/^__.*$/d' "$2"
 	sed -i '/^_.*$/d' "$2"
 }
