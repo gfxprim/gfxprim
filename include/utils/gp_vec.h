@@ -188,6 +188,19 @@ GP_WUR void *gp_vec_del(void *self, size_t off, size_t len);
 GP_WUR void *gp_vec_shrink(void *self, size_t len);
 
 /**
+ * @brief Moves last object in vector to idx and shrinks the vector by one.
+ *
+ * This is fast operation to remove an object from the middle of the vector by
+ * replacing it by last element in vector and then shrinking it.
+ *
+ * @param vec A vector.
+ * @param idx An index into the vector to be removed.
+ *
+ * @return A (new) pointer to the vector or NULL in a case of a failure.
+ */
+GP_WUR void *gp_vec_move_shrink(void *self, size_t idx);
+
+/**
  * @brief A vector iterator.
  *
  * A ready made iterator for the vector data.

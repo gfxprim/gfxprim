@@ -175,6 +175,25 @@ void *gp_vec_shrink(void *self, size_t length)
 	return (void*)vec->payload;
 }
 
+GP_WUR void *gp_vec_move_shrink(void *self, size_t idx)
+{
+	gp_vec *vec = GP_VEC(self);
+
+	if (idx >= vec->length) {
+		GP_WARN("Index out of range %zu length %zu",
+			idx, vec->length);
+		return NULL;
+	}
+
+	memmove(vec->payload + idx * vec->unit,
+	        vec->payload + (vec->length-1) * vec->unit,
+	        vec->unit);
+
+	vec = gp_vec_shrink_(vec, 1);
+
+	return (void*)vec->payload;
+}
+
 void *gp_vec_del(void *self, size_t i, size_t length)
 {
 	gp_vec *vec = GP_VEC(self);

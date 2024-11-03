@@ -80,6 +80,15 @@ int main(void)
 	GP_VEC_FOREACH(ints, int, val)
 		printf("%i\n", *val);
 
+	/* Moves last element 10 as a first member. */
+	ints = gp_vec_move_shrink(ints, 0);
+	/* Removes last element. */
+	ints = gp_vec_move_shrink(ints, 8);
+
+	printf("\nAfter move & shrink:\n");
+	GP_VEC_FOREACH(ints, int, val)
+		printf("%i\n", *val);
+
 	gp_vec_free(ints);
 
 	strs = gp_vec_new(10, sizeof(char*));

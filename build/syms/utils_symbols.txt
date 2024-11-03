@@ -7,6 +7,7 @@ gp_vec_new
 gp_vec_dup
 gp_vec_free
 gp_vec_ins
+gp_vec_move_shrink
 gp_vec_del
 gp_vec_resize
 gp_vec_shrink
