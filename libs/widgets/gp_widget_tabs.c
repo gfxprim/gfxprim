@@ -148,6 +148,21 @@ static gp_widget *active_tab_widget(gp_widget *self)
 	return tabs->tabs[tabs->active_tab].widget;
 }
 
+static void render_child_widget(gp_widget *self, gp_widget *child,
+                                const gp_offset *offset,
+                                const gp_widget_render_ctx *ctx, int flags)
+{
+	gp_coord px = payload_x(self, ctx) + offset->x;
+	gp_coord py = payload_y(self, ctx) + offset->y;
+
+	gp_offset widget_offset = {
+		.x = px,
+		.y = py,
+	};
+
+	gp_widget_ops_render(child, &widget_offset, ctx, flags);
+}
+
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
@@ -159,12 +174,17 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int act_x = 0, act_w = 0;
 	unsigned int i;
 	gp_pixel text_color = ctx->text_color;
+	gp_widget *widget = active_tab_widget(self);
+
+	if (!gp_widget_should_redraw(self, flags)) {
+		render_child_widget(self, widget, offset, ctx, flags);
+		return;
+	}
 
 	if (gp_widget_is_disabled(self, flags))
 		text_color = ctx->col_disabled;
 
-	if (self->redraw)
-		gp_widget_ops_blit(ctx, x, y, self->w, self->h);
+	gp_widget_ops_blit(ctx, x, y, self->w, self->h);
 
 	if (!gp_vec_len(tabs->tabs)) {
 		gp_fill_rect_xywh(ctx->buf, x, y,
@@ -172,7 +192,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 		return;
 	}
 
-	gp_widget *widget = active_tab_widget(self);
 
 	if (!widget) {
 		gp_fill_rect_xywh(ctx->buf, x, y,
@@ -238,15 +257,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_rrect_xywh(ctx->buf, x, y, self->w, self->h, text_color);
 
-	gp_coord px = payload_x(self, ctx) + offset->x;
-	gp_coord py = payload_y(self, ctx) + offset->y;
-
-	gp_offset widget_offset = {
-		.x = px,
-		.y = py,
-	};
-
-	gp_widget_ops_render(widget, &widget_offset, ctx, flags);
+	render_child_widget(self, widget, offset, ctx, flags);
 }
 
 static void set_tab(gp_widget *self, unsigned int tab)
