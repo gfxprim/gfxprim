@@ -49,18 +49,18 @@ enum gp_proxy_msg_types {
 	 */
 	GP_PROXY_EXIT,
 	/**
-	 * @brief Backend sends a pixel type to the application.
+	 * @brief Backend sends a basic information to the client (application).
 	 *
-	 * The payload lenght is sizeof(gp_pixel_size) and stores the pixel
-	 * type for the application to use for drawing.
+	 * The payload lenght is sizeof(struct gp_proxy_cli_init) and among other
+	 * things stores the pixel type for the application to use for drawing.
 	 *
 	 * This message is send to the application right after it connects to
 	 * the server and the application waits for this message before it
 	 * finished its initialization.
 	 *
-	 * See also struct gp_proxy_ptype.
+	 * See also struct gp_proxy_cli_init.
 	 */
-	GP_PROXY_PIXEL_TYPE,
+	GP_PROXY_CLI_INIT,
 	/**
 	 * @brief Backend sends a gp_event to the application.
 	 *
@@ -210,15 +210,28 @@ struct gp_proxy_rect {
 };
 
 /**
- * @brief A proxy pixel type message.
+ * @brief An initial infromation send to a client (application).
+ *
+ * This is initial backend information needed to be send to the client (application)
+ * before it can return from the gp_backend_proxy_init() function.
  */
-struct gp_proxy_ptype {
-	/** @brief Event type set to GP_PROXY_PIXEL_TYPE */
+struct gp_proxy_cli_init_ {
+	/** @brief A pixel type for drawing. */
+	gp_pixel_type pixel_type;
+	/** @brief A display DPI. */
+	unsigned int dpi;
+};
+
+/**
+ * @brief An initial infromation send to a client (application).
+ */
+struct gp_proxy_cli_init {
+	/** @brief Event type is set to GP_PROXY_CLI_INIT. */
 	uint32_t type;
-	/** @brief Size is set to header size + sizeof(gp_pixel_type). */
+	/** @brief Size is set to header size + sizeof(struct gp_proxy_rect_). */
 	uint32_t size;
-	/** @brief Pixel type. */
-	gp_pixel_type ptype;
+	/** @brief The client init payload. */
+	struct gp_proxy_cli_init_ cli_init;
 };
 
 /**
@@ -256,7 +269,7 @@ union gp_proxy_msg {
 	struct gp_proxy_map map;
 	struct gp_proxy_pixmap pix;
 	struct gp_proxy_rect rect;
-	struct gp_proxy_ptype ptype;
+	struct gp_proxy_cli_init cli_init;
 	struct gp_proxy_cursor cursor;
 };
 

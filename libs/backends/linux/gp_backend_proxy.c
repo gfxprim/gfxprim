@@ -153,8 +153,9 @@ static enum gp_poll_event_ret proxy_process_fd(gp_fd *self)
 	while ((ret = gp_proxy_buf_recv(priv->fd.fd, &priv->buf)) > 0) {
 		while (gp_proxy_next(&priv->buf, &msg)) {
 			switch (msg->type) {
-			case GP_PROXY_PIXEL_TYPE:
-				priv->dummy.pixel_type = msg->ptype.ptype;
+			case GP_PROXY_CLI_INIT:
+				priv->dummy.pixel_type = msg->cli_init.cli_init.pixel_type;
+				backend->dpi = msg->cli_init.cli_init.dpi;
 			break;
 			case GP_PROXY_EVENT:
 				gp_ev_queue_put(backend->event_queue, &msg->ev.ev);

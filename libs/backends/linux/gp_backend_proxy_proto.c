@@ -78,8 +78,8 @@ static const char *msg_type_name(enum gp_proxy_msg_types type)
 		return "GP_PROXY_NAME";
 	case GP_PROXY_EXIT:
 		return "GP_PROXY_EXIT";
-	case GP_PROXY_PIXEL_TYPE:
-		return "GP_PROXY_PIXEL_TYPE";
+	case GP_PROXY_CLI_INIT:
+		return "GP_PROXY_CLI_INIT";
 	case GP_PROXY_EVENT:
 		return "GP_PROXY_EVENT";
 	case GP_PROXY_MAP:
@@ -113,8 +113,8 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 	case GP_PROXY_NAME:
 		payload_size = strlen(payload);
 	break;
-	case GP_PROXY_PIXEL_TYPE:
-		payload_size += sizeof(gp_pixel_type);
+	case GP_PROXY_CLI_INIT:
+		payload_size += sizeof(struct gp_proxy_cli_init_);
 	break;
 	case GP_PROXY_EVENT:
 		payload_size = sizeof(gp_event);

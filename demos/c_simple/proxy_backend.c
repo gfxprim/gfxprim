@@ -251,11 +251,11 @@ static enum gp_poll_event_ret server_event(gp_fd *self)
 	int fd;
 
 	while ((fd = accept(self->fd, NULL, NULL)) > 0) {
-		/*
-		 * Pixel type has to be send first so that backend can return
-		 * from init() function.
-		 */
-		gp_proxy_send(fd, GP_PROXY_PIXEL_TYPE, &backend->pixmap->pixel_type);
+		struct gp_proxy_cli_init_ init = {
+			.pixel_type = backend->pixmap->pixel_type,
+			.dpi = backend->dpi,
+		};
+		gp_proxy_send(fd, GP_PROXY_CLI_INIT, &init);
 
 		client_add(backend, fd);
 	}
