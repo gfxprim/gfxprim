@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 

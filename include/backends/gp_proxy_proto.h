@@ -31,9 +31,12 @@ enum gp_proxy_msg_types {
 	/**
 	 * @brief Sets an application name.
 	 *
-	 * The string is not NULL terminated and passed directly after the
-	 * hader. The lenght of the string plus the size of the header is
-	 * stored in the size field.
+	 * This is send to the sever by the application after successfull
+	 * connection.
+	 *
+	 * The string in the message is not NULL terminated and passed directly
+	 * after the hader. The lenght of the string plus the size of the
+	 * header is stored in the size field.
 	 */
 	GP_PROXY_NAME,
 	/**
@@ -52,7 +55,8 @@ enum gp_proxy_msg_types {
 	 * type for the application to use for drawing.
 	 *
 	 * This message is send to the application right after it connects to
-	 * the server.
+	 * the server and the application waits for this message before it
+	 * finished its initialization.
 	 *
 	 * See also struct gp_proxy_ptype.
 	 */
@@ -220,10 +224,10 @@ struct gp_proxy_ptype {
 /**
  * @brief A coordinate.
  */
-struct gp_proxy_coord {
+typedef struct gp_proxy_coord {
 	uint32_t x;
 	uint32_t y;
-};
+} gp_proxy_coord;
 
 /**
  * @brief A proxy cursor position.
@@ -311,6 +315,7 @@ int gp_proxy_buf_recv(int fd, gp_proxy_buf *buf);
  * @param fd File descriptor connected to the server/client.
  * @param type Type of the message.
  * @param payload Pointer to message payload accordingly to the message type.
+ *
  * @return Zero on success, non-zero on failure.
  */
 int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload);

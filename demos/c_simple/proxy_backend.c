@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2024 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /*
  * This is a server part of proxy backend example, you need to start this
- * sever, then you can connect any backend demo to this sever.
+ * sever, then you can connect any backend or widget demo to this sever.
  */
 
 #include <signal.h>
@@ -104,8 +104,7 @@ static void hide_client(void)
 	if (!cli_shown)
 		return;
 
-	gp_proxy_cli_send(cli_shown, GP_PROXY_HIDE, NULL);
-	gp_proxy_cli_send(cli_shown, GP_PROXY_UNMAP, NULL);
+	gp_proxy_cli_hide(cli_shown);
 
 	cli_shown = NULL;
 }
@@ -133,10 +132,7 @@ static void show_client(int pos)
 		.y = backend->event_queue->state.cursor_y,
 	};
 
-	gp_proxy_cli_send(cli, GP_PROXY_MAP, &shm->path);
-	gp_proxy_cli_send(cli, GP_PROXY_PIXMAP, &shm->pixmap);
-	gp_proxy_cli_send(cli, GP_PROXY_CURSOR_POS, &cur_pos);
-	gp_proxy_cli_send(cli, GP_PROXY_SHOW, NULL);
+	gp_proxy_cli_show(cli, shm, &cur_pos);
 
 	cli_shown = cli;
 }
