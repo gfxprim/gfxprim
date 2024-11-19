@@ -259,7 +259,7 @@ struct gp_proxy_cursor {
  *
  * The type of payload is determined by the type field.
  */
-union gp_proxy_msg {
+typedef union gp_proxy_msg {
 	struct {
 		uint32_t type;
 		uint32_t size;
@@ -271,7 +271,7 @@ union gp_proxy_msg {
 	struct gp_proxy_rect rect;
 	struct gp_proxy_cli_init cli_init;
 	struct gp_proxy_cursor cursor;
-};
+} gp_proxy_msg;
 
 /**
  * @brief A proxy buffer size.
@@ -302,16 +302,28 @@ static inline void gp_proxy_buf_init(gp_proxy_buf *buf)
 }
 
 /**
+ * @brief Returns a string name for a proxy message type.
+ *
+ * @param type A proxy message type.
+ *
+ * @return A proxy message type name.
+ */
+const char *gp_proxy_msg_type_name(enum gp_proxy_msg_types type);
+
+/**
  * @brief Parse next message in the buffer.
  *
- * Parses next message in the proxy buffer, the pointer to a start of the
- * message is stored into the msg pointer.
+ * Parses next message in the proxy buffer, the start of the message is stored
+ * into the msg pointer. If there was no message parsed the msg pointer is set
+ * to NULL.
  *
- * @param buf Proxy bufer filled by the gp_proxy_buf_recv() function.
- * @param msg Pointer to the start of the next message.
- * @return Non-zero if full message was found in the buffer, zero otherwise.
+ * @param buf Proxy buffer filled by the gp_proxy_buf_recv() function.
+ * @param msg Pointer to store the start of the next message to.
+ *
+ * @return Positive if full message was found in the buffer, zero on no or
+ *         partial message and negative on error.
  */
-int gp_proxy_next(gp_proxy_buf *buf, union gp_proxy_msg **msg);
+int gp_proxy_next(gp_proxy_buf *buf, gp_proxy_msg **msg);
 
 /**
  * @brief Receives data from from fd and stores them to the proxy buffer.

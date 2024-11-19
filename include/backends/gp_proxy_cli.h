@@ -115,21 +115,30 @@ static inline void gp_proxy_cli_event(gp_proxy_cli *self, gp_event *ev)
 		GP_WARN("Dropping event");
 }
 
-struct gp_proxy_cli_ops {
-	void (*update)(gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp_size h);
-	void (*on_unmap)(gp_proxy_cli *self);
-	void (*on_map)(gp_proxy_cli *self);
-	void (*on_hide)(gp_proxy_cli *self);
-	void (*on_show)(gp_proxy_cli *self);
-};
-
-/*
- * Has to be called when there are data ready at cli->fd.
+/**
+ * @brief A function to fill the proxy client buffer.
  *
- * @self Pointer to a client.
+ * Has to be called when there are data ready at client fd. The buffer then has
+ * to be parsed by gp_proxy_cli_msg() function.
+ *
+ * @param self Pointer to a client.
  * @return Zero on success, non-zero otherwise.
  */
-int gp_proxy_cli_read(gp_proxy_cli *self, struct gp_proxy_cli_ops *ops);
+int gp_proxy_cli_read(gp_proxy_cli *self);
+
+/**
+ * @brief A function to parse messages from the client buffer.
+ *
+ * This function must be called in a loop until there are no more messages to be parsed.
+ *
+ * @param self Pointer to a client.
+ * @param msg A pointer to store the start of the message to. It's set to NULL
+ *            if there are no more messages.
+ *
+ * @return Zero on success, non-zero on a failure e.g. invalid sekvence of
+ *         bytes was found in the buffer.
+ */
+int gp_proxy_cli_msg(gp_proxy_cli *self, gp_proxy_msg **msg);
 
 /*
  * Adds a new client to the clients list pointed by root pointer.

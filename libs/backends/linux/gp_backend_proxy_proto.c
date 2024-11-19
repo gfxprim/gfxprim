@@ -52,7 +52,10 @@ int gp_proxy_next(struct gp_proxy_buf *buf, union gp_proxy_msg **msg)
 	int msg_size;
 	union gp_proxy_msg *ret = (void*)buf->buf + buf->pos;
 
+	*msg = NULL;
+
 	msg_size = validate_msg(ret, buf->size);
+
 	if (!msg_size) {
 		if (buf->size)
 			memmove(buf->buf, buf->buf + buf->pos, buf->size);
@@ -71,7 +74,7 @@ int gp_proxy_next(struct gp_proxy_buf *buf, union gp_proxy_msg **msg)
 	return 1;
 }
 
-static const char *msg_type_name(enum gp_proxy_msg_types type)
+const char *gp_proxy_msg_type_name(enum gp_proxy_msg_types type)
 {
 	switch (type) {
 	case GP_PROXY_NAME:
@@ -107,7 +110,7 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 	msg.type = type;
 	msg.size = 8;
 
-	GP_DEBUG(3, "Sending type %s (%i)", msg_type_name(type), type);
+	GP_DEBUG(3, "Sending type %s (%i)", gp_proxy_msg_type_name(type), type);
 
 	switch (type) {
 	case GP_PROXY_NAME:

@@ -30,7 +30,6 @@ static int set_name(struct gp_proxy_cli *app, void *name, size_t size)
 
 	app->name = ptr;
 
-	GP_DEBUG(0, "App name '%s'", app->name);
 	return 0;
 }
 
@@ -44,75 +43,79 @@ void gp_proxy_cli_rem(gp_dlist *clients, struct gp_proxy_cli *self)
 	free(self);
 }
 
-static int parse(struct gp_proxy_cli *self, struct gp_proxy_cli_ops *ops)
-{
-	union gp_proxy_msg *msg;
-	int ret;
-
-	while ((ret = gp_proxy_next(&self->buf, &msg)) == 1) {
-		switch (msg->type) {
-		case GP_PROXY_NAME:
-			if (set_name(self, msg->payload, msg->size - 8))
-				return 1;
-		break;
-		case GP_PROXY_EXIT:
-			GP_DEBUG(1, "Client (%p) fd %i requests exit", self, self->fd.fd);
-			return 1;
-		break;
-		case GP_PROXY_UPDATE:
-			if (!ops->update)
-				return 0;
-
-			ops->update(self, msg->rect.rect.x, msg->rect.rect.y,
-			                  msg->rect.rect.w, msg->rect.rect.h);
-		break;
-		case GP_PROXY_MAP:
-			if (ops->on_map)
-				ops->on_map(self);
-		break;
-		case GP_PROXY_UNMAP:
-			if (ops->on_unmap)
-				ops->on_unmap(self);
-		break;
-		case GP_PROXY_SHOW:
-			if (ops->on_show)
-				ops->on_show(self);
-		break;
-		case GP_PROXY_HIDE:
-			if (ops->on_hide)
-				ops->on_hide(self);
-		break;
-		default:
-			GP_DEBUG(1, "Client (%p) fd (%i) invalid request %i",
-			         self, self->fd.fd, msg->type);
-			return 1;
-		}
-	}
-
-	if (ret == -1)
-		return 1;
-
-	return 0;
-}
-
-int gp_proxy_cli_read(struct gp_proxy_cli *self, struct gp_proxy_cli_ops *ops)
+int gp_proxy_cli_read(struct gp_proxy_cli *self)
 {
 	ssize_t ret;
 
 	ret = gp_proxy_buf_recv(self->fd.fd, &self->buf);
 
-	if (ret > 0) {
-		if (parse(self, ops))
-			return 1;
-	}
+	if (ret > 0)
+		return 0;
 
 	if (ret == 0) {
-		fprintf(stderr, "Connection closed\n");
+		GP_WARN("Client (%p) '%s' Connection closed", self, self->name);
 		return 1;
 	}
 
 	if (ret < 0 && errno != EAGAIN) {
-		fprintf(stderr, "Error in connection: %s\n", strerror(errno));
+		GP_WARN("Client (%p) '%s': Connection error: %s",
+		         self, self->name, strerror(errno));
+		return 1;
+	}
+
+	return 0;
+}
+
+int gp_proxy_cli_msg(gp_proxy_cli *self, gp_proxy_msg **rmsg)
+{
+	int ret;
+
+	ret = gp_proxy_next(&self->buf, rmsg);
+	if (ret < 0)
+		return 1;
+
+	if (ret == 0)
+		return 0;
+
+	gp_proxy_msg *msg = *rmsg;
+
+	switch (msg->type) {
+	case GP_PROXY_NAME:
+		if (set_name(self, msg->payload, msg->size - 8))
+			return 1;
+
+		GP_DEBUG(1, "Client (%p) fd %i name set to '%s'",
+		         self, self->fd.fd, self->name);
+	break;
+	case GP_PROXY_EXIT:
+		GP_DEBUG(1, "Client (%p) '%s' fd %i requests exit",
+		         self, self->name, self->fd.fd);
+	break;
+	case GP_PROXY_UPDATE:
+		GP_DEBUG(4, "Client (%p) '%s' fd %i requested update %ux%u-%ux%u",
+			 self, self->name, self->fd.fd,
+		         msg->rect.rect.x, msg->rect.rect.y,
+			 msg->rect.rect.w, msg->rect.rect.h);
+	break;
+	case GP_PROXY_MAP:
+		GP_DEBUG(1, "Client (%p) '%s' fd %i mapped buffer",
+		         self, self->name, self->fd.fd);
+	break;
+	case GP_PROXY_UNMAP:
+		GP_DEBUG(1, "Client (%p) '%s' fd %i unmapped buffer",
+		         self, self->name, self->fd.fd);
+	break;
+	case GP_PROXY_SHOW:
+		GP_DEBUG(1, "Client (%p) '%s' fd %i started rendering",
+		         self, self->name, self->fd.fd);
+	break;
+	case GP_PROXY_HIDE:
+		GP_DEBUG(1, "Client (%p) '%s' fd %i stopped rendering",
+		         self, self->name, self->fd.fd);
+	break;
+	default:
+		GP_DEBUG(1, "Client (%p) '%s' fd (%i) invalid request %i",
+		         self, self->name, self->fd.fd, msg->type);
 		return 1;
 	}
 
