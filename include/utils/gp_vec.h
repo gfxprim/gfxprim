@@ -2,13 +2,13 @@
 /*
 
   Copyright (C) 2020 Richard Palethorpe <richiejp@f-m.fm>
-  Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+  Copyright (C) 2024 Cyril Hrubis <metan@ucw.cz>
 
 */
 
 /**
  * @file gp_vec.h
- * @brief Vector a growable array.
+ * @brief Vector a growable and shrinkable array.
  */
 
 #include <stddef.h>
@@ -105,22 +105,32 @@ GP_WUR void *gp_vec_resize(void *self, size_t len);
 /**
  * @brief Returns vector lenght.
  *
+ * Returns 0 for a NULL pointer, i.e. vector that hasn't been allocated yet.
+ *
  * @param self A vector.
  * @return A number of elements in the vector.
  */
 static inline size_t gp_vec_len(const void *self)
 {
+	if (!self)
+		return 0;
+
 	return GP_VEC(self)->length;
 }
 
 /**
  * @brief Returns vector unit.
  *
+ * Returns 0 for a NULL pointer, i.e. vector that hasn't been allocated yet.
+ *
  * @param self A vector.
  * @return A vector unit, i.e. size of a vector element.
  */
 static inline size_t gp_vec_unit(const void *self)
 {
+	if (!self)
+		return 0;
+
 	return GP_VEC(self)->unit;
 }
 
