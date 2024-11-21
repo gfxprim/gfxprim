@@ -49,8 +49,11 @@ int gp_proxy_cli_read(struct gp_proxy_cli *self)
 
 	ret = gp_proxy_buf_recv(self->fd.fd, &self->buf);
 
-	if (ret > 0)
+	if (ret > 0) {
+		GP_DEBUG(4, "Client (%p) '%s' read %zu bytes",
+		         self, self->name, ret);
 		return 0;
+	}
 
 	if (ret == 0) {
 		GP_WARN("Client (%p) '%s' Connection closed", self, self->name);
@@ -62,6 +65,7 @@ int gp_proxy_cli_read(struct gp_proxy_cli *self)
 		         self, self->name, strerror(errno));
 		return 1;
 	}
+
 
 	return 0;
 }

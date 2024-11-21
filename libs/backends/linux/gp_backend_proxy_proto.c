@@ -97,9 +97,13 @@ const char *gp_proxy_msg_type_name(enum gp_proxy_msg_types type)
 		return "GP_PROXY_SHOW";
 	case GP_PROXY_HIDE:
 		return "GP_PROXY_HIDE";
-	default:
-		return "???";
+	case GP_PROXY_CURSOR_POS:
+		return "GP_PROXY_CURSOR_POS";
+	case GP_PROXY_MAX:
+	break;
 	}
+
+	return "???";
 }
 
 int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)

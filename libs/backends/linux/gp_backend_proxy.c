@@ -154,33 +154,42 @@ static enum gp_poll_event_ret proxy_process_fd(gp_fd *self)
 		while (gp_proxy_next(&priv->buf, &msg)) {
 			switch (msg->type) {
 			case GP_PROXY_CLI_INIT:
+				GP_DEBUG(4, "Got GP_PROXY_CLI_INIT");
 				priv->dummy.pixel_type = msg->cli_init.cli_init.pixel_type;
 				backend->dpi = msg->cli_init.cli_init.dpi;
 			break;
 			case GP_PROXY_EVENT:
+				GP_DEBUG(4, "Got GP_PROXY_EVENT");
 				gp_ev_queue_put(backend->event_queue, &msg->ev.ev);
 			break;
 			case GP_PROXY_MAP:
+				GP_DEBUG(4, "Got GP_PROXY_MAP");
 				map_buffer(backend, msg);
 			break;
 			case GP_PROXY_UNMAP:
+				GP_DEBUG(4, "Got GP_PROXY_UNMAP");
 				unmap_buffer(backend);
 			break;
 			case GP_PROXY_PIXMAP:
+				GP_DEBUG(4, "Got GP_PROXY_PIXMAP");
 				init_pixmap(backend, msg);
 			break;
 			case GP_PROXY_SHOW:
+				GP_DEBUG(4, "Got GP_PROXY_SHOW");
 				visible(backend);
 			break;
 			case GP_PROXY_HIDE:
+				GP_DEBUG(4, "Got GP_PROXY_HIDE");
 				hidden(backend);
 			break;
 			case GP_PROXY_CURSOR_POS:
+				GP_DEBUG(4, "Got GP_PROXY_CURSOR_POS");
 				gp_ev_queue_set_cursor_pos(backend->event_queue,
 				                           msg->cursor.pos.x,
 				                           msg->cursor.pos.y);
 			break;
 			case GP_PROXY_EXIT:
+				GP_DEBUG(4, "Got GP_PROXY_EXIT");
 				gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
 				                 GP_EV_SYS_QUIT, 0, 0);
 			break;
@@ -201,8 +210,10 @@ static void proxy_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 {
 	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
 
-	if (!priv->visible)
+	if (!priv->visible) {
+		GP_DEBUG(4, "Not visible!");
 		return;
+	}
 
 	struct gp_proxy_rect_ rect = {
 		.x = x0,
@@ -210,6 +221,8 @@ static void proxy_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 		.w = x1 - x0 + 1,
 		.h = y1 - y0 + 1,
 	};
+
+	GP_DEBUG(4, "Sending GP_PROXY_UPDATE");
 
 	gp_proxy_send(priv->fd.fd, GP_PROXY_UPDATE, &rect);
 }
