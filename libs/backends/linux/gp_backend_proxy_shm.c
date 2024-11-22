@@ -45,6 +45,8 @@ gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, gp_pixel
 		return NULL;
 	}
 
+	memset(ret, 0, sizeof(*ret));
+
 	strcpy(ret->path.path, path);
 
 	gp_pixmap_init(&ret->pixmap, w, h, type, NULL, 0);
