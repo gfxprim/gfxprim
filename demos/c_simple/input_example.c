@@ -44,12 +44,12 @@ static void draw_event(gp_event *ev)
 
 static void event_loop(void)
 {
-	gp_pixmap *win = backend->pixmap;
 	static int size = 0;
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
 	for (;;) {
 		gp_backend_wait(backend);
+		gp_pixmap *win = backend->pixmap;
 
 		while (gp_backend_events(backend)) {
 			gp_event *ev = gp_backend_get_event(backend);
@@ -117,7 +117,8 @@ static void event_loop(void)
 				switch (ev->code) {
 				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);
-					gp_fill(win, black);
+					gp_fill(backend->pixmap, black);
+					gp_backend_flip(backend);
 				break;
 				case GP_EV_SYS_QUIT:
 					gp_backend_exit(backend);
@@ -135,21 +136,13 @@ int main(int argc, char *argv[])
 	const char *backend_opts = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "b:hi:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:h")) != -1) {
 		switch (opt) {
 		case 'b':
 			backend_opts = optarg;
 		break;
-		case 'i':
-	//		input = gp_input_linux_open(optarg);
-	//		if (!input) {
-	//			fprintf(stderr, "Cannot initialize '%s'\n", optarg);
-	//			return 1;
-	//		}
-		break;
 		case 'h':
 			printf("Options\n-------\n\n");
-			printf("-i /dev/input/eventX\n");
 			printf("-b backend\n\n");
 			printf("Backends\n--------\n\n");
 			gp_backend_init_help();
