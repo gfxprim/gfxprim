@@ -591,5 +591,10 @@ int gp_linux_input_new(const char *dev_path, gp_backend *backend)
 	gp_backend_poll_add(backend, &input->fd);
 	gp_dlist_push_head(&backend->input_drivers, &input->input.list_head);
 
+	GP_DEBUG(1, "Grabbing device '%s'", dev_path);
+
+	if (ioctl(fd, EVIOCGRAB, 1))
+		GP_WARN("Failet to grab device '%s': %s", dev_path, strerror(errno));
+
 	return 0;
 }
