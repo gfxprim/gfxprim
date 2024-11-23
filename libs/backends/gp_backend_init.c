@@ -552,7 +552,7 @@ static struct backend_init backends[] = {
 	 .help  = {"no_shadow   - turns off shadow buffer",
 	           "new_console - allocate new console",
 	           "input=[linux,kbd,none]",
-	           "      linux - (default) Linux input for keyboards and pointer devices"
+	           "      linux - (default) Linux input for keyboards and pointer devices",
 	           "      kbd   - Konsole KBD keyboard",
 	           "      none  - No input devices",
 	           NULL}
