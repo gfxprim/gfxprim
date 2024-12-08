@@ -206,6 +206,16 @@ void gp_widgets_main_loop(struct gp_widget *layout,
 void gp_widgets_exit(int exit_value) __attribute__((noreturn));
 
 /**
+ * @brief Quits the widgets.
+ *
+ * Deinitializes widgets, backend, etc. but unlike the gp_widgets_exit()
+ * returns back to the caller. The caller can do additional cleanup but after
+ * that it must call a function that does not return as returning back to the
+ * widget library will cause crash.
+ */
+void gp_widgets_quit(void);
+
+/**
  * @brief Replace a application layout.
  *
  * @layout New application widget layout.

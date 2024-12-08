@@ -309,3 +309,4 @@ gp_widgets_task_ins
 gp_widgets_task_rem
 gp_widgets_timer_ins
 gp_widgets_timer_rem
+gp_widgets_quit

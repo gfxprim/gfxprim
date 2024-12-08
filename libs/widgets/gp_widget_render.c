@@ -838,7 +838,7 @@ void gp_widgets_backend_set(gp_backend *new_backend)
 		backend = new_backend;
 }
 
-void gp_widgets_exit(int exit_value)
+void gp_widgets_quit(void)
 {
 	gp_app_send_event(GP_WIDGET_EVENT_FREE);
 
@@ -849,6 +849,12 @@ void gp_widgets_exit(int exit_value)
 	gp_font_face_free(render_font_big);
 	gp_font_face_free(render_font_big_bold);
 	gp_poll_clear(&backend->fds);
+}
+
+void gp_widgets_exit(int exit_value)
+{
+	gp_widgets_quit();
 
 	exit(exit_value);
 }
+
