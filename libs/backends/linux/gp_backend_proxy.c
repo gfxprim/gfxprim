@@ -246,6 +246,9 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 
 	memset(ret, 0, size);
 
+	if (!path)
+		path = getenv("GP_PROXY_PATH");
+
 	fd = gp_proxy_client_connect(NULL);
 	if (fd < 0) {
 		free(ret);

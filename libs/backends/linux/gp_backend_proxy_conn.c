@@ -44,6 +44,8 @@ int gp_proxy_server_init(const char *path)
 		goto fail;
 	}
 
+	setenv("GP_PROXY_PATH", path, 1);
+
 	return fd;
 fail:
 	close(fd);

@@ -638,6 +638,13 @@ static const char *autodetect_backend(void)
 	if (getenv("DISPLAY"))
 		return "x11";
 
+	if (getenv("GP_PROXY_PATH"))
+		return "proxy";
+
+#ifdef HAVE_LINUX_DRM
+	return "drm";
+#endif
+
 	return NULL;
 }
 
