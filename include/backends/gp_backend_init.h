@@ -42,9 +42,9 @@
  * @endcode
  *
  * @param params A backend init string, in most cases passed down by an user,
- *               when NULL is passed in params the library attempts to
- *               autodetect which backend to use. The params format is
- *               "backend_name:backend_params" e.g. "SDL:fs" is string for
+ *               when NULL or an empty string is passed in params the library
+ *               attempts to autodetect which backend to use. The params format
+ *               is "backend_name:backend_params" e.g. "SDL:fs" is string for
  *               fullscreen SDL backend. If "help" is passed as a backend name
  *               a help is printed into the stderr.
  * @param pref_w Preferred width pass 0 for default.

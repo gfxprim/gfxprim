@@ -652,7 +652,7 @@ gp_backend *gp_backend_init(const char *params,
                             gp_size pref_w, gp_size pref_h,
                             const char *caption)
 {
-	if (!params) {
+	if (!params || !params[0]) {
 		params = autodetect_backend();
 
 		if (!params) {
