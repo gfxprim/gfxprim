@@ -18,7 +18,6 @@
 struct spiv_config config = {
 	.slideshow_delay = 0,
 	.show_info = 0,
-	.backend_init = "X11",
 	.emul_type = GP_PIXEL_UNKNOWN,
 	.zoom_strategy = ZOOM_IMAGE_DOWNSCALE,
 	.win_strategy = ZOOM_WIN_FIXED,
