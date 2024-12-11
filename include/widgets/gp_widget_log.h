@@ -15,8 +15,8 @@
  * |   Attribute    |  Type  | Default | Description                                                      |
  * |----------------|--------|---------|------------------------------------------------------------------|
  * |  **max_logs**  |  uint  |         | A maximal number of log lines the widget can store.              |
- * |  **min_lines** |  uint  |         | A minimal number of log lines visible on the screen.             |
- * |  **min_width** |  uint  |         | A minimal widget width in text characters.                       |
+ * |  **min_lines** |  uint  |   25    | A minimal number of log lines visible on the screen.             |
+ * |  **min_width** |  uint  |   80    | A minimal widget width in text characters.                       |
  * |    **tattr**   | string | normal  | Log text attributes #gp_widget_tattr, e.g. `mono` for monospace. |
  */
 
