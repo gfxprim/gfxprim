@@ -23,7 +23,7 @@ struct gp_keymap_us {
 };
 
 static char keys_to_ascii[] = {
-	   0x00, 0x00,  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',
+	   0x00, 0x1b,  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',
 	    '9',  '0',  '-',  '=', 0x08, '\t',  'q',  'w',  'e',  'r',
 	    't',  'y',  'u',  'i',  'o',  'p',  '[',  ']', '\n', 0x00,
 	    'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l',  ';',
@@ -35,7 +35,7 @@ static char keys_to_ascii[] = {
 };
 
 static char keys_to_ascii_shift[] = {
-	   0x00, 0x00,  '!',  '@',  '#',  '$',  '%',  '^',  '&',  '*',
+	   0x00, 0x1b,  '!',  '@',  '#',  '$',  '%',  '^',  '&',  '*',
 	    '(',  ')',  '_',  '+', 0x08, '\t',  'Q',  'W',  'E',  'R',
 	    'T',  'Y',  'U',  'I',  'O',  'P',  '{',  '}', '\n', 0x00,
 	    'A',  'S',  'D',  'F',  'G',  'H',  'J',  'K',  'L',  ':',
@@ -112,7 +112,8 @@ static int event_key_us(gp_keymap *self, gp_ev_queue *queue, gp_event *ev)
 	else
 		utf = keys_to_ascii[key];
 
-	gp_ev_queue_push_utf(queue, utf, ev->time);
+	if (utf)
+		gp_ev_queue_push_utf(queue, utf, ev->time);
 
 	return 0;
 }
