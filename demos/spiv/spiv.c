@@ -728,7 +728,7 @@ static void init_backend(const char *backend_opts)
 	}
 
 	if (config.full_screen)
-		gp_backend_fullscreen(backend, 2);
+		gp_backend_fullscreen(backend, GP_BACKEND_FULLSCREEN_ON);
 }
 
 #define RESIZED_CACHE_MAX 400 * 1024
@@ -871,13 +871,13 @@ int main(int argc, char *argv[])
 
 	if (params.sleep_ms) {
 		timer.expires = params.sleep_ms;
-		gp_backend_add_timer(backend, &timer);
+		gp_backend_timer_add(backend, &timer);
 	}
 
 	for (;;) {
 		gp_event *ev;
 
-		while ((ev = gp_backend_wait_event(backend))) {
+		while ((ev = gp_backend_ev_wait(backend))) {
 
 			shift_flag = gp_ev_any_key_pressed(ev,
 			                                   GP_KEY_LEFT_SHIFT,
@@ -912,7 +912,7 @@ int main(int argc, char *argv[])
 					show_image(&params);
 				break;
 				case GP_KEY_F:
-					gp_backend_fullscreen(backend, 2);
+					gp_backend_fullscreen(backend, GP_BACKEND_FULLSCREEN_TOGGLE);
 				break;
 				case GP_KEY_I:
 				        config.show_info = !config.show_info;
@@ -943,11 +943,11 @@ int main(int argc, char *argv[])
 				break;
 				case GP_KEY_S:
 					if (params.sleep_ms) {
-						if (gp_backend_timers_in_queue(backend)) {
-							gp_backend_rem_timer(backend, &timer);
+						if (gp_backend_timers_queued(backend)) {
+							gp_backend_timer_rem(backend, &timer);
 						} else {
 							timer.expires = params.sleep_ms;
-							gp_backend_add_timer(backend, &timer);
+							gp_backend_timer_add(backend, &timer);
 						}
 					}
 				break;

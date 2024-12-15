@@ -1,5 +1,5 @@
 gp_aalib_init
-gp_backend_add_timer
+gp_backend_timer_add
 gp_backend_clipboard
 gp_backend_display_init
 gp_backend_display_models
@@ -7,8 +7,8 @@ gp_backend_exit
 gp_backend_init
 gp_backend_input_destroy
 gp_backend_poll
-gp_backend_poll_event
-gp_backend_rem_timer
+gp_backend_ev_poll
+gp_backend_timer_rem
 gp_backend_resize
 gp_backend_resize_ack
 gp_backend_task_ins
@@ -18,7 +18,7 @@ gp_backend_timer_timeout
 gp_backend_update_rect_xyxy
 gp_backend_virt_init
 gp_backend_wait
-gp_backend_wait_event
+gp_backend_ev_wait
 gp_display_eink_init
 gp_display_spi_busy_edge_set
 gp_display_spi_cmd
@@ -40,10 +40,12 @@ gp_linux_input_hotplug_new
 gp_linux_input_new
 gp_proxy_buf_recv
 gp_proxy_cli_add
+gp_proxy_cli_msg
 gp_proxy_cli_read
 gp_proxy_cli_rem
 gp_proxy_client_connect
 gp_proxy_init
+gp_proxy_msg_type_name
 gp_proxy_next
 gp_proxy_send
 gp_proxy_server_init

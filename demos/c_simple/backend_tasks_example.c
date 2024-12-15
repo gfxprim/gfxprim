@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 
 	/* Handle events */
 	for (;;) {
-		gp_event *ev = gp_backend_wait_event(backend);
+		gp_event *ev = gp_backend_ev_wait(backend);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

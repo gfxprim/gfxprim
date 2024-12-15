@@ -178,33 +178,70 @@ static int sdl_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
 }
 #endif
 
-static int sdl_set_attr(struct gp_backend *self, enum gp_backend_attrs attr,
-                        const void *vals)
+static enum gp_backend_ret sdl_set_fullscreen(enum gp_backend_fullscreen_req req)
+{
+#if LIBSDL_VERSION == 2
+	uint32_t flags = 0;
+	int fullscreen = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
+
+	switch (req) {
+	case GP_BACKEND_FULLSCREEN_ON:
+		flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+	break;
+	case GP_BACKEND_FULLSCREEN_OFF:
+		flags = 0;
+	break;
+	case GP_BACKEND_FULLSCREEN_TOGGLE:
+		flags = fullscreen ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP;
+	break;
+	case GP_BACKEND_FULLSCREEN_QUERY:
+		return !!fullscreen;
+	}
+
+	if (SDL_SetWindowFullscreen(window, flags))
+		return GP_BACKEND_CONNERR;
+
+	return GP_BACKEND_OK;
+#else
+	(void) req;
+	return GP_BACKEND_NOTSUPP;
+#endif
+}
+
+static enum gp_backend_ret sdl_set_attr(struct gp_backend *self,
+                                        enum gp_backend_attr attr,
+                                        const void *vals)
 {
 	SDL_mutexP(mutex);
+	enum gp_backend_ret ret = GP_BACKEND_NOTSUPP;
 
 	switch (attr) {
-	case GP_BACKEND_TITLE:
+	case GP_BACKEND_ATTR_TITLE:
 #if LIBSDL_VERSION == 1
 		SDL_WM_SetCaption(vals, vals);
 #elif LIBSDL_VERSION == 2
 		SDL_SetWindowTitle(window, (const char *)vals);
 #endif
+		ret = GP_BACKEND_OK;
 	break;
-	case GP_BACKEND_SIZE: {
+	case GP_BACKEND_ATTR_SIZE: {
 		const int *size = vals;
 		/* Send only resize event, the actual resize is done in resize_ack */
 		gp_ev_queue_push_resize(self->event_queue, size[0], size[1], 0);
+		ret = GP_BACKEND_OK;
 	}
 	break;
+	case GP_BACKEND_ATTR_FULLSCREEN:
+		ret = sdl_set_fullscreen(*(int *)vals);
+	break;
 	default:
-		GP_DEBUG(1, "Unimplemented backend attr %i", attr);
+		GP_WARN("Unsupported backend attribute %i", (int) attr);
 	break;
 	}
 
 	SDL_mutexV(mutex);
 
-	return 0;
+	return ret;
 }
 
 static int sdl_resize_ack(struct gp_backend *self __attribute__((unused)))

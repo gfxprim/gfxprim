@@ -34,6 +34,11 @@ void gp_ev_queue_init(gp_ev_queue *self,
 		self->keymap = gp_keymap_load(NULL);
 }
 
+void gp_ev_queue_flush(gp_ev_queue *self)
+{
+	while (gp_ev_queue_get(self));
+}
+
 void gp_ev_queue_set_screen_size(gp_ev_queue *self,
                                  unsigned int w, unsigned int h)
 {

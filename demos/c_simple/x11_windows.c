@@ -27,7 +27,7 @@ static int ev_loop(struct gp_backend *backend, const char *name)
 	if (backend == NULL)
 		return 0;
 
-	while ((ev = gp_backend_get_event(backend))) {
+	while ((ev = gp_backend_ev_get(backend))) {
 
 		printf("-------------------------- %s\n", name);
 

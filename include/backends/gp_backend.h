@@ -34,13 +34,78 @@
 
 #include <backends/gp_types.h>
 
-enum gp_backend_attrs {
-	/* window size */
-	GP_BACKEND_SIZE,
-	/* window title */
-	GP_BACKEND_TITLE,
-	/* fullscreen mode */
-	GP_BACKEND_FULLSCREEN,
+/**
+ * @brief Backend attributes.
+ */
+enum gp_backend_attr {
+	/**
+	 * @brief Window change request.
+	 *
+	 * The attribute value is an array with two integers.
+	 */
+	GP_BACKEND_ATTR_SIZE,
+	/**
+	 * @brief Window title change request.
+	 *
+	 * The attribute value is an UTF8 string.
+	 */
+	GP_BACKEND_ATTR_TITLE,
+	/**
+	 * @brief Fullscreen mode change request.
+	 *
+	 * The attribute value is enum gp_backend_fullscreen_req.
+	 */
+	GP_BACKEND_ATTR_FULLSCREEN,
+};
+
+/**
+ * @brief A return value from the backend set_attr callback.
+ *
+ * All error states are negative, for fucntions that sets attribute success is
+ * 0 and for functions that query an attribute the return is either >= 0 for
+ * success, or negative for errors.
+ */
+enum gp_backend_ret {
+	/** @brief Atrribute set succesfully. */
+	GP_BACKEND_OK = 0,
+	/** @brief Attribute is disabled. */
+	GP_BACKEND_OFF = 0,
+	/** @brief Attribute is enabled. */
+	GP_BACKEND_ON = 1,
+	/**
+	 * @brief Unsupported attribute.
+	 *
+	 * Not all backends support all attributes.
+	 */
+	GP_BACKEND_NOTSUPP = -1,
+	/**
+	 * @brief Invalid value.
+	 *
+	 * E.g. an attempt to set windows size to 0x0 pixels or resize window
+	 * in a fullscreen mode.
+	 */
+	GP_BACKEND_EINVAL = -2,
+	/** @brief Connection error. */
+	GP_BACKEND_CONNERR = -3,
+};
+
+/**
+ * @brief Fullscreen request type.
+ */
+enum gp_backend_fullscreen_req {
+	/** @brief Request fullscreen to be turned off. */
+	GP_BACKEND_FULLSCREEN_OFF = 0,
+	/** @brief Request fullscreen to be turned on. */
+	GP_BACKEND_FULLSCREEN_ON = 1,
+	/** @brief Toggle fullscreen state. */
+	GP_BACKEND_FULLSCREEN_TOGGLE = 2,
+	/**
+	 * @brief Query fullscreen state.
+	 *
+	 * Returns the fullscreen state one of #GP_BACKEND_ON, #GP_BACKEND_OFF
+	 * or an error e.g. #GP_BACKEND_NOTSUPP if fullscreen is not supported.
+	 */
+	GP_BACKEND_FULLSCREEN_QUERY = 3,
 };
 
 /**
@@ -105,17 +170,22 @@ struct gp_backend {
 	                    gp_coord x0, gp_coord y0,
 	                    gp_coord x1, gp_coord y1);
 
-	/*
-	 * Attribute change callback.
+	/**
+	 * @brief Attribute change callback.
 	 *
-	 * The vals is supposed to be:
+	 * This callback is not supposed to be used directly. Use the nice
+	 * helpers such as gp_backend_resize() or gp_backend_fullscreen().
 	 *
-	 * GP_BACKEND_SIZE uint32_t vals[2];
-	 * GP_BACKEND_TITLE const char *title
-	 * GP_BACKEND_FULLSCREEN int *fs
+	 * @param self A backend.
+	 * @param attr Which attribute to set.
+	 * @param vals An attribute value, the type depends on attribute.
+	 *
+	 * @return Returns if attribute was succesfully set or a value in
+	 *         case of a attribute query.
 	 */
-	int (*set_attr)(gp_backend *self, enum gp_backend_attrs attr,
-			const void *vals);
+	enum gp_backend_ret (*set_attr)(gp_backend *self,
+	                                enum gp_backend_attr attr,
+	                                const void *vals);
 
 	/**
 	 * @brief Sets cursor shape and/or hides and shows cursor.
@@ -265,21 +335,48 @@ static inline void gp_backend_update_rect_xywh(gp_backend *self,
 	gp_backend_update_rect_xyxy(self, x, y, x + w - 1, y + h - 1);
 }
 
+/**
+ * @brief Add a file descriptor to the backend poll loop.
+ *
+ * @param self A backend.
+ * @param fd A file descriptor with a callback.
+ */
 static inline void gp_backend_poll_add(gp_backend *self, gp_fd *fd)
 {
 	gp_poll_add(&self->fds, fd);
 }
 
+/**
+ * @brief Removes a file descriptor to the backend poll loop.
+ *
+ * @param self A backend.
+ * @param fd A file descriptor with a callback.
+ */
 static inline void gp_backend_poll_rem(gp_backend *self, gp_fd *fd)
 {
 	gp_poll_rem(&self->fds, fd);
 }
 
+/**
+ * @brief Removes a file descriptor to the backend poll loop.
+ *
+ * @param self A backend.
+ * @param fd A file descriptor used to look up the #gp_fd structure.
+ */
 static inline gp_fd *gp_backend_poll_rem_by_fd(gp_backend *self, int fd)
 {
 	return gp_poll_rem_by_fd(&self->fds, fd);
 }
 
+
+/**
+ * @brief Sets backend cursor type.
+ *
+ * If supported changes backend cursor to the requested type.
+ *
+ * @param self A backend.
+ * @param cursor A cursor type.
+ */
 static inline int gp_backend_cursor_set(gp_backend *self, enum gp_backend_cursors cursor)
 {
 	if (self->set_cursor)
@@ -292,103 +389,192 @@ static inline int gp_backend_cursor_set(gp_backend *self, enum gp_backend_cursor
  * @brief Exits the backend.
  *
  * This functions deinitializes the backend. E.g. closes all file descriptors,
- * frees memory, etc. It's important to call this before the application exits
- * since some backends, e.g. framebuffer, cannot be recovered unless we return
- * the underlying facility to the original state.
+ * frees memory, etc.
+ *
+ * @warning It's important to call this before the application exits since some
+ *          backends, e.g. framebuffer, cannot be recovered unless we return
+ *          the underlying facility to the original state.
  *
  * @param self A backend.
  */
 void gp_backend_exit(gp_backend *self);
 
-/*
- * Polls backend, the events are filled into event queue.
+/**
+ * @brief Polls a backend for events.
+ *
+ * This is a non-blocking function that fills the events into the backend event
+ * queue.
+ *
+ * @param self A backend.
  */
 void gp_backend_poll(gp_backend *self);
 
-/*
- * Poll and GetEvent combined.
+/**
+ * @brief Returns an event from the queue, polls the backend for events if the
+ *        queue is empty.
+ *
+ * This combines a gp_backend_poll() and gp_backend_ev_get() into a one
+ * function. The call to gp_backend_poll() may generate more than one event so
+ * the function tries to return events from the queue first and only if the
+ * queue is empty it reaches to the backend to try to fill the queue.
+ *
+ * The function is supposed to be called in a loop:
+ *
+ * @code
+ * gp_event *ev;
+ *
+ * while ((ev = gp_backend_ev_poll(backend)) {
+ *	// Event processing has to be done here
+ *
+ *      // To avoid bussy loop we have to sleep here
+ *	usleep(100);
+ * }
+ * @endcode
+ *
+ * @param self A backend.
+ * @return An event or NULL if queue was empty and no events were generated by by backend.
  */
-gp_event *gp_backend_poll_event(gp_backend *self);
+gp_event *gp_backend_ev_poll(gp_backend *self);
 
-/*
- * Waits for backend events.
+/**
+ * @brief Waits for a backend events.
+ *
+ * This is a blocking call that fills the events into the backend event queue.
+ *
+ * Once this call returns the events from the event queue must be processed.
+ *
+ * The event processing may look like:
+ *
+ * @code
+ * for (;;) {
+ *	gp_event *ev;
+ *
+ *	gp_backend_wait(backend);
+ *
+ *	while ((ev = gp_backend_ev_get(backend)) {
+ *	// Event processing has to be done here
+ *	}
+ * }
+ * @endcode
+ *
+ * @param self A backend.
  */
 void gp_backend_wait(gp_backend *self);
 
-/*
- * Wait and GetEvent combined.
- */
-gp_event *gp_backend_wait_event(gp_backend *self);
-
-/*
- * Adds timer to backend.
+/**
+ * @brief Returns an event from the queue, wait the backend for events if the
+ *        queue is empty.
  *
- * If timer Callback is NULL a timer event is pushed into
- * the backend event queue once timer expires.
+ * This combines a gp_backend_wait() and gp_backend_ev_get() into a one
+ * function. The call to gp_backend_wait() may generate more than one event so
+ * the function tries to return events from the queue first and only if the
+ * queue is empty it reaches to the backend to try to fill the queue.
  *
- * See input/GP_Timer.h for more information about timers.
+ * The function is supposed to be called in a loop:
+ *
+ * @code
+ * for (;;) {
+ *	gp_event *ev = gp_backend_ev_wait(backend));
+ *
+ *	// Event processing has to be done here
+ * }
+ * @endcode
+ *
+ * @param self A backend.
+ * @return An event.
  */
-void gp_backend_add_timer(gp_backend *self, gp_timer *timer);
+gp_event *gp_backend_ev_wait(gp_backend *self);
 
-/*
- * Removes timer from backend timer queue.
+/**
+ * @brief Adds a timer to backend.
+ *
+ * If timer callback is NULL a #gp_ev with #GP_EV_TMR type is pushed into the
+ * backend event queue once timer expires.
+ *
+ * @param self A backend.
+ * @param timer A timer.
  */
-void gp_backend_rem_timer(gp_backend *self, gp_timer *timer);
+void gp_backend_timer_add(gp_backend *self, gp_timer *timer);
 
-/*
- * Returns number of timers scheduled in backend.
+/**
+ * @brief Removes timer from backend timer queue.
+ *
+ * @param self A backend.
+ * @param timer A timer.
  */
-static inline unsigned int gp_backend_timers_in_queue(gp_backend *self)
+void gp_backend_timer_rem(gp_backend *self, gp_timer *timer);
+
+/**
+ * @brief Returns number of timers scheduled in backend.
+ *
+ * @param self A backend.
+ */
+static inline unsigned int gp_backend_timers_queued(gp_backend *self)
 {
 	return gp_timer_queue_size(self->timers);
 }
 
-/*
- * Returns a timeout to a closest timer in ms or -1. Can be passed directly to
- * poll(2).
+/**
+ * @brief Returns time to the closest timer timeout.
+ *
+ * @param self A backend.
+ *
+ * @return Returns a timeout to a closest timer in ms or -1. Can be passed
+ *         directly to poll(2).
  */
 int gp_backend_timer_timeout(gp_backend *self);
 
-/*
- * Sets backend caption, if supported.
+/**
+ * @brief Sets backend caption, if supported.
  *
- * When setting caption is not possible/implemented non zero is returned.
+ * Caption is an UTF8 string that is usually shown in the window title.
+ *
+ * @return On success #GP_BACKEND_OK is returned. When setting caption is not
+ *         possible or implemented #GP_BACKEND_NOTSUPP is returned.
  */
-static inline int gp_backend_set_caption(gp_backend *backend,
-                                         const char *caption)
+static inline enum gp_backend_ret gp_backend_set_caption(gp_backend *backend,
+                                                         const char *caption)
 {
 	if (!backend->set_attr)
-		return 1;
+		return GP_BACKEND_NOTSUPP;
 
-	return backend->set_attr(backend, GP_BACKEND_TITLE, caption);
+	return backend->set_attr(backend, GP_BACKEND_ATTR_TITLE, caption);
 }
 
-/*
- * Resize backend, if supported.
+/**
+ * @brief Request backend resize.
  *
- * When resizing is not possible/implemented non zero is returned.
+ * When the backend size matches the requested width and height no action is done.
  *
- * When the backend size matches the passed width and height,
- * no action is done.
+ * If a resize request is granted the backend sends #GP_EV_SYS event type with
+ * #GP_EV_SYS_RESIZE code and the new width and height in the struct gp_ev_sys.
+ * Upon receiving this event the application must stop any access to the
+ * gp_backend::pixmap and call gp_backend_resize_ack() to signal to the backend
+ * that it's safe to resize the buffers. Once that is done the application can
+ * start drawing to the new and resized gp_backend::pixmap.
  *
- * Note that after calling this, the backend->pixmap pointer may change.
+ * @return When resizing is not possible or not implemented non zero is returned.
  */
 int gp_backend_resize(gp_backend *backend, uint32_t w, uint32_t h);
 
-/*
- * Changes fullscreen mode.
+/**
+ * @brief Reuqests to change fullscreen mode.
  *
- * val 0 - turn off
- *     1 - turn on
- *     2 - toggle
- *     3 - query
+ * @param backend A backend.
+ * @param req A fullscreen request.
+ *
+ * @return #GP_BACKEND_OK on success, negative on failure. In the case of
+ *         #GP_BACKEND_FULLSCREEN_QUERY it's either #GP_BACKEND_ON,
+ *         #GP_BACKEND_OFF or an error, most commonly #GP_BACKEND_NOTSUPP.
  */
-static inline int gp_backend_fullscreen(gp_backend *backend, int val)
+
+static inline enum gp_backend_ret gp_backend_fullscreen(gp_backend *backend,
+                                                        enum gp_backend_fullscreen_req req)
 {
 	if (!backend->set_attr)
-		return 0;
+		return GP_BACKEND_NOTSUPP;
 
-	return backend->set_attr(backend, GP_BACKEND_FULLSCREEN, &val);
+	return backend->set_attr(backend, GP_BACKEND_ATTR_FULLSCREEN, &req);
 }
 
 /**
@@ -402,7 +588,8 @@ static inline int gp_backend_fullscreen(gp_backend *backend, int val)
  * at least the width, height, and pixels of gp_backend::pixmap are different
  * and the content of the gp_pixmap::pixels is undefined.
  *
- * This call also resizes the windo/display/screen size in the #gp_ev_queue.
+ * This call also resizes the window, display, screen size in the backend
+ * #gp_ev_queue.
  *
  * If the function fails the best action to take is to save application data
  * and exit as the backend may be in undefined state.
@@ -443,25 +630,73 @@ void gp_backend_task_rem(gp_backend *self, gp_task *task);
  */
 void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue);
 
-/*
- * Event Queue functions.
+/**
+ * @brief Removes all events from the event queue.
+ *
+ * @param self A backend.
  */
-static inline unsigned int gp_backend_events(gp_backend *self)
+static inline void gp_backend_ev_flush(gp_backend *self)
+{
+	return gp_ev_queue_flush(self->event_queue);
+}
+
+/**
+ * @brief Returns a number of events in the backend event queue.
+ *
+ * @param self A backend.
+ *
+ * @return A number of events queued.
+ */
+static inline unsigned int gp_backend_ev_queued(gp_backend *self)
 {
 	return gp_ev_queue_events(self->event_queue);
 }
 
-static inline gp_event *gp_backend_get_event(gp_backend *self)
+/**
+ * @brief Removes and returns a pointer to a first event in the queue.
+ *
+ * @warning The pointer to the event is valid only until the next call to a
+ *          function that modifies the queue. That includes the functions that
+ *          fill in the queue e.g.  gp_backend_wait().
+ *
+ * @param self A backend.
+ * @return A pointer to an event or NULL if queue is empty.
+ */
+static inline gp_event *gp_backend_ev_get(gp_backend *self)
 {
 	return gp_ev_queue_get(self->event_queue);
 }
 
-static inline gp_event *gp_backend_peek_event(gp_backend *self)
+/**
+ * @brief Returns a pointer to a first event in the queue.
+ *
+ * Unlike the gp_backend_ev_get() the event is not removed from the queue.
+ *
+ * @warning The pointer to the event is valid only until the next call to a
+ *          function that modifies the queue. That includes the functions that
+ *          fill in the queue e.g.  gp_backend_wait().
+ *
+ * @param self A backend.
+ * @return A pointer to an event or NULL if queue is empty.
+ */
+static inline gp_event *gp_backend_ev_peek(gp_backend *self)
 {
 	return gp_ev_queue_peek(self->event_queue);
 }
 
-static inline void gp_backend_put_event_back(gp_backend *self, gp_event *ev)
+/**
+ * @brief Puts back an event that has been just removed from the queue.
+ *
+ * This can undo a last call to gp_backend_ev_get() by putting the event that
+ * has been just removed back into the queue.
+ *
+ * @warning An attempt to put back more than one evevent or an event that
+ *          wasn't removed from the top of the queue is not supported.
+ *
+ * @param self A backend.
+ * @param ev An event to be put back into the queue.
+ */
+static inline void gp_backend_ev_put_back(gp_backend *self, gp_event *ev)
 {
 	gp_ev_queue_put_back(self->event_queue, ev);
 }

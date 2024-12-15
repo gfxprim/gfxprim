@@ -66,7 +66,7 @@ static void next_font(int dir)
 static void event_loop(void)
 {
 	for (;;) {
-		gp_event *ev = gp_backend_wait_event(win);
+		gp_event *ev = gp_backend_ev_wait(win);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

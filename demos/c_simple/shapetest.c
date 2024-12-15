@@ -379,7 +379,7 @@ void event_loop(void)
 	int shift_pressed;
 
 	for (;;) {
-		gp_event *ev = gp_backend_wait_event(backend);
+		gp_event *ev = gp_backend_ev_wait(backend);
 
 		shift_pressed = gp_ev_any_key_pressed(ev,
 		                                      GP_KEY_LEFT_SHIFT,

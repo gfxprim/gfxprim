@@ -107,7 +107,7 @@ static void redraw_screen(void)
 static void event_loop(void)
 {
 	for (;;) {
-		gp_event *ev = gp_backend_wait_event(backend);
+		gp_event *ev = gp_backend_ev_wait(backend);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

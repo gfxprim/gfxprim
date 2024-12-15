@@ -416,17 +416,17 @@ static void set_title(xcb_connection_t *c, xcb_window_t win, const char *str)
 	                    8, strlen(str), str);
 }
 
-static int x_set_size(gp_backend *self, const uint32_t *size)
+static enum gp_backend_ret x_set_size(gp_backend *self, const uint32_t *size)
 {
 	struct win *win = GP_BACKEND_PRIV(self);
 	xcb_connection_t *c = x_con.c;
 
 	if (size[0] == 0 || size[1] == 0)
-		return 1;
+		return GP_BACKEND_EINVAL;
 
 	if (win->fullscreen) {
 		GP_DEBUG(1, "Ignoring resize request in fullscreen");
-		return 1;
+		return GP_BACKEND_EINVAL;
 	}
 
 	GP_DEBUG(3, "Setting window size to %ux%u", size[0], size[1]);
@@ -435,10 +435,10 @@ static int x_set_size(gp_backend *self, const uint32_t *size)
 		             XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
 		             size);
 	xcb_flush(c);
-	return 0;
+	return GP_BACKEND_OK;
 }
 
-static int x_set_title(gp_backend *self, const char *title)
+static enum gp_backend_ret x_set_title(gp_backend *self, const char *title)
 {
 	struct win *win = GP_BACKEND_PRIV(self);
 	xcb_connection_t *c = x_con.c;
@@ -447,18 +447,57 @@ static int x_set_title(gp_backend *self, const char *title)
 
 	set_title(c, win->win, title);
 	xcb_flush(c);
-	return 0;
+
+	return GP_BACKEND_OK;
 }
 
-static int x_set_fullscreen(gp_backend *self, const int *val)
+#ifndef _NET_WM_STATE_REMOVE
+# define _NET_WM_STATE_REMOVE 0
+#endif
+
+#ifndef _NET_WM_STATE_ADD
+# define _NET_WM_STATE_ADD 1
+#endif
+
+#ifndef _NET_WM_STATE_TOGGLE
+# define _NET_WM_STATE_TOGGLE 2
+#endif
+
+static enum gp_backend_ret x_set_fullscreen(gp_backend *self, const int *val)
 {
 	struct win *win = GP_BACKEND_PRIV(self);
 	xcb_connection_t *c = x_con.c;
+	int mode, fs;
+	enum gp_backend_fullscreen_req req = *val;
 
 	if (!x_con.state_supported || !x_con.fullscreen_supported)
-		return 1;
+		return GP_BACKEND_NOTSUPP;
 
-	GP_DEBUG(3, "Changing fullscreen to %i", *val);
+	switch (req) {
+	case GP_BACKEND_FULLSCREEN_OFF:
+		fs = 0;
+		mode = _NET_WM_STATE_REMOVE;
+	break;
+	case GP_BACKEND_FULLSCREEN_ON:
+		fs = 1;
+		mode = _NET_WM_STATE_ADD;
+	break;
+	case GP_BACKEND_FULLSCREEN_TOGGLE:
+		fs = !win->fullscreen;
+		mode = _NET_WM_STATE_TOGGLE;
+	break;
+	case GP_BACKEND_FULLSCREEN_QUERY:
+		return !!win->fullscreen;
+	break;
+	default:
+		GP_WARN("Invalid fullscreen req = %i", (int)req);
+		return GP_BACKEND_NOTSUPP;
+	}
+
+	if (win->fullscreen == fs)
+		return GP_BACKEND_OK;
+
+	GP_DEBUG(3, "Changing fullscreen to %i", mode);
 
 	xcb_client_message_event_t ev = {
 		.response_type = XCB_CLIENT_MESSAGE,
@@ -467,7 +506,7 @@ static int x_set_fullscreen(gp_backend *self, const int *val)
 		.type = x_con.net_wm_state,
 		.data = {
 			.data32 = {
-				*val,
+				mode,
 				x_con.net_wm_state_fullscreen,
 				0,
 				1,
@@ -487,21 +526,21 @@ static int x_set_fullscreen(gp_backend *self, const int *val)
 	return 0;
 }
 
-static int x_set_attr(gp_backend *self, enum gp_backend_attrs attr,
-                      const void *vals)
+static enum gp_backend_ret x_set_attr(gp_backend *self,
+                                      enum gp_backend_attr attr,
+                                      const void *vals)
 {
 	switch (attr) {
-	case GP_BACKEND_SIZE:
+	case GP_BACKEND_ATTR_SIZE:
 		return x_set_size(self, vals);
-	case GP_BACKEND_TITLE:
+	case GP_BACKEND_ATTR_TITLE:
 		return x_set_title(self, vals);
-	case GP_BACKEND_FULLSCREEN:
+	case GP_BACKEND_ATTR_FULLSCREEN:
 		return x_set_fullscreen(self, vals);
 	}
 
-	GP_WARN("Invalid backend attribute type %i", attr);
-
-	return 1;
+	GP_WARN("Unsupported backend attribute %i", (int) attr);
+	return GP_BACKEND_NOTSUPP;
 }
 
 static int create_window(struct gp_backend *self, struct win *win,

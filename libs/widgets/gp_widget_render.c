@@ -329,9 +329,9 @@ void gp_widget_render_timer(gp_widget *self, int flags, unsigned int timeout_ms)
 	for (i = 0; i < GP_ARRAY_SIZE(timers); i++) {
 		if (timers[i].priv == self) {
 			if (flags & GP_TIMER_RESCHEDULE) {
-				gp_backend_rem_timer(backend, &timers[i]);
+				gp_backend_timer_rem(backend, &timers[i]);
 				timers[i].expires = timeout_ms;
-				gp_backend_add_timer(backend, &timers[i]);
+				gp_backend_timer_add(backend, &timers[i]);
 				return;
 			}
 
@@ -354,7 +354,7 @@ void gp_widget_render_timer(gp_widget *self, int flags, unsigned int timeout_ms)
 	timers[i].id = gp_widget_type_id(self);
 	timers[i].priv = self;
 
-	gp_backend_add_timer(backend, &timers[i]);
+	gp_backend_timer_add(backend, &timers[i]);
 }
 
 void gp_widget_render_timer_cancel(gp_widget *self)
@@ -363,7 +363,7 @@ void gp_widget_render_timer_cancel(gp_widget *self)
 
 	for (i = 0; i < GP_ARRAY_SIZE(timers); i++) {
 		if (timers[i].priv == self) {
-			gp_backend_rem_timer(backend, &timers[i]);
+			gp_backend_timer_rem(backend, &timers[i]);
 			timers[i].priv = NULL;
 			return;
 		}
@@ -661,7 +661,7 @@ int gp_widgets_process_events(gp_widget *layout)
 {
 	gp_event *ev;
 
-	while ((ev = gp_backend_poll_event(backend))) {
+	while ((ev = gp_backend_ev_poll(backend))) {
 		//gp_event_dump(&ev);
 		//fflush(stdout);
 		if (gp_widgets_event(ev, layout))

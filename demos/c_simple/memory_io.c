@@ -70,7 +70,7 @@ int main(void)
 	gp_backend_flip(b);
 
 	for (;;) {
-		gp_event *ev = gp_backend_wait_event(b);
+		gp_event *ev = gp_backend_ev_wait(b);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

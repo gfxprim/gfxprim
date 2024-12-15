@@ -78,7 +78,7 @@ void event_loop(void)
 {
 	gp_event *ev;
 
-	while ((ev = gp_backend_get_event(win))) {
+	while ((ev = gp_backend_ev_get(win))) {
 		gp_ev_dump(ev);
 
 		switch (ev->type) {

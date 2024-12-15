@@ -55,7 +55,7 @@ void event_loop(void)
 {
 	gp_event *ev;
 
-	while ((ev = gp_backend_get_event(win))) {
+	while ((ev = gp_backend_ev_get(win))) {
 		switch (ev->type) {
 		case GP_EV_KEY:
 			if (ev->code != GP_EV_KEY_DOWN)

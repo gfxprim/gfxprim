@@ -77,7 +77,7 @@ int gp_backend_resize(gp_backend *self, uint32_t w, uint32_t h)
 
 	int vals[] = {w, h};
 
-	return self->set_attr(self, GP_BACKEND_SIZE, vals);
+	return self->set_attr(self, GP_BACKEND_ATTR_SIZE, vals);
 }
 
 int gp_backend_resize_ack(gp_backend *self)
@@ -103,7 +103,7 @@ static uint32_t pushevent_callback(gp_timer *self)
 	return self->period;
 }
 
-void gp_backend_add_timer(gp_backend *self, gp_timer *timer)
+void gp_backend_timer_add(gp_backend *self, gp_timer *timer)
 {
 	if (!timer->callback) {
 		timer->callback = pushevent_callback;
@@ -113,7 +113,7 @@ void gp_backend_add_timer(gp_backend *self, gp_timer *timer)
 	gp_timer_queue_ins(&self->timers, gp_time_stamp(), timer);
 }
 
-void gp_backend_rem_timer(gp_backend *self, gp_timer *timer)
+void gp_backend_timer_rem(gp_backend *self, gp_timer *timer)
 {
 	gp_timer_queue_rem(&self->timers, timer);
 }
@@ -154,7 +154,7 @@ static void start_task_timer(gp_backend *self)
 {
 	backend_task_timer.priv = self;
 	backend_task_timer.expires = 0;
-	gp_backend_add_timer(self, &backend_task_timer);
+	gp_backend_timer_add(self, &backend_task_timer);
 }
 
 void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue)
@@ -186,7 +186,7 @@ void gp_backend_task_rem(gp_backend *self, gp_task *task)
 	gp_task_queue_rem(self->task_queue, task);
 
 	if (!gp_task_queue_tasks(self->task_queue))
-		gp_backend_rem_timer(self, &backend_task_timer);
+		gp_backend_timer_rem(self, &backend_task_timer);
 }
 
 void gp_backend_poll(gp_backend *self)
@@ -226,7 +226,7 @@ static void wait_timers_poll(gp_backend *self)
 		if (gp_poll_fds(&self->fds))
 			gp_poll_wait(&self->fds, 0);
 
-		if (gp_backend_events(self))
+		if (gp_backend_ev_queued(self))
 			return;
 
 		usleep(10000);
@@ -257,28 +257,28 @@ void gp_backend_wait(gp_backend *self)
 		gp_poll_wait(&self->fds, -1);
 }
 
-gp_event *gp_backend_wait_event(gp_backend *self)
+gp_event *gp_backend_ev_wait(gp_backend *self)
 {
 	gp_event *ev;
 
 	for (;;) {
-		if ((ev = gp_backend_get_event(self)))
+		if ((ev = gp_backend_ev_get(self)))
 			return ev;
 
 		gp_backend_wait(self);
 	}
 }
 
-gp_event *gp_backend_poll_event(gp_backend *self)
+gp_event *gp_backend_ev_poll(gp_backend *self)
 {
 	gp_event *ev;
 
-	if ((ev = gp_backend_get_event(self)))
+	if ((ev = gp_backend_ev_get(self)))
 		return ev;
 
 	gp_backend_poll(self);
 
-	if ((ev = gp_backend_get_event(self)))
+	if ((ev = gp_backend_ev_get(self)))
 		return ev;
 
 	return NULL;

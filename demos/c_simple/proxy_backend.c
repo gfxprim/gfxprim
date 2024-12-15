@@ -147,7 +147,7 @@ static int backend_event(gp_backend *b)
 {
 	gp_event *ev;
 
-	while ((ev = gp_backend_poll_event(b))) {
+	while ((ev = gp_backend_ev_get(b))) {
 		switch (ev->type) {
 		case GP_EV_KEY:
 			if (!gp_ev_any_key_pressed(ev,

@@ -92,6 +92,14 @@ void gp_ev_queue_init(gp_ev_queue *self,
                       unsigned int screen_w, unsigned int screen_h,
                       unsigned int queue_size, enum gp_ev_queue_flags flags);
 
+
+/**
+ * @brief Removes all events from the queue.
+ *
+ * @param self An event queue.
+ */
+void gp_ev_queue_flush(gp_ev_queue *self);
+
 /**
  * @brief Sets screen (window) size.
  *

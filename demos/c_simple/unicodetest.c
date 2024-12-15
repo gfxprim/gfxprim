@@ -129,7 +129,7 @@ void event_loop(void)
 	gp_font_face *new_font;
 
 	for (;;) {
-		gp_event *ev = gp_backend_wait_event(win);
+		gp_event *ev = gp_backend_ev_wait(win);
 
 		switch (ev->type) {
 		case GP_EV_KEY:

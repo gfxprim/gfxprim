@@ -43,17 +43,16 @@ static void virt_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 	virt->backend->update_rect(virt->backend, x0, y0, x1, y1);
 }
 
-static int virt_set_attr(struct gp_backend *self,
-                         enum gp_backend_attrs attr,
-                         const void *vals)
+static enum gp_backend_ret virt_set_attr(struct gp_backend *self,
+                                         enum gp_backend_attr attr,
+                                         const void *vals)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
-	int ret = virt->backend->set_attr(virt->backend, attr, vals);
-	if (ret)
-		return ret;
+	if (virt->backend->set_attr)
+		return virt->backend->set_attr(virt->backend, attr, vals);
 
-	return 0;
+	return GP_BACKEND_NOTSUPP;
 }
 
 static void virt_poll(gp_backend *self)
@@ -64,7 +63,7 @@ static void virt_poll(gp_backend *self)
 
 	gp_event *ev;
 
-	while ((ev = gp_backend_get_event(virt->backend)))
+	while ((ev = gp_backend_ev_get(virt->backend)))
 		gp_ev_queue_put(self->event_queue, ev);
 }
 
@@ -76,7 +75,7 @@ static void virt_wait(gp_backend *self)
 
 	gp_event *ev;
 
-	while ((ev = gp_backend_get_event(virt->backend)))
+	while ((ev = gp_backend_ev_get(virt->backend)))
 		gp_ev_queue_put(self->event_queue, ev);
 }
 

@@ -47,10 +47,9 @@ static void event_loop(struct bogoman_render *render, gp_backend *backend)
 	struct bogoman_map *map = render->map;
 	char path[128];
 	static int screenshots;
+	gp_event *ev;
 
-	while (gp_backend_events(backend)) {
-		gp_event *ev = gp_backend_get_event(backend);
-
+	while ((ev = gp_backend_ev_get(backend))) {
 		switch (ev->type) {
 		case GP_EV_KEY:
 			if (ev->code != GP_EV_KEY_DOWN)
@@ -154,7 +153,7 @@ int main(int argc, char *argv[])
 
 	bogoman_render(&render, BOGOMAN_RENDER_ALL);
 
-	gp_backend_add_timer(backend, &timer);
+	gp_backend_timer_add(backend, &timer);
 
 	for (;;) {
 		gp_backend_wait(backend);

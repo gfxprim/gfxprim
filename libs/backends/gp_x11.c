@@ -218,9 +218,9 @@ static int resize_buffer(struct gp_backend *self, uint32_t w, uint32_t h)
 	return 0;
 }
 
-static int x11_set_attributes(struct gp_backend *self,
-                              uint32_t w, uint32_t h,
-                              const char *caption)
+static enum gp_backend_ret x11_set_attributes(struct gp_backend *self,
+                                              uint32_t w, uint32_t h,
+                                              const char *caption)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
@@ -573,24 +573,23 @@ static void x11_exit(gp_backend *self)
 	free(self);
 }
 
-static int x11_set_attr(gp_backend *self, enum gp_backend_attrs attr,
-                        const void *vals)
+static enum gp_backend_ret x11_set_attr(gp_backend *self,
+                                        enum gp_backend_attr attr,
+                                        const void *vals)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
 	switch (attr) {
-	case GP_BACKEND_FULLSCREEN:
-		x11_win_fullscreen(win, *(const int *)vals);
-	break;
-	case GP_BACKEND_TITLE:
-		x11_set_attributes(self, 0, 0, (const char *)vals);
-	break;
-	case GP_BACKEND_SIZE:
-		x11_set_attributes(self, ((const int*)vals)[0], ((const int*)vals)[1], NULL);
-	break;
+	case GP_BACKEND_ATTR_FULLSCREEN:
+		return x11_win_fullscreen(win, *(const int *)vals);
+	case GP_BACKEND_ATTR_TITLE:
+		return x11_set_attributes(self, 0, 0, (const char *)vals);
+	case GP_BACKEND_ATTR_SIZE:
+		return x11_set_attributes(self, ((const int*)vals)[0], ((const int*)vals)[1], NULL);
 	}
 
-	return 0;
+	GP_WARN("Unsupported backend attribute %i", (int) attr);
+	return GP_BACKEND_NOTSUPP;
 }
 
 static int x11_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
@@ -674,7 +673,7 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	gp_poll_add(&backend->fds, &win->fd);
 
 	if (flags & GP_X11_FULLSCREEN)
-		x11_win_fullscreen(win, 1);
+		x11_win_fullscreen(win, GP_BACKEND_FULLSCREEN_ON);
 
 	/* Init the event queue, once we know the window size */
 	backend->event_queue = &win->ev_queue;

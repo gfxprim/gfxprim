@@ -36,17 +36,19 @@ struct proxy_priv {
 	size_t map_size;
 };
 
-static int proxy_set_attr(gp_backend *self, enum gp_backend_attrs attr, const void *vals)
+static enum gp_backend_ret proxy_set_attr(gp_backend *self,
+                                          enum gp_backend_attr attr,
+                                          const void *vals)
 {
 	switch (attr) {
-	case GP_BACKEND_TITLE:
+	case GP_BACKEND_ATTR_TITLE:
 //		gp_proxy_send(priv->fd.fd, GP_PROXY_NAME, vals);
 	break;
 	default:
 	break;
 	}
 
-	return 0;
+	return GP_BACKEND_NOTSUPP;
 }
 
 static void proxy_exit(gp_backend *self)

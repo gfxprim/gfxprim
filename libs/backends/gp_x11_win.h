@@ -100,35 +100,42 @@ static int win_list_empty(void)
 #endif
 
 /* Send NETWM message, most modern Window Managers should understand */
-static void x11_win_fullscreen(struct x11_win *win, int mode)
+static enum gp_backend_ret x11_win_fullscreen(struct x11_win *win, enum gp_backend_fullscreen_req req)
 {
 	int fs;
 	XEvent ev;
+	int mode;
 
-	switch (mode) {
-	case _NET_WM_STATE_REMOVE:
+	switch (req) {
+	case GP_BACKEND_FULLSCREEN_OFF:
 		fs = 0;
+		mode = _NET_WM_STATE_REMOVE;
 	break;
-	case _NET_WM_STATE_ADD:
+	case GP_BACKEND_FULLSCREEN_ON:
 		fs = 1;
+		mode = _NET_WM_STATE_ADD;
 	break;
-	case _NET_WM_STATE_TOGGLE:
+	case GP_BACKEND_FULLSCREEN_TOGGLE:
 		fs = !win->fullscreen_flag;
+		mode = _NET_WM_STATE_TOGGLE;
+	break;
+	case GP_BACKEND_FULLSCREEN_QUERY:
+		return !!win->fullscreen_flag;
 	break;
 	default:
-		GP_WARN("Invalid fullscreen mode = %u", mode);
-		return;
+		GP_WARN("Invalid fullscreen req = %i", (int)req);
+		return GP_BACKEND_NOTSUPP;
 	}
 
 	if (fs == win->fullscreen_flag)
-		return;
+		return GP_BACKEND_OK;
 
 	if (!x11_conn.S__NET_WM_STATE || !x11_conn.S__NET_WM_STATE_FULLSCREEN) {
 		GP_WARN("NetWM Fullscreen not supported");
-		return;
+		return GP_BACKEND_NOTSUPP;
 	}
 
-	GP_DEBUG(2, "Requesting fullscreen mode = %u, fs = %i", mode, fs);
+	GP_DEBUG(2, "Requesting fullscreen mode = %i, fs = %i", (int)req, fs);
 
 	memset(&ev, 0, sizeof(ev));
 
@@ -144,12 +151,13 @@ static void x11_win_fullscreen(struct x11_win *win, int mode)
 	if (!XSendEvent(win->dpy, XDefaultRootWindow(win->dpy),
 	                False, SubstructureNotifyMask|SubstructureRedirectMask, &ev)) {
 		GP_WARN("Failed to send _NET_WM_STATE_FULLSCREEN event");
-		return;
+		return GP_BACKEND_CONNERR;
 	}
 
 	win->fullscreen_flag = fs;
-
 	XFlush(win->dpy);
+
+	return GP_BACKEND_OK;
 }
 
 /* Window request structure */

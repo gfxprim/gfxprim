@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 		/* Read and parse events */
 		gp_event *ev;
 
-		while ((ev = gp_backend_get_event(backend))) {
+		while ((ev = gp_backend_ev_get(backend))) {
 			switch (ev->type) {
 			case GP_EV_KEY:
 

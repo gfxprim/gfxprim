@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
 		gp_backend_poll(backend);
 
-		while ((ev = gp_backend_get_event(backend))) {
+		while ((ev = gp_backend_ev_get(backend))) {
 			gp_ev_dump(ev);
 
 			switch (ev->type) {

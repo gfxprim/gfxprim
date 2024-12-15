@@ -264,7 +264,7 @@ void draw_help(gp_backend *backend)
 	for (;;) {
 		gp_event *ev;
 
-		while ((ev = gp_backend_wait_event(backend))) {
+		while ((ev = gp_backend_ev_wait(backend))) {
 			switch (ev->type) {
 			case GP_EV_KEY:
 				if (ev->code != GP_EV_KEY_DOWN)
@@ -313,7 +313,7 @@ void draw_help(gp_backend *backend)
 					last = redraw_help(backend, loff, xoff);
 				break;
 				case GP_EV_SYS_QUIT:
-					gp_backend_put_event_back(backend, ev);
+					gp_backend_ev_put_back(backend, ev);
 					return;
 				}
 			}

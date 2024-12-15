@@ -658,13 +658,13 @@ static void wayland_update_rect(gp_backend* self, gp_coord x, gp_coord y, gp_coo
 	wl_display_flush(state.display);
 }
 
-static int wayland_set_attr(gp_backend* self, enum gp_backend_attrs attrs, const void* values)
+static enum gp_backend_ret wayland_set_attr(gp_backend* self, enum gp_backend_attr attrs, const void* values)
 {
 	(void) self;
 	(void) attrs;
 	(void) values;
 
-	return 0;
+	return GP_BACKEND_NOTSUPP;
 }
 
 static enum gp_poll_event_ret wayland_process_fd(gp_fd *self)

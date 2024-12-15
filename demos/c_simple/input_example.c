@@ -51,8 +51,8 @@ static void event_loop(void)
 		gp_backend_wait(backend);
 		gp_pixmap *win = backend->pixmap;
 
-		while (gp_backend_events(backend)) {
-			gp_event *ev = gp_backend_get_event(backend);
+		while (gp_backend_ev_queued(backend)) {
+			gp_event *ev = gp_backend_ev_get(backend);
 
 			gp_ev_dump(ev);
 

@@ -89,12 +89,12 @@ int main(void)
 		.callback = timer_callback,
 	};
 
-	gp_backend_add_timer(backend, &timer1);
-	gp_backend_add_timer(backend, &timer2);
+	gp_backend_timer_add(backend, &timer1);
+	gp_backend_timer_add(backend, &timer2);
 
 	/* Handle events */
 	for (;;) {
-		gp_event *ev = gp_backend_wait_event(backend);
+		gp_event *ev = gp_backend_ev_wait(backend);
 
 		gp_ev_dump(ev);
 
