@@ -573,26 +573,7 @@ static void x11_exit(gp_backend *self)
 	free(self);
 }
 
-static enum gp_backend_ret x11_set_attr(gp_backend *self,
-                                        enum gp_backend_attr attr,
-                                        const void *vals)
-{
-	struct x11_win *win = GP_BACKEND_PRIV(self);
-
-	switch (attr) {
-	case GP_BACKEND_ATTR_FULLSCREEN:
-		return x11_win_fullscreen(win, *(const int *)vals);
-	case GP_BACKEND_ATTR_TITLE:
-		return x11_set_attributes(self, 0, 0, (const char *)vals);
-	case GP_BACKEND_ATTR_SIZE:
-		return x11_set_attributes(self, ((const int*)vals)[0], ((const int*)vals)[1], NULL);
-	}
-
-	GP_WARN("Unsupported backend attribute %i", (int) attr);
-	return GP_BACKEND_NOTSUPP;
-}
-
-static int x11_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
+static int x11_set_cursor(gp_backend *self, enum gp_backend_cursor_req cursor)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
@@ -616,10 +597,31 @@ static int x11_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
 		XDefineCursor(win->dpy, win->win, x11_conn.cursor_hand);
 	break;
 	default:
-		return 1;
+		return GP_BACKEND_NOTSUPP;
 	}
 
-	return 0;
+	return GP_BACKEND_OK;
+}
+
+static enum gp_backend_ret x11_set_attr(gp_backend *self,
+                                        enum gp_backend_attr attr,
+                                        const void *vals)
+{
+	struct x11_win *win = GP_BACKEND_PRIV(self);
+
+	switch (attr) {
+	case GP_BACKEND_ATTR_FULLSCREEN:
+		return x11_win_fullscreen(win, *(const int *)vals);
+	case GP_BACKEND_ATTR_TITLE:
+		return x11_set_attributes(self, 0, 0, (const char *)vals);
+	case GP_BACKEND_ATTR_SIZE:
+		return x11_set_attributes(self, ((const int*)vals)[0], ((const int*)vals)[1], NULL);
+	case GP_BACKEND_ATTR_CURSOR:
+		return x11_set_cursor(self, *(enum gp_backend_cursor_req *)vals);
+	}
+
+	GP_WARN("Unsupported backend attribute %i", (int) attr);
+	return GP_BACKEND_NOTSUPP;
 }
 
 gp_backend *gp_x11_init(const char *display, int x, int y,
@@ -700,7 +702,6 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	backend->set_attr = x11_set_attr;
 	backend->clipboard = x11_clipboard;
 	backend->resize_ack = x11_resize_ack;
-	backend->set_cursor = x11_set_cursor;
 
 	return backend;
 err1:

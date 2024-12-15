@@ -12,12 +12,14 @@
  *
  * The gp_backend is unified API for managing xserver, framebuffer, waylaynd,
  * drm, e-ink display, etc. along with support for input devices, e.g. mouse,
- * keyboard and keymaps.
+ * keyboard and keymaps. It also implements timers and tasks so that work can
+ * be schedulled.
  *
  * In contrast to other graphics libraries we do not try to create unified
  * initalization interface that would match specialities for every possible
  * backend. Rather than that we are trying to create API that is the same
- * for all backends, once initalization is done.
+ * for all backends, once initalization is done. This is implemented by
+ * optional backend attributes that may or may not be supported by a backend.
  */
 
 #ifndef BACKENDS_GP_BACKEND_H
@@ -56,6 +58,12 @@ enum gp_backend_attr {
 	 * The attribute value is enum gp_backend_fullscreen_req.
 	 */
 	GP_BACKEND_ATTR_FULLSCREEN,
+	/**
+	 * @brief Cursor modifications.
+	 *
+	 * The attribute value is enum gp_backend_cursor_req.
+	 */
+	GP_BACKEND_ATTR_CURSOR,
 };
 
 /**
@@ -111,7 +119,7 @@ enum gp_backend_fullscreen_req {
 /**
  * @brief Cursor types.
  */
-enum gp_backend_cursors {
+enum gp_backend_cursor_req {
 	/** @brief Arrow default cursor type */
 	GP_BACKEND_CURSOR_ARROW,
 	/** @brief Text edit cursor */
@@ -186,13 +194,6 @@ struct gp_backend {
 	enum gp_backend_ret (*set_attr)(gp_backend *self,
 	                                enum gp_backend_attr attr,
 	                                const void *vals);
-
-	/**
-	 * @brief Sets cursor shape and/or hides and shows cursor.
-	 *
-	 * If non NULL backend can enable/disable/change cursor.
-	 */
-	int (*set_cursor)(gp_backend *self, enum gp_backend_cursors cursor);
 
 	/*
 	 * Resize acknowledge callback. This must be called
@@ -368,21 +369,25 @@ static inline gp_fd *gp_backend_poll_rem_by_fd(gp_backend *self, int fd)
 	return gp_poll_rem_by_fd(&self->fds, fd);
 }
 
-
 /**
  * @brief Sets backend cursor type.
  *
- * If supported changes backend cursor to the requested type.
+ * If supported changes backend cursor to the requested type, disables or
+ * enables a cursor.
  *
  * @param self A backend.
  * @param cursor A cursor type.
+ *
+ * @return A #GP_BACKEND_OK if cursor was modified, #GP_BACKEND_NOTSUPP if
+ *         backend cursor cannot be set.
  */
-static inline int gp_backend_cursor_set(gp_backend *self, enum gp_backend_cursors cursor)
+static inline enum gp_backend_ret gp_backend_cursor_set(gp_backend *self,
+                                                        enum gp_backend_cursor_req cursor)
 {
-	if (self->set_cursor)
-		return self->set_cursor(self, cursor);
+	if (self->set_attr)
+		return self->set_attr(self, GP_BACKEND_ATTR_CURSOR, &cursor);
 
-	return 1;
+	return GP_BACKEND_NOTSUPP;
 }
 
 /**
@@ -604,6 +609,9 @@ int gp_backend_resize_ack(gp_backend *self);
  *
  * Tasks are executed sequentionally and input processing is blocked during
  * task execution.
+ *
+ * @warning When backend is created there is no task queue, to be able to
+ *          schedulle tasks user has to allocate and set the task queue first.
  *
  * @param self A backend.
  * @param task A task to be inserted into the task queue.

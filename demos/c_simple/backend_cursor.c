@@ -47,7 +47,7 @@ static void redraw(gp_backend *self)
 
 static void change_cursor(gp_backend *self)
 {
-	static enum gp_backend_cursors cursor = GP_BACKEND_CURSOR_ARROW;
+	static enum gp_backend_cursor_req cursor = GP_BACKEND_CURSOR_ARROW;
 
 	cursor = (cursor+1) % GP_BACKEND_CURSOR_MAX;
 	gp_backend_cursor_set(self, cursor);

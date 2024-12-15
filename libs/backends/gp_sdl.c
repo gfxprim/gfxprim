@@ -130,11 +130,9 @@ static void sdl_wait(struct gp_backend *self)
 	}
 }
 
-#if LIBSDL_VERSION == 2
-static int sdl_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
+static enum gp_backend_ret sdl_set_cursor(enum gp_backend_cursor_req cursor)
 {
-	(void) self;
-
+#if LIBSDL_VERSION == 2
 	switch (cursor) {
 	case GP_BACKEND_CURSOR_HIDE:
 		SDL_ShowCursor(SDL_DISABLE);
@@ -171,12 +169,16 @@ static int sdl_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
 			SDL_SetCursor(cursor_hand);
 	break;
 	default:
-		return 1;
+		return GP_BACKEND_NOTSUPP;
 	}
 
-	return 0;
-}
+	return GP_BACKEND_OK;
+#else
+	(void) cursor;
+
+	return GP_BACKEND_NOTSUPP;
 #endif
+}
 
 static enum gp_backend_ret sdl_set_fullscreen(enum gp_backend_fullscreen_req req)
 {
@@ -233,6 +235,9 @@ static enum gp_backend_ret sdl_set_attr(struct gp_backend *self,
 	break;
 	case GP_BACKEND_ATTR_FULLSCREEN:
 		ret = sdl_set_fullscreen(*(int *)vals);
+	break;
+	case GP_BACKEND_ATTR_CURSOR:
+		ret = sdl_set_cursor(*(enum gp_backend_cursor_req *)vals);
 	break;
 	default:
 		GP_WARN("Unsupported backend attribute %i", (int) attr);
@@ -307,7 +312,6 @@ static struct gp_backend backend = {
 	.resize_ack = sdl_resize_ack,
 #if LIBSDL_VERSION == 2
 	.clipboard = sdl_clipboard,
-	.set_cursor = sdl_set_cursor,
 #endif
 	.exit = sdl_exit,
 	.poll = sdl_poll,

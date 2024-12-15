@@ -105,13 +105,6 @@ static int virt_resize_ack(gp_backend *self)
 				virt->backend->pixmap->h);
 }
 
-static int virt_set_cursor(gp_backend *self, enum gp_backend_cursors cursor)
-{
-	struct virt_priv *virt = GP_BACKEND_PRIV(self);
-
-	return virt->backend->set_cursor(virt->backend, cursor);
-}
-
 gp_backend *gp_backend_virt_init(gp_backend *backend,
                                  gp_pixel_type pixel_type,
                                  enum gp_backend_virt_flags flags)
@@ -151,7 +144,6 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	self->fds = backend->fds;
 	self->dpi = backend->dpi;
 	self->event_queue = backend->event_queue;
-	self->set_cursor = backend->set_cursor ? virt_set_cursor : NULL;
 
 	return self;
 
