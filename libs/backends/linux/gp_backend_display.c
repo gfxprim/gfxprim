@@ -53,7 +53,7 @@ gp_backend *gp_backend_display_init(enum gp_backend_display_model_ids model)
 
 	if (ret) {
 		ret->event_queue = &event_queue;
-		gp_ev_queue_init(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+		gp_ev_queue_init(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
 	}
 
 	return ret;

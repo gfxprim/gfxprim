@@ -242,7 +242,7 @@ gp_backend *gp_aalib_init(void)
 	backend->event_queue = &aa->ev_queue;
 	backend->dpi = 0;
 
-	gp_ev_queue_init(backend->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+	gp_ev_queue_init(backend->event_queue, w, h, 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	return backend;
 err2:

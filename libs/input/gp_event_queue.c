@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <string.h>
@@ -14,7 +14,10 @@
 
 void gp_ev_queue_init(gp_ev_queue *self,
                       unsigned int screen_w, unsigned int screen_h,
-                      unsigned int queue_size, enum gp_ev_queue_flags flags)
+                      unsigned int queue_size,
+                      void (*cursor_move)(void *cursor_priv, uint32_t x, uint32_t y),
+                      void *cursor_priv,
+		      enum gp_ev_queue_flags flags)
 {
 	self->screen_w = screen_w;
 	self->screen_h = screen_h;
@@ -23,6 +26,12 @@ void gp_ev_queue_init(gp_ev_queue *self,
 
 	self->cursor_x = self->state.saved_cursor_x = screen_w / 2;
 	self->cursor_y = self->state.saved_cursor_y = screen_h / 2;
+
+	self->cursor_move = cursor_move;
+	self->cursor_priv = cursor_priv;
+
+	if (self->cursor_move)
+		self->cursor_move(self->cursor_priv, self->cursor_x, self->cursor_y);
 
 	self->keymap = NULL;
 
@@ -54,11 +63,20 @@ void gp_ev_queue_set_screen_size(gp_ev_queue *self,
 	if (self->state.saved_cursor_y >= h)
 		self->state.saved_cursor_y = h - 1;
 
-	if (self->cursor_x >= w)
-		self->cursor_x = w - 1;
+	int cursor_changed = 0;
 
-	if (self->cursor_y >= h)
+	if (self->cursor_x >= w) {
+		self->cursor_x = w - 1;
+		cursor_changed = 1;
+	}
+
+	if (self->cursor_y >= h) {
 		self->cursor_y = h - 1;
+		cursor_changed = 1;
+	}
+
+	if (cursor_changed && self->cursor_move)
+		self->cursor_move(self->cursor_priv, self->cursor_x, self->cursor_y);
 }
 
 void gp_ev_queue_set_cursor_pos(gp_ev_queue *self,
@@ -72,6 +90,9 @@ void gp_ev_queue_set_cursor_pos(gp_ev_queue *self,
 
 	self->cursor_x = self->state.saved_cursor_x = x;
 	self->cursor_y = self->state.saved_cursor_y = y;
+
+	if (self->cursor_move)
+		self->cursor_move(self->cursor_priv, self->cursor_x, self->cursor_y);
 }
 
 unsigned int gp_ev_queue_events(gp_ev_queue *self)
@@ -146,8 +167,18 @@ gp_event *gp_ev_queue_get(gp_ev_queue *self)
 	break;
 	}
 
+	int cursor_moved = 0;
+
+	if (self->state.cursor_x != self->state.saved_cursor_x ||
+	    self->state.cursor_y != self->state.saved_cursor_y) {
+		cursor_moved = 1;
+	}
+
 	self->state.cursor_x = self->state.saved_cursor_x;
 	self->state.cursor_y = self->state.saved_cursor_y;
+
+	if (cursor_moved && self->cursor_move)
+		self->cursor_move(self->cursor_priv, self->cursor_x, self->cursor_y);
 
 	ev->st = &self->state;
 

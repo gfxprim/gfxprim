@@ -88,7 +88,7 @@ static int test_keymap_shift_caps(void)
 	gp_keymap *keymap;
 	gp_ev_queue queue;
 
-	gp_ev_queue_init(&queue, 10, 10, GP_EVENT_QUEUE_SIZE, 0);
+	gp_ev_queue_init(&queue, 10, 10, GP_EVENT_QUEUE_SIZE, NULL, NULL, 0);
 
 	keymap = gp_keymap_json_load(KEYMAP);
 	if (!keymap) {
@@ -155,7 +155,7 @@ static int test_keymap_dead(void)
 	gp_keymap *keymap;
 	gp_ev_queue queue;
 
-	gp_ev_queue_init(&queue, 10, 10, GP_EVENT_QUEUE_SIZE, 0);
+	gp_ev_queue_init(&queue, 10, 10, GP_EVENT_QUEUE_SIZE, NULL, NULL, 0);
 
 	keymap = gp_keymap_json_load(KEYMAP);
 	if (!keymap) {

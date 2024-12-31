@@ -26,8 +26,9 @@ static void draw_event(gp_event *ev)
 	case GP_EV_KEY:
 		gp_text_clear(win, NULL, 20, 20, align, black, ksize);
 		ksize = gp_print(win, NULL, 20, 20, align,
-		                 white, black, "Key=%s",
-				 gp_ev_key_name(ev->key.key));
+		                 white, black, "Key=%s %u",
+				 gp_ev_key_name(ev->key.key),
+				 (unsigned int)ev->code);
 	break;
 	case GP_EV_UTF:
 		gp_text_clear(win, NULL, 20, 40, align, black, usize);

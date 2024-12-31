@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -31,6 +31,10 @@ struct gp_ev_queue {
 	uint32_t cursor_x;
 	/** @brief A cursor y position valid for the last event in the queue. */
 	uint32_t cursor_y;
+	/** @brief A callback to move a cursor for backends that render cursor. */
+	void (*cursor_move)(void *priv, uint32_t x, uint32_t y);
+	/** @brief A pointer passed to the cursor_move() callback. */
+	void *cursor_priv;
 
 	/* event queue */
 	unsigned int queue_first;
@@ -86,12 +90,16 @@ enum gp_ev_queue_flags {
  * @param screen_w A width of the display/window.
  * @param screen_h A height of the display/window.
  * @param queue_size A size of the circular buffer for the queue, pass 0 for default.
+ * @param cursor_move A cursor move callback.
+ * @param cursor_priv A private pointer used by the backend to pass context.
  * @param flags A bitwise combination of enum gp_ev_queue_flags.
  */
 void gp_ev_queue_init(gp_ev_queue *self,
                       unsigned int screen_w, unsigned int screen_h,
-                      unsigned int queue_size, enum gp_ev_queue_flags flags);
-
+                      unsigned int queue_size,
+                      void (*cursor_move)(void *cursor_priv, uint32_t x, uint32_t y),
+                      void *cursor_priv,
+		      enum gp_ev_queue_flags flags);
 
 /**
  * @brief Removes all events from the queue.

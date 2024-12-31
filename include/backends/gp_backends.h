@@ -15,8 +15,6 @@
 /* Base backend definitions */
 #include <backends/gp_backend.h>
 
-#include <backends/gp_sw_cursor.h>
-
 /* Clipboard */
 #include <backends/gp_clipboard.h>
 

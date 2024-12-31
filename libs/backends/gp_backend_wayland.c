@@ -748,7 +748,7 @@ gp_backend *gp_wayland_init(const char *display,
 		GP_DEBUG(1, "Output size and DPI is not known");
 	}
 
-	gp_ev_queue_init(backend.event_queue, w, h, 0, 0);
+	gp_ev_queue_init(backend.event_queue, w, h, 0, NULL, NULL, 0);
 
 	return &backend;
 }

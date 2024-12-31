@@ -679,7 +679,7 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 
 	/* Init the event queue, once we know the window size */
 	backend->event_queue = &win->ev_queue;
-	gp_ev_queue_init(backend->event_queue, wreq.w, wreq.h, 0, 0);
+	gp_ev_queue_init(backend->event_queue, wreq.w, wreq.h, 0, NULL, NULL, 0);
 
 	backend->pixmap = NULL;
 

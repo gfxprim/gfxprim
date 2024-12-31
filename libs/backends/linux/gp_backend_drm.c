@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2022 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2024 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <fcntl.h>
@@ -19,6 +19,7 @@
 #endif
 
 #include <backends/gp_backend.h>
+#include <backends/gp_cursor.h>
 #include <backends/gp_linux_drm.h>
 #include <backends/gp_linux_input.h>
 #include <core/gp_debug.h>
@@ -57,12 +58,29 @@ err0:
 	return -1;
 }
 
+/*
+ * A pixmap to draw to that is displayed on the screen, we need more than one
+ * in order to switch buffers on an update.
+ */
+struct backend_drm_fb {
+	/* framebuffer pixmap */
+	gp_pixmap pixmap;
+
+	/* frame buffer kernel pixmap handle */
+	uint32_t fb_handle;
+	/* frame buffer id */
+	uint32_t fb_id;
+	/* frame buffer mapped buffer size */
+	uint32_t fb_size;
+};
+
 struct backend_drm_priv {
 	/* points to a /dev/dri/cardX */
 	int drm_fd;
 
-	/* framebuffer pixmap */
-	gp_pixmap pixmap;
+	/* Pixmaps and handles to draw the pixels into. */
+	struct backend_drm_fb fbs[3];
+	int active_fb;
 
 	/* input event queue */
 	gp_ev_queue ev_queue;
@@ -71,6 +89,7 @@ struct backend_drm_priv {
 	struct drm_mode_crtc saved_crtc;
 	int no_crtc_restore;
 
+	/* Connector and pipeline IDs */
 	uint32_t connector_id;
 	uint32_t crtc_id;
 
@@ -81,55 +100,67 @@ struct backend_drm_priv {
 	uint32_t mm_width;
 	uint32_t mm_height;
 
-	/* frame buffer info */
-	uint32_t fb_handle;
-	uint32_t fb_id;
-	uint32_t fb_size;
+	/* Cursor max width and height */
+	uint32_t max_cursor_w;
+	uint32_t max_cursor_h;
+
+	/* DRM cursor handle and size */
+	uint32_t cursor_handle;
+	uint32_t cursor_size;
+
+	/* Our mapped cursor pixmap */
+	gp_pixmap cursor_pixmap;
+
 };
 
-static int mmap_fb(struct backend_drm_priv *priv)
+static int mmap_fb(struct backend_drm_priv *priv, struct backend_drm_fb *fb)
 {
 	int fd = priv->drm_fd;
 
 	struct drm_mode_create_dumb creq = {
-		.width = priv->pixmap.w,
-		.height = priv->pixmap.h,
+		.width = priv->mode.hdisplay,
+		.height = priv->mode.vdisplay,
 		.bpp = 32,
 	};
+
+	GP_DEBUG(1, "Allocating fb buffer %ux%u",
+	         (unsigned int)creq.width, (unsigned int)creq.height);
 
 	if (ioctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq)) {
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_CREATE_DUMB failed: %s", strerror(errno));
 		return 1;
 	}
 
-	priv->fb_handle = creq.handle;
-	priv->fb_size = creq.size;
-
-	priv->pixmap.bytes_per_row = creq.pitch;
-	priv->pixmap.pixel_type = GP_PIXEL_xRGB8888;
-
 	struct drm_mode_destroy_dumb dreq = {
-		.handle = priv->fb_handle
+		.handle = fb->fb_handle
 	};
 
-	struct drm_mode_fb_cmd fb = {
-		.width = priv->pixmap.w,
-		.height = priv->pixmap.h,
-		.pitch = priv->pixmap.bytes_per_row,
+	fb->fb_handle = creq.handle;
+	fb->fb_size = creq.size;
+
+	fb->pixmap.w = creq.width;
+	fb->pixmap.h = creq.height;
+	fb->pixmap.bytes_per_row = creq.pitch;
+	fb->pixmap.pixel_type = GP_PIXEL_xRGB8888;
+
+	struct drm_mode_fb_cmd fb_add = {
+		.width = fb->pixmap.w,
+		.height = fb->pixmap.h,
+		.pitch = fb->pixmap.bytes_per_row,
 		.depth = 24,
 		.bpp = 32,
-		.handle = priv->fb_handle
+		.handle = fb->fb_handle
 	};
 
-	if (ioctl(fd, DRM_IOCTL_MODE_ADDFB, &fb)) {
+	if (ioctl(fd, DRM_IOCTL_MODE_ADDFB, &fb_add)) {
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_ADDFB failed: %s", strerror(errno));
 		goto err0;
 	}
 
-	priv->fb_id = fb.fb_id;
+	fb->fb_id = fb_add.fb_id;
 
 	struct drm_mode_map_dumb mreq = {
-		.handle = priv->fb_handle
+		.handle = fb->fb_handle
 	};
 
 	if (ioctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mreq)) {
@@ -137,44 +168,180 @@ static int mmap_fb(struct backend_drm_priv *priv)
 		goto err1;
 	}
 
-	priv->pixmap.pixels = mmap(0, priv->fb_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mreq.offset);
-	if (priv->pixmap.pixels == MAP_FAILED) {
+	fb->pixmap.pixels = mmap(0, fb->fb_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mreq.offset);
+	if (fb->pixmap.pixels == MAP_FAILED) {
 		GP_DEBUG(1, "Failed to mmap() framebuffer: %s", strerror(errno));
 		goto err1;
 	}
 
-	memset(priv->pixmap.pixels, 0, priv->fb_size);
+	memset(fb->pixmap.pixels, 0, fb->fb_size);
 
-	GP_DEBUG(1, "Have %p framebuffer size %u", priv->pixmap.pixels, (unsigned)priv->fb_size);
+	GP_DEBUG(1, "Have %p framebuffer size %u", fb->pixmap.pixels, (unsigned)fb->fb_size);
 
 	return 0;
 err1:
-	if (ioctl(fd, DRM_IOCTL_MODE_RMFB, &priv->fb_id))
+	if (ioctl(fd, DRM_IOCTL_MODE_RMFB, &fb->fb_id))
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_RMFB failed: %s", strerror(errno));
 err0:
-
 	if (ioctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq))
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_DESTROY_DUMB failed: %s", strerror(errno));
 
 	return 1;
 }
 
-static void munmap_fb(struct backend_drm_priv *priv)
+static void munmap_fb(struct backend_drm_priv *priv, struct backend_drm_fb *fb)
 {
 	int fd = priv->drm_fd;
 
-	if (munmap(priv->pixmap.pixels, priv->fb_size))
+	if (munmap(fb->pixmap.pixels, fb->fb_size))
 		GP_DEBUG(1, "munmap() failed; %s", strerror(errno));
 
-	if (ioctl(fd, DRM_IOCTL_MODE_RMFB, &priv->fb_id))
+	if (ioctl(fd, DRM_IOCTL_MODE_RMFB, &fb->fb_id))
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_RMFB failed: %s", strerror(errno));
 
 	struct drm_mode_destroy_dumb dreq = {
-		.handle = priv->fb_handle
+		.handle = fb->fb_handle
 	};
 
 	if (ioctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq))
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_DESTROY_DUMB failed: %s", strerror(errno));
+}
+
+static int map_cursor(struct backend_drm_priv *priv)
+{
+	int drm_fd = priv->drm_fd;
+
+#if defined(DRM_CAP_CURSOR_WIDTH) && defined(DRM_CAP_CURSOR_HEIGHT)
+	struct drm_get_cap cursor_w = {
+		.capability = DRM_CAP_CURSOR_WIDTH,
+	};
+
+	struct drm_get_cap cursor_h = {
+		.capability = DRM_CAP_CURSOR_HEIGHT,
+	};
+
+	if (ioctl(drm_fd, DRM_IOCTL_GET_CAP, &cursor_w)) {
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_GET_CAP cursor_w failed: %s",
+		         strerror(errno));
+		return 1;
+	}
+
+	if (ioctl(drm_fd, DRM_IOCTL_GET_CAP, &cursor_h)) {
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_GET_CAP cursor_h failed: %s",
+			 strerror(errno));
+		return 1;
+	}
+
+	priv->max_cursor_w = cursor_w.value;
+	priv->max_cursor_h = cursor_h.value;
+#else
+	priv->max_cursor_w = 0;
+	priv->max_cursor_h = 0;
+#endif
+
+	if (!priv->max_cursor_w)
+		priv->max_cursor_w = 64;
+
+	if (!priv->max_cursor_h)
+		priv->max_cursor_h = 64;
+
+	GP_DEBUG(1, "Cursor size %ux%u",
+	         (unsigned int)priv->max_cursor_w,
+	         (unsigned int)priv->max_cursor_h);
+
+	struct drm_mode_create_dumb cursor_create = {
+		.width = priv->max_cursor_w,
+		.height = priv->max_cursor_h,
+		.bpp = 32,
+	};
+
+	if (ioctl(drm_fd, DRM_IOCTL_MODE_CREATE_DUMB, &cursor_create)) {
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_CREATE_DUMB failed; %s",
+		         strerror(errno));
+		return 1;
+	}
+
+	struct drm_mode_map_dumb map_cursor = {
+		.handle = cursor_create.handle
+	};
+
+	if (ioctl(drm_fd, DRM_IOCTL_MODE_MAP_DUMB, &map_cursor)) {
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_MAP_DUMB failed %s",
+		         strerror(errno));
+		goto err0;
+	}
+
+	struct drm_mode_destroy_dumb cursor_destroy  = {
+		.handle = cursor_create.handle
+	};
+
+	void *cursor_pixmap = mmap(0, cursor_create.size, PROT_READ | PROT_WRITE,
+	                           MAP_SHARED, drm_fd, map_cursor.offset);
+
+	if (cursor_pixmap == MAP_FAILED) {
+		GP_DEBUG(1, "mmap() failed: %s", strerror(errno));
+		goto err0;
+	}
+
+	priv->cursor_handle = cursor_create.handle;
+	priv->cursor_size = cursor_create.size;
+
+	gp_pixmap_init(&priv->cursor_pixmap,
+	               cursor_create.width, cursor_create.height,
+	               GP_PIXEL_RGBA8888, cursor_pixmap, 0);
+
+	memset(cursor_pixmap, 0x00, priv->cursor_size);
+
+	struct drm_mode_cursor cursor_mode = {
+		.flags = DRM_MODE_CURSOR_BO,
+		.crtc_id = priv->crtc_id,
+		.width = cursor_create.width,
+		.height = cursor_create.height,
+		.handle = priv->cursor_handle,
+	};
+
+	if (ioctl(drm_fd, DRM_IOCTL_MODE_CURSOR, &cursor_mode)) {
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_CURSOR failed: %s", strerror(errno));
+		goto err1;
+	}
+
+	gp_cursor_render(gp_cursors_32[0], &priv->cursor_pixmap, 0xffffffff, 0xff000000, 0, 0);
+
+	return 0;
+err1:
+	munmap(cursor_pixmap, cursor_create.size);
+err0:
+	if (ioctl(drm_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &cursor_destroy))
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_DESTROY_DUMB failed: %s", strerror(errno));
+
+	return 1;
+}
+
+static void munmap_cursor(struct backend_drm_priv *priv)
+{
+	munmap(priv->cursor_pixmap.pixels, priv->cursor_size);
+
+	struct drm_mode_destroy_dumb cursor_destroy  = {
+		.handle = priv->cursor_handle
+	};
+
+	if (ioctl(priv->drm_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &cursor_destroy))
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_DESTROY_DUMB failed: %s", strerror(errno));
+}
+
+static void drm_move_cursor(void *priv, uint32_t x, uint32_t y)
+{
+	struct backend_drm_priv *drm_priv = priv;
+
+	struct drm_mode_cursor cursor_move = {
+		.flags = DRM_MODE_CURSOR_MOVE,
+		.crtc_id = drm_priv->crtc_id,
+		.x = x,
+		.y = y,
+	};
+
+	if (ioctl(drm_priv->drm_fd, DRM_IOCTL_MODE_CURSOR, &cursor_move))
+		GP_WARN("Failed to move cursor: %s", strerror(errno));
 }
 
 #define CONNECTOR_STATUS_CONNECTED 1
@@ -256,9 +423,6 @@ retry:
 
 		GP_DEBUG(1, "Have mode %ux%u", (unsigned)modes[0].hdisplay, modes[0].vdisplay);
 
-		priv->pixmap.w = modes[0].hdisplay;
-		priv->pixmap.h = modes[0].vdisplay;
-
 		priv->mm_width = conn.mm_width;
 		priv->mm_height = conn.mm_height;
 
@@ -285,8 +449,21 @@ retry:
 
 			priv->crtc_id = enc.crtc_id;
 
-			if (!mmap_fb(priv))
+			if (mmap_fb(priv, &priv->fbs[0]))
 				goto free;
+
+			if (mmap_fb(priv, &priv->fbs[1])) {
+				munmap_fb(priv, &priv->fbs[0]);
+				goto free;
+			}
+
+			if (mmap_fb(priv, &priv->fbs[2])) {
+				munmap_fb(priv, &priv->fbs[0]);
+				munmap_fb(priv, &priv->fbs[1]);
+				goto free;
+			}
+
+			return 0;
 		}
 
 		GP_WARN("Haven't found any connected connector!");
@@ -308,7 +485,7 @@ static int modeset(struct backend_drm_priv *priv)
 	struct drm_mode_crtc crtc = {
 		.set_connectors_ptr = (uint64_t)(&priv->connector_id),
 		.count_connectors = 1,
-		.fb_id = priv->fb_id,
+		.fb_id = priv->fbs[priv->active_fb].fb_id,
 		.crtc_id = priv->crtc_id,
 		.mode = priv->mode,
 		.mode_valid = 1,
@@ -340,8 +517,42 @@ static void backend_drm_exit(gp_backend *self)
 	struct backend_drm_priv *priv = GP_BACKEND_PRIV(self);
 
 	modereset(priv);
-	munmap_fb(priv);
+	munmap_fb(priv, &priv->fbs[0]);
+	munmap_fb(priv, &priv->fbs[1]);
+	munmap_fb(priv, &priv->fbs[2]);
 	close(priv->drm_fd);
+}
+
+static void backend_drm_flip(gp_backend *self)
+{
+	struct backend_drm_priv *priv = GP_BACKEND_PRIV(self);
+
+	priv->active_fb = !priv->active_fb;
+
+	memcpy(priv->fbs[priv->active_fb].pixmap.pixels, self->pixmap->pixels, priv->fbs[2].fb_size);
+
+	struct drm_mode_crtc crtc = {
+		.set_connectors_ptr = (uint64_t)(&priv->connector_id),
+		.count_connectors = 1,
+		.fb_id = priv->fbs[priv->active_fb].fb_id,
+		.crtc_id = priv->crtc_id,
+		.mode = priv->mode,
+		.mode_valid = 1,
+	};
+
+	if (ioctl(priv->drm_fd, DRM_IOCTL_MODE_SETCRTC, &crtc))
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_SETCRTC failed; %s", strerror(errno));
+}
+
+static void backend_drm_update_rect(gp_backend *self,
+                                    gp_coord x0, gp_coord y0,
+                                    gp_coord x1, gp_coord y1)
+{
+	(void) x0;
+	(void) y0;
+	(void) x1;
+	(void) y1;
+	backend_drm_flip(self);
 }
 
 gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
@@ -358,6 +569,7 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	ret = malloc(size);
 	if (!ret) {
 		GP_WARN("Malloc failed :(");
+		free(ret);
 		return NULL;
 	}
 
@@ -380,22 +592,39 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	if (init_drm(priv))
 		goto err2;
 
-	if (modeset(priv))
-		goto err3;
+	if (map_cursor(priv)) {
+		GP_WARN("Failed to initialize cursor!");
+		goto err4;
+	}
 
-	ret->pixmap = &priv->pixmap;
+	priv->active_fb = 0;
+
+	if (modeset(priv))
+		goto err5;
+
+	priv->active_fb = 1;
+
+	ret->pixmap = &(priv->fbs[2].pixmap);
 
 	ret->event_queue = &priv->ev_queue;
-	gp_ev_queue_init(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+
+	gp_ev_queue_init(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0,
+	                 drm_move_cursor, priv, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	ret->exit = backend_drm_exit;
+	ret->flip = backend_drm_flip;
+	ret->update_rect = backend_drm_update_rect;
 
 	ret->dpi = gp_dpi_from_size(ret->pixmap->w, priv->mm_width,
 	                            ret->pixmap->h, priv->mm_height);
 
 	return ret;
-err3:
-	munmap_fb(priv);
+err5:
+	munmap_cursor(priv);
+err4:
+	munmap_fb(priv, &priv->fbs[0]);
+	munmap_fb(priv, &priv->fbs[1]);
+	munmap_fb(priv, &priv->fbs[2]);
 err2:
 	close(priv->drm_fd);
 err1:

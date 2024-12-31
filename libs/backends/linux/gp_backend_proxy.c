@@ -287,7 +287,7 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 
 	ret->event_queue = &priv->ev_queue;
 
-	gp_ev_queue_init(ret->event_queue, 1, 1, 0, 0);
+	gp_ev_queue_init(ret->event_queue, 1, 1, 0, NULL, NULL, 0);
 
 	ret->pixmap = &priv->dummy;
 	ret->pixmap->pixel_type = 0;

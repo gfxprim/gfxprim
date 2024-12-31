@@ -402,7 +402,7 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp,
 
 	backend.event_queue = &ev_queue;
 
-	gp_ev_queue_init(backend.event_queue, w, h, 0,
+	gp_ev_queue_init(backend.event_queue, w, h, 0, NULL, NULL,
 #if LIBSDL_VERSION == 1
 			0
 #else

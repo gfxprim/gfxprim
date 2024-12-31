@@ -468,7 +468,7 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 	backend->exit = fb_exit;
 	backend->event_queue = &fb->ev_queue;
 
-	gp_ev_queue_init(backend->event_queue, vscri.xres, vscri.yres, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+	gp_ev_queue_init(backend->event_queue, vscri.xres, vscri.yres, 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	if (kbd)
 		gp_ev_queue_feedback_register(backend->event_queue, &fb->feedback);
