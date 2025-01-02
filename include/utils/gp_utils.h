@@ -31,5 +31,6 @@
 #include <utils/gp_path.h>
 #include <utils/gp_user_path.h>
 #include <utils/gp_app_cfg.h>
+#include <utils/gp_strconv.h>
 
 #endif /* GP_UTILS_H */
