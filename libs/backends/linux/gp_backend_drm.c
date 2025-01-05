@@ -65,24 +65,32 @@ err0:
  * in order to switch buffers on an update.
  */
 struct backend_drm_fb {
-	/* framebuffer pixmap */
-	gp_pixmap pixmap;
-
 	/* frame buffer kernel pixmap handle */
-	uint32_t fb_handle;
+	uint32_t handle;
 	/* frame buffer id */
-	uint32_t fb_id;
-	/* frame buffer mapped buffer size */
-	uint32_t fb_size;
+	uint32_t id;
+	/* A pixel horizontal width in bytes. */
+	uint32_t pitch;
+	/* A frame buffer mapped buffer size. */
+	uint32_t size;
+	/* Pixmap width in pixels */
+	uint32_t w;
+	/* Pixmap height in pixels. */
+	uint32_t h;
+	/* Pointer to a mapped buffer */
+	void *pixels;
 };
 
 struct backend_drm_priv {
 	/* points to a /dev/dri/cardX */
 	int drm_fd;
 
-	/* Pixmaps and handles to draw the pixels into. */
-	struct backend_drm_fb fbs[3];
+	/* Pixmaps and handles to feed the pixels into graphic card. */
+	struct backend_drm_fb fbs[2];
 	int active_fb;
+
+	/* A backing pixmap for the application to draw into. */
+	gp_pixmap fb_pixmap;
 
 	/* input event queue */
 	gp_ev_queue ev_queue;
@@ -135,25 +143,23 @@ static int mmap_fb(struct backend_drm_priv *priv, struct backend_drm_fb *fb)
 		return 1;
 	}
 
+	fb->handle = creq.handle;
+	fb->size = creq.size;
+	fb->pitch = creq.pitch;
+	fb->w = creq.width;
+	fb->h = creq.height;
+
 	struct drm_mode_destroy_dumb dreq = {
-		.handle = fb->fb_handle
+		.handle = fb->handle
 	};
 
-	fb->fb_handle = creq.handle;
-	fb->fb_size = creq.size;
-
-	fb->pixmap.w = creq.width;
-	fb->pixmap.h = creq.height;
-	fb->pixmap.bytes_per_row = creq.pitch;
-	fb->pixmap.pixel_type = GP_PIXEL_xRGB8888;
-
 	struct drm_mode_fb_cmd fb_add = {
-		.width = fb->pixmap.w,
-		.height = fb->pixmap.h,
-		.pitch = fb->pixmap.bytes_per_row,
+		.width = creq.width,
+		.height = creq.height,
+		.pitch = creq.pitch,
 		.depth = 24,
 		.bpp = 32,
-		.handle = fb->fb_handle
+		.handle = fb->handle
 	};
 
 	if (ioctl(fd, DRM_IOCTL_MODE_ADDFB, &fb_add)) {
@@ -161,10 +167,10 @@ static int mmap_fb(struct backend_drm_priv *priv, struct backend_drm_fb *fb)
 		goto err0;
 	}
 
-	fb->fb_id = fb_add.fb_id;
+	fb->id = fb_add.fb_id;
 
 	struct drm_mode_map_dumb mreq = {
-		.handle = fb->fb_handle
+		.handle = fb->handle
 	};
 
 	if (ioctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mreq)) {
@@ -172,19 +178,19 @@ static int mmap_fb(struct backend_drm_priv *priv, struct backend_drm_fb *fb)
 		goto err1;
 	}
 
-	fb->pixmap.pixels = mmap(0, fb->fb_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mreq.offset);
-	if (fb->pixmap.pixels == MAP_FAILED) {
+	fb->pixels = mmap(0, fb->size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mreq.offset);
+	if (fb->pixels == MAP_FAILED) {
 		GP_DEBUG(1, "Failed to mmap() framebuffer: %s", strerror(errno));
 		goto err1;
 	}
 
-	memset(fb->pixmap.pixels, 0, fb->fb_size);
+	memset(fb->pixels, 0, fb->size);
 
-	GP_DEBUG(1, "Have %p framebuffer size %u", fb->pixmap.pixels, (unsigned)fb->fb_size);
+	GP_DEBUG(1, "Have %p framebuffer size %u", fb->pixels, (unsigned)fb->size);
 
 	return 0;
 err1:
-	if (ioctl(fd, DRM_IOCTL_MODE_RMFB, &fb->fb_id))
+	if (ioctl(fd, DRM_IOCTL_MODE_RMFB, &fb->id))
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_RMFB failed: %s", strerror(errno));
 err0:
 	if (ioctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq))
@@ -197,18 +203,37 @@ static void munmap_fb(struct backend_drm_priv *priv, struct backend_drm_fb *fb)
 {
 	int fd = priv->drm_fd;
 
-	if (munmap(fb->pixmap.pixels, fb->fb_size))
+	if (munmap(fb->pixels, fb->size))
 		GP_DEBUG(1, "munmap() failed; %s", strerror(errno));
 
-	if (ioctl(fd, DRM_IOCTL_MODE_RMFB, &fb->fb_id))
+	if (ioctl(fd, DRM_IOCTL_MODE_RMFB, &fb->id))
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_RMFB failed: %s", strerror(errno));
 
 	struct drm_mode_destroy_dumb dreq = {
-		.handle = fb->fb_handle
+		.handle = fb->handle
 	};
 
 	if (ioctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq))
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_DESTROY_DUMB failed: %s", strerror(errno));
+}
+
+static int alloc_fb_pixmap(struct backend_drm_priv *priv)
+{
+	struct backend_drm_fb *fb = &priv->fbs[0];
+
+	priv->fb_pixmap.pixels = malloc(fb->h * fb->pitch * 4);
+
+	priv->fb_pixmap.w = fb->w;
+	priv->fb_pixmap.h = fb->h;
+	priv->fb_pixmap.bytes_per_row = fb->pitch;
+	priv->fb_pixmap.pixel_type = GP_PIXEL_xRGB8888;
+
+	return 0;
+}
+
+static void free_fb_pixmap(struct backend_drm_priv *priv)
+{
+	free(priv->fb_pixmap.pixels);
 }
 
 static int map_cursor(struct backend_drm_priv *priv)
@@ -461,12 +486,6 @@ retry:
 				goto free;
 			}
 
-			if (mmap_fb(priv, &priv->fbs[2])) {
-				munmap_fb(priv, &priv->fbs[0]);
-				munmap_fb(priv, &priv->fbs[1]);
-				goto free;
-			}
-
 			return 0;
 		}
 
@@ -489,7 +508,7 @@ static int modeset(struct backend_drm_priv *priv)
 	struct drm_mode_crtc crtc = {
 		.set_connectors_ptr = (uint64_t)(&priv->connector_id),
 		.count_connectors = 1,
-		.fb_id = priv->fbs[priv->active_fb].fb_id,
+		.fb_id = priv->fbs[priv->active_fb].id,
 		.crtc_id = priv->crtc_id,
 		.mode = priv->mode,
 		.mode_valid = 1,
@@ -523,7 +542,8 @@ static void backend_drm_exit(gp_backend *self)
 	modereset(priv);
 	munmap_fb(priv, &priv->fbs[0]);
 	munmap_fb(priv, &priv->fbs[1]);
-	munmap_fb(priv, &priv->fbs[2]);
+
+	free_fb_pixmap(priv);
 
 	close(priv->drm_fd);
 
@@ -538,19 +558,20 @@ static void backend_drm_flip(gp_backend *self)
 
 	priv->active_fb = !priv->active_fb;
 
-	memcpy(priv->fbs[priv->active_fb].pixmap.pixels, self->pixmap->pixels, priv->fbs[2].fb_size);
+	struct backend_drm_fb *fb = &priv->fbs[priv->active_fb];
 
-	struct drm_mode_crtc crtc = {
-		.set_connectors_ptr = (uint64_t)(&priv->connector_id),
-		.count_connectors = 1,
-		.fb_id = priv->fbs[priv->active_fb].fb_id,
+	memcpy(fb->pixels, self->pixmap->pixels, fb->size);
+
+	struct drm_mode_crtc_page_flip flip = {
+		.fb_id = fb->id,
 		.crtc_id = priv->crtc_id,
-		.mode = priv->mode,
-		.mode_valid = 1,
+		.flags = 0,
 	};
 
-	if (ioctl(priv->drm_fd, DRM_IOCTL_MODE_SETCRTC, &crtc))
-		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_SETCRTC failed; %s", strerror(errno));
+	if (ioctl(priv->drm_fd, DRM_IOCTL_MODE_PAGE_FLIP, &flip)) {
+		GP_DEBUG(1, "ioctl() DRM_IOCTL_PAGE_FLIP failed; %s", strerror(errno));
+		priv->active_fb = !priv->active_fb;
+	}
 }
 
 static void backend_drm_update_rect(gp_backend *self,
@@ -637,19 +658,24 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	if (init_drm(priv))
 		goto err2;
 
+	if (alloc_fb_pixmap(priv)) {
+		GP_WARN("Failed to allocate pixmap");
+		goto err3;
+	}
+
 	if (map_cursor(priv)) {
 		GP_WARN("Failed to initialize cursor!");
-		goto err3;
+		goto err4;
 	}
 
 	priv->active_fb = 0;
 
 	if (modeset(priv))
-		goto err4;
+		goto err5;
 
 	priv->active_fb = 1;
 
-	ret->pixmap = &(priv->fbs[2].pixmap);
+	ret->pixmap = &priv->fb_pixmap;
 
 	ret->event_queue = &priv->ev_queue;
 
@@ -665,12 +691,13 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	                            ret->pixmap->h, priv->mm_height);
 
 	return ret;
-err4:
+err5:
 	munmap_cursor(priv);
-err3:
+err4:
 	munmap_fb(priv, &priv->fbs[0]);
 	munmap_fb(priv, &priv->fbs[1]);
-	munmap_fb(priv, &priv->fbs[2]);
+err3:
+	free_fb_pixmap(priv);
 err2:
 	close(priv->drm_fd);
 err1:
