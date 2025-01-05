@@ -189,6 +189,45 @@ void gp_backend_task_rem(gp_backend *self, gp_task *task)
 		gp_backend_timer_rem(self, &backend_task_timer);
 }
 
+static void backend_backlight_keys(gp_backend *self, int up)
+{
+	int brightness;
+
+	if (up)
+		brightness = gp_backend_backlight_inc(self);
+	else
+		brightness = gp_backend_backlight_dec(self);
+
+	if (brightness == GP_BACKEND_NOTSUPP)
+		return;
+
+	gp_ev_queue_push(self->event_queue, GP_EV_SYS, GP_EV_SYS_BACKLIGHT, brightness, 0);
+}
+
+gp_event *gp_backend_ev_get(gp_backend *self)
+{
+	gp_event *ev = gp_ev_queue_get(self->event_queue);
+
+	if (ev) {
+		switch (ev->type) {
+		case GP_EV_KEY:
+			switch (ev->key.key) {
+			case GP_KEY_BRIGHTNESS_DOWN:
+				if (ev->val)
+					backend_backlight_keys(self, 0);
+			break;
+			case GP_KEY_BRIGHTNESS_UP:
+				if (ev->val)
+					backend_backlight_keys(self, 1);
+			break;
+			}
+		break;
+		}
+	}
+
+	return ev;
+}
+
 void gp_backend_poll(gp_backend *self)
 {
 	if (self->timers) {

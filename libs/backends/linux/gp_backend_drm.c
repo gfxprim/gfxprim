@@ -18,13 +18,15 @@
 # include <libdrm/drm.h>
 #endif
 
-#include <backends/gp_backend.h>
-#include <backends/gp_cursor.h>
-#include <backends/gp_linux_drm.h>
-#include <backends/gp_linux_input.h>
 #include <core/gp_debug.h>
-#include <backends/gp_dpi.h>
 #include <core/gp_pixmap.h>
+
+#include <backends/gp_backend.h>
+#include <backends/gp_dpi.h>
+#include <backends/gp_cursor.h>
+#include <backends/gp_linux_input.h>
+#include <backends/gp_linux_backlight.h>
+#include <backends/gp_linux_drm.h>
 
 #if defined(HAVE_DRM_DRM_H) || defined(HAVE_LIBDRM_DRM_H)
 
@@ -111,6 +113,8 @@ struct backend_drm_priv {
 	/* Our mapped cursor pixmap */
 	gp_pixmap cursor_pixmap;
 
+	/* Backlight driver if found */
+	struct gp_linux_backlight *backlight;
 };
 
 static int mmap_fb(struct backend_drm_priv *priv, struct backend_drm_fb *fb)
@@ -520,7 +524,12 @@ static void backend_drm_exit(gp_backend *self)
 	munmap_fb(priv, &priv->fbs[0]);
 	munmap_fb(priv, &priv->fbs[1]);
 	munmap_fb(priv, &priv->fbs[2]);
+
 	close(priv->drm_fd);
+
+	gp_linux_backlight_exit(priv->backlight);
+
+	free(self);
 }
 
 static void backend_drm_flip(gp_backend *self)
@@ -555,6 +564,40 @@ static void backend_drm_update_rect(gp_backend *self,
 	backend_drm_flip(self);
 }
 
+static int backend_drm_backlight(gp_backend *self, enum gp_backend_backlight_req backlight_req)
+{
+	struct backend_drm_priv *priv = GP_BACKEND_PRIV(self);
+
+	switch (backlight_req) {
+	case GP_BACKEND_BACKLIGHT_INC:
+		return gp_linux_backlight_inc(priv->backlight);
+	case GP_BACKEND_BACKLIGHT_DEC:
+		return gp_linux_backlight_dec(priv->backlight);
+	case GP_BACKEND_BACKLIGHT_GET:
+		return gp_linux_backlight_get(priv->backlight);
+	}
+
+	return GP_BACKEND_NOTSUPP;
+}
+
+static enum gp_backend_ret backend_drm_set_attr(gp_backend *self,
+                                                enum gp_backend_attr attr,
+                                                const void *vals)
+{
+	switch (attr) {
+	case GP_BACKEND_ATTR_FULLSCREEN:
+	case GP_BACKEND_ATTR_TITLE:
+	case GP_BACKEND_ATTR_SIZE:
+	case GP_BACKEND_ATTR_CURSOR:
+		return GP_BACKEND_NOTSUPP;
+	case GP_BACKEND_ATTR_BACKLIGHT:
+		return backend_drm_backlight(self, *(enum gp_backend_backlight_req *)vals);
+	}
+
+	GP_WARN("Unsupported backend attribute %i", (int) attr);
+	return GP_BACKEND_NOTSUPP;
+}
+
 gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 {
 	struct backend_drm_priv *priv;
@@ -582,6 +625,8 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 			goto err0;
 	}
 
+	priv->backlight = gp_linux_backlight_init();
+
 	if (!drm_path)
 		drm_path = "/dev/dri/card0";
 
@@ -594,13 +639,13 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	if (map_cursor(priv)) {
 		GP_WARN("Failed to initialize cursor!");
-		goto err4;
+		goto err3;
 	}
 
 	priv->active_fb = 0;
 
 	if (modeset(priv))
-		goto err5;
+		goto err4;
 
 	priv->active_fb = 1;
 
@@ -614,14 +659,15 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	ret->exit = backend_drm_exit;
 	ret->flip = backend_drm_flip;
 	ret->update_rect = backend_drm_update_rect;
+	ret->set_attr = backend_drm_set_attr;
 
 	ret->dpi = gp_dpi_from_size(ret->pixmap->w, priv->mm_width,
 	                            ret->pixmap->h, priv->mm_height);
 
 	return ret;
-err5:
-	munmap_cursor(priv);
 err4:
+	munmap_cursor(priv);
+err3:
 	munmap_fb(priv, &priv->fbs[0]);
 	munmap_fb(priv, &priv->fbs[1]);
 	munmap_fb(priv, &priv->fbs[2]);
@@ -630,6 +676,7 @@ err2:
 err1:
 	gp_backend_input_destroy(ret);
 err0:
+	gp_linux_backlight_exit(priv->backlight);
 	free(ret);
 	return NULL;
 }

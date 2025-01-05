@@ -92,6 +92,13 @@ enum gp_ev_sys_code {
 	 * arrives to the appliction once the data are ready.
 	 */
 	GP_EV_SYS_CLIPBOARD = 2,
+	/**
+	 * @brief Backlight brightness change.
+	 *
+	 * When backend brightness was changed the new brightness in percents
+	 * is stored in the val.
+	 */
+	GP_EV_SYS_BACKLIGHT = 3,
 };
 
 /** @brief A relative cursor position change. */

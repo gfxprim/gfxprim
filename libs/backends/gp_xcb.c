@@ -577,6 +577,8 @@ static enum gp_backend_ret x_set_attr(gp_backend *self,
 		return x_set_fullscreen(self, vals);
 	case GP_BACKEND_ATTR_CURSOR:
 		return x_set_cursor(self, *(enum gp_backend_cursor_req *)vals);
+	case GP_BACKEND_ATTR_BACKLIGHT:
+		return GP_BACKEND_NOTSUPP;
 	}
 
 	GP_WARN("Unsupported backend attribute %i", (int) attr);

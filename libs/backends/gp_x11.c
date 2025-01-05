@@ -618,6 +618,8 @@ static enum gp_backend_ret x11_set_attr(gp_backend *self,
 		return x11_set_attributes(self, ((const int*)vals)[0], ((const int*)vals)[1], NULL);
 	case GP_BACKEND_ATTR_CURSOR:
 		return x11_set_cursor(self, *(enum gp_backend_cursor_req *)vals);
+	case GP_BACKEND_ATTR_BACKLIGHT:
+		return GP_BACKEND_NOTSUPP;
 	}
 
 	GP_WARN("Unsupported backend attribute %i", (int) attr);

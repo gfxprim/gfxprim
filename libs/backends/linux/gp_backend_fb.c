@@ -22,6 +22,7 @@
 #include <core/gp_pixmap.h>
 #include <input/gp_input_driver_kbd.h>
 #include <backends/gp_linux_input.h>
+#include <backends/gp_linux_backlight.h>
 #include <backends/gp_linux_fb.h>
 
 struct fb_priv {
@@ -45,6 +46,8 @@ struct fb_priv {
 	gp_ev_queue ev_queue;
 	/* poll fd struct */
 	gp_fd fd;
+	/* backlight driver */
+	struct gp_linux_backlight *backlight;
 
 	int fb_fd;
 	char path[];
@@ -307,6 +310,8 @@ static void fb_exit(gp_backend *self)
 
 	free_console(fb);
 
+	gp_linux_backlight_exit(fb->backlight);
+
 	free(self);
 }
 
@@ -338,6 +343,40 @@ static void fb_update_rect_shadow(gp_backend *self, gp_coord x0, gp_coord y0,
 	}
 }
 
+static int fb_backlight(gp_backend *self, enum gp_backend_backlight_req backlight_req)
+{
+	struct fb_priv *fb = GP_BACKEND_PRIV(self);
+
+	switch (backlight_req) {
+	case GP_BACKEND_BACKLIGHT_INC:
+		return gp_linux_backlight_inc(fb->backlight);
+	case GP_BACKEND_BACKLIGHT_DEC:
+		return gp_linux_backlight_dec(fb->backlight);
+	case GP_BACKEND_BACKLIGHT_GET:
+		return gp_linux_backlight_get(fb->backlight);
+	}
+
+	return GP_BACKEND_NOTSUPP;
+}
+
+static enum gp_backend_ret fb_set_attr(gp_backend *self,
+                                       enum gp_backend_attr attr,
+                                       const void *vals)
+{
+	switch (attr) {
+	case GP_BACKEND_ATTR_FULLSCREEN:
+	case GP_BACKEND_ATTR_TITLE:
+	case GP_BACKEND_ATTR_SIZE:
+	case GP_BACKEND_ATTR_CURSOR:
+		return GP_BACKEND_NOTSUPP;
+	case GP_BACKEND_ATTR_BACKLIGHT:
+		return fb_backlight(self, *(enum gp_backend_backlight_req *)vals);
+	}
+
+	GP_WARN("Unsupported backend attribute %i", (int) attr);
+	return GP_BACKEND_NOTSUPP;
+}
+
 gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 {
 	gp_backend *backend;
@@ -360,8 +399,11 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 
 	memset(backend, 0, size);
 
+
 	fb = GP_BACKEND_PRIV(backend);
 	fb->flags = flags;
+
+	fb->backlight = gp_linux_backlight_init();
 
 	if (allocate_console(fb, flags))
 		goto err0;
@@ -467,6 +509,7 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 	backend->update_rect = shadow ? fb_update_rect_shadow : NULL;
 	backend->exit = fb_exit;
 	backend->event_queue = &fb->ev_queue;
+	backend->set_attr = fb_set_attr;
 
 	gp_ev_queue_init(backend->event_queue, vscri.xres, vscri.yres, 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
@@ -487,6 +530,7 @@ err2:
 err1:
 	free_console(fb);
 err0:
+	gp_linux_backlight_exit(fb->backlight);
 	free(backend);
 	return NULL;
 }

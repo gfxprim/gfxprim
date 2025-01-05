@@ -19,7 +19,7 @@ static gp_pixel red, green, white, black;
 static void draw_event(gp_event *ev)
 {
 	gp_pixmap *win = backend->pixmap;
-	static gp_size ksize = 0, usize = 0;
+	static gp_size ksize = 0, usize = 0, bsize = 0;
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
 	switch (ev->type) {
@@ -35,6 +35,15 @@ static void draw_event(gp_event *ev)
 		usize = gp_print(win, NULL, 20, 40, align,
 		                 white, black, "UTF=%04x",
 				 ev->utf.ch);
+	break;
+	case GP_EV_SYS:
+		switch (ev->code) {
+		case GP_EV_SYS_BACKLIGHT:
+			gp_text_clear(win, NULL, 20, 60, align, black, bsize);
+			bsize = gp_print(win, NULL, 20, 60, align, white, black,
+			                 "Backlight brightness %i%%", ev->val);
+		break;
+		}
 	break;
 	default:
 		return;
@@ -115,6 +124,8 @@ static void event_loop(void)
 				break;
 			break;
 			case GP_EV_SYS:
+				draw_event(ev);
+
 				switch (ev->code) {
 				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);

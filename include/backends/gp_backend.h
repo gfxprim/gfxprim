@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -64,6 +64,13 @@ enum gp_backend_attr {
 	 * The attribute value is enum gp_backend_cursor_req.
 	 */
 	GP_BACKEND_ATTR_CURSOR,
+	/**
+	 * @brief Backlight support.
+	 *
+	 * Only a few backends need to support backlight, at the moment it's
+	 * mostly Linux DRM.
+	 */
+	GP_BACKEND_ATTR_BACKLIGHT,
 };
 
 /**
@@ -135,6 +142,28 @@ enum gp_backend_cursor_req {
 	GP_BACKEND_CURSOR_SHOW = 0xc000,
 	/** @brief Hides cursor */
 	GP_BACKEND_CURSOR_HIDE = 0x8000,
+};
+
+/**
+ * @brief Backlight operations.
+ */
+enum gp_backend_backlight_req {
+	/**
+	 * @brief Increases the backlight brightness.
+	 *
+	 * Returns current backlight intensity in percents.
+	 */
+	GP_BACKEND_BACKLIGHT_INC,
+	/**
+	 * @brief Decreases the backlight brightness.
+	 *
+	 * Returns current backlight intensity in percents.
+	 */
+	GP_BACKEND_BACKLIGHT_DEC,
+	/**
+	 * @brief Returns current backlight intensity in percents.
+	 */
+	GP_BACKEND_BACKLIGHT_GET,
 };
 
 /**
@@ -386,6 +415,66 @@ static inline enum gp_backend_ret gp_backend_cursor_set(gp_backend *self,
 {
 	if (self->set_attr)
 		return self->set_attr(self, GP_BACKEND_ATTR_CURSOR, &cursor);
+
+	return GP_BACKEND_NOTSUPP;
+}
+
+/**
+ * @brief Increases the backlight intensity.
+ *
+ * There are a few backends that can modify the backlight intensity, e.g. Linux
+ * DRM. For these backends the backlight can be increased in several steps.
+ *
+ * @param self A backend.
+ * @return A new backlight intensity in percents or GP_BACKEND_NOTSUPP if
+ *         backlight is not supported by the backend.
+ */
+static inline int gp_backend_backlight_inc(gp_backend *self)
+{
+	enum gp_backend_backlight_req req = GP_BACKEND_BACKLIGHT_INC;
+
+	if (self->set_attr)
+		return self->set_attr(self, GP_BACKEND_ATTR_BACKLIGHT, &req);
+
+	return GP_BACKEND_NOTSUPP;
+}
+
+/**
+ * @brief Decreases the backlight intensity.
+ *
+ * There are a few backends that can modify the backlight intensity, e.g. Linux
+ * DRM. For these backends the backlight can be decreased in several steps.
+ *
+ * @param self A backend.
+ * @return A new backlight intensity in percents or GP_BACKEND_NOTSUPP if
+ *         backlight is not supported by the backend.
+ */
+static inline int gp_backend_backlight_dec(gp_backend *self)
+{
+	enum gp_backend_backlight_req req = GP_BACKEND_BACKLIGHT_DEC;
+
+	if (self->set_attr)
+		return self->set_attr(self, GP_BACKEND_ATTR_BACKLIGHT, &req);
+
+	return GP_BACKEND_NOTSUPP;
+}
+
+/**
+ * @brief Returns backlight intensity in percents.
+ *
+ * There are a few backends that can modify the backlight intensity, e.g. Linux
+ * DRM.
+ *
+ * @param self A backend.
+ * @return A backlight intensity in percents or GP_BACKEND_NOTSUPP if
+ *         backlight is not supported by the backend.
+ */
+static inline int gp_backend_backlight_get(gp_backend *self)
+{
+	enum gp_backend_backlight_req req = GP_BACKEND_BACKLIGHT_GET;
+
+	if (self->set_attr)
+		return self->set_attr(self, GP_BACKEND_ATTR_BACKLIGHT, &req);
 
 	return GP_BACKEND_NOTSUPP;
 }
@@ -670,10 +759,7 @@ static inline unsigned int gp_backend_ev_queued(gp_backend *self)
  * @param self A backend.
  * @return A pointer to an event or NULL if queue is empty.
  */
-static inline gp_event *gp_backend_ev_get(gp_backend *self)
-{
-	return gp_ev_queue_get(self->event_queue);
-}
+gp_event *gp_backend_ev_get(gp_backend *self);
 
 /**
  * @brief Returns a pointer to a first event in the queue.

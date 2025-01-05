@@ -108,6 +108,9 @@ static void dump_sys(gp_event *ev)
 	case GP_EV_SYS_CLIPBOARD:
 		printf("Clipboard data ready\n");
 	break;
+	case GP_EV_SYS_BACKLIGHT:
+		printf("Backlight brightness changed to %i%%\n", (int)ev->val);
+	break;
 	}
 }
 
