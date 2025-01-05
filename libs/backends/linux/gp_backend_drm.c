@@ -84,10 +84,14 @@ struct backend_drm_fb {
 struct backend_drm_priv {
 	/* points to a /dev/dri/cardX */
 	int drm_fd;
+	/* poll callback to handle flip events */
+	gp_fd poll_fd;
 
 	/* Pixmaps and handles to feed the pixels into graphic card. */
 	struct backend_drm_fb fbs[2];
 	int active_fb;
+	int fb_flip_in_progress:1;
+	int fb_dirty:1;
 
 	/* A backing pixmap for the application to draw into. */
 	gp_pixmap fb_pixmap;
@@ -556,6 +560,11 @@ static void backend_drm_flip(gp_backend *self)
 {
 	struct backend_drm_priv *priv = GP_BACKEND_PRIV(self);
 
+	if (priv->fb_flip_in_progress) {
+		priv->fb_dirty = 1;
+		return;
+	}
+
 	priv->active_fb = !priv->active_fb;
 
 	struct backend_drm_fb *fb = &priv->fbs[priv->active_fb];
@@ -565,13 +574,16 @@ static void backend_drm_flip(gp_backend *self)
 	struct drm_mode_crtc_page_flip flip = {
 		.fb_id = fb->id,
 		.crtc_id = priv->crtc_id,
-		.flags = 0,
+		.flags = DRM_MODE_PAGE_FLIP_EVENT,
 	};
 
 	if (ioctl(priv->drm_fd, DRM_IOCTL_MODE_PAGE_FLIP, &flip)) {
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_PAGE_FLIP failed; %s", strerror(errno));
 		priv->active_fb = !priv->active_fb;
+		return;
 	}
+
+	priv->fb_flip_in_progress = 1;
 }
 
 static void backend_drm_update_rect(gp_backend *self,
@@ -619,6 +631,41 @@ static enum gp_backend_ret backend_drm_set_attr(gp_backend *self,
 	return GP_BACKEND_NOTSUPP;
 }
 
+static enum gp_poll_event_ret backend_drm_read(gp_fd *self)
+{
+	gp_backend *backend = self->priv;
+	struct backend_drm_priv *priv = GP_BACKEND_PRIV(backend);
+	char buf[1024];
+	struct drm_event *e;
+	ssize_t size;
+
+	size = read(self->fd, buf, sizeof(buf));
+	if (size < 0) {
+		GP_WARN("Failed to read from drm fd");
+		return GP_POLL_RET_OK;
+	}
+
+	e = (void*)buf;
+
+	while (size > (ssize_t)sizeof(*e)) {
+		switch (e->type) {
+		case DRM_EVENT_FLIP_COMPLETE:
+			priv->fb_flip_in_progress = 0;
+			if (priv->fb_dirty) {
+				GP_DEBUG(4, "Flipping dirty FB from DRM event handler.");
+				backend_drm_flip(backend);
+				priv->fb_dirty = 0;
+			}
+		break;
+		}
+
+		size -= e->length;
+		e = (void*)e + e->length;
+	}
+
+	return GP_POLL_RET_OK;
+}
+
 gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 {
 	struct backend_drm_priv *priv;
@@ -654,6 +701,13 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	priv->drm_fd = drm_open(drm_path);
 	if (priv->drm_fd < 0)
 		goto err1;
+
+	priv->poll_fd.fd = priv->drm_fd;
+	priv->poll_fd.event = backend_drm_read;
+	priv->poll_fd.events = GP_POLLIN;
+	priv->poll_fd.priv = ret;
+
+	gp_backend_poll_add(ret, &priv->poll_fd);
 
 	if (init_drm(priv))
 		goto err2;
