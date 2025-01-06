@@ -556,7 +556,17 @@ static void backend_drm_exit(gp_backend *self)
 	free(self);
 }
 
-static void backend_drm_flip(gp_backend *self)
+/* Copies application pixmap buffer to the inactive fb */
+static void drm_copy(gp_backend *self)
+{
+	struct backend_drm_priv *priv = GP_BACKEND_PRIV(self);
+	struct backend_drm_fb *fb = &priv->fbs[!priv->active_fb];
+
+	memcpy(fb->pixels, self->pixmap->pixels, fb->size);
+}
+
+/* Requests the buffer flip. */
+static void drm_flip(gp_backend *self)
 {
 	struct backend_drm_priv *priv = GP_BACKEND_PRIV(self);
 
@@ -565,9 +575,7 @@ static void backend_drm_flip(gp_backend *self)
 		return;
 	}
 
-	priv->active_fb = !priv->active_fb;
-
-	struct backend_drm_fb *fb = &priv->fbs[priv->active_fb];
+	struct backend_drm_fb *fb = &priv->fbs[!priv->active_fb];
 
 	memcpy(fb->pixels, self->pixmap->pixels, fb->size);
 
@@ -579,11 +587,17 @@ static void backend_drm_flip(gp_backend *self)
 
 	if (ioctl(priv->drm_fd, DRM_IOCTL_MODE_PAGE_FLIP, &flip)) {
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_PAGE_FLIP failed; %s", strerror(errno));
-		priv->active_fb = !priv->active_fb;
 		return;
 	}
 
+	priv->active_fb = !priv->active_fb;
 	priv->fb_flip_in_progress = 1;
+}
+
+static void backend_drm_flip(gp_backend *self)
+{
+	drm_copy(self);
+	drm_flip(self);
 }
 
 static void backend_drm_update_rect(gp_backend *self,
@@ -653,7 +667,7 @@ static enum gp_poll_event_ret backend_drm_read(gp_fd *self)
 			priv->fb_flip_in_progress = 0;
 			if (priv->fb_dirty) {
 				GP_DEBUG(4, "Flipping dirty FB from DRM event handler.");
-				backend_drm_flip(backend);
+				drm_flip(backend);
 				priv->fb_dirty = 0;
 			}
 		break;
