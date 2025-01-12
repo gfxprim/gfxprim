@@ -378,48 +378,7 @@ static void try_load_callibration(struct linux_input *self)
 		self->abs_press_max = abs[2];
 	}
 }
-/*
-static int input_by_name(const char *dev_name)
-{
-	DIR *input = opendir("/dev/input");
-	struct dirent *ent;
-	char name[128];
 
-	if (!input) {
-		GP_WARN("Failed to open '/dev/input': %s", strerror(errno));
-		return -1;
-	}
-
-	while ((ent = readdir(input))) {
-		if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
-			continue;
-
-		int fd = open(ent->d_name, O_RDONLY | O_NONBLOCK);
-
-		if (fd < 0) {
-			GP_WARN("Failed to open '%s': %s", ent->d_name, strerror(errno));
-			continue;
-		}
-
-		int ret = get_name(fd, name, sizeof(name));
-
-		if (ret < 0 || ret >= (int)sizeof(name)) {
-			GP_WARN("Failed to get '%s' device name", ent->d_name);
-			continue;
-		}
-
-		if (!strcmp(name, dev_name)) {
-			GP_DEBUG(1, "Found device name='%s' dev='%s'", name, ent->d_name);
-			return fd;
-		}
-
-		close(fd);
-	}
-
-	GP_DEBUG(1, "No input device name='%s' found", dev_name);
-	return -1;
-}
-*/
 static struct linux_input *new_input_driver(int fd)
 {
 	struct linux_input *ret;
@@ -459,99 +418,6 @@ static struct linux_input *new_input_driver(int fd)
 
 	return ret;
 }
-
-/*
-struct devstr_params {
-	char *dev_name;
-	char *dev_path;
-
-	int abs_swap;
-	int abs_mirror_x;
-	int abs_mirror_y;
-
-	int abs_min_x;
-	int abs_max_x;
-	int abs_min_y;
-	int abs_max_y;
-};
-
-struct linux_input *struct linux_input_by_devstr(const char *devstr)
-{
-	struct linux_input *ret = NULL;
-	char *str = strdup(devstr);
-	char *tok, *s, *save;
-
-	if (!str) {
-		GP_WARN("Malloc failed :-(");
-		return NULL;
-	}
-
-	s = str;
-
-	while ((tok = strtok_r(s, ":", &save))) {
-		char *tsave, *tid = strtok_r(tok, "=", &tsave);
-
-		if (!strcmp(tid, "name")) {
-			if (!ret)
-				ret = struct linux_input_by_name(tsave);
-		} if (!strcmp(tid, "path")) {
-			if (!ret)
-				ret = struct linux_input_open(tsave);
-		} else if (!strcmp(tid, "abs_swap")) {
-			if (!ret)
-				goto nodev;
-			ret->abs_swap = 1;
-		} else if (!strcmp(tid, "abs_mirror_x")) {
-			if (!ret)
-				goto nodev;
-			ret->abs_mirror_x = 1;
-		} else if (!strcmp(tid, "abs_mirror_y")) {
-			if (!ret)
-				goto nodev;
-			ret->abs_mirror_y = 1;
-		} else if (!strcmp(tid, "abs_min_x")) {
-			if (!ret)
-				goto nodev;
-			ret->abs_min_x = atoi(tsave);
-		} else if (!strcmp(tid, "abs_max_x")) {
-			if (!ret)
-				goto nodev;
-			ret->abs_max_x = atoi(tsave);
-		} else if (!strcmp(tid, "abs_min_y")) {
-			if (!ret)
-				goto nodev;
-			ret->abs_min_y = atoi(tsave);
-		} else if (!strcmp(tid, "abs_max_y")) {
-			if (!ret)
-				goto nodev;
-			ret->abs_max_y = atoi(tsave);
-		} else {
-			GP_WARN("Invalid key '%s'", tok);
-			goto exit;
-		}
-
-		s = NULL;
-	}
-
-exit:
-	free(str);
-	return ret;
-nodev:
-	free(str);
-	GP_WARN("No device open");
-	return NULL;
-}
-
-struct linux_input *struct linux_input_by_name(const char *name)
-{
-	int fd = input_by_name(name);
-
-	if (fd < 0)
-		return NULL;
-
-	return new_input_driver(fd);
-}
-*/
 
 static void input_destroy(gp_backend_input *self)
 {
