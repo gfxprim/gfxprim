@@ -95,6 +95,9 @@ err0:
 
 void gp_linux_backlight_exit(struct gp_linux_backlight *self)
 {
+	if (!self)
+		return;
+
 	GP_DEBUG(1, "Freeing Linux backlight driver '%s'", self->brightness_path);
 	free(self);
 }
