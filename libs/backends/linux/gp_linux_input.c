@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <sys/types.h>
@@ -21,9 +21,20 @@
 
 #include <backends/gp_linux_input.h>
 
+enum gp_linux_input_device_type {
+	LINUX_INPUT_NONE = 0x00,
+	LINUX_INPUT_MOUSE = 0x01,
+	LINUX_INPUT_TOUCHPAD = 0x02,
+	LINUX_INPUT_TOUCHSCREEN = 0x03,
+	LINUX_INPUT_TABLET = 0x04,
+	LINUX_INPUT_JOYSTICK = 0x05,
+};
+
 struct linux_input {
 	gp_backend_input input;
 	gp_backend *backend;
+
+	enum gp_linux_input_device_type device_type;
 
 	gp_fd fd;
 
@@ -379,7 +390,89 @@ static void try_load_callibration(struct linux_input *self)
 	}
 }
 
-static struct linux_input *new_input_driver(int fd)
+#define BITS_PER_LONG (sizeof(long) * 8)
+#define NBITS(x) ((((x)-1)/BITS_PER_LONG)+1)
+
+static inline int test_bit(unsigned long *bitmask, unsigned int bit)
+{
+	return (bitmask[bit / BITS_PER_LONG] >> (bit % BITS_PER_LONG)) & 0x01;
+}
+
+static void init_device_type(struct linux_input *self, const char *id)
+{
+	unsigned long types[NBITS(EV_MAX)] = {};
+	unsigned long ev_abs[NBITS(ABS_MAX)] = {};
+	unsigned long ev_keys[NBITS(KEY_MAX)] = {};
+	int fd = self->fd.fd;
+
+	self->device_type = LINUX_INPUT_NONE;
+
+	if (ioctl(fd, EVIOCGBIT(0, EV_MAX), types) < 0) {
+		GP_WARN("Failed to get input device capabilities!");
+		return;
+	}
+
+	if (test_bit(types, EV_REL)) {
+		GP_DEBUG(1, "Input device %s is mouse pointer.", id);
+		self->device_type = LINUX_INPUT_MOUSE;
+		return;
+	}
+
+	if (!test_bit(types, EV_KEY)) {
+		GP_DEBUG(1, "Input device %s does not have any keys!", id);
+		return;
+	}
+
+	if (ioctl(fd, EVIOCGBIT(EV_KEY, KEY_MAX), ev_keys) < 0) {
+		GP_WARN("Failed to get input device %s key capabilities!", id);
+		return;
+	}
+
+	if (test_bit(types, EV_ABS)) {
+		if (ioctl(fd, EVIOCGBIT(EV_ABS, ABS_MAX), ev_abs) < 0) {
+			GP_WARN("Failed to get input device %s absolute capabilities!", id);
+			return;
+		}
+
+		if (test_bit(ev_abs, ABS_X) && test_bit(ev_abs, ABS_Y)) {
+			if (test_bit(ev_keys, BTN_STYLUS) ||
+			    test_bit(ev_keys, BTN_TOOL_PEN)) {
+				GP_DEBUG(1, "Input device %s is a tablet.", id);
+				self->device_type = LINUX_INPUT_TABLET;
+				return;
+			}
+
+			if (test_bit(ev_keys, BTN_TOOL_FINGER) &&
+			    !test_bit(ev_keys, BTN_TOOL_PEN)) {
+				GP_DEBUG(1, "Input device %s is a touchpad.", id);
+				self->device_type = LINUX_INPUT_TOUCHPAD;
+				return;
+			}
+
+			if (test_bit(ev_keys, BTN_TRIGGER) ||
+                            test_bit(ev_keys, BTN_A) ||
+                            test_bit(ev_keys, BTN_1)) {
+				GP_DEBUG(1, "Input device %s is a joystick.", id);
+				self->device_type = LINUX_INPUT_JOYSTICK;
+				return;
+			}
+
+			if (test_bit(ev_keys, BTN_MOUSE)) {
+				GP_DEBUG(1, "Input device %s is an absolute mouse.", id);
+				self->device_type = LINUX_INPUT_MOUSE;
+				return;
+			}
+
+			if (test_bit(ev_keys, BTN_TOUCH)) {
+				GP_DEBUG(1, "Input device %s is a touchscreen.", id);
+				self->device_type = LINUX_INPUT_TOUCHSCREEN;
+				return;
+			}
+		}
+	}
+}
+
+static struct linux_input *new_input_driver(int fd, const char *dev_path)
 {
 	struct linux_input *ret;
 
@@ -402,6 +495,8 @@ static struct linux_input *new_input_driver(int fd)
 		.events = GP_POLLIN,
 		.priv = ret,
 	};
+
+	init_device_type(ret, dev_path);
 
 	ret->rel_x = 0;
 	ret->rel_y = 0;
@@ -445,7 +540,7 @@ int gp_linux_input_new(const char *dev_path, gp_backend *backend)
 		return 1;
 	}
 
-	struct linux_input *input = new_input_driver(fd);
+	struct linux_input *input = new_input_driver(fd, dev_path);
 	if (!input) {
 		close(fd);
 		return 1;
