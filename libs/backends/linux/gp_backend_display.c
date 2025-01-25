@@ -19,6 +19,10 @@ const struct gp_backend_display_model gp_backend_display_models[] = {
 	 .desc = "1BPP Grayscale 2.13 inch SPI e-ink display"},
 	{.name = "GMG12864",
 	 .desc = "1BPP Grayscale 58.5x46.5mm SPI LCD display"},
+	{.name = "JLX256128-1",
+	 .desc = "JLX Grayscale SPI LCD display 1bpp mode"},
+	{.name = "JLX256128-2",
+	 .desc = "JLX Grayscale SPI LCD display 2bpp mode"},
 	{}
 };
 
@@ -26,6 +30,13 @@ gp_backend *gp_waveshare_7_5_v2_init(void);
 gp_backend *gp_waveshare_3_7_init(void);
 gp_backend *gp_weact_2_13_init(void);
 gp_backend *gp_st7565_init(unsigned int dpi);
+gp_backend *gp_st75256_init(unsigned int dpi, unsigned int bpp);
+
+/*
+ * Horizontal DPI is 108
+ * Vertical DPI is 100
+ */
+#define JLX256128_DPI 104
 
 static gp_ev_queue event_queue;
 
@@ -45,6 +56,12 @@ gp_backend *gp_backend_display_init(enum gp_backend_display_model_ids model)
 	break;
 	case GP_GMG12864:
 		ret = gp_st7565_init(67);
+	break;
+	case GP_JLX256128_1:
+		ret = gp_st75256_init(JLX256128_DPI, 1);
+	break;
+	case GP_JLX256128_2:
+		ret = gp_st75256_init(JLX256128_DPI, 2);
 	break;
 	default:
 		GP_FATAL("Invalid model %i\n", model);

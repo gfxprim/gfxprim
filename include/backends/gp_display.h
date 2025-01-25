@@ -71,6 +71,18 @@ enum gp_backend_display_model_ids {
 	 * Chip ST7565
 	 */
 	GP_GMG12864 = 3,
+	/**
+	 * @brief A 256x128 LCD display 1bpp mode
+	 *
+	 * Chip ST75256
+	 */
+	GP_JLX256128_1 = 4,
+	/**
+	 * @brief A 256x128 LCD display 2bpp mode
+	 *
+	 * Chip ST75256
+	 */
+	GP_JLX256128_2 = 5,
 };
 
 /** @brief A display model description.  */
