@@ -34,6 +34,10 @@ struct linux_input {
 	gp_backend_input input;
 	gp_backend *backend;
 
+	/* Callbacks for leds e.g. Caps Lock */
+	gp_ev_feedback feedback;
+	uint32_t leds;
+
 	enum gp_linux_input_device_type device_type;
 
 	gp_fd fd;
@@ -72,6 +76,62 @@ struct linux_input {
 	uint8_t abs_flag_y:1;
 	uint8_t abs_pen_flag:1;
 };
+
+static struct leds_map {
+	int bitflag;
+	int code;
+} led_map[] = {
+	{GP_KBD_LED_NUM_LOCK, LED_NUML},
+	{GP_KBD_LED_CAPS_LOCK, LED_CAPSL},
+	{GP_KBD_LED_SCROLL_LOCK, LED_SCROLLL},
+	{GP_KBD_LED_COMPOSE, LED_COMPOSE},
+	{GP_KBD_LED_KANA, LED_KANA},
+};
+
+static int set_get_leds(gp_ev_feedback *self, gp_ev_feedback_op *op)
+{
+	struct linux_input *input = GP_CONTAINER_OF(self, struct linux_input, feedback);
+	struct input_event ev[GP_ARRAY_SIZE(led_map) + 1] = {};
+	int value;
+
+	switch (op->op) {
+	case GP_EV_LEDS_ON:
+		input->leds |= op->val;
+		value = 1;
+	break;
+	case GP_EV_LEDS_OFF:
+		input->leds ^= ~(op->val);
+		value = 0;
+	break;
+	case GP_EV_LEDS_GET:
+		op->val = input->leds;
+		return 0;
+	break;
+	default:
+		return 1;
+	}
+
+	size_t i;
+	int cur = 0;
+
+	for (i = 0; i < GP_ARRAY_SIZE(led_map); i++) {
+		if (led_map[i].bitflag & op->val) {
+			ev[cur].type = EV_LED;
+			ev[cur].code = led_map[i].code;
+			ev[cur].value = value;
+			cur++;
+		}
+	}
+
+	ev[cur].type = EV_SYN;
+	ev[cur].code = SYN_REPORT;
+
+	ssize_t ret = write(input->fd.fd, ev, (cur+1) * sizeof(struct input_event));
+
+	GP_DEBUG(1, "Writing leds! %zi %s", ret, strerror(errno));
+
+	return 0;
+}
 
 static void input_rel(struct linux_input *self, struct input_event *ev)
 {
@@ -524,6 +584,8 @@ static void input_destroy(gp_backend_input *self)
 	gp_backend_poll_rem(input->backend, &input->fd);
 	gp_dlist_rem(&input->backend->input_drivers, &input->input.list_head);
 
+	gp_ev_queue_feedback_unregister(input->backend->event_queue, &input->feedback);
+
 	close(input->fd.fd);
 	free(input);
 }
@@ -532,7 +594,7 @@ int gp_linux_input_new(const char *dev_path, gp_backend *backend)
 {
 	GP_DEBUG(2, "Opening '%s'", dev_path);
 
-	int fd = open(dev_path, O_RDONLY | O_NONBLOCK);
+	int fd = open(dev_path, O_RDWR | O_NONBLOCK);
 	if (fd < 0) {
 		int err = errno;
 		GP_FATAL("Failed to open '%s': %s", dev_path, strerror(errno));
@@ -551,6 +613,10 @@ int gp_linux_input_new(const char *dev_path, gp_backend *backend)
 
 	gp_backend_poll_add(backend, &input->fd);
 	gp_dlist_push_head(&backend->input_drivers, &input->input.list_head);
+
+	input->feedback.set_get = set_get_leds;
+
+	gp_ev_queue_feedback_register(backend->event_queue, &input->feedback);
 
 	GP_DEBUG(1, "Grabbing device '%s'", dev_path);
 

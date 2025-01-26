@@ -702,11 +702,6 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	priv = GP_BACKEND_PRIV(ret);
 
-	if (!(flags & GP_LINUX_DRM_NO_INPUT)) {
-		if (gp_linux_input_hotplug_new(ret))
-			goto err0;
-	}
-
 	priv->backlight = gp_linux_backlight_init();
 
 	if (!drm_path)
@@ -714,7 +709,7 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	priv->drm_fd = drm_open(drm_path);
 	if (priv->drm_fd < 0)
-		goto err1;
+		goto err0;
 
 	priv->poll_fd.fd = priv->drm_fd;
 	priv->poll_fd.event = backend_drm_read;
@@ -724,22 +719,22 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 	gp_backend_poll_add(ret, &priv->poll_fd);
 
 	if (init_drm(priv))
-		goto err2;
+		goto err1;
 
 	if (alloc_fb_pixmap(priv)) {
 		GP_WARN("Failed to allocate pixmap");
-		goto err3;
+		goto err2;
 	}
 
 	if (map_cursor(priv)) {
 		GP_WARN("Failed to initialize cursor!");
-		goto err4;
+		goto err3;
 	}
 
 	priv->active_fb = 0;
 
 	if (modeset(priv))
-		goto err5;
+		goto err4;
 
 	priv->active_fb = 1;
 
@@ -749,6 +744,11 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	gp_ev_queue_init(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0,
 	                 drm_move_cursor, priv, GP_EVENT_QUEUE_LOAD_KEYMAP);
+
+	if (!(flags & GP_LINUX_DRM_NO_INPUT)) {
+		if (gp_linux_input_hotplug_new(ret))
+			goto err5;
+	}
 
 	ret->exit = backend_drm_exit;
 	ret->flip = backend_drm_flip;
@@ -760,16 +760,16 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	return ret;
 err5:
-	munmap_cursor(priv);
+	modereset(priv);
 err4:
+	munmap_cursor(priv);
+err3:
 	munmap_fb(priv, &priv->fbs[0]);
 	munmap_fb(priv, &priv->fbs[1]);
-err3:
-	free_fb_pixmap(priv);
 err2:
-	close(priv->drm_fd);
+	free_fb_pixmap(priv);
 err1:
-	gp_backend_input_destroy(ret);
+	close(priv->drm_fd);
 err0:
 	gp_linux_backlight_exit(priv->backlight);
 	free(ret);

@@ -4,11 +4,14 @@
  */
 
 #include <stddef.h>
+#include <core/gp_debug.h>
 #include <input/gp_ev_feedback.h>
 
 void gp_ev_feedback_set_all(gp_ev_feedback *root, gp_ev_feedback_op *op)
 {
 	gp_ev_feedback *i;
+
+	GP_DEBUG(2, "Setting 0x%02x leds %s", op->val, op->op == GP_EV_LEDS_ON ? "on" : "off");
 
 	for (i = root; i; i = i->next)
 		i->set_get(i, op);

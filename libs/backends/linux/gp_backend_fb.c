@@ -411,11 +411,6 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 	if (setup_kbd(backend, fb))
 		goto err1;
 
-	if (flags & GP_FB_INPUT_LINUX) {
-		if (gp_linux_input_hotplug_new(backend))
-			goto err1;
-	}
-
 	/* open and mmap framebuffer */
 	GP_DEBUG(1, "Opening framebuffer '%s'", path);
 
@@ -502,6 +497,17 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 	int shadow = flags & GP_FB_SHADOW;
 	int kbd = flags & GP_FB_INPUT_KBD;
 
+	gp_ev_queue_init(backend->event_queue, vscri.xres, vscri.yres,
+	                 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
+
+	if (flags & GP_FB_INPUT_LINUX) {
+		if (gp_linux_input_hotplug_new(backend))
+			goto err4;
+	}
+
+	if (kbd)
+		gp_ev_queue_feedback_register(backend->event_queue, &fb->feedback);
+
 	/* update API */
 	backend->name = "Linux FB";
 	backend->pixmap = &fb->pixmap;
@@ -511,11 +517,6 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 	backend->event_queue = &fb->ev_queue;
 	backend->set_attr = fb_set_attr;
 
-	gp_ev_queue_init(backend->event_queue, vscri.xres, vscri.yres, 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
-
-	if (kbd)
-		gp_ev_queue_feedback_register(backend->event_queue, &fb->feedback);
-
 	return backend;
 err4:
 	if (flags & GP_FB_SHADOW)
@@ -524,9 +525,6 @@ err3:
 	close(fd);
 err2:
 	exit_kbd(fb);
-
-	if (flags & GP_FB_INPUT_LINUX)
-		gp_backend_input_destroy(backend);
 err1:
 	free_console(fb);
 err0:
