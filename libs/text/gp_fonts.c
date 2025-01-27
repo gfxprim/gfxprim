@@ -19,7 +19,7 @@ extern const gp_font_family font_family_haxor_narrow_16;
 extern const gp_font_family font_family_haxor_narrow_17;
 extern const gp_font_family font_family_haxor_narrow_18;
 extern const gp_font_family font_family_c64;
-extern const gp_font_family font_family_tiny;
+extern const gp_font_family font_family_haxor_tiny;
 extern const gp_font_family font_family_square;
 
 static const gp_font_family *const font_families[] = {
@@ -32,7 +32,7 @@ static const gp_font_family *const font_families[] = {
 	&font_family_haxor_narrow_17,
 	&font_family_haxor_narrow_18,
 	&font_family_c64,
-	&font_family_tiny,
+	&font_family_haxor_tiny,
 	&font_family_square,
 };
 
