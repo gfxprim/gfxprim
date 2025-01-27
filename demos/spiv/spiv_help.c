@@ -55,6 +55,8 @@ static struct key_help help_keys[] = {
 	{"]", "Change to next resampling method"},
 	{"[", "Change to prev resampling method"},
 	{"L", "Toggle low pass filter"},
+	{"\\", "Enable/disable dithering"},
+	{"'", "Cycle dithering altorithms"},
 	{"C", "Drop image cache"},
 };
 
@@ -76,7 +78,7 @@ static const struct examples examples[] = {
 	 "Runs slideshow with 5 second delay"},
 	{"spiv -1 'cp %F sorted' images/",
 	 "Copies currently loaded image into directory 'sorted/' on pressing F1"},
-	{"spiv -e G1 -d images/",
+	{"spiv -e G1 -d fs images/",
 	 "Emulates 1-bit Grayscale display and turns on Floyd-Steinberg dithering"},
 	{"spiv -b 'X11:use_root' -t 10 images/",
 	 "Runs slideshow using X root window as backend window"},
