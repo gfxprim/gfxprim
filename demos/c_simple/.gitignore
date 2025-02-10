@@ -47,3 +47,4 @@ dpi_check
 unicodetest
 backend_cursor
 elf_note
+update_rect_test
