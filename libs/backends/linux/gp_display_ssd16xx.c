@@ -485,11 +485,11 @@ gp_backend *gp_waveshare_3_7_init(void)
 	return backend;
 }
 
-gp_backend *gp_weact_2_13_init(void)
+gp_backend *gp_ssd16xx_init(unsigned int w, unsigned int h, int dpi)
 {
 	gp_backend *backend;
 
-	backend = ssd16xx_backend_init(122, 250, GP_PIXEL_G1);
+	backend = ssd16xx_backend_init(w, h, GP_PIXEL_G1);
 	if (!backend)
 		return NULL;
 
@@ -504,7 +504,7 @@ gp_backend *gp_weact_2_13_init(void)
 
 	gp_display_eink_init(backend);
 
-	backend->dpi = 130;
+	backend->dpi = dpi;
 
 	return backend;
 }

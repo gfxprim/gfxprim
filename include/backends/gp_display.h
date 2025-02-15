@@ -50,19 +50,29 @@ enum gp_backend_display_model_ids {
 	 *
 	 * Chip GD7965 aka UC8179c
 	 */
-	GP_WAVESHARE_7_5_V2 = 0,
+	GP_WAVESHARE_7_5_V2,
 	/**
 	 * @brief WaveShare RPi e-ink HAT 1BPP/4BPP grayscale 280x480
 	 *
 	 * Chip SSD1677
 	 */
-	GP_WAVESHARE_3_7 = 1,
+	GP_WAVESHARE_3_7,
 	/**
 	 * @brief WeeAct 2.13 inch BW display
 	 *
+	 * 250x122
+	 *
 	 * Chip SSD1680
 	 */
-	GP_WEACT_2_13_BW = 2,
+	GP_WEACT_2_13_BW,
+	/**
+	 * @brief WeeAct 2.9 inch BW display
+	 *
+	 * 296x128
+	 *
+	 * Chip SSD1680
+	 */
+	GP_WEACT_2_9_BW,
 	/**
 	 * @brief An 128 x 64 BW LCD display.
 	 *
@@ -70,19 +80,19 @@ enum gp_backend_display_model_ids {
 	 *
 	 * Chip ST7565
 	 */
-	GP_GMG12864 = 3,
+	GP_GMG12864,
 	/**
 	 * @brief A 256x128 LCD display 1bpp mode
 	 *
 	 * Chip ST75256
 	 */
-	GP_JLX256128_1 = 4,
+	GP_JLX256128_1,
 	/**
 	 * @brief A 256x128 LCD display 2bpp mode
 	 *
 	 * Chip ST75256
 	 */
-	GP_JLX256128_2 = 5,
+	GP_JLX256128_2,
 };
 
 /** @brief A display model description.  */
