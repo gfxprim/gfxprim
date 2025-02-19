@@ -212,6 +212,7 @@
 #define GP_SET_BITS4_ALIGNED(offset, len, dest, val) do { \
 	uint32_t v;                                       \
 	v  = ((uint8_t *)dest)[0];                        \
+	v |= ((uint8_t *)dest)[1]<<8;                     \
 	v |= ((uint8_t *)dest)[2]<<16;                    \
 	v |= ((uint8_t *)dest)[3]<<24;                    \
 	                                                  \
