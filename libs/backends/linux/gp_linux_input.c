@@ -9,7 +9,6 @@
 #include <errno.h>
 #include <string.h>
 #include <dirent.h>
-#include <linux/input.h>
 
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
@@ -19,63 +18,7 @@
 #include <utils/gp_json_reader.h>
 #include <utils/gp_json_serdes.h>
 
-#include <backends/gp_linux_input.h>
-
-enum gp_linux_input_device_type {
-	LINUX_INPUT_NONE = 0x00,
-	LINUX_INPUT_MOUSE = 0x01,
-	LINUX_INPUT_TOUCHPAD = 0x02,
-	LINUX_INPUT_TOUCHSCREEN = 0x03,
-	LINUX_INPUT_TABLET = 0x04,
-	LINUX_INPUT_JOYSTICK = 0x05,
-};
-
-struct linux_input {
-	gp_backend_input input;
-	gp_backend *backend;
-
-	/* Callbacks for leds e.g. Caps Lock */
-	gp_ev_feedback feedback;
-	uint32_t leds;
-
-	enum gp_linux_input_device_type device_type;
-
-	gp_fd fd;
-
-	/* to store rel coordinates */
-	int rel_x;
-	int rel_y;
-	int rel_wheel;
-
-	uint8_t rel_flag;
-
-	/* to store abs coordinates */
-	int abs_x;
-	int abs_y;
-	int abs_press;
-
-	/* Coordinate limits after transformation */
-	int abs_x_max;
-	int abs_y_max;
-	int abs_press_min;
-	int abs_press_max;
-
-	/*
-	 * Affine transformation matrix
-	 *
-	 * The multipliers are in 16.16 fixed point format
-	 */
-	int abs_x_off;
-	int abs_y_off;
-	int abs_x_mul_x;
-	int abs_x_mul_y;
-	int abs_y_mul_x;
-	int abs_y_mul_y;
-
-	uint8_t abs_flag_x:1;
-	uint8_t abs_flag_y:1;
-	uint8_t abs_pen_flag:1;
-};
+#include "gp_linux_input_dev.h"
 
 static struct leds_map {
 	int bitflag;
@@ -151,7 +94,7 @@ static void input_rel(struct linux_input *self, struct input_event *ev)
 		self->rel_flag |= 2;
 	break;
 	default:
-		GP_DEBUG(3, "Unhandled code %i", ev->code);
+		GP_DEBUG(3, "Unhandled code 0x%02x", ev->code);
 	}
 }
 
@@ -174,7 +117,7 @@ static void input_abs(struct linux_input *self, struct input_event *ev)
 		self->abs_press = ev->value;
 	break;
 	default:
-		GP_DEBUG(3, "Unhandled code %i", ev->code);
+		GP_DEBUG(3, "Unhandled code 0x%02x", ev->code);
 	}
 }
 
@@ -182,7 +125,7 @@ static void input_key(struct linux_input *self,
                       gp_ev_queue *event_queue,
                       struct input_event *ev)
 {
-	GP_DEBUG(4, "Key event");
+	GP_DEBUG(4, "Key %s event", gp_ev_key_name(ev->code));
 
 	/*
 	 * We need to postpone btn touch down until
@@ -268,6 +211,11 @@ static enum gp_poll_event_ret input_read(gp_fd *self)
 
 	if (ret < 1)
 		return 1;
+
+	if (input->device_type == LINUX_INPUT_TOUCHPAD) {
+		input_touchpad(input, &ev);
+		return 0;
+	}
 
 	switch (ev.type) {
 	case EV_REL:
@@ -549,6 +497,8 @@ static struct linux_input *new_input_driver(int fd, const char *dev_path)
 		return NULL;
 	}
 
+	memset(ret, 0, sizeof(*ret));
+
 	ret->fd = (gp_fd) {
 		.fd = fd,
 		.event = input_read,
@@ -558,18 +508,10 @@ static struct linux_input *new_input_driver(int fd, const char *dev_path)
 
 	init_device_type(ret, dev_path);
 
-	ret->rel_x = 0;
-	ret->rel_y = 0;
-	ret->rel_flag = 0;
-
-	ret->abs_x = 0;
-	ret->abs_y = 0;
-	ret->abs_press = 0;
-	ret->abs_flag_x = 0;
-	ret->abs_flag_y = 0;
-	ret->abs_pen_flag = 1;
-
-	try_load_callibration(ret);
+	if (ret->device_type == LINUX_INPUT_TOUCHSCREEN) {
+		ret->abs_pen_flag = 1;
+		try_load_callibration(ret);
+	}
 
 	return ret;
 }
