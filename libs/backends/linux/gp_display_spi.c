@@ -58,6 +58,12 @@ void gp_display_spi_data(struct gp_display_spi *self, uint8_t data)
 	gp_spi_write(self->spi_fd, data);
 }
 
+void gp_display_spi_cmd_data(struct gp_display_spi *self, uint8_t cmd, uint8_t data)
+{
+	gp_display_spi_cmd(self, cmd);
+	gp_display_spi_data(self, data);
+}
+
 void gp_display_spi_data_transfer(struct gp_display_spi *self,
                                   const uint8_t *tx_buf, uint8_t *rx_buf, size_t len)
 {

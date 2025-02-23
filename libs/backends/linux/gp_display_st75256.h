@@ -105,6 +105,14 @@ enum st7565_cmds {
 	 */
 	ST75256_SET_VOP     = 0x81,
 
+	/**
+	 * Set display mode. Followed by a byte.
+	 *
+	 * 0x10 - 1bpp
+	 * 0x11 - 2bpp
+	 */
+	ST75256_DISP_MODE   = 0xf0,
+
 	/* Extension2 commands */
 
 	/**

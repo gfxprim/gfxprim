@@ -58,6 +58,16 @@ void gp_display_spi_cmd(struct gp_display_spi *self, uint8_t cmd);
 void gp_display_spi_data(struct gp_display_spi *self, uint8_t data);
 
 /**
+ * @brief Sends a command followed by a data.
+ *
+ * This is shortcut for sending a command followed by a single byte of data.
+ * @self A SPI display.
+ * @cmd A command byte to be send.
+ * @data A data byte to be send.
+ */
+void gp_display_spi_cmd_data(struct gp_display_spi *self, uint8_t cmd, uint8_t data);
+
+/**
  * @brief Runs a SPI data transfer.
  *
  * Sets the dc pin high and does SPI transfer.

@@ -83,12 +83,10 @@ static void read_otp(struct gp_display_spi *self)
 	gp_display_spi_cmd(self, ST75256_EXT2);
 
 	/* Disable OTP auto read */
-	gp_display_spi_cmd(self, ST75256_OTP_AUTO_READ_CTRL);
-	gp_display_spi_data(self, 0x9f);
+	gp_display_spi_cmd_data(self, ST75256_OTP_AUTO_READ_CTRL, 0x9f);
 
 	/* Enable OTP read */
-	gp_display_spi_cmd(self, ST75256_OTP_WR_RD_CTRL);
-	gp_display_spi_data(self, 0x00);
+	gp_display_spi_cmd_data(self, ST75256_OTP_WR_RD_CTRL, 0x00);
 	usleep(10000);
 
 	/* Load OTP */
@@ -117,17 +115,14 @@ static void st75256_init(struct gp_display_spi *disp, unsigned int bpp)
 
 	gp_display_spi_cmd(disp, ST75256_EXT1);
 
-	/* Set column page direction */
-	gp_display_spi_cmd(disp, ST75256_SET_SCAN_DIRECTION);
-	/* Page direction first & swap X */
-	gp_display_spi_data(disp, 0x06);
+	/* Set column page direction - page direction first & swap X */
+	gp_display_spi_cmd_data(disp, ST75256_SET_SCAN_DIRECTION, 0x06);
 
 	/* Inverse display so that 00 is black */
 	gp_display_spi_cmd(disp, ST75256_DISP_INV);
 
 	/* Turn on internal voltage generators */
-	gp_display_spi_cmd(disp, ST75256_PWR_CTRL);
-	gp_display_spi_data(disp, 0x0b);
+	gp_display_spi_cmd_data(disp, ST75256_PWR_CTRL, 0x0b);
 	usleep(1000);
 
 	/* Sets contrast */
@@ -145,8 +140,7 @@ static void st75256_init(struct gp_display_spi *disp, unsigned int bpp)
 	gp_display_spi_data(disp, 0x02);
 */
 	/* Set 1bpp or 2bpp mode */
-	gp_display_spi_cmd(disp, 0xf0);
-	gp_display_spi_data(disp, bpp == 1 ? 0x10 : 0x11);
+	gp_display_spi_cmd_data(disp, ST75256_DISP_MODE, bpp == 1 ? 0x10 : 0x11);
 
 	gp_display_spi_cmd(disp, ST75256_DISP_CTRL);
 	gp_display_spi_data(disp, 0x00);
