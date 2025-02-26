@@ -93,6 +93,31 @@ enum gp_backend_display_model_ids {
 	 * Chip ST75256
 	 */
 	GP_JLX256128_2,
+
+	/**
+	 * @brief 170x320 1.9 TFT LCD.
+	 *
+	 * The display has inverse colors!
+	 *
+	 * Chip ST7789
+	 */
+	GP_ST7789_1_9,
+
+	/**
+	 * @brief 240x320 2.0 TFT LCD.
+	 *
+	 * The display has inverse colors!
+	 *
+	 * Chip ST7789
+	 */
+	GP_GMT020_02,
+
+	/**
+	 * @brief 240x320 2.8 TFT LCD.
+	 *
+	 * Chip ST7789
+	 */
+	GP_ST7789_2_8,
 };
 
 /** @brief A display model description.  */

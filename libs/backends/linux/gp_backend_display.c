@@ -10,6 +10,8 @@
 #include <backends/gp_backend.h>
 #include <backends/gp_display.h>
 
+#include <backends/gp_display_st77xx.h>
+
 const struct gp_backend_display_model gp_backend_display_models[] = {
 	[GP_WAVESHARE_7_5_V2] = {.name = "WaveShare-7.5-v2",
 	                         .desc = "1BPP Grayscale 7.5 inch SPI e-ink display"},
@@ -25,6 +27,12 @@ const struct gp_backend_display_model gp_backend_display_models[] = {
 	                    .desc = "JLX Grayscale SPI LCD display 1bpp mode"},
 	[GP_JLX256128_2] = {.name = "JLX256128-2",
 	                    .desc = "JLX Grayscale SPI LCD display 2bpp mode"},
+	[GP_ST7789_1_9] = {.name = "ST7789-1.9",
+	                   .desc = "TFT 1.9\" 170x320 ST7789 LCD display"},
+	[GP_GMT020_02] = {.name = "GMT020-02",
+	                   .desc = "TFT 2.0\" 240x320 ST7789 LCD display"},
+	[GP_ST7789_2_8] = {.name = "ST7789-2.8",
+	                   .desc = "TFT 2.8\" 240x320 ST7789 LCD display"},
 	{}
 };
 
@@ -70,6 +78,15 @@ gp_backend *gp_backend_display_init(enum gp_backend_display_model_ids model)
 	break;
 	case GP_JLX256128_2:
 		ret = gp_st75256_init(JLX256128_DPI, 2);
+	break;
+	case GP_ST7789_1_9:
+		ret = gp_display_st77xx_init(170, 320, 35, 0, 184, GP_DISPLAY_ST77XX_INV);
+	break;
+	case GP_GMT020_02:
+		ret = gp_display_st77xx_init(240, 320, 0, 0, 199, GP_DISPLAY_ST77XX_INV);
+	break;
+	case GP_ST7789_2_8:
+		ret = gp_display_st77xx_init(240, 320, 0, 0, 141, 0);
 	break;
 	default:
 		GP_FATAL("Invalid model %i\n", model);

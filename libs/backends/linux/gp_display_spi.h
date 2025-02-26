@@ -29,6 +29,11 @@ struct gp_display_spi {
 
 	uint16_t w;
 	uint16_t h;
+
+	struct {
+		uint16_t x_off;
+		uint16_t y_off;
+	};
 };
 
 int gp_display_spi_init(struct gp_display_spi *self,
