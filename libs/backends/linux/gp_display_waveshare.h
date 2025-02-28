@@ -28,7 +28,7 @@
 static struct gp_gpio_map gpio_map_rpi = {
 	.reset  = {.nr = 17, .dir = GP_GPIO_OUT},
 	.dc     = {.nr = 25, .dir = GP_GPIO_OUT},
-	.pwr    = {.nr = 18, .dir = GP_GPIO_OUT},
+	.pwr    = {.nr = 13, .dir = GP_GPIO_OUT},
 	.busy   = {.nr = 24, .dir = GP_GPIO_IN},
 };
 
