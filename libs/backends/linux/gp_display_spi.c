@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <core/gp_common.h>
@@ -21,7 +21,7 @@ int gp_display_spi_init(struct gp_display_spi *self,
 	if (self->spi_fd < 0)
 		return 1;
 
-	ret = gp_gpio_export(map->gpio, GP_ARRAY_SIZE(map->gpio));
+	ret = gp_gpio_export(map->gpio, GP_ARRAY_SIZE(map->gpio), "SPI display");
 	if (ret) {
 		gp_spi_close(self->spi_fd);
 		return 1;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #ifndef GP_DISPLAY_SPI_H
@@ -88,7 +88,7 @@ void gp_display_spi_data_transfer(struct gp_display_spi *self,
 /**
  * @brief Sets up an GPIO as an interrupt source.
  *
- * The GPIO busy file descriptor can be passed to poll() with POLLPRI in order
+ * The GPIO busy file descriptor can be passed to poll() with POLLIN in order
  * to get asynchronous edge change notification. Note that you need to set up
  * the poll() handler elsewhere, this only enables the kernel functionality.
  *
@@ -98,6 +98,22 @@ void gp_display_spi_data_transfer(struct gp_display_spi *self,
  * @return Zero on success, non-zero otherwise.
  */
 int gp_display_spi_busy_edge_set(struct gp_display_spi *self, enum gp_gpio_edge edge);
+
+/**
+ * @brief Reads edge event from busy GPIO.
+ *
+ * If busy GPIO was set up by gp_display_spi_busy_edge_set() events can be
+ * polled on the file descriptor and have to be read by this function.
+ *
+ * This function calls gp_gpio_edge_read() on the busy GPIO file descriptor.
+ *
+ * @self A SPI display.
+ * @return An edge or GP_GPIO_EDGE_NONE on error.
+ */
+static inline enum gp_gpio_edge gp_display_spi_edge_read(struct gp_display_spi *self)
+{
+	return gp_gpio_edge_read(&self->gpio_map->busy);
+}
 
 /**
  * @brief Spin wait for busy signal.

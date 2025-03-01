@@ -91,7 +91,7 @@ static enum gp_poll_event_ret flush_queued_repaints(gp_fd *self)
 
 	pthread_mutex_lock(&repaint_lock);
 
-	gp_gpio_read(&eink->spi.gpio_map->busy);
+	gp_display_spi_edge_read(&eink->spi);
 
 	if (eink->full_in_progress) {
 		GP_DEBUG(4, "Finishing full repaint");
@@ -179,7 +179,7 @@ void gp_display_eink_init(gp_backend *self)
 	eink->busy_fd = (gp_fd) {
 		.fd = eink->spi.gpio_map->busy.fd,
 		.event = flush_queued_repaints,
-		.events = GP_POLLPRI,
+		.events = GP_POLLIN,
 		.priv = self,
 	};
 
