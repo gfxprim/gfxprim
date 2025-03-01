@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2025 Cyril Hrubis <metan@ucw.cz>
+ */
+
+/**
+ * @file gp_linux_spi.h
+ * @brief A Linux SPI.
  */
 
 #ifndef GP_LINUX_SPI_H
@@ -9,11 +14,11 @@
 #include <linux/spi/spidev.h>
 
 /**
- * @brief Opens a SPI bus.
+ * @brief Opens an SPI bus.
  *
- * @spi_dev A SPI device dev path, e.g. /dev/spidev0.0
- * @mode A SPI mode, SPI_* constants in the linux/spi/spidev.h
- * @speed A SPI speed in Hz.
+ * @spi_dev An SPI device dev path, e.g. /dev/spidev0.0
+ * @mode An SPI mode, SPI_* constants in the linux/spi/spi.h
+ * @speed An SPI speed in Hz.
  *
  * @return A file descriptor or -1 in a case of a failure.
  */

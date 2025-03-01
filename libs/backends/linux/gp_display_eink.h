@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
- * Implements asynchronous e-ink display repaint. Instead of waiting for
- * display busy signal we return to the application and set up a timer for an
- * estimate when the refresh should be done. While the display is busy the area
- * of display that should be repainted is recorded.
+/**
+ * @file gp_display_eink.h
+ * @brief Implements asynchronous e-ink display repaint.
  *
- * Once the timer callback is called we check if there is anything to repaint,
- * if not we turn off the display power, otherwise we repaint the display and
- * start the timer again.
+ * When display is idle we set up a GPIO as an interrupt source, request
+ * repaint and return to the application. When application requests repaints
+ * while the display is busy, we queue and merge the area to be repainted and
+ * send the request to the display only after the previous repaint finished.
  *
- * If the area to be repainted is small, we do partial refresh, if large full
- * refresh. Also after a few partial refreshes the display needs a full refresh
- * to get rid of the accumulated noise.
+ * The code also manages partial vs full refreshes. Partial refreshes introduce
+ * a bit of noise on the screen, so when several partial refreshes are
+ * schedulled in a row we have to schedulle a full refres as well to clean up
+ * the display.
  */
 
 #ifndef GP_DISPLAY_EINK_H
@@ -27,11 +27,18 @@
 
 #include "gp_display_spi.h"
 
+/**
+ * @brief An e-ink display.
+ */
 struct gp_display_eink {
-	/* display hardware connection */
+	/**
+	 * @brief display SPI connection.
+	 */
 	struct gp_display_spi spi;
 
-	/* partial refresh counter for e-paper */
+	/**
+	 * @brief Partial refresh counter.
+	 */
 	unsigned int part_cnt;
 
 	/* how long on average repaint takes */
@@ -45,9 +52,19 @@ struct gp_display_eink {
 	unsigned int do_part:1;
 	unsigned int exitting:1;
 
+	/**
+	 * @brief Accumulated partial refresh area.
+	 *
+	 * While display is busy any partial refreshes are merged into these coordinates.
+	 */
 	gp_coord x0, y0, x1, y1;
 
-	/* File descriptor for the busy interrupts */
+	/**
+	 * @brief File descriptor for the busy edge interrupts.
+	 *
+	 * This is added to the poll() loop and receives events when edge
+	 * interrupts are enabled.
+	 */
 	gp_fd busy_fd;
 
 	/* callbacks to driver that sends the data/commands */
@@ -60,6 +77,13 @@ struct gp_display_eink {
 	void (*display_exit)(gp_backend *self);
 };
 
+/**
+ * @brief Initializes an e-ink display.
+ *
+ * This is called internally by the e-ink display backends.
+ *
+ * @brief self An e-ink backend.
+ */
 void gp_display_eink_init(gp_backend *self);
 
 #endif /* GP_DISPLAY_EINK_H */
