@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2025 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -29,7 +29,8 @@ struct proxy_priv {
 
 	gp_fd fd;
 
-	int visible;
+	unsigned int visible:1;
+	unsigned int sys_quit_requested:1;
 
 	/* mapped memory backing the pixmap */
 	void *map;
@@ -194,14 +195,21 @@ static enum gp_poll_event_ret proxy_process_fd(gp_fd *self)
 				GP_DEBUG(4, "Got GP_PROXY_EXIT");
 				gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
 				                 GP_EV_SYS_QUIT, 0, 0);
+				priv->sys_quit_requested = 1;
 			break;
 			}
 		}
 	}
 
 	if (ret == 0) {
+		if (priv->sys_quit_requested) {
+			GP_FATAL("Application still alive after GP_EV_SYS_QUIT event!");
+			gp_backend_exit(backend);
+			exit(1);
+		}
 		GP_WARN("Connection closed");
 		gp_ev_queue_push(backend->event_queue, GP_EV_SYS, GP_EV_SYS_QUIT, 0, 0);
+		priv->sys_quit_requested = 1;
 	}
 
 	return 0;
@@ -282,6 +290,7 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	priv->map = NULL;
 	priv->map_size = 0;
 	priv->visible = 0;
+	priv->sys_quit_requested = 0;
 
 	gp_proxy_buf_init(&priv->buf);
 
