@@ -199,10 +199,10 @@ static void draw_edges_hlines(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
 			gp_coord ex;
 
 			ex = find_edge(cx, cy, lx, ly);
-			gp_hline(pixmap, cx + x_off, ex + x_off, cy + y_off, pixel);
+			gp_hline_raw(pixmap, cx + x_off, ex + x_off, cy + y_off, pixel);
 
 			ex = find_edge(lx, ly, cx, cy);
-			gp_hline(pixmap, lx + x_off, ex + x_off, ly + y_off, pixel);
+			gp_hline_raw(pixmap, lx + x_off, ex + x_off, ly + y_off, pixel);
 		}
 
 		lx = cx;
@@ -279,10 +279,10 @@ void gp_fill_polygon_raw(gp_pixmap *pixmap, gp_coord x_off, gp_coord y_off,
 
 	switch (nvert) {
 	case 1:
-		gp_putpixel(pixmap, xy[0]+x_off, xy[1]+y_off, pixel);
+		gp_putpixel_raw(pixmap, xy[0]+x_off, xy[1]+y_off, pixel);
 		return;
 	case 2:
-		gp_line(pixmap, xy[0]+x_off, xy[1]+y_off, xy[2]+x_off, xy[3]+y_off, pixel);
+		gp_line_raw(pixmap, xy[0]+x_off, xy[1]+y_off, xy[2]+x_off, xy[3]+y_off, pixel);
 		return;
 	default:
 	break;
