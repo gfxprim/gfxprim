@@ -26,6 +26,7 @@
 #define BACKENDS_GP_BACKEND_H
 
 #include <core/gp_types.h>
+#include <core/gp_pixmap.h>
 
 #include <utils/gp_timer.h>
 #include <utils/gp_list.h>
@@ -294,6 +295,28 @@ struct gp_backend {
 };
 
 #define GP_BACKEND_PRIV(backend) ((void*)(backend)->priv)
+
+/**
+ * @brief Returns backend width.
+ *
+ * @param self A backend.
+ * @return A backend pixmap width.
+ */
+static inline gp_size gp_backend_w(gp_backend *self)
+{
+	return gp_pixmap_w(self->pixmap);
+}
+
+/**
+ * @brief Returns backend height.
+ *
+ * @param self A backend.
+ * @return A backend pixmap height.
+ */
+static inline gp_size gp_backend_h(gp_backend *self)
+{
+	return gp_pixmap_h(self->pixmap);
+}
 
 /**
  * @brief Copies whole backend pixmap to a display.
