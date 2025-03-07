@@ -17,8 +17,6 @@
 #include <gfxprim.h>
 
 #define TIMER_TICK 20000
-#define DISPLAY_W 640
-#define DISPLAY_H 480
 #define sqr(x) ((x)*(x))
 #define sgn(x) ((x)>0 ? 1 : -1)
 
@@ -65,8 +63,8 @@ static void draw(int x, int y, int l, int iter)
 {
 	gp_pixmap *pixmap = backend->pixmap;
 	double x1, y1, x2, y2, x3, y3;
-	int w = pixmap->w;
-	int h = pixmap->h;
+	int w = gp_backend_w(backend);
+	int h = gp_backend_h(backend);
 
 	l = ((w < h ? w : h) - 20)/(5 - 1.00*iter/120);
 
@@ -94,8 +92,6 @@ static int paused = 0;
 
 void redraw(void)
 {
-	gp_pixmap *pixmap = backend->pixmap;
-
 	if (paused)
 		return;
 
@@ -107,7 +103,7 @@ void redraw(void)
 	if (iter < 0)
 		way *= -1;
 
-	draw(pixmap->w/2, pixmap->h/2, l, iter);
+	draw(gp_backend_w(backend)/2, gp_backend_h(backend)/2, l, iter);
 }
 
 int main(int argc, char *argv[])
@@ -146,7 +142,7 @@ int main(int argc, char *argv[])
 	red   = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, pixmap);
 
 	iter = 0;
-	draw(pixmap->w/2, pixmap->h/2, l, iter);
+	draw(gp_backend_w(backend)/2, gp_backend_h(backend)/2, l, iter);
 
 	for (;;) {
 		gp_event *ev;
