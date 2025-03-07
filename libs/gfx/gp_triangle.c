@@ -51,5 +51,5 @@ void gp_fill_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
 		x2, y2,
 	};
 
-	gp_fill_polygon(pixmap, 0, 0, 3, points, pixel);
+	gp_fill_polygon_raw(pixmap, 0, 0, 3, points, pixel);
 }
