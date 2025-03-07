@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <inttypes.h>
@@ -35,26 +35,42 @@ void gp_backend_update_rect_xyxy(gp_backend *self,
 		GP_SWAP(y0, y1);
 
 	if (x0 < 0) {
-		GP_WARN("Negative x coordinate %i, clipping to 0", x0);
+		if (x1 < 0) {
+			GP_WARN("Both x0 and x1 are negative, skipping update");
+			return;
+		}
+		GP_WARN("Negative x0 coordinate %i, clipping to 0", x0);
 		x0 = 0;
 	}
 
 	if (y0 < 0) {
-		GP_WARN("Negative y coordinate %i, clipping to 0", y0);
+		if (y1 < 0) {
+			GP_WARN("Both y0 and y1 are negative, skipping update");
+			return;
+		}
+		GP_WARN("Negative y0 coordinate %i, clipping to 0", y0);
 		y0 = 0;
 	}
 
 	gp_coord w = self->pixmap->w;
 
 	if (x1 >= w) {
-		GP_WARN("Too large x coordinate %i, clipping to %u", x1, w - 1);
+		if (x0 >= w) {
+			GP_WARN("Both x0 and x1 are >= w, skipping update");
+			return;
+		}
+		GP_WARN("Too large x1 coordinate %i, clipping to %u", x1, w - 1);
 		x1 = w - 1;
 	}
 
 	gp_coord h = self->pixmap->h;
 
 	if (y1 >= h) {
-		GP_WARN("Too large y coordinate %i, clipping to %u", y1, h - 1);
+		if (y0 >= h) {
+			GP_WARN("Both y0 and y1 are >= h, skipping update");
+			return;
+		}
+		GP_WARN("Too large y1 coordinate %i, clipping to %u", y1, h - 1);
 		y1 = h - 1;
 	}
 
