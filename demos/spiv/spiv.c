@@ -64,7 +64,9 @@ struct loader_params {
 static int image_loader_callback(gp_progress_cb *self)
 {
 	static gp_size size = 0;
-	gp_pixmap *c = backend->pixmap;
+	gp_pixmap *pixmap = backend->pixmap;
+	gp_size w = gp_backend_w(backend);
+	gp_size h = gp_backend_h(backend);
 
 	if (abort_flag)
 		return 1;
@@ -81,18 +83,18 @@ static int image_loader_callback(gp_progress_cb *self)
 
 	size = gp_text_wbbox(config.style, buf);
 
-	int start = c->w/2 - size/2 - 10;
-	int end   = c->w/2 + size/2 + 10;
+	int start = w/2 - size/2 - 10;
+	int end   = w/2 + size/2 + 10;
 	int middle = start + (end - start) * self->percentage / 100;
-	int top = c->h - gp_text_height(config.style) - 11;
+	int top = h - gp_text_height(config.style) - 11;
 
-	gp_fill_rect_xyxy(c, start, c->h - 1, middle, top, gray_pixel);
-	gp_fill_rect_xyxy(c, middle, c->h - 1, end, top, black_pixel);
+	gp_fill_rect_xyxy(pixmap, start, h - 1, middle, top, gray_pixel);
+	gp_fill_rect_xyxy(pixmap, middle, h - 1, end, top, black_pixel);
 
-	gp_text(c, config.style, c->w/2, c->h - 5, align,
+	gp_text(pixmap, config.style, w/2, h - 5, align,
 	        white_pixel, black_pixel, buf);
 
-	gp_backend_update_rect(backend, start, c->h - 1, end, top);
+	gp_backend_update_rect(backend, start, h - 1, end, top);
 
 	return 0;
 }
@@ -135,12 +137,14 @@ static gp_pixmap *load_image(int elevate)
 		return img;
 
 	gp_pixmap *pixmap = backend->pixmap;
+	gp_size w = gp_backend_w(backend);
+	gp_size h = gp_backend_h(backend);
 
 	gp_fill(pixmap, black_pixel);
-	gp_print(pixmap, config.style, pixmap->w/2, pixmap->h/2 - 10,
+	gp_print(pixmap, config.style, w/2, h/2 - 10,
 	         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 	         "'%s'", image_loader_img_path());
-	gp_print(pixmap, config.style, pixmap->w/2, pixmap->h/2 + 10,
+	gp_print(pixmap, config.style, w/2, h/2 + 10,
 	         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 	         "Failed to load image :( (%s)", strerror(errno));
 	gp_backend_flip(backend);
@@ -297,6 +301,8 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 	gp_pixmap *pixmap = backend->pixmap;
 	struct cpu_timer timer;
 	gp_progress_cb callback = {.callback = image_loader_callback};
+	gp_size w = gp_backend_w(backend);
+	gp_size h = gp_backend_h(backend);
 
 	if (abort_flag)
 		return;
@@ -332,11 +338,11 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 	 */
 	if (config.win_strategy == ZOOM_WIN_FIXED) {
 
-		if (img->w < pixmap->w)
-			cx = (pixmap->w - img->w)/2;
+		if (img->w < w)
+			cx = (w - img->w)/2;
 
-		if (img->h < pixmap->h)
-			cy = (pixmap->h - img->h)/2;
+		if (img->h < h)
+			cy = (h - img->h)/2;
 	}
 
 	if (params->zoom_manual) {
@@ -365,25 +371,23 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 	cpu_timer_stop(&timer);
 
 	/* clean up the rest of the display */
-	gp_fill_rect_xywh(pixmap, 0, 0, cx, pixmap->h, black_pixel);
-	gp_fill_rect_xywh(pixmap, 0, 0, pixmap->w, cy, black_pixel);
+	gp_fill_rect_xywh(pixmap, 0, 0, cx, h, black_pixel);
+	gp_fill_rect_xywh(pixmap, 0, 0, w, cy, black_pixel);
 
+	int rw = w - img->w - cx;
 
-	int w = pixmap->w - img->w - cx;
+	if (rw > 0)
+		gp_fill_rect_xywh(pixmap, img->w + cx, 0, rw, h, black_pixel);
 
-	if (w > 0)
-		gp_fill_rect_xywh(pixmap, img->w + cx, 0, w, pixmap->h, black_pixel);
+	int rh = h - img->h - cy;
 
-	int h = pixmap->h - img->h - cy;
-
-	if (h > 0)
-		gp_fill_rect_xywh(pixmap, 0, img->h + cy, pixmap->w, h, black_pixel);
+	if (rh > 0)
+		gp_fill_rect_xywh(pixmap, 0, img->h + cy, w, h, black_pixel);
 
 	show_info(params, img, orig_img);
 
 	if (config.combined_orientation)
 		gp_pixmap_free(img);
-
 
 	if (abort_flag)
 		return;
@@ -608,7 +612,7 @@ static void *image_loader(void *ptr)
 	gp_size w, h;
 
 	params->zoom_rat = calc_img_size(params, orig_img->w, orig_img->h,
-	                                 pixmap->w, pixmap->h);
+	                                 gp_backend_w(backend), gp_backend_h(backend));
 
 	w = orig_img->w * params->zoom_rat + 0.5;
 	h = orig_img->h * params->zoom_rat + 0.5;
