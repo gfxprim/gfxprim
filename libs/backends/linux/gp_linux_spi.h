@@ -35,17 +35,15 @@ int gp_spi_open(const char *spi_dev, uint8_t mode, uint32_t speed);
 int gp_spi_write(int spi_fd, uint8_t byte);
 
 /**
- * @brief Runs an SPI transfer.
+ * @brief Writes a buffer into SPI.
  *
  * @spi_fd An SPI bus file descriptor.
- * @tx_buf A buffer for transfered data, may be NULL.
- * @rx_buf A buffer for received data, may be NULL.
- * @size The size of the rx_buf and tx_buf buffers.
+ * @buf A buffer to be written.
+ * @buf_size A buffer size be written.
  *
  * @return Zero on success, non-zero otherwise.
  */
-int gp_spi_transfer(int spi_fd, const uint8_t *tx_buf,
-                    uint8_t *rx_buf, size_t size);
+int gp_spi_send(int spi_fd, const uint8_t *buf, size_t buf_size);
 
 /**
  * @brief Closes SPI bus.

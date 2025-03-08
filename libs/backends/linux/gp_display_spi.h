@@ -118,17 +118,17 @@ void gp_display_spi_data(struct gp_display_spi *self, uint8_t data);
 void gp_display_spi_cmd_data(struct gp_display_spi *self, uint8_t cmd, uint8_t data);
 
 /**
- * @brief Runs a SPI data transfer.
+ * @brief Writes a buffer with data to the display.
  *
- * Sets the dc pin high and does SPI transfer.
+ * If the buffer is larger than maximal SPI transfer size, it's split into
+ * several transfers automatically.
  *
  * @self An SPI display.
- * @tx_buf A transmit buffer, can be NULL.
- * @rx_buf A receive buffer, can be NULL.
- * @len The size of tx and rx buffers.
+ * @data A byte to be send.
+ * @data_size A size of the data to be send.
  */
-void gp_display_spi_data_transfer(struct gp_display_spi *self,
-                                  const uint8_t *tx_buf, uint8_t *rx_buf, size_t len);
+void gp_display_spi_data_write(struct gp_display_spi *self,
+                               const uint8_t *data, size_t data_size);
 
 /**
  * @brief Sets up an GPIO as an interrupt source.

@@ -173,7 +173,7 @@ static void st77xx_repaint_full(gp_backend *self)
 
 	for (i = 0; i < disp->h/2; i++) {
 		uint8_t *row = self->pixmap->pixels + i * self->pixmap->bytes_per_row*2;
-		gp_display_spi_data_transfer(disp, row, NULL, self->pixmap->bytes_per_row*2);
+		gp_display_spi_data_write(disp, row, self->pixmap->bytes_per_row*2);
 	}
 
 	gp_display_spi_cmd(disp, ST77XX_RAM_CTRL);
@@ -250,11 +250,11 @@ static void st77xx_repaint_part(gp_backend *self,
 			}
 		}
 
-		gp_display_spi_data_transfer(disp, buf, NULL, bytes);
+		gp_display_spi_data_write(disp, buf, bytes);
 	} else {
 		for (y = y0; y <= y1; y++) {
 			uint8_t *row = GP_PIXEL_ADDR(self->pixmap, x0, y);
-			gp_display_spi_data_transfer(disp, row, NULL, 2*w);
+			gp_display_spi_data_write(disp, row, 2*w);
 		}
 	}
 

@@ -160,7 +160,7 @@ static void st75256_2bpp_repaint_full(gp_backend *self)
 
 	for (y = 0; y < 256; y++) {
 		uint8_t *row = &(self->pixmap->pixels[32 * y]);
-		gp_display_spi_data_transfer(disp, row, NULL, 32);
+		gp_display_spi_data_write(disp, row, 32);
 	}
 }
 
@@ -174,7 +174,7 @@ static void st75256_1bpp_repaint_full(gp_backend *self)
 
 	for (y = 0; y < 256; y++) {
 		uint8_t *row = &(self->pixmap->pixels[16 * y]);
-		gp_display_spi_data_transfer(disp, row, NULL, 16);
+		gp_display_spi_data_write(disp, row, 16);
 	}
 }
 
@@ -194,7 +194,7 @@ static void st75256_2bpp_repaint_part(gp_backend *self,
 
 	for (y = y0; y <= y1; y++) {
 		uint8_t *row = &(self->pixmap->pixels[32 * y + min_x]);
-		gp_display_spi_data_transfer(disp, row, NULL, width);
+		gp_display_spi_data_write(disp, row, width);
 	}
 }
 
@@ -214,7 +214,7 @@ static void st75256_1bpp_repaint_part(gp_backend *self,
 
 	for (y = y0; y <= y1; y++) {
 		uint8_t *row = &(self->pixmap->pixels[16 * y + min_x]);
-		gp_display_spi_data_transfer(disp, row, NULL, width);
+		gp_display_spi_data_write(disp, row, width);
 	}
 }
 

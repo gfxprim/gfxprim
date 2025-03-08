@@ -20,7 +20,7 @@ static void uc81xx_tres(struct gp_display_spi *disp, uint16_t w, uint16_t h)
 	GP_DEBUG(4, "Setting display resolution %"PRIu16" x %"PRIu16, w, h);
 
 	gp_display_spi_cmd(disp, UC8179_TRES);
-	gp_display_spi_data_transfer(disp, tx_buf, NULL, sizeof(tx_buf));
+	gp_display_spi_data_write(disp, tx_buf, sizeof(tx_buf));
 }
 
 static void uc81xx_init(struct gp_display_spi *self)
@@ -78,7 +78,7 @@ static void repaint_full_start(gp_backend *self)
 	for (y = 0; y < 480; y++) {
 		uint8_t *tx_buf = &self->pixmap->pixels[100 * y];
 
-		gp_display_spi_data_transfer(disp, tx_buf, NULL, 100);
+		gp_display_spi_data_write(disp, tx_buf, 100);
 	}
 
 	/* Setup interrupt source */
@@ -149,7 +149,7 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 	for (y = y0; y <= y1; y++) {
 		uint8_t *tx_buf = &self->pixmap->pixels[100 * y + x0/8];
 
-		gp_display_spi_data_transfer(disp, tx_buf, NULL, len);
+		gp_display_spi_data_write(disp, tx_buf, len);
 	}
 
 	/* Setup interrupt source */

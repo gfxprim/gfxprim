@@ -129,22 +129,22 @@ static const struct gp_uc81xx_lut gp_uc8179_bw_lut_part = {
 static void uc8179_write_lut(struct gp_display_spi *disp, const struct gp_uc81xx_lut *lut)
 {
 	gp_display_spi_cmd(disp, UC8179_LUTC);
-	gp_display_spi_data_transfer(disp, lut->lut_c, NULL, sizeof(lut->lut_c));
+	gp_display_spi_data_write(disp, lut->lut_c, sizeof(lut->lut_c));
 
 	gp_display_spi_cmd(disp, UC8179_LUTWW);
-	gp_display_spi_data_transfer(disp, lut->lut_ww, NULL, sizeof(lut->lut_ww));
+	gp_display_spi_data_write(disp, lut->lut_ww, sizeof(lut->lut_ww));
 
 	gp_display_spi_cmd(disp, UC8179_LUTKW);
-	gp_display_spi_data_transfer(disp, lut->lut_kw, NULL, sizeof(lut->lut_kw));
+	gp_display_spi_data_write(disp, lut->lut_kw, sizeof(lut->lut_kw));
 
 	gp_display_spi_cmd(disp, UC8179_LUTWK);
-	gp_display_spi_data_transfer(disp, lut->lut_wk, NULL, sizeof(lut->lut_wk));
+	gp_display_spi_data_write(disp, lut->lut_wk, sizeof(lut->lut_wk));
 
 	gp_display_spi_cmd(disp, UC8179_LUTKK);
-	gp_display_spi_data_transfer(disp, lut->lut_kk, NULL, sizeof(lut->lut_kk));
+	gp_display_spi_data_write(disp, lut->lut_kk, sizeof(lut->lut_kk));
 
 	gp_display_spi_cmd(disp, UC8179_LUTBD);
-	gp_display_spi_data_transfer(disp, lut->lut_bd, NULL, sizeof(lut->lut_bd));
+	gp_display_spi_data_write(disp, lut->lut_bd, sizeof(lut->lut_bd));
 }
 
 #endif /* GP_DISPLAY_UC8179_LUTS_H */

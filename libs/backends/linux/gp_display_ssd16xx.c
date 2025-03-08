@@ -86,7 +86,7 @@ static void ssd1677_load_lut(struct gp_display_spi *self, const uint8_t *lut)
 {
 	GP_DEBUG(4, "Writing LUT");
 	gp_display_spi_cmd(self, SSD16XX_WRITE_LUT);
-	gp_display_spi_data_transfer(self, lut, NULL, SSD1677_LUT_SIZE);
+	gp_display_spi_data_write(self, lut, SSD1677_LUT_SIZE);
 	gp_display_spi_wait_ready(self, 0);
 }
 
@@ -94,7 +94,7 @@ static void ssd168x_load_lut(struct gp_display_spi *self, const uint8_t *lut)
 {
 	GP_DEBUG(4, "Writing LUT");
 	gp_display_spi_cmd(self, SSD16XX_WRITE_LUT);
-	gp_display_spi_data_transfer(self, lut, NULL, SSD168X_LUT_SIZE);
+	gp_display_spi_data_write(self, lut, SSD168X_LUT_SIZE);
 	gp_display_spi_wait_ready(self, 0);
 }
 
@@ -311,7 +311,7 @@ static void ssd168x_full_repaint_start(gp_backend *self)
 
 	for (y = 0; y < disp->h; y++) {
 		uint8_t *tx_buf = &self->pixmap->pixels[line_bytes * y];
-		gp_display_spi_data_transfer(disp, tx_buf, NULL, line_bytes);
+		gp_display_spi_data_write(disp, tx_buf, line_bytes);
 	}
 
 	gp_display_spi_cmd(disp, SSD16XX_UPDT_CTRL2);
@@ -341,7 +341,7 @@ static void repaint_full_start(gp_backend *self)
 	for (y = 0; y < spi->h; y++) {
 		uint8_t *tx_buf = &self->pixmap->pixels[line_bytes * y];
 
-		gp_display_spi_data_transfer(spi, tx_buf, NULL, line_bytes);
+		gp_display_spi_data_write(spi, tx_buf, line_bytes);
 	}
 
 	ssd1677_load_lut(spi, lut_1bpp_DU);
@@ -381,7 +381,7 @@ static void repaint_part_start(gp_backend *self,
 	for (y = y_start; y <= y_end; y++) {
 		uint8_t *tx_buf = &self->pixmap->pixels[line_bytes * y + x_start/8];
 
-		gp_display_spi_data_transfer(spi, tx_buf, NULL, len);
+		gp_display_spi_data_write(spi, tx_buf, len);
 	}
 
 	ssd1677_load_lut(spi, lut_1bpp_A2);
@@ -413,7 +413,7 @@ static void ssd168x_part_repaint_start(gp_backend *self,
 	for (y = ys; y <= ye; y++) {
 		uint8_t *tx_buf = &self->pixmap->pixels[line_bytes * y + xs/8];
 
-		gp_display_spi_data_transfer(disp, tx_buf, NULL, len);
+		gp_display_spi_data_write(disp, tx_buf, len);
 	}
 
 	gp_display_spi_cmd(disp, SSD16XX_UPDT_CTRL2);

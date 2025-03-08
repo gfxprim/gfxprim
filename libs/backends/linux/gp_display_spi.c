@@ -64,16 +64,16 @@ void gp_display_spi_cmd_data(struct gp_display_spi *self, uint8_t cmd, uint8_t d
 	gp_display_spi_data(self, data);
 }
 
-void gp_display_spi_data_transfer(struct gp_display_spi *self,
-                                  const uint8_t *tx_buf, uint8_t *rx_buf, size_t len)
-{
-	gp_gpio_write(&self->gpio_map->dc, 1);
-	gp_spi_transfer(self->spi_fd, tx_buf, rx_buf, len);
-}
-
 int gp_display_spi_busy_edge_set(struct gp_display_spi *self, enum gp_gpio_edge edge)
 {
 	return gp_gpio_edge_set(&self->gpio_map->busy, edge);
+}
+
+void gp_display_spi_data_write(struct gp_display_spi *self,
+                               const uint8_t *data, size_t data_size)
+{
+	gp_gpio_write(&self->gpio_map->dc, 1);
+	gp_spi_send(self->spi_fd, data, data_size);
 }
 
 void gp_display_spi_wait_ready(struct gp_display_spi *self, int ready)

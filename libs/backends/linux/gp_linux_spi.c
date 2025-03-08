@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <fcntl.h>
@@ -9,7 +9,9 @@
 #include <inttypes.h>
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
+#include <sys/uio.h>
 
+#include <core/gp_common.h>
 #include <core/gp_debug.h>
 
 #include "gp_linux_spi.h"
@@ -63,16 +65,25 @@ int gp_spi_write(int spi_fd, uint8_t byte)
 	return 0;
 }
 
-int gp_spi_transfer(int spi_fd, const uint8_t *tx_buf,
-                    uint8_t *rx_buf, size_t len)
-{
-	struct spi_ioc_transfer tr = {
-		.tx_buf = (unsigned long)tx_buf,
-		.rx_buf = (unsigned long)rx_buf,
-		.len = len,
-	};
+#define MAX_TRANSFER_SIZE 4096u
 
-	if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &tr) < 1) {
+int gp_spi_send(int spi_fd, const uint8_t *buf, size_t buf_size)
+{
+	size_t iovcnt = (buf_size + MAX_TRANSFER_SIZE - 1)/MAX_TRANSFER_SIZE;
+	struct iovec iov[iovcnt];
+	size_t i;
+
+	for (i = 0; i < iovcnt; i++) {
+		size_t len = GP_MIN(MAX_TRANSFER_SIZE, buf_size);
+
+		iov[i].iov_base = (void*)buf;
+		iov[i].iov_len = len;
+
+		buf += len;
+		buf_size -= len;
+	}
+
+	if (writev(spi_fd, iov, iovcnt) <= 0) {
 		GP_WARN("Failed to send SPI message: %s", strerror(errno));
 		return 1;
 	}
