@@ -64,7 +64,7 @@ int gp_gpio_export(struct gp_gpio *gpio, unsigned int gpio_cnt,
 			req.config.attrs[0].mask |= 1ULL << i;
 	}
 
-	GP_DEBUG(0, "Requesting GPIOs on '%s'", GPIO_DEV);
+	GP_DEBUG(1, "Requesting GPIOs on '%s'", GPIO_DEV);
 
 	if (ioctl(fd, GPIO_V2_GET_LINE_IOCTL, &req)) {
 		GP_FATAL("Failed to request GPIOs: %s", strerror(errno));
