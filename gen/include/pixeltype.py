@@ -2,7 +2,7 @@
 #  gfxprim.pixeltype - Module with PixelType descrition class
 #
 # 2011      - Tomas Gavenciak <gavento@ucw.cz>
-# 2013-2014 - Cyril Hrubis <metan@ucw.cz>
+# 2013-2025 - Cyril Hrubis <metan@ucw.cz>
 #
 
 import re
@@ -54,6 +54,7 @@ class PixelType(object):
     """
     assert re.match('\A[A-Za-z][A-Za-z0-9_]*\Z', name)
     self.name = name
+
     # Create channel list with convinience variables
     new_chanslist = []
     self.chan_names = []

@@ -3,11 +3,12 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <string.h>
 #include <core/gp_get_set_bits.h>
+#include <core/gp_get_set_bytes.h>
 #include <core/gp_write_pixels.gen.h>
 
 static const uint8_t bytes_1BPP[] = {0x00, 0xff};
@@ -25,43 +26,43 @@ void gp_write_pixels_1BPP_DB(void *start, uint8_t off,
 	case 0:
 	break;
 	case 1:
-		GP_SET_BITS1_ALIGNED(1, 1, start, val);
+		GP_SET_BITS1(1, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1_ALIGNED(2, 1, start, val);
+		GP_SET_BITS1(2, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1_ALIGNED(3, 1, start, val);
+		GP_SET_BITS1(3, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 4:
-		GP_SET_BITS1_ALIGNED(4, 1, start, val);
+		GP_SET_BITS1(4, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 5:
-		GP_SET_BITS1_ALIGNED(5, 1, start, val);
+		GP_SET_BITS1(5, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 6:
-		GP_SET_BITS1_ALIGNED(6, 1, start, val);
+		GP_SET_BITS1(6, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 7:
-		GP_SET_BITS1_ALIGNED(7, 1, start, val);
+		GP_SET_BITS1(7, 1, start, val);
 
 		if (--len == 0)
 			return;
@@ -78,25 +79,25 @@ void gp_write_pixels_1BPP_DB(void *start, uint8_t off,
 	/* And the rest */
 	switch (len%8) {
 	case 7:
-		GP_SET_BITS1_ALIGNED(6, 1, start, val);
+		GP_SET_BITS1(6, 1, start, val);
 		/* fallthrough */
 	case 6:
-		GP_SET_BITS1_ALIGNED(5, 1, start, val);
+		GP_SET_BITS1(5, 1, start, val);
 		/* fallthrough */
 	case 5:
-		GP_SET_BITS1_ALIGNED(4, 1, start, val);
+		GP_SET_BITS1(4, 1, start, val);
 		/* fallthrough */
 	case 4:
-		GP_SET_BITS1_ALIGNED(3, 1, start, val);
+		GP_SET_BITS1(3, 1, start, val);
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1_ALIGNED(2, 1, start, val);
+		GP_SET_BITS1(2, 1, start, val);
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1_ALIGNED(1, 1, start, val);
+		GP_SET_BITS1(1, 1, start, val);
 		/* fallthrough */
 	case 1:
-		GP_SET_BITS1_ALIGNED(0, 1, start, val);
+		GP_SET_BITS1(0, 1, start, val);
 	break;
 	}
 }
@@ -114,43 +115,43 @@ void gp_write_pixels_1BPP_UB(void *start, uint8_t off,
 	case 0:
 	break;
 	case 1:
-		GP_SET_BITS1_ALIGNED(6, 1, start, val);
+		GP_SET_BITS1(6, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1_ALIGNED(5, 1, start, val);
+		GP_SET_BITS1(5, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1_ALIGNED(4, 1, start, val);
+		GP_SET_BITS1(4, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 4:
-		GP_SET_BITS1_ALIGNED(3, 1, start, val);
+		GP_SET_BITS1(3, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 5:
-		GP_SET_BITS1_ALIGNED(2, 1, start, val);
+		GP_SET_BITS1(2, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 6:
-		GP_SET_BITS1_ALIGNED(1, 1, start, val);
+		GP_SET_BITS1(1, 1, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 7:
-		GP_SET_BITS1_ALIGNED(0, 1, start, val);
+		GP_SET_BITS1(0, 1, start, val);
 
 		if (--len == 0)
 			return;
@@ -167,25 +168,25 @@ void gp_write_pixels_1BPP_UB(void *start, uint8_t off,
 	/* And the rest */
 	switch (len%8) {
 	case 7:
-		GP_SET_BITS1_ALIGNED(1, 1, start, val);
+		GP_SET_BITS1(1, 1, start, val);
 		/* fallthrough */
 	case 6:
-		GP_SET_BITS1_ALIGNED(2, 1, start, val);
+		GP_SET_BITS1(2, 1, start, val);
 		/* fallthrough */
 	case 5:
-		GP_SET_BITS1_ALIGNED(3, 1, start, val);
+		GP_SET_BITS1(3, 1, start, val);
 		/* fallthrough */
 	case 4:
-		GP_SET_BITS1_ALIGNED(4, 1, start, val);
+		GP_SET_BITS1(4, 1, start, val);
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1_ALIGNED(5, 1, start, val);
+		GP_SET_BITS1(5, 1, start, val);
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1_ALIGNED(6, 1, start, val);
+		GP_SET_BITS1(6, 1, start, val);
 		/* fallthrough */
 	case 1:
-		GP_SET_BITS1_ALIGNED(7, 1, start, val);
+		GP_SET_BITS1(7, 1, start, val);
 	break;
 	}
 }
@@ -202,19 +203,19 @@ void gp_write_pixels_2BPP_DB(void *start, uint8_t off,
 	case 0:
 	break;
 	case 1:
-		GP_SET_BITS1_ALIGNED(2, 2, start, val);
+		GP_SET_BITS1(2, 2, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1_ALIGNED(4, 2, start, val);
+		GP_SET_BITS1(4, 2, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1_ALIGNED(6, 2, start, val);
+		GP_SET_BITS1(6, 2, start, val);
 
 		if (--len == 0)
 			return;
@@ -231,13 +232,13 @@ void gp_write_pixels_2BPP_DB(void *start, uint8_t off,
 	/* And the rest */
 	switch (len%4) {
 	case 3:
-		GP_SET_BITS1_ALIGNED(4, 2, start, val);
+		GP_SET_BITS1(4, 2, start, val);
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1_ALIGNED(2, 2, start, val);
+		GP_SET_BITS1(2, 2, start, val);
 		/* fallthrough */
 	case 1:
-		GP_SET_BITS1_ALIGNED(0, 2, start, val);
+		GP_SET_BITS1(0, 2, start, val);
 	break;
 	}
 }
@@ -252,19 +253,19 @@ void gp_write_pixels_2BPP_UB(void *start, uint8_t off,
 	case 0:
 	break;
 	case 1:
-		GP_SET_BITS1_ALIGNED(4, 2, start, val);
+		GP_SET_BITS1(4, 2, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1_ALIGNED(2, 2, start, val);
+		GP_SET_BITS1(2, 2, start, val);
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1_ALIGNED(0, 2, start, val);
+		GP_SET_BITS1(0, 2, start, val);
 
 		if (--len == 0)
 			return;
@@ -281,13 +282,13 @@ void gp_write_pixels_2BPP_UB(void *start, uint8_t off,
 	/* And the rest */
 	switch (len%4) {
 	case 3:
-		GP_SET_BITS1_ALIGNED(2, 2, start, val);
+		GP_SET_BITS1(2, 2, start, val);
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1_ALIGNED(4, 2, start, val);
+		GP_SET_BITS1(4, 2, start, val);
 		/* fallthrough */
 	case 1:
-		GP_SET_BITS1_ALIGNED(6, 2, start, val);
+		GP_SET_BITS1(6, 2, start, val);
 	break;
 	}
 }
@@ -307,7 +308,7 @@ void gp_write_pixels_4BPP_DB(void *start, uint8_t off,
 	case 0:
 	break;
 	case 1:
-		GP_SET_BITS1_ALIGNED(4, 4, start, val);
+		GP_SET_BITS1(4, 4, start, val);
 
 		if (--len == 0)
 			return;
@@ -324,7 +325,7 @@ void gp_write_pixels_4BPP_DB(void *start, uint8_t off,
 	/* And the rest */
 	switch (len%2) {
 	case 1:
-		GP_SET_BITS1_ALIGNED(0, 4, start, val);
+		GP_SET_BITS1(0, 4, start, val);
 	break;
 	}
 }
@@ -339,7 +340,7 @@ void gp_write_pixels_4BPP_UB(void *start, uint8_t off,
 	case 0:
 	break;
 	case 1:
-		GP_SET_BITS1_ALIGNED(0, 4, start, val);
+		GP_SET_BITS1(0, 4, start, val);
 
 		if (--len == 0)
 			return;
@@ -356,7 +357,7 @@ void gp_write_pixels_4BPP_UB(void *start, uint8_t off,
 	/* And the rest */
 	switch (len%2) {
 	case 1:
-		GP_SET_BITS1_ALIGNED(4, 4, start, val);
+		GP_SET_BITS1(4, 4, start, val);
 	break;
 	}
 }
@@ -389,6 +390,28 @@ void gp_write_pixels_16BPP(void *start, size_t count, unsigned int value)
 			}
 		}
 	}
+}
+
+void gp_write_pixels_16BPP_LE(void *start, size_t count, unsigned int value)
+{
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+	gp_write_pixels_16BPP(start, count, value);
+#elif __BYTE_ORDER == __BIG_ENDIAN
+	gp_write_pixels_16BPP(start, count, GP_SWAP_BYTES2(value));
+#else
+# error Unknown endianity!
+#endif
+}
+
+void gp_write_pixels_16BPP_BE(void *start, size_t count, unsigned int value)
+{
+#if __BYTE_ORDER == __BIG_ENDIAN
+	gp_write_pixels_16BPP(start, count, value);
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+	gp_write_pixels_16BPP(start, count, GP_SWAP_BYTES2(value));
+#else
+# error Unknown endianity!
+#endif
 }
 
 void gp_write_pixels_24BPP(void *start, size_t count, unsigned int value)

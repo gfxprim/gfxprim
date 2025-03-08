@@ -3,7 +3,7 @@
  * Pixel channel operations.
  *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
- * Copyright (C) 2013-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2013-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -16,6 +16,7 @@
  */
 
 #include <core/gp_clamp.h>
+#include <core/gp_get_set_bytes.h>
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
- * Copyright (C) 2011-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2011-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -12,12 +12,14 @@
  * Which means that you can only pass value that is suitably aligned for it's
  * type, for example passing an 32 bit integer is OK, passing a char buffer
  * casted to 32 bit integer is not (unless you made sure that the start address
- * is multiple of 4).
+ * is multiple of 4). These macros also work with the machine endianity if
+ * pixels are packed in foreign endianity, the data has to be swapped properly
+ * at the input or output.
  *
  * The align-safe variants first gets the value from a buffer, byte by byte and
  * then uses the GP_GET_BITS() or GP_SET_BITS(). The number in their name tells
- * how much bytes are touched, as we need to touch minimal number of bytes
- * needed.
+ * how much bytes are touched and the endianity suffix describes the endianity
+ * these macros work with.
  */
 #ifndef CORE_GP_GET_SET_BITS_H
 #define CORE_GP_GET_SET_BITS_H
@@ -37,7 +39,7 @@
 	 ((val)>>(offset)) & (((((typeof(val))1)<<(len)) - 1)))
 
 /**
- * @brief Align-safe get bits.
+ * @brief Little endian align-safe get bits.
  *
  * Reads four bytes byte by byte, composes then shifts and masks them.
  *
@@ -45,18 +47,37 @@
  * @param len A number of bits to return.
  * @param buf A pointer to a starting byte of the buffer.
  */
-#define GP_GET_BITS4_ALIGNED(offset, len, buf) ({ \
-	uint32_t v;                               \
-	v  = ((uint8_t *)buf)[0];                 \
-	v |= ((uint8_t *)buf)[1]<<8;              \
-	v |= ((uint8_t *)buf)[2]<<16;             \
-	v |= ((uint8_t *)buf)[3]<<24;             \
-                                                  \
-	GP_GET_BITS(offset, len, v);              \
+#define GP_GET_BITS4_LE(offset, len, buf) ({ \
+	uint32_t v;                          \
+	v  = ((uint8_t *)buf)[0];            \
+	v |= ((uint8_t *)buf)[1]<<8;         \
+	v |= ((uint8_t *)buf)[2]<<16;        \
+	v |= ((uint8_t *)buf)[3]<<24;        \
+                                             \
+	GP_GET_BITS(offset, len, v);         \
 })
 
 /**
- * @brief Align-safe get bits.
+ * @brief Big endian align-safe get bits.
+ *
+ * Reads four bytes byte by byte, composes then shifts and masks them.
+ *
+ * @param offset Number of bits to shift to left.
+ * @param len A number of bits to return.
+ * @param buf A pointer to a starting byte of the buffer.
+ */
+#define GP_GET_BITS4_BE(offset, len, buf) ({ \
+	uint32_t v;                          \
+	v  = ((uint8_t *)buf)[3];            \
+	v |= ((uint8_t *)buf)[2]<<8;         \
+	v |= ((uint8_t *)buf)[1]<<16;        \
+	v |= ((uint8_t *)buf)[0]<<24;        \
+                                             \
+	GP_GET_BITS(offset, len, v);         \
+})
+
+/**
+ * @brief Little endian align-safe get bits.
  *
  * Reads three bytes byte by byte, composes then shifts and masks them.
  *
@@ -64,17 +85,35 @@
  * @param len A number of bits to return.
  * @param buf A pointer to a starting byte of the buffer.
  */
-#define GP_GET_BITS3_ALIGNED(offset, len, buf) ({ \
-	uint32_t v;                               \
-	v  = ((uint8_t *)buf)[0];                 \
-	v |= ((uint8_t *)buf)[1]<<8;              \
-	v |= ((uint8_t *)buf)[2]<<16;             \
-                                                  \
-	GP_GET_BITS(offset, len, v);              \
+#define GP_GET_BITS3_LE(offset, len, buf) ({ \
+	uint32_t v;                          \
+	v  = ((uint8_t *)buf)[0];            \
+	v |= ((uint8_t *)buf)[1]<<8;         \
+	v |= ((uint8_t *)buf)[2]<<16;        \
+                                             \
+	GP_GET_BITS(offset, len, v);         \
 })
 
 /**
- * @brief Align-safe get bits.
+ * @brief Big endian align-safe get bits.
+ *
+ * Reads three bytes byte by byte, composes then shifts and masks them.
+ *
+ * @param offset Number of bits to shift to left.
+ * @param len A number of bits to return.
+ * @param buf A pointer to a starting byte of the buffer.
+ */
+#define GP_GET_BITS3_BE(offset, len, buf) ({ \
+	uint32_t v;                          \
+	v  = ((uint8_t *)buf)[2];            \
+	v |= ((uint8_t *)buf)[1]<<8;         \
+	v |= ((uint8_t *)buf)[0]<<16;        \
+                                             \
+	GP_GET_BITS(offset, len, v);         \
+})
+
+/**
+ * @brief Little endian align-safe get bits.
  *
  * Reads two bytes byte by byte, composes then shifts and masks them.
  *
@@ -82,12 +121,29 @@
  * @param len A number of bits to return.
  * @param buf A pointer to a starting byte of the buffer.
  */
-#define GP_GET_BITS2_ALIGNED(offset, len, buf) ({ \
-	uint16_t v;                               \
-	v  = ((uint8_t *)buf)[0];                 \
-	v |= ((uint8_t *)buf)[1]<<8;              \
-                                                  \
-	GP_GET_BITS(offset, len, v);              \
+#define GP_GET_BITS2_LE(offset, len, buf) ({ \
+	uint16_t v;                          \
+	v  = ((uint8_t *)buf)[0];            \
+	v |= ((uint8_t *)buf)[1]<<8;         \
+                                             \
+	GP_GET_BITS(offset, len, v);         \
+})
+
+/**
+ * @brief Big endian align-safe get bits.
+ *
+ * Reads two bytes byte by byte, composes then shifts and masks them.
+ *
+ * @param offset Number of bits to shift to left.
+ * @param len A number of bits to return.
+ * @param buf A pointer to a starting byte of the buffer.
+ */
+#define GP_GET_BITS2_BE(offset, len, buf) ({ \
+	uint16_t v;                          \
+	v  = ((uint8_t *)buf)[1];            \
+	v |= ((uint8_t *)buf)[0]<<8;         \
+                                             \
+	GP_GET_BITS(offset, len, v);         \
 })
 
 /**
@@ -99,11 +155,11 @@
  * @param len A number of bits to return.
  * @param buf A pointer to a starting byte of the buffer.
  */
-#define GP_GET_BITS1_ALIGNED(offset, len, buf) ({ \
-	uint8_t v;                                \
-	v = ((uint8_t *)buf)[0];                  \
-                                                  \
-	GP_GET_BITS(offset, len, v);              \
+#define GP_GET_BITS1(offset, len, buf) ({ \
+	uint8_t v;                        \
+	v = ((uint8_t *)buf)[0];          \
+                                          \
+	GP_GET_BITS(offset, len, v);      \
 })
 
 /**
@@ -146,14 +202,14 @@
  * @param dest A buffer to write the data to.
  * @param val A value to be written.
  */
-#define GP_SET_BITS1_ALIGNED(offset, len, dest, val) do { \
-	uint8_t v = ((uint8_t *)dest)[0];                 \
-	GP_SET_BITS(offset, len, v, val);                 \
-	((uint8_t *)dest)[0] = v;                         \
+#define GP_SET_BITS1(offset, len, dest, val) do { \
+	uint8_t v = ((uint8_t *)dest)[0];         \
+	GP_SET_BITS(offset, len, v, val);         \
+	((uint8_t *)dest)[0] = v;                 \
 } while (0)
 
 /**
- * @brief Align-safe set bits.
+ * @brief Little endian align-safe set bits.
  *
  * Gets two bytes from dest, combines them with len bytes from value at offset
  * and writes it back.
@@ -163,19 +219,41 @@
  * @param dest A buffer to write the data to.
  * @param val A value to be written.
  */
-#define GP_SET_BITS2_ALIGNED(offset, len, dest, val) do { \
-	uint16_t v;                                       \
-	v  = ((uint8_t *)dest)[0];                        \
-	v |= ((uint8_t *)dest)[1]<<8;                     \
-	                                                  \
-	GP_SET_BITS(offset, len, v, val);                 \
-	                                                  \
-	((uint8_t *)dest)[0] = 0xff & v;                  \
-	((uint8_t *)dest)[1] = 0xff & (v >> 8);           \
+#define GP_SET_BITS2_LE(offset, len, dest, val) do { \
+	uint16_t v;                                  \
+	v  = ((uint8_t *)dest)[0];                   \
+	v |= ((uint8_t *)dest)[1]<<8;                \
+	                                             \
+	GP_SET_BITS(offset, len, v, val);            \
+	                                             \
+	((uint8_t *)dest)[0] = 0xff & v;             \
+	((uint8_t *)dest)[1] = 0xff & (v >> 8);      \
 } while (0)
 
 /**
- * @brief Align-safe set bits.
+ * @brief Big endian align-safe set bits.
+ *
+ * Gets two bytes from dest, combines them with len bytes from value at offset
+ * and writes it back.
+ *
+ * @param offset An offset in the byte.
+ * @param len A number of bits to write.
+ * @param dest A buffer to write the data to.
+ * @param val A value to be written.
+ */
+#define GP_SET_BITS2_BE(offset, len, dest, val) do { \
+	uint16_t v;                                  \
+	v  = ((uint8_t *)dest)[1];                   \
+	v |= ((uint8_t *)dest)[0]<<8;                \
+	                                             \
+	GP_SET_BITS(offset, len, v, val);            \
+	                                             \
+	((uint8_t *)dest)[1] = 0xff & v;             \
+	((uint8_t *)dest)[0] = 0xff & (v >> 8);      \
+} while (0)
+
+/**
+ * @brief Little endian align-safe set bits.
  *
  * Gets three bytes from dest, combines them with len bytes from value at
  * offset and writes it back.
@@ -185,21 +263,45 @@
  * @param dest A buffer to write the data to.
  * @param val A value to be written.
  */
-#define GP_SET_BITS3_ALIGNED(offset, len, dest, val) do { \
-	uint32_t v;                                       \
-	v  = ((uint8_t *)dest)[0];                        \
-	v |= ((uint8_t *)dest)[1]<<8;                     \
-	v |= ((uint8_t *)dest)[2]<<16;                    \
-	                                                  \
-	GP_SET_BITS(offset, len, v, val);                 \
-	                                                  \
-	((uint8_t *)dest)[0] = 0xff & v;                  \
-	((uint8_t *)dest)[1] = 0xff & (v >> 8);           \
-	((uint8_t *)dest)[2] = 0xff & (v >> 16);          \
+#define GP_SET_BITS3_LE(offset, len, dest, val) do { \
+	uint32_t v;                                  \
+	v  = ((uint8_t *)dest)[0];                   \
+	v |= ((uint8_t *)dest)[1]<<8;                \
+	v |= ((uint8_t *)dest)[2]<<16;               \
+	                                             \
+	GP_SET_BITS(offset, len, v, val);            \
+	                                             \
+	((uint8_t *)dest)[0] = 0xff & v;             \
+	((uint8_t *)dest)[1] = 0xff & (v >> 8);      \
+	((uint8_t *)dest)[2] = 0xff & (v >> 16);     \
 } while (0)
 
 /**
- * @brief Align-safe set bits.
+ * @brief Big endian align-safe set bits.
+ *
+ * Gets three bytes from dest, combines them with len bytes from value at
+ * offset and writes it back.
+ *
+ * @param offset An offset in the byte.
+ * @param len A number of bits to write.
+ * @param dest A buffer to write the data to.
+ * @param val A value to be written.
+ */
+#define GP_SET_BITS3_BE(offset, len, dest, val) do { \
+	uint32_t v;                                  \
+	v  = ((uint8_t *)dest)[2];                   \
+	v |= ((uint8_t *)dest)[1]<<8;                \
+	v |= ((uint8_t *)dest)[0]<<16;               \
+	                                             \
+	GP_SET_BITS(offset, len, v, val);            \
+	                                             \
+	((uint8_t *)dest)[2] = 0xff & v;             \
+	((uint8_t *)dest)[1] = 0xff & (v >> 8);      \
+	((uint8_t *)dest)[0] = 0xff & (v >> 16);     \
+} while (0)
+
+/**
+ * @brief Little endian align-safe set bits.
  *
  * Gets four bytes from dest, combines them with len bytes from value at offset
  * and writes it back.
@@ -209,20 +311,45 @@
  * @param dest A buffer to write the data to.
  * @param val A value to be written.
  */
-#define GP_SET_BITS4_ALIGNED(offset, len, dest, val) do { \
-	uint32_t v;                                       \
-	v  = ((uint8_t *)dest)[0];                        \
-	v |= ((uint8_t *)dest)[1]<<8;                     \
-	v |= ((uint8_t *)dest)[2]<<16;                    \
-	v |= ((uint8_t *)dest)[3]<<24;                    \
-	                                                  \
-	GP_SET_BITS(offset, len, v, val);                 \
-	                                                  \
-	((uint8_t *)dest)[0] = 0xff & v;                  \
-	((uint8_t *)dest)[1] = 0xff & (v >> 8);           \
-	((uint8_t *)dest)[2] = 0xff & (v >> 16);          \
-	((uint8_t *)dest)[3] = 0xff & (v >> 24);          \
+#define GP_SET_BITS4_LE(offset, len, dest, val) do { \
+	uint32_t v;                                  \
+	v  = ((uint8_t *)dest)[0];                   \
+	v |= ((uint8_t *)dest)[1]<<8;                \
+	v |= ((uint8_t *)dest)[2]<<16;               \
+	v |= ((uint8_t *)dest)[3]<<24;               \
+	                                             \
+	GP_SET_BITS(offset, len, v, val);            \
+	                                             \
+	((uint8_t *)dest)[0] = 0xff & v;             \
+	((uint8_t *)dest)[1] = 0xff & (v >> 8);      \
+	((uint8_t *)dest)[2] = 0xff & (v >> 16);     \
+	((uint8_t *)dest)[3] = 0xff & (v >> 24);     \
 } while (0)
 
+/**
+ * @brief Big endian align-safe set bits.
+ *
+ * Gets four bytes from dest, combines them with len bytes from value at offset
+ * and writes it back.
+ *
+ * @param offset An offset in the byte.
+ * @param len A number of bits to write.
+ * @param dest A buffer to write the data to.
+ * @param val A value to be written.
+ */
+#define GP_SET_BITS4_BE(offset, len, dest, val) do { \
+	uint32_t v;                                  \
+	v  = ((uint8_t *)dest)[3];                   \
+	v |= ((uint8_t *)dest)[2]<<8;                \
+	v |= ((uint8_t *)dest)[1]<<16;               \
+	v |= ((uint8_t *)dest)[0]<<24;               \
+	                                             \
+	GP_SET_BITS(offset, len, v, val);            \
+	                                             \
+	((uint8_t *)dest)[3] = 0xff & v;             \
+	((uint8_t *)dest)[2] = 0xff & (v >> 8);      \
+	((uint8_t *)dest)[1] = 0xff & (v >> 16);     \
+	((uint8_t *)dest)[0] = 0xff & (v >> 24);     \
+} while (0)
 
 #endif /* CORE_GP_GET_SET_BITS_H */

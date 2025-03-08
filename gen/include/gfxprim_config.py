@@ -2,7 +2,6 @@
 #  gfxprim_config.py - module configuring GfxPrim code generation and
 #                      known PixelTypes
 #
-
 #
 # 2011      Tomas Gavenciak <gavento@ucw.cz>
 # 2011-2024 Cyril Hrubis <metan@ucw.cz>
@@ -13,7 +12,7 @@
 #
 
 from pixeltype import PixelType
-from pixelpack import PixelPack, DB, UB
+from pixelpack import PixelPack, DB, UB, BE, LE, ME
 from gfxprimconfig import GfxPrimConfig
 
 # Declared pixel sizes:
@@ -23,8 +22,10 @@ PS_2BPP_DB = PixelPack(2, bit_order=DB)
 PS_2BPP_UB = PixelPack(2, bit_order=UB)
 PS_4BPP_DB = PixelPack(4, bit_order=DB)
 PS_4BPP_UB = PixelPack(4, bit_order=UB)
+# PixelPacks default to endian=ME which is current machine endian
 PS_8BPP = PixelPack(8)
 PS_16BPP = PixelPack(16)
+PS_16BPP_BE = PixelPack(16, endian=BE)
 PS_24BPP = PixelPack(24)
 PS_32BPP = PixelPack(32)
 
@@ -38,7 +39,7 @@ config = GfxPrimConfig(
 
     # List of pixel packings, explicit on purpose
     pixelpacks = [PS_1BPP_DB, PS_1BPP_UB, PS_2BPP_DB, PS_2BPP_UB, PS_4BPP_DB, PS_4BPP_UB,
-                  PS_8BPP, PS_16BPP, PS_24BPP, PS_32BPP,
+                  PS_8BPP, PS_16BPP, PS_16BPP_BE, PS_24BPP, PS_32BPP,
                   PS_18BPP_DB,
                  ],
 
@@ -75,12 +76,12 @@ config = GfxPrimConfig(
 	  ('G',  8, 8, 2),
 	  ('R',  0, 8, 2)]),
 
-      PixelType(name='RGB555', pixelpack=PS_16BPP, chanslist=[
+      PixelType(name='RGB555', pixelpack=PS_16BPP_BE, chanslist=[
 	  ('R', 10, 5, 2),
 	  ('G',  5, 5, 2),
 	  ('B',  0, 5, 2)]),
 
-      PixelType(name='RGB565', pixelpack=PS_16BPP, chanslist=[
+      PixelType(name='RGB565', pixelpack=PS_16BPP_BE, chanslist=[
 	  ('R', 11, 5, 2),
 	  ('G',  5, 6, 2),
 	  ('B',  0, 5, 2)]),

@@ -23,7 +23,7 @@
 typedef enum gp_pixel_pack {
 @ for pp in pixelpacks:
 	/** @brief {{ pp.pack }} */
-	{{ pp.pack}} = {{ '0x%02x' % pp.pack_id }},
+	{{ pp.pack }} = {{ '0x%02x' % pp.pack_id }},
 @ end
 } gp_pixel_pack;
 

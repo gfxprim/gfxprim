@@ -144,11 +144,6 @@ static void st77xx_init(struct gp_display_spi *disp,
 
 	gp_display_spi_cmd(disp, ST77XX_RAM_CTRL);
 	gp_display_spi_data(disp, 0x00);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-	gp_display_spi_data(disp, 0xf8);
-#else
-	gp_display_spi_data(disp, 0xf0);
-#endif
 
 	gp_display_spi_cmd(disp, ST77XX_NORM_ON);
 	usleep(10000);
