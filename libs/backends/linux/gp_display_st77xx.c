@@ -131,19 +131,26 @@ static void st77xx_init(struct gp_display_spi *disp,
 	usleep(50000);
 
 	gp_display_spi_cmd(disp, ST77XX_COLOR_MODE);
-	gp_display_spi_data(disp, 0x55);
+	gp_display_spi_data(disp, 0x05);
 	usleep(10000);
 
-	gp_display_spi_cmd(disp, ST77XX_MADDR_CTRL);
-	gp_display_spi_data(disp, 0x00);
+	uint8_t maddr = 0x00;
+
+	if (flags & GP_DISPLAY_ST77XX_MIRROR_X)
+		maddr |= 0x40;
+
+	if (flags & GP_DISPLAY_ST77XX_MIRROR_Y)
+		maddr |= 0x80;
+
+	if (flags & GP_DISPLAY_ST77XX_BGR)
+		maddr |= 0x08;
+
+	gp_display_spi_cmd_data(disp, ST77XX_MADDR_CTRL, maddr);
 
 	if (flags & GP_DISPLAY_ST77XX_INV) {
 		gp_display_spi_cmd(disp, ST77XX_INV_ON);
 		usleep(10000);
 	}
-
-	gp_display_spi_cmd(disp, ST77XX_RAM_CTRL);
-	gp_display_spi_data(disp, 0x00);
 
 	gp_display_spi_cmd(disp, ST77XX_NORM_ON);
 	usleep(10000);
@@ -157,22 +164,12 @@ static void st77xx_init(struct gp_display_spi *disp,
 static void st77xx_repaint_full(gp_backend *self)
 {
 	struct gp_display_spi *disp = GP_BACKEND_PRIV(self);
-	unsigned int i;
-
-	/** Hack turn of display refresh when we write to the RAM */
-	gp_display_spi_cmd(disp, ST77XX_RAM_CTRL);
-	gp_display_spi_data(disp, 0x01);
 
 	st77xx_set_window(disp, 0, disp->w-1, 0, disp->h-1);
 	gp_display_spi_cmd(disp, ST77XX_RAM_WRITE);
 
-	for (i = 0; i < disp->h/2; i++) {
-		uint8_t *row = self->pixmap->pixels + i * self->pixmap->bytes_per_row*2;
-		gp_display_spi_data_write(disp, row, self->pixmap->bytes_per_row*2);
-	}
-
-	gp_display_spi_cmd(disp, ST77XX_RAM_CTRL);
-	gp_display_spi_data(disp, 0x00);
+	gp_display_spi_data_write(disp, self->pixmap->pixels,
+	                          disp->h * self->pixmap->bytes_per_row);
 }
 
 static enum gp_backend_ret st77xx_set_backlight(gp_backend *self,
@@ -224,9 +221,6 @@ static void st77xx_repaint_part(gp_backend *self,
 	gp_size j;
 	gp_coord y;
 
-	gp_display_spi_cmd(disp, ST77XX_RAM_CTRL);
-	gp_display_spi_data(disp, 0x01);
-
 	st77xx_set_window(disp, x0, x1, y0, y1);
 	gp_display_spi_cmd(disp, ST77XX_RAM_WRITE);
 
@@ -252,9 +246,6 @@ static void st77xx_repaint_part(gp_backend *self,
 			gp_display_spi_data_write(disp, row, 2*w);
 		}
 	}
-
-	gp_display_spi_cmd(disp, ST77XX_RAM_CTRL);
-	gp_display_spi_data(disp, 0x00);
 }
 
 gp_backend *gp_display_st77xx_init(uint16_t w, uint16_t h, uint16_t x_off, uint16_t y_off,
@@ -278,7 +269,7 @@ gp_backend *gp_display_st77xx_init(uint16_t w, uint16_t h, uint16_t x_off, uint1
 	struct gp_display_spi *disp = GP_BACKEND_PRIV(backend);
 
 	ret = gp_display_spi_init(disp, EINK_SPI_DEV, SPI_MODE_3,
-	                          32000000, &gpio_map_rpi, w, h);
+				  80000000, &gpio_map_rpi, w, h);
 	if (ret)
 		goto err1;
 

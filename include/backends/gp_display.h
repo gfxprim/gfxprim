@@ -118,6 +118,13 @@ enum gp_backend_display_model_ids {
 	 * Chip ST7789
 	 */
 	GP_ST7789_2_8,
+
+	/**
+	 * @brief 320x480 3.5 TFT LCD.
+	 *
+	 * Chip ST7796
+	 */
+	GP_ST7796_3_5,
 };
 
 /** @brief A display model description.  */

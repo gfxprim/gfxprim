@@ -12,6 +12,9 @@
 
 #include <stdint.h>
 
+/**
+ * @brief Display quirks.
+ */
 enum gp_display_st77xx_flags {
 	/**
 	 * @brief Enable inverse mode.
@@ -22,9 +25,21 @@ enum gp_display_st77xx_flags {
 	GP_DISPLAY_ST77XX_INV = 0x01,
 
 	/**
-	 * @brief Apply X offset.
+	 * @brief Switch between RGB and BGR.
+	 *
+	 * There are displays that have inversed order.
 	 */
-	GP_DISPLAY_ST77XX_XOFF = 0x02,
+	GP_DISPLAY_ST77XX_BGR = 0x02,
+
+	/**
+	 * @brief Mirrors X.
+	 */
+	GP_DISPLAY_ST77XX_MIRROR_X = 0x04,
+
+	/**
+	 * @brief Mirrors Y.
+	 */
+	GP_DISPLAY_ST77XX_MIRROR_Y = 0x08,
 };
 
 /**
