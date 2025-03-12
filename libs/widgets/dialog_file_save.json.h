@@ -15,7 +15,7 @@ static const char *dialog_file_save = "\
 	{\"type\": \"button\", \"btype\": \"new_dir\", \"on_event\": \"new_dir\"} \n\
       ] \n\
     }, \n\
-    {\"type\": \"table\", \"align\": \"fill\", \"min_rows\": 25, \"uid\": \"files\", \n\
+    {\"type\": \"table\", \"align\": \"fill\", \"min_rows\": 10, \"uid\": \"files\", \n\
      \"col_ops\": \"file_table\", \n\
      \"header\": [ \n\
       {\"label\": \"File\", \"id\": \"name\", \"min_size\": 20, \"fill\": 1}, \n\

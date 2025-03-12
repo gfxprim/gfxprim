@@ -14,7 +14,7 @@
 	{"type": "button", "btype": "new_dir", "on_event": "new_dir"}
       ]
     },
-    {"type": "table", "align": "fill", "min_rows": 25, "uid": "files",
+    {"type": "table", "align": "fill", "min_rows": 10, "uid": "files",
      "col_ops": "file_table",
      "header": [
       {"label": "File", "id": "name", "min_size": 20, "fill": 1},

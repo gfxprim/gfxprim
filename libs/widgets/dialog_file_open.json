@@ -17,7 +17,7 @@
      "type": "table",
      "focused": true,
      "align": "fill",
-     "min_rows": 25,
+     "min_rows": 10,
      "uid": "files",
      "col_ops": "file_table",
      "header": [

@@ -18,7 +18,7 @@ static const char *dialog_file_open = "\
      \"type\": \"table\", \n\
      \"focused\": true, \n\
      \"align\": \"fill\", \n\
-     \"min_rows\": 25, \n\
+     \"min_rows\": 10, \n\
      \"uid\": \"files\", \n\
      \"col_ops\": \"file_table\", \n\
      \"header\": [ \n\
