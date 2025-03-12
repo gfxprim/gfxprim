@@ -35,6 +35,8 @@ const struct gp_backend_display_model gp_backend_display_models[] = {
 	                   .desc = "TFT 2.8\" 240x320 ST7789 LCD display"},
 	[GP_ST7796_3_5] = {.name = "ST7796-3.5",
 	                   .desc = "TFT 3.5\" 320x480 ST7796 LCD display"},
+	[GP_ST7735_1_8] = {.name = "ST7735-1.8",
+	                   .desc = "TFT 1.8\" 128x160 ST7735 LCD display"},
 	{}
 };
 
@@ -94,6 +96,9 @@ gp_backend *gp_backend_display_init(enum gp_backend_display_model_ids model)
 		ret = gp_display_st77xx_init(320, 480, 0, 0, 166,
 		                             GP_DISPLAY_ST77XX_BGR |
 		                             GP_DISPLAY_ST77XX_MIRROR_X);
+	break;
+	case GP_ST7735_1_8:
+		ret = gp_display_st77xx_init(128, 160, 0, 0, 115, 0);
 	break;
 	default:
 		GP_FATAL("Invalid model %i\n", model);
