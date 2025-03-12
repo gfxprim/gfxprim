@@ -161,7 +161,7 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 		.msg_iovlen = 3,
 	};
 
-	ssize_t ret = sendmsg(fd, &hdr, MSG_DONTWAIT);
+	ssize_t ret = sendmsg(fd, &hdr, 0);
 
 	if (ret == -1) {
 		GP_WARN("sendmsg(): %s", strerror(errno));

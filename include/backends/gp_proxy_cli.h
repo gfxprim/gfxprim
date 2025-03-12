@@ -97,7 +97,7 @@ static inline void gp_proxy_cli_show(gp_proxy_cli *self, gp_proxy_shm *shm, gp_p
 static inline void gp_proxy_cli_hide(gp_proxy_cli *self)
 {
 	if (!self)
-	return;
+		return;
 
 	gp_proxy_cli_send(self, GP_PROXY_HIDE, NULL);
 	gp_proxy_cli_send(self, GP_PROXY_UNMAP, NULL);

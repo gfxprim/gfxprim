@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <core/gp_debug.h>
 #include <backends/gp_proxy_shm.h>
 #include <backends/gp_proxy_proto.h>
@@ -134,6 +135,9 @@ struct gp_proxy_cli *gp_proxy_cli_add(gp_dlist *clients, int cli_fd)
 
 	if (!cli)
 		return NULL;
+
+	if (fcntl(cli_fd, F_SETFL, O_NONBLOCK | O_CLOEXEC))
+		GP_WARN("Failed to set cli fd non blocking: %s", strerror(errno));
 
 	cli->fd = (gp_fd) {
 		.fd = cli_fd,

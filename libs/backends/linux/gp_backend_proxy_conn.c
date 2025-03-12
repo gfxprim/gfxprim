@@ -54,7 +54,7 @@ fail:
 
 int gp_proxy_client_connect(const char *path)
 {
-	int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0);
+	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	struct sockaddr_un addr;
 
 	if (fd < 0)
