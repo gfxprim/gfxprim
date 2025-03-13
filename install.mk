@@ -4,10 +4,12 @@ ifdef DESTDIR
 BIN_DIR=$(DESTDIR)/$(bindir)
 MAN_DIR=$(DESTDIR)/$(mandir)/man1
 DOC_DIR=$(DESTDIR)/$(docdir)/libgfxprim-$(LIB_VERSION)
+PKGCONFIG_DIR=$(DESTDIR)/$(libdir)/pkgconfig/
 else
 MAN_DIR=$(mandir)/man1
 BIN_DIR=$(bindir)
 DOC_DIR=$(docdir)/libgfxprim-$(LIB_MAJOR)-$(LIB_MINOR)
+PKGCONFIG_DIR=$(libdir)/pkgconfig/
 endif
 
 install:
@@ -41,5 +43,16 @@ else
 	@install -d "$(DOC_DIR)"
 	@echo "MKDIR $(DOC_DIR)"
 	@for i in $(INSTALL_DOC); do echo "CP    $$i $(DOC_DIR)/$$i"; install -D -m 644 "$$i" "$(DOC_DIR)/$$i"; done
+endif
+endif
+
+ifdef INSTALL_PKGCONFIG
+ifdef VERBOSE
+	install -d "$(PKGCONFIG_DIR)"
+	for i in $(INSTALL_PKGCONFIG); do install -D -m 644 "$$i" "$(PKGCONFIG_DIR)/$$i"; done
+else
+	@install -d "$(PKGCONFIG_DIR)"
+	@echo "MKDIR $(PKGCONFIG_DIR)"
+	@for i in $(INSTALL_PKGCONFIG); do echo "CP    $$i $(PKGCONFIG_DIR)/$$i"; install -D -m 644 "$$i" "$(PKGCONFIG_DIR)/$$i"; done
 endif
 endif

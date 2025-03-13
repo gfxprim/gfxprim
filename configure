@@ -406,6 +406,37 @@ def write_gfxprim_config(cfg, libs):
     f.close()
     os.system('chmod +x gfxprim-config')
 
+def write_pkgconfig(cfg, libs):
+    modules = libs.get_modules()
+    prefix = cfg['prefix'][0]
+
+    for m in modules:
+        module_name = 'gfxprim'
+        if m != 'core':
+            module_name += '-' + m
+
+        f = open('build/' + module_name + '.pc', 'w')
+        f.write('prefix=' + prefix + '\n')
+        f.write('exec_prefix=${prefix}\n')
+        f.write('includedir=' + cfg_get_value('includedir') + '\n')
+        f.write('libdir=' + cfg_get_value('libdir') + '\n')
+        f.write('\n')
+        f.write('Name: ' + module_name + '\n')
+        f.write('Description: gfxprim library ' + m + '\n')
+        #TODO: Write version to configure.h and include/core/gp_version.h
+        f.write('Version: 1.0.0\n')
+        if m != 'core':
+            f.write('Requires: gfxprim >= 1.0.0')
+            if m == 'widgets':
+                f.write(' gfxprim-backends >= 1.0.0')
+            f.write('\n')
+        f.write('Cflags: -I' + cfg_get_value('includedir') + '/gfxprim\n')
+        f.write('Libs: -L' + cfg_get_value('libdir') + ' -l' + module_name)
+        if m == 'widgets':
+            f.write(' -lgfxprim-backends -rdynamic')
+        f.write('\n')
+
+
 def cfg_parse_args(cfg, args):
     for i in args:
         par = i.split('=');
@@ -667,3 +698,4 @@ if __name__ ==  '__main__':
     write_config_h(cfg, l)
     write_config_mk(cfg, l)
     write_gfxprim_config(cfg, l)
+    write_pkgconfig(cfg, l)

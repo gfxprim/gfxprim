@@ -23,6 +23,11 @@ endif
 
 all: $(LIBS)
 
+INSTALL_PKGCONFIG=$(wildcard *.pc)
+install: $(INSTALL_PKGCONFIG)
+
+include $(TOPDIR)/install.mk
+
 rebuild: all
 
 distclean: clean
