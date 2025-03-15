@@ -330,9 +330,10 @@ int gp_proxy_next(gp_proxy_buf *buf, gp_proxy_msg **msg);
  *
  * @param fd File descriptor connected to the server/client.
  * @param buf Proxy buffer to store data to.
+ * @param block If set recv blocks until data are received.
  * @return Number of bytes stored into the buffer, -1 on failure.
  */
-int gp_proxy_buf_recv(int fd, gp_proxy_buf *buf);
+int gp_proxy_buf_recv(int fd, gp_proxy_buf *buf, int block);
 
 /**
  * @brief Sends a message to the server/client.

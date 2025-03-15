@@ -116,6 +116,33 @@ static inline void gp_proxy_cli_event(gp_proxy_cli *self, gp_event *ev)
 }
 
 /**
+ * @brief Tells client that requested update was finished.
+ *
+ * This is called by the proxy backend after it finished copying data from the
+ * shared buffer. After client receives this event it can resume drawing to the
+ * area for which update was pending.
+ *
+ * @param self A client (application).
+ * @param x A rect x coordinate.
+ * @param y A rect y coordinate.
+ * @param w A rect width.
+ * @param h A rect height.
+ */
+static inline void gp_proxy_cli_rect_updated(gp_proxy_cli *self,
+                                             uint32_t x, uint32_t y,
+                                             uint32_t w, uint32_t h)
+{
+	struct gp_proxy_rect_ rect = {
+		.x = x,
+		.y = y,
+		.w = w,
+		.h = h,
+	};
+
+	gp_proxy_cli_send(self, GP_PROXY_UPDATE, &rect);
+}
+
+/**
  * @brief A function to fill the proxy client buffer.
  *
  * Has to be called when there are data ready at client fd. The buffer then has

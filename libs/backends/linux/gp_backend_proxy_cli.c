@@ -48,7 +48,7 @@ int gp_proxy_cli_read(struct gp_proxy_cli *self)
 {
 	ssize_t ret;
 
-	ret = gp_proxy_buf_recv(self->fd.fd, &self->buf);
+	ret = gp_proxy_buf_recv(self->fd.fd, &self->buf, 0);
 
 	if (ret > 0) {
 		GP_DEBUG(4, "Client (%p) '%s' read %zu bytes",

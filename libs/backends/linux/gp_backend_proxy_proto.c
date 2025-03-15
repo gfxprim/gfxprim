@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2025 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -34,13 +34,13 @@ static int validate_msg(const union gp_proxy_msg *msg, unsigned int size)
 	return msg->size;
 }
 
-int gp_proxy_buf_recv(int fd, struct gp_proxy_buf *buf)
+int gp_proxy_buf_recv(int fd, struct gp_proxy_buf *buf, int block)
 {
 	ssize_t ret;
 	char *bufp = buf->buf + buf->pos + buf->size;
 	size_t len = GP_PROXY_BUF_SIZE - buf->pos - buf->size;
 
-	ret = recv(fd, bufp, len, MSG_DONTWAIT);
+	ret = recv(fd, bufp, len, block ? 0 : MSG_DONTWAIT);
 	if (ret > 0)
 		buf->size += ret;
 

@@ -32,6 +32,8 @@ struct proxy_priv {
 	unsigned int visible:1;
 	unsigned int sys_quit_requested:1;
 
+	unsigned int update_in_progress:1;
+
 	/* mapped memory backing the pixmap */
 	void *map;
 	size_t map_size;
@@ -146,60 +148,23 @@ static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
 	gp_ev_queue_set_screen_size(self->event_queue, msg->pix.pix.w, msg->pix.pix.h);
 }
 
-static enum gp_poll_event_ret proxy_process_fd(gp_fd *self)
+/**
+ * @brief Receives data and parses them into event(s).
+ *
+ * Reads data from the client socket and parses them into event(s).
+ *
+ * @param self A fd.
+ * @block If set the call blocks until data are received.
+ * @return A number of bytes read or -1 on a failure.
+ */
+static int proxy_recv_events(gp_fd *self, int block)
 {
 	gp_backend *backend = self->priv;
 	struct proxy_priv *priv = GP_BACKEND_PRIV(backend);
 	union gp_proxy_msg *msg;
 	int ret;
 
-	while ((ret = gp_proxy_buf_recv(priv->fd.fd, &priv->buf)) > 0) {
-		while (gp_proxy_next(&priv->buf, &msg)) {
-			switch (msg->type) {
-			case GP_PROXY_CLI_INIT:
-				GP_DEBUG(4, "Got GP_PROXY_CLI_INIT");
-				priv->dummy.pixel_type = msg->cli_init.cli_init.pixel_type;
-				backend->dpi = msg->cli_init.cli_init.dpi;
-			break;
-			case GP_PROXY_EVENT:
-				GP_DEBUG(4, "Got GP_PROXY_EVENT");
-				gp_ev_queue_put(backend->event_queue, &msg->ev.ev);
-			break;
-			case GP_PROXY_MAP:
-				GP_DEBUG(4, "Got GP_PROXY_MAP");
-				map_buffer(backend, msg);
-			break;
-			case GP_PROXY_UNMAP:
-				GP_DEBUG(4, "Got GP_PROXY_UNMAP");
-				unmap_buffer(backend);
-			break;
-			case GP_PROXY_PIXMAP:
-				GP_DEBUG(4, "Got GP_PROXY_PIXMAP");
-				init_pixmap(backend, msg);
-			break;
-			case GP_PROXY_SHOW:
-				GP_DEBUG(4, "Got GP_PROXY_SHOW");
-				visible(backend);
-			break;
-			case GP_PROXY_HIDE:
-				GP_DEBUG(4, "Got GP_PROXY_HIDE");
-				hidden(backend);
-			break;
-			case GP_PROXY_CURSOR_POS:
-				GP_DEBUG(4, "Got GP_PROXY_CURSOR_POS");
-				gp_ev_queue_set_cursor_pos(backend->event_queue,
-				                           msg->cursor.pos.x,
-				                           msg->cursor.pos.y);
-			break;
-			case GP_PROXY_EXIT:
-				GP_DEBUG(4, "Got GP_PROXY_EXIT");
-				gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
-				                 GP_EV_SYS_QUIT, 0, 0);
-				priv->sys_quit_requested = 1;
-			break;
-			}
-		}
-	}
+	ret = gp_proxy_buf_recv(priv->fd.fd, &priv->buf, block);
 
 	if (ret == 0) {
 		if (priv->sys_quit_requested) {
@@ -210,7 +175,71 @@ static enum gp_poll_event_ret proxy_process_fd(gp_fd *self)
 		GP_WARN("Connection closed");
 		gp_ev_queue_push(backend->event_queue, GP_EV_SYS, GP_EV_SYS_QUIT, 0, 0);
 		priv->sys_quit_requested = 1;
+
+		return 0;
 	}
+
+	if (ret < 0)
+		return ret;
+
+	while (gp_proxy_next(&priv->buf, &msg)) {
+		switch (msg->type) {
+		case GP_PROXY_CLI_INIT:
+			GP_DEBUG(4, "Got GP_PROXY_CLI_INIT");
+			priv->dummy.pixel_type = msg->cli_init.cli_init.pixel_type;
+			backend->dpi = msg->cli_init.cli_init.dpi;
+		break;
+		case GP_PROXY_EVENT:
+			GP_DEBUG(4, "Got GP_PROXY_EVENT");
+			gp_ev_queue_put(backend->event_queue, &msg->ev.ev);
+		break;
+		case GP_PROXY_MAP:
+			GP_DEBUG(4, "Got GP_PROXY_MAP");
+			map_buffer(backend, msg);
+		break;
+		case GP_PROXY_UNMAP:
+			GP_DEBUG(4, "Got GP_PROXY_UNMAP");
+			unmap_buffer(backend);
+		break;
+		case GP_PROXY_PIXMAP:
+			GP_DEBUG(4, "Got GP_PROXY_PIXMAP");
+			init_pixmap(backend, msg);
+		break;
+		case GP_PROXY_SHOW:
+			GP_DEBUG(4, "Got GP_PROXY_SHOW");
+			visible(backend);
+		break;
+		case GP_PROXY_HIDE:
+			GP_DEBUG(4, "Got GP_PROXY_HIDE");
+			hidden(backend);
+		break;
+		case GP_PROXY_CURSOR_POS:
+			GP_DEBUG(4, "Got GP_PROXY_CURSOR_POS");
+			gp_ev_queue_set_cursor_pos(backend->event_queue,
+			                           msg->cursor.pos.x,
+			                           msg->cursor.pos.y);
+		break;
+		case GP_PROXY_EXIT:
+			GP_DEBUG(4, "Got GP_PROXY_EXIT");
+			gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
+			                 GP_EV_SYS_QUIT, 0, 0);
+			priv->sys_quit_requested = 1;
+			priv->update_in_progress = 0;
+		break;
+		case GP_PROXY_UPDATE:
+			GP_DEBUG(4, "Got GP_PROXY_UPDATE %i %i %i %i",
+				 msg->rect.rect.x, msg->rect.rect.y, msg->rect.rect.w, msg->rect.rect.h);
+			priv->update_in_progress = 0;
+		break;
+		}
+	}
+
+	return ret;
+}
+
+static enum gp_poll_event_ret proxy_process_fd(gp_fd *self)
+{
+	while (proxy_recv_events(self, 0) > 0);
 
 	return 0;
 }
@@ -235,6 +264,10 @@ static void proxy_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 	GP_DEBUG(4, "Sending GP_PROXY_UPDATE");
 
 	gp_proxy_send(priv->fd.fd, GP_PROXY_UPDATE, &rect);
+
+	priv->update_in_progress = 1;
+	while (priv->update_in_progress)
+		proxy_recv_events(&priv->fd, 1);
 }
 
 static void proxy_flip(gp_backend *self)

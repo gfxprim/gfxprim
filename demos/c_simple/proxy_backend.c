@@ -64,12 +64,12 @@ static void shm_update(gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp
 		h = screen_h;
 	}
 
-	printf("%i %i %u %u\n", x, y, w, h);
-
 	//TODO: Check SIZE!!!
 	gp_blit_xywh_clipped(&shm->pixmap, x, y, w, h, backend->pixmap, x, y);
 
 	gp_backend_update_rect_xywh(backend, x, y, w, h);
+
+	gp_proxy_cli_rect_updated(self, x, y, w, h);
 }
 
 static void do_exit(void)
