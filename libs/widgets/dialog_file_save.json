@@ -9,7 +9,7 @@
       "border": "none",
       "cfill": "1, 0, 0",
       "widgets": [
-	{"type": "tbox", "len": 75, "halign": "fill", "uid": "path", "ttype": "path", "on_event": "path"},
+	{"type": "tbox", "len": 60, "halign": "fill", "uid": "path", "ttype": "path", "on_event": "path"},
 	{"type": "button", "btype": "home", "on_event": "home"},
 	{"type": "button", "btype": "new_dir", "on_event": "new_dir"}
       ]

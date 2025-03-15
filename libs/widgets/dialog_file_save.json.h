@@ -10,7 +10,7 @@ static const char *dialog_file_save = "\
       \"border\": \"none\", \n\
       \"cfill\": \"1, 0, 0\", \n\
       \"widgets\": [ \n\
-	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\", \"on_event\": \"path\"}, \n\
+	{\"type\": \"tbox\", \"len\": 60, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\", \"on_event\": \"path\"}, \n\
 	{\"type\": \"button\", \"btype\": \"home\", \"on_event\": \"home\"}, \n\
 	{\"type\": \"button\", \"btype\": \"new_dir\", \"on_event\": \"new_dir\"} \n\
       ] \n\
