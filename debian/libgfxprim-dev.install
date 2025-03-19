@@ -1,3 +1,4 @@
 usr/include/*
+usr/lib/*/pkgconfig/*.pc
 usr/lib/*/lib*.a
 usr/bin/gfxprim-config
