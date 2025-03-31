@@ -277,7 +277,7 @@ static enum gp_poll_event_ret server_event(gp_fd *self)
 
 	while ((fd = accept(self->fd, NULL, NULL)) > 0) {
 		struct gp_proxy_cli_init_ init = {
-			.pixel_type = backend->pixmap->pixel_type,
+			.pixel_type = gp_backend_pixel_type(backend),
 			.dpi = backend->dpi,
 		};
 		gp_proxy_send(fd, GP_PROXY_CLI_INIT, &init);
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 	gp_size w = backend->pixmap->w;
 	gp_size h = backend->pixmap->h;
 
-	shm = gp_proxy_shm_init("/dev/shm/.proxy_backend", w, h, backend->pixmap->pixel_type);
+	shm = gp_proxy_shm_init("/dev/shm/.proxy_backend", w, h, gp_backend_pixel_type(backend));
 	if (!shm) {
 		gp_backend_exit(backend);
 		return 1;

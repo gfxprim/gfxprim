@@ -71,7 +71,7 @@ static void change_bitmap(void)
 
 	snprintf(text_buf, sizeof(text_buf), "'%s' -> '%s'",
 	         gp_pixel_type_name(bitmap->pixel_type),
-		 gp_pixel_type_name(win->pixmap->pixel_type));
+		 gp_pixel_type_name(gp_backend_pixel_type(win)));
 }
 
 void event_loop(void)
@@ -172,8 +172,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	bitmap_conv = gp_pixmap_convert_alloc(bitmap_raw,
-					      win->pixmap->pixel_type);
+	bitmap_conv = gp_pixmap_convert_alloc(bitmap_raw, gp_backend_pixel_type(win));
 	change_bitmap();
 
 	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);

@@ -319,6 +319,17 @@ static inline gp_size gp_backend_h(gp_backend *self)
 }
 
 /**
+ * @brief Returns backend pixel type.
+ *
+ * @param self A backend.
+ * @return A backend pixel type.
+ */
+static inline gp_pixel_type gp_backend_pixel_type(gp_backend *self)
+{
+	return self->pixmap->pixel_type;
+}
+
+/**
  * @brief Copies whole backend pixmap to a display.
  *
  * Majority of the backends are double buffered, that means that changes done
