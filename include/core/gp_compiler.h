@@ -55,4 +55,7 @@
 # define GP_PACKED
 #endif
 
+/* Make sure typeof() is defined even with ISO C */
+#define typeof(x) __typeof__(x)
+
 #endif /* CORE_GP_COMPILER_H */
