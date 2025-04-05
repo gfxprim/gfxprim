@@ -393,6 +393,17 @@ gp_pixmap *gp_pixmap_convert(const gp_pixmap *src, gp_pixmap *dst);
 void gp_pixmap_print_info(const gp_pixmap *self);
 
 /**
+ * @brief Rotates pixmap accordingly to rotate flags.
+ *
+ * The underlying pixmap buffer is not changed, only the rotation flags are
+ * affected.
+ *
+ * @param self A pixmap.
+ * @param symmetry How should we rotate the pixmap.
+ */
+void gp_pixmap_rotate(gp_pixmap *self, gp_symmetry symmetry);
+
+/**
  * @brief Rotates pixmap flags clockwise.
  *
  * @param self A pixmap.
@@ -400,7 +411,10 @@ void gp_pixmap_print_info(const gp_pixmap *self);
  * The underlying pixmap buffer is not changed, only the rotation flags are
  * affected.
  */
-void gp_pixmap_rotate_cw(gp_pixmap *self);
+static inline void gp_pixmap_rotate_cw(gp_pixmap *self)
+{
+	gp_pixmap_rotate(self, GP_ROTATE_CW);
+}
 
 /**
  * @brief Rotates pixmap flags counter clock wise.
@@ -410,7 +424,10 @@ void gp_pixmap_rotate_cw(gp_pixmap *self);
  * The underlying pixmap buffer is not changed, only the rotation flags are
  * affected.
  */
-void gp_pixmap_rotate_ccw(gp_pixmap *self);
+static inline void gp_pixmap_rotate_ccw(gp_pixmap *self)
+{
+	gp_pixmap_rotate(self, GP_ROTATE_CCW);
+}
 
 /**
  * @brief Compares rotation flags for two pixmaps.

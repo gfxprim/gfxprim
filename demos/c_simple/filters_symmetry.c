@@ -21,10 +21,10 @@ static void usage_and_exit(int ret)
 	int i;
 	printf("filter_symmetry [-d debug_level] -s {");
 
-	for (i = 0; gp_filter_symmetry_names[i+1] != NULL; i++)
-		printf("%s, ", gp_filter_symmetry_names[i]);
+	for (i = 0; gp_symmetry_names[i+1] != NULL; i++)
+		printf("%s, ", gp_symmetry_names[i]);
 
-	printf("%s} image_in image_out\n", gp_filter_symmetry_names[i]);
+	printf("%s} image_in image_out\n", gp_symmetry_names[i]);
 
 	exit(ret);
 }
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 		usage_and_exit(1);
 	}
 
-	sym = gp_filter_symmetry_by_name(symmetry);
+	sym = gp_symmetry_by_name(symmetry);
 
 	if (sym < 0) {
 		printf("Invalid symmetry name '%s'\n", symmetry);

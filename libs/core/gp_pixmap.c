@@ -320,7 +320,7 @@ void gp_pixmap_print_info(const gp_pixmap *self)
  *
  * The flags change as follows:
  *
- * One group:
+ * Clockwise group:
  *
  * x_swap y_swap axes_swap
  *      0      0         0
@@ -328,7 +328,7 @@ void gp_pixmap_print_info(const gp_pixmap *self)
  *      1      1         0
  *      0      1         1
  *
- * And mirrored group:
+ * And mirrored counter clockwise group:
  *
  * x_swap y_swap axes_swap
  *      0      0         1
@@ -336,8 +336,10 @@ void gp_pixmap_print_info(const gp_pixmap *self)
  *      1      1         1
  *      0      1         0
  *
+ * Also note that at any point doing the rotation twice (i.e. rotation by 180
+ * degrees) just inverts the x_swap and y_swap flags.
  */
-void gp_pixmap_rotate_cw(gp_pixmap *pixmap)
+static void pixmap_rotate_cw(gp_pixmap *pixmap)
 {
 	pixmap->axes_swap = !pixmap->axes_swap;
 
@@ -359,7 +361,7 @@ void gp_pixmap_rotate_cw(gp_pixmap *pixmap)
 	pixmap->y_swap  = 0;
 }
 
-void gp_pixmap_rotate_ccw(gp_pixmap *pixmap)
+static void pixmap_rotate_ccw(gp_pixmap *pixmap)
 {
 	pixmap->axes_swap = !pixmap->axes_swap;
 
@@ -379,6 +381,30 @@ void gp_pixmap_rotate_ccw(gp_pixmap *pixmap)
 	}
 
 	pixmap->x_swap  = 1;
+}
+
+void gp_pixmap_rotate(gp_pixmap *pixmap, gp_symmetry symmetry)
+{
+	switch (symmetry) {
+	case GP_ROTATE_90:
+		pixmap_rotate_cw(pixmap);
+	break;
+	case GP_ROTATE_180:
+		pixmap->y_swap = !pixmap->y_swap;
+		pixmap->x_swap = !pixmap->x_swap;
+	break;
+	case GP_ROTATE_CCW:
+		pixmap_rotate_ccw(pixmap);
+	break;
+	case GP_MIRROR_H:
+		pixmap->y_swap = !pixmap->y_swap;
+	break;
+	case GP_MIRROR_V:
+		pixmap->x_swap = !pixmap->x_swap;
+	break;
+	case GP_ROTATE_INVALID:
+	break;
+	}
 }
 
 int gp_pixmap_equal(const gp_pixmap *pixmap1, const gp_pixmap *pixmap2)

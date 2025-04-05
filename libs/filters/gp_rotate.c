@@ -87,30 +87,8 @@ gp_pixmap *gp_filter_mirror_v_alloc(const gp_pixmap *src,
 	return res;
 }
 
-static const char *symmetry_names[] = {
-	"90",
-	"180",
-	"270",
-	"H",
-	"V",
-	NULL,
-};
-
-const char **gp_filter_symmetry_names = symmetry_names;
-
-int gp_filter_symmetry_by_name(const char *symmetry)
-{
-	int i;
-
-	for (i = 0; symmetry_names[i] != NULL; i++)
-		if (!strcasecmp(symmetry, symmetry_names[i]))
-			return i;
-
-	return -1;
-}
-
 gp_pixmap *gp_filter_symmetry_alloc(const gp_pixmap *src,
-                                    gp_filter_symmetries symmetry,
+                                    gp_symmetry symmetry,
 			            gp_progress_cb *callback)
 {
 	switch (symmetry) {
@@ -125,13 +103,13 @@ gp_pixmap *gp_filter_symmetry_alloc(const gp_pixmap *src,
 	case GP_MIRROR_V:
 		return gp_filter_mirror_v_alloc(src, callback);
 	default:
-		GP_DEBUG(1, "Invalid symmetry %i", (int) symmetry);
+		GP_DEBUG(1, "Invalid rotate %i", (int) symmetry);
 		return NULL;
 	}
 }
 
 int gp_filter_symmetry(const gp_pixmap *src, gp_pixmap *dst,
-                       gp_filter_symmetries symmetry,
+                       gp_symmetry symmetry,
                        gp_progress_cb *callback)
 {
 	switch (symmetry) {
@@ -146,7 +124,7 @@ int gp_filter_symmetry(const gp_pixmap *src, gp_pixmap *dst,
 	case GP_MIRROR_V:
 		return gp_filter_mirror_v(src, dst, callback);
 	default:
-		GP_DEBUG(1, "Invalid symmetry %i", (int) symmetry);
+		GP_DEBUG(1, "Invalid rotate %i", (int) symmetry);
 		return 1;
 	}
 }

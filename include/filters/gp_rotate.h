@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
 
-  gp_pixmap rotations and mirroring.
+  gp_pixmap symmetrys and mirroring.
 
  */
 
@@ -84,42 +84,12 @@ int gp_filter_rotate_270(const gp_pixmap *src, gp_pixmap *dst,
 gp_pixmap *gp_filter_rotate_270_alloc(const gp_pixmap *src,
                                       gp_progress_cb *callback);
 
-/*
- * Calls a symmetry filter on bitmap.
- *
- * If dst is NULL, new bitmap is allocated.
- *
- * Returns pointer to destination bitmap or NULL if allocation failed.
- */
-typedef enum gp_filter_symmetries {
-	GP_ROTATE_90 = 0,
-	GP_ROTATE_CW = GP_ROTATE_90,
-	GP_ROTATE_180,
-	GP_ROTATE_270,
-	GP_ROTATE_CCW = GP_ROTATE_270,
-	GP_MIRROR_H,
-	GP_MIRROR_V,
-} gp_filter_symmetries;
-
-/*
- * NULL-terminated array of symmetry names (C strings).
- */
-extern const char **gp_filter_symmetry_names;
-
-/*
- * Symmetry by name (as defined in gp_filer_symmetry_names).
- *
- * Returns either one of the gp_filter_symmetries enums or -1 in case of
- * failure.
- */
-int gp_filter_symmetry_by_name(const char *symmetry);
-
 int gp_filter_symmetry(const gp_pixmap *src, gp_pixmap *dst,
-                       gp_filter_symmetries symmetry,
+                       gp_symmetry symmetry,
                        gp_progress_cb *callback);
 
 gp_pixmap *gp_filter_symmetry_alloc(const gp_pixmap *src,
-                                    gp_filter_symmetries symmetry,
-                                    gp_progress_cb *callback);
+                                    gp_symmetry symmetry,
+                                  gp_progress_cb *callback);
 
 #endif /* FILTERS_GP_ROTATE_H */
