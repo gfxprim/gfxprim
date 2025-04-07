@@ -239,6 +239,10 @@ enum gp_pixmap_init_flags {
  * Initalize pixmap structure, pixels pointer is not dereferenced so it's safe
  * to pass NULL there and allocate it later with size pixmap->bpr * pixmap->h.
  *
+ * The pixmap->bpr also known as stride is computed automatically as a number
+ * of bits per pixel multiplied by width and aligned to whole bytes. Use
+ * gp_pixmap_init_ex() if you need to explicitly set it instead.
+ *
  * BEWARE: The user has to make sure that the pixels array has correct size and
  *         format.
  *
@@ -254,6 +258,29 @@ enum gp_pixmap_init_flags {
 gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
                           gp_pixel_type type, void *pixels,
                           enum gp_pixmap_init_flags flags);
+
+/**
+ * @brief Initializes allocated pixmap structure.
+ *
+ * Initalize pixmap structure, pixels pointer is not dereferenced so it's safe
+ * to pass NULL there and allocate it later with size pixmap->bpr * pixmap->h.
+ *
+ * BEWARE: The user has to make sure that the pixels array has correct size and
+ *         format.
+ *
+ * @param pixmap A pointer to a pixmap structure to be initialized with a data.
+ * @param w Pixmap width
+ * @param h Pixmap height
+ * @param bpr Bytes per row also called stride.
+ * @param type A pixel type, describes how pixels are organized in the data buffer.
+ * @param pixels A pointer to a buffer with the pixel data.
+ * @param flags A bitmask or of the enum gp_pixmap_init_flags
+ *
+ * @return Returns pointer to pixmap that is passed as first argument.
+ */
+gp_pixmap *gp_pixmap_init_ex(gp_pixmap *pixmap, gp_size w, gp_size h,
+                             gp_pixel_type type, uint32_t bpr,
+			     void *pixels, enum gp_pixmap_init_flags flags);
 
 /**
  * @brief Creates a pixmap from a buffer allocated by malloc().
