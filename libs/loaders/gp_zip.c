@@ -517,6 +517,106 @@ static void zip_close(gp_container *self)
 	free(self);
 }
 
+enum header_state {
+	HEADER_START,
+	HEADER_P,
+	HEADER_K,
+	HEADER_3,
+	HEADER_4,
+};
+
+static enum header_state next_header_state(enum header_state state, int next_ch)
+{
+	switch (state) {
+	case HEADER_START:
+		if (next_ch == 'P')
+			return HEADER_P;
+	break;
+	case HEADER_P:
+		if (next_ch == 'K')
+			return HEADER_K;
+	break;
+	case HEADER_K:
+		if (next_ch == 0x03)
+			return HEADER_3;
+	break;
+	case HEADER_3:
+		if (next_ch == 0x04)
+			return HEADER_4;
+	break;
+	case HEADER_4:
+	break;
+	}
+
+	if (next_ch == 'P')
+		return HEADER_P;
+
+	return HEADER_START;
+}
+
+/*
+ * Gets offset to the first zip entry i.e. "PK\x03\x04".
+ */
+static int zip_find_start(gp_io *io)
+{
+	static uint16_t zip_header[] = {
+		'P',
+		'K',
+		GP_IO_END
+	};
+
+	if (gp_io_readf(io, zip_header) != 2) {
+		GP_DEBUG(1, "Invalid zip header");
+		return EINVAL;
+	}
+
+	enum header_state state = HEADER_K;
+	int b1, b2;
+
+	b1 = gp_io_getb(io);
+	if (b1 == -1)
+		return errno;
+
+	b2 = gp_io_getb(io);
+	if (b2 == -1)
+		return errno;
+
+	state = next_header_state(state, b1);
+	if (state != HEADER_3)
+		goto search;
+
+	state = next_header_state(state, b2);
+	if (state != HEADER_4)
+		goto search;
+
+	goto ret;
+search:
+	GP_WARN("Invalid ZIP header, continuing search...");
+
+	for (;;) {
+		int b = gp_io_getb(io);
+
+		if (b == -1)
+			return errno;
+
+		state = next_header_state(state, b);
+
+		if (state == HEADER_4) {
+			GP_DEBUG(1, "Found zip header at offset %02llx",
+			         (long long unsigned)gp_io_tell(io)-4);
+			break;
+		}
+	}
+
+ret:
+	if (gp_io_seek(io, -4, GP_SEEK_CUR) == (off_t)-1) {
+		GP_DEBUG(1, "Failed to seek back");
+		return errno;
+	}
+
+	return 0;
+}
+
 static gp_io *open_zip(const char *path)
 {
 	gp_io *io;
@@ -530,30 +630,9 @@ static gp_io *open_zip(const char *path)
 		goto err0;
 	}
 
-	/* Check zip local file header and seek back */
-	if (gp_io_mark(io, GP_IO_MARK)) {
-		err = errno;
+	err = zip_find_start(io);
+	if (err)
 		goto err1;
-	}
-
-	static uint16_t zip_header[] = {
-		'P',
-		'K',
-		0x03,
-		0x04,
-		GP_IO_END
-	};
-
-	if (gp_io_readf(io, zip_header) != 4) {
-		GP_DEBUG(1, "Invalid zip header");
-		err = EINVAL;
-		goto err1;
-	}
-
-	if (gp_io_mark(io, GP_IO_REWIND)) {
-		err = errno;
-		goto err1;
-	}
 
 	return io;
 err1:
@@ -569,6 +648,10 @@ gp_container *gp_init_zip(gp_io *io)
 	gp_container *ret;
 	int err;
 	long *offsets;
+
+	err = zip_find_start(io);
+	if (err)
+		goto err0;
 
 	ret = malloc(sizeof(gp_container) + sizeof(struct zip_priv));
 	offsets = gp_vec_new(1, sizeof(long));
@@ -594,7 +677,6 @@ gp_container *gp_init_zip(gp_io *io)
 
 	return ret;
 err0:
-	gp_io_close(io);
 	errno = err;
 	return NULL;
 }
@@ -639,7 +721,7 @@ gp_container *gp_init_zip(gp_io GP_UNUSED(*io))
 
 int gp_match_zip(const void *buf)
 {
-	return !memcmp("PK\03\04", buf, 4);
+	return !memcmp("PK", buf, 2);
 }
 
 const gp_container_ops gp_zip_ops = {
