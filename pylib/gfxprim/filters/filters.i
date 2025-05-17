@@ -42,7 +42,6 @@ FILTER_FUNC(rotate_90);
 FILTER_FUNC(rotate_180);
 FILTER_FUNC(rotate_270);
 FILTER_FUNC(symmetry);
-%immutable gp_filter_symmetry_names;
 %include "gp_rotate.h"
 
 /* Convolutions */

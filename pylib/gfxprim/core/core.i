@@ -9,6 +9,7 @@
  * Basic types and common methods
  */
 
+%immutable gp_symmetry_names;
 %include "gp_core.h"
 %include "gp_types.h"
 %include "gp_compiler.h"
