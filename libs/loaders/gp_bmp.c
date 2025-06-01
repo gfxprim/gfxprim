@@ -815,13 +815,14 @@ static int bmp_write_data(gp_io *io, const gp_pixmap *src,
 	int y;
 	uint32_t padd_len = 0;
 	char padd[3] = {0};
-	uint8_t tmp[3 * src->w];
+	ssize_t bytes_per_row = 3 * (ssize_t)src->w;
+	uint8_t tmp[bytes_per_row];
 	gp_line_convert convert;
 
 	convert = gp_line_convert_get(src->pixel_type, GP_PIXEL_RGB888);
 
-	if (src->bytes_per_row%4)
-		padd_len = 4 - src->bytes_per_row%4;
+	if (bytes_per_row%4)
+		padd_len = 4 - bytes_per_row%4;
 
 	for (y = src->h - 1; y >= 0; y--) {
 		void *row = GP_PIXEL_ADDR(src, 0, y);
@@ -831,7 +832,7 @@ static int bmp_write_data(gp_io *io, const gp_pixmap *src,
 			row = tmp;
 		}
 
-		if (gp_io_write(io, row, src->bytes_per_row) != src->bytes_per_row)
+		if (gp_io_write(io, row, bytes_per_row) != bytes_per_row)
 			return EIO;
 
 		/* write padding */

@@ -103,7 +103,7 @@ static struct check_color_test black_grayscale = {
 
 static struct check_color_test red = {
 	.path = "100x100-red.png",
-	.pixel = 0xff0000,
+	.pixel = 0x0000ff,
 };
 
 static int test_save_PNG(gp_pixel_type pixel_type)

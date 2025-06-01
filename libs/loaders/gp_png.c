@@ -347,14 +347,12 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	break;
 	case PNG_COLOR_TYPE_RGB:
 
-		png_set_bgr(png);
-
 		switch (depth) {
 		case 8:
-			pixel_type = GP_PIXEL_RGB888;
+			pixel_type = GP_PIXEL_BGR888;
 		break;
 		case 16:
-			pixel_type = GP_PIXEL_RGB888;
+			pixel_type = GP_PIXEL_BGR888;
 			convert_16_to_8 = 1;
 		break;
 		}
@@ -384,7 +382,6 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 		/* Convert everything else to RGB888 */
 		//TODO: add palette matching to G2 G4 and G8
 		png_set_palette_to_rgb(png);
-		png_set_bgr(png);
 
 		png_read_update_info(png, png_info);
 
@@ -394,8 +391,9 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 		if (color_type & PNG_COLOR_MASK_ALPHA) {
 			pixel_type = GP_PIXEL_RGBA8888;
 			png_set_swap_alpha(png);
+			png_set_bgr(png);
 		} else {
-			pixel_type = GP_PIXEL_RGB888;
+			pixel_type = GP_PIXEL_BGR888;
 		}
 	break;
 	}
@@ -456,7 +454,6 @@ err1:
 
 static gp_pixel_type save_ptypes[] = {
 	GP_PIXEL_BGR888,
-	GP_PIXEL_RGB888,
 	GP_PIXEL_G1,
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,

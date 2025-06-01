@@ -21,6 +21,7 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_debug.h>
 
+#include <loaders/gp_line_convert.h>
 #include <loaders/gp_icc.h>
 #include <loaders/gp_loaders.gen.h>
 
@@ -639,15 +640,20 @@ err0:
 	return 1;
 }
 
+static void save_grayscale_header(TIFF *tiff, gp_pixel_type ptype)
+{
+	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, gp_pixel_size(ptype));
+	TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 1);
+	TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+	TIFFSetField(tiff, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
+}
+
 static int save_grayscale(TIFF *tiff, const gp_pixmap *src,
                           gp_progress_cb *callback)
 {
 	uint32_t y;
 
-	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, gp_pixel_size(src->pixel_type));
-	TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 1);
-	TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-	TIFFSetField(tiff, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
+	save_grayscale_header(tiff, src->pixel_type);
 
 	for (y = 0; y < src->h; y++) {
 		uint8_t *addr = GP_PIXEL_ADDR(src, 0, y);
@@ -670,40 +676,56 @@ static int save_grayscale(TIFF *tiff, const gp_pixmap *src,
 	return 0;
 }
 
-static int save_rgb(TIFF *tiff, const gp_pixmap *src,
-                    gp_progress_cb *callback)
+static int save_grayscale_convert(TIFF *tiff, const gp_pixmap *src,
+                                  gp_pixel out_pix, gp_progress_cb *callback)
 {
-	uint8_t buf[src->w * 3];
-	uint32_t x, y;
+	uint32_t y;
+	uint8_t out[src->bytes_per_row];
 
+	save_grayscale_header(tiff, out_pix);
+
+	gp_line_convert convert = gp_line_convert_get(src->pixel_type, out_pix);
+
+	for (y = 0; y < src->h; y++) {
+		uint8_t *in = GP_PIXEL_ADDR(src, 0, y);
+		tsize_t ret;
+
+		convert(in, out, src->w);
+
+		ret = TIFFWriteEncodedStrip(tiff, y, out, src->bytes_per_row);
+
+		if (ret == -1) {
+			//TODO TIFF ERROR
+			GP_DEBUG(1, "TIFFWriteEncodedStrip failed");
+			return EIO;
+		}
+
+		if (gp_progress_cb_report(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
+static void save_rgb_header(TIFF *tiff)
+{
 	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
 	TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 3);
 	//TODO: Set based on the src correction?
 	TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+}
+
+static int save_rgb(TIFF *tiff, const gp_pixmap *src,
+                    gp_progress_cb *callback)
+{
+	uint32_t y;
+
+	save_rgb_header(tiff);
 
 	for (y = 0; y < src->h; y++) {
 		uint8_t *addr = GP_PIXEL_ADDR(src, 0, y);
-
-		switch (src->pixel_type) {
-		case GP_PIXEL_RGB888:
-			for (x = 0; x < src->bytes_per_row; x+=3) {
-				buf[x + 2] = addr[x];
-				buf[x + 1] = addr[x + 1];
-				buf[x]     = addr[x + 2];
-			}
-			addr = buf;
-		break;
-		case GP_PIXEL_xRGB8888:
-			for (x = 0; x < src->bytes_per_row; x+=4) {
-				buf[3*(x/4) + 2] = addr[x];
-				buf[3*(x/4) + 1] = addr[x + 1];
-				buf[3*(x/4)]     = addr[x + 2];
-			}
-			addr = buf;
-		break;
-		default:
-		break;
-		}
 
 		TIFFWriteEncodedStrip(tiff, y, addr, src->w * 3);
 
@@ -716,10 +738,34 @@ static int save_rgb(TIFF *tiff, const gp_pixmap *src,
 	return 0;
 }
 
+static int save_rgb_convert(TIFF *tiff, const gp_pixmap *src,
+                            gp_pixel_type out_pix, gp_progress_cb *callback)
+{
+	uint32_t y;
+	uint8_t out[src->w * 3];
+
+	save_rgb_header(tiff);
+
+	gp_line_convert convert = gp_line_convert_get(src->pixel_type, out_pix);
+
+	for (y = 0; y < src->h; y++) {
+		uint8_t *in = GP_PIXEL_ADDR(src, 0, y);
+
+		convert(in, out, src->w);
+
+		TIFFWriteEncodedStrip(tiff, y, out, src->w * 3);
+
+		if (gp_progress_cb_report(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
 static gp_pixel_type save_ptypes[] = {
 	GP_PIXEL_BGR888,
-	GP_PIXEL_RGB888,
-	GP_PIXEL_xRGB8888,
 	GP_PIXEL_G1,
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,
@@ -732,6 +778,7 @@ int gp_write_tiff(const gp_pixmap *src, gp_io *io,
 {
 	TIFF *tiff;
 	int err = 0;
+	gp_pixel_type out_pix;
 
 	GP_DEBUG(1, "Writing TIFF to I/O (%p)", io);
 
@@ -741,17 +788,8 @@ int gp_write_tiff(const gp_pixmap *src, gp_io *io,
 		return 1;
 	}
 
-	switch (src->pixel_type) {
-	case GP_PIXEL_G1:
-	case GP_PIXEL_G2:
-	case GP_PIXEL_G4:
-	case GP_PIXEL_G8:
-	break;
-	case GP_PIXEL_RGB888:
-	case GP_PIXEL_BGR888:
-	case GP_PIXEL_xRGB8888:
-	break;
-	default:
+	out_pix = gp_line_convertible(src->pixel_type, save_ptypes);
+	if (out_pix == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unsupported pixel type %s",
 		         gp_pixel_type_name(src->pixel_type));
 		errno = ENOSYS;
@@ -775,21 +813,24 @@ int gp_write_tiff(const gp_pixmap *src, gp_io *io,
 	TIFFSetField(tiff, TIFFTAG_ROWSPERSTRIP, 1);
 	TIFFSetField(tiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
-	switch (src->pixel_type) {
-	case GP_PIXEL_RGB888:
+	switch (out_pix) {
 	case GP_PIXEL_BGR888:
-	case GP_PIXEL_xRGB8888:
-		err = save_rgb(tiff, src, callback);
+		if (out_pix == src->pixel_type)
+			err = save_rgb(tiff, src, callback);
+		else
+			err = save_rgb_convert(tiff, src, out_pix, callback);
 	break;
 	case GP_PIXEL_G1:
 	case GP_PIXEL_G2:
 	case GP_PIXEL_G4:
 	case GP_PIXEL_G8:
-		err = save_grayscale(tiff, src, callback);
+		if (out_pix == src->pixel_type)
+			err = save_grayscale(tiff, src, callback);
+		else
+			err = save_grayscale_convert(tiff, src, out_pix, callback);
 	break;
 	default:
 		GP_BUG("Wrong pixel type");
-	break;
 	}
 
 	if (err) {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -725,7 +725,8 @@ int gp_write_pbm(const gp_pixmap *src, gp_io *io,
 
 	GP_DEBUG(1, "Writing PBM into I/O (%p)", io);
 
-	if (src->pixel_type != GP_PIXEL_G1) {
+	if (src->pixel_type != GP_PIXEL_G1 &&
+	    !gp_line_convertible(src->pixel_type, pbm_save_pixels)) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
 		         gp_pixel_type_name(src->pixel_type));
 		errno = EINVAL;
@@ -903,8 +904,13 @@ int gp_write_pgm(const gp_pixmap *src, gp_io *io,
 	gp_io *bio;
 
 	GP_DEBUG(1, "Writing PGM to I/O (%p)", io);
+	depth = pixel_to_depth(src->pixel_type);
 
-	if ((depth = pixel_to_depth(src->pixel_type)) == -1) {
+	if (depth == -1 && gp_line_convertible(src->pixel_type, pgm_save_pixels)) {
+		depth = (1<<gp_pixel_size(src->pixel_type)) - 1;
+	}
+
+	if (depth == -1) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
 		         gp_pixel_type_name(src->pixel_type));
 		errno = EINVAL;
@@ -1075,7 +1081,6 @@ int gp_write_ppm(const gp_pixmap *src, gp_io *io,
 	GP_DEBUG(1, "Writing PPM into I/O (%p)", io);
 
 	out_pix = gp_line_convertible(src->pixel_type, ppm_save_pixels);
-
 	if (out_pix == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
 		         gp_pixel_type_name(src->pixel_type));
