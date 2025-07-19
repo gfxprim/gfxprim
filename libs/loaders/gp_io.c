@@ -85,7 +85,7 @@ gp_io *gp_io_file(const char *path, enum gp_io_file_mode mode)
 
 	switch (mode) {
 	case GP_IO_WRONLY:
-		flags = O_CREAT | O_WRONLY;
+		flags = O_CREAT | O_WRONLY | O_TRUNC;
 	break;
 	case GP_IO_RDONLY:
 		flags = O_RDONLY;
