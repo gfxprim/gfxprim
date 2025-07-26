@@ -435,11 +435,11 @@ gp_io *gp_io_wbuffer(gp_io *pio, size_t bsize)
 	return io;
 }
 
-int gp_io_mark(gp_io *self, enum gp_io_mark_types type)
+int gp_io_mark(gp_io *self, enum gp_io_mark_op op)
 {
 	off_t ret;
 
-	switch (type) {
+	switch (op) {
 	case GP_IO_MARK:
 		ret = gp_io_seek(self, 0, GP_SEEK_CUR);
 	break;

@@ -334,14 +334,14 @@ static int get_ascii_int(struct buf *buf, int *val)
 static inline int write_ascii_byte(gp_io *io, uint8_t byte)
 {
 	if (byte >= 100)
-		gp_io_putc(io, '0' + byte/100);
+		gp_io_putb(io, '0' + byte/100);
 
 	if (byte >= 10)
-		gp_io_putc(io, '0' + (byte%100)/10);
+		gp_io_putb(io, '0' + (byte%100)/10);
 
-	gp_io_putc(io, '0' + (byte%10));
+	gp_io_putb(io, '0' + (byte%10));
 
-	return gp_io_putc(io, ' ');
+	return gp_io_putb(io, ' ');
 }
 
 /*
@@ -636,7 +636,7 @@ static int save_ascii(gp_io *io, const gp_pixmap *pixmap,
 			return ECANCELED;
 		}
 
-		if (gp_io_putc(io, '\n'))
+		if (gp_io_putb(io, '\n'))
 			return errno;
 	}
 
@@ -1057,7 +1057,7 @@ static int save_ascii_rgb888(gp_io *io, const gp_pixmap *pixmap,
 			return ECANCELED;
 		}
 
-		if (gp_io_putc(io, '\n'))
+		if (gp_io_putb(io, '\n'))
 			return errno;
 	}
 

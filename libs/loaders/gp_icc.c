@@ -206,7 +206,7 @@ int gp_read_icc(gp_io *io, gp_storage *storage)
 	gp_storage_add_string(storage, icc_root, "Created", buf);
 
 	// TODO: assert correct values!
-	gp_storage_add_string(storage, icc_root, "Color space", h.color_space);
+	gp_storage_add_string(storage, icc_root, "Color Space", h.color_space);
 	gp_storage_add_string(storage, icc_root, "Class", h.class);
 	gp_storage_add_string(storage, icc_root, "Type", h.type);
 	gp_storage_add_string(storage, icc_root, "Primary Platform", h.primary_plat);

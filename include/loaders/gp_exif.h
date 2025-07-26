@@ -3,10 +3,9 @@
  * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
  */
 
- /*
-
-   EXIF parser.
-
+ /**
+  * @file gp_exif.h
+  * @brief EXIF parser.
   */
 
 #ifndef LOADERS_GP_EXIF_H
@@ -19,24 +18,25 @@
 /**
  * @brief Reads EXIF from a readable I/O stream and stores the values into storage.
  *
- * @io An input I/O stream.
- * @storage A data storage for exif metadata, may be NULL if not needed.
- * @corr_desc A correction parsed from the exif.
+ * @param io An input I/O stream.
+ * @param storage A data storage for exif metadata, may be NULL if not needed.
+ * @param corr_desc A correction tables parsed from the exif.
+ *
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_read_exif(gp_io *io, gp_storage *storage, gp_correction_desc *corr_desc);
 
-/*
- * Looks for EXIF file signature. Returns non-zero if found.
- */
-int gp_match_exif(const void *buf);
-
-/*
- * Defines position to 0,0 coordinate.
+/**
+ * @brief Defines position to 0,0 coordinate.
  */
 enum GP_EXIF_ORIENTATION {
+	/** @brief Upper left. */
 	GP_EXIF_UPPER_LEFT = 1,
+	/** @brief Lower right. */
 	GP_EXIF_LOWER_RIGHT = 3,
+	/** @brief Upper right. */
 	GP_EXIF_UPPER_RIGHT = 6,
+	/** @brief Lower left. */
 	GP_EXIF_LOWER_LEFT = 8,
 };
 

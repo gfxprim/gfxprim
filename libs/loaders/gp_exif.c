@@ -7,7 +7,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "core/gp_common.h"
+#include <core/gp_common.h>
 #include <core/gp_debug.h>
 #include <loaders/gp_exif.h>
 
