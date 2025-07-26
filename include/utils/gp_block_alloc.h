@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2025 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -51,5 +51,15 @@ GP_WUR void *gp_balloc(gp_balloc_pool **self, size_t size);
  * @param self A pointer to a block pointer.
  */
 void gp_bfree(gp_balloc_pool **self);
+
+/**
+ * @brief Clears all the data in the block allocator.
+ *
+ * This is similar to gp_bfree() but keeps exacly one allocated and cleared
+ * block for reuse.
+ *
+ * @param self A pointer to a block pointer.
+ */
+void gp_bclear(gp_balloc_pool **self);
 
 #endif /* GP_BLOCK_ALLOC_H */

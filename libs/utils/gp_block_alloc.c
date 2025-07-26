@@ -74,6 +74,25 @@ void gp_bfree(gp_balloc_pool **self)
 	*self = NULL;
 }
 
+void gp_bclear(gp_balloc_pool **self)
+{
+	gp_balloc_pool *i, *j;
+
+	GP_DEBUG(1, "Clearing block allocator %p", *self);
+
+	if (!(*self))
+		return;
+
+	for (i = (*self)->next; i;) {
+		j = i->next;
+		free_block(i);
+		i = j;
+	}
+
+	(*self)->next = NULL;
+	(*self)->free = block_size - sizeof(gp_balloc_pool);
+}
+
 static void *do_alloc(gp_balloc_pool *self, size_t size)
 {
 	size_t pos = block_size - self->free;

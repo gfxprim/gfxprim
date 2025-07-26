@@ -59,6 +59,22 @@ int balloc_more_blocks(void)
 	return TST_PASSED;
 }
 
+int balloc_clear(void)
+{
+	gp_balloc_pool *pool = NULL;
+	int i;
+
+	for (i = 0; i < 4 * 8192; i++) {
+		long *ptr = gp_balloc(&pool, sizeof(long));
+		*ptr = i;
+	}
+
+	gp_bclear(&pool);
+
+	tst_msg("We haven't crashed");
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "balloc testsuite",
 	.tests = {
@@ -67,6 +83,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "balloc more blocks",
 		 .tst_fn = balloc_more_blocks},
+
+		{.name = "balloc clear",
+		 .tst_fn = balloc_clear},
 
 		{}
 	}
