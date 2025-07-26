@@ -9,6 +9,7 @@
 
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
+#include <utils/gp_block_alloc.h>
 #include <loaders/gp_data_storage.h>
 
 struct record {
@@ -24,20 +25,12 @@ struct gp_data_dict {
 #define BLOCK_SIZE 4096
 #define BLOCK_MAX 128
 
-struct block {
-	size_t size;
-	struct block *next;
-	char data[];
-};
-
 struct gp_storage {
 	/* Root dictionary */
 	struct gp_data_node root;
 	struct gp_data_dict dict;
 
-	/* Block allocator */
-	struct block *blocks;
-	struct block *cur_block;
+	gp_balloc_pool *pool;
 };
 
 /* Align to four bytes boundary */
@@ -46,54 +39,6 @@ static size_t align(size_t size)
 	size_t mask = 3;
 
 	return (size + mask) & ~mask;
-}
-
-static struct block *new_block(gp_storage *self, size_t size)
-{
-	struct block *new = malloc(size);
-
-	GP_DEBUG(3, "Allocating new block for %zu bytes", size);
-
-	if (!new)
-		return NULL;
-
-	new->size = size - sizeof(*new);
-
-	new->next = self->blocks;
-	self->blocks = new;
-
-	return new;
-}
-
-static void *storage_alloc(gp_storage *self, size_t size)
-{
-	struct block *new;
-	void *ret;
-
-	GP_DEBUG(3, "Allocating %zu bytes", size);
-
-	if (size >= BLOCK_MAX) {
-		new = new_block(self, sizeof(*new) + size);
-
-		if (!new)
-			return NULL;
-
-		return new->data;
-	}
-
-	if (self->cur_block->size < size) {
-		new = new_block(self, BLOCK_SIZE);
-
-		if (!new)
-			return NULL;
-
-		self->cur_block = new;
-	}
-
-	ret = self->cur_block->data + BLOCK_SIZE - self->cur_block->size;
-	self->cur_block->size -= size;
-
-	return ret;
 }
 
 static struct record *new_record(gp_storage *self, gp_data_node *node)
@@ -114,7 +59,7 @@ static struct record *new_record(gp_storage *self, gp_data_node *node)
 	break;
 	}
 
-	new = storage_alloc(self, sizeof(*new) + id_len + payload_len);
+	new = gp_balloc(&self->pool, sizeof(*new) + id_len + payload_len);
 
 	if (!new)
 		return NULL;
@@ -158,57 +103,30 @@ gp_storage *gp_storage_create(void)
 	storage->dict.first = NULL;
 	storage->dict.last = NULL;
 
-	storage->blocks = NULL;
-	storage->cur_block = new_block(storage, BLOCK_SIZE);
-
-	if (!storage->cur_block) {
-		free(storage);
-		return NULL;
-	}
+	storage->pool = NULL;
 
 	return storage;
 }
 
 void gp_storage_destroy(gp_storage *self)
 {
-	struct block *i, *j;
-
 	if (!self)
 		return;
 
 	GP_DEBUG(1, "Destroying data storage");
 
-	for (i = self->blocks; i; ) {
-		j = i->next;
-		free(i);
-		i = j;
-	}
-
+	gp_bfree(&self->pool);
 	free(self);
 }
 
 void gp_storage_clear(gp_storage *self)
 {
-	struct block *i, *j;
-
 	GP_DEBUG(1, "Clearing all data in storage");
 
-	/* Clear all but first block */
-	for (i = self->blocks->next; i;) {
-		j = i->next;
-		free(i);
-		i = j;
-	}
-
-	/* Rest first block */
-	self->cur_block = self->blocks;
-	self->cur_block->next = NULL;
-	//TODO: Store block size!!
-	self->cur_block->size = BLOCK_SIZE - sizeof(struct block);
-
-	/* Reset root dict */
 	self->dict.first = NULL;
 	self->dict.last = NULL;
+
+	gp_bclear(&self->pool);
 }
 
 gp_data_node *gp_storage_root(gp_storage *self)
