@@ -181,7 +181,7 @@ int gp_read_icc(gp_io *io, gp_storage *storage)
 		return 1;
 	}
 
-	GP_DEBUG(0, "ICC Profile version=%u.%u.%u created %4u:%02u:%02u %02u:%02u:%02u type=%s class=%s color_space=%s tag_count=%u",
+	GP_DEBUG(1, "ICC Profile version=%u.%u.%u created %4u:%02u:%02u %02u:%02u:%02u type=%s class=%s color_space=%s tag_count=%u",
 		 (unsigned int)GP_ICC_VER_MAJOR(h.version),
 		 (unsigned int)GP_ICC_VER_MINOR(h.version),
 		 (unsigned int)GP_ICC_VER_BUGFIX(h.version),
