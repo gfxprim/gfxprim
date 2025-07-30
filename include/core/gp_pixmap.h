@@ -132,6 +132,25 @@ struct gp_pixmap {
  * @brief Allocates a pixmap.
  * @ingroup pixmap
  *
+ * This is a variant of gp_pixmap_alloc() that allows to set a custom image
+ * stride. If zero is passed this call is equivalent to gp_pixmap_alloc() and
+ * stride is calculated internally.
+ *
+ * @param w A pixmap width.
+ * @param h A pixmap height.
+ * @param type A pixel type.
+ * @param stride The length in bytes of an image buffer row. Must be larger or
+ *               equal than pixel size in bytes multiplied by width.
+ *
+ * @return A newly allocated pixmap or NULL in a case of malloc() failure.
+ */
+gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type,
+                              uint32_t stride);
+
+/**
+ * @brief Allocates a pixmap.
+ * @ingroup pixmap
+ *
  * The pixmap consists of two parts, the gp_pixmap structure and pixels array.
  *
  * The rotation flags are set to (0, 0, 0).
@@ -142,7 +161,10 @@ struct gp_pixmap {
  *
  * @return A newly allocated pixmap or NULL in a case of malloc() failure.
  */
-gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type);
+static inline gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type)
+{
+	return gp_pixmap_alloc_ex(w, h, type, 0);
+}
 
 /**
  * @brief Sets a correction for the pixmap.

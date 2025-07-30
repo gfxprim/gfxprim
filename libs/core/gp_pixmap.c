@@ -29,7 +29,7 @@ static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 	return bits_per_row / 8 + padd;
 }
 
-gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type)
+gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t stride)
 {
 	gp_pixmap *pixmap;
 	uint32_t bpp;
@@ -55,6 +55,16 @@ gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type)
 
 	if (!(bpr = get_bpr(bpp, w)))
 		return NULL;
+
+	if (stride) {
+		if (stride < bpr) {
+			GP_WARN("Invalid stride %u need at least %u",
+				(unsigned int)stride, (unsigned int)bpr);
+			errno = EINVAL;
+			return NULL;
+		}
+		bpr = stride;
+	}
 
 	size_t size = bpr * h;
 
