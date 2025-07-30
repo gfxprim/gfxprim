@@ -40,6 +40,7 @@ static const gp_loader *loaders[MAX_LOADERS] = {
 	&gp_psp,
 	&gp_psd,
 	&gp_ico,
+	&gp_heif,
 };
 
 static unsigned int get_last_loader(void)

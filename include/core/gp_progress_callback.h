@@ -34,6 +34,9 @@ struct gp_progress_cb {
 	/** @brief User private pointer */
 	void *priv;
 
+	/** @brief Flags to be used by the loaders. Do not touch! */
+	int flags;
+
 	/**
 	 * @brief A number of threads.
 	 *

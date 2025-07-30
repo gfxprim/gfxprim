@@ -27,7 +27,7 @@ jobs:
       - name: update-apt-db
         run: sudo apt-get update
       - name: install-image-libs
-        run: sudo apt-get install libjpeg-dev libpng-dev libgif-dev libtiff-dev libwebp-dev libarchive-dev
+        run: sudo apt-get install libjpeg-dev libpng-dev libgif-dev libtiff-dev libwebp-dev libarchive-dev libheif-dev
       - name: install-freetype-libs
         run: sudo apt-get install libfreetype6-dev libfontconfig-dev
       - name: install-backend-libs

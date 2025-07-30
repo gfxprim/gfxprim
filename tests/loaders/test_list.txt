@@ -9,6 +9,7 @@ pgm
 ppm
 pnm
 pcx
+heic
 zip
 io
 loader
