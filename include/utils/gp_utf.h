@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2022 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2022-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -163,6 +163,100 @@ static inline int gp_to_utf8(uint32_t unicode, char *buf)
 	buf[2] = 0x80 | (0x3f & (unicode>>6));
 	buf[3] = 0x80 | (0x3f & unicode);
 	return 4;
+}
+
+/**
+ * @brief Calculates a size for an utf8 string to hold utf16 characters.
+ *
+ * @param chars An array of utf16 characters.
+ * @param chars_len The lenth of the utf16 array.
+ *
+ * @return A size of the buffer or zero in a case of a size_t overflow. The
+ *         returned size includes space for a terminating null character.
+ */
+static inline size_t gp_utf16_to_utf8_size(uint16_t *chars, size_t chars_len)
+{
+	size_t ret = 1;
+	size_t i;
+
+	for (i = 0; i < chars_len; i++) {
+		size_t bytes = gp_utf8_bytes(chars[i]);
+
+		if (bytes + ret < ret)
+			return 0;
+
+		ret += bytes;
+	}
+
+	return ret;
+}
+
+/**
+ * @brief Convers utf16 characters into an utf8 string.
+ *
+ * @param chars An array of utf16 characters.
+ * @param chars_len The lenth of the utf16 array.
+ *
+ * @param dest A buffer large enough to store the utf16 characters and
+ *             terminating null character. This can be calculated by
+ *             gp_utf16_to_utf8_size().
+ */
+static inline void gp_utf16_to_utf8(uint16_t *chars, size_t chars_len,
+                                    char *dest)
+{
+	size_t i;
+
+	for (i = 0; i < chars_len; i++)
+		dest += gp_to_utf8(chars[i], dest);
+
+	*dest = 0;
+}
+
+/**
+ * @brief Calculates a size for an utf8 string to hold utf32 characters.
+ *
+ * @param chars An array of utf32 characters.
+ * @param chars_len The lenth of the utf32 array.
+ *
+ * @return A size of the buffer or zero in a case of a size_t overflow. The
+ *         returned size includes space for a terminating null character.
+ */
+static inline size_t gp_utf32_to_utf8_size(uint32_t *chars, size_t chars_len)
+{
+	size_t ret = 1;
+	size_t i;
+
+	for (i = 0; i < chars_len; i++) {
+		size_t bytes = gp_utf8_bytes(chars[i]);
+
+		if (bytes + ret < ret)
+			return 0;
+
+		ret += bytes;
+	}
+
+	return ret;
+}
+
+/**
+ * @brief Convers utf32 characters into an utf8 string.
+ *
+ * @param chars An array of utf32 characters.
+ * @param chars_len The lenth of the utf16 array.
+ *
+ * @param dest A buffer large enough to store the utf32 characters and
+ *             terminating null character. This can be calculated by
+ *             gp_utf32_to_utf8_size().
+ */
+static inline void gp_utf32_to_utf8(uint32_t *chars, size_t chars_len,
+                                    char *dest)
+{
+	size_t i;
+
+	for (i = 0; i < chars_len; i++)
+		dest += gp_to_utf8(chars[i], dest);
+
+	*dest = 0;
 }
 
 /**

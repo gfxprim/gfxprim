@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
 
-  Copyright (C) 2022 Cyril Hrubis <metan@ucw.cz>
+  Copyright (C) 2022-2025 Cyril Hrubis <metan@ucw.cz>
 
  */
 
+#include <string.h>
 #include <utils/gp_utf.h>
 
 #include "tst_test.h"
@@ -121,6 +122,67 @@ static int test_utf8_strlen_02(void)
 	return TST_PASSED;
 }
 
+static int test_utf16_to_utf8(void)
+{
+	char *utf8 = "test\u00a9";
+	char utf8_conv[7];
+	uint16_t utf16[] = {
+		't',
+		'e',
+		's',
+		't',
+		0xa9,
+	};
+
+	memset(utf8_conv, 0xff, sizeof(utf8_conv));
+
+	size_t conv_len = gp_utf16_to_utf8_size(utf16, 5);
+
+	if (conv_len != 7) {
+		tst_msg("Wrong converted size %zu expected 7", conv_len);
+		return TST_FAILED;
+	}
+
+	gp_utf16_to_utf8(utf16, 5, utf8_conv);
+
+	if (strcmp(utf8, utf8_conv)) {
+		tst_msg("Wrong utf8 ('%s') string after conversion!", utf8_conv);
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+static int test_utf32_to_utf8(void)
+{
+	char *utf8 = "test\u00a9";
+	char utf8_conv[7];
+	uint32_t utf32[] = {
+		't',
+		'e',
+		's',
+		't',
+		0xa9,
+	};
+
+	memset(utf8_conv, 0xff, sizeof(utf8_conv));
+
+	size_t conv_len = gp_utf32_to_utf8_size(utf32, 5);
+
+	if (conv_len != 7) {
+		tst_msg("Wrong converted size %zu expected 7", conv_len);
+		return TST_FAILED;
+	}
+
+	gp_utf32_to_utf8(utf32, 5, utf8_conv);
+
+	if (strcmp(utf8, utf8_conv)) {
+		tst_msg("Wrong utf8 ('%s') string after conversion!", utf8_conv);
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
 
 const struct tst_suite tst_suite = {
 	.suite_name = "utf",
@@ -142,6 +204,12 @@ const struct tst_suite tst_suite = {
 
 		{.name = "gp_utf_fallback()",
 		 .tst_fn = test_utf_fallback},
+
+		{.name = "gp_utf16_to_utf8()",
+		 .tst_fn = test_utf16_to_utf8},
+
+		{.name = "gp_utf32_to_utf8()",
+		 .tst_fn = test_utf32_to_utf8},
 
 		{}
 	}
