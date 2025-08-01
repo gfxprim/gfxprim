@@ -218,7 +218,7 @@ gp_io *gp_io_zlib(gp_io *io, size_t comp_size)
 	priv->strm.zalloc = Z_NULL;
 	priv->strm.zfree = Z_NULL;
 	priv->strm.opaque = Z_NULL;
-	priv->strm.avail_in = Z_NULL;
+	priv->strm.avail_in = 0;
 	priv->strm.next_in = Z_NULL;
 
 	ret = inflateInit2(&priv->strm, -15);
