@@ -9,6 +9,8 @@
 
 #include <core/gp_common.h>
 #include <core/gp_debug.h>
+
+#include <loaders/gp_io_parser.h>
 #include <loaders/gp_exif.h>
 
 enum IFD_formats {

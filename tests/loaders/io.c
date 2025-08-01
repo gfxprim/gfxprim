@@ -6,8 +6,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include "core/gp_common.h"
+#include <core/gp_common.h>
 #include <loaders/gp_io.h>
+#include <loaders/gp_io_parser.h>
 
 #include "tst_test.h"
 

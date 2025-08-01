@@ -16,6 +16,7 @@
 
 #include <core/gp_debug.h>
 #include <loaders/gp_io.h>
+#include <loaders/gp_io_parser.h>
 #include <loaders/gp_loaders.gen.h>
 #include <loaders/gp_bmp.h>
 

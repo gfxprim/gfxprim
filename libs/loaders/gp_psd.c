@@ -17,9 +17,10 @@
 #include <errno.h>
 
 #include <core/gp_debug.h>
-#include "core/gp_common.h"
+#include <core/gp_common.h>
 #include <core/gp_get_put_pixel.h>
 
+#include <loaders/gp_io_parser.h>
 #include <loaders/gp_loaders.gen.h>
 
 #define PSD_SIGNATURE "8BPS\x00\x01"

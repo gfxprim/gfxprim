@@ -22,6 +22,7 @@
 #include <core/gp_temp_alloc.h>
 
 #include <loaders/gp_io.h>
+#include <loaders/gp_io_parser.h>
 #include <loaders/gp_line_convert.h>
 #include <loaders/gp_loaders.gen.h>
 

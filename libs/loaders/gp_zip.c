@@ -17,11 +17,13 @@
 
 #endif /* HAVE_ZLIB */
 
-#include <utils/gp_vec.h>
 #include <core/gp_common.h>
 #include <core/gp_debug.h>
 
+#include <utils/gp_vec.h>
+
 #include <loaders/gp_loader.h>
+#include <loaders/gp_io_parser.h>
 #include <loaders/gp_io_zlib.h>
 #include <loaders/gp_zip.h>
 
