@@ -265,7 +265,7 @@ struct gp_backend {
 	/** @brief File descriptors to poll for. */
 	gp_poll fds;
 
-	/* @brief Queue to store input events. */
+	/** @brief Queue to store input events. */
 	gp_ev_queue *event_queue;
 
 	/** @brief Priority queue for timers. */
@@ -283,6 +283,11 @@ struct gp_backend {
 	 */
 	gp_dlist input_drivers;
 
+	/**
+	 * @brief Clipboard data.
+	 *
+	 * Pointer to be used by the backend clipboard implementation.
+	 */
 	void *clipboard_data;
 
 	/**

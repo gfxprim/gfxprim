@@ -3,10 +3,9 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
-
-  Catch all header for backends.
-
+/**
+ * @file gp_backends.h
+ * @brief Catch all header for backends.
  */
 
 #ifndef BACKENDS_GP_BACKENDS_H
@@ -31,7 +30,7 @@
 #include <backends/gp_wayland.h>
 #include <backends/gp_sdl.h>
 #include <backends/gp_x11.h>
-#include "backends/gp_xcb.h"
+#include <backends/gp_xcb.h>
 #include <backends/gp_aalib.h>
 #include <backends/gp_backend_virtual.h>
 #include <backends/gp_proxy.h>

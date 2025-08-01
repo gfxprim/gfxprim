@@ -3,8 +3,9 @@
  * Copyright (C) 2025 Cyril Hrubis <metan@ucw.cz>
  */
 
-/*
- * Driver for st7789 displays.
+/**
+ * @file gp_display_st77xx.h
+ * @brief Driver for st7796, st7789, st7735 displays.
  */
 
 #ifndef GP_DISPLAY_ST77XX_H
@@ -45,10 +46,12 @@ enum gp_display_st77xx_flags {
 /**
  * @brief Initialize st77xx display driver.
  *
- * @w A display width.
- * @h A display height.
- * @dpi A display DPI.
- * @flags Additional display flags.
+ * @param w A display width.
+ * @param h A display height.
+ * @param x_off A display x offset, some displays does not start at 0.
+ * @param y_off A display y offset, some displays does not start at 0.
+ * @param dpi A display DPI.
+ * @param flags Display quirks.
  */
 gp_backend *gp_display_st77xx_init(uint16_t w, uint16_t h, uint16_t x_off, uint16_t y_off,
                                    unsigned int dpi, enum gp_display_st77xx_flags flags);
