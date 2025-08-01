@@ -13,6 +13,8 @@
 #include <core/gp_common.h>
 #include <core/gp_debug.h>
 #include <core/gp_byte_order.h>
+
+#include <loaders/gp_io_parser.h>
 #include <loaders/gp_icc.h>
 
 struct icc_tag {
@@ -33,6 +35,88 @@ struct icc_tag {
 
 #define ICC_TAG_SIG(tag) \
 	ICC_SIG((tag).sig[0], (tag).sig[1], (tag).sig[2], (tag).sig[3])
+
+#define ICC_CODE(a, b) \
+	(((uint16_t)a)<<8 | \
+	 ((uint16_t)b))
+
+static char *icc_read_utf16_str(gp_io *io, uint32_t lenght, uint32_t offset, uint32_t rel_offset)
+{
+	size_t off = (size_t)offset + (size_t)rel_offset;
+
+	if (gp_io_seek(io, off, GP_SEEK_SET) == (off_t)-1) {
+		GP_WARN("Failed to seek to string offset");
+		return NULL;
+	}
+
+	char *str = gp_io_read_b2_utf16(io, lenght/2);
+
+	GP_DEBUG(4, "Loaded '%s'", str);
+
+	return str;
+}
+
+static char *read_mluc_tag_en(gp_io *io, const struct icc_tag *tag)
+{
+	uint32_t nrec;
+	uint32_t rec_size;
+	uint32_t i;
+
+	if (gp_io_read_b4(io, &nrec) || gp_io_read_b4(io, &rec_size)) {
+		GP_WARN("Failed to read number and size of MLUC records");
+		return NULL;
+	}
+
+	GP_DEBUG(4, "Number of MLUC records %u of header size %u",
+	         (unsigned int)nrec, (unsigned int)rec_size);
+
+	if (nrec == 0)
+		return NULL;
+
+	if (rec_size != 12) {
+		GP_WARN("Unsupported MLUC record header size %u",
+		        (unsigned int)rec_size);
+		return NULL;
+	}
+
+	uint32_t first_offset = 0;
+	uint32_t first_lenght = 0;
+
+	uint16_t mluc_rec_header[] = {
+		GP_IO_B2, /* Language code */
+		GP_IO_B2, /* Country code */
+		GP_IO_B4, /* String lenght */
+		GP_IO_B4, /* String offset */
+		GP_IO_END
+	};
+
+	for (i = 0; i < nrec; i++) {
+		uint16_t lang, country;
+		uint32_t lenght, offset;
+
+		if (gp_io_readf(io, mluc_rec_header, &lang, &country, &lenght, &offset) != 4) {
+			GP_WARN("Failed to read MLUC record header");
+			return NULL;
+		}
+
+		GP_DEBUG(4, "Have MLUC record %c%c/%c%c offset %u lenght %u",
+			 lang>>8, lang & 0xff, country>>8, country & 0xff,
+			 (unsigned int)offset + tag->offset, (unsigned int)lenght);
+
+		if (lang == ICC_CODE('e', 'n') && country == ICC_CODE('U', 'S'))
+			return icc_read_utf16_str(io, lenght, tag->offset, offset);
+
+		if (!first_lenght) {
+			first_offset = offset;
+			first_lenght = lenght;
+		}
+	}
+
+	if (first_lenght)
+		return icc_read_utf16_str(io, first_lenght, tag->offset, first_offset);
+
+	return NULL;
+}
 
 static char *read_icc_tag_str(gp_io *io, const struct icc_tag *tag)
 {
@@ -71,7 +155,7 @@ static char *read_icc_tag_str(gp_io *io, const struct icc_tag *tag)
 
 		return str;
 	case ICC_SIG('m', 'l', 'u', 'c'):
-		GP_TODO("mluc Unicode");
+		return read_mluc_tag_en(io, tag);
 	break;
 	default:
 		GP_WARN("Invalid %s tag header %s", tag->sig, text_tag.sig);
