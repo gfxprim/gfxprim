@@ -28,6 +28,8 @@
 #include <loaders/gp_container.h>
 #include <loaders/gp_zip.h>
 
+#include <loaders/gp_io.h>
+#include <loaders/gp_io_parser.h>
 #include <loaders/gp_io_zlib.h>
 
 #endif /* LOADERS_GP_LOADERS_H */
