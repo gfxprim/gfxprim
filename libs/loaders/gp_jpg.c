@@ -262,8 +262,6 @@ static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
 				continue;
 			}
 
-			printf("%x %x\n", marker->data[12], marker->data[13]);
-
 			gp_io *io = gp_io_mem(marker->data + 14, marker->data_length - 14, NULL);
 			if (!io) {
 				GP_WARN("Failed to create MemIO");
