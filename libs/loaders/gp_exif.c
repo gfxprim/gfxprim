@@ -242,6 +242,10 @@ static int load_tag(gp_io *io, gp_storage *storage,
 			if (load_string(io, storage, node, res->name, num_comp, &val))
 				used = 1;
 		break;
+		case IFD_SCENE_TYPE:
+			gp_storage_add_int(storage, node, res->name, val);
+			used = 1;
+		break;
 		default:
 		break;
 		}

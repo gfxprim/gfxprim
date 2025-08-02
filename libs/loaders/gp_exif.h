@@ -129,6 +129,7 @@ enum IFD_EXIF_tags {
 	/* TODO: enum of sensing methods */
 	IFD_SENSING_METHOD = 0xa217,
 	IFD_FILE_SOURCE = 0xa300,
+	/* Set to 1 when image was directly photographed */
 	IFD_SCENE_TYPE = 0xa301,
 	/* Color Filter Array pattern */
 	IFD_CFA_PATTERN = 0xa302,
@@ -156,6 +157,19 @@ enum IFD_EXIF_tags {
 	IFD_SUBJECT_DISTANCE_RANGE = 0xa40c,
 	/* Unique in hex string */
 	IFD_IMAGE_UNIQUE_ID = 0xa420,
+
+	/* Camera owner name - string */
+	IFD_CAMERA_OWNER_NAME = 0xa430,
+	/* Body serial number - string */
+	IFD_BODY_SERIAL_NUMBER = 0xa431,
+	/* Lens specification - rational */
+	IFD_LENS_SPECIFICATION = 0xa432,
+	/* Lens maker - string */
+	IFD_LENS_MAKE = 0xa433,
+	/* Lens model - string */
+	IFD_LENS_MODEL = 0xa434,
+	/* Lens type - string */
+	IFD_LENS_SERIAL_NUMBER = 0xa435,
 
 	/* Rational */
 	IFD_IMAGE_GAMMA = 0xa500,
@@ -258,6 +272,14 @@ static const struct IFD_tag IFD_EXIF_taglist[] = {
 	{IFD_SHARPNESS, "Sharpness", IFD_UNSIGNED_SHORT, 1},
 	{IFD_SUBJECT_DISTANCE_RANGE, "Subject Distance Range", IFD_UNSIGNED_SHORT, 1},
 	{IFD_IMAGE_UNIQUE_ID, "Image Unique ID", IFD_ASCII_STRING, 33},
+
+	{IFD_CAMERA_OWNER_NAME, "Camera Owner Name", IFD_ASCII_STRING, 0},
+	{IFD_BODY_SERIAL_NUMBER, "Body Serial Number", IFD_ASCII_STRING, 0},
+	{IFD_LENS_SPECIFICATION, "Lens Specification", IFD_UNSIGNED_RATIONAL, 4},
+	{IFD_LENS_MAKE, "Lens Make", IFD_ASCII_STRING, 0},
+	{IFD_LENS_MODEL, "Lens Model", IFD_ASCII_STRING, 0},
+	{IFD_LENS_SERIAL_NUMBER, "Lens Serial Number", IFD_ASCII_STRING, 0},
+
 	{IFD_IMAGE_GAMMA, "Image gamma", IFD_UNSIGNED_RATIONAL, 1},
 
 	{IFD_PRINT_IM, "Print IM", IFD_UNDEFINED, 0},
