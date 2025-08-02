@@ -217,8 +217,24 @@ static int load_tag(gp_io *io, gp_storage *storage,
 	break;
 	case IFD_UNSIGNED_BYTE:
 	case IFD_SIGNED_BYTE:
+		if (num_comp == 1) {
+			if (endian == 'M')
+				val = ((val & 0xff000000)>>24) | ((val & 0x000000ff)<<24);
+
+			gp_storage_add_int(storage, node, res->name, val);
+			used = 1;
+		}
+	break;
 	case IFD_UNSIGNED_SHORT:
 	case IFD_SIGNED_SHORT:
+		if (num_comp == 1) {
+			if (endian == 'M')
+				val = ((val & 0xffff0000)>>16) | ((val & 0x0000ffff)<<16);
+
+			gp_storage_add_int(storage, node, res->name, val);
+			used = 1;
+		}
+	break;
 	case IFD_UNSIGNED_LONG:
 	case IFD_SIGNED_LONG:
 		if (num_comp == 1) {
