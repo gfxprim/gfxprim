@@ -127,7 +127,10 @@ static char *read_icc_tag_str(gp_io *io, const struct icc_tag *tag)
 	};
 	struct icc_tag text_tag = {};
 	char *str;
-	size_t text_size = GP_MAX(tag->size, 1u);
+	uint32_t text_size = tag->size;
+
+	if (!text_size)
+		return NULL;
 
 	if (gp_io_seek(io, tag->offset, GP_SEEK_SET) == (off_t)-1) {
 		GP_WARN("Failed to seek to %s tag header", tag->sig);
@@ -140,13 +143,25 @@ static char *read_icc_tag_str(gp_io *io, const struct icc_tag *tag)
 	}
 
 	switch (ICC_TAG_SIG(text_tag)) {
+	/* desc tag has size after the header */
+	case ICC_SIG('d', 'e', 's', 'c'):
+		gp_io_read_b4(io, &text_size);
+		if (!text_size)
+			return NULL;
+
+		if (text_size > tag->size - 4) {
+			GP_WARN("Text size %u > tag->size - 4 %u", text_size, tag->size);
+			text_size = tag->size - 4;
+		}
+
+	/* Fallthrough */
 	case ICC_SIG('t', 'e', 'x', 't'):
 		GP_DEBUG(4, "Tag %s header signature %s", tag->sig, text_tag.sig);
 		str = malloc(text_size);
 		if (!str)
 			return NULL;
 
-		if (gp_io_read(io, str, tag->size) < 0) {
+		if (gp_io_read(io, str, text_size) < 0) {
 			GP_WARN("Failed to read %s tag text", tag->sig);
 			free(str);
 			return NULL;
@@ -162,45 +177,6 @@ static char *read_icc_tag_str(gp_io *io, const struct icc_tag *tag)
 		return NULL;
 	}
 
-	return NULL;
-}
-
-static char *read_icc_tag_desc(gp_io *io, const struct icc_tag *desc)
-{
-	uint16_t desc_header[] = {
-		'd', 'e', 's', 'c',
-		0, 0, 0, 0,
-		GP_IO_B4, /* ASCII desc len */
-		GP_IO_END
-	};
-	uint32_t ascii_len = 0;
-	char *str;
-
-	if (gp_io_seek(io, desc->offset, GP_SEEK_SET) == (off_t)-1) {
-		GP_WARN("Failed to seek to desc tag");
-		goto err0;
-	}
-
-	if (gp_io_readf(io, desc_header, &ascii_len) != 9) {
-		GP_WARN("Failed to read desc tag ascii lenght");
-		goto err0;
-	}
-
-	str = malloc(ascii_len);
-	if (!str) {
-		GP_WARN("Malloc failed :(");
-		goto err0;
-	}
-
-	if (gp_io_read(io, str, ascii_len) != ascii_len) {
-		GP_WARN("Failed to read ascii desc");
-		goto err1;
-	}
-
-	return str;
-err1:
-	free(str);
-err0:
 	return NULL;
 }
 
@@ -361,7 +337,7 @@ int gp_read_icc(gp_io *io, gp_storage *storage)
 	}
 
 	if (desc.sig[0]) {
-		str = read_icc_tag_desc(io, &desc);
+		str = read_icc_tag_str(io, &desc);
 		if (str)
 			gp_storage_add_string(storage, icc_root, "Description", str);
 		free(str);
