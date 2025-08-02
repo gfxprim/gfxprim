@@ -125,7 +125,7 @@ static int cancel_decoding_heif(void *progress_user_data)
 
 	return callback->flags;
 }
-#endif
+#endif /* 1.19.0 */
 
 static void parse_exif_heif(struct heif_image_handle *image_handle,
                             gp_storage *storage, gp_correction_desc *corr_desc)
@@ -167,6 +167,7 @@ static void parse_exif_heif(struct heif_image_handle *image_handle,
 	free(exif);
 }
 
+#if LIBHEIF_HAVE_VERSION(1, 4, 0)
 static void parse_color_profile_heif(struct heif_image_handle *image_handle,
                                      gp_storage *storage)
 {
@@ -214,6 +215,7 @@ static void parse_color_profile_heif(struct heif_image_handle *image_handle,
 	gp_io_close(mem_io);
 	free(icc);
 }
+#endif /* 1.4.0 */
 
 static inline int err_heif_to_errno(struct heif_error err)
 {
@@ -228,7 +230,7 @@ static inline int err_heif_to_errno(struct heif_error err)
 #if LIBHEIF_HAVE_VERSION(1, 19, 0)
 	case heif_error_Canceled:
 		return ECANCELED;
-#endif
+#endif /* 1.19.0 */
 	default:
 		return EINVAL;
 	}
@@ -267,7 +269,9 @@ int gp_read_heif_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 
 	fill_metadata(storage, w, h);
 	parse_exif_heif(image_handle, storage, &corr_desc);
+#if LIBHEIF_HAVE_VERSION(1, 4, 0)
 	parse_color_profile_heif(image_handle, storage);
+#endif /* 1.4.0 */
 
 	if (img) {
 		int stride;
@@ -281,7 +285,7 @@ int gp_read_heif_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 			.progress_user_data = callback,
 #if LIBHEIF_HAVE_VERSION(1, 19, 0)
 			.cancel_decoding = cancel_decoding_heif,
-#endif
+#endif /* 1.19.0 */
 		};
 
 		err = heif_decode_image(image_handle, &image,
