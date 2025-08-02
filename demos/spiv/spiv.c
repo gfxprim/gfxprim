@@ -220,8 +220,10 @@ static unsigned int print_meta_data(gp_data_node *node, gp_pixmap *pixmap,
 			info_printf(pixmap, x, y, "%s : %s", i->id, i->value.str);
 		break;
 		case GP_DATA_RATIONAL:
-			info_printf(pixmap, x, y, "%s : %li/%li",
-			            i->id, i->value.rat.num, i->value.rat.den);
+			info_printf(pixmap, x, y, "%s : %.3f (%li/%li)",
+			            i->id,
+				    1.00 * i->value.rat.num / i->value.rat.den,
+				    i->value.rat.num, i->value.rat.den);
 		break;
 		case GP_DATA_DICT:
 			info_printf(pixmap, x, y, "%s", i->id);
