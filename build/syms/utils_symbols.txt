@@ -24,8 +24,9 @@ gp_fds_add
 gp_fds_poll
 gp_fds_rem
 
-gp_block_alloc
-gp_block_free
+gp_balloc
+gp_bfree
+gp_bclear
 
 gp_json_obj_first_filter
 gp_json_obj_next

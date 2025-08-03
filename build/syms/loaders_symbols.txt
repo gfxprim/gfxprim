@@ -116,4 +116,7 @@ gp_write_png
 gp_write_pnm
 gp_write_ppm
 gp_write_tiff
+gp_match_heif
+gp_read_heif_ex
+gp_heif
 gp_zip_ops

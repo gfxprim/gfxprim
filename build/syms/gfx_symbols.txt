@@ -15,3 +15,8 @@ gp_symbol_raw
 
 gp_fill_ring_seg
 gp_fill_ring_seg_raw
+gp_line_th_raw_16BPP_BE
+gp_hline_raw_16BPP_BE
+gp_vline_raw_16BPP_BE_clip
+gp_vline_raw_16BPP_BE
+gp_line_raw_16BPP_BE
