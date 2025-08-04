@@ -110,6 +110,7 @@ static void hidden(gp_backend *self)
 	//TODO: remap GP_PROXY_NONE?
 
 	priv->visible = 0;
+	priv->update_in_progress = 0;
 
 	self->pixmap = &priv->dummy;
 }
