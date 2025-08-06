@@ -97,7 +97,7 @@ static int event_key_us(gp_keymap *self, gp_ev_queue *queue, gp_event *ev)
 		return 0;
 	}
 
-	if (ev->code != GP_EV_KEY_DOWN)
+	if (ev->code != GP_EV_KEY_DOWN && ev->code != GP_EV_KEY_REPEAT)
 		return 0;
 
 	if (key >= sizeof(keys_to_ascii))
