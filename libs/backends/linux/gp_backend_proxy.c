@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <inttypes.h>
+#include <pthread.h>
 #include <sys/mman.h>
 #include <core/gp_debug.h>
 #include <core/gp_pixmap.h>
@@ -18,6 +20,8 @@
 #include <backends/gp_proxy_proto.h>
 #include <backends/gp_proxy_conn.h>
 #include <backends/gp_proxy.h>
+
+#define UPDATE_COOKIES_MAX 16
 
 struct proxy_priv {
 	struct gp_proxy_buf buf;
@@ -32,7 +36,9 @@ struct proxy_priv {
 	unsigned int visible:1;
 	unsigned int sys_quit_requested:1;
 
-	unsigned int update_in_progress:1;
+	/* array to store udpate rect cookies */
+	uint32_t update_cookies[UPDATE_COOKIES_MAX];
+	unsigned int update_cookies_cnt;
 
 	/* mapped memory backing the pixmap */
 	void *map;
@@ -110,11 +116,9 @@ static void hidden(gp_backend *self)
 	//TODO: remap GP_PROXY_NONE?
 
 	priv->visible = 0;
-	priv->update_in_progress = 0;
 
 	self->pixmap = &priv->dummy;
 }
-
 
 static void unmap_buffer(gp_backend *self)
 {
@@ -147,6 +151,61 @@ static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
 	//TODO: check that the buffer is large enough!
 
 	gp_ev_queue_set_screen_size(self->event_queue, msg->pix.pix.w, msg->pix.pix.h);
+}
+
+/*
+ * Inserts update cookie into the array of cookies.
+ */
+static void update_cookie_add(struct proxy_priv *priv, uint32_t cookie)
+{
+	if (priv->update_cookies_cnt >= UPDATE_COOKIES_MAX) {
+		GP_WARN("Too many update cookies!");
+		return;
+	}
+
+	GP_DEBUG(4, "Storing update cookie %"PRIu32" cookie cnt %u",
+	         cookie, priv->update_cookies_cnt);
+
+	priv->update_cookies[priv->update_cookies_cnt++] = cookie;
+}
+
+/*
+ * Looks up an update cookie, returns index if found, -1 if not.
+ */
+static int update_cookie_get(struct proxy_priv *priv, uint32_t cookie)
+{
+	unsigned int i;
+
+	for (i = 0; i < priv->update_cookies_cnt; i++) {
+		if (priv->update_cookies[i] == cookie) {
+			GP_DEBUG(4, "Update cookie %u found", (unsigned int)cookie);
+			return i;
+		}
+	}
+
+	GP_DEBUG(4, "Update cookie %u not found", (unsigned int)cookie);
+
+	return -1;
+}
+
+/*
+ * Looks up an update cookie, clears it if found.
+ */
+static int update_cookie_clear(struct proxy_priv *priv, uint32_t cookie)
+{
+	int i = update_cookie_get(priv, cookie);
+
+	/* Fake completion events if we are hidden */
+	if (!priv->visible)
+		return 1;
+
+	if (i < 0)
+		return 0;
+
+	uint32_t last_cookie = priv->update_cookies[--priv->update_cookies_cnt];
+	priv->update_cookies[i] = last_cookie;
+
+	return 1;
 }
 
 /**
@@ -225,12 +284,12 @@ static int proxy_recv_events(gp_fd *self, int block)
 			gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
 			                 GP_EV_SYS_QUIT, 0, 0);
 			priv->sys_quit_requested = 1;
-			priv->update_in_progress = 0;
 		break;
 		case GP_PROXY_UPDATE:
-			GP_DEBUG(4, "Got GP_PROXY_UPDATE %i %i %i %i",
-				 msg->rect.rect.x, msg->rect.rect.y, msg->rect.rect.w, msg->rect.rect.h);
-			priv->update_in_progress = 0;
+			GP_DEBUG(4, "Got GP_PROXY_UPDATE %i %i %i %i cookie = %u",
+				 msg->rect.rect.x, msg->rect.rect.y, msg->rect.rect.w, msg->rect.rect.h,
+				 msg->rect.rect.cookie);
+			update_cookie_add(priv, msg->rect.rect.cookie);
 		break;
 		}
 	}
@@ -238,9 +297,28 @@ static int proxy_recv_events(gp_fd *self, int block)
 	return ret;
 }
 
+static int proxy_recv_events_mt(gp_backend *self, int block, int check_cookie, uint32_t cookie)
+{
+	static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
+	int ret = 0;
+
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+	pthread_mutex_lock(&mutex);
+	if (!check_cookie || update_cookie_get(priv, cookie) < 0)
+		ret = proxy_recv_events(&priv->fd, block);
+	pthread_mutex_unlock(&mutex);
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+
+	return ret;
+}
+
 static enum gp_poll_event_ret proxy_process_fd(gp_fd *self)
 {
-	while (proxy_recv_events(self, 0) > 0);
+	gp_backend *backend = self->priv;
+
+	while (proxy_recv_events_mt(backend, 0, 0, 0) > 0);
 
 	return 0;
 }
@@ -249,26 +327,27 @@ static void proxy_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
                              gp_coord x1, gp_coord y1)
 {
 	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
+	static uint32_t cookie;
 
 	if (!priv->visible) {
 		GP_DEBUG(4, "Not visible!");
 		return;
 	}
 
-	struct gp_proxy_rect_ rect = {
+	struct gp_proxy_rect rect = {
 		.x = x0,
 		.y = y0,
 		.w = x1 - x0 + 1,
 		.h = y1 - y0 + 1,
+		.cookie = ++cookie,
 	};
 
-	GP_DEBUG(4, "Sending GP_PROXY_UPDATE");
+	GP_DEBUG(4, "Sending GP_PROXY_UPDATE cookie %" PRIu32, cookie);
 
 	gp_proxy_send(priv->fd.fd, GP_PROXY_UPDATE, &rect);
 
-	priv->update_in_progress = 1;
-	while (priv->update_in_progress)
-		proxy_recv_events(&priv->fd, 1);
+	while (!update_cookie_clear(priv, cookie))
+		proxy_recv_events_mt(self, 1, 1, cookie);
 }
 
 static void proxy_flip(gp_backend *self)

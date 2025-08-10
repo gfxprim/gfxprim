@@ -123,23 +123,11 @@ static inline void gp_proxy_cli_event(gp_proxy_cli *self, gp_event *ev)
  * area for which update was pending.
  *
  * @param self A client (application).
- * @param x A rect x coordinate.
- * @param y A rect y coordinate.
- * @param w A rect width.
- * @param h A rect height.
+ * @param rect A proxy rectangle.
  */
-static inline void gp_proxy_cli_rect_updated(gp_proxy_cli *self,
-                                             uint32_t x, uint32_t y,
-                                             uint32_t w, uint32_t h)
+static inline void gp_proxy_cli_rect_updated(gp_proxy_cli *self, struct gp_proxy_rect *rect)
 {
-	struct gp_proxy_rect_ rect = {
-		.x = x,
-		.y = y,
-		.w = w,
-		.h = h,
-	};
-
-	gp_proxy_cli_send(self, GP_PROXY_UPDATE, &rect);
+	gp_proxy_cli_send(self, GP_PROXY_UPDATE, rect);
 }
 
 /**

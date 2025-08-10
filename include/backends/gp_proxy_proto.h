@@ -51,14 +51,14 @@ enum gp_proxy_msg_types {
 	/**
 	 * @brief Backend sends a basic information to the client (application).
 	 *
-	 * The payload lenght is sizeof(struct gp_proxy_cli_init) and among other
+	 * The payload lenght is sizeof(struct gp_proxy_cli_init_msg) and among other
 	 * things stores the pixel type for the application to use for drawing.
 	 *
 	 * This message is send to the application right after it connects to
 	 * the server and the application waits for this message before it
 	 * finished its initialization.
 	 *
-	 * See also struct gp_proxy_cli_init.
+	 * See also struct gp_proxy_cli_init_msg.
 	 */
 	GP_PROXY_CLI_INIT,
 	/**
@@ -67,7 +67,7 @@ enum gp_proxy_msg_types {
 	 * The payload is an input #gp_event which is put into the application
 	 * event queue.
 	 *
-	 * See also struct gp_proxy_event.
+	 * See also struct gp_proxy_event_msg.
 	 */
 	GP_PROXY_EVENT,
 	/**
@@ -137,7 +137,7 @@ enum gp_proxy_msg_types {
 /**
  * @brief A proxy input event message.
  */
-struct gp_proxy_event {
+struct gp_proxy_event_msg {
 	/** @brief Event type set to GP_PROXY_EVENT. */
 	uint32_t type;
 	/** @brief Event size set to header_size (8) + sizeof(gp_event). */
@@ -159,11 +159,23 @@ struct gp_proxy_path {
 /**
  * @brief A rectangle.
  */
-struct gp_proxy_rect_ {
+struct gp_proxy_rect {
+	/** @brief A x offset. */
 	uint32_t x;
+	/** @brief A y offset. */
 	uint32_t y;
+	/** @brief A width. */
 	uint32_t w;
+	/** @brief A height. */
 	uint32_t h;
+	/**
+	 * @brief An update cookie.
+	 *
+	 * Each update rect operation can send a unique cookie that is written
+	 * back to the application by the sever. This is used by the
+	 * application to pair the fininished operation to the right thread.
+	 */
+	uint32_t cookie;
 };
 
 /**
@@ -172,7 +184,7 @@ struct gp_proxy_rect_ {
  * This request is send by the sever to the application. When application
  * confirms the mmap() was finished it sends a reply without the payload.
  */
-struct gp_proxy_map {
+struct gp_proxy_map_msg {
 	/** @brief Event type is set to GP_PROXY_MAP. */
 	uint32_t type;
 	/** @brief Size is set to header size + sizeof(struct gp_proxy_path). */
@@ -186,7 +198,7 @@ struct gp_proxy_map {
  *
  * Send by the server to create a pixmap to draw to from the mapped SHM buffer.
  */
-struct gp_proxy_pixmap {
+struct gp_proxy_pixmap_msg {
 	/** @brief Event type is set to GP_PROXY_PIXMAP. */
 	uint32_t type;
 	/** @brief Size is set to header size + sizeof(gp_pixmap). */
@@ -200,13 +212,13 @@ struct gp_proxy_pixmap {
  *
  * Send by the application to request update from the SHM memory to the screen.
  */
-struct gp_proxy_rect {
+struct gp_proxy_rect_msg {
 	/** @brief Event type is set to GP_PROXY_UPDATE. */
 	uint32_t type;
 	/** @brief Size is set to header size + sizeof(struct gp_proxy_rect_). */
 	uint32_t size;
 	/** @brief The rectangle payload. */
-	struct gp_proxy_rect_ rect;
+	struct gp_proxy_rect rect;
 };
 
 /**
@@ -225,7 +237,7 @@ struct gp_proxy_cli_init_ {
 /**
  * @brief An initial infromation send to a client (application).
  */
-struct gp_proxy_cli_init {
+struct gp_proxy_cli_init_msg {
 	/** @brief Event type is set to GP_PROXY_CLI_INIT. */
 	uint32_t type;
 	/** @brief Size is set to header size + sizeof(struct gp_proxy_rect_). */
@@ -245,7 +257,7 @@ typedef struct gp_proxy_coord {
 /**
  * @brief A proxy cursor position.
  */
-struct gp_proxy_cursor {
+struct gp_proxy_cursor_msg {
 	/** @brief Event type set to GP_PROXY_CURSOR_POS. */
 	uint32_t type;
 	/** @brief Size is set to header size + sizeof(struct gp_proxy_coord). */
@@ -265,12 +277,12 @@ typedef union gp_proxy_msg {
 		uint32_t size;
 		char payload[];
 	};
-	struct gp_proxy_event ev;
-	struct gp_proxy_map map;
-	struct gp_proxy_pixmap pix;
-	struct gp_proxy_rect rect;
-	struct gp_proxy_cli_init cli_init;
-	struct gp_proxy_cursor cursor;
+	struct gp_proxy_event_msg ev;
+	struct gp_proxy_map_msg map;
+	struct gp_proxy_pixmap_msg pix;
+	struct gp_proxy_rect_msg rect;
+	struct gp_proxy_cli_init_msg cli_init;
+	struct gp_proxy_cursor_msg cursor;
 } gp_proxy_msg;
 
 /**

@@ -134,7 +134,7 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 		payload_size = sizeof(gp_pixmap);
 	break;
 	case GP_PROXY_UPDATE:
-		payload_size = sizeof(struct gp_proxy_rect_);
+		payload_size = sizeof(struct gp_proxy_rect);
 	break;
 	case GP_PROXY_CURSOR_POS:
 		payload_size = sizeof(struct gp_proxy_coord);

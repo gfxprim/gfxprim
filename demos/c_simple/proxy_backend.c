@@ -52,12 +52,18 @@ static void redraw(void)
 	gp_backend_flip(backend);
 }
 
-static void shm_update(gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp_size h)
+static void shm_update(gp_proxy_cli *self, struct gp_proxy_rect *rect)
 {
 	gp_size screen_h = backend->pixmap->h;
 
 	if (self != cli_shown)
 		return;
+
+	gp_size w = rect->w;
+	gp_size h = rect->h;
+
+	gp_size x = rect->x;
+	gp_size y = rect->y;
 
 	if (h > screen_h) {
 		GP_WARN("Invalid height");
@@ -69,7 +75,7 @@ static void shm_update(gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp
 
 	gp_backend_update_rect_xywh(backend, x, y, w, h);
 
-	gp_proxy_cli_rect_updated(self, x, y, w, h);
+	gp_proxy_cli_rect_updated(self, rect);
 }
 
 static void do_exit(void)
@@ -241,9 +247,7 @@ static enum gp_poll_event_ret client_event(gp_fd *self)
 			on_unmap(self->priv);
 		break;
 		case GP_PROXY_UPDATE:
-			shm_update(self->priv,
-			           msg->rect.rect.x, msg->rect.rect.y,
-			           msg->rect.rect.w, msg->rect.rect.h);
+			shm_update(self->priv, &msg->rect.rect);
 		break;
 		case GP_PROXY_NAME:
 			if (!cli_shown)
