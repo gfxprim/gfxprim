@@ -30,20 +30,20 @@ static int x11_clipboard(gp_backend *self, gp_clipboard *op)
 		copy_to_clipboard(self, op->str, op->len);
 		XSetSelectionOwner(win->dpy, x11_conn.A_CLIPBOARD, win->win, 0);
 		GP_DEBUG(3, "Setting XSelectionOwner for A_CLIPBOARD");
-		return 0;
+		goto flush;
 	break;
 	case GP_CLIPBOARD_CLEAR:
 		clear_clipboard(self);
 		XSetSelectionOwner(win->dpy, x11_conn.A_CLIPBOARD, None, 0);
 		GP_DEBUG(3, "Clearing XSelectionOwner for A_CLIPBOARD");
-                return 0;
+                goto flush;
         break;
 	case GP_CLIPBOARD_REQUEST:
 		XConvertSelection(win->dpy, x11_conn.A_CLIPBOARD,
 		                  x11_conn.A_UTF8_STRING, x11_conn.A_XSEL_DATA,
 		                  win->win, CurrentTime);
 		GP_DEBUG(3, "Requesting A_CLIPBOARD with XConvertSelection");
-		return 0;
+		goto flush;
 	break;
 	case GP_CLIPBOARD_GET:
 		if (!self->clipboard_data) {
@@ -53,11 +53,14 @@ static int x11_clipboard(gp_backend *self, gp_clipboard *op)
 		}
 		GP_DEBUG(3, "Returning clipboard data");
 		op->ret = strdup(self->clipboard_data);
-		return 0;
+		goto flush;
 	break;
 	}
 
 	return 1;
+flush:
+	XFlush(win->dpy);
+	return 0;
 }
 
 static void x11_selection_clear(gp_backend *self, XEvent *ev)
