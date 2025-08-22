@@ -600,6 +600,8 @@ static int x11_set_cursor(gp_backend *self, enum gp_backend_cursor_req cursor)
 		return GP_BACKEND_NOTSUPP;
 	}
 
+	XFlush(win->dpy);
+
 	return GP_BACKEND_OK;
 }
 
