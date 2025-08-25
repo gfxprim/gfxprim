@@ -102,7 +102,7 @@ zypper in xcb-util-keysyms-devel
 
 .Install Wayland devel library
 -------------------------------------------------------------------------------
-zypper in wayland-devel
+zypper in wayland-devel libxkbcommon-devel
 -------------------------------------------------------------------------------
 
 .Install swig
@@ -114,8 +114,8 @@ zypper in swig python-devel
 -------------------------------------------------------------------------------
 zypper in gcc make libjpeg-devel libpng-devel giflib-devel libtiff-devel
           freetype-devel fontconfig-devel libX11-devel libXext-devel
-          libXrandr-devel xcb-util-keysyms-devel wayland-devel swig
-          python-devel
+          libXrandr-devel xcb-util-keysyms-devel wayland-devel libxkbcommon-devel
+          swig python-devel
 -------------------------------------------------------------------------------
 
 Debian
@@ -146,7 +146,7 @@ apt-get install libx11-dev libxfixes-dev libxext-dev libxrandr-dev
 
 .Install Wayland devel library
 -------------------------------------------------------------------------------
-apt-get install libwayland-dev
+apt-get install libwayland-dev libxkbcommon-dev
 -------------------------------------------------------------------------------
 
 .Install swig
@@ -159,7 +159,7 @@ apt-get install swig python-dev
 apt-get install gcc make pkg-config libjpeg-dev libpng-dev libgif-dev
                 libtiff-dev libwebp-dev libfreetype6-dev libfontconfig-dev
                 libx11-dev libxfixes-dev libxext-dev libxrandr-dev
-                libwayland-dev swig python-dev
+                libwayland-dev libxkbcommon-dev swig python-dev
 -------------------------------------------------------------------------------
 
 Deb packages can be build from the GFXprim source (after installing necessary
