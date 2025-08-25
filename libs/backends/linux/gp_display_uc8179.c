@@ -43,7 +43,7 @@ static void uc81xx_init(struct gp_display_spi *self)
 	 * And LUT for BW so that 1 == white and 0 == black
 	 */
 	gp_display_spi_cmd(self, UC8179_VCON);
-	gp_display_spi_data(self, 0x83);
+	gp_display_spi_data(self, 0x8b);
 }
 
 static void uc81xx_deep_sleep(struct gp_display_spi *self)
@@ -152,6 +152,9 @@ static void repaint_part_start(gp_backend *self, gp_coord x0, gp_coord y0, gp_co
 		gp_display_spi_data_write(disp, tx_buf, len);
 	}
 
+	/* Exit partial mode */
+	gp_display_spi_cmd(disp, UC8179_PTOUT);
+
 	/* Setup interrupt source */
 	gp_display_spi_busy_edge_set(disp, GP_GPIO_EDGE_RISE);
 
@@ -174,9 +177,6 @@ static void repaint_part_finish(gp_backend *self)
 
 	/* Disable interrupt source */
 	gp_display_spi_busy_edge_set(spi, GP_GPIO_EDGE_NONE);
-
-	/* Exit partial mode */
-	gp_display_spi_cmd(spi, UC8179_PTOUT);
 
 	/* Power off and wait for ready */
 	gp_display_spi_cmd(spi, UC8179_POF);
@@ -208,8 +208,8 @@ gp_backend *gp_waveshare_7_5_v2_init(void)
 
 	uc81xx_init(&eink->spi);
 
-	eink->full_repaint_ms = 4000;
-	eink->part_repaint_ms = 4000;
+	eink->full_repaint_ms = 2000;
+	eink->part_repaint_ms = 1000;
 	eink->repaint_full_start = repaint_full_start;
 	eink->repaint_full_finish = repaint_full_finish;
 	eink->repaint_part_start = repaint_part_start;
