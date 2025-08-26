@@ -37,7 +37,11 @@ int gp_proxy_callback(gp_progress_cb *self)
         else
                 args = Py_BuildValue("(f)", self->percentage);
 
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 9
+        res = PyObject_Call(params->callback, args, NULL);
+#else
         res = PyEval_CallObject(params->callback, args);
+#endif
 
         /* Parse Error, Interruption, etc. */
         if (res == NULL) {
