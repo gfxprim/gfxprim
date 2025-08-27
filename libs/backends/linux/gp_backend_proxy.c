@@ -35,6 +35,7 @@ struct proxy_priv {
 
 	unsigned int visible:1;
 	unsigned int sys_quit_requested:1;
+	unsigned int unmap_requested:1;
 
 	/* array to store udpate rect cookies */
 	uint32_t update_cookies[UPDATE_COOKIES_MAX];
@@ -113,25 +114,23 @@ static void hidden(gp_backend *self)
 {
 	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
 
-	//TODO: remap GP_PROXY_NONE?
-
 	priv->visible = 0;
-
-	self->pixmap = &priv->dummy;
 }
 
 static void unmap_buffer(gp_backend *self)
 {
 	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
 
-	munmap(priv->map, priv->map_size);
+	if (!priv->map) {
+		GP_WARN("Buffer unmap requested but buffer is not mapped!");
+		return;
+	}
 
-	priv->map = NULL;
-	priv->map_size = 0;
+	priv->unmap_requested = 1;
 
-//	hidden(self);
+	GP_DEBUG(1, "Buffer unmap requested");
 
-	gp_proxy_send(priv->fd.fd, GP_PROXY_UNMAP, NULL);
+	gp_ev_queue_push_resize(self->event_queue, 0, 0, 0);
 }
 
 static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
@@ -355,6 +354,28 @@ static void proxy_flip(gp_backend *self)
 	proxy_update_rect(self, 0, 0, self->pixmap->w-1, self->pixmap->h-1);
 }
 
+static int proxy_resize_ack(gp_backend *self)
+{
+	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
+
+	if (priv->unmap_requested) {
+		munmap(priv->map, priv->map_size);
+
+		priv->map = NULL;
+		priv->map_size = 0;
+
+		self->pixmap = &priv->dummy;
+
+		gp_proxy_send(priv->fd.fd, GP_PROXY_UNMAP, NULL);
+
+		priv->unmap_requested = 0;
+
+		GP_DEBUG(1, "Buffer unmap completed");
+	}
+
+	return 0;
+}
+
 gp_backend *gp_proxy_init(const char *path, const char *title)
 {
 	int fd;
@@ -398,12 +419,13 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	ret->exit = proxy_exit;
 	ret->update_rect = proxy_update_rect;
 	ret->flip = proxy_flip;
-
+	ret->resize_ack = proxy_resize_ack;
 
 	priv->map = NULL;
 	priv->map_size = 0;
 	priv->visible = 0;
 	priv->sys_quit_requested = 0;
+	priv->unmap_requested = 0;
 
 	gp_proxy_buf_init(&priv->buf);
 
