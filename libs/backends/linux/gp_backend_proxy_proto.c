@@ -15,13 +15,8 @@
 
 static int validate_msg(const union gp_proxy_msg *msg, unsigned int size)
 {
-	if (size == 0)
+	if (size < 8)
 		return 0;
-
-	if (size < 8) {
-		GP_WARN("Invalid message size %u < 8", size);
-		return -1;
-	}
 
 	if (msg->type >= GP_PROXY_MAX) {
 		GP_WARN("Invalid message type %" PRIu32, msg->type);
@@ -163,12 +158,12 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 
 	ssize_t ret = sendmsg(fd, &hdr, 0);
 
-	if (ret == -1) {
+	if (ret < 0) {
 		GP_WARN("sendmsg(): %s", strerror(errno));
 		return 1;
 	}
 
-	if (ret != msg.size) {
+	if ((uint32_t)ret != msg.size) {
 		GP_WARN("sendmsg() returned %zi != %" PRIu32, ret, msg.size);
 		return 1;
 	}
