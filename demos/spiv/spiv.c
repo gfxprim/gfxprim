@@ -774,14 +774,14 @@ static uint32_t timer_callback(gp_timer *self)
 	static int retries = 0;
 
 	/*
-	 * If loader is still running, reschedule after 20ms
+	 * If loader is still running, reschedule after 200ms
 	 *
-	 * If more than two seconds has passed, try load next
+	 * If more than twenty seconds has passed, try load next
 	 */
 	if (loader_running && retries < 100) {
-		printf("Loader still running %ims\n", 20 * retries);
+		printf("Loader still running %ims\n", 200 * retries);
 		retries++;
-		return 20;
+		return 200;
 	} else {
 		retries = 0;
 	}
@@ -1019,7 +1019,6 @@ int main(int argc, char *argv[])
 					show_image(&params);
 				break;
 				case GP_KEY_ESC:
-				case GP_KEY_ENTER:
 				case GP_KEY_Q:
 					stop_loader();
 					image_cache_destroy(params.img_resized_cache);
