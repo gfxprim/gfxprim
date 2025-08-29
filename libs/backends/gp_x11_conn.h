@@ -36,6 +36,8 @@ struct x11_conn {
 	Cursor cursor_text_edit;
 	Cursor cursor_crosshair;
 	Cursor cursor_hand;
+	Cursor cursor_empty;
+	Cursor cursor_saved;
 
 	/* reference counter, incremented on window creation */
 	unsigned int ref_cnt;
@@ -102,12 +104,31 @@ static void x11_detect_wm_features(void)
 	}
 }
 
+static void create_empty_cursor(void)
+{
+
+	Pixmap empty_bitmap;
+	XColor black = {.red = 0, .blue = 0, .green = 0};
+	static char empty_pixels[] = {0, 0, 0, 0, 0, 0, 0, 0};
+	Window root_win = XDefaultRootWindow(x11_conn.dpy);
+
+	empty_bitmap = XCreateBitmapFromData(x11_conn.dpy, root_win, empty_pixels, 8, 8);
+	x11_conn.cursor_empty = XCreatePixmapCursor(x11_conn.dpy,
+	                                            empty_bitmap, empty_bitmap,
+	                                            &black, &black, 0, 0);
+	XDefineCursor(x11_conn.dpy, root_win, x11_conn.cursor_empty);
+}
+
 static void x11_get_cursors(void)
 {
 	x11_conn.cursor_arrow = XCreateFontCursor(x11_conn.dpy, XC_left_ptr);
 	x11_conn.cursor_text_edit = XCreateFontCursor(x11_conn.dpy, XC_xterm);
 	x11_conn.cursor_crosshair = XCreateFontCursor(x11_conn.dpy, XC_tcross);
 	x11_conn.cursor_hand = XCreateFontCursor(x11_conn.dpy, XC_hand2);
+
+	x11_conn.cursor_saved = x11_conn.cursor_arrow;
+
+	create_empty_cursor();
 }
 
 static void x11_input_init(void);

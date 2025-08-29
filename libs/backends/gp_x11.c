@@ -579,21 +579,27 @@ static int x11_set_cursor(gp_backend *self, enum gp_backend_cursor_req cursor)
 
 	switch (cursor) {
 	case GP_BACKEND_CURSOR_HIDE:
-		XFixesHideCursor(win->dpy, win->win);
+	//	XFixesHideCursor(win->dpy, win->win);
+		XDefineCursor(win->dpy, win->win, x11_conn.cursor_empty);
 	break;
 	case GP_BACKEND_CURSOR_SHOW:
-		XFixesShowCursor(win->dpy, win->win);
+	//	XFixesShowCursor(win->dpy, win->win);
+		XDefineCursor(win->dpy, win->win, x11_conn.cursor_saved);
 	break;
 	case GP_BACKEND_CURSOR_ARROW:
+		x11_conn.cursor_saved = x11_conn.cursor_arrow;
 		XDefineCursor(win->dpy, win->win, x11_conn.cursor_arrow);
 	break;
 	case GP_BACKEND_CURSOR_TEXT_EDIT:
+		x11_conn.cursor_saved = x11_conn.cursor_text_edit;
 		XDefineCursor(win->dpy, win->win, x11_conn.cursor_text_edit);
 	break;
 	case GP_BACKEND_CURSOR_CROSSHAIR:
+		x11_conn.cursor_saved = x11_conn.cursor_crosshair;
 		XDefineCursor(win->dpy, win->win, x11_conn.cursor_crosshair);
 	break;
 	case GP_BACKEND_CURSOR_HAND:
+		x11_conn.cursor_saved = x11_conn.cursor_hand;
 		XDefineCursor(win->dpy, win->win, x11_conn.cursor_hand);
 	break;
 	default:
