@@ -131,7 +131,7 @@ static void st75256_init(struct gp_display_spi *disp, unsigned int bpp)
 	gp_display_spi_data(disp, 0x04);
 
 	/* Set gray levels */
-	set_gray_level(disp, 0x0b, 0x0f);
+	set_gray_level(disp, 0x09, 0x0c);
 
 /*
 	gp_display_spi_cmd(disp, ST75256_ANALOG_CIRCUIT_SET);
