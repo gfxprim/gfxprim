@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
 	gp_progress_cb callback = {.callback = progress_callback,
 	                           .priv = &priv};
 
-	if (argc != 2) {
-		fprintf(stderr, "Takes an image as an parameter\n");
+	if (argc != 3) {
+		fprintf(stderr, "usage: %s in_img out_img\n", argv[0]);
 		return 1;
 	}
 
@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
 
 
 	priv.op   = "Saving";
-	priv.name = "out.png";
+	priv.name = argv[2];
 
-	if (gp_save_png(img, "out.png", &callback)) {
+	if (gp_save_image(img, argv[2], &callback)) {
 		fprintf(stderr, "Failed to save image %s", strerror(errno));
 		return 1;
 	}
