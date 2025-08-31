@@ -18,6 +18,7 @@
 
 #include <loaders/gp_io.h>
 #include <loaders/gp_loaders.gen.h>
+#include <loaders/gp_line_convert.h>
 
 int gp_match_webp(const void *buf)
 {
@@ -30,9 +31,15 @@ int gp_match_webp(const void *buf)
 	return 1;
 }
 
+static gp_pixel_type out_pixel_types[] = {
+	GP_PIXEL_BGR888,
+	GP_PIXEL_UNKNOWN
+};
+
 #ifdef HAVE_WEBP
 
 #include <webp/decode.h>
+#include <webp/encode.h>
 
 static void fill_metadata(gp_storage *storage, int w, int h)
 {
@@ -156,6 +163,122 @@ err0:
 	return 1;
 }
 
+static int webp_writer_func(const uint8_t* data, size_t data_size, const WebPPicture *picture)
+{
+	gp_io *io = picture->custom_ptr;
+
+	gp_io_write(io, data, data_size);
+
+	return 1;
+}
+
+static int webp_progress_hook(int percents, const WebPPicture *picture)
+{
+	gp_progress_cb *callback = picture->user_data;
+
+	if (callback) {
+		callback->percentage = percents;
+		return !callback->callback(callback);
+	}
+
+	return 1;
+}
+
+int gp_write_webp_ex(const gp_pixmap *src, gp_io *io, gp_progress_cb *callback)
+{
+	int err;
+	gp_pixel_type out_pix;
+	WebPPicture picture = {};
+	WebPConfig config;
+
+	GP_DEBUG(1, "Writing WebP Image to I/O (%p)", io);
+
+	out_pix = gp_line_convertible(src->pixel_type, out_pixel_types);
+	if (out_pix == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Unsupported pixel type %s",
+		         gp_pixel_type_name(src->pixel_type));
+		errno = ENOSYS;
+		return 1;
+	}
+
+	if (!WebPConfigInit(&config)) {
+		GP_DEBUG(1, "Failed to initialize encoder");
+		errno = EINVAL;
+		return 1;
+	}
+
+	config.lossless = 1;
+
+	if (!WebPPictureInit(&picture)) {
+		GP_DEBUG(1, "Failed to initialize picture");
+		errno = EINVAL;
+		return 1;
+	}
+
+	picture.width = src->w;
+	picture.height = src->h;
+	picture.use_argb = 1;
+
+	if (!WebPPictureAlloc(&picture)) {
+		GP_DEBUG(1, "Malloc failed :(");
+		errno = ENOMEM;
+		return 1;
+	}
+
+	gp_line_convert convert = gp_line_convert_get(src->pixel_type, out_pix);
+	uint32_t *dst_buf = picture.argb;
+	gp_size x, y;
+
+	picture.argb_stride = src->w;
+
+	for (y = 0; y < src->h; y++) {
+		uint8_t *src_buf = GP_PIXEL_ADDR(src, 0, y);
+		uint8_t tmp[3 * src->w];
+
+		if (convert) {
+			convert(src_buf, tmp, src->w);
+			src_buf = tmp;
+		}
+
+		/* WebPImage stores RGB pixels always with alpha channel. */
+		for (x = 0; x < src->w; x++) {
+			dst_buf[x] = (0xff000000) | (src_buf[3*x]<<16) | (src_buf[3*x+1]<<8) | src_buf[3*x+2];
+		}
+		dst_buf += src->w;
+	}
+
+	picture.writer = webp_writer_func;
+	picture.custom_ptr = io;
+
+	if (callback) {
+		picture.progress_hook = webp_progress_hook;
+		picture.user_data = callback;
+	}
+
+	err = WebPEncode(&config, &picture);
+
+	switch (picture.error_code) {
+	case VP8_ENC_OK:
+	break;
+	case VP8_ENC_ERROR_USER_ABORT:
+		errno = ECANCELED;
+	break;
+	case VP8_ENC_ERROR_BITSTREAM_OUT_OF_MEMORY:
+	case VP8_ENC_ERROR_OUT_OF_MEMORY:
+		errno = ENOMEM;
+	break;
+	case VP8_ENC_ERROR_BAD_WRITE:
+		errno = EIO;
+	break;
+	default:
+		errno = EINVAL;
+	}
+
+	WebPPictureFree(&picture);
+
+	return !err;
+}
+
 #else
 
 int gp_read_webp_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
@@ -166,11 +289,20 @@ int gp_read_webp_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
 	return 1;
 }
 
+int gp_write_webp_ex(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
+                     gp_progress_cb GP_UNUSED(*callback))
+{
+	errno = ENOSYS;
+	return 1;
+}
+
 #endif /* HAVE_WEBP */
 
 const gp_loader gp_webp = {
 #ifdef HAVE_WEBP
 	.read = gp_read_webp_ex,
+	.write = gp_write_webp_ex,
+	.save_ptypes = out_pixel_types,
 #endif /* HAVE_WEBP */
 	.match = gp_match_webp,
 
