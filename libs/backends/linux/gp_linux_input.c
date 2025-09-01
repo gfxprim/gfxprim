@@ -528,6 +528,11 @@ static void input_destroy(gp_backend_input *self)
 
 	gp_ev_queue_feedback_unregister(input->backend->event_queue, &input->feedback);
 
+	GP_DEBUG(1, "Ungrabbing device");
+
+	if (ioctl(input->fd.fd, EVIOCGRAB, 0))
+		GP_WARN("Failet to ungrab device: %s", strerror(errno));
+
 	close(input->fd.fd);
 	free(input);
 }
