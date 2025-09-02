@@ -116,7 +116,6 @@ static void create_empty_cursor(void)
 	x11_conn.cursor_empty = XCreatePixmapCursor(x11_conn.dpy,
 	                                            empty_bitmap, empty_bitmap,
 	                                            &black, &black, 0, 0);
-	XDefineCursor(x11_conn.dpy, root_win, x11_conn.cursor_empty);
 }
 
 static void x11_get_cursors(void)
