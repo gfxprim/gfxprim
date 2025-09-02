@@ -320,6 +320,10 @@ uint32_t gp_utf_fallback(uint32_t ch)
 		return ret;
 
 	switch (ch) {
+	case 0x2018: /* Left single quotation mark. */
+		return '\'';
+	case 0x2019: /* Right single quotation mark. */
+		return '\'';
 	case 0xa9: /* copyright */
 		return 'C';
 	}
