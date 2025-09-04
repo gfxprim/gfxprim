@@ -244,6 +244,9 @@ gp_backend *gp_aalib_init(void)
 
 	gp_ev_queue_init(backend->event_queue, w, h, 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
+	gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
+	                 GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_IN, 0);
+
 	return backend;
 err2:
 	aa_close(aa->c);

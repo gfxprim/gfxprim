@@ -499,6 +499,8 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 
 	gp_ev_queue_init(backend->event_queue, vscri.xres, vscri.yres,
 	                 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
+	gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
+	                 GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_IN, 0);
 
 	if (flags & GP_FB_INPUT_LINUX) {
 		if (gp_linux_input_hotplug_new(backend))
