@@ -99,6 +99,48 @@ enum gp_ev_sys_code {
 	 * is stored in the val.
 	 */
 	GP_EV_SYS_BACKLIGHT = 3,
+
+	/**
+	 * @brief A focus in or focus out event.
+	 *
+	 * The event val is set to enum gp_ev_sys_focus_val.
+	 */
+	GP_EV_SYS_FOCUS = 4,
+
+	/**
+	 * @brief An application is shown on or hidden from a screen.
+	 *
+	 * The event val is set to enum gp_ev_sys_visibility_val
+	 */
+	GP_EV_SYS_VISIBILITY = 5,
+};
+
+/**
+ * @brief Values for the GP_EV_SYS_FOCUS event.
+ *
+ * Application starts in focused out state and should expect to be notified
+ * when it gains focus.
+ */
+enum gp_ev_sys_focus_val {
+	/** @brief Application was focused out. */
+	GP_EV_SYS_FOCUS_OUT = 0,
+	/** @brief Appliaction was focused in. */
+	GP_EV_SYS_FOCUS_IN = 1,
+};
+
+/**
+ * @brief Values for the GP_EV_SYS_VISIBILITY event.
+ *
+ * Application should assume that it's visible unless it gets a hide event.
+ *
+ * When application is hidden it should stop rendering into the buffer to save
+ * CPU cycles.
+ */
+enum gp_ev_sys_visibility_val {
+	/** @brief Application is hidden from a screen. */
+	GP_EV_SYS_VISIBILITY_HIDE = 0,
+	/** @brief Application is shown on a screen. */
+	GP_EV_SYS_VISIBILITY_SHOW = 1,
 };
 
 /** @brief A relative cursor position change. */

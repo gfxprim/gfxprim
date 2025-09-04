@@ -111,6 +111,12 @@ static void dump_sys(gp_event *ev)
 	case GP_EV_SYS_BACKLIGHT:
 		printf("Backlight brightness changed to %i%%\n", (int)ev->val);
 	break;
+	case GP_EV_SYS_FOCUS:
+		printf("Sys Focus %s\n", ev->val ? "In" : "Out");
+	break;
+	case GP_EV_SYS_VISIBILITY:
+		printf("Sys Visibility %s\n", ev->val ? "Show" : "Hide");
+	break;
 	}
 }
 
