@@ -212,13 +212,33 @@ void gp_input_driver_sdl_event_put(gp_backend *backend, gp_ev_queue *event_queue
 	break;
 #elif LIBSDL_VERSION == 2
 	case SDL_WINDOWEVENT:
-		if (ev->window.event == SDL_WINDOWEVENT_EXPOSED)
-			gp_backend_flip(backend);
-
-		if (ev->window.event == SDL_WINDOWEVENT_SIZE_CHANGED ||
-		    ev->window.event == SDL_WINDOWEVENT_RESIZED) {
+		switch (ev->window.event) {
+		case SDL_WINDOWEVENT_SIZE_CHANGED:
+		case SDL_WINDOWEVENT_RESIZED:
 			gp_ev_queue_push_resize(event_queue, ev->window.data1,
-			                           ev->window.data2, 0);
+			                        ev->window.data2, 0);
+		break;
+		case SDL_WINDOWEVENT_EXPOSED:
+			gp_backend_flip(backend);
+		break;
+		case SDL_WINDOWEVENT_FOCUS_GAINED:
+			gp_ev_queue_push(event_queue, GP_EV_SYS,
+			                 GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_IN, 0);
+		break;
+		case SDL_WINDOWEVENT_FOCUS_LOST:
+			gp_ev_queue_push(event_queue, GP_EV_SYS,
+			                 GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_OUT, 0);
+		break;
+		case SDL_WINDOWEVENT_SHOWN:
+			gp_ev_queue_push(event_queue, GP_EV_SYS,
+			                 GP_EV_SYS_VISIBILITY, GP_EV_SYS_VISIBILITY_SHOW, 0);
+		break;
+		case SDL_WINDOWEVENT_HIDDEN:
+			gp_ev_queue_push(event_queue, GP_EV_SYS,
+			                 GP_EV_SYS_VISIBILITY, GP_EV_SYS_VISIBILITY_HIDE, 0);
+		break;
+		default:
+			GP_DEBUG(0, "Unhandled event %i\n", ev->window.event);
 		}
 	break;
 #endif
