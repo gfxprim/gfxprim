@@ -290,6 +290,9 @@ static void wait_timers_poll(gp_backend *self)
 
 void gp_backend_wait(gp_backend *self)
 {
+	if (gp_backend_ev_queued(self))
+		return;
+
 	if (self->timers) {
 		uint64_t now = gp_time_stamp();
 
