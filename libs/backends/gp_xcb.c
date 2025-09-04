@@ -19,11 +19,6 @@
 
 #include <core/gp_pixmap.h>
 
-#include "gp_xcb_con.h"
-#include "gp_xcb_input.h"
-
-static void x_poll_events(gp_backend *backend);
-
 struct win {
 	xcb_screen_t *scr;
 	xcb_window_t win;
@@ -40,7 +35,12 @@ struct win {
 
 	int resized:1;
 	int fullscreen:1;
+	int visible:1;
+	int focused:1;
 };
+
+#include "gp_xcb_con.h"
+#include "gp_xcb_input.h"
 
 static void x_exit(gp_backend *self)
 {
@@ -203,6 +203,8 @@ static void put_shm_image(gp_backend *self, int x, int y, int w, int h)
 	xcb_flush(x_con.c);
 }
 
+static void x_poll_events(gp_backend *backend);
+
 static void x_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
                              gp_coord x1, gp_coord y1)
 {
@@ -311,7 +313,7 @@ static void x_ev(gp_backend *self, xcb_generic_event_t *ev)
 		win->resized = 1;
 	} /* fallthru */
 	default:
-		xcb_input_event_put(self->event_queue, ev,
+		xcb_input_event_put(self->event_queue, win, ev,
 		                    self->pixmap->w, self->pixmap->h);
 	}
 }
@@ -604,6 +606,7 @@ static int create_window(struct gp_backend *self, struct win *win,
 			       XCB_EVENT_MASK_BUTTON_RELEASE |
 			       XCB_EVENT_MASK_POINTER_MOTION |
 			       XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+			       XCB_EVENT_MASK_VISIBILITY_CHANGE |
 	                       XCB_EVENT_MASK_FOCUS_CHANGE};
 
 	xcb_create_window(c,
@@ -678,6 +681,9 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 		goto err0;
 
 	win = GP_BACKEND_PRIV(backend);
+
+	win->visible = 1;
+	win->focused = 0;
 
 	int fd = xcb_get_file_descriptor(x_con.c);
 
