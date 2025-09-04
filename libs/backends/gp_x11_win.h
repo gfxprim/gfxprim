@@ -40,6 +40,8 @@ struct x11_win {
 	int resized_flag:1;
 	int shm_flag:1;
 	int fullscreen_flag:1;
+	int visible:1;
+	int focused:1;
 
 	/* poll fd structure */
 	gp_fd fd;
@@ -215,7 +217,7 @@ static int x11_win_open(struct x11_wreq *wreq)
 
 	/* Set event mask */
 	attrs.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask |
-	                   KeyReleaseMask | PointerMotionMask | FocusChangeMask;
+	                   KeyReleaseMask | PointerMotionMask | FocusChangeMask | VisibilityChangeMask;
 	attr_mask |= CWEventMask;
 
 	/*
@@ -394,9 +396,6 @@ static int x11_win_open(struct x11_wreq *wreq)
 	x11_input_init_im(win);
 
 	win_list_add(win);
-
-	/* Show window */
-	XMapWindow(win->dpy, win->win);
 
 	return 0;
 }

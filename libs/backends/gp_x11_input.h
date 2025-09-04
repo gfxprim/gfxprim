@@ -154,6 +154,40 @@ static unsigned int get_key(unsigned int xkey)
 	return key;
 }
 
+static void handle_visibility(gp_ev_queue *event_queue, struct x11_win *win, int val)
+{
+	if (val == GP_EV_SYS_VISIBILITY_SHOW) {
+		if (win->visible)
+			return;
+		win->visible = 1;
+	}
+
+	if (val == GP_EV_SYS_VISIBILITY_HIDE) {
+		if (!win->visible)
+			return;
+		win->visible = 0;
+	}
+
+	gp_ev_queue_push(event_queue, GP_EV_SYS, GP_EV_SYS_VISIBILITY, val, 0);
+}
+
+static void handle_focus(gp_ev_queue *event_queue, struct x11_win *win, int val)
+{
+	if (val == GP_EV_SYS_FOCUS_IN) {
+		if (win->focused)
+			return;
+		win->focused = 1;
+	}
+
+	if (val == GP_EV_SYS_FOCUS_OUT) {
+		if (!win->focused)
+			return;
+		win->focused = 0;
+	}
+
+	gp_ev_queue_push(event_queue, GP_EV_SYS, GP_EV_SYS_FOCUS, val, 0);
+}
+
 static void x11_input_event_put(gp_ev_queue *event_queue,
                                 XEvent *ev, struct x11_win *win, int w, int h)
 {
@@ -246,6 +280,7 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 	break;
 	case MapNotify:
 		GP_DEBUG(1, "MapNotify event received");
+		handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
 	break;
 	case ReparentNotify:
 		GP_DEBUG(1, "ReparentNotify event received");
@@ -255,13 +290,32 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 	break;
 	case UnmapNotify:
 		GP_DEBUG(1, "UnmapNotify event received");
+		handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_HIDE);
 	break;
 	case FocusOut:
 		GP_DEBUG(1, "FocusOut event releasing all keys in events_state");
 		gp_events_state_release_all(&event_queue->state);
+		handle_focus(event_queue, win, GP_EV_SYS_FOCUS_OUT);
 	break;
 	case FocusIn:
 		GP_DEBUG(1, "FocusIn event received");
+		handle_focus(event_queue, win, GP_EV_SYS_FOCUS_IN);
+	break;
+	case VisibilityNotify:
+		switch (ev->xvisibility.state) {
+		case VisibilityFullyObscured:
+			GP_DEBUG(1, "VisibilityFullyObscured received");
+			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_HIDE);
+		break;
+		case VisibilityPartiallyObscured:
+			GP_DEBUG(1, "VisibilityPartiallyObscured received");
+			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
+		break;
+		case VisibilityUnobscured:
+			GP_DEBUG(1, "VisibilityUnobscured received");
+			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
+		break;
+		}
 	break;
 	default:
 		GP_WARN("Unhandled X11 event type %u", ev->type);

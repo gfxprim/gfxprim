@@ -651,8 +651,6 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 
 	win = GP_BACKEND_PRIV(backend);
 
-	//XSynchronize(win->dpy, True);
-
 	/* Pack parameters and open window */
 	struct x11_wreq wreq = {
 		.win = win,
@@ -673,6 +671,13 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 		goto err1;
 	}
 
+	//XSynchronize(win->dpy, True);
+
+	backend->event_queue = &win->ev_queue;
+	gp_ev_queue_init(backend->event_queue, wreq.w, wreq.h, 0, NULL, NULL, 0);
+
+	process_events(win, backend);
+
 	int fd = XConnectionNumber(win->dpy);
 
 	win->fd = (gp_fd) {
@@ -687,10 +692,6 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	if (flags & GP_X11_FULLSCREEN)
 		x11_win_fullscreen(win, GP_BACKEND_FULLSCREEN_ON);
 
-	/* Init the event queue, once we know the window size */
-	backend->event_queue = &win->ev_queue;
-	gp_ev_queue_init(backend->event_queue, wreq.w, wreq.h, 0, NULL, NULL, 0);
-
 	backend->pixmap = NULL;
 
 	if ((flags & GP_X11_DISABLE_SHM || !x11_conn.local)
@@ -699,11 +700,15 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 			goto err1;
 	}
 
+	/* Show window */
+	XMapWindow(win->dpy, win->win);
 	XFlush(win->dpy);
 
 	backend->dpi = x11_win_get_dpi(win);
 
 	win->resized_flag = 0;
+	win->focused = 0;
+	win->visible = 1;
 
 	backend->name = "X11";
 	backend->flip = x11_flip;
