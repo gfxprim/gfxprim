@@ -234,6 +234,7 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 		gp_ev_queue_push(event_queue, GP_EV_KEY, key, press, 0);
 	break;
 	case ConfigureNotify:
+		GP_DEBUG(1, "ConfigureNotify event received");
 		gp_ev_queue_push_resize(event_queue, ev->xconfigure.width,
 		                           ev->xconfigure.height, 0);
 	break;

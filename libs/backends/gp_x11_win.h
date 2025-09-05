@@ -397,6 +397,9 @@ static int x11_win_open(struct x11_wreq *wreq)
 
 	win_list_add(win);
 
+	/* Show window */
+	XMapWindow(win->dpy, win->win);
+
 	return 0;
 }
 

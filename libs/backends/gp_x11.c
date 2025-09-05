@@ -377,9 +377,6 @@ static int create_shm_ximage(gp_backend *self, gp_size w, gp_size h)
 
 	win->shm_flag = 1;
 
-	//FIXME: Proper synchronization
-	XSync(win->dpy, True);
-
 	return 0;
 err2:
 	shmdt(win->shminfo.shmaddr);
@@ -676,8 +673,6 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	backend->event_queue = &win->ev_queue;
 	gp_ev_queue_init(backend->event_queue, wreq.w, wreq.h, 0, NULL, NULL, 0);
 
-	process_events(win, backend);
-
 	int fd = XConnectionNumber(win->dpy);
 
 	win->fd = (gp_fd) {
@@ -700,8 +695,6 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 			goto err1;
 	}
 
-	/* Show window */
-	XMapWindow(win->dpy, win->win);
 	XFlush(win->dpy);
 
 	backend->dpi = x11_win_get_dpi(win);
