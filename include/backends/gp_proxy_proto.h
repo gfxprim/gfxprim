@@ -130,6 +130,10 @@ enum gp_proxy_msg_types {
 	 * position.
 	 */
 	GP_PROXY_CURSOR_POS,
+	/**
+	 * @brief Sets cursor image or shows/hides cursor.
+	 */
+	GP_PROXY_CURSOR,
 	/** @brief Last message type + 1. */
 	GP_PROXY_MAX,
 };
@@ -227,7 +231,7 @@ struct gp_proxy_rect_msg {
  * This is initial backend information needed to be send to the client (application)
  * before it can return from the gp_backend_proxy_init() function.
  */
-struct gp_proxy_cli_init_ {
+struct gp_proxy_cli_init {
 	/** @brief A pixel type for drawing. */
 	gp_pixel_type pixel_type;
 	/** @brief A display DPI. */
@@ -243,7 +247,7 @@ struct gp_proxy_cli_init_msg {
 	/** @brief Size is set to header size + sizeof(struct gp_proxy_rect_). */
 	uint32_t size;
 	/** @brief The client init payload. */
-	struct gp_proxy_cli_init_ cli_init;
+	struct gp_proxy_cli_init cli_init;
 };
 
 /**
@@ -255,9 +259,21 @@ typedef struct gp_proxy_coord {
 } gp_proxy_coord;
 
 /**
- * @brief A proxy cursor position.
+ * @brief A cursor change msg.
  */
 struct gp_proxy_cursor_msg {
+	/** @brief Event type set to GP_PROXY_CURSOR. */
+	uint32_t type;
+	/** @brief Size is set to header size + sizeof(uint32_t). */
+	uint32_t size;
+	/** @brief A cursor change request. */
+	uint32_t cursor;
+};
+
+/**
+ * @brief A proxy cursor position.
+ */
+struct gp_proxy_cursor_pos_msg {
 	/** @brief Event type set to GP_PROXY_CURSOR_POS. */
 	uint32_t type;
 	/** @brief Size is set to header size + sizeof(struct gp_proxy_coord). */
@@ -283,6 +299,7 @@ typedef union gp_proxy_msg {
 	struct gp_proxy_rect_msg rect;
 	struct gp_proxy_cli_init_msg cli_init;
 	struct gp_proxy_cursor_msg cursor;
+	struct gp_proxy_cursor_pos_msg cursor_pos;
 } gp_proxy_msg;
 
 /**

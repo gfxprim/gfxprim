@@ -50,9 +50,16 @@ static enum gp_backend_ret proxy_set_attr(gp_backend *self,
                                           enum gp_backend_attr attr,
                                           const void *vals)
 {
+	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
+	uint32_t val;
+
 	switch (attr) {
 	case GP_BACKEND_ATTR_TITLE:
 //		gp_proxy_send(priv->fd.fd, GP_PROXY_NAME, vals);
+	break;
+	case GP_BACKEND_ATTR_CURSOR:
+		val = *(enum gp_backend_cursor_req *)vals;
+		gp_proxy_send(priv->fd.fd, GP_PROXY_CURSOR, &val);
 	break;
 	default:
 	break;
@@ -275,8 +282,8 @@ static int proxy_recv_events(gp_fd *self, int block)
 		case GP_PROXY_CURSOR_POS:
 			GP_DEBUG(4, "Got GP_PROXY_CURSOR_POS");
 			gp_ev_queue_set_cursor_pos(backend->event_queue,
-			                           msg->cursor.pos.x,
-			                           msg->cursor.pos.y);
+			                           msg->cursor_pos.pos.x,
+			                           msg->cursor_pos.pos.y);
 		break;
 		case GP_PROXY_EXIT:
 			GP_DEBUG(4, "Got GP_PROXY_EXIT");

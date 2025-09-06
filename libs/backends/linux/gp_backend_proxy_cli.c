@@ -118,6 +118,10 @@ int gp_proxy_cli_msg(gp_proxy_cli *self, gp_proxy_msg **rmsg)
 		GP_DEBUG(1, "Client (%p) '%s' fd %i stopped rendering",
 		         self, self->name, self->fd.fd);
 	break;
+	case GP_PROXY_CURSOR:
+		GP_DEBUG(1, "Client (%p) '%s' fd %i request cursor %04x",
+		         self, self->name, self->fd.fd, msg->cursor.cursor);
+	break;
 	default:
 		GP_DEBUG(1, "Client (%p) '%s' fd (%i) invalid request %i",
 		         self, self->name, self->fd.fd, msg->type);

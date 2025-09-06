@@ -92,6 +92,8 @@ const char *gp_proxy_msg_type_name(enum gp_proxy_msg_types type)
 		return "GP_PROXY_SHOW";
 	case GP_PROXY_HIDE:
 		return "GP_PROXY_HIDE";
+	case GP_PROXY_CURSOR:
+		return "GP_PROXY_CURSOR";
 	case GP_PROXY_CURSOR_POS:
 		return "GP_PROXY_CURSOR_POS";
 	case GP_PROXY_MAX:
@@ -116,7 +118,7 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 		payload_size = strlen(payload);
 	break;
 	case GP_PROXY_CLI_INIT:
-		payload_size += sizeof(struct gp_proxy_cli_init_);
+		payload_size += sizeof(struct gp_proxy_cli_init);
 	break;
 	case GP_PROXY_EVENT:
 		payload_size = sizeof(gp_event);
@@ -130,6 +132,9 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 	break;
 	case GP_PROXY_UPDATE:
 		payload_size = sizeof(struct gp_proxy_rect);
+	break;
+	case GP_PROXY_CURSOR:
+		payload_size = sizeof(uint32_t);
 	break;
 	case GP_PROXY_CURSOR_POS:
 		payload_size = sizeof(struct gp_proxy_coord);
