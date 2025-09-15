@@ -320,12 +320,32 @@ uint32_t gp_utf_fallback(uint32_t ch)
 		return ret;
 
 	switch (ch) {
+	/* Latin 1 supplement block */
+	case 0xa9: /* copyright */
+		return 'C';
+	case 0xae: /* registered */
+		return 'R';
+
+	/* General punctuation */
 	case 0x2018: /* Left single quotation mark. */
 		return '\'';
 	case 0x2019: /* Right single quotation mark. */
 		return '\'';
-	case 0xa9: /* copyright */
-		return 'C';
+	case 0x201c: /* Left double quotation mark. */
+		return '"';
+	case 0x201d: /* Right double quotation mark. */
+		return '"';
+	case 0x2022: /* Bullet point. */
+		return '*';
+
+	/* Block elements */
+	/* TODO: maybe render these? */
+	case 0x2591: /* block element 25% shade */
+		return '-';
+	case 0x2592: /* block element 50% shade */
+		return '=';
+	case 0x2593: /* block element 75% shade */
+		return '#';
 	}
 
 	return ch;
