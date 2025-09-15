@@ -324,6 +324,7 @@ static int map_cursor(struct backend_drm_priv *priv)
 	               GP_PIXEL_RGBA8888, cursor_pixmap, 0);
 
 	memset(cursor_pixmap, 0x00, priv->cursor_size);
+	gp_cursor_render(gp_cursors_32[0], &priv->cursor_pixmap, 0xffffffff, 0xff000000, 0, 0);
 
 	struct drm_mode_cursor cursor_mode = {
 		.flags = DRM_MODE_CURSOR_BO,
@@ -337,8 +338,6 @@ static int map_cursor(struct backend_drm_priv *priv)
 		GP_DEBUG(1, "ioctl() DRM_IOCTL_MODE_CURSOR failed: %s", strerror(errno));
 		goto err1;
 	}
-
-	gp_cursor_render(gp_cursors_32[0], &priv->cursor_pixmap, 0xffffffff, 0xff000000, 0, 0);
 
 	return 0;
 err1:
