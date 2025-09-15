@@ -29,7 +29,7 @@ is quite usable on e-ink displays.
 E-ink displays that support partial refresh have to do a full refresh once in
 a while in order to get rid of noise/artifacts/ghosts that is added by doing
 several partial refreshes in a row. The e-ink display layer keeps track of
-partial refreshes and schedulles full refresh when needed so that this is
+partial refreshes and schedules full refresh when needed so that this is
 transparent to the application.
 
 SPI displays

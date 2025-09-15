@@ -108,11 +108,11 @@ static inline void redraw_buffered(gp_widget *self,
 	/*
 	 * Library requests partiall update there are two cases:
 	 *
-	 * - if no update is schedulled for the pixmap by the application, we
+	 * - if no update is scheduled for the pixmap by the application, we
 	 *   just use intersection of the partial update bbox we were passed
 	 *   down by the library with the widget itself
 	 *
-	 * - if update is schedulled we have to unify the application bounding box
+	 * - if update is scheduled we have to unify the application bounding box
 	 *   with the partiall update bouding box and then do an intersection with
 	 *   the widget itself
 	 */

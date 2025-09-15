@@ -329,9 +329,9 @@ void gp_widget_render_timer(gp_widget *self, int flags, unsigned int timeout_ms)
 	for (i = 0; i < GP_ARRAY_SIZE(timers); i++) {
 		if (timers[i].priv == self) {
 			if (flags & GP_TIMER_RESCHEDULE) {
-				gp_backend_timer_rem(backend, &timers[i]);
+				gp_backend_timer_stop(backend, &timers[i]);
 				timers[i].expires = timeout_ms;
-				gp_backend_timer_add(backend, &timers[i]);
+				gp_backend_timer_start(backend, &timers[i]);
 				return;
 			}
 
@@ -354,7 +354,7 @@ void gp_widget_render_timer(gp_widget *self, int flags, unsigned int timeout_ms)
 	timers[i].id = gp_widget_type_id(self);
 	timers[i].priv = self;
 
-	gp_backend_timer_add(backend, &timers[i]);
+	gp_backend_timer_start(backend, &timers[i]);
 }
 
 void gp_widget_render_timer_cancel(gp_widget *self)
@@ -363,7 +363,7 @@ void gp_widget_render_timer_cancel(gp_widget *self)
 
 	for (i = 0; i < GP_ARRAY_SIZE(timers); i++) {
 		if (timers[i].priv == self) {
-			gp_backend_timer_rem(backend, &timers[i]);
+			gp_backend_timer_stop(backend, &timers[i]);
 			timers[i].priv = NULL;
 			return;
 		}
@@ -408,7 +408,7 @@ void gp_widgets_redraw(struct gp_widget *layout)
 
 static char *backend_init_str = NULL;
 
-void gp_widget_timer_queue_switch(gp_timer **);
+void gp_app_timer_queue_switch(gp_timer **);
 
 static gp_task_queue task_queue = {};
 
@@ -479,7 +479,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 
 	move_poll(backend);
 
-	gp_widget_timer_queue_switch(&backend->timers);
+	gp_app_timer_queue_switch(&backend->timers);
 	gp_backend_task_queue_set(backend, &task_queue);
 
 	gp_key_repeat_timer_init(backend->event_queue, &backend->timers);

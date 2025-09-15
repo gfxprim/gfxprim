@@ -14,7 +14,7 @@
  *
  * The code also manages partial vs full refreshes. Partial refreshes introduce
  * a bit of noise on the screen, so when several partial refreshes are
- * schedulled in a row we have to schedulle a full refres as well to clean up
+ * scheduled in a row we have to schedule a full refres as well to clean up
  * the display.
  */
 

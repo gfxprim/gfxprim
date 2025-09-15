@@ -7,10 +7,10 @@
  * @file gp_task.h
  * @brief Application tasks.
  *
- * Tasks a way how to schedulle a short amount of work in the context of the
+ * Tasks a way how to schedule a short amount of work in the context of the
  * application main loop. Tasks are sorted into queues accordingly to its
  * priorities. Queue with smallest priority runs until it's out of tasks.
- * Tasks inside a single queue are schedulled by a round robin.
+ * Tasks inside a single queue are scheduled by a round robin.
  */
 
 #ifndef INPUT_GP_TASK_H
@@ -60,7 +60,7 @@ struct gp_task {
 	 * @param self A task structure.
 	 * @return If zero is returned the callback is finished i.e. removed
 	 *         from the queue and the queued flag is cleared, otherwise
-	 *         it's reschedulled.
+	 *         it's rescheduled.
 	 */
 	int (*callback)(gp_task *self);
 	/** @brief A private pointer to be used by the user of the API. */

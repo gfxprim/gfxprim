@@ -36,10 +36,7 @@ static int event_handler(gp_widget_event *ev)
 
 	gp_widget_overlay_show(ev->self, 1);
 
-	tmr.expires = 3000;
-
-	gp_widgets_timer_rem(&tmr);
-	gp_widgets_timer_ins(&tmr);
+	gp_app_timer_reschedule(&tmr, 3000);
 
 	return 1;
 }
@@ -69,7 +66,7 @@ int main(int argc, char *argv[])
 
 	tmr.priv = layout;
 
-	gp_widgets_timer_ins(&tmr);
+	gp_app_timer_start(&tmr);
 
 	gp_widgets_main_loop(layout, NULL, argc, argv);
 

@@ -122,7 +122,7 @@ struct gp_widget {
 	/**
 	 * @brief Internal widget resize flag.
 	 *
-	 * If set widget resize is schedulled before we attemp to repaint it.
+	 * If set widget resize is scheduled before we attemp to repaint it.
 	 */
 	unsigned int resized:1;
 

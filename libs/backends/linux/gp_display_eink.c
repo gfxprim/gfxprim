@@ -16,7 +16,7 @@ static int can_start_repaint(gp_backend *backend)
 	return !(eink->full_in_progress || eink->part_in_progress);
 }
 
-static void schedulle_full_repaint(gp_backend *self)
+static void schedule_full_repaint(gp_backend *self)
 {
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(self);
 
@@ -36,7 +36,7 @@ static void schedulle_full_repaint(gp_backend *self)
 static void gp_display_eink_flip(gp_backend *self)
 {
 	pthread_mutex_lock(&repaint_lock);
-	schedulle_full_repaint(self);
+	schedule_full_repaint(self);
 	pthread_mutex_unlock(&repaint_lock);
 }
 
@@ -49,7 +49,7 @@ static void gp_display_eink_update_rect(gp_backend *self, gp_coord x0, gp_coord 
 	if (eink->part_cnt >= 5) {
 		eink->part_cnt = 0;
 		GP_DEBUG(4, "Five partial repaints in row, requesting full repaint");
-		schedulle_full_repaint(self);
+		schedule_full_repaint(self);
 		goto unlock;
 	}
 
@@ -107,7 +107,7 @@ static enum gp_poll_event_ret flush_queued_repaints(gp_fd *self)
 	}
 
 	if (eink->exitting) {
-		GP_DEBUG(4, "Exit was schedulled during repaint");
+		GP_DEBUG(4, "Exit was scheduled during repaint");
 		goto unlock;
 	}
 

@@ -53,10 +53,10 @@ static int play_pause_on_event(gp_widget_event *ev)
 		return 0;
 
 	if (gp_widget_button_type_get(ev->self) == GP_BUTTON_PAUSE) {
-		gp_widgets_timer_rem(&tmr);
+		gp_app_timer_stop(&tmr);
 		gp_widget_button_type_set(ev->self, GP_BUTTON_PLAY);
 	} else {
-		gp_widgets_timer_ins(&tmr);
+		gp_app_timer_start(&tmr);
 		gp_widget_button_type_set(ev->self, GP_BUTTON_PAUSE);
 	}
 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 	gp_widget_on_event_set(min_y_spinner, min_y_on_event, graph);
 
 	tmr.priv = graph;
-	gp_widgets_timer_ins(&tmr);
+	gp_app_timer_start(&tmr);
 
 	gp_widgets_main_loop(grid, NULL, argc, argv);
 

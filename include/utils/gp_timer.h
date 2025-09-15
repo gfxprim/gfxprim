@@ -42,7 +42,7 @@ struct gp_timer {
 	uint32_t running:1;
 	/** Set during the run of the timer callback */
 	uint32_t in_callback:1;
-	/** Set if timer was reschedulled from callback */
+	/** Set if timer was rescheduled from callback */
 	uint32_t res_in_callback:1;
 
 	/* Do not touch! */
@@ -75,7 +75,7 @@ struct gp_timer {
  * @param timer A timer.
  * @return Non-zero if timer is running, zero otherwise.
  */
-static inline int gp_timer_running(gp_timer *timer)
+static inline int gp_timer_is_running(gp_timer *timer)
 {
 	return timer->running;
 }
@@ -90,13 +90,13 @@ void gp_timer_queue_dump(gp_timer *queue);
 /**
  * @brief Inserts timer into the timer priority queue.
  *
- * If timer is already running nothing is done. In order to reschedulle a timer
+ * If timer is already running nothing is done. In order to reschedule a timer
  * it has to be removed from the queue first.
  *
  * It's safe to call insert from the timer callback.
  *
  * If timer was removed then inserted from the timer callback the timer is
- * reschedulled at now + timer->expired time and the return value from the
+ * rescheduled at now + timer->expired time and the return value from the
  * callback is discarded.
  *
  * @param queue A timer queue.
@@ -121,7 +121,7 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer);
 /**
  * @brief Processes queue, all timers with expires <= now are processed.
  *
- * It's possible to reschedulle a timer with expires set to 0, which will
+ * It's possible to reschedule a timer with expires set to 0, which will
  * process the timer on the next process call.
  *
  * @param queue A timer queue.

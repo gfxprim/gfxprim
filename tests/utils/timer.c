@@ -106,7 +106,7 @@ static int expirations_sorted(void)
 		return TST_FAILED;
 
 	if (gp_timer_queue_size(head)) {
-		tst_msg("Some timers reschedulled?!");
+		tst_msg("Some timers rescheduled?!");
 		return TST_FAILED;
 	}
 
@@ -125,7 +125,7 @@ static int process_with_NULL_head(void)
 	return TST_PASSED;
 }
 
-static uint32_t callback_reschedulle(gp_timer *self)
+static uint32_t callback_reschedule(gp_timer *self)
 {
 	self->priv = (void*)1;
 
@@ -137,8 +137,8 @@ static uint32_t callback_reschedulle(gp_timer *self)
  */
 static int periodic_timers(void)
 {
-	GP_TIMER_DECLARE(timer1, 10, 10, "Test1", callback_reschedulle, NULL);
-	GP_TIMER_DECLARE(timer2, 20, 20, "Test2", callback_reschedulle, NULL);
+	GP_TIMER_DECLARE(timer1, 10, 10, "Test1", callback_reschedule, NULL);
+	GP_TIMER_DECLARE(timer2, 20, 20, "Test2", callback_reschedule, NULL);
 	gp_timer *head = NULL;
 	int fail = 0;
 	int ret;
@@ -170,7 +170,7 @@ static int periodic_timers(void)
 	}
 
 	if (timer1.expires != 30) {
-		tst_msg("Timer1 reschedulled at wrong time %"PRIu64" expected 30", timer1.expires);
+		tst_msg("Timer1 rescheduled at wrong time %"PRIu64" expected 30", timer1.expires);
 		fail++;
 	}
 
@@ -189,7 +189,7 @@ static int periodic_timers(void)
 	}
 
 	if (timer1.expires != 40) {
-		tst_msg("Timer1 reschedulled at wrong time %"PRIu64" expected 40", timer1.expires);
+		tst_msg("Timer1 rescheduled at wrong time %"PRIu64" expected 40", timer1.expires);
 		fail++;
 	}
 
@@ -199,7 +199,7 @@ static int periodic_timers(void)
 	}
 
 	if (timer2.expires != 50) {
-		tst_msg("Timer2 reschedulled at wrong time %"PRIu64" expected 50", timer2.expires);
+		tst_msg("Timer2 rescheduled at wrong time %"PRIu64" expected 50", timer2.expires);
 		fail++;
 	}
 
@@ -240,7 +240,7 @@ static int rem_regression(void)
 	return TST_PASSED;
 }
 
-static uint32_t callback_reschedulle_now(gp_timer *self)
+static uint32_t callback_reschedule_now(gp_timer *self)
 {
 	(void) self;
 	return 0;
@@ -250,11 +250,11 @@ static uint32_t callback_reschedulle_now(gp_timer *self)
  * Make sure that timer with zero expiration does not cause infinite loop in
  * gp_timer_queue_process()
  */
-static int reschedulle_now(void)
+static int reschedule_now(void)
 {
 	gp_timer *head = NULL;
 
-	GP_TIMER_DECLARE(timer, 0, 0, "Test", callback_reschedulle_now, NULL);
+	GP_TIMER_DECLARE(timer, 0, 0, "Test", callback_reschedule_now, NULL);
 
 	gp_timer_queue_ins(&head, 0, &timer);
 
@@ -400,14 +400,14 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = process_with_NULL_head},
 		{.name = "Expirations are sorted",
 		 .tst_fn = expirations_sorted},
-		{.name = "Expirations are sorted + reschedulle",
+		{.name = "Expirations are sorted + reschedule",
 		 .tst_fn = periodic_timers},
 		{.name = "Removal regression",
 		 .tst_fn = rem_regression},
 		{.name = "Removal clears expires",
 		 .tst_fn = rem_clears_expires},
-		{.name = "Zero reschedulle time from cb",
-		 .tst_fn = reschedulle_now},
+		{.name = "Zero reschedule time from cb",
+		 .tst_fn = reschedule_now},
 		{.name = "Call rem from cb",
 		 .tst_fn = call_rem_from_cb,
 		 .data = callback_call_rem},

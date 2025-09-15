@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
 	bogoman_render(&render, BOGOMAN_RENDER_ALL);
 
-	gp_backend_timer_add(backend, &timer);
+	gp_backend_timer_start(backend, &timer);
 
 	for (;;) {
 		gp_backend_wait(backend);

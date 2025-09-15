@@ -877,7 +877,7 @@ int main(int argc, char *argv[])
 
 	if (params.sleep_ms) {
 		timer.expires = params.sleep_ms;
-		gp_backend_timer_add(backend, &timer);
+		gp_backend_timer_start(backend, &timer);
 	}
 
 	for (;;) {
@@ -950,10 +950,10 @@ int main(int argc, char *argv[])
 				case GP_KEY_S:
 					if (params.sleep_ms) {
 						if (gp_backend_timers_queued(backend)) {
-							gp_backend_timer_rem(backend, &timer);
+							gp_backend_timer_stop(backend, &timer);
 						} else {
 							timer.expires = params.sleep_ms;
-							gp_backend_timer_add(backend, &timer);
+							gp_backend_timer_start(backend, &timer);
 						}
 					}
 				break;

@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 	gp_widget_events_unmask(pixmap, GP_WIDGET_EVENT_REDRAW);
 
-	gp_widgets_timer_ins(&tmr);
+	gp_app_timer_start(&tmr);
 
 	gp_widgets_main_loop(layout, NULL, argc, argv);
 }

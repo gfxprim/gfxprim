@@ -352,13 +352,13 @@ Returns number of timers scheduled in backend timer queue.
 Tasks
 -----
 
-Tasks are rutines schedulled in the backend main loop. Tasks are executed in
+Tasks are rutines scheduled in the backend main loop. Tasks are executed in
 FIFO order and have priorities. When program enters the backend loop via one
 of the functions to poll or wait for event exactly one task from the highest
 non empty FIFO list is executed.
 
 IMPORTANT: When backend is created there is no task queue, to be able to
-           schedulle tasks user has to allocate and set the task queue first.
+           schedule tasks user has to allocate and set the task queue first.
 
 TIP: For example usage see
      link:example_backend_tasks.html[backend tasks example].
@@ -394,4 +394,4 @@ Schedulles a link:tasks.html[task].
 void gp_backend_task_rem(gp_backend *self, gp_task *task);
 -------------------------------------------------------------------------------
 
-If schedulled removes a link:tasks.html[task].
+If scheduled removes a link:tasks.html[task].

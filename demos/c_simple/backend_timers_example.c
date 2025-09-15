@@ -66,7 +66,7 @@ int main(void)
 	/*
 	 * Periodic timer with 1000ms interval. As the callback is set to NULL
 	 * Timer Event is pushed to event queue upon expiration. The backend
-	 * timer callback returns the .period value, which reschedulles the
+	 * timer callback returns the .period value, which reschedules the
 	 * timer. You can also set .period to GP_TIMER_STOP which would make the
 	 * timer oneshot.
 	 *
@@ -89,8 +89,8 @@ int main(void)
 		.callback = timer_callback,
 	};
 
-	gp_backend_timer_add(backend, &timer1);
-	gp_backend_timer_add(backend, &timer2);
+	gp_backend_timer_start(backend, &timer1);
+	gp_backend_timer_start(backend, &timer2);
 
 	/* Handle events */
 	for (;;) {

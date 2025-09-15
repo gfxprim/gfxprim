@@ -119,7 +119,7 @@ static uint32_t pushevent_callback(gp_timer *self)
 	return self->period;
 }
 
-void gp_backend_timer_add(gp_backend *self, gp_timer *timer)
+void gp_backend_timer_start(gp_backend *self, gp_timer *timer)
 {
 	if (!timer->callback) {
 		timer->callback = pushevent_callback;
@@ -129,7 +129,17 @@ void gp_backend_timer_add(gp_backend *self, gp_timer *timer)
 	gp_timer_queue_ins(&self->timers, gp_time_stamp(), timer);
 }
 
-void gp_backend_timer_rem(gp_backend *self, gp_timer *timer)
+void gp_backend_timer_reschedule(gp_backend *self, gp_timer *timer, uint32_t expires_ms)
+{
+	if (gp_timer_is_running(timer))
+		gp_timer_queue_rem(&self->timers, timer);
+
+	timer->expires = expires_ms;
+
+	gp_timer_queue_ins(&self->timers, gp_time_stamp(), timer);
+}
+
+void gp_backend_timer_stop(gp_backend *self, gp_timer *timer)
 {
 	gp_timer_queue_rem(&self->timers, timer);
 }
@@ -170,7 +180,7 @@ static void start_task_timer(gp_backend *self)
 {
 	backend_task_timer.priv = self;
 	backend_task_timer.expires = 0;
-	gp_backend_timer_add(self, &backend_task_timer);
+	gp_backend_timer_start(self, &backend_task_timer);
 }
 
 void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue)
@@ -202,7 +212,7 @@ void gp_backend_task_rem(gp_backend *self, gp_task *task)
 	gp_task_queue_rem(self->task_queue, task);
 
 	if (!gp_task_queue_tasks(self->task_queue))
-		gp_backend_timer_rem(self, &backend_task_timer);
+		gp_backend_timer_stop(self, &backend_task_timer);
 }
 
 static void backend_backlight_keys(gp_backend *self, int up)

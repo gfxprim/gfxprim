@@ -13,7 +13,7 @@
  * The gp_backend is unified API for managing xserver, framebuffer, waylaynd,
  * drm, e-ink display, etc. along with support for input devices, e.g. mouse,
  * keyboard and keymaps. It also implements timers and tasks so that work can
- * be schedulled.
+ * be scheduled.
  *
  * In contrast to other graphics libraries we do not try to create unified
  * initalization interface that would match specialities for every possible
@@ -619,7 +619,7 @@ void gp_backend_wait(gp_backend *self);
 gp_event *gp_backend_ev_wait(gp_backend *self);
 
 /**
- * @brief Adds a timer to backend.
+ * @brief Adds a timer to a backend timer queue.
  *
  * If timer callback is NULL a #gp_ev with #GP_EV_TMR type is pushed into the
  * backend event queue once timer expires.
@@ -627,7 +627,19 @@ gp_event *gp_backend_ev_wait(gp_backend *self);
  * @param self A backend.
  * @param timer A timer.
  */
-void gp_backend_timer_add(gp_backend *self, gp_timer *timer);
+void gp_backend_timer_start(gp_backend *self, gp_timer *timer);
+
+/**
+ * @brief Reschedules a timer.
+ *
+ * If a timer is running (inserted into the timer queue) it's stopped before
+ * it's started again.
+ *
+ * @param self A backend.
+ * @param timer A timer.
+ * @param expires_ms A new timeout for the timer in miliseconds.
+ */
+void gp_backend_timer_reschedule(gp_backend *self, gp_timer *timer, uint32_t expires_ms);
 
 /**
  * @brief Removes timer from backend timer queue.
@@ -635,7 +647,7 @@ void gp_backend_timer_add(gp_backend *self, gp_timer *timer);
  * @param self A backend.
  * @param timer A timer.
  */
-void gp_backend_timer_rem(gp_backend *self, gp_timer *timer);
+void gp_backend_timer_stop(gp_backend *self, gp_timer *timer);
 
 /**
  * @brief Returns number of timers scheduled in backend.
@@ -739,7 +751,7 @@ int gp_backend_resize_ack(gp_backend *self);
  * task execution.
  *
  * @warning When backend is created there is no task queue, to be able to
- *          schedulle tasks user has to allocate and set the task queue first.
+ *          schedule tasks user has to allocate and set the task queue first.
  *
  * @param self A backend.
  * @param task A task to be inserted into the task queue.
