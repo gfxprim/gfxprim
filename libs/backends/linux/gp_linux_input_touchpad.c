@@ -11,19 +11,45 @@
 
 #include "gp_linux_input_dev.h"
 
-#define INVALID_LAST_COORD INT_MIN
+/* How many bits are we using for low pass fixed point. */
+#define LOWPASS_FP_BITS 1
+/* Slow down coeficient in fixed point. */
+#define SLOWDOWN (4 * (1<<LOWPASS_FP_BITS))
+/* Treshold for the adaptive low pass filter normalized for fixed point */
+#define LOWPASS_THRESHOLD (16 * (1<<LOWPASS_FP_BITS))
+/* Low pass weight for old sample, the larger the slower is the low pass. */
+#define LOWPASS_WEIGHT 4
+
+static int adaptive_lowpass(int old, int new)
+{
+	if (abs(old - new) < LOWPASS_THRESHOLD)
+		return ((LOWPASS_WEIGHT-1)*old + new + LOWPASS_WEIGHT/2)/LOWPASS_WEIGHT;
+
+	return new;
+}
 
 static void input_abs_touchpad(struct linux_input *self, struct input_event *ev)
 {
 	switch (ev->code) {
 	case ABS_X:
 		self->tp.last_x = self->tp.abs_x;
-		self->tp.abs_x = ev->value;
+		self->tp.abs_x = adaptive_lowpass(self->tp.abs_x, ev->value<<LOWPASS_FP_BITS);
+
+		if (!self->tp.x_valid) {
+			self->tp.x_valid = 1;
+			self->tp.last_x = self->tp.abs_x = ev->value<<LOWPASS_FP_BITS;
+		}
+
 		GP_DEBUG(4, "ABS X %i", ev->value);
 	break;
 	case ABS_Y:
 		self->tp.last_y = self->tp.abs_y;
-		self->tp.abs_y = ev->value;
+		self->tp.abs_y = adaptive_lowpass(self->tp.abs_y, ev->value<<LOWPASS_FP_BITS);
+
+		if (!self->tp.y_valid) {
+			self->tp.y_valid = 1;
+			self->tp.last_y = self->tp.abs_y = ev->value<<LOWPASS_FP_BITS;
+		}
 		GP_DEBUG(4, "ABS Y %i", ev->value);
 	break;
 	default:
@@ -39,10 +65,8 @@ static void input_key_touchpad(struct linux_input *self, struct input_event *ev)
 	case GP_BTN_TOUCH:
 	break;
 	case GP_BTN_TOOL_FINGER:
-		self->tp.abs_x = INVALID_LAST_COORD;
-		self->tp.abs_y = INVALID_LAST_COORD;
-		self->tp.last_x = INVALID_LAST_COORD;
-		self->tp.last_y = INVALID_LAST_COORD;
+		self->tp.x_valid = 0;
+		self->tp.y_valid = 0;
 
 		self->tp.single_tap = ev->value;
 		GP_DEBUG(4, "Single tap");
@@ -70,8 +94,8 @@ static void input_sync_touchpad(struct linux_input *self)
 	if (self->tp.double_tap) {
 		int rel_x = 0;
 
-		if (self->tp.last_x != INVALID_LAST_COORD)
-			rel_x = self->tp.last_x - self->tp.abs_x;
+		if (self->tp.x_valid)
+			rel_x = (self->tp.last_x - self->tp.abs_x + SLOWDOWN/2)/SLOWDOWN;
 
 		if (rel_x) {
 			GP_DEBUG(4, "Relative wheel %i", rel_x);
@@ -84,11 +108,11 @@ static void input_sync_touchpad(struct linux_input *self)
 		int rel_x = 0;
 		int rel_y = 0;
 
-		if (self->tp.last_x != INVALID_LAST_COORD)
-			rel_x = self->tp.abs_x - self->tp.last_x;
+		if (self->tp.x_valid)
+			rel_x = (self->tp.abs_x - self->tp.last_x + SLOWDOWN/2)/SLOWDOWN;
 
-		if (self->tp.last_y != INVALID_LAST_COORD)
-			rel_y = self->tp.abs_y - self->tp.last_y;
+		if (self->tp.y_valid)
+			rel_y = (self->tp.abs_y - self->tp.last_y + SLOWDOWN/2)/SLOWDOWN;
 
 		if (rel_x || rel_y) {
 			GP_DEBUG(4, "Relative movement %i %i", rel_x, rel_y);

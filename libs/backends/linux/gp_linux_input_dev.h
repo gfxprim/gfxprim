@@ -25,6 +25,8 @@ struct input_touchpad {
 	int last_x;
 	int last_y;
 
+	uint8_t x_valid:1;
+	uint8_t y_valid:1;
 	uint8_t single_tap;
 	uint8_t double_tap;
 	uint8_t triple_tap;
