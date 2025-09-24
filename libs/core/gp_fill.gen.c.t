@@ -20,7 +20,9 @@ static void fill_{{ ps.suffix }}(gp_pixmap *pixmap, gp_pixel val)
 	for (y = 0; y < pixmap->h; y++) {
 @     if ps.suffix in optimized_writepixels:
 		void *start = GP_PIXEL_ADDR(pixmap, 0, y);
-@         if ps.needs_bit_order():
+@         if ps.size == 1:
+		gp_write_pixels_{{ ps.suffix }}(start, pixmap->offset, y%2, pixmap->w, val);
+@         elif ps.needs_bit_order():
 		gp_write_pixels_{{ ps.suffix }}(start, pixmap->offset, pixmap->w, val);
 @         else:
 		gp_write_pixels_{{ ps.suffix }}(start, pixmap->w, val);

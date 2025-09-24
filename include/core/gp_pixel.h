@@ -27,6 +27,7 @@
 #include <core/gp_pixel_channel.gen.h>
 #include <core/gp_pixel_alias.h>
 #include <core/gp_get_set_bits.h>
+#include <core/gp_pattern_fill.h>
 
 /**
  * @brief Description of one pixel channel.

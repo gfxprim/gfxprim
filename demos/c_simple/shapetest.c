@@ -402,6 +402,14 @@ void event_loop(void)
 				center_x = gp_pixmap_w(win) / 2;
 				center_y = gp_pixmap_h(win) / 2;
 			break;
+			case GP_KEY_P:
+				if (gp_pixel_size(win->pixel_type) == 1) {
+					if (gp_pixel_pattern(red))
+						red = 0x01;
+					else
+						red = GP_PIXEL_PATTERN_50 | 0x01;
+				}
+			break;
 			case GP_KEY_F:
 				fill = !fill;
 				if (!fill && !outline)
@@ -504,6 +512,7 @@ void print_instructions(void)
 	printf("    Esc ................. exit\n");
 	printf("    Space ............... change shapes\n");
 	printf("    O ................... draw outlines (none/before/after fill)\n");
+	printf("    P ................... toggle pattern fill (for monochrome)\n");
 	printf("    F ................... toggle filling\n");
 	printf("    A ................... show/hide axes\n");
 	printf("    X ................... mirror X\n");
@@ -516,6 +525,29 @@ void print_instructions(void)
 	printf("    PgUp/PgDn ........... increase/decrease both radii\n");
 	printf("    = ................... reset radii to the same value\n");
 	printf("    1/2/3/4 ............. choose shape variant (if applicable)\n");
+}
+
+static void setup_colors(gp_pixel_type pixel_type)
+{
+	if (gp_pixel_size(pixel_type) == 1) {
+		black = 0x00;
+		white = 0x01;
+		yellow = 0x01;
+		green = 0x01;
+		red = GP_PIXEL_PATTERN_50 | 0x01;
+		gray = GP_PIXEL_PATTERN_50 | 0x01;
+		darkgray = GP_PIXEL_PATTERN_50 | 0x01;
+		return;
+	}
+
+	/* Load colors compatible with the display */
+	black    = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
+	white    = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win);
+	yellow   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0x00, win);
+	green    = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, win);
+	red      = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
+	gray     = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win);
+	darkgray = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win);
 }
 
 int main(int argc, char *argv[])
@@ -550,14 +582,7 @@ int main(int argc, char *argv[])
 	center_x = win->w / 2;
 	center_y = win->h / 2;
 
-	/* Load colors compatible with the display */
-	black    = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
-	white    = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win);
-	yellow   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0x00, win);
-	green    = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, win);
-	red      = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
-	gray     = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win);
-	darkgray = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win);
+	setup_colors(win->pixel_type);
 
 	font.font = gp_font_face_lookup("tiny", GP_FONT_REGULAR | GP_FONT_FALLBACK);
 

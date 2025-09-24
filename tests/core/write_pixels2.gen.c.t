@@ -89,7 +89,7 @@ static int write_pixels_1BPP_{{endian}}_{{off}}_{{len}}(void)
 
 	uint8_t res[{{int(max_buf_len/8)+2}}] = {};
 
-	gp_write_pixels_1BPP_{{endian}}(res+2, {{off}}, {{len}}, 1);
+	gp_write_pixels_1BPP_{{endian}}(res+2, {{off}}, 0, {{len}}, 1);
 
 	return compare_buffers(exp, res, {{int(max_buf_len/8)+2}});
 }

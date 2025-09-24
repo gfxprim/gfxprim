@@ -13,9 +13,26 @@ void gp_vline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x,
 			gp_coord y0, gp_coord y1, gp_pixel pixel)
 {
 	int y;
-
+@     if ps.size != 1:
 	for (y = y0; y <= y1; y++)
 		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y, pixel);
+@     else:
+	gp_pixel p;
+
+	switch (gp_pixel_pattern(pixel)) {
+	case GP_PIXEL_PATTERN_NONE:
+		for (y = y0; y <= y1; y++)
+			gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y, pixel);
+	break;
+	case GP_PIXEL_PATTERN_50:
+		p = (pixel & 0x01) ^ (x % 2);
+		for (y = y0; y <= y1; y++) {
+			gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y, p);
+			p = !p;
+		}
+	break;
+	}
+@     end
 }
 
 void gp_vline_raw_{{ ps.suffix }}_clip(gp_pixmap *pixmap, gp_coord x,

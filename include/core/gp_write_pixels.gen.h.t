@@ -28,6 +28,9 @@
  */
 @         if ps.needs_bit_order():
 void gp_write_pixels_{{ ps.suffix }}(void *start, uint8_t off,
+@             if ps.size == 1:
+                             uint8_t y_off,
+@             end
                              size_t cnt, unsigned int val);
 
 @         else:
