@@ -36,7 +36,7 @@ static uint16_t bit_lookup[] = {
 static void draw_1BPP_glyph_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
                                           gp_coord x, gp_coord y, gp_pixel fg, const gp_glyph *glyph)
 {
-	int i, j, k, l;
+	int i, j, k;
 
 	unsigned int bpp = WIDTH_TO_1BPP_BPP(glyph->width);
 
@@ -54,16 +54,14 @@ static void draw_1BPP_glyph_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style
 				continue;
 
 			gp_coord px = x + i * x_mul;
+			gp_coord py = y;
+			gp_coord sx = style->pixel_xmul;
+			gp_coord sy = style->pixel_ymul;
 
-			for (k = y; k < y + style->pixel_ymul; k++) {
-				for (l = px; l < px + style->pixel_xmul; l++) {
-					gp_coord sx = l;
-					gp_coord sy = k;
-					GP_TRANSFORM_POINT(pixmap, sx, sy);
-					if (!GP_PIXEL_IS_CLIPPED(pixmap, sx, sy))
-						gp_putpixel_raw_{{ pt.pixelpack.suffix }}(pixmap, sx, sy, fg);
-				}
-			}
+			GP_TRANSFORM_RECT(pixmap, px, py, sx, sy);
+
+			for (k = py; k < py + sy; k++)
+				gp_hline_raw_{{ pt.pixelpack.suffix }}(pixmap, px, px + sx, k, fg);
 		}
 		y += y_mul;
 	}
