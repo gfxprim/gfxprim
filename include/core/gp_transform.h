@@ -92,15 +92,15 @@
  * @param w A rectangle width.
  * @param h A rectangle height.
  */
-#define GP_TRANSFORM_RECT(pixmap, x, y, w, h) do { \
-	GP_TRANSFORM_SWAP(pixmap, x, y);           \
-	GP_TRANSFORM_SWAP(pixmap, w, h);           \
-	                                           \
-	if ((pixmap)->x_swap)                      \
-		x = (pixmap)->w - x - w;           \
-	                                           \
-	if ((pixmap)->y_swap)                      \
-		y = (pixmap)->h - y - h;           \
+#define GP_TRANSFORM_RECT(pixmap, rx, ry, rw, rh) do { \
+	GP_TRANSFORM_SWAP(pixmap, rx, ry);             \
+	GP_TRANSFORM_SWAP(pixmap, rw, rh);             \
+	                                               \
+	if ((pixmap)->x_swap)                          \
+		rx = (pixmap)->w - rx - rw;            \
+	                                               \
+	if ((pixmap)->y_swap)                          \
+		ry = (pixmap)->h - ry - rh;            \
 } while (0)
 
 /*
