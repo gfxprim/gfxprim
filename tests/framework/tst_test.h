@@ -6,6 +6,9 @@
 #ifndef TST_TEST_H
 #define TST_TEST_H
 
+#include <stdint.h>
+#include <inttypes.h>
+
 enum tst_ret {
 	TST_PASSED,   /* Test succedded                                    */
 	TST_SKIPPED,  /* Test skipped due to not enough memory, ENOSYS ... */
@@ -117,5 +120,20 @@ int tst_err(const char *fmt, ...)
  * Translates errno number into short string, i.e. EFOO
  */
 const char *tst_strerr(int err);
+
+#define TST_EXP_UINT(val, exp, err_msg) do { \
+	if ((val) != (exp)) { \
+		tst_msg(err_msg " %"PRIuMAX" != %"PRIuMAX, \
+			(uintmax_t)(exp), (uintmax_t)val); \
+		return TST_FAILED; \
+	} \
+} while (0)
+
+#define TST_EXP_NULL(val, err_msg) do { \
+	if (val) { \
+		tst_msg(err_msg " is not NULL but %p\n", (val)); \
+		return TST_FAILED; \
+	} \
+} while (0)
 
 #endif /* TST_TEST_H */
