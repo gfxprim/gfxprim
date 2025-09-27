@@ -122,6 +122,10 @@ struct gp_pixmap {
 
 /**
  * @brief Returns true when pixel is clipped out of pixmap.
+ *
+ * This macro does not take into account the rotation flags. Pixel has to be
+ * rotated with GP_TRANSFORM_POINT() first.
+ *
  * @ingroup pixmap
  */
 #define GP_PIXEL_IS_CLIPPED(pixmap, x, y) \
@@ -132,17 +136,35 @@ struct gp_pixmap {
  * @brief Allocates a pixmap.
  * @ingroup pixmap
  *
- * This is a variant of gp_pixmap_alloc() that allows to set a custom image
- * stride. If zero is passed this call is equivalent to gp_pixmap_alloc() and
- * stride is calculated internally.
+ * The pixmap consists of two parts, the gp_pixmap structure and pixels buffer.
+ *
+ * Upon creation the pixmap rotation flags are set to (0, 0, 0) and gamma is
+ * set to NULL. If gamma correction is needed it has to be initialized by
+ * gp_pixmap_gamma_set() or gp_pixmap_srgb_set().
+ *
+ * It's possible to allocate a pixmap with zero w and h and in that case the
+ * gp_pixmap::pixels pointer will be set to NULL. Such pixmap must be resized
+ * with gp_pixmap_resize() to non-zero w and h in order to actually draw any
+ * pixels.
+ *
+ * The content of gp_pixmap::pixels buffer is undefined.
+ *
+ * The pixmap has to be freed with gp_pixmap_free() when no longer needed.
  *
  * @param w A pixmap width.
  * @param h A pixmap height.
  * @param type A pixel type.
  * @param stride The length in bytes of an image buffer row. Must be larger or
- *               equal than pixel size in bytes multiplied by width.
+ *               equal than pixel size in bytes multiplied by width. It's
+ *               determinted automatically when 0 is passed.
  *
- * @return A newly allocated pixmap or NULL in a case of malloc() failure.
+ * @return A newly allocated and initialized pixmap.
+ * @return NULL in a case of failure and `errno` is set.
+ *
+ * @exception EINVAL Invalid pixel type or stride.
+ * @exception ENOMEM Memory allocation failure.
+ * @exception EOVERFLOW One of the multiplications did overflow when pixel
+ *                      buffer size was calculated.
  */
 gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type,
                               uint32_t stride);
@@ -151,9 +173,8 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type,
  * @brief Allocates a pixmap.
  * @ingroup pixmap
  *
- * The pixmap consists of two parts, the gp_pixmap structure and pixels array.
- *
- * The rotation flags are set to (0, 0, 0).
+ * This is a shortcut for gp_pixmap_alloc_ex() without the stride parameter
+ * (stride set to 0 to be determined by the library).
  *
  * @param w A pixmap width.
  * @param h A pixmap height.
@@ -241,7 +262,7 @@ static inline int gp_pixmap_srgb_set(gp_pixmap *self)
  * @ingroup pixmap
  *
  * If pixmap->free_pixels is set also free pixel data, this flag is set
- * automatically by gp_pixmap_alloc().
+ * automatically by gp_pixmap_alloc() and gp_pixmap_alloc_ex().
  *
  * @param self A pixmap to free.
  */

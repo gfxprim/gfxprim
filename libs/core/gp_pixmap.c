@@ -33,8 +33,9 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t
 {
 	gp_pixmap *pixmap;
 	uint32_t bpp;
-	size_t bpr;
+	size_t bpr = 0;
 	void *pixels;
+	int err;
 
 	if (!GP_VALID_PIXELTYPE(type)) {
 		GP_WARN("Invalid pixel type %u", type);
@@ -42,56 +43,23 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t
 		return NULL;
 	}
 
-	if (w <= 0 || h <= 0) {
-		GP_WARN("Trying to allocate pixmap with zero width and/or height");
-		errno = EINVAL;
-		return NULL;
-	}
-
 	GP_DEBUG(1, "Allocating pixmap %u x %u - %s",
 	         w, h, gp_pixel_type_name(type));
 
-	bpp = gp_pixel_size(type);
-
-	if (!(bpr = get_bpr(bpp, w)))
-		return NULL;
-
-	if (stride) {
-		if (stride < bpr) {
-			GP_WARN("Invalid stride %u need at least %u",
-				(unsigned int)stride, (unsigned int)bpr);
-			errno = EINVAL;
-			return NULL;
-		}
-		bpr = stride;
-	}
-
-	size_t size = bpr * h;
-
-	if (size / h != bpr) {
-		GP_WARN("Pixmap too big %u x %u (owerflow detected)", w, h);
-		return NULL;
-	}
-
-	pixels = malloc(size);
 	pixmap = malloc(sizeof(gp_pixmap));
-
-	if (pixels == NULL || pixmap == NULL) {
-		free(pixels);
-		free(pixmap);
-		GP_WARN("Malloc failed :(");
+	if (!pixmap) {
+		GP_DEBUG(1, "Malloc failed :(");
 		errno = ENOMEM;
 		return NULL;
 	}
 
-	pixmap->pixels        = pixels;
-	pixmap->bytes_per_row = bpr;
-	pixmap->offset        = 0;
+	pixmap->pixels = NULL;
+	pixmap->bytes_per_row = 0;
+	pixmap->offset = 0;
+	pixmap->gamma = NULL;
 
 	pixmap->w = w;
 	pixmap->h = h;
-
-	pixmap->gamma = NULL;
 
 	pixmap->pixel_type = type;
 
@@ -100,7 +68,51 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t
 
 	pixmap->free_pixels = 1;
 
+	if (!w || !h)
+		return pixmap;
+
+	bpp = gp_pixel_size(type);
+
+	if (!(bpr = get_bpr(bpp, w))) {
+		err = EOVERFLOW;
+		goto err;
+	}
+
+	if (stride) {
+		if (stride < bpr) {
+			GP_WARN("Invalid stride %u need at least %u",
+				(unsigned int)stride, (unsigned int)bpr);
+			err = EINVAL;
+			goto err;
+		}
+		bpr = stride;
+	}
+
+	size_t size = bpr * h;
+
+	if (size / h != bpr) {
+		GP_WARN("Pixmap too big %u x %u (owerflow detected)", w, h);
+		err = EOVERFLOW;
+		goto err;
+	}
+
+	pixels = malloc(size);
+	if (!pixels) {
+		GP_WARN("Malloc failed :(");
+		free(pixels);
+		free(pixmap);
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	pixmap->pixels = pixels;
+	pixmap->bytes_per_row = bpr;
+
 	return pixmap;
+err:
+	free(pixmap);
+	errno = err;
+	return NULL;
 }
 
 int gp_pixmap_correction_set(gp_pixmap *self, gp_correction_desc *corr_desc)

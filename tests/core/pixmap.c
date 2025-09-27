@@ -12,103 +12,64 @@
 
 static int pixmap_alloc_free(void)
 {
-	gp_pixmap *c;
+	gp_pixmap *p;
 
-	c = gp_pixmap_alloc(100, 200, GP_PIXEL_RGB888);
+	p = gp_pixmap_alloc(100, 200, GP_PIXEL_RGB888);
 
-	if (!c) {
+	if (!p) {
 		tst_msg("gp_pixmap_alloc() failed");
 		return TST_FAILED;
 	}
 
-	if (c->bytes_per_row != 3 * c->w) {
-		tst_msg("pixmap->bytes_per_row != %i (== %i)",
-		        3 * c->w, c->bytes_per_row);
-		return TST_FAILED;
-	}
+	TST_EXP_UINT(p->w, 100, "Width should be:");
+	TST_EXP_UINT(p->h, 200, "Height should be:");
+	TST_EXP_UINT(p->bytes_per_row, 3 * p->w, "Bytes per row should be:");
+	TST_EXP_UINT(p->offset, 0, "Offset should be:");
+	TST_EXP_NULL(p->gamma, "Pixmap gamma");
 
-	if (c->w != 100) {
-		tst_msg("pixmap->w != 100 (== %i)", c->w);
-		return TST_FAILED;
-	}
-
-	if (c->h != 200) {
-		tst_msg("pixmap->h != 200 (== %i)", c->h);
-		return TST_FAILED;
-	}
-
-	if (c->offset != 0) {
-		tst_msg("pixmap->offset != 0");
-		return TST_FAILED;
-	}
-
-	if (c->pixel_type != GP_PIXEL_RGB888) {
+	if (p->pixel_type != GP_PIXEL_RGB888) {
 		tst_msg("pixmap->pixel_type != GP_PIXEL_RGB888");
 		return TST_FAILED;
 	}
 
-	if (c->gamma != NULL) {
-		tst_msg("pixmap->gamma != NULL");
-		return TST_FAILED;
-	}
-
-	if (c->axes_swap != 0 || c->x_swap != 0 || c->y_swap != 0) {
+	if (p->axes_swap != 0 || p->x_swap != 0 || p->y_swap != 0) {
 		tst_msg("Wrong default orientation %i %i %i",
-		        c->axes_swap, c->x_swap, c->y_swap);
+		        p->axes_swap, p->x_swap, p->y_swap);
 		return TST_FAILED;
 	}
 
 	/* access the pixel buffer */
-	*(char*)GP_PIXEL_ADDR(c, 0, 0) = 0;
-	*(char*)GP_PIXEL_ADDR(c, 100, 100) = 0;
+	*(char*)GP_PIXEL_ADDR(p, 0, 0) = 0;
+	*(char*)GP_PIXEL_ADDR(p, 100, 100) = 0;
 
-	gp_pixmap_free(c);
+	gp_pixmap_free(p);
 
 	return TST_PASSED;
 }
 
-static int subpixmap_assert(const gp_pixmap *c, const gp_pixmap *sc,
-                             gp_size w, gp_size h)
+static int subpixmap_assert(const gp_pixmap *p, const gp_pixmap *sp,
+                            gp_size w, gp_size h)
 {
-	if (c->bytes_per_row != sc->bytes_per_row) {
-		tst_msg("pixmap->bytes_per_row != sub_pixmap->bytes_per_row");
-		return TST_FAILED;
-	}
+	TST_EXP_UINT(sp->w, w, "sub_pixmap->w: ");
+	TST_EXP_UINT(sp->h, h, "sub_pixmap->h:");
+	TST_EXP_UINT(sp->bytes_per_row, p->bytes_per_row, "pixmap->bytes_per_row != sub_pixmap->bytes_per_row");
+	TST_EXP_UINT(sp->offset, 0, "Offset should be:");
+	TST_EXP_NULL(sp->gamma, "sub_pixmap->gamma");
 
-	if (sc->w != w) {
-		tst_msg("sub_pixmap->w != %u (== %i)", w, sc->w);
-		return TST_FAILED;
-	}
-
-	if (sc->h != h) {
-		tst_msg("sub_pixmap->h != %u (== %i)", h, sc->h);
-		return TST_FAILED;
-	}
-
-	if (sc->offset != 0) {
-		tst_msg("sub_pixmap->offset != 0");
-		return TST_FAILED;
-	}
-
-	if (sc->pixel_type != GP_PIXEL_RGB888) {
+	if (sp->pixel_type != GP_PIXEL_RGB888) {
 		tst_msg("sub_pixmap->pixel_type != GP_PIXEL_RGB888");
 		return TST_FAILED;
 	}
 
-	if (sc->gamma != NULL) {
-		tst_msg("sub_pixmap->gamma != NULL");
-		return TST_FAILED;
-	}
-
-	if (sc->axes_swap != 0 || sc->x_swap != 0 || sc->y_swap != 0) {
+	if (sp->axes_swap != 0 || sp->x_swap != 0 || sp->y_swap != 0) {
 		tst_msg("Wrong default orientation %i %i %i",
-		        sc->axes_swap, sc->x_swap, sc->y_swap);
+		        sp->axes_swap, sp->x_swap, sp->y_swap);
 		return TST_FAILED;
 	}
 
 	/* access the start and end of the pixel buffer */
-	*(char*)GP_PIXEL_ADDR(sc, 0, 0) = 0;
-	*(char*)GP_PIXEL_ADDR(sc, sc->w - 1, sc->h - 1) = 0;
+	*(char*)GP_PIXEL_ADDR(sp, 0, 0) = 0;
+	*(char*)GP_PIXEL_ADDR(sp, sp->w - 1, sp->h - 1) = 0;
 
 	return 0;
 }
@@ -169,38 +130,56 @@ static int sub_pixmap_create(void)
 
 static int pixmap_zero_w(void)
 {
-	gp_pixmap *c;
+	gp_pixmap *p;
 
-	c = gp_pixmap_alloc(0, 200, GP_PIXEL_G8);
-
-	if (c != NULL) {
-		tst_msg("Pixmap with zero width successfuly allocated");
+	p = gp_pixmap_alloc(0, 200, GP_PIXEL_G8);
+	if (!p) {
+		tst_msg("Pixmap with zero width wasn't allocated");
 		return TST_FAILED;
 	}
 
-	if (errno != EINVAL) {
-		tst_msg("Expected errno set to EINVAL");
+	TST_EXP_NULL(p->pixels, "Pixmap pixels");
+	TST_EXP_UINT(p->w, 0, "Width should be:");
+	TST_EXP_UINT(p->h, 200, "Height should be:");
+	TST_EXP_UINT(p->bytes_per_row, 0, "Bytes per row should be:");
+	TST_EXP_UINT(p->offset, 0, "Offset should be:");
+	TST_EXP_NULL(p->gamma, "Pixmap gamma");
+
+	if (p->axes_swap != 0 || p->x_swap != 0 || p->y_swap != 0) {
+		tst_msg("Wrong default orientation %i %i %i",
+		        p->axes_swap, p->x_swap, p->y_swap);
 		return TST_FAILED;
 	}
+
+	gp_pixmap_free(p);
 
 	return TST_PASSED;
 }
 
 static int pixmap_zero_h(void)
 {
-	gp_pixmap *c;
+	gp_pixmap *p;
 
-	c = gp_pixmap_alloc(200, 0, GP_PIXEL_G8);
-
-	if (c) {
-		tst_msg("Pixmap with zero height successfuly allocated");
+	p = gp_pixmap_alloc(200, 0, GP_PIXEL_G8);
+	if (!p) {
+		tst_msg("Pixmap with zero height wasn't allocated");
 		return TST_FAILED;
 	}
 
-	if (errno != EINVAL) {
-		tst_msg("Expected errno set to EINVAL");
+	TST_EXP_NULL(p->pixels, "Pixmap pixels");
+	TST_EXP_UINT(p->w, 200, "Width should be:");
+	TST_EXP_UINT(p->h, 0, "Height should be:");
+	TST_EXP_UINT(p->bytes_per_row, 0, "Bytes per row should be:");
+	TST_EXP_UINT(p->offset, 0, "Offset should be:");
+	TST_EXP_NULL(p->gamma, "Pixmap gamma");
+
+	if (p->axes_swap != 0 || p->x_swap != 0 || p->y_swap != 0) {
+		tst_msg("Wrong default orientation %i %i %i",
+		        p->axes_swap, p->x_swap, p->y_swap);
 		return TST_FAILED;
 	}
+
+	gp_pixmap_free(p);
 
 	return TST_PASSED;
 }
@@ -516,9 +495,11 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = sub_pixmap_off,
 		 .data = &sub_pixmap_2bpp_off0},
 		{.name = "Pixmap create w = 0",
-		 .tst_fn = pixmap_zero_w},
+		 .tst_fn = pixmap_zero_w,
+		 .flags = TST_CHECK_MALLOC},
 		{.name = "Pixmap create h = 0",
-		 .tst_fn = pixmap_zero_h},
+		 .tst_fn = pixmap_zero_h,
+		 .flags = TST_CHECK_MALLOC},
 		{.name = "Pixmap create pixel_type = -1",
 		 .tst_fn = pixmap_invalid_pixeltype1},
 		{.name = "Pixmap create invalid pixel_type",
