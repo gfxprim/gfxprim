@@ -37,7 +37,7 @@ static inline void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int x
 @         if ps.needs_bit_order():
 	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(pixmap, x0);
 @             if ps.size == 1:
-	gp_write_pixels_{{ ps.suffix }}(start, offset, y%2, length, pixel);
+	gp_write_pixels_{{ ps.suffix }}(start, offset, y, length, pixel);
 @             else:
 	gp_write_pixels_{{ ps.suffix }}(start, offset, length, pixel);
 @             end

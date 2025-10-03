@@ -12,59 +12,137 @@
 #include <core/gp_write_pixels.gen.h>
 #include <core/gp_pattern_fill.h>
 
-static const uint8_t bytes_1BPP_50[] = {0xaa, 0x55};
+#define BIT(byte, offset) (((byte)>>(offset)) & 0x01)
 
-static void gp_write_pixels_1BPP_DB_50(void *start, uint8_t off, uint8_t y_off,
-                                       size_t cnt, unsigned int val)
+static uint8_t pattern_byte_1bpp_UB(gp_pixel pixel, uint8_t y_off)
+{
+	uint8_t bytes_25_DSC[] = {0x88, 0x44, 0x22, 0x11};
+	uint8_t bytes_25_ASC[] = {0x11, 0x22, 0x44, 0x88};
+	uint8_t bytes_50[] = {0xaa, 0x55};
+
+	uint8_t color = gp_pixel_pattern_fg_get(pixel);
+
+	switch (gp_pixel_pattern_get(pixel)) {
+	case GP_PIXEL_PATTERN_50:
+		return color ? ~bytes_50[y_off%2] : bytes_50[y_off%2];
+	case GP_PIXEL_PATTERN_ASC_75:
+		return color ? ~bytes_25_ASC[y_off%4] : bytes_25_ASC[y_off%4];
+	case GP_PIXEL_PATTERN_ASC_25:
+		return color ? bytes_25_ASC[y_off%4] : ~bytes_25_ASC[y_off%4];
+	case GP_PIXEL_PATTERN_DSC_75:
+		return color ? ~bytes_25_DSC[y_off%4] : bytes_25_DSC[y_off%4];
+	case GP_PIXEL_PATTERN_DSC_25:
+		return color ? bytes_25_DSC[y_off%4] : ~bytes_25_DSC[y_off%4];
+	case GP_PIXEL_PATTERN_DOTS_75:
+		color = !color;
+	/* fallthrough */
+	case GP_PIXEL_PATTERN_DOTS_25:
+		if (y_off % 2 == 0)
+			return color ? 0xaa : ~0xaa;
+		return color ? 0x00 : 0xff;
+	case GP_PIXEL_PATTERN_DOTS_87_5:
+		color = !color;
+	/* fallthrough */
+	case GP_PIXEL_PATTERN_DOTS_12_5:
+		if (y_off % 4 == 0)
+			return color ? 0x88 : ~0x88;
+		return color ? 0x00 : 0xff;
+	/* will not happen */
+	case GP_PIXEL_PATTERN_NONE:
+	break;
+	}
+
+	return 0;
+}
+
+static uint8_t pattern_byte_1bpp_DB(gp_pixel pixel, uint8_t y_off)
+{
+	uint8_t bytes_25_ASC[] = {0x88, 0x44, 0x22, 0x11};
+	uint8_t bytes_25_DSC[] = {0x11, 0x22, 0x44, 0x88};
+	uint8_t bytes_50[] = {0x55, 0xaa};
+
+	uint8_t color = gp_pixel_pattern_fg_get(pixel);
+
+	switch (gp_pixel_pattern_get(pixel)) {
+	case GP_PIXEL_PATTERN_50:
+		return color ? ~bytes_50[y_off%2] : bytes_50[y_off%2];
+	case GP_PIXEL_PATTERN_ASC_75:
+		return color ? ~bytes_25_ASC[y_off%4] : bytes_25_ASC[y_off%4];
+	case GP_PIXEL_PATTERN_ASC_25:
+		return color ? bytes_25_ASC[y_off%4] : ~bytes_25_ASC[y_off%4];
+	case GP_PIXEL_PATTERN_DSC_75:
+		return color ? ~bytes_25_DSC[y_off%4] : bytes_25_DSC[y_off%4];
+	case GP_PIXEL_PATTERN_DSC_25:
+		return color ? bytes_25_DSC[y_off%4] : ~bytes_25_DSC[y_off%4];
+	case GP_PIXEL_PATTERN_DOTS_75:
+		color = !color;
+	/* fallthrough */
+	case GP_PIXEL_PATTERN_DOTS_25:
+		if (y_off % 2 == 0)
+			return color ? 0x55 : ~0x55;
+		return color ? 0x00 : 0xff;
+	case GP_PIXEL_PATTERN_DOTS_87_5:
+		color = !color;
+	/* fallthrough */
+	case GP_PIXEL_PATTERN_DOTS_12_5:
+		if (y_off % 4 == 0)
+			return color ? 0x11 : ~0x11;
+		return color ? 0x00 : 0xff;
+	/* will not happen */
+	case GP_PIXEL_PATTERN_NONE:
+	break;
+	}
+
+	return 0;
+}
+
+static void gp_write_pixels_pattern_1BPP_DB(void *start, uint8_t off,
+                                            size_t cnt, uint8_t byte)
 {
 	int len = cnt;
-	uint8_t idx = val & 0x01;
-
-	if (y_off%2)
-		idx = !idx;
 
 	/* Write start of the line */
 	switch (off) {
 	case 0:
 	break;
 	case 1:
-		GP_SET_BITS1(1, 1, start, !idx);
+		GP_SET_BITS1(1, 1, start, BIT(byte, 1));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1(2, 1, start, idx);
+		GP_SET_BITS1(2, 1, start, BIT(byte, 2));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1(3, 1, start, !idx);
+		GP_SET_BITS1(3, 1, start, BIT(byte, 3));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 4:
-		GP_SET_BITS1(4, 1, start, idx);
+		GP_SET_BITS1(4, 1, start, BIT(byte, 4));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 5:
-		GP_SET_BITS1(5, 1, start, !idx);
+		GP_SET_BITS1(5, 1, start, BIT(byte, 5));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 6:
-		GP_SET_BITS1(6, 1, start, idx);
+		GP_SET_BITS1(6, 1, start, BIT(byte, 6));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 7:
-		GP_SET_BITS1(7, 1, start, !idx);
+		GP_SET_BITS1(7, 1, start, BIT(byte, 7));
 
 		if (--len == 0)
 			return;
@@ -74,89 +152,85 @@ static void gp_write_pixels_1BPP_DB_50(void *start, uint8_t off, uint8_t y_off,
 	}
 
 	/* Write as many bytes as possible */
-	memset(start, bytes_1BPP_50[idx], len/8);
+	memset(start, byte, len/8);
 
 	start+=len/8;
 
 	/* And the rest */
 	switch (len%8) {
 	case 7:
-		GP_SET_BITS1(6, 1, start, idx);
+		GP_SET_BITS1(6, 1, start, BIT(byte, 6));
 		/* fallthrough */
 	case 6:
-		GP_SET_BITS1(5, 1, start, !idx);
+		GP_SET_BITS1(5, 1, start, BIT(byte, 5));
 		/* fallthrough */
 	case 5:
-		GP_SET_BITS1(4, 1, start, idx);
+		GP_SET_BITS1(4, 1, start, BIT(byte, 4));
 		/* fallthrough */
 	case 4:
-		GP_SET_BITS1(3, 1, start, !idx);
+		GP_SET_BITS1(3, 1, start, BIT(byte, 3));
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1(2, 1, start, idx);
+		GP_SET_BITS1(2, 1, start, BIT(byte, 2));
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1(1, 1, start, !idx);
+		GP_SET_BITS1(1, 1, start, BIT(byte, 1));
 		/* fallthrough */
 	case 1:
-		GP_SET_BITS1(0, 1, start, idx);
+		GP_SET_BITS1(0, 1, start, BIT(byte, 0));
 	break;
 	case 0:
 	break;
 	}
 }
 
-void gp_write_pixels_1BPP_UB_50(void *start, uint8_t off, uint8_t y_off,
-                                size_t cnt, unsigned int val)
+static void gp_write_pixels_pattern_1BPP_UB(void *start, uint8_t off,
+                                            size_t cnt, uint8_t byte)
 {
 	int len = cnt;
-	uint8_t idx = val & 0x01;
-
-	if (y_off%2)
-		idx = !idx;
 
 	/* Write start of the line */
 	switch (off) {
 	case 0:
 	break;
 	case 1:
-		GP_SET_BITS1(6, 1, start, idx);
+		GP_SET_BITS1(6, 1, start, BIT(byte, 6));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1(5, 1, start, !idx);
+		GP_SET_BITS1(5, 1, start, BIT(byte, 5));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1(4, 1, start, idx);
+		GP_SET_BITS1(4, 1, start, BIT(byte, 4));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 4:
-		GP_SET_BITS1(3, 1, start, !idx);
+		GP_SET_BITS1(3, 1, start, BIT(byte, 3));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 5:
-		GP_SET_BITS1(2, 1, start, idx);
+		GP_SET_BITS1(2, 1, start, BIT(byte, 2));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 6:
-		GP_SET_BITS1(1, 1, start, !idx);
+		GP_SET_BITS1(1, 1, start, BIT(byte, 1));
 
 		if (--len == 0)
 			return;
 		/* fallthrough */
 	case 7:
-		GP_SET_BITS1(0, 1, start, idx);
+		GP_SET_BITS1(0, 1, start, BIT(byte, 0));
 
 		if (--len == 0)
 			return;
@@ -166,32 +240,32 @@ void gp_write_pixels_1BPP_UB_50(void *start, uint8_t off, uint8_t y_off,
 	}
 
 	/* Write as many bytes as possible */
-	memset(start, bytes_1BPP_50[idx], len/8);
+	memset(start, byte, len/8);
 
 	start+=len/8;
 
 	/* And the rest */
 	switch (len%8) {
 	case 7:
-		GP_SET_BITS1(1, 1, start, !idx);
+		GP_SET_BITS1(1, 1, start, BIT(byte, 1));
 		/* fallthrough */
 	case 6:
-		GP_SET_BITS1(2, 1, start, idx);
+		GP_SET_BITS1(2, 1, start, BIT(byte, 2));
 		/* fallthrough */
 	case 5:
-		GP_SET_BITS1(3, 1, start, !idx);
+		GP_SET_BITS1(3, 1, start, BIT(byte, 3));
 		/* fallthrough */
 	case 4:
-		GP_SET_BITS1(4, 1, start, idx);
+		GP_SET_BITS1(4, 1, start, BIT(byte, 4));
 		/* fallthrough */
 	case 3:
-		GP_SET_BITS1(5, 1, start, !idx);
+		GP_SET_BITS1(5, 1, start, BIT(byte, 5));
 		/* fallthrough */
 	case 2:
-		GP_SET_BITS1(6, 1, start, idx);
+		GP_SET_BITS1(6, 1, start, BIT(byte, 6));
 		/* fallthrough */
 	case 1:
-		GP_SET_BITS1(7, 1, start, !idx);
+		GP_SET_BITS1(7, 1, start, BIT(byte, 7));
 	break;
 	}
 }
@@ -206,12 +280,9 @@ void gp_write_pixels_1BPP_DB(void *start, uint8_t off, uint8_t y_off,
 	if (!len)
 		return;
 
-	switch (gp_pixel_pattern(val)) {
-	case GP_PIXEL_PATTERN_50:
-		gp_write_pixels_1BPP_DB_50(start, off, y_off, cnt, val);
+	if (gp_pixel_pattern_get(val)) {
+		gp_write_pixels_pattern_1BPP_DB(start, off, cnt, pattern_byte_1bpp_DB(val, y_off));
 		return;
-	case GP_PIXEL_PATTERN_NONE:
-	break;
 	}
 
 	/* Write start of the line */
@@ -303,12 +374,9 @@ void gp_write_pixels_1BPP_UB(void *start, uint8_t off, uint8_t y_off,
 	if (!len)
 		return;
 
-	switch (gp_pixel_pattern(val)) {
-	case GP_PIXEL_PATTERN_50:
-		gp_write_pixels_1BPP_UB_50(start, off, y_off, cnt, val);
+	if (gp_pixel_pattern_get(val)) {
+		gp_write_pixels_pattern_1BPP_UB(start, off, cnt, pattern_byte_1bpp_UB(val, y_off));
 		return;
-	case GP_PIXEL_PATTERN_NONE:
-	break;
 	}
 
 	/* Write start of the line */

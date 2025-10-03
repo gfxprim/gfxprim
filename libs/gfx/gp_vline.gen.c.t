@@ -17,18 +17,24 @@ void gp_vline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x,
 	for (y = y0; y <= y1; y++)
 		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y, pixel);
 @     else:
-	gp_pixel p;
+	gp_pixel fg, bg, p;
+	uint8_t x_mod, y_mod, *lookup;
 
-	switch (gp_pixel_pattern(pixel)) {
+	switch (gp_pixel_pattern_get(pixel)) {
 	case GP_PIXEL_PATTERN_NONE:
 		for (y = y0; y <= y1; y++)
 			gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y, pixel);
 	break;
-	case GP_PIXEL_PATTERN_50:
-		p = (pixel & 0x01) ^ (x % 2);
+	default:
+		lookup = gp_pixel_pattern_lookup_table_get(gp_pixel_pattern_get(pixel));
+		fg = gp_pixel_pattern_fg_get(pixel);
+		bg = gp_pixel_pattern_bg_get(pixel);
+		x_mod = (pixmap->offset + x) % GP_PIXEL_PATTERN_W;
+
 		for (y = y0; y <= y1; y++) {
+			y_mod = y % GP_PIXEL_PATTERN_H;
+			gp_pixel p = gp_pixel_pattern_pixel_get(lookup, fg, bg, x_mod, y_mod);
 			gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y, p);
-			p = !p;
 		}
 	break;
 	}

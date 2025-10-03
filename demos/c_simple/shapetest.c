@@ -404,10 +404,13 @@ void event_loop(void)
 			break;
 			case GP_KEY_P:
 				if (gp_pixel_size(win->pixel_type) == 1) {
-					if (gp_pixel_pattern(red))
-						red = 0x01;
-					else
-						red = GP_PIXEL_PATTERN_50 | 0x01;
+					uint8_t fgcol = gp_pixel_pattern_fg_get(red);
+					uint8_t bgcol = gp_pixel_pattern_bg_get(red);
+					uint8_t pattern = gp_pixel_pattern_get(red);
+
+					pattern = (pattern + 1) % GP_PIXEL_PATTERN_CNT;
+
+					red = gp_pixel_pattern(fgcol, bgcol, pattern);
 				}
 			break;
 			case GP_KEY_F:
@@ -532,11 +535,11 @@ static void setup_colors(gp_pixel_type pixel_type)
 	if (gp_pixel_size(pixel_type) == 1) {
 		black = 0x00;
 		white = 0x01;
-		yellow = 0x01;
+		yellow = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
 		green = 0x01;
-		red = GP_PIXEL_PATTERN_50 | 0x01;
-		gray = GP_PIXEL_PATTERN_50 | 0x01;
-		darkgray = GP_PIXEL_PATTERN_50 | 0x01;
+		red = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
+		gray = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
+		darkgray = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_ASC_25);
 		return;
 	}
 
