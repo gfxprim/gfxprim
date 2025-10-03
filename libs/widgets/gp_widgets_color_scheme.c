@@ -142,7 +142,7 @@ static void widgets_color_scheme_load_1bpp(void)
 	ctx.alert_color = fg;
 	ctx.warn_color = fg;
 	ctx.accept_color = fg;
-	ctx.col_disabled = fg;
+	ctx.col_disabled = gp_pixel_pattern(fg, bg, GP_PIXEL_PATTERN_50);
 	ctx.hl_color = fg;
 	ctx.sel_color = fg;
 

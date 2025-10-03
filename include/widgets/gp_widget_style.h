@@ -24,14 +24,8 @@ static inline gp_pixel gp_widget_text_color(gp_widget *self,
 {
 	gp_pixel text_color = ctx->text_color;
 
-	switch (gp_pixel_size(ctx->pixel_type)) {
-	case 1:
-	break;
-	default:
-		if (gp_widget_is_disabled(self, render_flags))
-			text_color = ctx->col_disabled;
-	break;
-	}
+	if (gp_widget_is_disabled(self, render_flags))
+		text_color = ctx->col_disabled;
 
 	return text_color;
 }
@@ -44,14 +38,8 @@ static inline gp_pixel gp_widget_frame_color(gp_widget *self,
 
 	(void) render_flags;
 
-	switch (gp_pixel_size(ctx->pixel_type)) {
-	case 1:
-	break;
-	default:
-		if (self->focused)
-			frame_color = ctx->sel_color;
-	break;
-	}
+	if (self->focused)
+		frame_color = ctx->sel_color;
 
 	return frame_color;
 }
