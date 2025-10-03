@@ -108,6 +108,9 @@ static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style 
 	int nomul = style->pixel_xmul == 1 && style->pixel_ymul == 1 &&
                     style->pixel_xspace == 0 && style->pixel_yspace == 0;
 
+	if (gp_pixel_size(pixmap->pixel_type) == 1 && gp_pixel_pattern_get(fg))
+		nomul = 0;
+
 	for (pos = 0; pos < max_chars && (ch = gp_utf8_next(&str)); pos++) {
 		const gp_glyph *glyph = gp_glyph_get(style->font, ch);
 
