@@ -61,7 +61,7 @@ static void draw_1BPP_glyph_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style
 			GP_TRANSFORM_RECT(pixmap, px, py, sx, sy);
 
 			for (k = py; k < py + sy; k++)
-				gp_hline_raw_{{ pt.pixelpack.suffix }}(pixmap, px, px + sx, k, fg);
+				gp_hline_raw_{{ pt.pixelpack.suffix }}(pixmap, px, px + sx - 1, k, fg);
 		}
 		y += y_mul;
 	}
