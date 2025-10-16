@@ -99,6 +99,8 @@ const char *gp_font_ucode_block_name(enum gp_font_ucode_block block)
 		return "Greek";
 	case GP_UCODE_CYRILIC:
 		return "Cyrilic";
+	case GP_UCODE_PUNCTUATION:
+		return "Punctuation";
 	case GP_UCODE_HIRAGANA:
 		return "Hiragana";
 	case GP_UCODE_KATAKANA:

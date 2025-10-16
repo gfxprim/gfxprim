@@ -353,6 +353,7 @@ sub utf_to_utf
 
 my $greek = $ENV{'GREEK'};
 my $cyrilic = $ENV{'CYRILIC'};
+my $punctuation = $ENV{'PUNCTUATION'};
 my $katakana = $ENV{'KATAKANA'};
 my $hiragana = $ENV{'HIRAGANA'};
 
@@ -415,6 +416,11 @@ sub convert_font
 		$ucode_blocks .= " | GP_UCODE_CYRILIC";
 	}
 
+	if ($enc eq "ISO10646-1" && $punctuation) {
+		gen_glyph_table($glyphs, 0x2018, 0x2037, $max_width, $font_id . "_punctuation", $bold, \&utf_to_utf);
+		$ucode_blocks .= " | GP_UCODE_PUNCTUATION";
+	}
+
 	if ($enc eq "ISO10646-1" && $katakana) {
 		gen_glyph_table($glyphs, 0x30a0, 0x30ff, $max_width, $font_id . "_katakana", $bold, \&utf_to_utf);
 		$ucode_blocks .= " | GP_UCODE_KATAKANA";
@@ -439,6 +445,7 @@ sub convert_font
 	$glyph_tables+=1 if ($enc eq "iso8859-2" || $enc eq "ISO10646-1");
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $greek);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $cyrilic);
+	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $punctuation);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $katakana);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $hiragana);
 
@@ -462,6 +469,9 @@ sub convert_font
 	}
 	if ($enc eq "ISO10646-1" && $cyrilic) {
 		add_block("0x400", "0x45f", $font_id, "cyrilic");
+	}
+	if ($enc eq "ISO10646-1" && $punctuation) {
+		add_block("0x2018", "0x2037", $font_id, "punctuation");
 	}
 	if ($enc eq "ISO10646-1" && $katakana) {
 		add_block("0x30a0", "0x30ff", $font_id, "katakana");

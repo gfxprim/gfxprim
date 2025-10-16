@@ -33,6 +33,7 @@ static struct codepage codepages[] = {
 	{.name = "Latin Extended-A", .first = 0x100, .last = 0x17e},
 	{.name = "Greek", .first = 0x384, .last = 0x3ce},
 	{.name = "Cyrilic", .first = 0x400, .last = 0x45f},
+	{.name = "Punctuation", .first = 0x2018, .last = 0x2037},
 	{.name = "Hiragana", .first = 0x3041, .last = 0x3096},
 	{.name = "Katakana", .first = 0x30a0, .last = 0x30ff},
 };
