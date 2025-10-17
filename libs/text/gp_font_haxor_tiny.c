@@ -1064,6 +1064,62 @@ static gp_glyph_offset font_cyrilic_offsets[] = {
 	    0x0480, 
 };
 
+static uint8_t font_punctuation_glyphs[] = {
+	/* 0x2018 '¿ò' */	  2,  2,  1,  5,  5,
+			  0x80, 0xc0, 0x00,
+	/* 0x2019 '¿ô' */	  2,  2,  1,  5,  5,
+			  0xc0, 0x40, 0x00,
+	/* 0x201a '¿ö' */	  3,  2,  0,  2,  5,
+			  0x60, 0x20, 0x00,
+	/* 0x201b '¿õ' */	  2,  2,  1,  5,  5,
+			  0xc0, 0x80, 0x00,
+	/* 0x201c '¿ú' */	  4,  2,  0,  5,  5,
+			  0xa0, 0xb0, 0x00,
+	/* 0x201d '¿ù' */	  4,  2,  0,  5,  5,
+			  0xd0, 0x50, 0x00,
+	/* 0x201e '¿û' */	  4,  2,  0,  2,  5,
+			  0xd0, 0x50, 0x00,
+	/* 0x201f '¿ü' */	  4,  2,  0,  5,  5,
+			  0xb0, 0xa0, 0x00,
+	/* 0x2022 '¿¢' */	  2,  2,  1,  3,  5,
+			  0xc0, 0xc0, 0x00,
+	/* 0x2023 '¿£' */	  2,  3,  1,  4,  5,
+			  0x80, 0xc0, 0x80,
+	/* 0x2024 '¿§' */	  3,  1,  0,  1,  5,
+			  0x20, 0x00, 0x00,
+	/* 0x2025 '¿•' */	  4,  1,  0,  1,  5,
+			  0x50, 0x00, 0x00,
+	/* 0x2026 '¿¶' */	  5,  1,  0,  1,  5,
+			  0xa8, 0x00, 0x00,
+	/* 0x2027 '¿ß' */	  2,  1,  1,  3,  5,
+			  0xc0, 0x00, 0x00,
+	/* 0x2030 '¿∞' */	  4,  5,  0,  5,  5,
+			  0x90, 0x10, 0x60, 0x80, 0xb0, 0x00, 0x00,
+	/* 0x2031 '¿±' */	  5,  5,  0,  5,  5,
+			  0x90, 0x10, 0x60, 0x80, 0xb8, 0x00, 0x00,
+	/* 0x2032 '¿≤' */	  2,  2,  1,  5,  5,
+			  0x40, 0x80, 0x00,
+	/* 0x2033 '¿≥' */	  4,  2,  0,  5,  5,
+			  0x50, 0xa0, 0x00,
+	/* 0x2034 '¿¥' */	  4,  2,  0,  5,  5,
+			  0x70, 0xe0, 0x00,
+	/* 0x2035 '¿µ' */	  2,  2,  1,  5,  5,
+			  0x80, 0x40, 0x00,
+	/* 0x2036 '¿∂' */	  4,  2,  0,  5,  5,
+			  0xa0, 0x50, 0x00,
+	/* 0x2037 '¿∑' */	  4,  2,  0,  5,  5,
+			  0xe0, 0x70, 0x00,
+
+};
+
+static gp_glyph_offset font_punctuation_offsets[] = {
+	    0x0000,     0x0008,     0x0010,     0x0018,     0x0020,     0x0028,     0x0030,     0x0038,
+	GP_NOGLYPH, GP_NOGLYPH,     0x0040,     0x0048,     0x0050,     0x0058,     0x0060,     0x0068,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	    0x0070,     0x007c,     0x0088,     0x0090,     0x0098,     0x00a0,     0x00a8,     0x00b0,
+	    0x00b8, 
+};
+
 static struct gp_font_face font = {
 	.family_name = "haxor_tiny",
 	.style = GP_FONT_MONO,
@@ -1071,7 +1127,7 @@ static struct gp_font_face font = {
 	.descent = 2,
 	.max_glyph_width = 5,
 	.max_glyph_advance = 5,
-	.glyph_tables = 4,
+	.glyph_tables = 5,
 	.glyphs = {
 		{
 			.glyphs = font_glyphs,
@@ -1096,6 +1152,12 @@ static struct gp_font_face font = {
 			.offsets = font_cyrilic_offsets,
 			.min_glyph = 0x400,
 			.max_glyph = 0x45f,
+		},
+		{
+			.glyphs = font_punctuation_glyphs,
+			.offsets = font_punctuation_offsets,
+			.min_glyph = 0x2018,
+			.max_glyph = 0x2037,
 		},
 
 	}
@@ -2163,6 +2225,62 @@ static gp_glyph_offset font_bold_cyrilic_offsets[] = {
 	    0x0480, 
 };
 
+static uint8_t font_bold_punctuation_glyphs[] = {
+	/* 0x2018 '¿ò' */	  3,  2,  1,  5,  5,
+			  0xc0, 0xe0, 0x00,
+	/* 0x2019 '¿ô' */	  3,  2,  1,  5,  5,
+			  0xe0, 0x60, 0x00,
+	/* 0x201a '¿ö' */	  4,  2,  0,  2,  5,
+			  0x70, 0x30, 0x00,
+	/* 0x201b '¿õ' */	  3,  2,  1,  5,  5,
+			  0xe0, 0xc0, 0x00,
+	/* 0x201c '¿ú' */	  5,  2,  0,  5,  5,
+			  0xf0, 0xf8, 0x00,
+	/* 0x201d '¿ù' */	  5,  2,  0,  5,  5,
+			  0xf8, 0x78, 0x00,
+	/* 0x201e '¿û' */	  5,  2,  0,  2,  5,
+			  0xf8, 0x78, 0x00,
+	/* 0x201f '¿ü' */	  5,  2,  0,  5,  5,
+			  0xf8, 0xf0, 0x00,
+	/* 0x2022 '¿¢' */	  3,  2,  1,  3,  5,
+			  0xe0, 0xe0, 0x00,
+	/* 0x2023 '¿£' */	  3,  3,  1,  4,  5,
+			  0xc0, 0xe0, 0xc0,
+	/* 0x2024 '¿§' */	  4,  1,  0,  1,  5,
+			  0x30, 0x00, 0x00,
+	/* 0x2025 '¿•' */	  5,  1,  0,  1,  5,
+			  0x78, 0x00, 0x00,
+	/* 0x2026 '¿¶' */	  5,  1,  0,  1,  5,
+			  0xfc, 0x00, 0x00,
+	/* 0x2027 '¿ß' */	  3,  1,  1,  3,  5,
+			  0xe0, 0x00, 0x00,
+	/* 0x2030 '¿∞' */	  5,  5,  0,  5,  5,
+			  0xd8, 0x18, 0x70, 0xc0, 0xf8, 0x00, 0x00,
+	/* 0x2031 '¿±' */	  5,  5,  0,  5,  5,
+			  0xd8, 0x18, 0x70, 0xc0, 0xfc, 0x00, 0x00,
+	/* 0x2032 '¿≤' */	  3,  2,  1,  5,  5,
+			  0x60, 0xc0, 0x00,
+	/* 0x2033 '¿≥' */	  5,  2,  0,  5,  5,
+			  0x78, 0xf0, 0x00,
+	/* 0x2034 '¿¥' */	  5,  2,  0,  5,  5,
+			  0x78, 0xf0, 0x00,
+	/* 0x2035 '¿µ' */	  3,  2,  1,  5,  5,
+			  0xc0, 0x60, 0x00,
+	/* 0x2036 '¿∂' */	  5,  2,  0,  5,  5,
+			  0xf0, 0x78, 0x00,
+	/* 0x2037 '¿∑' */	  5,  2,  0,  5,  5,
+			  0xf0, 0x78, 0x00,
+
+};
+
+static gp_glyph_offset font_bold_punctuation_offsets[] = {
+	    0x0000,     0x0008,     0x0010,     0x0018,     0x0020,     0x0028,     0x0030,     0x0038,
+	GP_NOGLYPH, GP_NOGLYPH,     0x0040,     0x0048,     0x0050,     0x0058,     0x0060,     0x0068,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	    0x0070,     0x007c,     0x0088,     0x0090,     0x0098,     0x00a0,     0x00a8,     0x00b0,
+	    0x00b8, 
+};
+
 static struct gp_font_face font_bold = {
 	.family_name = "haxor_tiny_bold",
 	.style = GP_FONT_MONO | GP_FONT_BOLD,
@@ -2170,7 +2288,7 @@ static struct gp_font_face font_bold = {
 	.descent = 2,
 	.max_glyph_width = 5,
 	.max_glyph_advance = 5,
-	.glyph_tables = 4,
+	.glyph_tables = 5,
 	.glyphs = {
 		{
 			.glyphs = font_bold_glyphs,
@@ -2196,13 +2314,19 @@ static struct gp_font_face font_bold = {
 			.min_glyph = 0x400,
 			.max_glyph = 0x45f,
 		},
+		{
+			.glyphs = font_bold_punctuation_glyphs,
+			.offsets = font_bold_punctuation_offsets,
+			.min_glyph = 0x2018,
+			.max_glyph = 0x2037,
+		},
 
 	}
 };
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_haxor_tiny = {
 	.family_name = "haxor-tiny",
-	.ucode_blocks = GP_UCODE_LATIN_BASIC | GP_UCODE_LATIN_SUP | GP_UCODE_LATIN_EXT_A | GP_UCODE_GREEK | GP_UCODE_CYRILIC,
+	.ucode_blocks = GP_UCODE_LATIN_BASIC | GP_UCODE_LATIN_SUP | GP_UCODE_LATIN_EXT_A | GP_UCODE_GREEK | GP_UCODE_CYRILIC | GP_UCODE_PUNCTUATION,
 	.fonts = {
 		&font,
 		&font_bold,
