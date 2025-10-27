@@ -250,10 +250,12 @@ typedef enum gp_font_ucode_block {
 	GP_UCODE_CYRILIC = 0x0010,
 	/** @brief Punctuation 0x20xx */
 	GP_UCODE_PUNCTUATION = 0x0020,
+	/** @brief Box drawing 0x25xx */
+	GP_UCODE_BOX = 0x0040,
 	/** @brief Hiragan 0x3041 - 0x3096 */
-	GP_UCODE_HIRAGANA= 0x0040,
+	GP_UCODE_HIRAGANA= 0x0080,
 	/** @brief Katakana 0x30a0 - 0x30aff */
-	GP_UCODE_KATAKANA = 0x0080,
+	GP_UCODE_KATAKANA = 0x0100,
 } gp_font_ucode_block;
 
 /**
