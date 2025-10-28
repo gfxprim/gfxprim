@@ -26,5 +26,5 @@ fonts:
 	BOX=1 HIRAGANA=1 KATAKANA=1 GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-15-utf.bdf haxor_narrow_15 haxor-narrow-15 14 > gp_haxor_narrow_15.c && \
 	GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-16-utf.bdf haxor_narrow_16 haxor-narrow-16 15 > gp_haxor_narrow_16.c && \
 	PUNCTUATION=1 GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-17-utf.bdf haxor_narrow_17 haxor-narrow-17 16 > gp_haxor_narrow_17.c && \
-	PUNCTUATION=1 HIRAGANA=1 KATAKANA=1 GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-18-utf.bdf haxor_narrow_18 haxor-narrow-18 18 > gp_font_haxor_narrow_18.c && \
+	BOX=1 PUNCTUATION=1 HIRAGANA=1 KATAKANA=1 GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-18-utf.bdf haxor_narrow_18 haxor-narrow-18 18 > gp_font_haxor_narrow_18.c && \
 	CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorSquare-8x8-utf.bdf square square > gp_haxor_square_8x8.c
