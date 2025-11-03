@@ -11,8 +11,8 @@
  * @brief Manipulates timers in an application main loop.
  */
 
-#ifndef GP_APP_TIMER_H
-#define GP_APP_TIMER_H
+#ifndef WIDGETS_GP_APP_TIMER_H
+#define WIDGETS_GP_APP_TIMER_H
 
 /**
  * @brief Inserts a timer into the widgets timer queue.
@@ -43,4 +43,4 @@ void gp_app_timer_stop(gp_timer *timer);
  */
 void gp_app_timer_reschedule(gp_timer *timer, uint32_t expires_ms);
 
-#endif /* GP_APP_TIMER_H */
+#endif /* WIDGETS_GP_APP_TIMER_H */

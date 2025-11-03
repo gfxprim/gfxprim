@@ -20,10 +20,10 @@
 #include <widgets/gp_key_repeat_timer.h>
 #include <widgets/gp_dialog.h>
 #include <widgets/gp_app_event.h>
-#include <widgets/gp_widgets_task.h>
+#include <widgets/gp_app_task.h>
 #include <widgets/gp_widget_keys.h>
 #include <widgets/gp_app_info.h>
-#include <widgets/gp_widget_poll.h>
+#include <widgets/gp_app_poll.h>
 #include <widgets/gp_dialog_msg.h>
 
 #include "gp_widgets_internal.h"
@@ -412,7 +412,7 @@ void gp_app_timer_queue_switch(gp_timer **);
 
 static gp_task_queue task_queue = {};
 
-void gp_widgets_task_ins(gp_task *task)
+void gp_app_task_start(gp_task *task)
 {
 	if (backend)
 		gp_backend_task_ins(backend, task);
@@ -420,7 +420,7 @@ void gp_widgets_task_ins(gp_task *task)
 		gp_task_queue_ins(&task_queue, task);
 }
 
-void gp_widgets_task_rem(gp_task *task)
+void gp_app_task_stop(gp_task *task)
 {
 	if (backend)
 		gp_backend_task_rem(backend, task);
@@ -430,7 +430,7 @@ void gp_widgets_task_rem(gp_task *task)
 
 static gp_dlist fds;
 
-void gp_widget_poll_add(gp_fd *fd)
+void gp_app_poll_add(gp_fd *fd)
 {
 	if (backend)
 		gp_backend_poll_add(backend, fd);
@@ -438,7 +438,7 @@ void gp_widget_poll_add(gp_fd *fd)
 		gp_dlist_push_head(&fds, &fd->lhead);
 }
 
-void gp_widget_poll_rem(gp_fd *fd)
+void gp_app_poll_rem(gp_fd *fd)
 {
 	if (!backend) {
 		GP_FATAL("Not implemented!");
@@ -448,7 +448,7 @@ void gp_widget_poll_rem(gp_fd *fd)
 	gp_backend_poll_rem(backend, fd);
 }
 
-gp_fd *gp_widget_poll_rem_by_fd(int fd)
+gp_fd *gp_app_poll_rem_by_fd(int fd)
 {
 	if (!backend) {
 		GP_FATAL("Not implemented!");

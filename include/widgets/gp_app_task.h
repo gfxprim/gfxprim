@@ -2,19 +2,17 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2025 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 /**
- * @file gp_widgets_task.h
+ * @file gp_app_task.h
  * @brief Runs a task in the context of the app main loop.
- *
- * TODO: Rename to gp_app_task()
  */
 
-#ifndef GP_WIDGETS_TASK_H
-#define GP_WIDGETS_TASK_H
+#ifndef WIDGETS_GP_APP_TASK_H
+#define WIDGETS_GP_APP_TASK_H
 
 #include <input/gp_task.h>
 
@@ -25,7 +23,7 @@
  *
  * @param task A pointer to a gp_task.
  */
-void gp_widgets_task_ins(gp_task *task);
+void gp_app_task_start(gp_task *task);
 
 /**
  * @brief Removes a task from the widgets main loop.
@@ -34,6 +32,6 @@ void gp_widgets_task_ins(gp_task *task);
  *
  * @param task Pointer to a gp_task.
  */
-void gp_widgets_task_rem(gp_task *task);
+void gp_app_task_stop(gp_task *task);
 
-#endif /* GP_WIDGETS_TASK_H */
+#endif /* WIDGETS_GP_APP_TASK_H */

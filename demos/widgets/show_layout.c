@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
 	if (argv[1]) {
 		screenshot_task.priv = argv[1];
-		gp_widgets_task_ins(&screenshot_task);
+		gp_app_task_start(&screenshot_task);
 	}
 
 	gp_widgets_main_loop(layout, NULL, 0, NULL);

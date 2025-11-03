@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 		.events = GP_POLLPRI,
 	};
 
-	gp_widget_poll_add(&fd);
+	gp_app_poll_add(&fd);
 
 	gp_widgets_main_loop(layout, NULL, argc, argv);
 

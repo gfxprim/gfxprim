@@ -55,15 +55,15 @@
 #include <widgets/gp_app_layout.h>
 #include <widgets/gp_app_event.h>
 #include <widgets/gp_app_info.h>
+#include <widgets/gp_app_timer.h>
+#include <widgets/gp_app_poll.h>
+#include <widgets/gp_app_task.h>
 
 #include <widgets/gp_widget_tattr.h>
 #include <widgets/gp_widget_size_units.h>
 
 #include <widgets/gp_widget_json.h>
 #include <widgets/gp_widget_uid.h>
-#include <widgets/gp_app_timer.h>
-#include <widgets/gp_widget_poll.h>
-#include <widgets/gp_widgets_task.h>
 #include <widgets/gp_file_size.h>
 
 #include <widgets/gp_widget_stock.h>
