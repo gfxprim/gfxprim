@@ -315,7 +315,7 @@ static void fb_exit(gp_backend *self)
 	free(self);
 }
 
-static void fb_flip_shadow(gp_backend *self)
+static void fb_update_shadow(gp_backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
@@ -513,7 +513,7 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 	/* update API */
 	backend->name = "Linux FB";
 	backend->pixmap = &fb->pixmap;
-	backend->flip = shadow ? fb_flip_shadow : NULL;
+	backend->update = shadow ? fb_update_shadow : NULL;
 	backend->update_rect = shadow ? fb_update_rect_shadow : NULL;
 	backend->exit = fb_exit;
 	backend->event_queue = &fb->ev_queue;

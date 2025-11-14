@@ -61,6 +61,8 @@ void redraw_screen(void)
 		        align, black_pixel, gray_pixel, line->text);
 		line = line->next;
 	}
+
+	gp_backend_flip(backend);
 }
 
 static void warp_up(int lines)
@@ -71,7 +73,6 @@ static void warp_up(int lines)
 	}
 
 	redraw_screen();
-	gp_backend_flip(backend);
 }
 
 static void warp_down(int lines)
@@ -82,7 +83,6 @@ static void warp_down(int lines)
 	}
 
 	redraw_screen();
-	gp_backend_flip(backend);
 }
 
 static void next_font(int dir)
@@ -119,22 +119,18 @@ void event_loop(void)
 			case GP_KEY_SPACE:
 				next_font(GP_FONTS_ITER_NEXT);
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_BACKSPACE:
 				next_font(GP_FONTS_ITER_PREV);
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_RIGHT:
 				tracking++;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_LEFT:
 				tracking--;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_UP:
 				warp_up(1);
@@ -145,23 +141,19 @@ void event_loop(void)
 			case GP_KEY_DOT:
 				space++;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_COMMA:
 				space--;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_RIGHT_BRACE:
 				mul++;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_LEFT_BRACE:
 				if (mul > 0)
 					mul--;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_PAGE_UP:
 				warp_up(30);
@@ -184,7 +176,6 @@ void event_loop(void)
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(backend);
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			}
 		break;
@@ -278,7 +269,6 @@ int main(int argc, char *argv[])
 	next_font(GP_FONTS_ITER_FIRST);
 
 	redraw_screen();
-	gp_backend_flip(backend);
 
 	event_loop();
 

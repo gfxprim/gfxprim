@@ -118,7 +118,7 @@ gp_backend *gp_st7565_init(unsigned int dpi)
 
 	st7565_init(disp);
 
-	backend->flip = st7565_repaint_full;
+	backend->update = st7565_repaint_full;
 	backend->update_rect = st7565_repaint_part;
 	backend->exit = st7565_exit;
 

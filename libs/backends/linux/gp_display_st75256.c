@@ -255,11 +255,11 @@ gp_backend *gp_st75256_init(unsigned int dpi, unsigned int bpp)
 
 	switch (bpp) {
 	case 1:
-		backend->flip = st75256_1bpp_repaint_full;
+		backend->update = st75256_1bpp_repaint_full;
 		backend->update_rect = st75256_1bpp_repaint_part;
 	break;
 	case 2:
-		backend->flip = st75256_2bpp_repaint_full;
+		backend->update = st75256_2bpp_repaint_full;
 		backend->update_rect = st75256_2bpp_repaint_part;
 	break;
 	}

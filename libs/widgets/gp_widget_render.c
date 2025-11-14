@@ -513,7 +513,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 		return;
 
 	gp_widget_render(layout, &ctx, flag);
-	gp_backend_flip(backend);
+	gp_backend_update(backend);
 }
 
 const gp_pixmap *gp_widget_render_buffer(void)
@@ -620,7 +620,7 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 			ctx.buf = backend->pixmap;
 			gp_fill(backend->pixmap, ctx.fill_color);
 			gp_widget_render(layout, &ctx, GP_WIDGET_RESIZE);
-			gp_backend_flip(backend);
+			gp_backend_update(backend);
 			handled = 1;
 		break;
 		case GP_EV_SYS_QUIT:

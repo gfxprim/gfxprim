@@ -59,6 +59,7 @@ void redraw_screen(void)
 	gp_text(pix, &style, 16, 32 + gp_text_height(&style),
 		GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 		gray_pixel, black_pixel, "Plain old text");
+	gp_backend_flip(backend);
 }
 
 static void next_font(int dir)
@@ -95,48 +96,39 @@ void event_loop(void)
 			case GP_KEY_SPACE:
 				next_font(GP_FONTS_ITER_NEXT);
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_BACKSPACE:
 				next_font(GP_FONTS_ITER_PREV);
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_RIGHT:
 				tracking++;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_LEFT:
 				tracking--;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_DOT:
 				space++;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_COMMA:
 				space--;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_RIGHT_BRACE:
 				mul++;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_LEFT_BRACE:
 				if (mul > 0)
 					mul--;
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_R:
 				gp_pixmap_rotate_cw(backend->pixmap);
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			case GP_KEY_ESC:
 				gp_backend_exit(backend);
@@ -153,7 +145,6 @@ void event_loop(void)
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(backend);
 				redraw_screen();
-				gp_backend_flip(backend);
 			break;
 			}
 		break;
@@ -205,7 +196,6 @@ int main(int argc, char *argv[])
 	next_font(GP_FONTS_ITER_FIRST);
 
 	redraw_screen();
-	gp_backend_flip(backend);
 
 	event_loop();
 

@@ -166,6 +166,8 @@ void redraw_screen(void)
 		gp_text(win->pixmap, &style, 64, SPACING*i + 88, align,
 		        dark_gray_pixel, black_pixel, test_string);
 	}
+
+	gp_backend_flip(win);
 }
 
 static void next_font(int dir)
@@ -202,22 +204,18 @@ void event_loop(void)
 			case GP_KEY_SPACE:
 				next_font(GP_FONTS_ITER_NEXT);
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_BACKSPACE:
 				next_font(GP_FONTS_ITER_PREV);
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_UP:
 				tracking++;
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_DOWN:
 				tracking--;
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			case GP_KEY_B:
 				font_h++;
@@ -225,7 +223,6 @@ void event_loop(void)
 					gp_font_face_free(font);
 					font = gp_font_face_load(font_path, 0, font_h);
 					redraw_screen();
-					gp_backend_flip(win);
 				}
 			break;
 			case GP_KEY_S:
@@ -234,7 +231,6 @@ void event_loop(void)
 					gp_font_face_free(font);
 					font = gp_font_face_load(font_path, 0, font_h);
 					redraw_screen();
-					gp_backend_flip(win);
 				}
 			break;
 			case GP_KEY_ESC:
@@ -252,7 +248,6 @@ void event_loop(void)
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(win);
 				redraw_screen();
-				gp_backend_flip(win);
 			break;
 			}
 		break;
@@ -319,7 +314,6 @@ int main(int argc, char *argv[])
 	next_font(GP_FONTS_ITER_FIRST);
 
 	redraw_screen();
-	gp_backend_flip(win);
 
 	event_loop();
 

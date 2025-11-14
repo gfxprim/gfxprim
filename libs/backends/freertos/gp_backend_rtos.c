@@ -24,16 +24,6 @@ static void rtos_wait(gp_backend *self)
 	}
 }
 
-static void rtos_flip(gp_backend *self)
-{
-	GP_DEBUG(2, "Flipping buffer");
-}
-
-static void rtos_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
-                             gp_coord x1, gp_coord y1)
-{
-}
-
 static gp_pixmap rtos_pixmap;
 
 static gp_backend rtos_backend = {
@@ -41,8 +31,6 @@ static gp_backend rtos_backend = {
 	.pixmap = &rtos_pixmap,
 	.poll = rtos_poll,
 	.wait = rtos_wait,
-	.flip = rtos_flip,
-	.update_rect = rtos_update_rect,
 };
 
 gp_ev_queue *gp_rtos_ev_queue;

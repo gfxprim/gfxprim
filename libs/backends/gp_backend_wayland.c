@@ -634,7 +634,7 @@ static int window_create(struct client_state *state, unsigned int w, unsigned in
 	return 0;
 }
 
-static void wayland_flip(gp_backend *self)
+static void wayland_update(gp_backend *self)
 {
 	(void) self;
 
@@ -698,7 +698,7 @@ static void wayland_exit(gp_backend* self)
 
 static struct gp_backend backend = {
 	.name = "Wayland",
-	.flip = wayland_flip,
+	.update = wayland_update,
 	.update_rect = wayland_update_rect,
 	.set_attr = wayland_set_attr,
 	.resize_ack = wayland_resize_ack,

@@ -22,8 +22,10 @@ void gp_backend_update_rect_xyxy(gp_backend *self,
                                  gp_coord x0, gp_coord y0,
                                  gp_coord x1, gp_coord y1)
 {
-	if (!self->update_rect)
+	if (!self->update_rect) {
+		gp_backend_update(self);
 		return;
+	}
 
 	GP_TRANSFORM_POINT(self->pixmap, x0, y0);
 	GP_TRANSFORM_POINT(self->pixmap, x1, y1);

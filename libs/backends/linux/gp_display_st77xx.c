@@ -278,7 +278,7 @@ gp_backend *gp_display_st77xx_init(uint16_t w, uint16_t h, uint16_t x_off, uint1
 
 	st77xx_init(disp, flags);
 
-	backend->flip = st77xx_repaint_full;
+	backend->update = st77xx_repaint_full;
 	backend->update_rect = st77xx_repaint_part;
 	backend->set_attr = st77xx_set_attr;
 	backend->exit = st77xx_exit;

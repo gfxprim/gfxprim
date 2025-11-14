@@ -194,7 +194,6 @@ static int backend_event(gp_backend *b)
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(b);
 				redraw();
-				gp_backend_flip(b);
 				resize_shown_client();
 				return 0;
 			break;

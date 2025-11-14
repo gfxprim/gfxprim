@@ -262,5 +262,5 @@ void bogoman_render(struct bogoman_render *render, int flags)
 	}
 
 	if (flags & BOGOMAN_RENDER_ALL && render->backend)
-		gp_backend_flip(render->backend);
+		gp_backend_update(render->backend);
 }

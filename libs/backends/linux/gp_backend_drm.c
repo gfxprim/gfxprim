@@ -565,7 +565,7 @@ static void drm_copy(gp_backend *self)
 }
 
 /* Requests the buffer flip. */
-static void drm_flip(gp_backend *self)
+static void backend_drm_flip(gp_backend *self)
 {
 	struct backend_drm_priv *priv = GP_BACKEND_PRIV(self);
 
@@ -593,20 +593,9 @@ static void drm_flip(gp_backend *self)
 	priv->fb_flip_in_progress = 1;
 }
 
-static void backend_drm_flip(gp_backend *self)
+static void backend_drm_update(gp_backend *self)
 {
 	drm_copy(self);
-	drm_flip(self);
-}
-
-static void backend_drm_update_rect(gp_backend *self,
-                                    gp_coord x0, gp_coord y0,
-                                    gp_coord x1, gp_coord y1)
-{
-	(void) x0;
-	(void) y0;
-	(void) x1;
-	(void) y1;
 	backend_drm_flip(self);
 }
 
@@ -666,7 +655,7 @@ static enum gp_poll_event_ret backend_drm_read(gp_fd *self)
 			priv->fb_flip_in_progress = 0;
 			if (priv->fb_dirty) {
 				GP_DEBUG(4, "Flipping dirty FB from DRM event handler.");
-				drm_flip(backend);
+				backend_drm_flip(backend);
 				priv->fb_dirty = 0;
 			}
 		break;
@@ -753,7 +742,7 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	ret->exit = backend_drm_exit;
 	ret->flip = backend_drm_flip;
-	ret->update_rect = backend_drm_update_rect;
+	ret->update = backend_drm_update;
 	ret->set_attr = backend_drm_set_attr;
 
 	ret->dpi = gp_dpi_from_size(ret->pixmap->w, priv->mm_width,

@@ -21,7 +21,7 @@ void redraw_screen(void)
 	gp_pixmap *pix = backend->pixmap;
 
 	gp_fill(pix, black);
-	gp_backend_flip(backend);
+	gp_backend_update(backend);
 
 	gp_size w = gp_pixmap_w(pix) - x_off - w_off;
 	gp_size h = gp_pixmap_h(pix) - y_off - h_off;
@@ -43,8 +43,8 @@ void event_loop(void)
 				continue;
 
 			switch (ev->key.key) {
-			case GP_KEY_F:
-				gp_backend_flip(backend);
+			case GP_KEY_U:
+				gp_backend_update(backend);
 			break;
 			case GP_KEY_X:
 				x_off++;

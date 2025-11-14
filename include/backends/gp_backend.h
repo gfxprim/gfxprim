@@ -174,12 +174,32 @@ enum gp_backend_backlight_req {
  */
 struct gp_backend {
 	/**
-	 * @brief Pointer to pixmap app should draw to.
+	 * @brief Pointer to a pixmap an app should draw to.
 	 *
-	 * In most cases changes are not propagaged into display until
-	 * gp_backend_flip() or gp_backend_update_rect() is called.
+	 * In most cases changes are not updated on a display until
+	 * gp_backend_flip(), gp_backend_update() or gp_backend_update_rect()
+	 * is called.
 	 *
-	 * This MAY change upon a flip operation.
+	 * Generally there are three different possible ways how data are
+	 * updated on a display.
+	 *
+	 * - Directly mapped display buffer (e.g. old Linux framebuffer) the
+	 *   pixmap data points directly to a DMA buffer that is periodically
+	 *   send to the display. In this case the gp_backend::flip,
+	 *   gp_backend::update, and gp_backend::update_rect pointers are set
+	 *   to NULL.
+	 *
+	 * - Buffers are atomically swapped on update (e.g. Linux DRM). The
+	 *   gp_backend::update_rect is NULL, the gp_backend_update_rect()
+	 *   calls gp_backend_update() and gp_backend::update does copy the
+	 *   old buffer to the new buffer before buffers are swapped.
+	 *
+	 * - Buffer is send over a bus to a display (e.g. e-ink or LCD SPI
+	 *   display). In this case the gp_backend::flip pointer is NULL and
+	 *   gp_backend_flip() calls gp_backend::update.
+	 *
+	 * @warning The pixmap or gp_pixmap::pixels pointers MAY change when data are
+	 *          updated on a display.
 	 */
 	gp_pixmap *pixmap;
 
@@ -187,22 +207,41 @@ struct gp_backend {
 	const char *name;
 
 	/**
-	 * @brief Updates display.
+	 * @brief Flips backend and display buffers.
 	 *
-	 * If display is buffered, this copies content
-	 * of pixmap into display.
-	 *
-	 * If display is not buffered, this is no-op (set to NULL).
+	 * This callback swaps buffers between gp_backend::pixmap and
+	 * currently displayed buffer. Some backends, e.g. SPI displays, does
+	 * not support this operation, the pointer is NULL and
+	 * gp_backend_flip() falls back to gp_backend_update().
 	 */
 	void (*flip)(gp_backend *self);
 
 	/**
+	 * @brief Updates whole display buffer.
+	 *
+	 * Updates a display to show an image from gp_backend::pixmap. The
+	 * gp_backend::pixmap data (not necesarilly the gp_pixmap or
+	 * gp_pixmap::pixels pointers) will keep the image data. For some
+	 * backends, e.g. Linux DRM this means we are doing a memcpy() from the
+	 * buffer we are going to display to a buffer that the application will
+	 * write into.
+	 *
+	 * This pointer may be NULL if gp_pixmap::pixels points directly to a
+	 * display DMA buffer and in this case the gp_backend_update() is
+	 * no-op.
+	 */
+	void (*update)(gp_backend *self);
+
+	/**
 	 * @brief Updates display rectangle.
 	 *
-	 * In contrast to flip operation, the pixmap
-	 * must not change (this is intended for updating very small areas).
+	 * Updates a (part) of the gp_backend::pixmap buffer on the display.
 	 *
-	 * If display is not buffered, this is no-op (set to NULL).
+	 * Some backends does not support partial update (e.g. Linux DRM) and
+	 * always do a full display update. Other backends needs to round the
+	 * coordinates to a byte boundary (e.g. E-Ink display). That means that
+	 * the whole buffer must contain valid data even if we do partial
+	 * update.
 	 */
 	void (*update_rect)(gp_backend *self,
 	                    gp_coord x0, gp_coord y0,
@@ -335,28 +374,21 @@ static inline gp_pixel_type gp_backend_pixel_type(gp_backend *self)
 }
 
 /**
- * @brief Copies whole backend pixmap to a display.
- *
- * Majority of the backends are double buffered, that means that changes done
- * to gp_backend::pixmap are not propagated to the display memory buffer unless
- * they are copied explicitly. This call copies the complete backend pixmap to
- * the display.
- *
- * @param self A backend.
- */
-static inline void gp_backend_flip(gp_backend *self)
-{
-	if (self->flip)
-		self->flip(self);
-}
-
-/**
  * @brief Copies a rectangle from backend pixmap to a display.
  *
- * Majority of the backends are double buffered, that means that changes done
- * to gp_backend::pixmap are not propagated to the display memory buffer unless
- * they are copied explicitly. This call copies a rectanlge from backend pixmap
- * to the display.
+ * @important This function should be used when application draws small partial
+ *            updates of the display, e.g. appending letters into a textbox.
+ *
+ * Updates a rectangle from a gp_pixmap::pixels buffer on the display.
+ *
+ * @warning Some backends does not support partial update (e.g. Linux DRM)
+ *          and always do a full display update. Other backends needs to
+ *          round the coordinates to a byte boundary (e.g. E-Ink display).
+ *          That means that the whole gp_pixmap::pixels buffer must contain
+ *          a valid data even if we do partial update.
+ *
+ * This call is no-op for backends that write directly into the display DMA
+ * buffer.
  *
  * @param self A backend.
  * @param x0 First x coordinate of the rectangle.
@@ -365,8 +397,8 @@ static inline void gp_backend_flip(gp_backend *self)
  * @param y1 Last y coordinate of the rectangle.
  */
 void gp_backend_update_rect_xyxy(gp_backend *self,
-                                gp_coord x0, gp_coord y0,
-                                gp_coord x1, gp_coord y1);
+                                 gp_coord x0, gp_coord y0,
+                                 gp_coord x1, gp_coord y1);
 
 /**
  * @brief Copies a rectangle from backend pixmap to a display.
@@ -402,6 +434,54 @@ static inline void gp_backend_update_rect_xywh(gp_backend *self,
                                                gp_size w, gp_size h)
 {
 	gp_backend_update_rect_xyxy(self, x, y, x + w - 1, y + h - 1);
+}
+
+/**
+ * @brief Copies data from backend buffer to display.
+ *
+ * This function copies the data from the backend pixmap to the displayed
+ * buffer. Unlike the gp_backend_flip() the pixmap data are kept after the
+ * operation. For some backends, e.g. Linux DRM this means that this function
+ * does memcpy() of the buffer we are about to display. For SPI display
+ * backends this sends the whole gp_backend::pixmap pixels buffer to the
+ * display over SPI.
+ *
+ * This call is no-op for backends that write directly into the display DMA
+ * buffer.
+ *
+ * @param self A backend.
+ */
+static inline void gp_backend_update(gp_backend *self)
+{
+	if (self->update)
+		self->update(self);
+}
+
+/**
+ * @brief Flips backend and display buffers.
+ *
+ * @important This call should be used when application generates each frame
+ *            from a scratch and send them to a display e.g. video player.
+ *
+ * In most cases this function swaps buffers between the gp_backend::pixmap
+ * and display. If flipping buffers is not supported, e.g. for displays
+ * connected over SPI the gp_backend::flip pointer is NULL and the operation
+ * falls back to gp_backend_update().
+ *
+ * @warning After this call the content of the gp_backend::pixmap or the
+ *          location of its memory may change.
+ *
+ * This call is no-op for backends that write directly into the display DMA
+ * buffer.
+ *
+ * @param self A backend.
+ */
+static inline void gp_backend_flip(gp_backend *self)
+{
+	if (self->flip)
+		self->flip(self);
+	else
+		gp_backend_update(self);
 }
 
 /**

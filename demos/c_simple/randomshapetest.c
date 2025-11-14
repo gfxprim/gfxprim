@@ -140,7 +140,7 @@ void draw_random_polygon(gp_pixel pixel)
 void clear_screen(void)
 {
 	gp_fill(win->pixmap, black);
-	gp_backend_flip(win);
+	gp_backend_update(win);
 }
 
 void redraw_screen(void)
@@ -173,6 +173,8 @@ void redraw_screen(void)
 		draw_random_polygon(pixel);
 	break;
 	}
+
+	gp_backend_update(win);
 }
 
 void event_loop(void)
@@ -222,7 +224,6 @@ void event_loop(void)
 			if (ev->code == GP_EV_SYS_RESIZE) {
 				gp_backend_resize_ack(win);
 				clear_screen();
-				gp_backend_flip(win);
 			}
 		break;
 		}
@@ -271,7 +272,6 @@ int main(int argc, char *argv[])
 			continue;
 
 		redraw_screen();
-		gp_backend_flip(win);
 	}
 }
 

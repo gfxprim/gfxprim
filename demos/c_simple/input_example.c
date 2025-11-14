@@ -49,7 +49,7 @@ static void draw_event(gp_event *ev)
 		return;
 	}
 
-	gp_backend_flip(backend);
+	gp_backend_update(backend);
 }
 
 static void event_loop(void)
@@ -85,7 +85,7 @@ static void event_loop(void)
 					gp_vline_xyy(win, ev->st->cursor_x,
 					            ev->st->cursor_y - 3,
 						    ev->st->cursor_y + 3, red);
-					gp_backend_flip(backend);
+					gp_backend_update(backend);
 				break;
 				default:
 				break;
@@ -105,13 +105,13 @@ static void event_loop(void)
 					                white, black, "X=%3u Y=%3u dX=%3i dY=%3i",
 						        ev->st->cursor_x, ev->st->cursor_y,
 							ev->rel.rx, ev->rel.ry);
-					gp_backend_flip(backend);
+					gp_backend_update(backend);
 				break;
 				case GP_EV_REL_WHEEL:
 					gp_text_clear(win, NULL, 20, 60, align, black, size);
 					size = gp_print(win, NULL, 20, 60, align, white, black,
 							"wheel=%i", ev->val);
-					gp_backend_flip(backend);
+					gp_backend_update(backend);
 				break;
 				}
 			break;
@@ -120,7 +120,7 @@ static void event_loop(void)
 					gp_putpixel(win, ev->st->cursor_x,
 					            ev->st->cursor_y,
 						    green);
-					gp_backend_flip(backend);
+					gp_backend_update(backend);
 				break;
 			break;
 			case GP_EV_SYS:
@@ -130,7 +130,7 @@ static void event_loop(void)
 				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);
 					gp_fill(backend->pixmap, black);
-					gp_backend_flip(backend);
+					gp_backend_update(backend);
 				break;
 				case GP_EV_SYS_QUIT:
 					gp_backend_exit(backend);
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
 
 	gp_fill(win, black);
-	gp_backend_flip(backend);
+	gp_backend_update(backend);
 
 	event_loop();
 	return 0;

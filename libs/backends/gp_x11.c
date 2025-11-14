@@ -75,7 +75,7 @@ static void x11_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 	XUnlockDisplay(win->dpy);
 }
 
-static void x11_flip(gp_backend *self)
+static void x11_update(gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 	unsigned int w = self->pixmap->w;
@@ -84,7 +84,7 @@ static void x11_flip(gp_backend *self)
 	GP_DEBUG(4, "Flipping pixmap");
 
 	if (win->resized_flag) {
-		GP_DEBUG(4, "Ignoring flip, waiting for resize ack");
+		GP_DEBUG(4, "Ignoring update, waiting for resize ack");
 		return;
 	}
 
@@ -704,7 +704,7 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	win->visible = 1;
 
 	backend->name = "X11";
-	backend->flip = x11_flip;
+	backend->update = x11_update;
 	backend->update_rect = x11_update_rect;
 	backend->exit = x11_exit;
 	backend->set_attr = x11_set_attr;

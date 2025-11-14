@@ -356,7 +356,7 @@ static void proxy_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 		proxy_recv_events_mt(self, 1, 1, cookie);
 }
 
-static void proxy_flip(gp_backend *self)
+static void proxy_update(gp_backend *self)
 {
 	proxy_update_rect(self, 0, 0, self->pixmap->w-1, self->pixmap->h-1);
 }
@@ -425,7 +425,7 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	ret->set_attr = proxy_set_attr;
 	ret->exit = proxy_exit;
 	ret->update_rect = proxy_update_rect;
-	ret->flip = proxy_flip;
+	ret->update = proxy_update;
 	ret->resize_ack = proxy_resize_ack;
 
 	priv->map = NULL;

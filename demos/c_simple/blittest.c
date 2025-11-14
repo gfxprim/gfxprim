@@ -117,7 +117,7 @@ void event_loop(void)
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(win);
 				gp_fill(win->pixmap, black);
-				gp_backend_flip(win);
+				gp_backend_update(win);
 			break;
 			}
 		break;
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
 
 	gp_fill(win->pixmap, black);
-	gp_backend_flip(win);
+	gp_backend_update(win);
 
 	for (;;) {
 		gp_backend_poll(win);

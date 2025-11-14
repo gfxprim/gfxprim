@@ -33,7 +33,7 @@ static void schedule_full_repaint(gp_backend *self)
 	eink->do_part = 0;
 }
 
-static void gp_display_eink_flip(gp_backend *self)
+static void gp_display_eink_update(gp_backend *self)
 {
 	pthread_mutex_lock(&repaint_lock);
 	schedule_full_repaint(self);
@@ -172,7 +172,7 @@ void gp_display_eink_init(gp_backend *self)
 	eink->part_cnt = 0;
 	eink->exitting = 0;
 
-	self->flip = gp_display_eink_flip;
+	self->update = gp_display_eink_update;
 	self->update_rect = gp_display_eink_update_rect;
 	self->exit = eink_exit;
 

@@ -18,7 +18,7 @@ struct virt_priv {
 	int flags;
 };
 
-static void virt_flip(gp_backend *self)
+static void virt_update(gp_backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
@@ -27,7 +27,7 @@ static void virt_flip(gp_backend *self)
 		virt->backend->pixmap, 0, 0);
 
 	/* Call blit on original backend */
-	virt->backend->flip(virt->backend);
+	gp_backend_flip(virt->backend);
 }
 
 static void virt_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
@@ -40,7 +40,7 @@ static void virt_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 	             virt->backend->pixmap, x0, y0);
 
 	/* Call blit on original backend */
-	virt->backend->update_rect(virt->backend, x0, y0, x1, y1);
+	gp_backend_update_rect(virt->backend, x0, y0, x1, y1);
 }
 
 static enum gp_backend_ret virt_set_attr(struct gp_backend *self,
@@ -137,7 +137,7 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	self->resize_ack = virt_resize_ack;
 	self->set_attr = backend->set_attr ? virt_set_attr : NULL;
 	self->name = "Virtual Backend";
-	self->flip = virt_flip;
+	self->update = virt_update;
 	self->poll = backend->poll ? virt_poll : NULL;
 	self->wait = backend->wait ? virt_wait : NULL;
 	self->exit = virt_exit;

@@ -228,7 +228,7 @@ static void x_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 	x_poll_events(self);
 }
 
-static void x_flip(gp_backend *self)
+static void x_update(gp_backend *self)
 {
 	x_update_rect(self, 0, 0, self->pixmap->w - 1, self->pixmap->h - 1);
 
@@ -701,7 +701,7 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 		goto err1;
 
 	backend->name = "XCB";
-	backend->flip = x_flip;
+	backend->update = x_update;
 	backend->update_rect = x_update_rect;
 	backend->exit = x_exit;
 	backend->set_attr = x_set_attr;

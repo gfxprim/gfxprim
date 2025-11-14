@@ -24,7 +24,7 @@ static void redraw(gp_backend *self)
 	gp_line(pixmap, 0, 0, pixmap->w - 1, pixmap->h - 1, white_pixel);
 	gp_line(pixmap, 0, pixmap->h - 1, pixmap->w - 1, 0, white_pixel);
 
-	gp_backend_flip(self);
+	gp_backend_update(self);
 }
 
 static int redraw_task_callback(gp_task *self)
@@ -38,7 +38,7 @@ static int redraw_task_callback(gp_task *self)
 	        GP_ALIGN_CENTER|GP_VALIGN_BELOW,
 		red_pixel, 0, "Task called!");
 
-	gp_backend_flip(backend);
+	gp_backend_update(backend);
 
 	return 0;
 }

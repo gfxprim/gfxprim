@@ -41,6 +41,8 @@ void redraw_screen(void)
 	gp_hline(win->pixmap, 0, X, Y/3, darkgray_pixel);
 	gp_text(win->pixmap, &style, X/2, Y/3, GP_ALIGN_CENTER|GP_VALIGN_BASELINE,
 	        white_pixel, black_pixel, "x center y baseline");
+
+	gp_backend_flip(win);
 }
 
 static void next_font(int dir)
@@ -128,7 +130,6 @@ static void event_loop(void)
 		}
 
 		redraw_screen();
-		gp_backend_flip(win);
 	}
 }
 
@@ -190,7 +191,6 @@ int main(int argc, char *argv[])
 	next_font(GP_FONTS_ITER_FIRST);
 
 	redraw_screen();
-	gp_backend_flip(win);
 	event_loop();
 
 	return 0;

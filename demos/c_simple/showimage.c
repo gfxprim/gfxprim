@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Blit image into the window and show it */
+	gp_fill(backend->pixmap, 0);
 	gp_blit(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
 	gp_backend_flip(backend);
 
