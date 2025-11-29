@@ -11,6 +11,7 @@
 # so a complete recompilation is required after any change.
 #
 
+from sys import byteorder
 from pixeltype import PixelType
 from pixelpack import PixelPack, DB, UB, BE, LE, ME
 from gfxprimconfig import GfxPrimConfig
@@ -26,8 +27,14 @@ PS_4BPP_UB = PixelPack(4, bit_order=UB)
 PS_8BPP = PixelPack(8)
 PS_16BPP = PixelPack(16)
 PS_16BPP_BE = PixelPack(16, endian=BE)
+PS_16BPP_LE = PixelPack(16, endian=LE)
 PS_24BPP = PixelPack(24)
 PS_32BPP = PixelPack(32)
+
+if byteorder == 'little':
+    PS_16BPP = PS_16BPP_LE
+else:
+    PS_16BPP = PS_16BPP_BE
 
 # Experimental:
 PS_18BPP_DB = PixelPack(18, bit_order=DB)
@@ -39,7 +46,7 @@ config = GfxPrimConfig(
 
     # List of pixel packings, explicit on purpose
     pixelpacks = [PS_1BPP_DB, PS_1BPP_UB, PS_2BPP_DB, PS_2BPP_UB, PS_4BPP_DB, PS_4BPP_UB,
-                  PS_8BPP, PS_16BPP, PS_16BPP_BE, PS_24BPP, PS_32BPP,
+                  PS_8BPP, PS_16BPP_LE, PS_16BPP_BE, PS_24BPP, PS_32BPP,
                   PS_18BPP_DB,
                  ],
 
@@ -81,7 +88,12 @@ config = GfxPrimConfig(
 	  ('G',  5, 5, 2),
 	  ('B',  0, 5, 2)]),
 
-      PixelType(name='RGB565', pixelpack=PS_16BPP_BE, chanslist=[
+      PixelType(name='RGB565_BE', pixelpack=PS_16BPP_BE, chanslist=[
+	  ('R', 11, 5, 2),
+	  ('G',  5, 6, 2),
+	  ('B',  0, 5, 2)]),
+
+      PixelType(name='RGB565_LE', pixelpack=PS_16BPP_LE, chanslist=[
 	  ('R', 11, 5, 2),
 	  ('G',  5, 6, 2),
 	  ('B',  0, 5, 2)]),

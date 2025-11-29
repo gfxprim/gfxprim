@@ -11,6 +11,20 @@
 #define CORE_GP_PIXEL_ALIAS_H
 
 #include <core/gp_pixel.gen.h>
+#include <core/gp_byte_order.h>
+
+/**
+ * @brief The default endianity for RGB565 pixel type is machine endianity.
+ */
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+# ifdef GP_PIXEL_RGB565_LE
+#  define GP_PIXEL_RGB565 GP_PIXEL_RGB565_LE
+# endif
+#else
+# ifdef GP_PIXEL_RGB565_BE
+#  define GP_PIXEL_RGB565 GP_PIXEL_RGB565_BE
+# endif
+#endif
 
 /**
  * @brief List of pixel type aliases.

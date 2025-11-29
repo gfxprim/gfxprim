@@ -143,5 +143,6 @@ gp_pixel gp_pixel_to_{{ pt.name }}(gp_pixel pixel, gp_pixel_type type);
 @ end
 
 /* Experimental macros testing generated scripts */
-@ pixel_type_to_type(pixeltypes_dict['RGB565'], pixeltypes_dict['RGBA8888'])
+@ pixel_type_to_type(pixeltypes_dict['RGB565_LE'], pixeltypes_dict['RGB888'])
+@ pixel_type_to_type(pixeltypes_dict['RGB565_BE'], pixeltypes_dict['RGB888'])
 @ pixel_type_to_type(pixeltypes_dict['RGBA8888'], pixeltypes_dict['G2_UB'])

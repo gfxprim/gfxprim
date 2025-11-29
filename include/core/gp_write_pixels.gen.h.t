@@ -14,26 +14,34 @@
 #include <stddef.h>
 #include <stdint.h>
 
-@ for ps in pixelpacks:
-@     if ps.suffix in optimized_writepixels:
+@ def gen_func(suffix, needs_bit_order):
 /**
  * @brief Optimized function to draw a row of {{ ps.suffix }} pixels.
  *
  * @param start A pointer to starting byte in the buffer
-@         if ps.needs_bit_order():
+@     if needs_bit_order:
  * @param off Number of pixels to skip in the first byte
-@         end
+@     end
  * @param cnt A number of pixels to write
  * @param val A pixel value to be written.
  */
-@         if ps.needs_bit_order():
-void gp_write_pixels_{{ ps.suffix }}(void *start, uint8_t off,
-@             if ps.size == 1:
+@     if needs_bit_order:
+void gp_write_pixels_{{ suffix }}(void *start, uint8_t off,
+@         if ps.size == 1:
                              uint8_t y_off,
-@             end
+@         end
                              size_t cnt, unsigned int val);
 
-@         else:
-void gp_write_pixels_{{ ps.suffix }}(void *start, size_t cnt, unsigned int val);
+@     else:
+void gp_write_pixels_{{ suffix }}(void *start, size_t cnt, unsigned int val);
 
+@ end
+@
+@ for ps in pixelpacks:
+@     if ps.suffix in optimized_writepixels:
+@          optimized_writepixels.remove(ps.suffix)
+@          gen_func(ps.suffix, ps.needs_bit_order())
+@ end
+@ for suffix in optimized_writepixels:
+@     gen_func(suffix, False)
 @ end

@@ -262,7 +262,7 @@ gp_backend *gp_display_st77xx_init(uint16_t w, uint16_t h, uint16_t x_off, uint1
 
 	memset(backend, 0, sizeof(gp_backend) + sizeof(struct gp_display_spi));
 
-	backend->pixmap = gp_pixmap_alloc(w, h, GP_PIXEL_RGB565);
+	backend->pixmap = gp_pixmap_alloc(w, h, GP_PIXEL_RGB565_BE);
 	if (!backend->pixmap)
 		goto err0;
 
