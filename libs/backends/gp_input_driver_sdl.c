@@ -194,7 +194,13 @@ void gp_input_driver_sdl_event_put(gp_backend *backend, gp_ev_queue *event_queue
 		}
 #endif
 
-		gp_ev_queue_push_key(event_queue, key, ev->key.state, 0);
+		gp_ev_queue_push_key(event_queue, key, ev->key.state,
+#if LIBSDL_VERSION == 1
+				ev->key.keysym.unicode,
+#else
+				0, //TODO Unicode handling in libsdl2.0?
+#endif
+				0);
 
 #if LIBSDL_VERSION == 1
 		//KEYMAP CTRL

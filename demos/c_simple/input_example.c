@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
@@ -19,22 +19,17 @@ static gp_pixel red, green, white, black;
 static void draw_event(gp_event *ev)
 {
 	gp_pixmap *win = backend->pixmap;
-	static gp_size ksize = 0, usize = 0, bsize = 0;
+	static gp_size ksize = 0, bsize = 0;
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
 	switch (ev->type) {
 	case GP_EV_KEY:
 		gp_text_clear(win, NULL, 20, 20, align, black, ksize);
 		ksize = gp_print(win, NULL, 20, 20, align,
-		                 white, black, "Key=%s %u",
+		                 white, black, "Key=%s %u UTF=0x%04x",
 				 gp_ev_key_name(ev->key.key),
-				 (unsigned int)ev->code);
-	break;
-	case GP_EV_UTF:
-		gp_text_clear(win, NULL, 20, 40, align, black, usize);
-		usize = gp_print(win, NULL, 20, 40, align,
-		                 white, black, "UTF=%04x",
-				 ev->utf.ch);
+				 (unsigned int)ev->code,
+				 ev->key.utf);
 	break;
 	case GP_EV_SYS:
 		switch (ev->code) {
@@ -67,9 +62,6 @@ static void event_loop(void)
 			gp_ev_dump(ev);
 
 			switch (ev->type) {
-			case GP_EV_UTF:
-				draw_event(ev);
-			break;
 			case GP_EV_KEY:
 				draw_event(ev);
 

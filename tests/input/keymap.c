@@ -61,7 +61,7 @@
 	       " }\n"\
 	       "}\n"
 
-static int expect_char(gp_ev_queue *queue, uint32_t ch)
+static int expect_char(gp_ev_queue *queue, uint32_t key, uint32_t ch)
 {
 	gp_event *ev = gp_ev_queue_get(queue);
 	if (!ev) {
@@ -69,14 +69,20 @@ static int expect_char(gp_ev_queue *queue, uint32_t ch)
 		return TST_FAILED;
 	}
 
-	if (ev->type != GP_EV_UTF) {
+	if (ev->type != GP_EV_KEY) {
 		tst_msg("Wrong event type");
 		return TST_FAILED;
 	}
 
-	if (ev->utf.ch != ch) {
+	if (ev->key.key != key) {
+		tst_msg("Wrong key pressed %u expected %u",
+		        (unsigned int)ev->key.key, (unsigned int)key);
+		return TST_FAILED;
+	}
+
+	if (ev->key.utf != ch) {
 		tst_msg("Wrong character '%c' generated expected '%c'",
-		        ev->utf.ch, ch);
+		        ev->key.utf, ch);
 		return TST_FAILED;
 	}
 
@@ -96,53 +102,60 @@ static int test_keymap_shift_caps(void)
 		return TST_FAILED;
 	}
 
-	gp_event key = {
-		.type = GP_EV_KEY,
-		.code = GP_EV_KEY_DOWN,
-		.val = GP_KEY_A,
-	};
+	queue.keymap = keymap;
 
-	gp_keymap_event_key(keymap, &queue, &key);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
 
-	if (expect_char(&queue, 'a'))
+	if (expect_char(&queue, GP_KEY_A, 'a'))
 		return TST_FAILED;
 
-	key.val = GP_KEY_LEFT_SHIFT;
-	gp_keymap_event_key(keymap, &queue, &key);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_UP, 0, 0);
 
-	key.val = GP_KEY_B;
-	gp_keymap_event_key(keymap, &queue, &key);
-
-	if (expect_char(&queue, 'B'))
+	if (expect_char(&queue, GP_KEY_A, 0))
 		return TST_FAILED;
 
-	key.val = GP_KEY_CAPS_LOCK;
-	gp_keymap_event_key(keymap, &queue, &key);
+	gp_ev_queue_push_key(&queue, GP_KEY_LEFT_SHIFT, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_B, GP_EV_KEY_DOWN, 0, 0);
 
-	key.val = GP_KEY_A;
-	gp_keymap_event_key(keymap, &queue, &key);
-
-	if (expect_char(&queue, 'a'))
+	if (expect_char(&queue, GP_KEY_LEFT_SHIFT, 0))
 		return TST_FAILED;
 
-	key.val = GP_KEY_LEFT_SHIFT;
-	key.code = GP_EV_KEY_UP;
-	gp_keymap_event_key(keymap, &queue, &key);
-
-	key.val = GP_KEY_A;
-	key.code = GP_EV_KEY_DOWN;
-	gp_keymap_event_key(keymap, &queue, &key);
-
-	if (expect_char(&queue, 'A'))
+	if (expect_char(&queue, GP_KEY_B, 'B'))
 		return TST_FAILED;
 
-	key.val = GP_KEY_CAPS_LOCK;
-	gp_keymap_event_key(keymap, &queue, &key);
+	gp_ev_queue_push_key(&queue, GP_KEY_CAPS_LOCK, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_CAPS_LOCK, GP_EV_KEY_UP, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
 
-	key.val = GP_KEY_B;
-	gp_keymap_event_key(keymap, &queue, &key);
+	if (expect_char(&queue, GP_KEY_CAPS_LOCK, 0))
+		return TST_FAILED;
 
-	if (expect_char(&queue, 'b'))
+	if (expect_char(&queue, GP_KEY_CAPS_LOCK, 0))
+		return TST_FAILED;
+
+	if (expect_char(&queue, GP_KEY_A, 'a'))
+		return TST_FAILED;
+
+	gp_ev_queue_push_key(&queue, GP_KEY_LEFT_SHIFT, GP_EV_KEY_UP, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
+
+	if (expect_char(&queue, GP_KEY_LEFT_SHIFT, 0))
+		return TST_FAILED;
+
+	if (expect_char(&queue, GP_KEY_A, 'A'))
+		return TST_FAILED;
+
+	gp_ev_queue_push_key(&queue, GP_KEY_CAPS_LOCK, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_CAPS_LOCK, GP_EV_KEY_UP, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_B, GP_EV_KEY_DOWN, 0, 0);
+
+	if (expect_char(&queue, GP_KEY_CAPS_LOCK, 0))
+		return TST_FAILED;
+
+	if (expect_char(&queue, GP_KEY_CAPS_LOCK, 0))
+		return TST_FAILED;
+
+	if (expect_char(&queue, GP_KEY_B, 'b'))
 		return TST_FAILED;
 
 	gp_keymap_free(keymap);
@@ -163,24 +176,28 @@ static int test_keymap_dead(void)
 		return TST_FAILED;
 	}
 
-	gp_event key = {
-		.type = GP_EV_KEY,
-		.code = GP_EV_KEY_DOWN,
-		.val = GP_KEY_EQUAL,
-	};
+	queue.keymap = keymap;
 
-	gp_keymap_event_key(keymap, &queue, &key);
+	gp_ev_queue_push_key(&queue, GP_KEY_EQUAL, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_EQUAL, GP_EV_KEY_UP, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_UP, 0, 0);
 
-	key.val = GP_KEY_A;
-	gp_keymap_event_key(keymap, &queue, &key);
-
-	if (expect_char(&queue, '*'))
+	if (expect_char(&queue, GP_KEY_EQUAL, 0))
 		return TST_FAILED;
 
-	key.val = GP_KEY_A;
-	gp_keymap_event_key(keymap, &queue, &key);
+	if (expect_char(&queue, GP_KEY_EQUAL, 0))
+		return TST_FAILED;
 
-	if (expect_char(&queue, 'a'))
+	if (expect_char(&queue, GP_KEY_A, '*'))
+		return TST_FAILED;
+
+	if (expect_char(&queue, GP_KEY_A, 0))
+		return TST_FAILED;
+
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
+
+	if (expect_char(&queue, GP_KEY_A, 'a'))
 		return TST_FAILED;
 
 	gp_keymap_free(keymap);

@@ -245,7 +245,7 @@ pointer_handle_button(void *data, struct wl_pointer UN(*pointer),
 	struct client_state *state = data;
 	gp_backend *backend = state->backend;
 
-	gp_ev_queue_push_key(backend->event_queue, button, button_state, 0);
+	gp_ev_queue_push_key(backend->event_queue, button, button_state, 0, 0);
 }
 
 static void
@@ -331,16 +331,25 @@ keyboard_handle_key(void *data, struct wl_keyboard UN(*keyboard),
 	int ret;
 	char buf[128];
 
-	gp_ev_queue_push_key(backend->event_queue, key, key_state, 0);
-
 	ret = xkb_state_key_get_utf8(state->keymap_state, key+8, buf, sizeof(buf));
 	if (ret) {
-		uint32_t unicode;
+		uint32_t utf;
 		const char *str = buf;
+		size_t len = gp_utf8_strlen(str);
 
-		while ((unicode = gp_utf8_next(&str)))
-			gp_ev_queue_push_utf(backend->event_queue, unicode, 0);
+		/*
+		 * Send all characters without a key scancode, the key scancode
+		 * is send to the last one.
+		 */
+		while ((utf = gp_utf8_next(&str))) {
+			gp_ev_queue_push_key(backend->event_queue,
+			                     --len ? 0 : key, key_state, utf, 0);
+		}
+
+		return;
 	}
+
+	gp_ev_queue_push_key(backend->event_queue, key, key_state, 0, 0);
 }
 
 static void

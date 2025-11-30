@@ -163,8 +163,8 @@ static void parse_event(gp_backend *self, int ev)
 	}
 
 	/* emulate keyup events */
-	gp_ev_queue_push_key(self->event_queue, key, 1, 0);
-	gp_ev_queue_push_key(self->event_queue, key, 0, 0);
+	gp_ev_queue_push_key(self->event_queue, key, 1, 0, 0);
+	gp_ev_queue_push_key(self->event_queue, key, 0, 0, 0);
 }
 
 static void aalib_poll(gp_backend *self)

@@ -84,8 +84,9 @@ static inline void type_string(gp_widget *widget, const char *ch)
 {
 	while (*ch) {
 		gp_event ev_utf = {
-			.type = GP_EV_UTF,
-			.utf = {.ch = (uint32_t)*ch},
+			.type = GP_EV_KEY,
+			.code = GP_EV_KEY_DOWN,
+			.key = {.key = 0, .utf = (uint32_t)*ch},
 			.st = &events_state,
 		};
 

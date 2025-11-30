@@ -17,7 +17,7 @@ static int get_pointer_preserved(void)
 
 	gp_ev_queue_init(&queue, 1, 1, 0, NULL, NULL, 0);
 
-	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0, 0);
 
 	ev = gp_ev_queue_get(&queue);
 
@@ -32,7 +32,7 @@ static int get_pointer_preserved(void)
 	}
 
 	for (i = 0; i < GP_EVENT_QUEUE_SIZE; i++)
-		gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0, 0);
 
 	if (ev->key.key != GP_KEY_ENTER) {
 		tst_msg("Event rewritten");
@@ -50,11 +50,11 @@ static int peek_test(void)
 
 	gp_ev_queue_init(&queue, 1, 1, 0, NULL, NULL, 0);
 
-	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
-	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0, 0);
 
 	for (i = 0; i < GP_EVENT_QUEUE_SIZE-2; i++)
-		gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0, 0);
 
 	if (gp_events_state_pressed(&queue.state, GP_KEY_ENTER)) {
 		tst_msg("Key enter is pressed");
@@ -91,13 +91,13 @@ static int key_state_test(void)
 
 	gp_ev_queue_init(&queue, 1, 1, 0, NULL, NULL, 0);
 
-	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
-	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_UP, 0);
-	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0);
-	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0);
-	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_UP, 0);
-	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_REPEAT, 0);
-	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_UP, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_UP, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_UP, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_REPEAT, 0, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_UP, 0, 0);
 
 	while ((ev = gp_ev_queue_get(&queue))) {
 		switch (ev->code) {
@@ -216,11 +216,11 @@ static int queue_events_test(void)
 			return TST_FAILED;
 		}
 
-		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
 		gp_ev_queue_get(&queue);
 	}
 
-	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+	gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
 
 	for (i = 0; i < 2 * queue.queue_size; i++) {
 		if (gp_ev_queue_events(&queue) != 1) {
@@ -229,11 +229,11 @@ static int queue_events_test(void)
 		}
 
 		gp_ev_queue_get(&queue);
-		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
 	}
 
 	for (i = 0; i < queue.queue_size-1; i++)
-		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
 
 	for (i = 0; i < 2 * queue.queue_size; i++) {
 		if (gp_ev_queue_events(&queue) != queue.queue_size-1) {
@@ -242,7 +242,7 @@ static int queue_events_test(void)
 		}
 
 		gp_ev_queue_get(&queue);
-		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0);
+		gp_ev_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, 0, 0);
 	}
 
 	return TST_PASSED;

@@ -194,7 +194,7 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 	int key = 0, press = 0;
 	KeySym keysym;
 	Status status;
-	uint32_t unicode = 0;
+	uint32_t utf = 0;
 	char str[32];
 
 	switch (ev->type) {
@@ -255,10 +255,21 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 			Xutf8LookupString(win->xic, &ev->xkey, str, sizeof(str)-1, &keysym, &status);
 
 			if (status == XLookupChars || status == XLookupBoth) {
+				key = get_key(ev->xkey.keycode);
 				const char *s = str;
-				unicode = gp_utf8_next(&s);
+				size_t len = gp_utf8_strlen(str);
 
-				gp_ev_queue_push_utf(event_queue, unicode, 0);
+				/*
+				 * Send all characters without a key scancode, the key scancode
+				 * is send to the last one.
+				 */
+				while ((utf = gp_utf8_next(&s))) {
+					gp_ev_queue_push_key(event_queue,
+					                     --len ? 0 : key,
+					                     press, utf, 0);
+				}
+
+				return;
 			}
 		}
 	/* fallthrough */
@@ -268,7 +279,7 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 		if (key == 0)
 			return;
 
-		gp_ev_queue_push_key(event_queue, key, press, 0);
+		gp_ev_queue_push_key(event_queue, key, press, 0, 0);
 	break;
 	/* events from WM */
 	case ClientMessage:

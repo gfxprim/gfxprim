@@ -82,8 +82,8 @@ static void dump_key(gp_event *ev)
 {
 	const char *name = gp_ev_key_name(ev->key.key);
 
-	printf("Key %i (Key%s) %s\n",
-	       ev->key.key, name, ev->code ? "down" : "up");
+	printf("Key %i (Key%s) UTF=0x%04x %s\n",
+	       ev->key.key, name, ev->key.utf, ev->code ? "down" : "up");
 }
 
 static void dump_abs(gp_event *ev)
@@ -139,9 +139,6 @@ void gp_ev_dump(gp_event *ev)
 	break;
 	case GP_EV_TMR:
 		printf("Timer %s expired\n", ev->tmr->id);
-	break;
-	case GP_EV_UTF:
-		printf("Unicode char %04x\n", ev->utf.ch);
 	break;
 	default:
 		printf("Unknown %u\n", ev->type);

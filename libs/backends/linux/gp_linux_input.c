@@ -138,7 +138,7 @@ static void input_key(struct linux_input *self,
 			return;
 	}
 
-	gp_ev_queue_push_key(event_queue, ev->code, ev->value, 0);
+	gp_ev_queue_push_key(event_queue, ev->code, ev->value, 0, 0);
 }
 
 static void do_sync(struct linux_input *self, gp_ev_queue *ev_queue)
@@ -173,7 +173,7 @@ static void do_sync(struct linux_input *self, gp_ev_queue *ev_queue)
 		                     self->abs_x_max, self->abs_y_max, self->abs_press_max, 0);
 
 		if (self->abs_pen_flag) {
-			gp_ev_queue_push_key(ev_queue, BTN_TOUCH, 1, 0);
+			gp_ev_queue_push_key(ev_queue, BTN_TOUCH, 1, 0, 0);
 			self->abs_pen_flag = 0;
 		}
 	}

@@ -33,8 +33,6 @@ enum gp_ev_type {
 	GP_EV_SYS = 4,
 	/** @brief A timer expired. */
 	GP_EV_TMR = 5,
-	/** @brief An unicode character typed on a keyboard. */
-	GP_EV_UTF = 6,
 	/** @brief Last used event type. */
 	GP_EV_MAX = 6,
 };
@@ -156,8 +154,24 @@ struct gp_ev_pos_abs {
 	uint32_t pressure, pressure_max;
 };
 
+/**
+ * @brief A key press/release/repeat event.
+ */
 struct gp_ev_key {
+	/**
+	 * @brief One of enum gp_event_key_value.
+	 *
+	 * This is the raw key scancode. It can be set to zero if this is a
+	 * synthetic unicode character.
+	 */
 	uint32_t key;
+	/**
+	 * @brief Unicode character (finalized) by this keystroke.
+	 *
+	 * If non-zero the key press was translated into a character by current
+	 * keyboard mapping.
+	 */
+	uint32_t utf;
 };
 
 /** @brief An system event value. */
@@ -216,8 +230,6 @@ struct gp_event {
 		struct gp_ev_pos_abs abs;
 		/** @brief A system event. */
 		struct gp_ev_sys sys;
-		/** @brief An unicode input event. */
-		struct gp_ev_utf utf;
 		/** @brief A timer expired event. */
 		gp_timer *tmr;
 	};
@@ -233,11 +245,14 @@ struct gp_event {
  * @brief Checks if a character is not printable.
  *
  * @param ev A key input event.
- * @return True if ch is a control character (non-printable).
+ * @return True if utf character is a control character (non-printable).
  */
 static inline int gp_ev_utf_is_ctrl(gp_event *ev)
 {
-	return ev->utf.ch < 0x20 && ev->utf.ch != 0x7f;
+	if (!ev->key.utf)
+		return 0;
+
+	return ev->key.utf < 0x20 && ev->key.utf != 0x7f;
 }
 
 /**

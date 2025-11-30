@@ -93,7 +93,7 @@ static int event_key_us(gp_keymap *self, gp_ev_queue *queue, gp_event *ev)
 	if (keymap_us->lctrl_state || keymap_us->rctrl_state) {
 		utf = keys_to_ascii_ctrl[key];
 		if (utf)
-			gp_ev_queue_push_utf(queue, utf, ev->time);
+			ev->key.utf = utf;
 		return 0;
 	}
 
@@ -113,7 +113,7 @@ static int event_key_us(gp_keymap *self, gp_ev_queue *queue, gp_event *ev)
 		utf = keys_to_ascii[key];
 
 	if (utf)
-		gp_ev_queue_push_utf(queue, utf, ev->time);
+		ev->key.utf = utf;
 
 	return 0;
 }
@@ -528,7 +528,7 @@ static int map_key(struct map *map, struct mods *mods, gp_ev_queue *queue, gp_ev
 		if (map->mods.states[i] == mods->state) {
 			utf = map->map[ev->key.key - map->min_key];
 			if (utf) {
-				gp_ev_queue_push_utf(queue, utf, ev->time);
+				ev->key.utf = utf;
 				GP_DEBUG(5, "Mapping %i to %u", ev->key.key,
 				         map->map[ev->key.key - map->min_key]);
 				return 0;

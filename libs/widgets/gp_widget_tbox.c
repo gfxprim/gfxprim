@@ -884,6 +884,16 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		break;
 		}
 
+		if (!ev->key.utf)
+			return 0;
+
+		if (gp_ev_utf_is_ctrl(ev))
+			 return 0;
+
+		clear_on_input(self);
+		utf_key(self, ev->key.utf);
+		return 1;
+
 	break;
 	case GP_EV_TMR:
 		tbox->alert = 0;
@@ -901,17 +911,6 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		if (!gp_ev_any_key_pressed(ev, GP_BTN_TOUCH, GP_BTN_LEFT))
 			return 0;
 		return mouse_drag(self, ctx, ev);
-	break;
-	case GP_EV_UTF:
-		if (gp_widget_key_mod_pressed(ev))
-			return 0;
-
-		if (gp_ev_utf_is_ctrl(ev))
-			return 0;
-
-		clear_on_input(self);
-		utf_key(self, ev->utf.ch);
-		return 1;
 	break;
 	}
 

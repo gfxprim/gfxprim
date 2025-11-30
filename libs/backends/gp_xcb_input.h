@@ -241,7 +241,8 @@ static void xcb_input_event_put(gp_ev_queue *event_queue, struct win *win,
 		if (key == 0)
 			return;
 
-		gp_ev_queue_push_key(event_queue, key, press, 0);
+		//TODO: unicode!
+		gp_ev_queue_push_key(event_queue, key, press, 0, 0);
 	} break;
 	/* events from WM */
 	case XCB_CLIENT_MESSAGE: {

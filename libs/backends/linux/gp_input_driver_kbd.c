@@ -58,7 +58,7 @@ void gp_input_driver_kbd_event_put(gp_ev_queue *event_queue,
 		key = keycode_table[keycode - 1];
 
 		if (key != 0) {
-			gp_ev_queue_push_key(event_queue, key, press, 0);
+			gp_ev_queue_push_key(event_queue, key, press, 0, 0);
 			return;
 		}
 	}

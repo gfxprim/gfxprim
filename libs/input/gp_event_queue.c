@@ -312,7 +312,7 @@ void gp_ev_queue_push_abs(gp_ev_queue *self,
 
 void gp_ev_queue_push_key(gp_ev_queue *self,
                           uint32_t key, uint8_t code,
-                          uint64_t time)
+                          uint32_t utf, uint64_t time)
 {
 	switch (code) {
 	case GP_EV_KEY_UP:
@@ -329,7 +329,7 @@ void gp_ev_queue_push_key(gp_ev_queue *self,
 	gp_event ev = {
 		.type = GP_EV_KEY,
 		.code = code,
-		.key = {.key = key}
+		.key = {.key = key, .utf = utf}
 	};
 
 	set_time(&ev, time);
@@ -341,19 +341,6 @@ void gp_ev_queue_push_key(gp_ev_queue *self,
 
 	if (!dead_key)
 		event_put(self, &ev);
-}
-
-void gp_ev_queue_push_utf(gp_ev_queue *self, uint32_t utf_ch,
-                          uint64_t time)
-{
-	gp_event ev = {
-		.type = GP_EV_UTF,
-		.utf = {.ch = utf_ch}
-	};
-
-	set_time(&ev, time);
-
-	event_put(self, &ev);
 }
 
 void gp_ev_queue_push_resize(gp_ev_queue *self,
@@ -375,7 +362,7 @@ void gp_ev_queue_push(gp_ev_queue *self,
                       uint64_t time)
 {
 	if (type == GP_EV_KEY) {
-		gp_ev_queue_push_key(self, code, value, time);
+		gp_ev_queue_push_key(self, code, value, 0, time);
 		return;
 	}
 

@@ -80,7 +80,7 @@ static void input_key_touchpad(struct linux_input *self, struct input_event *ev)
 		GP_DEBUG(4, "Triple tap");
 	break;
 	default:
-		gp_ev_queue_push_key(self->backend->event_queue, ev->code, ev->value, 0);
+		gp_ev_queue_push_key(self->backend->event_queue, ev->code, ev->value, 0, 0);
 	}
 }
 
