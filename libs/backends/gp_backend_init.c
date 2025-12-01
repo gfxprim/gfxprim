@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include "../../config.h"
@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #include <core/gp_debug.h>
+#include <core/gp_types.h>
 
 #include <backends/gp_backends.h>
 #include <backends/gp_backend_init.h>
@@ -580,12 +581,31 @@ static struct backend_init backends[] = {
 	{.name = NULL}
 };
 
+static void print_rotation_help(void)
+{
+	int i;
+
+	fprintf(stderr, "Available rotations:\n--------------------\n\n");
+
+	for (i = 0; gp_symmetry_names[i]; i++)
+		fprintf(stderr, "\t - %s\n", gp_symmetry_names[i]);
+
+	fprintf(stderr, "\n");
+}
+
 static gp_backend *do_help(char GP_UNUSED(*params),
                            gp_size GP_UNUSED(pref_w), gp_size GP_UNUSED(pref_h),
                            const char GP_UNUSED(*caption))
 {
 	struct backend_init *i;
 	unsigned int j;
+
+	fprintf(stderr, "Usage\n-----\n\n");
+	fprintf(stderr, "[rotate=90|180|270|V|H:]backend[:backend_opt:backend_opt...]\n\n");
+
+	print_rotation_help();
+
+	fprintf(stderr, "Backends\n--------\n\n");
 
 	for (i = backends; (i+1)->name; i++) {
 		fprintf(stderr, "Backend %s\n\n %s\n\n",
@@ -625,6 +645,9 @@ static gp_backend *init_backend(const char *name, char *params,
 		return NULL;
 	}
 
+	if (!*params)
+		params = NULL;
+
 	ret = init->init(params, pref_w, pref_h, caption);
 
 	return ret;
@@ -648,10 +671,27 @@ static const char *autodetect_backend(void)
 	return NULL;
 }
 
+static char *shift_buf(char *buf)
+{
+	size_t i;
+
+	for (i = 0; buf[i]; i++) {
+		if (buf[i] == ':') {
+			buf[i] = '\0';
+			return buf + i + 1;
+		}
+	}
+
+	return buf + i;
+}
+
 gp_backend *gp_backend_init(const char *params,
                             gp_size pref_w, gp_size pref_h,
                             const char *caption)
 {
+	enum gp_symmetry rotation = GP_ROTATE_INVALID;
+	gp_backend *ret;
+
 	if (!params)
 		params = getenv("GP_BACKEND_INIT");
 
@@ -670,21 +710,42 @@ gp_backend *gp_backend_init(const char *params,
 	if (!pref_h)
 		pref_h = 480;
 
-	/* parse backend name */
-	int i, len = strlen(params);
-	char buf[len+1], *backend_params = NULL;
+	size_t len = strlen(params);
+	char buf[len+1], *backend, *backend_params = NULL;
 
 	strcpy(buf, params);
 
-	for (i = 0; i < len; i++) {
-		if (buf[i] == ':') {
-			buf[i] = '\0';
-			backend_params = buf + i + 1;
-			break;
+	backend = buf;
+
+	if (!strncmp(backend, "rotate=", 7)) {
+		char *str_rotation = backend + 7;
+
+		backend = shift_buf(backend);
+
+		if (!strcmp(str_rotation, "help")) {
+			print_rotation_help();
+			return NULL;
 		}
+
+		rotation = gp_symmetry_by_name(str_rotation);
+		if (rotation == GP_ROTATE_INVALID) {
+			GP_FATAL("Invalid rotation '%s'", str_rotation);
+			print_rotation_help();
+			return NULL;
+		}
+
+		GP_DEBUG(1, "Backend rotation set to '%s'", str_rotation);
 	}
 
-	GP_DEBUG(1, "Have backend name '%s' params '%s'", buf, backend_params);
+	backend_params = shift_buf(backend);
 
-	return init_backend(buf, backend_params, pref_w, pref_h, caption);
+	GP_DEBUG(1, "Have backend name '%s' params '%s'", backend, backend_params);
+
+	ret = init_backend(backend, backend_params, pref_w, pref_h, caption);
+	//TODO: this is a hack, we need gp_backend_rotate() to rotate the input queue as well
+	//      and the flags are lost if backend->pixmap is reallocated as well
+	if (ret && rotation != GP_ROTATE_INVALID)
+		gp_pixmap_rotate(ret->pixmap, rotation);
+
+	return ret;
 }
