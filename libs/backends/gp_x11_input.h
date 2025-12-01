@@ -195,7 +195,7 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 	KeySym keysym;
 	Status status;
 	uint32_t utf = 0;
-	char str[32];
+	char str[8] = {};
 
 	switch (ev->type) {
 	case ButtonPress:
