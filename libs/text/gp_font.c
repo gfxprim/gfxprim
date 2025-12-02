@@ -42,6 +42,26 @@ static gp_glyph *glyph_get(const gp_font_face *font, uint32_t c)
 	return NULL;
 }
 
+static gp_glyph *get_fallback(const gp_font_face *font, uint32_t ch)
+{
+	unsigned int i;
+
+	for (i = 0; i < 10; i++) {
+		uint32_t fb = gp_utf_fallback(ch);
+		gp_glyph *glyph;
+
+		if (fb != ch)
+			glyph = glyph_get(font, fb);
+
+		if (glyph)
+			return glyph;
+
+		ch = fb;
+	}
+
+	return NULL;
+}
+
 gp_glyph *gp_glyph_get(const gp_font_face *font, uint32_t ch)
 {
 	gp_glyph *glyph = glyph_get(font, ch);
@@ -49,12 +69,8 @@ gp_glyph *gp_glyph_get(const gp_font_face *font, uint32_t ch)
 	if (!glyph && font->ops && font->ops->glyph_load)
 		glyph = font->ops->glyph_load(font, ch);
 
-	if (!glyph && ch > 0x7f) {
-		uint32_t fb = gp_utf_fallback(ch);
-
-		if (fb != ch)
-			glyph = glyph_get(font, fb);
-	}
+	if (!glyph && ch > 0x7f)
+		glyph = get_fallback(font, ch);
 
 	if (!glyph)
 		glyph = glyph_get(font, '?');
