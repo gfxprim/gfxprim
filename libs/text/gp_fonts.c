@@ -44,6 +44,9 @@ const gp_font_family *gp_font_family_lookup(const char *family_name)
 
 	GP_DEBUG(3, "Looking for a font family '%s'", family_name);
 
+	if (!family_name || !strcasecmp(family_name, "default"))
+		return &font_family_gfxprim;
+
 	for (i = 0; i < GP_ARRAY_SIZE(font_families); i++) {
 		if (!strcasecmp(font_families[i]->family_name, family_name))
 			return font_families[i];
