@@ -52,15 +52,9 @@ const gp_font_family *gp_font_family_lookup(const char *family_name)
 	return NULL;
 }
 
-const gp_font_face *gp_font_family_face_lookup(const gp_font_family *family, uint8_t style)
+static const gp_font_face *font_face_lookup(const gp_font_family *family, uint8_t style)
 {
 	const gp_font_face *const *f;
-
-	GP_DEBUG(3, "Looking for font style %s in family '%s'",
-	         gp_font_style_name(style), family ? family->family_name : "NULL");
-
-	if (!family)
-		family = gp_font_family_default;
 
 	for (f = family->fonts; *f; f++) {
 		if ((*f)->style == GP_FONT_STYLE(style)) {
@@ -69,14 +63,37 @@ const gp_font_face *gp_font_family_face_lookup(const gp_font_family *family, uin
 		}
 	}
 
-	if (style & GP_FONT_FALLBACK) {
-		GP_DEBUG(3, "Style not found, choosing fallback");
-		return family->fonts[0];
+	return NULL;
+}
+
+const gp_font_face *gp_font_family_face_lookup(const gp_font_family *family, uint8_t style)
+{
+	const gp_font_face *f;
+
+	GP_DEBUG(3, "Looking for font style %s in family '%s'",
+	         gp_font_style_name(style), family ? family->family_name : "NULL");
+
+	if (!family)
+		family = gp_font_family_default;
+
+	f = font_face_lookup(family, style);
+	if (f)
+		return f;
+
+	if (!(style & GP_FONT_FALLBACK)) {
+		GP_DEBUG(3, "Style not found!");
+		return NULL;
 	}
 
-	GP_DEBUG(3, "Style not found!");
+	GP_DEBUG(3, "Attempting to find fallback by flipping monospace bit");
 
-	return NULL;
+	style ^= GP_FONT_MONO;
+	f = font_face_lookup(family, style);
+	if (f)
+		return f;
+
+	GP_DEBUG(3, "Falling back to first font in the family");
+	return family->fonts[0];
 }
 
 const gp_font_face *gp_font_face_lookup(const char *family_name, uint8_t style)
