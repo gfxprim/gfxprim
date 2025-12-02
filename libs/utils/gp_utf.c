@@ -346,6 +346,14 @@ uint32_t gp_utf_fallback(uint32_t ch)
 		return '=';
 	case 0x2593: /* block element 75% shade */
 		return '#';
+
+
+	/* right arrow */
+	case 0x2792:
+		return '-';
+	/* utf dingbat right arrow used by mpv osd info */
+	case 0x279c:
+		return 0x2792;
 	}
 
 	return ch;
