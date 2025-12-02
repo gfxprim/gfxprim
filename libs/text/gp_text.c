@@ -81,7 +81,7 @@ gp_size gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
 
 	gp_coord topleft_x, topleft_y;
 
-	gp_size w = gp_text_width(style, GP_TEXT_LEN_BBOX, str);
+	gp_size w = gp_text_width_len(style, GP_TEXT_LEN_BBOX, str, max_chars);
 
 	GP_ASSERT(do_align(&topleft_x, &topleft_y, flags, x, y, style, w) == 0,
 	         "Invalid aligment flags");
