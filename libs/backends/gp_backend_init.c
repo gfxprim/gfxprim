@@ -645,7 +645,7 @@ static gp_backend *init_backend(const char *name, char *params,
 		return NULL;
 	}
 
-	if (!*params)
+	if (params && !*params)
 		params = NULL;
 
 	ret = init->init(params, pref_w, pref_h, caption);
