@@ -85,6 +85,11 @@ static void sdl_update_rect(struct gp_backend *self __attribute__((unused)),
 	SDL_mutexV(mutex);
 }
 
+static void sdl_update(struct gp_backend *self)
+{
+	sdl_update_rect(self, 0, 0, self->pixmap->w-1, self->pixmap->h-1);
+}
+
 //TODO: Move to priv!
 static gp_ev_queue ev_queue;
 
@@ -308,6 +313,7 @@ static struct gp_backend backend = {
 	.name = "SDL",
 	.flip = sdl_flip,
 	.update_rect = sdl_update_rect,
+	.update = sdl_update,
 	.set_attr = sdl_set_attr,
 	.resize_ack = sdl_resize_ack,
 #if LIBSDL_VERSION == 2

@@ -83,7 +83,7 @@ static void aalib_exit(gp_backend *self)
 	aa_close(aa->c);
 }
 
-static void aalib_flip(gp_backend *self)
+static void aalib_update(gp_backend *self)
 {
 	struct aalib_priv *aa = GP_BACKEND_PRIV(self);
 
@@ -233,7 +233,7 @@ gp_backend *gp_aalib_init(void)
 
 	backend->pixmap = &aa->pixmap;
 	backend->name = "AALib";
-	backend->flip = aalib_flip;
+	backend->update = aalib_update;
 	backend->update_rect = aalib_update_rect;
 	backend->resize_ack = aalib_resize_ack;
 	backend->poll = aalib_poll;
