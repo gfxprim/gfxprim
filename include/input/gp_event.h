@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <utils/gp_types.h>
 #include <input/gp_types.h>
 #include <input/gp_keys.h>
 #include <input/gp_event_keys.h>
@@ -33,6 +34,8 @@ enum gp_ev_type {
 	GP_EV_SYS = 4,
 	/** @brief A timer expired. */
 	GP_EV_TMR = 5,
+	/** @brief A poll event on a filescriptor. */
+	GP_EV_FD = 6,
 	/** @brief Last used event type. */
 	GP_EV_MAX = 6,
 };
@@ -182,12 +185,6 @@ struct gp_ev_sys {
 	uint32_t h;
 };
 
-/** @brief An unicode event value. */
-struct gp_ev_utf {
-	/** @brief An unicode character. */
-	uint32_t ch;
-};
-
 #define GP_EVENT_KEY_BITMAP_BYTES 56
 
 /**
@@ -232,6 +229,8 @@ struct gp_event {
 		struct gp_ev_sys sys;
 		/** @brief A timer expired event. */
 		gp_timer *tmr;
+		/** @brief A poll fd event. */
+		gp_fd *fd;
 	};
 
 	/** @brief An event timestamp. */

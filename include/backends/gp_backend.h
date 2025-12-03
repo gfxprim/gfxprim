@@ -487,13 +487,13 @@ static inline void gp_backend_flip(gp_backend *self)
 /**
  * @brief Add a file descriptor to the backend poll loop.
  *
+ * If fd gp_fd::event callback is NULL a gp_event with #GP_EV_FD type is pushed
+ * into the backend event queue once events are returned from poll.
+ *
  * @param self A backend.
  * @param fd A file descriptor with a callback.
  */
-static inline void gp_backend_poll_add(gp_backend *self, gp_fd *fd)
-{
-	gp_poll_add(&self->fds, fd);
-}
+void gp_backend_poll_add(gp_backend *self, gp_fd *fd);
 
 /**
  * @brief Removes a file descriptor to the backend poll loop.
@@ -759,7 +759,7 @@ static inline gp_event *gp_backend_ev_wait(gp_backend *self)
 /**
  * @brief Adds a timer to a backend timer queue.
  *
- * If timer callback is NULL a #gp_ev with #GP_EV_TMR type is pushed into the
+ * If timer callback is NULL a gp_event with #GP_EV_TMR type is pushed into the
  * backend event queue once timer expires.
  *
  * @param self A backend.

@@ -90,8 +90,10 @@ struct gp_fd {
 	uint32_t revents;
 	/** @brief A file descriptor. */
 	int fd;
-	/** User private pointer, not used by the library */
+	/** @brief User private pointer, not used by the library. */
 	void *priv;
+	/** @brief Library private pointer. Do not touch! */
+	void *_priv;
 };
 
 /**

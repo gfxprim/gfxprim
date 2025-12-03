@@ -45,7 +45,7 @@ struct gp_timer {
 	/** Set if timer was rescheduled from callback */
 	uint32_t res_in_callback:1;
 
-	/* Do not touch! */
+	/** @brief Library private pointer. Do not touch! */
 	void *_priv;
 
 	/**

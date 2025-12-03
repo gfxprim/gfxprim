@@ -108,15 +108,16 @@ int gp_backend_resize_ack(gp_backend *self)
 	return 0;
 }
 
-static uint32_t pushevent_callback(gp_timer *self)
+static uint32_t timer_pushevent_callback(gp_timer *self)
 {
 	gp_event ev;
+	gp_backend *backend = self->_priv;
 
 	ev.type = GP_EV_TMR;
 	ev.time = gp_time_stamp();
 	ev.tmr = self;
 
-	gp_ev_queue_put(self->_priv, &ev);
+	gp_ev_queue_put(backend->event_queue, &ev);
 
 	return self->period;
 }
@@ -124,8 +125,8 @@ static uint32_t pushevent_callback(gp_timer *self)
 void gp_backend_timer_start(gp_backend *self, gp_timer *timer)
 {
 	if (!timer->callback) {
-		timer->callback = pushevent_callback;
-		timer->_priv = self->event_queue;
+		timer->callback = timer_pushevent_callback;
+		timer->_priv = self;
 	}
 
 	gp_timer_queue_ins(&self->timers, gp_time_stamp(), timer);
@@ -372,6 +373,30 @@ gp_event *gp_backend_ev_poll(gp_backend *self)
 		return ev;
 
 	return NULL;
+}
+
+static enum gp_poll_event_ret fd_pushevent_callback(gp_fd *self)
+{
+	gp_event ev;
+	gp_backend *backend = self->_priv;
+
+	ev.type = GP_EV_FD;
+	ev.time = gp_time_stamp();
+	ev.fd = self;
+
+	gp_ev_queue_put(backend->event_queue, &ev);
+
+	return GP_POLL_RET_OK;
+}
+
+void gp_backend_poll_add(gp_backend *self, gp_fd *fd)
+{
+	if (!fd->event) {
+		fd->event = fd_pushevent_callback;
+		fd->_priv = self;
+	}
+
+	gp_poll_add(&self->fds, fd);
 }
 
 void gp_backend_exit(gp_backend *self)
