@@ -116,7 +116,7 @@ static void sdl_poll(struct gp_backend *self __attribute__((unused)))
 	SDL_mutexV(mutex);
 }
 
-static void sdl_wait(struct gp_backend *self)
+static void sdl_wait(struct gp_backend *self, int timeout_ms)
 {
 	SDL_Event ev;
 
@@ -131,7 +131,13 @@ static void sdl_wait(struct gp_backend *self)
 
 		SDL_mutexV(mutex);
 
-		usleep(10000);
+		if (timeout_ms == 0)
+			return;
+
+		if (timeout_ms > 0)
+			timeout_ms--;
+
+		usleep(1000);
 	}
 }
 

@@ -270,64 +270,84 @@ void gp_backend_poll(gp_backend *self)
 		gp_poll_wait(&self->fds, 0);
 }
 
-static void wait_timers_fds(gp_backend *self, uint64_t now)
+static void wait_timers_fds(gp_backend *self, uint64_t now, int timeout_ms)
 {
 	int timeout = self->timers->expires - now;
+
+	if (timeout_ms >= 0)
+		timeout = GP_MIN(timeout, timeout_ms);
 
 	gp_poll_wait(&self->fds, timeout);
 }
 
-/*
- * Polling for backends that does not expose FD to wait on (namely SDL).
- */
-static void wait_timers_poll(gp_backend *self)
+/* Polling for backends that does not expose FD to wait on (namely aalib, SDL). */
+static void wait_timers_poll(gp_backend *self, int timeout_ms)
 {
 	for (;;) {
-		uint64_t now = gp_time_stamp();
-
-		if (gp_timer_queue_process(&self->timers, now))
-			return;
-
-		self->poll(self);
-
-		if (gp_poll_fds(&self->fds))
-			gp_poll_wait(&self->fds, 0);
-
-		if (gp_backend_ev_queued(self))
-			return;
-
-		usleep(10000);
-	}
-}
-
-void gp_backend_wait(gp_backend *self)
-{
-	if (gp_backend_ev_queued(self))
-		return;
-
-	if (self->timers) {
 		uint64_t now = gp_time_stamp();
 
 		/* Get rid of possibly expired timers */
 		if (gp_timer_queue_process(&self->timers, now))
 			return;
 
-		/* Wait for events or timer expiration */
-		if (self->poll)
-			wait_timers_poll(self);
-		else
-			wait_timers_fds(self, now);
+		/* Poll for backend events */
+		self->poll(self);
 
+		/* Poll file descriptors, if any */
+		if (gp_poll_fds(&self->fds))
+			gp_poll_wait(&self->fds, 0);
+
+		if (gp_backend_ev_queued(self))
+			return;
+
+		if (timeout_ms == 0)
+			return;
+
+		if (timeout_ms > 0)
+			timeout_ms--;
+
+		usleep(1000);
+	}
+}
+
+void gp_backend_wait_timeout(gp_backend *self, int timeout_ms)
+{
+	uint64_t now = gp_time_stamp();
+
+	if (gp_backend_ev_queued(self))
+		return;
+
+	/* Get rid of possibly expired timers */
+	if (gp_timer_queue_process(&self->timers, now))
+		return;
+
+	/*
+	 * If timers or file descriptors are registered we need to poll
+	 * backends that does not expose file descriptor(s).
+	 */
+	if (self->timers || gp_poll_fds(&self->fds)) {
+		if (self->poll) {
+			wait_timers_poll(self, timeout_ms);
+			return;
+		}
+	}
+
+	/*
+	 * If timers are registered and we have file descriptors we need to
+	 * calculate the timeout until either timeout or closest timer.
+	 */
+	if (self->timers) {
+		wait_timers_fds(self, now, timeout_ms);
 		return;
 	}
 
 	if (self->wait)
-		self->wait(self);
+		self->wait(self, timeout_ms);
 	else
-		gp_poll_wait(&self->fds, -1);
+		gp_poll_wait(&self->fds, timeout_ms);
 }
 
-gp_event *gp_backend_ev_wait(gp_backend *self)
+gp_event *gp_backend_ev_wait_timeout(gp_backend *self, int timeout_ms)
 {
 	gp_event *ev;
 
@@ -335,7 +355,7 @@ gp_event *gp_backend_ev_wait(gp_backend *self)
 		if ((ev = gp_backend_ev_get(self)))
 			return ev;
 
-		gp_backend_wait(self);
+		gp_backend_wait_timeout(self, timeout_ms);
 	}
 }
 

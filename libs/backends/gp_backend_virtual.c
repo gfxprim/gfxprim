@@ -67,11 +67,11 @@ static void virt_poll(gp_backend *self)
 		gp_ev_queue_put(self->event_queue, ev);
 }
 
-static void virt_wait(gp_backend *self)
+static void virt_wait(gp_backend *self, int timeout_ms)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
-	virt->backend->wait(virt->backend);
+	virt->backend->wait(virt->backend, timeout_ms);
 
 	gp_event *ev;
 

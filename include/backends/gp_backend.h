@@ -299,7 +299,7 @@ struct gp_backend {
 	 * Backends that have a file descriptor does not set this function and
 	 * rather insert a file descriptor into the fds array.
 	 */
-	void (*wait)(gp_backend *self);
+	void (*wait)(gp_backend *self, int timeout_ms);
 
 	/** @brief File descriptors to poll for. */
 	gp_poll fds;
@@ -650,6 +650,33 @@ void gp_backend_poll(gp_backend *self);
 gp_event *gp_backend_ev_poll(gp_backend *self);
 
 /**
+ * @brief Waits for a backend events with a timeout.
+ *
+ * This is a blocking call that fills the events into the backend event queue
+ * until timeout.
+ *
+ * Once this call returns the events from the event queue must be processed.
+ *
+ * The event processing may look like:
+ *
+ * @code
+ * for (;;) {
+ *	gp_event *ev;
+ *
+ *	gp_backend_wait_timeout(backend, 10);
+ *
+ *	while ((ev = gp_backend_ev_get(backend)) {
+ *	// Event processing has to be done here
+ *	}
+ * }
+ * @endcode
+ *
+ * @param self A backend.
+ * @param timeout_ms A timeout in miliseconds. Passing -1 means no timeout.
+ */
+void gp_backend_wait_timeout(gp_backend *self, int timeout_ms);
+
+/**
  * @brief Waits for a backend events.
  *
  * This is a blocking call that fills the events into the backend event queue.
@@ -672,7 +699,35 @@ gp_event *gp_backend_ev_poll(gp_backend *self);
  *
  * @param self A backend.
  */
-void gp_backend_wait(gp_backend *self);
+static inline void gp_backend_wait(gp_backend *self)
+{
+	gp_backend_wait_timeout(self, -1);
+}
+
+/**
+ * @brief Returns an event from the queue, wait for the backend events until a
+ *        timeout if the queue is empty.
+ *
+ * This combines a gp_backend_wait_timeout() and gp_backend_ev_get() into a one
+ * function. The call to gp_backend_wait_timeout() may generate more than one
+ * event so the function tries to return events from the queue first and only
+ * if the queue is empty it reaches to the backend to try to fill the queue.
+ *
+ * The function is supposed to be called in a loop:
+ *
+ * @code
+ * for (;;) {
+ *	gp_event *ev = gp_backend_ev_wait_timeout(backend, 10);
+ *
+ *	// Event processing has to be done here
+ * }
+ * @endcode
+ *
+ * @param self A backend.
+ * @param timeout_ms A timeout in miliseconds. Passing -1 means no timeout.
+ * @return An event.
+ */
+gp_event *gp_backend_ev_wait_timeout(gp_backend *self, int timeout_ms);
 
 /**
  * @brief Returns an event from the queue, wait the backend for events if the
@@ -696,7 +751,10 @@ void gp_backend_wait(gp_backend *self);
  * @param self A backend.
  * @return An event.
  */
-gp_event *gp_backend_ev_wait(gp_backend *self);
+static inline gp_event *gp_backend_ev_wait(gp_backend *self)
+{
+	return gp_backend_ev_wait_timeout(self, -1);
+}
 
 /**
  * @brief Adds a timer to a backend timer queue.

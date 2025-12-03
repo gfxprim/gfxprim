@@ -179,7 +179,7 @@ static void aalib_poll(gp_backend *self)
 	parse_event(self, key);
 }
 
-static void aalib_wait(gp_backend *self)
+static void aalib_wait(gp_backend *self, int timeout_ms)
 {
 	/* We cannot wait due to possible lockup, so we poll */
 	for (;;) {
@@ -188,7 +188,13 @@ static void aalib_wait(gp_backend *self)
 		if (gp_ev_queue_events(self->event_queue))
 			return;
 
-		usleep(10000);
+		if (timeout_ms == 0)
+			return;
+
+		if (timeout_ms > 0)
+			timeout_ms--;
+
+		usleep(1000);
 	}
 }
 
