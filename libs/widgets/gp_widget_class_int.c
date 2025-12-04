@@ -14,23 +14,23 @@
 #include <widgets/gp_widget_render.h>
 
 #define CHECK_VAL(self, type, min, max, val) ({ \
-		int gp_ret__ = (val) < (min) || (val) > (max); \
-		if (gp_ret__) { \
+		int gp_ret_tmp = (val) < (min) || (val) > (max); \
+		if (gp_ret_tmp) { \
 			GP_WARN("Widget %s (%p) val %"PRIi64" outside of [%"PRIi64", %"PRIi64"]", \
 				type > 0 ? gp_widget_type_name(type) : "none", \
 				self, val, min, max); \
 		} \
-		gp_ret__; \
+		gp_ret_tmp; \
 })
 
 #define CHECK_RANGE(self, type, min, max) ({ \
-		int gp_ret__ = (min) > (max); \
-		if (gp_ret__) { \
+		int gp_ret_tmp = (min) > (max); \
+		if (gp_ret_tmp) { \
 			GP_WARN("Widget %s (%p) min %"PRIi64" > max %"PRIi64, \
 				type > 0 ? gp_widget_type_name(type) : "none", \
 				self, min, max); \
 		} \
-		gp_ret__; \
+		gp_ret_tmp; \
 })
 
 static gp_widget *widget_int_new(enum gp_widget_type type,

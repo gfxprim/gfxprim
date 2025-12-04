@@ -3,8 +3,8 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef COMPARE_H__
-#define COMPARE_H__
+#ifndef TESTS_GFX_COMPARE_H
+#define TESTS_GFX_COMPARE_H
 
 #include <stdio.h>
 #include <core/gp_get_put_pixel.h>
@@ -94,4 +94,4 @@ static inline int compare_pixmaps(gp_pixmap *p1, gp_pixmap *p2)
 	return TST_PASSED;
 }
 
-#endif /* COMPARE_H__ */
+#endif /* TESTS_GFX_COMPARE_H */

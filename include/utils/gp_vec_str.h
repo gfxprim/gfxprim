@@ -107,10 +107,10 @@ GP_WUR static inline char *gp_vec_str_append(char *self, const char *str)
 }
 
 #define GP_VEC_STR_APPEND(self, str) ({\
-		char *gp_ret__ = gp_vec_str_append(self, str); \
-		if (gp_ret__) \
-			self = gp_ret__; \
-		gp_ret__; \
+		char *gp_ret_tmp = gp_vec_str_append(self, str); \
+		if (gp_ret_tmp) \
+			self = gp_ret_tmp; \
+		gp_ret_tmp; \
 	})
 
 /**

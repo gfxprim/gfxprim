@@ -11,8 +11,8 @@
  * attached to a backend.
  */
 
-#ifndef BACKENDS_GP_BACKEND_INPUT_H__
-#define BACKENDS_GP_BACKEND_INPUT_H__
+#ifndef BACKENDS_GP_BACKEND_INPUT_H
+#define BACKENDS_GP_BACKEND_INPUT_H
 
 #include <backends/gp_backend.h>
 #include <utils/gp_list.h>
@@ -40,4 +40,4 @@ struct gp_backend_input {
  */
 void gp_backend_input_destroy(gp_backend *self);
 
-#endif /* BACKENDS_GP_BACKEND_INPUT_H__ */
+#endif /* BACKENDS_GP_BACKEND_INPUT_H */

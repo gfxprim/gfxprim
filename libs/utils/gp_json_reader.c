@@ -1055,7 +1055,7 @@ gp_json_val *gp_json_val_alloc(size_t buf_size)
 
 	memset(ret, 0, sizeof(gp_json_val) + buf_size);
 
-	ret->buf = ret->buf__;
+	ret->buf = ret->alloc_buf;
 	ret->buf_size = buf_size;
 
 	return ret;

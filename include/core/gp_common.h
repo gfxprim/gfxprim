@@ -29,9 +29,9 @@
  * @return A minimum of a and b.
  */
 #define GP_MIN(a, b) ({ \
-	typeof(a) gp_a__ = (a); \
-	typeof(b) gp_b__ = (b); \
-	gp_a__ < gp_b__ ? gp_a__ : gp_b__; \
+	typeof(a) gp_a_tmp = (a); \
+	typeof(b) gp_b_tmp = (b); \
+	gp_a_tmp < gp_b_tmp ? gp_a_tmp : gp_b_tmp; \
 })
 
 /**
@@ -43,10 +43,10 @@
  * @return A minimum of a, b and c.
  */
 #define GP_MIN3(a, b, c) ({ \
-	typeof(a) gp_a__ = (a); \
-	typeof(b) gp_b__ = (b); \
-	typeof(c) gp_c__ = (c); \
-	gp_a__ < gp_b__ ? (gp_a__ < gp_c__ ? gp_a__ : gp_c__) : (gp_b__ < gp_c__ ? gp_b__ : gp_c__); \
+	typeof(a) gp_a_tmp = (a); \
+	typeof(b) gp_b_tmp = (b); \
+	typeof(c) gp_c_tmp = (c); \
+	gp_a_tmp < gp_b_tmp ? (gp_a_tmp < gp_c_tmp ? gp_a_tmp : gp_c_tmp) : (gp_b_tmp < gp_c_tmp ? gp_b_tmp : gp_c_tmp); \
 })
 
 /**
@@ -57,9 +57,9 @@
  * @return A maximum of a and b.
  */
 #define GP_MAX(a, b) ({ \
-	typeof(a) gp_a__ = (a); \
-	typeof(b) gp_b__ = (b); \
-	gp_a__ > gp_b__ ? gp_a__ : gp_b__; \
+	typeof(a) gp_a_tmp = (a); \
+	typeof(b) gp_b_tmp = (b); \
+	gp_a_tmp > gp_b_tmp ? gp_a_tmp : gp_b_tmp; \
 })
 
 /**
@@ -71,10 +71,10 @@
  * @return A maximum of a, b and c.
  */
 #define GP_MAX3(a, b, c) ({ \
-	typeof(a) gp_a__ = (a); \
-	typeof(b) gp_b__ = (b); \
-	typeof(c) gp_c__ = (c); \
-	gp_a__ > gp_b__ ? (gp_a__ > gp_c__ ? gp_a__ : gp_c__) : (gp_b__ > gp_c__ ? gp_b__ : gp_c__); \
+	typeof(a) gp_a_tmp = (a); \
+	typeof(b) gp_b_tmp = (b); \
+	typeof(c) gp_c_tmp = (c); \
+	gp_a_tmp > gp_b_tmp ? (gp_a_tmp > gp_c_tmp ? gp_a_tmp : gp_c_tmp) : (gp_b_tmp > gp_c_tmp ? gp_b_tmp : gp_c_tmp); \
 })
 
 /**
@@ -87,7 +87,7 @@
  */
 #define GP_CONCAT2(a, b) a##b
 
-#define GP_UNIQUE_ID__(prefix, suffix) GP_CONCAT2(prefix, suffix)
+#define GP_UNIQUE_ID2(prefix, suffix) GP_CONCAT2(prefix, suffix)
 
 /**
  * @brief Generates an unique C identifier with a given prefix.
@@ -99,7 +99,7 @@
  *
  * @return An unique C identifier with a given prefix.
  */
-#define GP_UNIQUE_ID(prefix) GP_UNIQUE_ID__(prefix, __COUNTER__)
+#define GP_UNIQUE_ID(prefix) GP_UNIQUE_ID2(prefix, __COUNTER__)
 
 /**
  * @brief Returns an absolute value.
@@ -108,8 +108,8 @@
  * @return An absolute value of a.
  */
 #define GP_ABS(a) ({ \
-	typeof(a) gp_a__ = a; \
-	gp_a__ > 0 ? gp_a__ : - gp_a__; \
+	typeof(a) gp_a_tmp = a; \
+	gp_a_tmp > 0 ? gp_a_tmp : - gp_a_tmp; \
 })
 
 /**
@@ -121,9 +121,9 @@
  * @return An absolute value of a difference between a and b.
  */
 #define GP_ABS_DIFF(a, b) ({ \
-	typeof(a) gp_a__ = a; \
-	typeof(b) gp_b__ = b; \
-	gp_a__ > gp_b__ ? gp_a__ - gp_b__ : gp_b__ - gp_a__; \
+	typeof(a) gp_a_tmp = a; \
+	typeof(b) gp_b_tmp = b; \
+	gp_a_tmp > gp_b_tmp ? gp_a_tmp - gp_b_tmp : gp_b_tmp - gp_a_tmp; \
 })
 
 /**
@@ -133,8 +133,8 @@
  * @return A value aligned to be divisible by two.
  */
 #define GP_ALIGN2(a) ({ \
-	typeof(a) gp_a__ = a; \
-	gp_a__ + (gp_a__%2); \
+	typeof(a) gp_a_tmp = a; \
+	gp_a_tmp + (gp_a_tmp%2); \
 })
 
 /**
@@ -146,17 +146,17 @@
  * @param b A value to be swapped.
  */
 #define GP_SWAP(a, b) do { \
-	typeof(b) gp_b__ = b; \
+	typeof(b) gp_b_tmp = b; \
 	b = a; \
-	a = gp_b__; \
+	a = gp_b_tmp; \
 } while (0)
 
 /* Determines the sign of the integer value; it is +1 if value is positive,
  * -1 if negative, and 0 if it is zero.
  */
 #define GP_SIGN(a) ({ \
-	typeof(a) gp_a__ = a; \
-	(gp_a__ > 0) ? 1 : ((gp_a__ < 0) ? -1 : 0); \
+	typeof(a) gp_a_tmp = a; \
+	(gp_a_tmp > 0) ? 1 : ((gp_a_tmp < 0) ? -1 : 0); \
 })
 
 /**
@@ -206,13 +206,13 @@ void gp_print_abort_info(const char *file, const char *function, unsigned int li
                          const char *msg, const char *fmt, ...)
 		         __attribute__ ((format (printf, 5, 6)));
 
-#define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
-	if (GP_UNLIKELY(!(check_cond_))) { \
+#define GP_GENERAL_CHECK(gp_check_cond, gp_check_message, ...) do { \
+	if (GP_UNLIKELY(!(gp_check_cond))) { \
 		if (#__VA_ARGS__ [0]) \
-			GP_INTERNAL_ABORT(check_message_ #check_cond_, \
+			GP_INTERNAL_ABORT(gp_check_message #gp_check_cond, \
 			                  "\n" __VA_ARGS__); \
 		else \
-			GP_INTERNAL_ABORT(check_message_ #check_cond_, " "); \
+			GP_INTERNAL_ABORT(gp_check_message #gp_check_cond, " "); \
 	} \
 } while (0)
 
@@ -235,8 +235,8 @@ void gp_print_abort_info(const char *file, const char *function, unsigned int li
  * GP_ASSERT(cond, format, params...) where msg and format must be string
  * constants.
  */
-#define GP_ASSERT(check_cond_, ...) \
-	GP_GENERAL_CHECK(check_cond_, "assertion failed: ", ##__VA_ARGS__)
+#define GP_ASSERT(gp_check_cond, ...) \
+	GP_GENERAL_CHECK(gp_check_cond, "assertion failed: ", ##__VA_ARGS__)
 
 /*
  * Perform a runtime check, on failure abort and print a message.
@@ -246,7 +246,7 @@ void gp_print_abort_info(const char *file, const char *function, unsigned int li
  * GP_CHECK(cond, format, params...) where msg and format must be string
  * constants.
  */
-#define GP_CHECK(check_cond_, ...) \
-	GP_GENERAL_CHECK(check_cond_, "check failed: ", ##__VA_ARGS__)
+#define GP_CHECK(gp_check_cond, ...) \
+	GP_GENERAL_CHECK(gp_check_cond, "check failed: ", ##__VA_ARGS__)
 
 #endif /* CORE_GP_COMMON_H */

@@ -6,17 +6,17 @@
 
  */
 
-#ifndef GP_COMMON_H
-#define GP_COMMON_H
+#ifndef WIDGETS_GP_COMMON_H
+#define WIDGETS_GP_COMMON_H
 
 #define GP_ODD_UP(x) ({    \
-	typeof(x) x__ = x; \
-	x__ + !(x__%2);    \
+	typeof(x) x_tmp = x; \
+	x_tmp + !(x_tmp%2);    \
 })
 
 #define GP_EVEN_UP(x) ({    \
-	typeof(x) x__ = x;  \
-	x__ + (x__%2);      \
+	typeof(x) x_tmp = x;  \
+	x_tmp + (x_tmp%2);      \
 })
 
-#endif /* GP_COMMON_H */
+#endif /* WIDGETS_GP_COMMON_H */

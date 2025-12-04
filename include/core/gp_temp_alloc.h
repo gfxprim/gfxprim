@@ -58,14 +58,14 @@ struct gp_temp_alloc {
 })
 
 #define gp_temp_alloc_create(name, bsize)                              \
-	struct gp_temp_alloc name = {.size = (bsize), .pos = 0,       \
+	struct gp_temp_alloc name = {.size = (bsize), .pos = 0,        \
 				    .buffer = GP_TEMP_ALLOC(bsize)};
 
-#define gp_temp_alloc_get(self, bsize) ({            \
-	GP_ASSERT(self.pos + bsize <= self.size);    \
-	size_t gp_pos__ = self.pos;                  \
-	self.pos += bsize;                           \
-	(void*)(((char*)(self.buffer)) + gp_pos__);  \
+#define gp_temp_alloc_get(self, bsize) ({             \
+	GP_ASSERT(self.pos + bsize <= self.size);     \
+	size_t gp_pos_tmp = self.pos;                 \
+	self.pos += bsize;                            \
+	(void*)(((char*)(self.buffer)) + gp_pos_tmp); \
 })
 
 #define gp_temp_alloc_arr(self, type, len) \

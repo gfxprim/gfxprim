@@ -3,8 +3,8 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef SPIV_HELP_H__
-#define SPIV_HELP_H__
+#ifndef SPIV_HELP_H
+#define SPIV_HELP_H
 
 /*
  * Prints help into stderr
@@ -18,4 +18,4 @@ void print_man(void);
  */
 void draw_help(gp_backend *backend);
 
-#endif /* SPIV_HELP_H__ */
+#endif /* SPIV_HELP_H */

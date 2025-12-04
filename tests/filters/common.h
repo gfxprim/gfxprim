@@ -3,8 +3,8 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef __COMMON_H__
-#define __COMMON_H__
+#ifndef TESTS_FILTERS_COMMON_H
+#define TESTS_FILTERS_COMMON_H
 
 #include <core/gp_pixmap.h>
 
@@ -12,4 +12,4 @@ void dump_buffers(const char *pattern, const gp_pixmap *c);
 
 int compare_buffers(const char *pattern, const gp_pixmap *c);
 
-#endif /* __COMMON_H__ */
+#endif /* TESTS_FILTERS_COMMON_H */

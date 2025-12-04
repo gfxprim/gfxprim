@@ -13,18 +13,18 @@
 #include <core/gp_compiler.h>
 
 #define GP_CLAMP_GENERIC(val, min, max) ({ \
-	typeof(val) gp_val__ = (val); \
-	typeof(max) gp_max__ = (max); \
-	typeof(min) gp_min__ = (min); \
-	gp_val__ = gp_val__ < gp_min__ ? gp_min__ : gp_val__; \
-	gp_val__ = gp_val__ > gp_max__ ? gp_max__ : gp_val__; \
-	gp_val__; \
+	typeof(val) gp_val_tmp = (val); \
+	typeof(max) gp_max_tmp = (max); \
+	typeof(min) gp_min_tmp = (min); \
+	gp_val_tmp = gp_val_tmp < gp_min_tmp ? gp_min_tmp : gp_val_tmp; \
+	gp_val_tmp = gp_val_tmp > gp_max_tmp ? gp_max_tmp : gp_val_tmp; \
+	gp_val_tmp; \
 })
 
 #define GP_CLAMP_INT_0_255(val) ({ \
-	typeof(val) gp_val__ = (val); \
-	typeof(val) _mask = ~0xff; \
-	(gp_val__ & _mask) ? (gp_val__ < 0 ? 0 : 255) : gp_val__; \
+	typeof(val) gp_val_tmp = (val); \
+	typeof(val) gp_mask_tmp = ~0xff; \
+	(gp_val_tmp & gp_mask_tmp) ? (gp_val_tmp < 0 ? 0 : 255) : gp_val_tmp; \
 })
 
 /**
@@ -54,9 +54,9 @@
  * @return A clamped down value.
  */
 #define GP_CLAMP_DOWN(val, max) ({ \
-	typeof(val) gp_val__ = (val); \
-	typeof(val) gp_max__ = (max); \
-	gp_val__ > gp_max__ ? gp_max__ : gp_val__; \
+	typeof(val) gp_val_tmp = (val); \
+	typeof(val) gp_max_tmp = (max); \
+	gp_val_tmp > gp_max_tmp ? gp_max_tmp : gp_val_tmp; \
 })
 
 /**
@@ -71,16 +71,16 @@
  * @return A saturated addition.
  */
 #define GP_SAT_ADD(val, add, max) ({ \
-	typeof(val) gp_val__ = (val); \
-	typeof(add) gp_add__ = (add); \
-	typeof(val) gp_max__ = (max); \
-	typeof(val) gp_ret__; \
-	typeof(val) gp_add_neg__ = -gp_add__; \
-	if (gp_add__ > 0) \
-		gp_ret__ =  gp_val__ + gp_add__ > gp_max__ ? gp_max__ : gp_val__ + gp_add__; \
+	typeof(val) gp_val_tmp = (val); \
+	typeof(add) gp_add_tmp = (add); \
+	typeof(val) gp_max_tmp = (max); \
+	typeof(val) gp_ret_tmp; \
+	typeof(val) gp_add_neg_tmp = -gp_add_tmp; \
+	if (gp_add_tmp > 0) \
+		gp_ret_tmp =  gp_val_tmp + gp_add_tmp > gp_max_tmp ? gp_max_tmp : gp_val_tmp + gp_add_tmp; \
 	else \
-		gp_ret__ =  gp_val__ < gp_add_neg__ ? 0 : gp_val__ + gp_add__; \
-	gp_ret__; \
+		gp_ret_tmp =  gp_val_tmp < gp_add_neg_tmp ? 0 : gp_val_tmp + gp_add_tmp; \
+	gp_ret_tmp; \
 })
 
 #endif /* CORE_GP_CLAMP_H */

@@ -242,12 +242,12 @@ GP_WUR void *gp_vec_move_shrink(void *self, size_t idx);
  * @return NULL on a failure.
  */
 #define GP_VEC_APPEND(vec, val) ({ \
-	typeof(vec) gp_ret__ = gp_vec_expand(vec, 1); \
-	if (gp_ret__) { \
-		gp_ret__[gp_vec_len(gp_ret__)-1] = val; \
-		vec = gp_ret__; \
+	typeof(vec) gp_ret_tmp = gp_vec_expand(vec, 1); \
+	if (gp_ret_tmp) { \
+		gp_ret_tmp[gp_vec_len(gp_ret_tmp)-1] = val; \
+		vec = gp_ret_tmp; \
 	} \
-	gp_ret__; \
+	gp_ret_tmp; \
 })
 
 #endif	/* GP_VEC_H */

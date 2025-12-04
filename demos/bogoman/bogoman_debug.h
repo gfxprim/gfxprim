@@ -3,8 +3,8 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef BOGOMAN_DEBUG_H__
-#define BOGOMAN_DEBUG_H__
+#ifndef BOGOMAN_DEBUG_H
+#define BOGOMAN_DEBUG_H
 
 #define DEBUG(level, ...) \
         bogoman_dbg_print(level, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
@@ -19,4 +19,4 @@ void bogoman_dbg_print(unsigned int level, const char *file, const char *fn,
 
 void bogoman_set_dbg_level(unsigned int level);
 
-#endif /* BOGOMAN_DEBUG_H__ */
+#endif /* BOGOMAN_DEBUG_H */

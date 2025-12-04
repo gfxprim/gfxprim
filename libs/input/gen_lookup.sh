@@ -11,8 +11,8 @@ echo "/*"
 echo " * Generated file, do not edit!"
 echo " */"
 echo
-echo "#ifndef INPUT_KEYS_H__"
-echo "#define INPUT_KEYS_H__"
+echo "#ifndef INPUT_KEYS_H"
+echo "#define INPUT_KEYS_H"
 echo
 echo "#include <input/gp_event_keys.h>"
 echo
@@ -55,4 +55,4 @@ done
 
 echo "};"
 echo
-echo "#endif /* INPUT_KEYS_H__ */"
+echo "#endif /* INPUT_KEYS_H */"

@@ -3,8 +3,8 @@
  * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef BOGOMAN_RENDER_H__
-#define BOGOMAN_RENDER_H__
+#ifndef BOGOMAN_RENDER_H
+#define BOGOMAN_RENDER_H
 
 struct bogoman_map;
 
@@ -34,4 +34,4 @@ enum bogonam_render_flags {
 
 void bogoman_render(struct bogoman_render *render, int flags);
 
-#endif /* BOGOMAN_RENDER_H__ */
+#endif /* BOGOMAN_RENDER_H */

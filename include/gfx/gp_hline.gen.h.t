@@ -8,8 +8,8 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef GFX_GP_HLINE_GEN_H__
-#define GFX_GP_HLINE_GEN_H__
+#ifndef GFX_GP_HLINE_GEN_H
+#define GFX_GP_HLINE_GEN_H
 
 #include <core/gp_get_put_pixel.gen.h>
 #include <core/gp_write_pixels.gen.h>
@@ -50,4 +50,4 @@ static inline void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int x
 }
 
 @ end
-#endif /* GFX_GP_HLINE_GEN_H__ */
+#endif /* GFX_GP_HLINE_GEN_H */

@@ -18,11 +18,11 @@
 
   */
 
-#ifndef IMAGE_ACTIONS_H__
-#define IMAGE_ACTIONS_H__
+#ifndef IMAGE_ACTIONS_H
+#define IMAGE_ACTIONS_H
 
 void image_action_set(unsigned int action, const char *cmd);
 
 int image_action_run(unsigned int action, const char *img_path);
 
-#endif /* IMAGE_ACTIONS_H__ */
+#endif /* IMAGE_ACTIONS_H */

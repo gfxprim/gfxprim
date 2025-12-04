@@ -3,8 +3,8 @@
  * Generated file, do not edit!
  */
 
-#ifndef INPUT_KEYS_H__
-#define INPUT_KEYS_H__
+#ifndef INPUT_KEYS_H
+#define INPUT_KEYS_H
 
 #include <input/gp_event_keys.h>
 
@@ -827,4 +827,4 @@ static const char *key_names[] = {
 	[GP_KEY_ZOOM_RESET] = "ZoomReset",
 };
 
-#endif /* INPUT_KEYS_H__ */
+#endif /* INPUT_KEYS_H */

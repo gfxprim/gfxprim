@@ -8,8 +8,8 @@
  * @brief Linux input drivers.
  */
 
-#ifndef BACKENDS_GP_LINUX_INPUT_H__
-#define BACKENDS_GP_LINUX_INPUT_H__
+#ifndef BACKENDS_GP_LINUX_INPUT_H
+#define BACKENDS_GP_LINUX_INPUT_H
 
 #include <backends/gp_backend.h>
 #include <backends/gp_backend_input.h>
@@ -41,4 +41,4 @@ int gp_linux_input_hotplug_new(gp_backend *backend);
  */
 int gp_linux_input_new(const char *dev_path, gp_backend *backend);
 
-#endif /* BACKENDS_GP_LINUX_INPUT_H__ */
+#endif /* BACKENDS_GP_LINUX_INPUT_H */

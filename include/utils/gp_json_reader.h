@@ -106,7 +106,7 @@ struct gp_json_val {
 	/** @brief An ID for object values */
 	char id[GP_JSON_ID_MAX];
 
-	char buf__[];
+	char alloc_buf[];
 };
 
 /**

@@ -3,8 +3,8 @@
  * Copyright (C) 2020-2023 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef TESTS_COMMON_H__
-#define TESTS_COMMON_H__
+#ifndef TESTS_WIDGETS_COMMON_H
+#define TESTS_WIDGETS_COMMON_H
 
 #include <backends/gp_backend.h>
 #include <backends/gp_clipboard.h>
@@ -117,4 +117,4 @@ static inline void paste_event(gp_widget *widget)
  */
 void gp_widgets_backend_set(gp_backend *backend);
 
-#endif /* TESTS_COMMON_H__ */
+#endif /* TESTS_WIDGETS_COMMON_H */
