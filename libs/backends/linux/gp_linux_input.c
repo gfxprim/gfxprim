@@ -198,6 +198,8 @@ static void input_syn(struct linux_input *self,
 	}
 }
 
+static void input_destroy(gp_backend_input *self);
+
 static enum gp_poll_event_ret input_read(gp_fd *self)
 {
 	struct linux_input *input = self->priv;
@@ -209,8 +211,10 @@ static enum gp_poll_event_ret input_read(gp_fd *self)
 	if (ret == -1 && errno == EAGAIN)
 		return 0;
 
-	if (ret < 1)
-		return 1;
+	if (ret < 1) {
+		input_destroy(&input->input);
+		return 0;
+	}
 
 	if (input->device_type == LINUX_INPUT_TOUCHPAD) {
 		input_touchpad(input, &ev);
@@ -530,8 +534,8 @@ static void input_destroy(gp_backend_input *self)
 
 	GP_DEBUG(1, "Ungrabbing device");
 
-	if (ioctl(input->fd.fd, EVIOCGRAB, 0))
-		GP_WARN("Failet to ungrab device: %s", strerror(errno));
+	if (ioctl(input->fd.fd, EVIOCGRAB, 0) && errno != ENODEV)
+		GP_WARN("Failed to ungrab device: %s", strerror(errno));
 
 	close(input->fd.fd);
 	free(input);
