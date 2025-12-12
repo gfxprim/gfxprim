@@ -53,6 +53,65 @@ static int input_walk(gp_backend *backend)
 	return 0;
 }
 
+struct dev_path_timer {
+	gp_timer timer;
+	gp_backend *backend;
+	unsigned int retries;
+	char dev_path[];
+};
+
+static uint32_t input_dev_retry_open(gp_timer *self)
+{
+	struct dev_path_timer *dev_path_timer = GP_CONTAINER_OF(self, struct dev_path_timer, timer);
+	int ret;
+
+	ret = gp_linux_input_new(dev_path_timer->dev_path, dev_path_timer->backend);
+	if (ret && errno == EACCES) {
+		if (dev_path_timer->retries++ < 16) {
+			self->period *= 2;
+			return self->period;
+		}
+	}
+
+	if (ret)
+		GP_WARN("Timeouted while waiting for '%s'", dev_path_timer->dev_path);
+
+	return GP_TIMER_STOP;
+}
+
+static void input_dev_timer_free(gp_timer *self)
+{
+	struct dev_path_timer *dev_path_timer = GP_CONTAINER_OF(self, struct dev_path_timer, timer);
+
+	free(dev_path_timer);
+}
+
+static int input_dev_open_timer_start(gp_backend *backend, const char *dev_path)
+{
+	struct dev_path_timer *dev_path_timer;
+
+	dev_path_timer = malloc(sizeof(struct dev_path_timer) + strlen(dev_path) + 1);
+	if (!dev_path_timer)
+		return 1;
+
+	strcpy(dev_path_timer->dev_path, dev_path);
+	dev_path_timer->retries = 0;
+	dev_path_timer->backend = backend;
+
+	dev_path_timer->timer = (gp_timer) {
+		.callback = input_dev_retry_open,
+		.stopped = input_dev_timer_free,
+		.id = "retry input open()",
+		.expires = 100,
+		.period = 200,
+		.priv = backend,
+	};
+
+	gp_backend_timer_start(backend, &dev_path_timer->timer);
+
+	return 0;
+}
+
 static enum gp_poll_event_ret input_hotplug_read(gp_fd *fd)
 {
 	struct linux_input_hotplug *hotplug = fd->priv;
@@ -70,31 +129,12 @@ static enum gp_poll_event_ret input_hotplug_read(gp_fd *fd)
 
 		if (ev->len && !strncmp(ev->name, "event", 5)) {
 
-			snprintf(str, BUF_LEN, "%s%s", DEV_PATH,
-			         ev->name);
+			snprintf(str, BUF_LEN, "%s%s", DEV_PATH, ev->name);
 
 			if (ev->mask & IN_CREATE) {
-				int retries = 100;
-
 				GP_DEBUG(4, "Plugging new device '%s'.", str);
-
-				//TODO: fire up a timer for the retry!
-				for (;;) {
-					int ret = gp_linux_input_new(str, hotplug->backend);
-
-					if (!ret)
-						break;
-
-					if (errno != EACCES)
-						break;
-
-					if (retries-- <= 0) {
-						GP_WARN("Timeouted while waiting for '%s'", str);
-						break;
-					}
-
-					usleep(10000);
-				}
+				if (input_dev_open_timer_start(hotplug->backend, str))
+					GP_WARN("Failed to setup open timer for '%s'", str);
 			}
 
 			if (ev->mask & IN_DELETE) {
