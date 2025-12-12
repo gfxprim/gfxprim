@@ -103,6 +103,9 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
 
 	gp_heap_head *head = gp_heap_rem(&(*queue)->heap, &timer->heap, timer_cmp);
 
+	if (timer->stopped)
+		timer->stopped(timer);
+
 	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
 }
 
@@ -131,10 +134,12 @@ static gp_timer *process_top(gp_timer *queue, gp_timer **reschedule, uint64_t no
 	if (ret == GP_TIMER_STOP) {
 		timer->running = 0;
 		timer->expires = 0;
+		if (timer->stopped)
+			timer->stopped(timer);
 	} else {
 		timer->expires = ret + now;
-		GP_DEBUG(3, "Rescheduling timer '%s' expires at %"PRIu64,
-		         timer->id, timer->expires);
+		GP_DEBUG(3, "Rescheduling timer '%s' after %"PRIu32" expires at %"PRIu64,
+		         timer->id, ret, timer->expires);
 		timer->next = *reschedule;
 		*reschedule = timer;
 	}

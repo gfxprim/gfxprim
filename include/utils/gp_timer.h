@@ -55,8 +55,20 @@ struct gp_timer {
 	 * return value from now.
 	 */
 	uint32_t (*callback)(struct gp_timer *self);
+
 	/** A user private pointer */
 	void *priv;
+
+	/**
+	 * @brief An optional function to cleanup when timer is stopped.
+	 *
+	 * When non-NULL this function is called when timer is stopped. Timer
+	 * can be either stopped when gp_timer::callback returns #GP_TIMER_STOP
+	 * or when a timer was removed from the queue.
+	 *
+	 * It is safe to free dynamically alocated timers from this callback.
+	 */
+	void (*stopped)(gp_timer *self);
 };
 
 #define GP_TIMER_DECLARE(name, texpires, tperiod, tid, tcallback, tpriv) \
