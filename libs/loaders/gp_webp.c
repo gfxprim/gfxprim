@@ -184,7 +184,7 @@ static int webp_progress_hook(int percents, const WebPPicture *picture)
 	return 1;
 }
 
-int gp_write_webp_ex(const gp_pixmap *src, gp_io *io, gp_progress_cb *callback)
+int gp_write_webp(const gp_pixmap *src, gp_io *io, gp_progress_cb *callback)
 {
 	int err;
 	gp_pixel_type out_pix;
@@ -289,8 +289,8 @@ int gp_read_webp_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
 	return 1;
 }
 
-int gp_write_webp_ex(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
-                     gp_progress_cb GP_UNUSED(*callback))
+int gp_write_webp(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
+                  gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
@@ -301,7 +301,7 @@ int gp_write_webp_ex(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
 const gp_loader gp_webp = {
 #ifdef HAVE_WEBP
 	.read = gp_read_webp_ex,
-	.write = gp_write_webp_ex,
+	.write = gp_write_webp,
 	.save_ptypes = out_pixel_types,
 #endif /* HAVE_WEBP */
 	.match = gp_match_webp,
