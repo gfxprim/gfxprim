@@ -499,8 +499,13 @@ gp_backend *gp_linux_fb_init(const char *path, enum gp_linux_fb_flags flags)
 
 	gp_ev_queue_init(backend->event_queue, vscri.xres, vscri.yres,
 	                 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
-	gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
-	                 GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_IN, 0);
+
+	gp_ev_queue_push_pixel_type(backend->event_queue,
+	                            backend->pixmap->pixel_type, 0);
+	gp_ev_queue_push_focus_in(backend->event_queue, 0);
+	gp_ev_queue_push_resize_start(backend->event_queue,
+	                              backend->pixmap->w,
+	                              backend->pixmap->h, 0);
 
 	if (flags & GP_FB_INPUT_LINUX) {
 		if (gp_linux_input_hotplug_new(backend))

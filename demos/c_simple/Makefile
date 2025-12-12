@@ -22,10 +22,9 @@ INCLUDE=
 LDLIBS+=-lrt -lgfxprim
 
 APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
-     virtual_backend_example meta_data showimage\
-     v4l2_show v4l2_grab convolution weighted_median shapetest koch \
-     input_example fileview linetest randomshapetest fonttest\
-     loaders_register blittest textaligntest x11_windows\
+     meta_data showimage v4l2_show v4l2_grab convolution weighted_median\
+     shapetest koch input_example fileview linetest randomshapetest\
+     fonttest loaders_register blittest textaligntest x11_windows\
      debug_handler gaussian_noise version pretty_print timers\
      zip_container backend_timers_example memory_io data_storage\
      vector matrix proxy_backend bbox backend_tasks_example json_writer\
@@ -50,7 +49,6 @@ backend_example: LDLIBS+=-lgfxprim-backends
 backend_cursor: LDLIBS+=-lgfxprim-backends
 backend_sw_cursor: LDLIBS+=-lgfxprim-backends
 backend_timers_example: LDLIBS+=-lgfxprim-backends
-virtual_backend_example: LDLIBS+=-lgfxprim-backends -lm
 loaders_example: LDLIBS+=-lgfxprim-loaders
 loaders: LDLIBS+=-lgfxprim-loaders
 filters_symmetry: LDLIBS+=-lgfxprim-loaders

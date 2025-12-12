@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2024 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -30,6 +30,10 @@ static gp_pixel fg;
 static void redraw(void)
 {
 	gp_dlist_head *i;
+
+	if (!backend->pixmap)
+		return;
+
 	gp_fill(backend->pixmap, bg);
 
 	gp_coord y = 20;
@@ -191,10 +195,16 @@ static int backend_event(gp_backend *b)
 			case GP_EV_SYS_QUIT:
 				do_exit();
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(b);
-				redraw();
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(b);
+				return 0;
+			break;
+			case GP_EV_SYS_RENDER_RESIZE:
 				resize_shown_client();
+				return 0;
+			break;
+			case GP_EV_SYS_RENDER_START:
+				redraw();
 				return 0;
 			break;
 			}

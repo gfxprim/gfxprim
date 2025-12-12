@@ -348,8 +348,21 @@ void gp_ev_queue_push_resize(gp_ev_queue *self,
 {
 	gp_event ev = {
 		.type = GP_EV_SYS,
-		.code = GP_EV_SYS_RESIZE,
-		.sys = {.w = new_w, .h = new_h},
+		.code = GP_EV_SYS_RENDER_RESIZE,
+		.resize = {.w = new_w, .h = new_h},
+	};
+
+	set_time(&ev, time);
+
+	event_put(self, &ev);
+}
+
+void gp_ev_queue_push_pixel_type(gp_ev_queue *self, uint16_t pixel_type, uint64_t time)
+{
+	gp_event ev = {
+		.type = GP_EV_SYS,
+		.code = GP_EV_SYS_RENDER_PIXEL_TYPE,
+		.pixel_type = pixel_type,
 	};
 
 	set_time(&ev, time);

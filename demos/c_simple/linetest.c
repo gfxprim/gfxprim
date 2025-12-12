@@ -23,6 +23,10 @@ void redraw_screen(void)
 {
 	double angle;
 	int x, y;
+
+	if (!win->pixmap)
+		return;
+
 	int w = win->pixmap->w;
 	int h = win->pixmap->h;
 	int xcenter = w/2;
@@ -77,8 +81,12 @@ void event_loop(void)
 				gp_backend_exit(win);
 				exit(0);
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(win);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(win);
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				white = gp_rgb_to_pixel(0xff, 0xff, 0xff, ev->pixel_type);
+				black = gp_rgb_to_pixel(0x00, 0x00, 0x00, ev->pixel_type);
 			break;
 			}
 		break;
@@ -114,9 +122,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
-	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
-
 	redraw_screen();
 
 	for (;;) {
@@ -129,7 +134,6 @@ int main(int argc, char *argv[])
 			continue;
 
 		redraw_screen();
-		gp_backend_flip(win);
 
 		start_angle += 0.01;
 		if (start_angle > 2*M_PI) {

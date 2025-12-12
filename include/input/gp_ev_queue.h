@@ -298,10 +298,9 @@ void gp_ev_queue_push_key(gp_ev_queue *self,
 /**
  * @brief Pushes a window resize event to the queue.
  *
- * Backends start the resize operation by pushing the #GP_EV_SYS_RESIZE event
- * to the input queue. When the application processes the event it has to
- * acknowledge the resize by calling gp_backend_resize_ack(), which resizes the
- * pixel buffers and also calls gp_ev_queue_set_screen_size().
+ * Pushed #GP_EV_SYS_RENDER_RESIZE event followed by #GP_EV_SYS_RENDER_START. This is
+ * called by backends in the gp_backend::render_stopped() callback in the case
+ * that the backend have been resized.
  *
  * @param self An input queue.
  * @param new_w A new display/window/screen width.
@@ -309,7 +308,8 @@ void gp_ev_queue_push_key(gp_ev_queue *self,
  * @param time A timestamp, if NULL current time is used.
  */
 void gp_ev_queue_push_resize(gp_ev_queue *self,
-                             uint32_t new_w, uint32_t new_h, uint64_t time);
+                             uint32_t new_w, uint32_t new_h,
+                             uint64_t time);
 
 /**
  * @brief Push a generic event into the queue.
@@ -325,6 +325,78 @@ void gp_ev_queue_push_resize(gp_ev_queue *self,
 void gp_ev_queue_push(gp_ev_queue *self,
                       uint16_t type, uint32_t code, int32_t value,
                       uint64_t time);
+
+/**
+ * @brief Push a rendering stop event to the queue.
+ *
+ * The application must call the gp_backend_render_stopped() function after
+ * getting this event.
+ *
+ * @param self An input queue.
+ * @param time A timestamp, if NULL current time is used.
+ */
+static inline void gp_ev_queue_push_render_stop(gp_ev_queue *self, uint64_t time)
+{
+	gp_ev_queue_push(self, GP_EV_SYS, GP_EV_SYS_RENDER_STOP, 0, time);
+}
+
+/**
+ * @brief Push a rendering start event to the queue.
+ *
+ * @param self An input queue.
+ * @param time A timestamp, if NULL current time is used.
+ */
+static inline void gp_ev_queue_push_render_start(gp_ev_queue *self, uint64_t time)
+{
+	gp_ev_queue_push(self, GP_EV_SYS, GP_EV_SYS_RENDER_START, 0, time);
+}
+
+/**
+ * @brief Push pixel type event to the queue.
+ *
+ * @param self An input queue.
+ * @param pixel_type A pixel type to be used for rendering.
+ * @param time A timestamp, if NULL current time is used.
+ */
+void gp_ev_queue_push_pixel_type(gp_ev_queue *self, uint16_t pixel_type, uint64_t time);
+
+/**
+ * @brief Sends #GP_EV_SYS_RENDER_RESIZE and #GP_EV_SYS_RENDER_START events.
+ *
+ * @param self An input queue.
+ * @param new_w A new display/window/screen width.
+ * @param new_h A new display/window/screen height.
+ * @param time A timestamp, if NULL current time is used.
+ */
+static inline void gp_ev_queue_push_resize_start(gp_ev_queue *self,
+                                                 uint32_t new_w, uint32_t new_h,
+                                                 uint64_t time)
+{
+	gp_ev_queue_push_resize(self, new_w, new_h, time);
+	gp_ev_queue_push_render_start(self, time);
+}
+
+/**
+ * @brief Pushes #GP_EV_SYS_FOCUS_IN.
+ *
+ * @param self An input queue.
+ * @param time A timestamp, if NULL current time is used.
+ */
+static inline void gp_ev_queue_push_focus_in(gp_ev_queue *self, uint64_t time)
+{
+	gp_ev_queue_push(self, GP_EV_SYS, GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_IN, time);
+}
+
+/**
+ * @brief Pushes #GP_EV_SYS_FOCUS_OUT.
+ *
+ * @param self An input queue.
+ * @param time A timestamp, if NULL current time is used.
+ */
+static inline void gp_ev_queue_push_focus_out(gp_ev_queue *self, uint64_t time)
+{
+	gp_ev_queue_push(self, GP_EV_SYS, GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_OUT, time);
+}
 
 /**
  * @brief Pushes a mouse wheel movement into the queue.

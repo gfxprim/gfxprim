@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
@@ -97,6 +97,9 @@ static void print_font_properties(const gp_font_face *font)
 
 void redraw_screen(void)
 {
+	if (!win->pixmap)
+		return;
+
 	gp_fill(win->pixmap, black_pixel);
 
 	print_font_properties(style.font);
@@ -190,6 +193,17 @@ static void next_font(int dir)
 	       family->family_name, gp_font_style_name(style.font->style));
 }
 
+
+static void init_colors(gp_pixel_type pixel_type)
+{
+	white_pixel     = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
+	gray_pixel      = gp_rgb_to_pixel(0xbe, 0xbe, 0xbe, pixel_type);
+	dark_gray_pixel = gp_rgb_to_pixel(0x7f, 0x7f, 0x7f, pixel_type);
+	black_pixel     = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
+	red_pixel       = gp_rgb_to_pixel(0xff, 0x00, 0x00, pixel_type);
+	blue_pixel      = gp_rgb_to_pixel(0x00, 0x00, 0xff, pixel_type);
+}
+
 void event_loop(void)
 {
 	for (;;) {
@@ -245,9 +259,14 @@ void event_loop(void)
 				gp_backend_exit(win);
 				exit(0);
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(win);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(win);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				redraw_screen();
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				init_colors(ev->pixel_type);
 			break;
 			}
 		break;
@@ -304,16 +323,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	white_pixel     = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
-	gray_pixel      = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win->pixmap);
-	dark_gray_pixel = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win->pixmap);
-	black_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
-	red_pixel       = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win->pixmap);
-	blue_pixel      = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, win->pixmap);
-
 	next_font(GP_FONTS_ITER_FIRST);
-
-	redraw_screen();
 
 	event_loop();
 

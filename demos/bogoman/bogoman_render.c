@@ -250,6 +250,9 @@ void bogoman_render(struct bogoman_render *render, int flags)
 {
 	unsigned int x, y;
 
+	if (!render->pixmap)
+		return;
+
 	//TODO: Hack
 	init_colors(render->pixmap, &colors);
 

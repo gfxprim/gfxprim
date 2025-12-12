@@ -615,8 +615,11 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 	break;
 	case GP_EV_SYS:
 		switch (ev->code) {
-		case GP_EV_SYS_RESIZE:
-			gp_backend_resize_ack(backend);
+		case GP_EV_SYS_RENDER_STOP:
+			gp_backend_render_stopped(backend);
+			ctx.buf = NULL;
+		break;
+		case GP_EV_SYS_RENDER_START:
 			ctx.buf = backend->pixmap;
 			gp_fill(backend->pixmap, ctx.fill_color);
 			gp_widget_render(layout, &ctx, GP_WIDGET_RESIZE);
@@ -662,7 +665,7 @@ int gp_widgets_process_events(gp_widget *layout)
 	gp_event *ev;
 
 	while ((ev = gp_backend_ev_poll(backend))) {
-		//gp_event_dump(&ev);
+		gp_ev_dump(ev);
 		//fflush(stdout);
 		if (gp_widgets_event(ev, layout))
 			gp_widgets_exit(0);

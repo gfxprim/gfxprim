@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
  /*
@@ -9,7 +9,7 @@
 
   */
 
-#include <stdio.h>
+#include <unistd.h>
 #include <gfxprim.h>
 
 static gp_pixel black_pixel, white_pixel;
@@ -45,23 +45,38 @@ static void redraw(gp_backend *backend)
 	gp_backend_flip(backend);
 }
 
-int main(void)
+static void init_colors(gp_pixel_type pixel_type)
 {
-	gp_backend *backend;
+	black_pixel = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
+	white_pixel = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
+}
+
+int main(int argc, char *argv[])
+{
 	const char *backend_opts = NULL;
+	gp_backend *backend;
+	int opt;
+
+	while ((opt = getopt(argc, argv, "b:h")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		case 'h':
+			gp_backend_init_help();
+			return 0;
+		break;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			return 1;
+		}
+	}
 
 	backend = gp_backend_init(backend_opts, 200, 100, "Backend Timers Example");
-
 	if (!backend) {
 		fprintf(stderr, "Failed to initialize backend\n");
 		return 1;
 	}
-
-	black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, backend->pixmap);
-	white_pixel = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, backend->pixmap);
-
-	gp_fill(backend->pixmap, black_pixel);
-	gp_backend_flip(backend);
 
 	/*
 	 * Periodic timer with 1000ms interval. As the callback is set to NULL
@@ -110,9 +125,14 @@ int main(void)
 		break;
 		case GP_EV_SYS:
 			switch (ev->code) {
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				redraw(backend);
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				init_colors(ev->pixel_type);
 			break;
 			case GP_EV_SYS_QUIT:
 				gp_backend_exit(backend);
@@ -122,7 +142,8 @@ int main(void)
 		break;
 		case GP_EV_TMR:
 			timer1_expirations++;
-			redraw(backend);
+			if (backend->pixmap)
+				redraw(backend);
 		break;
 		}
 	}

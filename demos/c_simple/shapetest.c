@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <math.h>
@@ -12,7 +12,6 @@
 
 #include <gfxprim.h>
 
-static gp_pixmap *win;
 static gp_backend *backend;
 
 /* Basic colors in display-specific format. */
@@ -56,7 +55,7 @@ static int shape = SHAPE_FIRST;
 /* Variants in coordinates, if applicable */
 static int variant = 1;
 
-/* center of drawing */
+/* center of drabackend->pixmapg */
 static int center_x;
 static int center_y;
 
@@ -102,31 +101,31 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 	/* draw the three vertices green; they should never be visible
 	 * because the red triangle should cover them; if they are visible,
 	 * it means we don't draw to the end */
-	gp_putpixel(win, x0, y0, green);
-	gp_putpixel(win, x1, y1, green);
-	gp_putpixel(win, x2, y2, green);
+	gp_putpixel(backend->pixmap, x0, y0, green);
+	gp_putpixel(backend->pixmap, x1, y1, green);
+	gp_putpixel(backend->pixmap, x2, y2, green);
 
 	if (outline == 1)
-		gp_triangle(win, x0, y0, x1, y1, x2, y2, yellow);
+		gp_triangle(backend->pixmap, x0, y0, x1, y1, x2, y2, yellow);
 
 	if (fill)
-		gp_fill_triangle(win, x0, y0, x1, y1, x2, y2, red);
+		gp_fill_triangle(backend->pixmap, x0, y0, x1, y1, x2, y2, red);
 
 	if (outline == 2)
-		gp_triangle(win, x0, y0, x1, y1, x2, y2, white);
+		gp_triangle(backend->pixmap, x0, y0, x1, y1, x2, y2, white);
 }
 
 void draw_testing_circle(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
 	if (outline == 1)
-		gp_circle(win, x, y, xradius, yellow);
+		gp_circle(backend->pixmap, x, y, xradius, yellow);
 
 	if (fill)
-		gp_fill_circle(win, x, y, xradius, red);
+		gp_fill_circle(backend->pixmap, x, y, xradius, red);
 
 	if (outline == 2)
-		gp_circle(win, x, y, xradius, white);
+		gp_circle(backend->pixmap, x, y, xradius, white);
 }
 
 static uint8_t variant_to_segment(void)
@@ -150,26 +149,26 @@ void draw_testing_circle_seg(int x, int y, int xradius,
 	uint8_t seg = variant_to_segment();
 
 	if (outline == 1)
-		gp_circle_seg(win, x, y, xradius, seg, yellow);
+		gp_circle_seg(backend->pixmap, x, y, xradius, seg, yellow);
 
 	if (fill)
-		gp_fill_circle_seg(win, x, y, xradius, seg, red);
+		gp_fill_circle_seg(backend->pixmap, x, y, xradius, seg, red);
 
 	if (outline == 2)
-		gp_circle_seg(win, x, y, xradius, seg, white);
+		gp_circle_seg(backend->pixmap, x, y, xradius, seg, white);
 }
 
 
 void draw_testing_ring(int x, int y, int xradius, int yradius)
 {
 	if (outline == 1)
-		gp_ring(win, x, y, xradius, yradius, yellow);
+		gp_ring(backend->pixmap, x, y, xradius, yradius, yellow);
 
 	if (fill)
-		gp_fill_ring(win, x, y, xradius, yradius, red);
+		gp_fill_ring(backend->pixmap, x, y, xradius, yradius, red);
 
 	if (outline == 2)
-		gp_ring(win, x, y, xradius, yradius, white);
+		gp_ring(backend->pixmap, x, y, xradius, yradius, white);
 }
 
 void draw_testing_ring_seg(int x, int y, int xradius, int yradius)
@@ -177,34 +176,34 @@ void draw_testing_ring_seg(int x, int y, int xradius, int yradius)
 	uint8_t seg = variant_to_segment();
 
 	if (outline == 1) {
-		gp_circle_seg(win, x, y, xradius, seg, yellow);
-		gp_circle_seg(win, x, y, yradius, seg, yellow);
+		gp_circle_seg(backend->pixmap, x, y, xradius, seg, yellow);
+		gp_circle_seg(backend->pixmap, x, y, yradius, seg, yellow);
 	}
 
 	if (fill)
-		gp_fill_ring_seg(win, x, y, xradius, yradius, seg, red);
+		gp_fill_ring_seg(backend->pixmap, x, y, xradius, yradius, seg, red);
 
 	if (outline == 2) {
-		gp_circle_seg(win, x, y, xradius, seg, yellow);
-		gp_circle_seg(win, x, y, yradius, seg, yellow);
+		gp_circle_seg(backend->pixmap, x, y, xradius, seg, yellow);
+		gp_circle_seg(backend->pixmap, x, y, yradius, seg, yellow);
 	}
 }
 
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 {
 	if (outline == 1)
-		gp_ellipse(win, x, y, xradius, yradius, yellow);
+		gp_ellipse(backend->pixmap, x, y, xradius, yradius, yellow);
 
 	if (fill)
-		gp_fill_ellipse(win, x, y, xradius, yradius, red);
+		gp_fill_ellipse(backend->pixmap, x, y, xradius, yradius, red);
 
 	if (outline == 2)
-		gp_ellipse(win, x, y, xradius, yradius, white);
+		gp_ellipse(backend->pixmap, x, y, xradius, yradius, white);
 }
 
 void draw_testing_arc(int x, int y, int xradius, int yradius)
 {
-	gp_arc_segment(win, x, y, xradius, yradius, -1,
+	gp_arc_segment(backend->pixmap, x, y, xradius, yradius, -1,
 			M_PI - M_PI/8.0, M_PI/4.0, red);
 }
 
@@ -214,13 +213,13 @@ void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 	int x1 = x + xradius, y1 = y + yradius;
 
 	if (outline == 1)
-		gp_rect(win, x0, y0, x1, y1, yellow);
+		gp_rect(backend->pixmap, x0, y0, x1, y1, yellow);
 
 	if (fill)
-		gp_fill_rect(win, x0, y0, x1, y1, red);
+		gp_fill_rect(backend->pixmap, x0, y0, x1, y1, red);
 
 	if (outline == 2)
-		gp_rect(win, x0, y0, x1, y1, white);
+		gp_rect(backend->pixmap, x0, y0, x1, y1, white);
 }
 
 void draw_testing_tetragon(int x, int y, int xradius, int yradius)
@@ -231,13 +230,13 @@ void draw_testing_tetragon(int x, int y, int xradius, int yradius)
 	int x3 = x,           y3 = y + yradius;
 
 	if (outline == 1)
-		gp_tetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, yellow);
+		gp_tetragon(backend->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, yellow);
 
 	if (fill)
-		gp_fill_tetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, red);
+		gp_fill_tetragon(backend->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, red);
 
 	if (outline == 2)
-		gp_tetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, white);
+		gp_tetragon(backend->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, white);
 }
 
 void draw_testing_polygon(int x, int y, int xradius, int yradius)
@@ -267,32 +266,32 @@ void draw_testing_polygon(int x, int y, int xradius, int yradius)
 	xy[13] = -yradius / 4;
 
 	if (outline == 1)
-		gp_polygon(win, x, y, edges, xy, yellow);
+		gp_polygon(backend->pixmap, x, y, edges, xy, yellow);
 
 	if (fill)
-		gp_fill_polygon(win, x, y, edges, xy, red);
+		gp_fill_polygon(backend->pixmap, x, y, edges, xy, red);
 
 	if (outline == 2)
-		gp_polygon(win, x, y, edges, xy, white);
+		gp_polygon(backend->pixmap, x, y, edges, xy, white);
 }
 
 void redraw_screen(void)
 {
-	gp_fill(win, black);
+	gp_fill(backend->pixmap, black);
 
 	/* axes */
 	if (show_axes) {
 		int w, h;
 
-		w = gp_pixmap_w(win);
-		h = gp_pixmap_h(win);
+		w = gp_pixmap_w(backend->pixmap);
+		h = gp_pixmap_h(backend->pixmap);
 
-		gp_hline(win, 0, w, center_y, gray);
-		gp_hline(win, 0, w, center_y-yradius, darkgray);
-		gp_hline(win, 0, w, center_y+yradius, darkgray);
-		gp_vline(win, center_x, 0, h, gray);
-		gp_vline(win, center_x-xradius, 0, h, darkgray);
-		gp_vline(win, center_x+xradius, 0, h, darkgray);
+		gp_hline(backend->pixmap, 0, w, center_y, gray);
+		gp_hline(backend->pixmap, 0, w, center_y-yradius, darkgray);
+		gp_hline(backend->pixmap, 0, w, center_y+yradius, darkgray);
+		gp_vline(backend->pixmap, center_x, 0, h, gray);
+		gp_vline(backend->pixmap, center_x-xradius, 0, h, darkgray);
+		gp_vline(backend->pixmap, center_x+xradius, 0, h, darkgray);
 	}
 
 	/* the shape */
@@ -340,7 +339,7 @@ void redraw_screen(void)
 	break;
 	}
 
-	gp_text(win, &font, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	gp_text(backend->pixmap, &font, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 	        yellow, black, title);
 
 	gp_backend_flip(backend);
@@ -349,7 +348,7 @@ void redraw_screen(void)
 static void xradius_add(int xradius_add)
 {
 	if (xradius + xradius_add > 1 &&
-	    xradius + xradius_add < (int) gp_pixmap_w(win))
+	    xradius + xradius_add < (int) gp_pixmap_w(backend->pixmap))
 		xradius += xradius_add;
 }
 
@@ -357,22 +356,45 @@ static void xradius_add(int xradius_add)
 static void yradius_add(int yradius_add)
 {
 	if (yradius + yradius_add > 1 &&
-	    yradius + yradius_add < (int) gp_pixmap_h(win))
+	    yradius + yradius_add < (int) gp_pixmap_h(backend->pixmap))
 		yradius += yradius_add;
 }
 
 static void xcenter_add(int xcenter_add)
 {
 	if (center_x + xcenter_add > 1 &&
-	    center_x + xcenter_add < (int) gp_pixmap_w(win)/2)
+	    center_x + xcenter_add < (int) gp_pixmap_w(backend->pixmap)/2)
 		center_x += xcenter_add;
 }
 
 static void ycenter_add(int ycenter_add)
 {
 	if (center_y + ycenter_add > 1 &&
-	    center_y + ycenter_add < (int) gp_pixmap_h(win)/2)
+	    center_y + ycenter_add < (int) gp_pixmap_h(backend->pixmap)/2)
 		center_y += ycenter_add;
+}
+
+static void setup_colors(gp_pixel_type pixel_type)
+{
+	if (gp_pixel_size(pixel_type) == 1) {
+		black = 0x00;
+		white = 0x01;
+		yellow = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
+		green = 0x01;
+		red = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
+		gray = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
+		darkgray = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_ASC_25);
+		return;
+	}
+
+	/* Load colors compatible with the display */
+	black    = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, backend->pixmap);
+	white    = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, backend->pixmap);
+	yellow   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0x00, backend->pixmap);
+	green    = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, backend->pixmap);
+	red      = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, backend->pixmap);
+	gray     = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, backend->pixmap);
+	darkgray = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, backend->pixmap);
 }
 
 void event_loop(void)
@@ -393,18 +415,18 @@ void event_loop(void)
 
 			switch (ev->key.key) {
 			case GP_KEY_X:
-				win->x_swap = !win->x_swap;
+				backend->pixmap->x_swap = !backend->pixmap->x_swap;
 			break;
 			case GP_KEY_Y:
-				win->y_swap = !win->y_swap;
+				backend->pixmap->y_swap = !backend->pixmap->y_swap;
 			break;
 			case GP_KEY_R:
-				win->axes_swap = !win->axes_swap;
-				center_x = gp_pixmap_w(win) / 2;
-				center_y = gp_pixmap_h(win) / 2;
+				backend->pixmap->axes_swap = !backend->pixmap->axes_swap;
+				center_x = gp_pixmap_w(backend->pixmap) / 2;
+				center_y = gp_pixmap_h(backend->pixmap) / 2;
 			break;
 			case GP_KEY_P:
-				if (gp_pixel_size(win->pixel_type) == 1) {
+				if (gp_pixel_size(backend->pixmap->pixel_type) == 1) {
 					uint8_t fgcol = gp_pixel_pattern_fg_get(red);
 					uint8_t bgcol = gp_pixel_pattern_bg_get(red);
 					uint8_t pattern = gp_pixel_pattern_get(red);
@@ -496,23 +518,28 @@ void event_loop(void)
 				gp_backend_exit(backend);
 				exit(0);
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
-				win = backend->pixmap;
-				center_x = gp_pixmap_w(win) / 2;
-				center_y = gp_pixmap_h(win) / 2;
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_RESIZE:
+				center_x = ev->resize.w / 2;
+				center_y = ev->resize.h / 2;
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				setup_colors(ev->pixel_type);
 			break;
 			}
 		break;
 		}
 
-		redraw_screen();
+		if (backend->pixmap)
+			redraw_screen();
 	}
 }
 
 void print_instructions(void)
 {
-	printf("Use the following keys to control the test:\n");
+	printf("Use the follobackend->pixmapg keys to control the test:\n");
 	printf("    Esc ................. exit\n");
 	printf("    Space ............... change shapes\n");
 	printf("    O ................... draw outlines (none/before/after fill)\n");
@@ -529,29 +556,6 @@ void print_instructions(void)
 	printf("    PgUp/PgDn ........... increase/decrease both radii\n");
 	printf("    = ................... reset radii to the same value\n");
 	printf("    1/2/3/4 ............. choose shape variant (if applicable)\n");
-}
-
-static void setup_colors(gp_pixel_type pixel_type)
-{
-	if (gp_pixel_size(pixel_type) == 1) {
-		black = 0x00;
-		white = 0x01;
-		yellow = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
-		green = 0x01;
-		red = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
-		gray = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_50);
-		darkgray = gp_pixel_pattern(1, 0, GP_PIXEL_PATTERN_ASC_25);
-		return;
-	}
-
-	/* Load colors compatible with the display */
-	black    = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
-	white    = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win);
-	yellow   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0x00, win);
-	green    = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, win);
-	red      = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
-	gray     = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win);
-	darkgray = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win);
 }
 
 int main(int argc, char *argv[])
@@ -581,17 +585,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	win = backend->pixmap;
-
-	center_x = win->w / 2;
-	center_y = win->h / 2;
-
-	setup_colors(win->pixel_type);
 
 	font.font = gp_font_face_lookup("tiny", GP_FONT_REGULAR | GP_FONT_FALLBACK);
 
 	print_instructions();
-	redraw_screen();
 	event_loop();
 
 	return 0;

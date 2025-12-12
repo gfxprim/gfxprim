@@ -310,8 +310,10 @@ void draw_help(gp_backend *backend)
 			break;
 			case GP_EV_SYS:
 				switch (ev->code) {
-				case GP_EV_SYS_RESIZE:
-					gp_backend_resize_ack(backend);
+				case GP_EV_SYS_RENDER_STOP:
+					gp_backend_render_stopped(backend);
+				break;
+				case GP_EV_SYS_RENDER_START:
 					last = redraw_help(backend, loff, xoff);
 				break;
 				case GP_EV_SYS_QUIT:

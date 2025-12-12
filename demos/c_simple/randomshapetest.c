@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
@@ -139,13 +139,16 @@ void draw_random_polygon(gp_pixel pixel)
 
 void clear_screen(void)
 {
+	if (win->pixmap)
+		return;
+
 	gp_fill(win->pixmap, black);
 	gp_backend_update(win);
 }
 
 void redraw_screen(void)
 {
-	if (pause_flag)
+	if (pause_flag || !win->pixmap)
 		return;
 
 	/* Pick a random color for drawing. */
@@ -175,6 +178,12 @@ void redraw_screen(void)
 	}
 
 	gp_backend_update(win);
+}
+
+static void init_colors(gp_pixel_type pixel_type)
+{
+	white = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
+	black = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
 }
 
 void event_loop(void)
@@ -221,9 +230,16 @@ void event_loop(void)
 			}
 		break;
 		case GP_EV_SYS:
-			if (ev->code == GP_EV_SYS_RESIZE) {
-				gp_backend_resize_ack(win);
+			switch (ev->code) {
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(win);
+			break;
+			case GP_EV_SYS_RENDER_RESIZE:
 				clear_screen();
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				init_colors(ev->pixel_type);
+			break;
 			}
 		break;
 		}
@@ -257,16 +273,11 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
-	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
-
-	clear_screen();
-
 	for (;;) {
 		gp_backend_poll(win);
 		event_loop();
 
-		usleep(20000);
+		usleep(200);
 
 		if (pause_flag)
 			continue;

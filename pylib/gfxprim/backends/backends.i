@@ -29,7 +29,7 @@
 %ignore gp_backend::task_queue;
 
 ERROR_ON_NONZERO(gp_backend_set_caption);
-ERROR_ON_NONZERO(gp_backend_resize);
+ERROR_ON_NONZERO(gp_backend_render_stopped);
 
 %include "gp_backend.h"
 

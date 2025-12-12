@@ -8,9 +8,13 @@
 #include <stdio.h>
 #include <gfxprim.h>
 
-static void redraw(struct gp_pixmap *pixmap)
+static void redraw(struct gp_backend *backend)
 {
+	gp_pixmap *pixmap = backend->pixmap;
 	gp_pixel white_pixel, black_pixel;
+
+	if (!pixmap)
+		return;
 
 	black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
 	white_pixel = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, pixmap);
@@ -18,13 +22,15 @@ static void redraw(struct gp_pixmap *pixmap)
 	gp_fill(pixmap, black_pixel);
 	gp_line(pixmap, 0, 0, pixmap->w - 1, pixmap->h - 1, white_pixel);
 	gp_line(pixmap, 0, pixmap->h - 1, pixmap->w - 1, 0, white_pixel);
+
+	gp_backend_flip(backend);
 }
 
 static int ev_loop(struct gp_backend *backend, const char *name)
 {
 	gp_event *ev;
 
-	if (backend == NULL)
+	if (!backend)
 		return 0;
 
 	while ((ev = gp_backend_ev_get(backend))) {
@@ -45,10 +51,11 @@ static int ev_loop(struct gp_backend *backend, const char *name)
 		break;
 		case GP_EV_SYS:
 			switch (ev->code) {
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
-				redraw(backend->pixmap);
-				gp_backend_flip(backend);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_START:
+				redraw(backend);
 			break;
 			case GP_EV_SYS_QUIT:
 				gp_backend_exit(backend);
@@ -71,18 +78,11 @@ int main(void)
 	win_1 = gp_x11_init(NULL, 0, 0, 300, 300, "win 1", 0);
 	win_2 = gp_x11_init(NULL, 0, 0, 300, 300, "win 2", 0);
 
-	if (win_1 == NULL || win_2 == NULL) {
+	if (!win_1 || !win_2) {
 		gp_backend_exit(win_1);
 		gp_backend_exit(win_2);
 		return 1;
 	}
-
-	/* Update the windows */
-	redraw(win_1->pixmap);
-	redraw(win_2->pixmap);
-
-	gp_backend_flip(win_1);
-	gp_backend_flip(win_2);
 
 	for (;;) {
 		/*

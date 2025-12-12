@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -92,7 +92,7 @@ static int paused = 0;
 
 void redraw(void)
 {
-	if (paused)
+	if (paused || !backend->pixmap)
 		return;
 
 	iter += 2 * way;
@@ -104,6 +104,14 @@ void redraw(void)
 		way *= -1;
 
 	draw(gp_backend_w(backend)/2, gp_backend_h(backend)/2, l, iter);
+}
+
+static void init_colors(gp_pixel_type pixel_type)
+{
+	black = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
+	blue  = gp_rgb_to_pixel(0x00, 0x00, 0xff, pixel_type);
+	gray  = gp_rgb_to_pixel(0xbe, 0xbe, 0xbe, pixel_type);
+	red   = gp_rgb_to_pixel(0xff, 0x00, 0x00, pixel_type);
 }
 
 int main(int argc, char *argv[])
@@ -128,21 +136,13 @@ int main(int argc, char *argv[])
 
 	backend = gp_backend_init(backend_opts, 0, 0, "Koch");
 
-	if (backend == NULL) {
+	if (!backend) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
 		        backend_opts);
 		return 1;
 	}
 
-	gp_pixmap *pixmap = backend->pixmap;
-
-	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
-	blue  = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, pixmap);
-	gray  = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, pixmap);
-	red   = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, pixmap);
-
 	iter = 0;
-	draw(gp_backend_w(backend)/2, gp_backend_h(backend)/2, l, iter);
 
 	for (;;) {
 		gp_event *ev;
@@ -174,8 +174,11 @@ int main(int argc, char *argv[])
 			break;
 			case GP_EV_SYS:
 				switch (ev->code) {
-				case GP_EV_SYS_RESIZE:
-					gp_backend_resize_ack(backend);
+				case GP_EV_SYS_RENDER_STOP:
+					gp_backend_render_stopped(backend);
+				break;
+				case GP_EV_SYS_RENDER_PIXEL_TYPE:
+					init_colors(ev->pixel_type);
 				break;
 				case GP_EV_SYS_QUIT:
 					gp_backend_exit(backend);

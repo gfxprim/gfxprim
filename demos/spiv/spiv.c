@@ -610,6 +610,11 @@ static void *image_loader(void *ptr)
 		return NULL;
 	}
 
+	if (!pixmap) {
+		loader_running = 0;
+		return NULL;
+	}
+
 	/* Figure zoom */
 	gp_size w, h;
 
@@ -663,7 +668,6 @@ static void show_image(struct loader_params *params)
 	loader_running = 1;
 
 	ret = pthread_create(&loader_thread, NULL, image_loader, (void*)params);
-
 	if (ret) {
 		fprintf(stderr, "Failed to start thread: %s\n", strerror(ret));
 		gp_backend_exit(backend);
@@ -871,9 +875,6 @@ int main(int argc, char *argv[])
 
 	gp_fill(pixmap, black_pixel);
 	gp_backend_flip(backend);
-
-	params.show_progress_once = 1;
-	show_image(&params);
 
 	if (params.sleep_ms) {
 		timer.expires = params.sleep_ms;
@@ -1136,10 +1137,12 @@ int main(int argc, char *argv[])
 			break;
 			case GP_EV_SYS:
 				switch (ev->code) {
-				case GP_EV_SYS_RESIZE:
+				case GP_EV_SYS_RENDER_STOP:
 					/* stop loader thread before resizing backend buffer */
 					stop_loader();
-					gp_backend_resize_ack(backend);
+					gp_backend_render_stopped(backend);
+				break;
+				case GP_EV_SYS_RENDER_START:
 					gp_fill(backend->pixmap, 0);
 					params.show_progress_once = 1;
 					show_image(&params);

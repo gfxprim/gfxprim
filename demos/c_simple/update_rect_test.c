@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2025 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2025-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <unistd.h>
@@ -20,6 +20,9 @@ void redraw_screen(void)
 {
 	gp_pixmap *pix = backend->pixmap;
 
+	if (!pix)
+		return;
+
 	gp_fill(pix, black);
 	gp_backend_update(backend);
 
@@ -28,6 +31,12 @@ void redraw_screen(void)
 
 	gp_fill_rect_xywh(pix, x_off, y_off, w, h, white);
 	gp_backend_update_rect_xywh(backend, x_off, y_off, w, h);
+}
+
+static void init_colors(gp_pixel_type pixel_type)
+{
+	black = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
+	white = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
 }
 
 void event_loop(void)
@@ -74,9 +83,14 @@ void event_loop(void)
 				gp_backend_exit(backend);
 				exit(0);
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				redraw_screen();
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				init_colors(ev->pixel_type);
 			break;
 			}
 		break;
@@ -121,11 +135,6 @@ int main(int argc, char *argv[])
 		        backend_opts);
 		return 1;
 	}
-
-	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, backend->pixmap);
-	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, backend->pixmap);
-
-	redraw_screen();
 
 	event_loop();
 }

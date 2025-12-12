@@ -732,8 +732,6 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	gp_ev_queue_init(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0,
 	                 drm_move_cursor, priv, GP_EVENT_QUEUE_LOAD_KEYMAP);
-	gp_ev_queue_push(ret->event_queue, GP_EV_SYS,
-	                 GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_IN, 0);
 
 	if (!(flags & GP_LINUX_DRM_NO_INPUT)) {
 		if (gp_linux_input_hotplug_new(ret))
@@ -747,6 +745,10 @@ gp_backend *gp_linux_drm_init(const char *drm_path, int flags)
 
 	ret->dpi = gp_dpi_from_size(ret->pixmap->w, priv->mm_width,
 	                            ret->pixmap->h, priv->mm_height);
+
+	gp_ev_queue_push_pixel_type(ret->event_queue, ret->pixmap->pixel_type, 0);
+	gp_ev_queue_push_focus_in(ret->event_queue, 0);
+	gp_ev_queue_push_resize_start(ret->event_queue, ret->pixmap->w, ret->pixmap->h, 0);
 
 	return ret;
 err5:

@@ -98,12 +98,12 @@ int gp_backend_resize(gp_backend *self, uint32_t w, uint32_t h)
 	return self->set_attr(self, GP_BACKEND_ATTR_SIZE, vals);
 }
 
-int gp_backend_resize_ack(gp_backend *self)
+int gp_backend_render_stopped(gp_backend *self)
 {
-	GP_DEBUG(2, "Calling backend %s resize_ack()", self->name);
-
-	if (self->resize_ack)
-		return self->resize_ack(self);
+	if (self->render_stopped) {
+		GP_DEBUG(2, "Calling backend %s render_stopped()", self->name);
+		return self->render_stopped(self);
+	}
 
 	return 0;
 }

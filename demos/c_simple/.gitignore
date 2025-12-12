@@ -30,7 +30,6 @@ SDL2_glue
 /v4l2_grab
 /v4l2_show
 /version
-/virtual_backend_example
 /weighted_median
 /x11_windows
 /zip_container

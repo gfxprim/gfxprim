@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <string.h>
@@ -118,7 +118,7 @@ static void aalib_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 	pthread_mutex_unlock(&aalib_mutex);
 }
 
-static int aalib_resize_ack(gp_backend *self)
+static int aalib_resize(gp_backend *self)
 {
 	struct aalib_priv *aa = GP_BACKEND_PRIV(self);
 
@@ -134,6 +134,8 @@ static int aalib_resize_ack(gp_backend *self)
 
 	gp_pixmap_init(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c), 0);
 
+	gp_ev_queue_push_resize_start(self->event_queue, w, h, 0);
+
 	return 0;
 }
 
@@ -146,8 +148,7 @@ static void parse_event(gp_backend *self, int ev)
 
 	if (ev == AA_RESIZE) {
 		GP_DEBUG(1, "Resize event");
-		//TODO: Can we get the new size somehow?
-		gp_ev_queue_push_resize(self->event_queue, 0, 0, 0);
+		gp_ev_queue_push_render_stop(self->event_queue, 0);
 		return;
 	}
 
@@ -241,7 +242,7 @@ gp_backend *gp_aalib_init(void)
 	backend->name = "AALib";
 	backend->update = aalib_update;
 	backend->update_rect = aalib_update_rect;
-	backend->resize_ack = aalib_resize_ack;
+	backend->render_stopped = aalib_resize;
 	backend->poll = aalib_poll;
 	backend->wait = aalib_wait;
 	backend->exit = aalib_exit;
@@ -250,8 +251,9 @@ gp_backend *gp_aalib_init(void)
 
 	gp_ev_queue_init(backend->event_queue, w, h, 0, NULL, NULL, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
-	gp_ev_queue_push(backend->event_queue, GP_EV_SYS,
-	                 GP_EV_SYS_FOCUS, GP_EV_SYS_FOCUS_IN, 0);
+	gp_ev_queue_push_pixel_type(backend->event_queue, GP_PIXEL_G8, 0);
+	gp_ev_queue_push_focus_in(backend->event_queue, 0);
+	gp_ev_queue_push_resize_start(backend->event_queue, w, h, 0);
 
 	return backend;
 err2:

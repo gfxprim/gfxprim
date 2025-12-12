@@ -64,8 +64,7 @@ int main(int argc, char *argv[])
 	}
 
 	grabber = gp_grabber_v4l2_init(v4l2_device, w, h);
-
-	if (grabber == NULL) {
+	if (!grabber) {
 		fprintf(stderr, "Failed to initalize grabber '%s': %s\n",
 		        v4l2_device, strerror(errno));
 		return 1;
@@ -73,8 +72,7 @@ int main(int argc, char *argv[])
 
 	backend = gp_x11_init(NULL, 0, 0, grabber->frame->w,
 	                            grabber->frame->h, "V4L2", 0);
-
-	if (backend == NULL) {
+	if (!backend) {
 		gp_grabber_exit(grabber);
 		return 1;
 	}
@@ -89,7 +87,7 @@ int main(int argc, char *argv[])
 	printf("Press SPACE to change mode and Q to exit.\n");
 
 	for (;;) {
-		if (gp_grabber_poll(grabber) > 0) {
+		if (gp_grabber_poll(grabber) > 0 && backend->pixmap) {
 			gp_pixmap *res, *img = grabber->frame;
 
 			switch (mode) {
@@ -150,8 +148,10 @@ int main(int argc, char *argv[])
 			break;
 			case GP_EV_SYS:
 				switch (ev->code) {
-				case GP_EV_SYS_RESIZE:
-					gp_backend_resize_ack(backend);
+				case GP_EV_SYS_RENDER_STOP:
+					gp_backend_render_stopped(backend);
+				break;
+				case GP_EV_SYS_RENDER_START:
 					gp_fill(backend->pixmap, 0);
 				break;
 				case GP_EV_SYS_QUIT:

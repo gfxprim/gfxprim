@@ -102,8 +102,8 @@ static void dump_sys(const gp_event *ev)
 	case GP_EV_SYS_QUIT:
 		printf("Sys Quit\n");
 	break;
-	case GP_EV_SYS_RESIZE:
-		printf("Sys Resize %ux%u\n", ev->sys.w, ev->sys.h);
+	case GP_EV_SYS_RENDER_RESIZE:
+		printf("Sys Resize %ux%u\n", ev->resize.w, ev->resize.h);
 	break;
 	case GP_EV_SYS_CLIPBOARD:
 		printf("Clipboard data ready\n");
@@ -114,8 +114,14 @@ static void dump_sys(const gp_event *ev)
 	case GP_EV_SYS_FOCUS:
 		printf("Sys Focus %s\n", ev->val ? "In" : "Out");
 	break;
-	case GP_EV_SYS_VISIBILITY:
-		printf("Sys Visibility %s\n", ev->val ? "Show" : "Hide");
+	case GP_EV_SYS_RENDER_START:
+		printf("Sys Render Start\n");
+	break;
+	case GP_EV_SYS_RENDER_STOP:
+		printf("Sys Render Stop\n");
+	break;
+	case GP_EV_SYS_RENDER_PIXEL_TYPE:
+		printf("Sys Pixel Type %u\n", (unsigned int)ev->pixel_type);
 	break;
 	}
 }

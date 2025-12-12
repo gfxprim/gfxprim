@@ -40,7 +40,7 @@ struct x11_win {
 	int resized_flag:1;
 	int shm_flag:1;
 	int fullscreen_flag:1;
-	int visible:1;
+	int rendering:1;
 	int focused:1;
 
 	/* poll fd structure */

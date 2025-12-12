@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2025 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -25,13 +25,16 @@
 
 struct proxy_priv {
 	struct gp_proxy_buf buf;
-	gp_pixmap dummy;
 
 	gp_pixmap shm_pixmap;
+
+	gp_pixmap dummy;
 
 	gp_ev_queue ev_queue;
 
 	gp_fd fd;
+
+	gp_size w, h;
 
 	unsigned int visible:1;
 	unsigned int sys_quit_requested:1;
@@ -114,7 +117,7 @@ static void visible(gp_backend *self)
 
 	priv->visible = 1;
 
-	gp_ev_queue_push_resize(self->event_queue, self->pixmap->w, self->pixmap->h, 0);
+	gp_ev_queue_push_render_start(self->event_queue, 0);
 }
 
 static void hidden(gp_backend *self)
@@ -122,6 +125,8 @@ static void hidden(gp_backend *self)
 	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
 
 	priv->visible = 0;
+
+	gp_ev_queue_push_render_stop(self->event_queue, 0);
 }
 
 static void unmap_buffer(gp_backend *self)
@@ -137,7 +142,7 @@ static void unmap_buffer(gp_backend *self)
 
 	GP_DEBUG(1, "Buffer unmap requested");
 
-	gp_ev_queue_push_resize(self->event_queue, 0, 0, 0);
+	gp_ev_queue_push_render_stop(self->event_queue, 0);
 }
 
 static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
@@ -157,6 +162,7 @@ static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
 	//TODO: check that the buffer is large enough!
 
 	gp_ev_queue_set_screen_size(self->event_queue, msg->pix.pix.w, msg->pix.pix.h);
+	gp_ev_queue_push_resize(self->event_queue, msg->pix.pix.w, msg->pix.pix.h, 0);
 }
 
 /*
@@ -361,7 +367,7 @@ static void proxy_update(gp_backend *self)
 	proxy_update_rect(self, 0, 0, self->pixmap->w-1, self->pixmap->h-1);
 }
 
-static int proxy_resize_ack(gp_backend *self)
+static int proxy_render_stopped(gp_backend *self)
 {
 	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
 
@@ -371,7 +377,7 @@ static int proxy_resize_ack(gp_backend *self)
 		priv->map = NULL;
 		priv->map_size = 0;
 
-		self->pixmap = &priv->dummy;
+		self->pixmap = NULL;
 
 		gp_proxy_send(priv->fd.fd, GP_PROXY_UNMAP, NULL);
 
@@ -426,7 +432,7 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	ret->exit = proxy_exit;
 	ret->update_rect = proxy_update_rect;
 	ret->update = proxy_update;
-	ret->resize_ack = proxy_resize_ack;
+	ret->render_stopped = proxy_render_stopped;
 
 	priv->map = NULL;
 	priv->map_size = 0;
@@ -448,6 +454,8 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	/* Wait for the pixel type */
 	while (!priv->dummy.pixel_type)
 		gp_poll_wait(&ret->fds, -1);
+
+	gp_ev_queue_push_pixel_type(ret->event_queue, priv->dummy.pixel_type, 0);
 
 	gp_pixmap_init(&priv->dummy, 0, 0, priv->dummy.pixel_type, NULL, 0);
 

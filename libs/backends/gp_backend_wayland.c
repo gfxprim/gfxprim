@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2026 Cyril Hrubis <metan@ucw.cz>
  * Copyright (C) 2023 Jiri Dluhos <jiri.bluebear.dluhos@gmail.com>
  */
 
@@ -587,7 +587,7 @@ static void toplevel_configure(void *data, struct xdg_toplevel UN(*toplevel),
 {
 	struct client_state *st = data;
 
-	gp_ev_queue_push_resize(st->backend->event_queue, w, h, 0);
+	gp_ev_queue_push_render_stop(st->backend->event_queue, 0);
 }
 
 static void toplevel_close(void *data, struct xdg_toplevel UN(*toplevel))
@@ -685,9 +685,13 @@ static enum gp_poll_event_ret wayland_process_fd(gp_fd *self)
 	return 0;
 }
 
-static int wayland_resize_ack(gp_backend* self)
+static int wayland_render_stopped(gp_backend* self)
 {
 	(void) self;
+
+	//TODO: Resize buffer
+
+//	gp_ev_queue_push_resize(st->backend->event_queue, w, h, 0);
 
 	return 0;
 }
@@ -710,7 +714,7 @@ static struct gp_backend backend = {
 	.update = wayland_update,
 	.update_rect = wayland_update_rect,
 	.set_attr = wayland_set_attr,
-	.resize_ack = wayland_resize_ack,
+	.render_stopped = wayland_render_stopped,
 	.exit = wayland_exit,
 };
 
@@ -758,6 +762,8 @@ gp_backend *gp_wayland_init(const char *display,
 	}
 
 	gp_ev_queue_init(backend.event_queue, w, h, 0, NULL, NULL, 0);
+
+	gp_ev_queue_push_pixel_type(backend.event_queue, state.pixel_type, 0);
 
 	return &backend;
 }

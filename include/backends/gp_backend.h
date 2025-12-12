@@ -264,12 +264,16 @@ struct gp_backend {
 	                                enum gp_backend_attr attr,
 	                                const void *vals);
 
-	/*
-	 * Resize acknowledge callback. This must be called
-	 * after you got resize event in order to resize
-	 * backend buffers.
+	/**
+	 * @brief Rendering stopped callback.
+	 *
+	 * Signals to the backend that it's safe to modify the
+	 * gp_backend::pixmap.
+	 *
+	 * An application must stop all threads that modify gp_backend::pixmap
+	 * and call this call after receiving #GP_EV_SYS_RENDER_STOP event.
 	 */
-	int (*resize_ack)(gp_backend *self);
+	int (*render_stopped)(gp_backend *self);
 
 	/**
 	 * @brief Exits the backend.
@@ -830,7 +834,7 @@ static inline enum gp_backend_ret gp_backend_set_caption(gp_backend *backend,
  * When the backend size matches the requested width and height no action is done.
  *
  * If a resize request is granted the backend sends #GP_EV_SYS event type with
- * #GP_EV_SYS_RESIZE code and the new width and height in the struct gp_ev_sys.
+ * #GP_EV_SYS_RENDER_RESIZE code and the new width and height in the struct gp_ev_sys.
  * Upon receiving this event the application must stop any access to the
  * gp_backend::pixmap and call gp_backend_resize_ack() to signal to the backend
  * that it's safe to resize the buffers. Once that is done the application can
@@ -861,18 +865,23 @@ static inline enum gp_backend_ret gp_backend_fullscreen(gp_backend *backend,
 }
 
 /**
- * @brief Resize acknowledge.
+ * @brief Rendering stopped acknowledge.
  *
- * You must call this right after you application has received resize event.
- * For a multithreaded application all threads that operate on the backend
- * pixmap must be stopped first.
+ * An application must stop all threads that modify gp_backend::pixmap and call
+ * this call after receiving #GP_EV_SYS_RENDER_STOP event.
  *
- * After this call returns the backend pixmap has been resized, that means that
- * at least the width, height, and pixels of gp_backend::pixmap are different
- * and the content of the gp_pixmap::pixels is undefined.
+ * After this call returns the gp_backend::pixmap has been changed.
  *
- * This call also resizes the window, display, screen size in the backend
- * #gp_ev_queue.
+ * If application is not visible the gp_backend::pixmap pointer will be NULL
+ * until it's visible again at which point the #GP_EV_SYS_RENDER_START event
+ * will be emited.
+ *
+ * This even is also emited before gp_backend::pixmap is resized. In that case
+ * the gp_backend::pixmap will be resized only after this function has been
+ * called by the application. The application will receive #GP_EV_SYS_RENDER_RESIZE
+ * and then #GP_EV_SYS_RENDER_START events. The gp_backend::pixmap is
+ * guaranteed to be valid only during and after the
+ * #GP_EV_SYS_RENDER_START_EVENT.
  *
  * If the function fails the best action to take is to save application data
  * and exit as the backend may be in undefined state.
@@ -880,7 +889,7 @@ static inline enum gp_backend_ret gp_backend_fullscreen(gp_backend *backend,
  * @param self A backend.
  * @return Zero on success, non-zero otherwise.
  */
-int gp_backend_resize_ack(gp_backend *self);
+int gp_backend_render_stopped(gp_backend *self);
 
 /**
  * @brief Inserts a task into the task queue.

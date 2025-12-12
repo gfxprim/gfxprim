@@ -39,6 +39,9 @@ void redraw_screen(void)
 {
 	gp_pixmap *win = backend->pixmap;
 
+	if (!win)
+		return;
+
 	gp_fill(win, gray_pixel);
 
 	style.pixel_xmul = mul;
@@ -103,6 +106,16 @@ static void next_font(int dir)
 
 	printf("Font family: '%s' Font style: '%s'\n",
 	       family->family_name, gp_font_style_name(style.font->style));
+}
+
+static void init_colors(gp_pixel_type pixel_type)
+{
+	white_pixel     = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
+	gray_pixel      = gp_rgb_to_pixel(0xbe, 0xbe, 0xbe, pixel_type);
+	dark_gray_pixel = gp_rgb_to_pixel(0x7f, 0x7f, 0x7f, pixel_type);
+	black_pixel     = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
+	red_pixel       = gp_rgb_to_pixel(0xff, 0x00, 0x00, pixel_type);
+	blue_pixel      = gp_rgb_to_pixel(0x00, 0x00, 0xff, pixel_type);
 }
 
 void event_loop(void)
@@ -173,9 +186,14 @@ void event_loop(void)
 				gp_backend_exit(backend);
 				exit(0);
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				redraw_screen();
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				init_colors(ev->pixel_type);
 			break;
 			}
 		break;
@@ -257,18 +275,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	gp_pixmap *win = backend->pixmap;
-
-	white_pixel     = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win);
-	gray_pixel      = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win);
-	dark_gray_pixel = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win);
-	black_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
-	red_pixel       = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
-	blue_pixel      = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, win);
-
 	next_font(GP_FONTS_ITER_FIRST);
-
-	redraw_screen();
 
 	event_loop();
 

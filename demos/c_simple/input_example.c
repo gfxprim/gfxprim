@@ -47,6 +47,14 @@ static void draw_event(gp_event *ev)
 	gp_backend_update(backend);
 }
 
+static void init_colors(gp_pixel_type pixel_type)
+{
+	red   = gp_rgb_to_pixel(0xff, 0x00, 0x00, pixel_type);
+	green = gp_rgb_to_pixel(0x00, 0xff, 0x00, pixel_type);
+	white = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
+	black = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
+}
+
 static void event_loop(void)
 {
 	static int size = 0;
@@ -116,13 +124,19 @@ static void event_loop(void)
 				break;
 			break;
 			case GP_EV_SYS:
-				draw_event(ev);
+				if (backend->pixmap)
+					draw_event(ev);
 
 				switch (ev->code) {
-				case GP_EV_SYS_RESIZE:
-					gp_backend_resize_ack(backend);
+				case GP_EV_SYS_RENDER_STOP:
+					gp_backend_render_stopped(backend);
+				break;
+				case GP_EV_SYS_RENDER_START:
 					gp_fill(backend->pixmap, black);
 					gp_backend_update(backend);
+				break;
+				case GP_EV_SYS_RENDER_PIXEL_TYPE:
+					init_colors(ev->pixel_type);
 				break;
 				case GP_EV_SYS_QUIT:
 					gp_backend_exit(backend);
@@ -163,16 +177,6 @@ int main(int argc, char *argv[])
 		        backend_opts);
 		return 1;
 	}
-
-	gp_pixmap *win = backend->pixmap;
-
-	red   = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
-	green = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, win);
-	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win);
-	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
-
-	gp_fill(win, black);
-	gp_backend_update(backend);
 
 	event_loop();
 	return 0;

@@ -117,21 +117,22 @@ static unsigned int get_key(unsigned int xkey)
 	return key;
 }
 
-static void handle_visibility(gp_ev_queue *event_queue, struct win *win, int val)
+static void handle_render(gp_backend *self, struct win *win, gp_ev_queue *event_queue, int val)
 {
-	if (val == GP_EV_SYS_VISIBILITY_SHOW) {
-		if (win->visible)
+	if (val == GP_EV_SYS_RENDER_START) {
+		if (win->rendering)
 			return;
-		win->visible = 1;
+		win->rendering = 1;
+		self->pixmap = win->pix;
 	}
 
-	if (val == GP_EV_SYS_VISIBILITY_HIDE) {
-		if (!win->visible)
+	if (val == GP_EV_SYS_RENDER_STOP) {
+		if (!win->rendering)
 			return;
-		win->visible = 0;
+		win->rendering = 0;
 	}
 
-	gp_ev_queue_push(event_queue, GP_EV_SYS, GP_EV_SYS_VISIBILITY, val, 0);
+	gp_ev_queue_push(event_queue, GP_EV_SYS, val, 0, 0);
 }
 
 static void handle_focus(gp_ev_queue *event_queue, struct win *win, int val)
@@ -155,7 +156,8 @@ static void handle_focus(gp_ev_queue *event_queue, struct win *win, int val)
 # include <xcb/xcb_errors.h>
 #endif
 
-static void xcb_input_event_put(gp_ev_queue *event_queue, struct win *win,
+static void xcb_input_event_put(gp_backend *self, struct win *win,
+                                gp_ev_queue *event_queue,
                                 xcb_generic_event_t *ev, int w, int h)
 {
 	int key = 0, press = 0;
@@ -256,7 +258,7 @@ static void xcb_input_event_put(gp_ev_queue *event_queue, struct win *win,
 	} break;
 	case XCB_MAP_NOTIFY:
 		GP_DEBUG(1, "MapNotify event received");
-		handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
+		handle_render(self, win, event_queue, GP_EV_SYS_RENDER_START);
 	break;
 	case XCB_REPARENT_NOTIFY:
 		GP_DEBUG(1, "ReparentNotify event received");
@@ -266,7 +268,10 @@ static void xcb_input_event_put(gp_ev_queue *event_queue, struct win *win,
 	break;
 	case XCB_UNMAP_NOTIFY:
 		GP_DEBUG(1, "UnmapNotify event received");
-		handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_HIDE);
+		handle_render(self, win, event_queue, GP_EV_SYS_RENDER_STOP);
+	break;
+	case XCB_GRAPHICS_EXPOSURE:
+		GP_DEBUG(1, "GraphicsExposure event received");
 	break;
 	case XCB_NO_EXPOSURE:
 		GP_DEBUG(1, "NoExposure event received");
@@ -285,15 +290,15 @@ static void xcb_input_event_put(gp_ev_queue *event_queue, struct win *win,
 		switch (cev->state) {
 		case XCB_VISIBILITY_FULLY_OBSCURED:
 			GP_DEBUG(1, "VisibilityFullyObscured received");
-			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_HIDE);
+			handle_render(self, win, event_queue, GP_EV_SYS_RENDER_STOP);
 		break;
 		case XCB_VISIBILITY_PARTIALLY_OBSCURED:
 			GP_DEBUG(1, "VisibilityPartiallyObscured received");
-			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
+			handle_render(self, win, event_queue, GP_EV_SYS_RENDER_START);
 		break;
 		case XCB_VISIBILITY_UNOBSCURED:
 			GP_DEBUG(1, "VisibilityUnobscured received");
-			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
+			handle_render(self, win, event_queue, GP_EV_SYS_RENDER_START);
 		break;
 		}
 	}

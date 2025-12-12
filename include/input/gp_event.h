@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -78,13 +78,17 @@ enum gp_ev_sys_code {
 	 */
 	GP_EV_SYS_QUIT = 0,
 	/**
-	 * @brief User resized the applicaton window.
+	 * @brief The backend was resized.
 	 *
-	 * This event has to be handled and the resize has to be acked by
-	 * gp_backend_resize_ack() in order to resize the backend pixmap to
-	 * match the window size.
+	 * The rendering is stopped with #GP_EV_SYS_RENDER_STOP and the
+	 * gp_backend::pixmap is resized only after the rendering stop was
+	 * acknowledged by the application by calling the
+	 * gp_backend_render_stopped().
+	 *
+	 * Once the gp_backend::pixmap has been resized the this event is send
+	 * followed by #GP_EV_SYS_RENDER_START.
 	 */
-	GP_EV_SYS_RESIZE = 1,
+	GP_EV_SYS_RENDER_RESIZE = 1,
 	/**
 	 * @brief Clipboard request is ready.
 	 *
@@ -109,39 +113,47 @@ enum gp_ev_sys_code {
 	GP_EV_SYS_FOCUS = 4,
 
 	/**
-	 * @brief An application is shown on or hidden from a screen.
+	 * @brief Stops rendering.
 	 *
-	 * The event val is set to enum gp_ev_sys_visibility_val
+	 * Application must stop rendering into the gp_backend::pixmap when it receives
+	 * GP_EV_SYS_RENDER_STOP and acknowledge to the backend that rendering has been
+	 * stopped by calling the gp_backend_render_stopped().
+	 *
+	 * During the time rendering is stopped the gp_backend::pixmap pointer
+	 * is NULL.
 	 */
-	GP_EV_SYS_VISIBILITY = 5,
+	GP_EV_SYS_RENDER_STOP = 5,
+
+	/**
+	 * @brief Starts rendering.
+	 *
+	 * The gp_backend::pixmap pointer is valid again.
+	 */
+	GP_EV_SYS_RENDER_START = 6,
+
+	/**
+	 * @brief Pixel type for the rendering.
+	 *
+	 * This event is send before first GP_EV_SYS_RENDER_START so that
+	 * application can prepare colors for the rendering.
+	 */
+	GP_EV_SYS_RENDER_PIXEL_TYPE = 7,
 };
 
 /**
- * @brief Values for the GP_EV_SYS_FOCUS event.
+ * @brief Values for the #GP_EV_SYS_FOCUS event.
  *
  * Application starts in focused out state and should expect to be notified
  * when it gains focus.
+ *
+ * @attention Focus events may arrive when render is stopped with
+ *            #GP_EV_SYS_RENDER_STOP.
  */
 enum gp_ev_sys_focus_val {
 	/** @brief Application was focused out. */
 	GP_EV_SYS_FOCUS_OUT = 0,
 	/** @brief Appliaction was focused in. */
 	GP_EV_SYS_FOCUS_IN = 1,
-};
-
-/**
- * @brief Values for the GP_EV_SYS_VISIBILITY event.
- *
- * Application should assume that it's visible unless it gets a hide event.
- *
- * When application is hidden it should stop rendering into the buffer to save
- * CPU cycles.
- */
-enum gp_ev_sys_visibility_val {
-	/** @brief Application is hidden from a screen. */
-	GP_EV_SYS_VISIBILITY_HIDE = 0,
-	/** @brief Application is shown on a screen. */
-	GP_EV_SYS_VISIBILITY_SHOW = 1,
 };
 
 /** @brief A relative cursor position change. */
@@ -177,8 +189,8 @@ struct gp_ev_key {
 	uint32_t utf;
 };
 
-/** @brief An system event value. */
-struct gp_ev_sys {
+/** @brief A value for the GP_EV_SYS_RENDER_RESIZE event. */
+struct gp_ev_sys_resize {
 	/** @brief New width for a window resize event. */
 	uint32_t w;
 	/** @brief New height for a window resize event. */
@@ -225,8 +237,10 @@ struct gp_event {
 		struct gp_ev_pos_rel rel;
 		/** @brief An absolute position. */
 		struct gp_ev_pos_abs abs;
-		/** @brief A system event. */
-		struct gp_ev_sys sys;
+		/** @brief A value for the GP_EV_SYS_RENDER_RESIZE event. */
+		struct gp_ev_sys_resize resize;
+		/** @brief A value for the GP_EV_SYS_RENDER_PIXEL_TYPE event. */
+		uint16_t pixel_type;
 		/** @brief A timer expired event. */
 		gp_timer *tmr;
 		/** @brief A poll fd event. */

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
@@ -11,8 +11,7 @@
 
 static gp_backend *backend;
 
-static gp_pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
-		red_pixel, blue_pixel;
+static gp_pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel;
 
 static gp_text_style style = GP_DEFAULT_TEXT_STYLE;
 
@@ -102,6 +101,16 @@ static void redraw_screen(void)
 				 black_pixel, white_pixel, "%i", cnt/10);
 		}
 	}
+
+	gp_backend_flip(backend);
+}
+
+static void init_colors(gp_pixel_type pixel_type)
+{
+	white_pixel     = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
+	gray_pixel      = gp_rgb_to_pixel(0xbe, 0xbe, 0xbe, pixel_type);
+	dark_gray_pixel = gp_rgb_to_pixel(0x7f, 0x7f, 0x7f, pixel_type);
+	black_pixel     = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
 }
 
 static void event_loop(void)
@@ -127,10 +136,14 @@ static void event_loop(void)
 				gp_backend_exit(backend);
 				exit(0);
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				redraw_screen();
-				gp_backend_flip(backend);
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				init_colors(ev->pixel_type);
 			break;
 			}
 		break;
@@ -164,16 +177,6 @@ int main(int argc, char *argv[])
 		        backend_opts);
 		return 1;
 	}
-
-	white_pixel     = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, backend->pixmap);
-	gray_pixel      = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, backend->pixmap);
-	dark_gray_pixel = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, backend->pixmap);
-	black_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, backend->pixmap);
-	red_pixel       = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, backend->pixmap);
-	blue_pixel      = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, backend->pixmap);
-
-	redraw_screen();
-	gp_backend_flip(backend);
 
 	event_loop();
 

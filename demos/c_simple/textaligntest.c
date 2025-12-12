@@ -23,6 +23,9 @@ static gp_backend *win;
 
 void redraw_screen(void)
 {
+	if (!win->pixmap)
+		return;
+
 	gp_fill(win->pixmap, black_pixel);
 
 	/* draw axes intersecting in the middle, where text should be shown */
@@ -63,6 +66,17 @@ static void next_font(int dir)
 
 	printf("Font family: '%s' Font style: '%s'\n",
 	       family->family_name, gp_font_style_name(style.font->style));
+}
+
+static void init_colors(gp_pixel_type pixel_type)
+{
+	black_pixel    = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
+	red_pixel      = gp_rgb_to_pixel(0xff, 0x00, 0x00, pixel_type);
+	blue_pixel     = gp_rgb_to_pixel(0x00, 0x00, 0xff, pixel_type);
+	green_pixel    = gp_rgb_to_pixel(0x00, 0xff, 0x00, pixel_type);
+	yellow_pixel   = gp_rgb_to_pixel(0xff, 0xff, 0x00, pixel_type);
+	white_pixel    = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
+	darkgray_pixel = gp_rgb_to_pixel(0x7f, 0x7f, 0x7f, pixel_type);
 }
 
 static void event_loop(void)
@@ -120,10 +134,18 @@ static void event_loop(void)
 				gp_backend_exit(win);
 				exit(0);
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(win);
-				X = win->pixmap->w;
-				Y = win->pixmap->h;
+			case GP_EV_SYS_RENDER_START:
+				redraw_screen();
+			break;
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(win);
+			break;
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				init_colors(ev->pixel_type);
+			break;
+			case GP_EV_SYS_RENDER_RESIZE:
+				X = ev->resize.w;
+				Y = ev->resize.h;
 			break;
 			}
 		break;
@@ -173,24 +195,14 @@ int main(int argc, char *argv[])
 		font = gp_font_face_load(font_face, 0, 20);
 
 	win = gp_backend_init(backend_opts, 0, 0, "Font Align Test");
-
-	if (win == NULL) {
+	if (!win) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
 		        backend_opts);
 		return 1;
 	}
 
-	black_pixel    = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
-	red_pixel      = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win->pixmap);
-	blue_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, win->pixmap);
-	green_pixel    = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, win->pixmap);
-	yellow_pixel   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0x00, win->pixmap);
-	white_pixel   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
-	darkgray_pixel = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win->pixmap);
-
 	next_font(GP_FONTS_ITER_FIRST);
 
-	redraw_screen();
 	event_loop();
 
 	return 0;

@@ -121,8 +121,10 @@ int main(int argc, char *argv[])
 					gp_backend_exit(backend);
 					exit(0);
 				break;
-				case GP_EV_SYS_RESIZE:
-					gp_backend_resize_ack(backend);
+				case GP_EV_SYS_RENDER_STOP:
+					gp_backend_render_stopped(backend);
+				break;
+				case GP_EV_SYS_RENDER_START:
 					space_destroy(space);
 					space = space_create(particles,
 					                     10<<8, 10<<8,

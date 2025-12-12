@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include "../../config.h"
@@ -30,12 +30,14 @@ struct win {
 
 	gp_fd fd;
 
+	gp_pixmap *pix;
+
 	int new_w;
 	int new_h;
 
 	int resized:1;
 	int fullscreen:1;
-	int visible:1;
+	int rendering:1;
 	int focused:1;
 };
 
@@ -235,7 +237,7 @@ static void x_update(gp_backend *self)
 	x_poll_events(self);
 }
 
-static int x_resize_ack(struct gp_backend *self)
+static int x_resize(struct gp_backend *self)
 {
 	struct win *win = GP_BACKEND_PRIV(self);
 
@@ -255,11 +257,25 @@ static int x_resize_ack(struct gp_backend *self)
 		                               win->new_w, win->new_h);
 	}
 
+	gp_ev_queue_push_resize_start(self->event_queue, win->new_w, win->new_h, 0);
+
 	GP_DEBUG(3, "Done");
 
 	return ret;
 }
 
+static int x_render_stopped(struct gp_backend *self)
+{
+	struct win *win = GP_BACKEND_PRIV(self);
+
+	if (win->resized)
+		return x_resize(self);
+
+	GP_DEBUG(3, "Window hidden, setting self->pixmap == NULL");
+	self->pixmap = NULL;
+
+	return 0;
+}
 
 static void x_ev(gp_backend *self, xcb_generic_event_t *ev)
 {
@@ -273,13 +289,13 @@ static void x_ev(gp_backend *self, xcb_generic_event_t *ev)
 		         eev->x, eev->y, eev->width, eev->height, eev->count);
 
 		/* Safety measure */
-		if (eev->x + eev->width > (int)self->pixmap->w) {
-			GP_WARN("Expose x + w > pixmap->w");
+		if (eev->x + eev->width > (int)win->new_w) {
+			GP_WARN("Expose x + w > win->new_w");
 			break;
 		}
 
-		if (eev->y + eev->height > (int)self->pixmap->h) {
-			GP_WARN("Expose y + h > pixmap->h");
+		if (eev->y + eev->height > (int)win->new_h) {
+			GP_WARN("Expose y + h > win->new_h");
 			break;
 		}
 
@@ -296,10 +312,6 @@ static void x_ev(gp_backend *self, xcb_generic_event_t *ev)
 	case XCB_CONFIGURE_NOTIFY: {
 		xcb_configure_notify_event_t *cev = (xcb_configure_notify_event_t *)ev;
 
-		if (cev->width == (int)self->pixmap->w &&
-		    cev->height == (int)self->pixmap->h)
-			break;
-
 		if (cev->width == (int)win->new_w &&
 		    cev->height == (int)win->new_h)
 			break;
@@ -309,11 +321,13 @@ static void x_ev(gp_backend *self, xcb_generic_event_t *ev)
 
 		GP_DEBUG(2, "Configure Notify %ux%u", cev->width, cev->height);
 
-		/*  Window has been resized, set flag. */
 		win->resized = 1;
-	} /* fallthru */
+
+		gp_ev_queue_push_render_stop(self->event_queue, 0);
+	}
+	break;
 	default:
-		xcb_input_event_put(self->event_queue, win, ev,
+		xcb_input_event_put(self, win, self->event_queue, ev,
 		                    self->pixmap->w, self->pixmap->h);
 	}
 }
@@ -402,7 +416,8 @@ static int create_backing_pixmap(struct gp_backend *self, xcb_connection_t *c,
 		create_shm_backing_pixmap(self, c, pixel_type, w, h);
 	} else {
 		xcb_create_pixmap(c, win->scr->root_depth, win->pixmap, win->win, w, h);
-		self->pixmap = gp_pixmap_alloc(w, h, pixel_type);
+		win->pix = gp_pixmap_alloc(w, h, pixel_type);
+		self->pixmap = win->pix;
 	}
 
 	if (!self->pixmap)
@@ -682,7 +697,7 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 
 	win = GP_BACKEND_PRIV(backend);
 
-	win->visible = 1;
+	win->rendering = 1;
 	win->focused = 0;
 
 	int fd = xcb_get_file_descriptor(x_con.c);
@@ -705,7 +720,10 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 	backend->update_rect = x_update_rect;
 	backend->exit = x_exit;
 	backend->set_attr = x_set_attr;
-	backend->resize_ack = x_resize_ack;
+	backend->render_stopped = x_render_stopped;
+
+	gp_ev_queue_push_pixel_type(backend->event_queue, backend->pixmap->pixel_type, 0);
+	gp_ev_queue_push_resize_start(backend->event_queue, w, h, 0);
 
 	return backend;
 err1:

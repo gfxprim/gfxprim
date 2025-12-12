@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
@@ -74,11 +74,20 @@ static void change_bitmap(void)
 		 gp_pixel_type_name(gp_backend_pixel_type(win)));
 }
 
+static void init_colors(gp_pixel_type pixel_type)
+{
+	bitmap_conv = gp_pixmap_convert_alloc(bitmap_raw, pixel_type);
+	change_bitmap();
+
+	black = gp_rgb_to_pixel(0x00, 0x00, 0x00, pixel_type);
+	white = gp_rgb_to_pixel(0xff, 0xff, 0xff, pixel_type);
+}
+
 void event_loop(void)
 {
 	gp_event *ev;
 
-	while ((ev = gp_backend_ev_get(win))) {
+	while ((ev = gp_backend_ev_poll(win))) {
 		gp_ev_dump(ev);
 
 		switch (ev->type) {
@@ -114,8 +123,13 @@ void event_loop(void)
 				gp_backend_exit(win);
 				exit(0);
 			break;
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(win);
+			case GP_EV_SYS_RENDER_PIXEL_TYPE:
+				init_colors(ev->pixel_type);
+			break;
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(win);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				gp_fill(win->pixmap, black);
 				gp_backend_update(win);
 			break;
@@ -159,7 +173,6 @@ int main(int argc, char *argv[])
 	}
 
 	bitmap_raw = gp_load_image(sprite, NULL);
-
 	if (!bitmap_raw) {
 		fprintf(stderr, "Failed to load '%s'\n", sprite);
 		return 1;
@@ -172,17 +185,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	bitmap_conv = gp_pixmap_convert_alloc(bitmap_raw, gp_backend_pixel_type(win));
-	change_bitmap();
-
-	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
-	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
-
-	gp_fill(win->pixmap, black);
-	gp_backend_update(win);
-
 	for (;;) {
-		gp_backend_poll(win);
 		event_loop();
 
 		usleep(8000);
@@ -190,7 +193,8 @@ int main(int argc, char *argv[])
 		if (pause_flag)
 			continue;
 
-		redraw_screen();
+		if (win->pixmap)
+			redraw_screen();
 	}
 }
 

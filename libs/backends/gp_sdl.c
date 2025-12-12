@@ -26,11 +26,10 @@
 
 #include <backends/gp_sdl_pixmap.h>
 
-#include "gp_input_driver_sdl.h"
-
 static SDL_Surface *sdl_surface;
 static SDL_mutex *mutex;
 static gp_pixmap pixmap;
+static gp_ev_queue ev_queue;
 
 #if LIBSDL_VERSION == 2
 static SDL_Window *window;
@@ -43,10 +42,63 @@ static SDL_Cursor *cursor_hand;
 
 static uint32_t sdl_flags = SDL_SWSURFACE;
 
+static struct gp_backend backend;
+
 /* To hold size from resize event */
 static unsigned int new_w, new_h;
+static int do_resize;
 
-static struct gp_backend backend;
+static void schedule_resize(gp_ev_queue *ev_queue,
+                            unsigned int w, unsigned int h)
+{
+	new_w = w;
+	new_h = h;
+	do_resize = 1;
+	gp_ev_queue_push_render_stop(ev_queue, 0);
+}
+
+static int resize(gp_backend *self)
+{
+	GP_DEBUG(2, "Resizing the buffer to %ux%u", new_w, new_h);
+
+	SDL_mutexP(mutex);
+
+#if LIBSDL_VERSION == 1
+	sdl_surface = SDL_SetVideoMode(new_w, new_h, 0, sdl_flags);
+#elif LIBSDL_VERSION == 2
+	SDL_FreeSurface(sdl_surface);
+	sdl_surface = SDL_GetWindowSurface(window);
+#endif
+
+	gp_pixmap_from_sdl_surface(backend.pixmap, sdl_surface);
+	gp_ev_queue_set_screen_size(backend.event_queue,
+	                            backend.pixmap->w, backend.pixmap->h);
+
+	SDL_mutexV(mutex);
+
+	gp_ev_queue_push_resize_start(self->event_queue, new_w, new_h, 0);
+
+	return 0;
+}
+
+static int sdl_render_stopped(gp_backend *self)
+{
+	if (do_resize) {
+		do_resize = 0;
+		return resize(self);
+	}
+
+	self->pixmap = NULL;
+	return 0;
+}
+
+static void render_start(gp_backend *self)
+{
+	self->pixmap = &pixmap;
+	gp_ev_queue_push_render_start(self->event_queue, 0);
+}
+
+#include "gp_input_driver_sdl.h"
 
 static void sdl_flip(struct gp_backend *self __attribute__((unused)))
 {
@@ -90,28 +142,19 @@ static void sdl_update(struct gp_backend *self)
 	sdl_update_rect(self, 0, 0, self->pixmap->w-1, self->pixmap->h-1);
 }
 
-//TODO: Move to priv!
-static gp_ev_queue ev_queue;
-
-static void sdl_put_event(SDL_Event *ev)
+static void sdl_put_event(gp_backend *self, SDL_Event *ev)
 {
-#if LIBSDL_VERSION == 1
-	if (ev->type == SDL_VIDEORESIZE) {
-		new_w = ev->resize.w;
-		new_h = ev->resize.h;
-	}
-#endif
-	gp_input_driver_sdl_event_put(&backend, backend.event_queue, ev);
+	gp_input_driver_sdl_event_put(self, self->event_queue, ev);
 }
 
-static void sdl_poll(struct gp_backend *self __attribute__((unused)))
+static void sdl_poll(struct gp_backend *self)
 {
 	SDL_Event ev;
 
 	SDL_mutexP(mutex);
 
-	while (SDL_PollEvent(&ev) && !gp_ev_queue_full(backend.event_queue))
-		sdl_put_event(&ev);
+	while (SDL_PollEvent(&ev) && !gp_ev_queue_full(self->event_queue))
+		sdl_put_event(self, &ev);
 
 	SDL_mutexV(mutex);
 }
@@ -127,7 +170,7 @@ static void sdl_wait(struct gp_backend *self, int timeout_ms)
 		SDL_mutexP(mutex);
 
 		while (SDL_PollEvent(&ev))
-			sdl_put_event(&ev);
+			sdl_put_event(self, &ev);
 
 		SDL_mutexV(mutex);
 
@@ -239,8 +282,7 @@ static enum gp_backend_ret sdl_set_attr(struct gp_backend *self,
 	break;
 	case GP_BACKEND_ATTR_SIZE: {
 		const int *size = vals;
-		/* Send only resize event, the actual resize is done in resize_ack */
-		gp_ev_queue_push_resize(self->event_queue, size[0], size[1], 0);
+		schedule_resize(self->event_queue, size[0], size[1]);
 		ret = GP_BACKEND_OK;
 	}
 	break;
@@ -258,28 +300,6 @@ static enum gp_backend_ret sdl_set_attr(struct gp_backend *self,
 	SDL_mutexV(mutex);
 
 	return ret;
-}
-
-static int sdl_resize_ack(struct gp_backend *self __attribute__((unused)))
-{
-	GP_DEBUG(2, "Resizing the buffer to %ux%u", new_w, new_h);
-
-	SDL_mutexP(mutex);
-
-#if LIBSDL_VERSION == 1
-	sdl_surface = SDL_SetVideoMode(new_w, new_h, 0, sdl_flags);
-#elif LIBSDL_VERSION == 2
-	SDL_FreeSurface(sdl_surface);
-	sdl_surface = SDL_GetWindowSurface(window);
-#endif
-
-	gp_pixmap_from_sdl_surface(backend.pixmap, sdl_surface);
-	gp_ev_queue_set_screen_size(backend.event_queue,
-	                            backend.pixmap->w, backend.pixmap->h);
-
-	SDL_mutexV(mutex);
-
-	return 0;
 }
 
 #if LIBSDL_VERSION == 2
@@ -321,7 +341,7 @@ static struct gp_backend backend = {
 	.update_rect = sdl_update_rect,
 	.update = sdl_update,
 	.set_attr = sdl_set_attr,
-	.resize_ack = sdl_resize_ack,
+	.render_stopped = sdl_render_stopped,
 #if LIBSDL_VERSION == 2
 	.clipboard = sdl_clipboard,
 #endif
@@ -432,6 +452,9 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp,
 	SDL_GetDisplayDPI(0, &dpi_v, &dpi_h, NULL);
 	backend.dpi = (dpi_v + dpi_h + 1)/2;
 #endif
+
+	gp_ev_queue_push_pixel_type(backend.event_queue, pixmap.pixel_type, 0);
+	gp_ev_queue_push_resize(backend.event_queue, pixmap.w, pixmap.h, 0);
 
 	return &backend;
 }

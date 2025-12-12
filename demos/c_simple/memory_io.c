@@ -64,11 +64,6 @@ int main(void)
 		return 1;
 	}
 
-	gp_fill(b->pixmap, 0);
-	gp_blit_clipped(img, 0, 0, img->w, img->h, b->pixmap,
-	                (WIN_W - img->w)/2, (WIN_H - img->h)/2);
-	gp_backend_flip(b);
-
 	for (;;) {
 		gp_event *ev = gp_backend_ev_wait(b);
 
@@ -84,7 +79,15 @@ int main(void)
 		break;
 		case GP_EV_SYS:
 			switch (ev->code) {
-			case GP_EV_SYS_RESIZE:
+			case GP_EV_SYS_RENDER_START:
+				gp_fill(b->pixmap, 0);
+				gp_blit_clipped(img, 0, 0, img->w, img->h, b->pixmap,
+						(WIN_W - img->w)/2, (WIN_H - img->h)/2);
+				gp_backend_flip(b);
+			break;
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(b);
+			break;
 			case GP_EV_SYS_QUIT:
 				gp_backend_exit(b);
 				return 0;

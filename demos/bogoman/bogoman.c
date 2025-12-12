@@ -82,8 +82,11 @@ static void event_loop(struct bogoman_render *render, gp_backend *backend)
 		break;
 		case GP_EV_SYS:
 			switch (ev->code) {
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+				render->pixmap = NULL;
+			break;
+			case GP_EV_SYS_RENDER_START:
 				render->pixmap = backend->pixmap;
 				bogoman_render(render, BOGOMAN_RENDER_ALL);
 			break;

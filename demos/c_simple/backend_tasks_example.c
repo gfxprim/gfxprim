@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
  /*
@@ -31,6 +31,9 @@ static int redraw_task_callback(gp_task *self)
 {
 	gp_backend *backend = self->priv;
 	gp_pixel red_pixel;
+
+	if (!backend->pixmap)
+		return 0;
 
 	red_pixel = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, backend->pixmap);
 
@@ -71,8 +74,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	redraw(backend);
-
 	gp_backend_task_queue_set(backend, &task_queue);
 
 	gp_task redraw_task = {
@@ -101,8 +102,10 @@ int main(int argc, char *argv[])
 		break;
 		case GP_EV_SYS:
 			switch (ev->code) {
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				redraw(backend);
 			break;
 			case GP_EV_SYS_QUIT:

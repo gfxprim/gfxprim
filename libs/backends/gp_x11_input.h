@@ -154,21 +154,27 @@ static unsigned int get_key(unsigned int xkey)
 	return key;
 }
 
-static void handle_visibility(gp_ev_queue *event_queue, struct x11_win *win, int val)
+static void handle_render(gp_backend *self, struct x11_win *win, int val)
 {
-	if (val == GP_EV_SYS_VISIBILITY_SHOW) {
-		if (win->visible)
+	gp_ev_queue *event_queue = self->event_queue;
+
+	if (val == GP_EV_SYS_RENDER_START) {
+		if (win->rendering)
 			return;
-		win->visible = 1;
+		self->pixmap = &win->pixmap;
+		win->rendering = 1;
 	}
 
-	if (val == GP_EV_SYS_VISIBILITY_HIDE) {
-		if (!win->visible)
+	if (val == GP_EV_SYS_RENDER_STOP) {
+		if (!win->rendering)
 			return;
-		win->visible = 0;
+		win->rendering = 0;
 	}
 
-	gp_ev_queue_push(event_queue, GP_EV_SYS, GP_EV_SYS_VISIBILITY, val, 0);
+	if (win->rendering)
+		gp_ev_queue_push_render_start(event_queue, 0);
+	else
+		gp_ev_queue_push_render_stop(event_queue, 0);
 }
 
 static void handle_focus(gp_ev_queue *event_queue, struct x11_win *win, int val)
@@ -188,9 +194,10 @@ static void handle_focus(gp_ev_queue *event_queue, struct x11_win *win, int val)
 	gp_ev_queue_push(event_queue, GP_EV_SYS, GP_EV_SYS_FOCUS, val, 0);
 }
 
-static void x11_input_event_put(gp_ev_queue *event_queue,
+static void x11_input_event_put(gp_backend *self,
                                 XEvent *ev, struct x11_win *win, int w, int h)
 {
+	gp_ev_queue *event_queue = self->event_queue;
 	int key = 0, press = 0;
 	KeySym keysym;
 	Status status;
@@ -232,11 +239,6 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 		}
 
 		gp_ev_queue_push(event_queue, GP_EV_KEY, key, press, 0);
-	break;
-	case ConfigureNotify:
-		GP_DEBUG(1, "ConfigureNotify event received");
-		gp_ev_queue_push_resize(event_queue, ev->xconfigure.width,
-		                           ev->xconfigure.height, 0);
 	break;
 	case MotionNotify:
 		/* Ignore all pointer events that are out of the window */
@@ -290,7 +292,7 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 	break;
 	case MapNotify:
 		GP_DEBUG(1, "MapNotify event received");
-		handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
+		handle_render(self, win, GP_EV_SYS_RENDER_START);
 	break;
 	case ReparentNotify:
 		GP_DEBUG(1, "ReparentNotify event received");
@@ -300,7 +302,7 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 	break;
 	case UnmapNotify:
 		GP_DEBUG(1, "UnmapNotify event received");
-		handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_HIDE);
+		handle_render(self, win, GP_EV_SYS_RENDER_STOP);
 	break;
 	case FocusOut:
 		GP_DEBUG(1, "FocusOut event releasing all keys in events_state");
@@ -315,15 +317,15 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 		switch (ev->xvisibility.state) {
 		case VisibilityFullyObscured:
 			GP_DEBUG(1, "VisibilityFullyObscured received");
-			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_HIDE);
+			handle_render(self, win, GP_EV_SYS_RENDER_STOP);
 		break;
 		case VisibilityPartiallyObscured:
 			GP_DEBUG(1, "VisibilityPartiallyObscured received");
-			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
+			handle_render(self, win, GP_EV_SYS_RENDER_START);
 		break;
 		case VisibilityUnobscured:
 			GP_DEBUG(1, "VisibilityUnobscured received");
-			handle_visibility(event_queue, win, GP_EV_SYS_VISIBILITY_SHOW);
+			handle_render(self, win, GP_EV_SYS_RENDER_START);
 		break;
 		}
 	break;

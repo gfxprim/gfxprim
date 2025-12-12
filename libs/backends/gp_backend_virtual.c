@@ -15,6 +15,9 @@ struct virt_priv {
 	/* Original backend */
 	gp_backend *backend;
 
+	gp_pixel_type pixel_type;
+	gp_pixmap *pixmap;
+
 	int flags;
 };
 
@@ -55,6 +58,27 @@ static enum gp_backend_ret virt_set_attr(struct gp_backend *self,
 	return GP_BACKEND_NOTSUPP;
 }
 
+static void handle_events(gp_backend *self, gp_event *ev)
+{
+	struct virt_priv *virt = GP_BACKEND_PRIV(self);
+
+	if (ev->type != GP_EV_SYS)
+		return;
+
+	switch (ev->code) {
+	case GP_EV_SYS_RENDER_START:
+		self->pixmap = virt->pixmap;
+	break;
+	case GP_EV_SYS_RENDER_RESIZE:
+		gp_pixmap_resize(virt->pixmap, virt->backend->pixmap->w,
+		                 virt->backend->pixmap->h);
+	break;
+	case GP_EV_SYS_RENDER_PIXEL_TYPE:
+		ev->pixel_type = virt->pixmap->pixel_type;
+	break;
+	}
+}
+
 static void virt_poll(gp_backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
@@ -63,8 +87,10 @@ static void virt_poll(gp_backend *self)
 
 	gp_event *ev;
 
-	while ((ev = gp_backend_ev_get(virt->backend)))
+	while ((ev = gp_backend_ev_get(virt->backend))) {
+		handle_events(self, ev);
 		gp_ev_queue_put(self->event_queue, ev);
+	}
 }
 
 static void virt_wait(gp_backend *self, int timeout_ms)
@@ -75,8 +101,10 @@ static void virt_wait(gp_backend *self, int timeout_ms)
 
 	gp_event *ev;
 
-	while ((ev = gp_backend_ev_get(virt->backend)))
+	while ((ev = gp_backend_ev_get(virt->backend))) {
+		handle_events(self, ev);
 		gp_ev_queue_put(self->event_queue, ev);
+	}
 }
 
 static void virt_exit(gp_backend *self)
@@ -91,18 +119,13 @@ static void virt_exit(gp_backend *self)
 	free(self);
 }
 
-static int virt_resize_ack(gp_backend *self)
+static int virt_render_stopped(gp_backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
-	int ret;
 
-	ret = virt->backend->resize_ack(virt->backend);
+	self->pixmap = NULL;
 
-	if (ret)
-		return ret;
-
-	return gp_pixmap_resize(self->pixmap, virt->backend->pixmap->w,
-				virt->backend->pixmap->h);
+	return virt->backend->render_stopped(virt->backend);
 }
 
 gp_backend *gp_backend_virt_init(gp_backend *backend,
@@ -125,16 +148,18 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	self->pixmap = gp_pixmap_alloc(backend->pixmap->w, backend->pixmap->h,
 				       pixel_type);
 
-	if (self->pixmap == NULL)
+	if (!self->pixmap)
 		goto err0;
 
 	virt = GP_BACKEND_PRIV(self);
+	virt->pixel_type = pixel_type;
 	virt->backend = backend;
 	virt->flags = flags;
+	virt->pixmap = self->pixmap;
 
 	/* Initalize new backend */
 	self->update_rect = virt_update_rect;
-	self->resize_ack = virt_resize_ack;
+	self->render_stopped = virt_render_stopped;
 	self->set_attr = backend->set_attr ? virt_set_attr : NULL;
 	self->name = "Virtual Backend";
 	self->update = virt_update;

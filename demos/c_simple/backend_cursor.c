@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
  /*
@@ -80,8 +80,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	redraw(backend);
-
 	/* Handle events */
 	for (;;) {
 		gp_event *ev = gp_backend_ev_wait(backend);
@@ -112,8 +110,10 @@ int main(int argc, char *argv[])
 		break;
 		case GP_EV_SYS:
 			switch (ev->code) {
-			case GP_EV_SYS_RESIZE:
-				gp_backend_resize_ack(backend);
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				redraw(backend);
 			break;
 			case GP_EV_SYS_QUIT:

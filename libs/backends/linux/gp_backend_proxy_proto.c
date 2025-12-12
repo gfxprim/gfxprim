@@ -111,7 +111,8 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 	msg.type = type;
 	msg.size = 8;
 
-	GP_DEBUG(3, "Sending type %s (%i)", gp_proxy_msg_type_name(type), type);
+	GP_DEBUG(3, "Sending type %s (%i) fd %i",
+	         gp_proxy_msg_type_name(type), type, fd);
 
 	switch (type) {
 	case GP_PROXY_NAME:

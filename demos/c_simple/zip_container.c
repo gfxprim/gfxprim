@@ -61,23 +61,17 @@ int main(int argc, char *argv[])
 
 	/* Load image */
 	image = gp_container_load_next(container, NULL);
-
-	if (image == NULL) {
+	if (!image) {
 		fprintf(stderr, "Failed to load image %s\n", strerror(errno));
 		return 1;
 	}
 
 	/* Initalize backend */
 	backend = gp_x11_init(NULL, 0, 0, image->w, image->h, argv[1], 0);
-
-	if (backend == NULL) {
+	if (!backend) {
 		fprintf(stderr, "Failed to initalize backend\n");
 		return 1;
 	}
-
-	/* Blit image into the window and show it */
-	gp_blit_clipped(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
-	gp_backend_flip(backend);
 
 	/* Wait for events  */
 	for (;;) {
@@ -99,11 +93,15 @@ int main(int argc, char *argv[])
 			}
 		break;
 		case GP_EV_SYS:
-			if (ev->code == GP_EV_SYS_RESIZE) {
-				gp_backend_resize_ack(backend);
+			switch (ev->code) {
+			case GP_EV_SYS_RENDER_STOP:
+				gp_backend_render_stopped(backend);
+			break;
+			case GP_EV_SYS_RENDER_START:
 				gp_blit_clipped(image, 0, 0, image->w, image->h,
 				        backend->pixmap, 0, 0);
 				gp_backend_flip(backend);
+			break;
 			}
 		break;
 		}

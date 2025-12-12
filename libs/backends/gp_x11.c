@@ -155,10 +155,6 @@ static void x11_ev(XEvent *ev)
 		x11_selection_notify(self, ev);
 	break;
 	case ConfigureNotify:
-		if (ev->xconfigure.width == (int)self->pixmap->w &&
-		    ev->xconfigure.height == (int)self->pixmap->h)
-			break;
-
 		if (ev->xconfigure.width == (int)win->new_w &&
 		    ev->xconfigure.height == (int)win->new_h)
 			break;
@@ -170,11 +166,13 @@ static void x11_ev(XEvent *ev)
 
 		/*  Window has been resized, set flag. */
 		win->resized_flag = 1;
-	/* fallthrough */
+
+		gp_ev_queue_push_render_stop(self->event_queue, 0);
+	break;
 	default:
 		//TODO: More accurate window w and h?
-		x11_input_event_put(self->event_queue, ev, win,
-		                    self->pixmap->w, self->pixmap->h);
+		x11_input_event_put(self, ev, win,
+		                    win->new_w, win->new_h);
 	break;
 	}
 }
@@ -248,26 +246,35 @@ out:
 	return 0;
 }
 
-static int x11_resize_ack(struct gp_backend *self)
+static int x11_render_stopped(struct gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
-	int ret;
+	int ret = 0;
 
 	XLockDisplay(win->dpy);
 
-	GP_DEBUG(3, "Setting buffer size to %ux%u", win->new_w, win->new_h);
+	if (win->resized_flag) {
+		GP_DEBUG(3, "Setting buffer size to %ux%u", win->new_w, win->new_h);
 
-	ret = resize_buffer(self, win->new_w, win->new_h);
+		ret = resize_buffer(self, win->new_w, win->new_h);
 
-	win->resized_flag = 0;
+		win->resized_flag = 0;
 
-	if (!ret) {
-		gp_ev_queue_set_screen_size(self->event_queue,
+		if (!ret) {
+			gp_ev_queue_set_screen_size(self->event_queue,
 		                               win->new_w, win->new_h);
+		}
+
+		gp_ev_queue_push_resize_start(self->event_queue, win->new_w, win->new_h, 0);
+
+		GP_DEBUG(3, "Done");
+		goto ret;
 	}
 
-	GP_DEBUG(3, "Done");
+	self->pixmap = NULL;
+	GP_DEBUG(3, "Window hidden, setting self->pixmap == NULL");
 
+ret:
 	XUnlockDisplay(win->dpy);
 
 	return ret;
@@ -369,6 +376,8 @@ static int create_shm_ximage(gp_backend *self, gp_size w, gp_size h)
 		GP_WARN("XShmAttach failed");
 		goto err2;
 	}
+
+	XFlush(win->dpy);
 
 	gp_pixmap_init(&win->pixmap, w, h, pixel_type, win->shminfo.shmaddr, 0);
 	win->pixmap.bytes_per_row = win->img->bytes_per_line;
@@ -576,11 +585,9 @@ static int x11_set_cursor(gp_backend *self, enum gp_backend_cursor_req cursor)
 
 	switch (cursor) {
 	case GP_BACKEND_CURSOR_HIDE:
-	//	XFixesHideCursor(win->dpy, win->win);
 		XDefineCursor(win->dpy, win->win, x11_conn.cursor_empty);
 	break;
 	case GP_BACKEND_CURSOR_SHOW:
-	//	XFixesShowCursor(win->dpy, win->win);
 		XDefineCursor(win->dpy, win->win, x11_conn.cursor_saved);
 	break;
 	case GP_BACKEND_CURSOR_ARROW:
@@ -701,7 +708,10 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 
 	win->resized_flag = 0;
 	win->focused = 0;
-	win->visible = 1;
+	win->rendering = 1;
+
+	win->new_w = wreq.w;
+	win->new_h = wreq.h;
 
 	backend->name = "X11";
 	backend->update = x11_update;
@@ -709,7 +719,10 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	backend->exit = x11_exit;
 	backend->set_attr = x11_set_attr;
 	backend->clipboard = x11_clipboard;
-	backend->resize_ack = x11_resize_ack;
+	backend->render_stopped = x11_render_stopped;
+
+	gp_ev_queue_push_pixel_type(backend->event_queue, backend->pixmap->pixel_type, 0);
+	gp_ev_queue_push_resize_start(backend->event_queue, w, h, 0);
 
 	return backend;
 err1:
