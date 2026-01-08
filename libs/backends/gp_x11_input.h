@@ -251,10 +251,9 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 		press = 1;
 
 		if (!XFilterEvent(ev, None)) {
-
 			Xutf8LookupString(win->xic, &ev->xkey, str, sizeof(str)-1, &keysym, &status);
 
-			if (status == XLookupChars || status == XLookupBoth) {
+			if ((status == XLookupChars || status == XLookupBoth) && str[0]) {
 				key = get_key(ev->xkey.keycode);
 				const char *s = str;
 				size_t len = gp_utf8_strlen(str);
@@ -268,7 +267,6 @@ static void x11_input_event_put(gp_ev_queue *event_queue,
 					                     --len ? 0 : key,
 					                     press, utf, 0);
 				}
-
 				return;
 			}
 		}
