@@ -66,7 +66,7 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t
 	/* rotation and mirroring */
 	gp_pixmap_rotation_set(pixmap, 0, 0, 0);
 
-	pixmap->free_pixels = 1;
+	pixmap->pixels_allocated = 1;
 
 	if (!w || !h)
 		return pixmap;
@@ -133,7 +133,7 @@ void gp_pixmap_free(gp_pixmap *pixmap)
 	if (!pixmap)
 		return;
 
-	if (pixmap->free_pixels)
+	if (pixmap->pixels_allocated)
 		free(pixmap->pixels);
 
 	gp_gamma_decref(pixmap->gamma);
@@ -158,7 +158,7 @@ gp_pixmap *gp_pixmap_init_ex(gp_pixmap *pixmap, gp_size w, gp_size h,
 
 	gp_pixmap_rotation_set(pixmap, 0, 0, 0);
 
-	pixmap->free_pixels = !!(flags & GP_PIXMAP_FREE_PIXELS);
+	pixmap->pixels_allocated = !!(flags & GP_PIXMAP_FREE_PIXELS);
 
 	return pixmap;
 }
@@ -178,10 +178,13 @@ int gp_pixmap_resize(gp_pixmap *pixmap, gp_size w, gp_size h)
 	uint32_t bpr = get_bpr(bpp, w);
 	void *pixels;
 
+	if (!pixmap->pixels_allocated)
+		return EINVAL;
+
 	pixels = realloc(pixmap->pixels, bpr * h);
 
-	if (pixels == NULL)
-		return 1;
+	if (!pixels)
+		return ENOMEM;
 
 	pixmap->w = w;
 	pixmap->h = h;
@@ -233,7 +236,7 @@ gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, enum gp_pixmap_copy_flags flags)
 	else
 		new->gamma = NULL;
 
-	new->free_pixels = 1;
+	new->pixels_allocated = 1;
 
 	return new;
 }
@@ -320,7 +323,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
 
 	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x, y);
 
-	subpixmap->free_pixels = 0;
+	subpixmap->pixels_allocated = 0;
 
 	return subpixmap;
 }
@@ -335,8 +338,8 @@ void gp_pixmap_print_info(const gp_pixmap *self)
 	printf("Pixel\t%s (%u)\n", gp_pixel_type_name(self->pixel_type),
 	       self->pixel_type);
 	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
-	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u free_pixels=%u\n",
-	       self->axes_swap, self->x_swap, self->y_swap, self->free_pixels);
+	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u pixels_allocated=%u\n",
+	       self->axes_swap, self->x_swap, self->y_swap, self->pixels_allocated);
 
 	if (self->gamma)
 		gp_gamma_print(self->gamma);

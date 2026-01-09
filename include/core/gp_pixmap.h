@@ -94,8 +94,15 @@ struct gp_pixmap {
 	 */
 	uint8_t y_swap:1;
 
-	/** @brief If set pixels are freed on gp_pixmap_free */
-	uint8_t free_pixels:1;
+	/**
+	 * @brief Set pixels were allocatd by malloc().
+	 *
+	 * If set the pixels are:
+	 *
+	 * - freed by free() when pixmap is freed.
+	 * - pixmap could be resized by gp_pixmap_resize()
+	 */
+	uint8_t pixels_allocated:1;
 };
 
 /**
@@ -261,7 +268,7 @@ static inline int gp_pixmap_srgb_set(gp_pixmap *self)
  * @brief Frees a pixmap.
  * @ingroup pixmap
  *
- * If pixmap->free_pixels is set also free pixel data, this flag is set
+ * If pixmap->pixels_allocated is set also free pixel data, this flag is set
  * automatically by gp_pixmap_alloc() and gp_pixmap_alloc_ex().
  *
  * @param self A pixmap to free.
@@ -368,8 +375,10 @@ static inline gp_pixmap *gp_pixmap_from_data(gp_size w, gp_size h,
  * @param w A new width.
  * @param h A new height.
  *
- * @returns Zero on success non-zero on failure if underlying malloc() has
- *          failed.
+ * @attention Works only on pixmaps where pixels were allocated by malloc().
+ *
+ * @returns Zero on success. ENOMEM if malloc() has failed. EINVAL if pixels
+ *          buffer wasn't allocated by malloc().
  */
 int gp_pixmap_resize(gp_pixmap *self, gp_size w, gp_size h);
 
