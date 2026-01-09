@@ -1,0 +1,10 @@
+[build-dependencies]
+bindgen = "*"
+cc = "1.0"
+
+[package]
+edition = "2024"
+name = "gfxprim"
+build = "build.rs"
+version = "0.1.0"
+authors = ["Cyril Hrubis <metan@ucw.cz>"]
