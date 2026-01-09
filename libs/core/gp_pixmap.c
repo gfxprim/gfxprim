@@ -297,31 +297,31 @@ gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *pixmap,
 	return gp_sub_pixmap(pixmap, res, x, y, w, h);
 }
 
-gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
+gp_pixmap *gp_sub_pixmap(const gp_pixmap *src, gp_pixmap *subpixmap,
                          gp_coord x, gp_coord y, gp_size w, gp_size h)
 {
-	GP_CHECK(pixmap, "NULL pixmap");
+	GP_CHECK(src, "NULL pixmap");
 
-	GP_TRANSFORM_RECT(pixmap, x, y, w, h);
+	GP_TRANSFORM_RECT(src, x, y, w, h);
 
-	GP_CHECK(pixmap->w >= x + w, "Subpixmap w out of original pixmap.");
-	GP_CHECK(pixmap->h >= y + h, "Subpixmap h out of original pixmap.");
+	GP_CHECK(src->w >= x + w, "Subpixmap w out of original pixmap.");
+	GP_CHECK(src->h >= y + h, "Subpixmap h out of original pixmap.");
 
-	subpixmap->bytes_per_row = pixmap->bytes_per_row;
-	subpixmap->offset = gp_pixel_addr_offset(pixmap, x);
+	subpixmap->bytes_per_row = src->bytes_per_row;
+	subpixmap->offset = gp_pixel_addr_offset(src, x);
 
 	subpixmap->w = w;
 	subpixmap->h = h;
 
-	subpixmap->pixel_type = pixmap->pixel_type;
+	subpixmap->pixel_type = src->pixel_type;
 
 	/* gamma */
-	subpixmap->gamma = pixmap->gamma;
+	subpixmap->gamma = gp_gamma_incref(src->gamma);
 
 	/* rotation and mirroring */
-	gp_pixmap_rotation_copy(pixmap, subpixmap);
+	gp_pixmap_rotation_copy(src, subpixmap);
 
-	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x, y);
+	subpixmap->pixels = GP_PIXEL_ADDR(src, x, y);
 
 	subpixmap->pixels_allocated = 0;
 
