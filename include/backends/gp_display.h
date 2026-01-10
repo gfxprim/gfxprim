@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -81,6 +81,7 @@ enum gp_backend_display_model_ids {
 	 * Chip ST7565
 	 */
 	GP_GMG12864,
+
 	/**
 	 * @brief A 256x128 LCD display 1bpp mode
 	 *
@@ -93,6 +94,20 @@ enum gp_backend_display_model_ids {
 	 * Chip ST75256
 	 */
 	GP_JLX256128_2,
+
+	/**
+	 * @brief A 256x160 LCD display 1bpp mode
+	 *
+	 * Chip ST75256
+	 */
+	GP_JLX256160_1,
+	/**
+	 * @brief A 256x160 LCD display 2bpp mode
+	 *
+	 * Chip ST75256
+	 */
+	GP_JLX256160_2,
+
 
 	/**
 	 * @brief 170x320 1.9 TFT LCD.
@@ -156,9 +171,11 @@ extern const struct gp_backend_display_model gp_backend_display_models[];
  *
  * The backend uses Linux input devices for keyboard and mouse support.
  *
+ * @param comm A connection mapping name pass "help" for a list.
  * @param model A display model.
+ *
  * @return An initialized backend.
  */
-gp_backend *gp_backend_display_init(enum gp_backend_display_model_ids model);
+gp_backend *gp_backend_display_init(const char *conn, enum gp_backend_display_model_ids model);
 
 #endif /* BACKENDS_GP_DISPLAY_H */

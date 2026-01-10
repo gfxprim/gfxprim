@@ -8,7 +8,7 @@
 #include <core/gp_debug.h>
 
 #include "gp_display_eink.h"
-#include "gp_display_waveshare.h"
+#include "gp_display_conn.h"
 #include "gp_display_ssd16xx.h"
 
 static const uint8_t lut_1bpp_DU[SSD1677_LUT_SIZE] =
@@ -425,9 +425,10 @@ static void ssd168x_part_repaint_start(gp_backend *self,
 	gp_display_spi_cmd(disp, SSD16XX_DISP_UPDT);
 }
 
-static gp_backend *ssd16xx_backend_init(uint16_t w, uint16_t h, gp_pixel_type pixel_type)
+static gp_backend *ssd16xx_backend_init(const char *conn_id, uint16_t w, uint16_t h, gp_pixel_type pixel_type)
 {
 	gp_backend *backend;
+	struct gp_display_conn *conn = gp_display_conn_by_name(conn_id);
 	int ret;
 
 	backend = malloc(sizeof(gp_backend) + sizeof(struct gp_display_eink));
@@ -444,8 +445,8 @@ static gp_backend *ssd16xx_backend_init(uint16_t w, uint16_t h, gp_pixel_type pi
 
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);
 
-	ret = gp_display_spi_init(&eink->spi, EINK_SPI_DEV, EINK_SPI_MODE,
-	                          EINK_SPI_SPEED_HZ, &gpio_map_rpi, w, h);
+	ret = gp_display_spi_init(&eink->spi, conn, EINK_SPI_MODE,
+	                          EINK_SPI_SPEED_HZ, w, h);
 	if (ret)
 		goto err1;
 
@@ -459,11 +460,11 @@ err0:
 	return NULL;
 }
 
-gp_backend *gp_waveshare_3_7_init(void)
+gp_backend *gp_waveshare_3_7_init(const char *conn_id)
 {
 	gp_backend *backend;
 
-	backend = ssd16xx_backend_init(280, 480, GP_PIXEL_G1);
+	backend = ssd16xx_backend_init(conn_id, 280, 480, GP_PIXEL_G1);
 	if (!backend)
 		return NULL;
 
@@ -485,11 +486,11 @@ gp_backend *gp_waveshare_3_7_init(void)
 	return backend;
 }
 
-gp_backend *gp_ssd16xx_init(unsigned int w, unsigned int h, int dpi)
+gp_backend *gp_ssd16xx_init(const char *conn_id, unsigned int w, unsigned int h, int dpi)
 {
 	gp_backend *backend;
 
-	backend = ssd16xx_backend_init(w, h, GP_PIXEL_G1);
+	backend = ssd16xx_backend_init(conn_id, w, h, GP_PIXEL_G1);
 	if (!backend)
 		return NULL;
 

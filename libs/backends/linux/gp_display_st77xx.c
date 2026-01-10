@@ -8,7 +8,7 @@
 #include <core/gp_debug.h>
 
 #include "gp_display_eink.h"
-#include "gp_display_waveshare.h"
+#include "gp_display_conn.h"
 
 #include "gp_display_st77xx.h"
 
@@ -248,10 +248,12 @@ static void st77xx_repaint_part(gp_backend *self,
 	}
 }
 
-gp_backend *gp_display_st77xx_init(uint16_t w, uint16_t h, uint16_t x_off, uint16_t y_off,
+gp_backend *gp_display_st77xx_init(const char *conn_id,
+                                   uint16_t w, uint16_t h, uint16_t x_off, uint16_t y_off,
                                    unsigned int dpi, enum gp_display_st77xx_flags flags)
 {
 	gp_backend *backend;
+	struct gp_display_conn *conn = gp_display_conn_by_name(conn_id);
 	int ret;
 
 	backend = malloc(sizeof(gp_backend) + sizeof(struct gp_display_spi));
@@ -268,8 +270,7 @@ gp_backend *gp_display_st77xx_init(uint16_t w, uint16_t h, uint16_t x_off, uint1
 
 	struct gp_display_spi *disp = GP_BACKEND_PRIV(backend);
 
-	ret = gp_display_spi_init(disp, EINK_SPI_DEV, SPI_MODE_3,
-				  80000000, &gpio_map_rpi, w, h);
+	ret = gp_display_spi_init(disp, conn, SPI_MODE_3, 80000000, w, h);
 	if (ret)
 		goto err1;
 

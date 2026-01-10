@@ -9,7 +9,7 @@
 #include <core/gp_debug.h>
 
 #include "gp_display_eink.h"
-#include "gp_display_waveshare.h"
+#include "gp_display_conn.h"
 #include "gp_display_uc8179.h"
 #include "gp_display_uc8179_luts.h"
 
@@ -183,10 +183,11 @@ static void repaint_part_finish(gp_backend *self)
 	gp_display_spi_wait_ready(spi, 1);
 }
 
-gp_backend *gp_waveshare_7_5_v2_init(void)
+gp_backend *gp_waveshare_7_5_v2_init(const char *conn_id)
 {
-	int ret;
+	struct gp_display_conn *conn = gp_display_conn_by_name(conn_id);
 	gp_backend *backend;
+	int ret;
 
 	backend = malloc(sizeof(gp_backend) + sizeof(struct gp_display_eink));
 	if (!backend) {
@@ -202,7 +203,7 @@ gp_backend *gp_waveshare_7_5_v2_init(void)
 
 	struct gp_display_eink *eink = GP_BACKEND_PRIV(backend);
 
-	ret = gp_display_spi_init(&eink->spi, EINK_SPI_DEV, EINK_SPI_MODE, EINK_SPI_SPEED_HZ, &gpio_map_rpi, 800, 480);
+	ret = gp_display_spi_init(&eink->spi, conn, EINK_SPI_MODE, EINK_SPI_SPEED_HZ, 800, 480);
 	if (ret)
 		goto err1;
 

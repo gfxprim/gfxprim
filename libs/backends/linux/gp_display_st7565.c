@@ -9,7 +9,7 @@
 #include <core/gp_debug.h>
 
 #include "gp_display_eink.h"
-#include "gp_display_waveshare.h"
+#include "gp_display_conn.h"
 
 #include "gp_display_st7565.h"
 
@@ -92,9 +92,10 @@ static void st7565_repaint_part(gp_backend *self, gp_coord x0, gp_coord y0, gp_c
 	st7565_repaint_full(self);
 }
 
-gp_backend *gp_st7565_init(unsigned int dpi)
+gp_backend *gp_st7565_init(const char *conn_id, unsigned int dpi)
 {
 	gp_backend *backend;
+	struct gp_display_conn *conn = gp_display_conn_by_name(conn_id);
 	int ret;
 
 	backend = malloc(sizeof(gp_backend) + sizeof(struct gp_display_spi));
@@ -111,8 +112,7 @@ gp_backend *gp_st7565_init(unsigned int dpi)
 
 	struct gp_display_spi *disp = GP_BACKEND_PRIV(backend);
 
-	ret = gp_display_spi_init(disp, EINK_SPI_DEV, SPI_MODE_3,
-	                          1000000, &gpio_map_rpi, 64, 128);
+	ret = gp_display_spi_init(disp, conn, SPI_MODE_3, 1000000, 64, 128);
 	if (ret)
 		goto err1;
 

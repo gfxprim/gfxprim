@@ -46,6 +46,7 @@ enum gp_display_st77xx_flags {
 /**
  * @brief Initialize st77xx display driver.
  *
+ * @param conn_id A connection mapping name.
  * @param w A display width.
  * @param h A display height.
  * @param x_off A display x offset, some displays does not start at 0.
@@ -53,7 +54,8 @@ enum gp_display_st77xx_flags {
  * @param dpi A display DPI.
  * @param flags Display quirks.
  */
-gp_backend *gp_display_st77xx_init(uint16_t w, uint16_t h, uint16_t x_off, uint16_t y_off,
+gp_backend *gp_display_st77xx_init(const char *conn_id,
+                                   uint16_t w, uint16_t h, uint16_t x_off, uint16_t y_off,
                                    unsigned int dpi, enum gp_display_st77xx_flags flags);
 
 #endif /* GP_DISPLAY_ST77XX_H */

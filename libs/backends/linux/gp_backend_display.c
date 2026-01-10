@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <string.h>
@@ -11,6 +11,9 @@
 #include <backends/gp_display.h>
 
 #include <backends/gp_display_st77xx.h>
+#include <backends/gp_display_st75256.h>
+
+#include "gp_display_conn.h"
 
 const struct gp_backend_display_model gp_backend_display_models[] = {
 	[GP_WAVESHARE_7_5_V2] = {.name = "WaveShare-7.5-v2",
@@ -27,6 +30,10 @@ const struct gp_backend_display_model gp_backend_display_models[] = {
 	                    .desc = "JLX Grayscale SPI LCD display 1bpp mode"},
 	[GP_JLX256128_2] = {.name = "JLX256128-2",
 	                    .desc = "JLX Grayscale SPI LCD display 2bpp mode"},
+	[GP_JLX256160_1] = {.name = "JLX256160-1",
+	                    .desc = "JLX Grayscale SPI LCD display 1bpp mode"},
+	[GP_JLX256160_2] = {.name = "JLX256160-2",
+	                    .desc = "JLX Grayscale SPI LCD display 2bpp mode"},
 	[GP_ST7789_1_9] = {.name = "ST7789-1.9",
 	                   .desc = "TFT 1.9\" 170x320 ST7789 LCD display"},
 	[GP_GMT020_02] = {.name = "GMT020-02",
@@ -40,14 +47,13 @@ const struct gp_backend_display_model gp_backend_display_models[] = {
 	{}
 };
 
-gp_backend *gp_waveshare_7_5_v2_init(void);
-gp_backend *gp_waveshare_3_7_init(void);
-gp_backend *gp_weact_2_13_init(void);
+gp_backend *gp_waveshare_7_5_v2_init(const char *conn_id);
+gp_backend *gp_waveshare_3_7_init(const char *conn_id);
+gp_backend *gp_weact_2_13_init(const char *conn_id);
 
-gp_backend *gp_ssd16xx_init(unsigned int w, unsigned int h, int dpi);
+gp_backend *gp_ssd16xx_init(const char *conn_id, unsigned int w, unsigned int h, int dpi);
 
-gp_backend *gp_st7565_init(unsigned int dpi);
-gp_backend *gp_st75256_init(unsigned int dpi, unsigned int bpp);
+gp_backend *gp_st7565_init(const char *conn_id, unsigned int dpi);
 
 /*
  * Horizontal DPI is 108
@@ -55,50 +61,63 @@ gp_backend *gp_st75256_init(unsigned int dpi, unsigned int bpp);
  */
 #define JLX256128_DPI 104
 
+#define JLX256160_DPI 102
+
 static gp_ev_queue event_queue;
 
-gp_backend *gp_backend_display_init(enum gp_backend_display_model_ids model)
+gp_backend *gp_backend_display_init(const char *conn_id, enum gp_backend_display_model_ids model)
 {
 	gp_backend *ret = NULL;
 
+	if (conn_id && !strcasecmp(conn_id, "help")) {
+		gp_display_conn_by_name(conn_id);
+		return NULL;
+	}
+
 	switch (model) {
 	case GP_WAVESHARE_7_5_V2:
-		ret = gp_waveshare_7_5_v2_init();
+		ret = gp_waveshare_7_5_v2_init(conn_id);
 	break;
 	case GP_WAVESHARE_3_7:
-		ret = gp_waveshare_3_7_init();
+		ret = gp_waveshare_3_7_init(conn_id);
 	break;
 	case GP_WEACT_2_13_BW:
-		ret = gp_ssd16xx_init(122, 250, 130);
+		ret = gp_ssd16xx_init(conn_id, 122, 250, 130);
 	break;
 	case GP_WEACT_2_9_BW:
-		ret = gp_ssd16xx_init(128, 296, 125);
+		ret = gp_ssd16xx_init(conn_id, 128, 296, 125);
 	break;
 	case GP_GMG12864:
-		ret = gp_st7565_init(67);
+		ret = gp_st7565_init(conn_id, 67);
 	break;
 	case GP_JLX256128_1:
-		ret = gp_st75256_init(JLX256128_DPI, 1);
+		ret = gp_display_st75256_init(conn_id, 128, 256, 312, JLX256128_DPI, 1);
 	break;
 	case GP_JLX256128_2:
-		ret = gp_st75256_init(JLX256128_DPI, 2);
+		ret = gp_display_st75256_init(conn_id, 128, 256, 312, JLX256128_DPI, 2);
+	break;
+	case GP_JLX256160_1:
+		ret = gp_display_st75256_init(conn_id, 160, 256, 284, JLX256160_DPI, 1);
+	break;
+	case GP_JLX256160_2:
+		ret = gp_display_st75256_init(conn_id, 160, 256, 284, JLX256160_DPI, 2);
 	break;
 	case GP_ST7789_1_9:
-		ret = gp_display_st77xx_init(170, 320, 35, 0, 184, GP_DISPLAY_ST77XX_INV);
+		ret = gp_display_st77xx_init(conn_id, 170, 320, 35, 0, 184, GP_DISPLAY_ST77XX_INV);
 	break;
 	case GP_GMT020_02:
-		ret = gp_display_st77xx_init(240, 320, 0, 0, 199, GP_DISPLAY_ST77XX_INV);
+		ret = gp_display_st77xx_init(conn_id, 240, 320, 0, 0, 199, GP_DISPLAY_ST77XX_INV);
 	break;
 	case GP_ST7789_2_8:
-		ret = gp_display_st77xx_init(240, 320, 0, 0, 141, 0);
+		ret = gp_display_st77xx_init(conn_id, 240, 320, 0, 0, 141, 0);
 	break;
 	case GP_ST7796_3_5:
-		ret = gp_display_st77xx_init(320, 480, 0, 0, 166,
+		ret = gp_display_st77xx_init(conn_id, 320, 480, 0, 0, 166,
 		                             GP_DISPLAY_ST77XX_BGR |
 		                             GP_DISPLAY_ST77XX_MIRROR_X);
 	break;
 	case GP_ST7735_1_8:
-		ret = gp_display_st77xx_init(128, 160, 0, 0, 115, 0);
+		ret = gp_display_st77xx_init(conn_id, 128, 160, 0, 0, 115, 0);
 	break;
 	default:
 		GP_FATAL("Invalid model %i\n", model);

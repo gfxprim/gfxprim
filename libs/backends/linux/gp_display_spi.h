@@ -37,6 +37,16 @@ struct gp_gpio_map {
 };
 
 /**
+ * @brief Describes a display connection.
+ */
+struct gp_display_conn {
+	/** @brief Mappings for Reset, Data/Command, etc. */
+	struct gp_gpio_map *gpio_map;
+	/** @brief Path to the SPI device e.g. "/dev/spi0.0" */
+	const char *spi_dev;
+};
+
+/**
  * @brief SPI display.
  */
 struct gp_display_spi {
@@ -66,17 +76,18 @@ struct gp_display_spi {
  *
  * @brief self An SPI display structure to be initialized.
  * @brief spi_dev An SPI device e.g. "/dev/spidev0.0".
+ * @brief conn Display connector GPIO map + SPI device e.g. "/dev/spidev0.0".
  * @brief mode An SPI mode, see linux/spi/spi.h for details.
  * @brief speed An SPI speed in Hz.
- * @brief gpio_map A GPIO map for the display.
  * @brief w Display width in pixels.
  * @brief h Display height in pixels.
  *
  * @return Zero on success, non-zero otherwise.
  */
 int gp_display_spi_init(struct gp_display_spi *self,
-                        const char *spi_dev, uint8_t mode, uint32_t speed,
-			struct gp_gpio_map *gpio_map, uint16_t w, uint16_t h);
+                        struct gp_display_conn *conn,
+                        uint8_t mode, uint32_t speed,
+			uint16_t w, uint16_t h);
 
 /**
  * @brief Deinitializes an SPI display.

@@ -11,12 +11,14 @@
 #include "gp_display_spi.h"
 
 int gp_display_spi_init(struct gp_display_spi *self,
-                        const char *spi_dev, uint8_t mode, uint32_t speed,
-			struct gp_gpio_map *map, uint16_t w, uint16_t h)
+                        struct gp_display_conn *conn,
+			uint8_t mode, uint32_t speed,
+			uint16_t w, uint16_t h)
 {
 	int ret;
+	struct gp_gpio_map *map = conn->gpio_map;
 
-	self->spi_fd = gp_spi_open(spi_dev, mode, speed);
+	self->spi_fd = gp_spi_open(conn->spi_dev, mode, speed);
 
 	if (self->spi_fd < 0)
 		return 1;

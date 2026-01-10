@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include "../../config.h"
@@ -394,8 +394,9 @@ static gp_backend *display_init(char *params,
                                 const char GP_UNUSED(*caption))
 {
 	unsigned int i;
+	const char *conn_id = NULL;
 
-	if (!strcmp(params, "help")) {
+	if (!strcasecmp(params, "help")) {
 		printf("display_models:\n\n");
 		for (i = 0; gp_backend_display_models[i].name; i++) {
 			printf("\t%s - %s\n",
@@ -407,11 +408,28 @@ static gp_backend *display_init(char *params,
 		return NULL;
 	}
 
+	if (!strncasecmp(params, "conn=", 5)) {
+		conn_id = params + 5;
+
+		while (*params && *params != ':')
+			params++;
+
+		if (*params) {
+			*params = 0;
+			params++;
+		}
+
+		if (!strcasecmp(conn_id, "help")) {
+			gp_backend_display_init(conn_id, 0);
+			return NULL;
+		}
+	}
+
 	for (i = 0; gp_backend_display_models[i].name; i++) {
 		if (!strcasecmp(gp_backend_display_models[i].name, params)) {
-			gp_backend *ret = gp_backend_display_init(i);
+			gp_backend *ret = gp_backend_display_init(conn_id, i);
 
-			if (gp_linux_input_hotplug_new(ret)) {
+			if (ret && gp_linux_input_hotplug_new(ret)) {
 				GP_WARN("Failed to initialize Linux input");
 				gp_backend_exit(ret);
 				return NULL;
