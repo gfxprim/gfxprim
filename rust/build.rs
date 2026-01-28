@@ -5,11 +5,16 @@ use std::path::PathBuf;
 
 fn main() {
     println!("cargo:rustc-link-lib=gfxprim");
+    println!("cargo:rustc-link-lib=gfxprim-loaders");
 
     let bindings = bindgen::Builder::default()
         .wrap_static_fns(true)
         .wrap_static_fns_path(PathBuf::from("wrapper.c"))
+        .allowlist_function("gp_.*")
+        .allowlist_type("gp_.*")
+        .allowlist_var("gp_.*")
         .prepend_enum_name(false)
+        .generate_comments(false)
         .clang_arg("-I/usr/include/gfxprim")
         .header("wrapper.h")
         .generate()
