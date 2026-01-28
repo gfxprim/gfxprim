@@ -4,6 +4,7 @@
  */
 
 #include <time.h>
+#include <math.h>
 #include <core/gp_fixed_point.h>
 #include "space.h"
 

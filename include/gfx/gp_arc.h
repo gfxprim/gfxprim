@@ -11,8 +11,6 @@
 
 #include <core/gp_types.h>
 
-#include <math.h>
-
 void gp_arc_segment(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 		    gp_size a, gp_size b, int direction,
 		    double start, double end,

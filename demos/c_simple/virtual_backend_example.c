@@ -12,6 +12,8 @@
 
   */
 
+#include <math.h>
+
 #include <gfxprim.h>
 
 static gp_pixel white_pixel, black_pixel, red_pixel, blue_pixel, green_pixel;

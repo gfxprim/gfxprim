@@ -6,6 +6,7 @@
  * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 

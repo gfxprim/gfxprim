@@ -6,6 +6,7 @@
 
  */
 
+#include <math.h>
 #include <string.h>
 
 #include <widgets/gp_widgets.h>

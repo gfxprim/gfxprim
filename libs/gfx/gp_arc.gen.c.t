@@ -6,6 +6,8 @@
  * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
+#include <math.h>
+
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_transform.h>
 #include <core/gp_pixel_pack.gen.h>
