@@ -18,7 +18,7 @@
 
 #include <input/gp_keys.h>
 
-int gp_ev_any_key_pressed_(gp_event *ev, ...)
+int gp_ev_any_key_pressed_(const gp_event *ev, ...)
 {
 	va_list ap;
 	uint32_t key;
@@ -40,7 +40,7 @@ int gp_ev_any_key_pressed_(gp_event *ev, ...)
 	}
 }
 
-int gp_ev_all_keys_pressed_(gp_event *ev, ...)
+int gp_ev_all_keys_pressed_(const gp_event *ev, ...)
 {
 	va_list ap;
 	uint32_t key;
@@ -62,7 +62,7 @@ int gp_ev_all_keys_pressed_(gp_event *ev, ...)
 	}
 }
 
-static void dump_rel(gp_event *ev)
+static void dump_rel(const gp_event *ev)
 {
 	printf("Rel ");
 
@@ -78,7 +78,7 @@ static void dump_rel(gp_event *ev)
 	}
 }
 
-static void dump_key(gp_event *ev)
+static void dump_key(const gp_event *ev)
 {
 	const char *name = gp_ev_key_name(ev->key.key);
 
@@ -86,7 +86,7 @@ static void dump_key(gp_event *ev)
 	       ev->key.key, name, ev->key.utf, ev->code ? "down" : "up");
 }
 
-static void dump_abs(gp_event *ev)
+static void dump_abs(const gp_event *ev)
 {
 	switch (ev->code) {
 	case GP_EV_ABS_POS:
@@ -96,7 +96,7 @@ static void dump_abs(gp_event *ev)
 	}
 }
 
-static void dump_sys(gp_event *ev)
+static void dump_sys(const gp_event *ev)
 {
 	switch (ev->code) {
 	case GP_EV_SYS_QUIT:
@@ -120,7 +120,7 @@ static void dump_sys(gp_event *ev)
 	}
 }
 
-void gp_ev_dump(gp_event *ev)
+void gp_ev_dump(const gp_event *ev)
 {
 	printf("Event (%"PRIu64") ", ev->time);
 

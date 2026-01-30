@@ -246,7 +246,7 @@ struct gp_event {
  * @param ev A key input event.
  * @return True if utf character is a control character (non-printable).
  */
-static inline int gp_ev_utf_is_ctrl(gp_event *ev)
+static inline int gp_ev_utf_is_ctrl(const gp_event *ev)
 {
 	if (!ev->key.utf)
 		return 0;
@@ -276,7 +276,7 @@ static inline void gp_events_state_press(gp_events_state *self, uint32_t key)
  *
  * @return True if the key pressed bit is set in the state keys bitmap.
  */
-static inline int gp_events_state_pressed(gp_events_state *self, uint32_t key)
+static inline int gp_events_state_pressed(const gp_events_state *self, uint32_t key)
 {
 	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
 		return 0;
@@ -316,7 +316,7 @@ static inline void gp_events_state_release_all(gp_events_state *self)
  *
  * @return True if key is being pressed.
  */
-static inline int gp_ev_key_pressed(gp_event *ev, uint32_t key)
+static inline int gp_ev_key_pressed(const gp_event *ev, uint32_t key)
 {
 	if (!ev->st)
 		return 0;
@@ -333,7 +333,7 @@ static inline int gp_ev_key_pressed(gp_event *ev, uint32_t key)
  * @return True if any key from a list is pressed.
  */
 #define gp_ev_any_key_pressed(ev, ...) gp_ev_any_key_pressed_(ev, __VA_ARGS__, 0)
-int gp_ev_any_key_pressed_(gp_event *ev, ...);
+int gp_ev_any_key_pressed_(const gp_event *ev, ...);
 
 /**
  * @brief Checks for all key from a set to be pressed.
@@ -343,13 +343,13 @@ int gp_ev_any_key_pressed_(gp_event *ev, ...);
  * @return True if all keys from a list are pressed.
  */
 #define gp_ev_all_keys_pressed(ev, ...) gp_ev_all_keys_pressed_(ev, __VA_ARGS__, 0)
-int gp_ev_all_keys_pressed_(gp_event *ev, ...);
+int gp_ev_all_keys_pressed_(const gp_event *ev, ...);
 
 /**
  * @brief Dumps event into a stdout.
  *
  * @param ev A pointer to an input event.
  */
-void gp_ev_dump(gp_event *ev);
+void gp_ev_dump(const gp_event *ev);
 
 #endif /* INPUT_GP_EVENT_H */
