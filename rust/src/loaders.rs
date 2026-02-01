@@ -1,3 +1,4 @@
+use std::ffi::CString;
 use super::gfxprim_ffi::*;
 use super::Pixmap;
 
@@ -30,10 +31,12 @@ where F: FnMut(f32) -> bool + 'static,
 /// Image loaders and savers
 impl Pixmap {
     /// Loads image from a file.
-    pub fn load(s: String, on_progress: impl Fn(f32) -> bool + 'static) -> Option<Pixmap> {
+    pub fn load(s: &str, on_progress: impl Fn(f32) -> bool + 'static) -> Option<Pixmap> {
         progress_trampoline(on_progress, |cb_ptr| {
+                let path = CString::new(s).expect("Invalid string");
+
                 unsafe {
-                    let img_ptr = gp_load_image(s.as_ptr() as *const i8, cb_ptr);
+                    let img_ptr = gp_load_image(path.as_ptr(), cb_ptr);
 
                     if img_ptr.is_null() {
                         None
@@ -47,8 +50,9 @@ impl Pixmap {
 
     pub fn save(self, s: String, on_progress: impl Fn(f32) -> bool + 'static) {
         progress_trampoline(on_progress, |cb_ptr| {
+                let path = CString::new(s).expect("Invalid string");
                 unsafe {
-                    gp_save_image(self.ptr, s.as_ptr() as *const i8, cb_ptr);
+                    gp_save_image(self.ptr, path.as_ptr(), cb_ptr);
                 }
             }
         )
@@ -61,7 +65,7 @@ mod tests {
 
     #[test]
     fn callback_test() {
-        let mut p = Pixmap::new(100, 100, GP_PIXEL_RGB888, 0).expect("Malloc failed");
+        let mut p = Pixmap::new(100, 100, PIXEL_RGB888, 0).expect("Malloc failed");
 
         p.fill(0);
 

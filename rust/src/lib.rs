@@ -3,9 +3,11 @@
 #![allow(non_camel_case_types)]
 
 mod gfxprim_ffi;
-mod gfx;
-mod loaders;
+pub mod gfx;
+pub mod loaders;
+pub mod backends;
 
+pub use gfxprim_ffi::*;
 use std::rc::Rc;
 use std::ffi::c_void;
 use gfxprim_ffi::*;
@@ -39,7 +41,7 @@ impl Pixmap {
     ///
     /// # Examples
     ///
-    /// let mut pic = Pixmap::new(10, 10, GP_PIXEL_RGB888, 0);
+    /// let mut pic = Pixmap::new(10, 10, PIXEL_RGB888, 0);
     ///
     /// # Errors
     ///
@@ -244,7 +246,7 @@ mod tests {
     fn pixmap_test() {
         let w = 100;
         let h = 200;
-        let pixel_type = GP_PIXEL_RGB888;
+        let pixel_type = PIXEL_RGB888;
 
         let mut p = Pixmap::new(w, h, pixel_type, 0).expect("Malloc failed");
 
@@ -269,7 +271,7 @@ mod tests {
     fn sub_pixmap_test() {
         let w = 100;
         let h = 200;
-        let pixel_type = GP_PIXEL_RGB888;
+        let pixel_type = PIXEL_RGB888;
 
         let mut p = Pixmap::new(w, h, pixel_type, 0).expect("Malloc failed");
         let mut sp = p.sub_pixmap(1, 1, w - 2, h - 2).expect("Malloc failed");
@@ -309,7 +311,7 @@ mod tests {
         let sp : Pixmap;
 
         {
-            let p = Pixmap::new(100, 100, GP_PIXEL_RGB888, 0).expect("Malloc failed");
+            let p = Pixmap::new(100, 100, PIXEL_RGB888, 0).expect("Malloc failed");
 
             sp = p.sub_pixmap(1, 1, 80, 80).expect("Malloc failed");
 
@@ -322,7 +324,7 @@ mod tests {
     #[test]
     fn pixmap_fill()
     {
-        let mut pixmap = Pixmap::new(100, 100, GP_PIXEL_RGB888, 0).expect("Malloc failure");
+        let mut pixmap = Pixmap::new(100, 100, PIXEL_RGB888, 0).expect("Malloc failure");
         let red = pixmap.rgb_to_pixel(0xff, 0x00, 0x00);
         let green = pixmap.rgb_to_pixel(0x00, 0xff, 0x00);
 
@@ -336,7 +338,7 @@ mod tests {
     #[test]
     fn pixmap_from_vec() {
         let mut pixels = vec![0x00, 0x00, 0x00];
-        let mut p = Pixmap::from_data(1, 1, GP_PIXEL_RGB888, &mut pixels).expect("Malloc failed");
+        let mut p = Pixmap::from_data(1, 1, PIXEL_RGB888, &mut pixels).expect("Malloc failed");
         let white = p.rgb_to_pixel(0xff, 0xff, 0xff);
         let black = p.rgb_to_pixel(0x00, 0x00, 0x00);
 
@@ -347,8 +349,8 @@ mod tests {
 
     #[test]
     fn blit_test() {
-        let mut src = Pixmap::new(100, 100, GP_PIXEL_RGB888, 0).expect("Malloc failure");
-        let mut dst = Pixmap::new(100, 100, GP_PIXEL_RGB888, 0).expect("Malloc failure");
+        let mut src = Pixmap::new(100, 100, PIXEL_RGB888, 0).expect("Malloc failure");
+        let mut dst = Pixmap::new(100, 100, PIXEL_RGB888, 0).expect("Malloc failure");
 
         let white = src.rgb_to_pixel(0xff, 0xff, 0xff);
         let black = dst.rgb_to_pixel(0x00, 0x00, 0x00);

@@ -75,7 +75,7 @@ mod tests {
     fn line_test() {
         let w = 10;
         let h = 10;
-        let pixel_type = GP_PIXEL_RGB888;
+        let pixel_type = PIXEL_RGB888;
 
         let mut p = Pixmap::new(w, h, pixel_type, 0).expect("Malloc failed");
 
