@@ -95,7 +95,7 @@ struct gp_pixmap {
 	uint8_t y_swap:1;
 
 	/**
-	 * @brief Set pixels were allocatd by malloc().
+	 * @brief Set if pixels were allocatd by malloc().
 	 *
 	 * If set the pixels are:
 	 *
@@ -103,6 +103,13 @@ struct gp_pixmap {
 	 * - pixmap could be resized by gp_pixmap_resize()
 	 */
 	uint8_t pixels_allocated:1;
+
+	/**
+	 * @brief Set if pixmap was allocated by malloc().
+	 *
+	 * If set the pixmap is freed by free() when pixmap is freed.
+	 */
+	uint8_t pixmap_allocated:1;
 };
 
 /**
@@ -279,8 +286,10 @@ void gp_pixmap_free(gp_pixmap *self);
  * @brief A pixmap init flags.
  */
 enum gp_pixmap_init_flags {
+	/** If set the pixmap is freed on gp_pixmap_free() */
+	GP_PIXMAP_FREE_PIXMAP = 0x01,
 	/** If set the pixmap->pixels is freed on gp_pixmap_free() */
-	GP_PIXMAP_FREE_PIXELS = 0x01,
+	GP_PIXMAP_FREE_PIXELS = 0x02,
 };
 
 /**
@@ -355,11 +364,10 @@ static inline gp_pixmap *gp_pixmap_from_data(gp_size w, gp_size h,
 					     enum gp_pixmap_init_flags flags)
 {
 	gp_pixmap *ret = malloc(sizeof(gp_pixmap));
-
 	if (!ret)
 		return NULL;
 
-	return gp_pixmap_init(ret, w, h, type, pixels, flags);
+	return gp_pixmap_init(ret, w, h, type, pixels, flags | GP_PIXMAP_FREE_PIXMAP);
 }
 
 /**

@@ -53,6 +53,7 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t
 		return NULL;
 	}
 
+	pixmap->pixmap_allocated = 1;
 	pixmap->pixels = NULL;
 	pixmap->bytes_per_row = 0;
 	pixmap->offset = 0;
@@ -65,8 +66,6 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t
 
 	/* rotation and mirroring */
 	gp_pixmap_rotation_set(pixmap, 0, 0, 0);
-
-	pixmap->pixels_allocated = 1;
 
 	if (!w || !h)
 		return pixmap;
@@ -106,6 +105,7 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t
 	}
 
 	pixmap->pixels = pixels;
+	pixmap->pixels_allocated = 1;
 	pixmap->bytes_per_row = bpr;
 
 	return pixmap;
@@ -138,7 +138,8 @@ void gp_pixmap_free(gp_pixmap *pixmap)
 
 	gp_gamma_decref(pixmap->gamma);
 
-	free(pixmap);
+	if (pixmap->pixmap_allocated)
+		free(pixmap);
 }
 
 gp_pixmap *gp_pixmap_init_ex(gp_pixmap *pixmap, gp_size w, gp_size h,
@@ -159,6 +160,7 @@ gp_pixmap *gp_pixmap_init_ex(gp_pixmap *pixmap, gp_size w, gp_size h,
 	gp_pixmap_rotation_set(pixmap, 0, 0, 0);
 
 	pixmap->pixels_allocated = !!(flags & GP_PIXMAP_FREE_PIXELS);
+	pixmap->pixmap_allocated = !!(flags & GP_PIXMAP_FREE_PIXMAP);
 
 	return pixmap;
 }
@@ -214,6 +216,7 @@ gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, enum gp_pixmap_copy_flags flags)
 	}
 
 	new->pixels = pixels;
+	new->pixmap_allocated = 1;
 
 	if (flags & GP_PIXMAP_COPY_PIXELS)
 		memcpy(pixels, src->pixels, src->bytes_per_row * src->h);
@@ -294,6 +297,8 @@ gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *pixmap,
 		return NULL;
 	}
 
+	res->pixmap_allocated = 1;
+
 	return gp_sub_pixmap(pixmap, res, x, y, w, h);
 }
 
@@ -338,8 +343,8 @@ void gp_pixmap_print_info(const gp_pixmap *self)
 	printf("Pixel\t%s (%u)\n", gp_pixel_type_name(self->pixel_type),
 	       self->pixel_type);
 	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
-	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u pixels_allocated=%u\n",
-	       self->axes_swap, self->x_swap, self->y_swap, self->pixels_allocated);
+	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u pixmap_allocated=%u pixels_allocated=%u\n",
+	       self->axes_swap, self->x_swap, self->y_swap, self->pixmap_allocated, self->pixels_allocated);
 
 	if (self->gamma)
 		gp_gamma_print(self->gamma);

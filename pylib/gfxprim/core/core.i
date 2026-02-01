@@ -65,7 +65,8 @@ const gp_pixel_type_desc *gp_pixel_types_access(gp_pixel_type no)
 %rename("_%s") "gp_pixmap::x_swap";
 %rename("_%s") "gp_pixmap::y_swap";
 %rename("_%s") "gp_pixmap::bit_endian";
-%rename("_%s") "gp_pixmap::free_pixels";
+%rename("_%s") "gp_pixmap::pixels_allocated";
+%rename("_%s") "gp_pixmap::pixmap_allocated";
 
 %inline %{
 PyObject *gp_pixmap_to_byte_array(gp_pixmap *self)
@@ -93,8 +94,8 @@ and self.thisown.") gp_pixmap;
 
 %extend gp_pixmap {
   ~gp_pixmap() {
-    GP_DEBUG(2, "[wrapper] gp_pixmap_free (%dx%d raw, free_pixels:%d)",
-      $self->w, $self->h, $self->free_pixels);
+    GP_DEBUG(2, "[wrapper] gp_pixmap_free (%dx%d raw, pixmap_allocated:%u pixels_allocated:%u)",
+      $self->w, $self->h, $self->pixmap_allocated, $self->pixels_allocated);
     gp_pixmap_free($self);
   }
   gp_pixmap(gp_coord w, gp_coord h, gp_pixel_type typeno) {
