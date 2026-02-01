@@ -14,6 +14,7 @@
 #define LOADERS_GP_CONTAINER_H
 
 #include <core/gp_types.h>
+#include <core/gp_compiler.h>
 #include <core/gp_progress_callback.h>
 #include <utils/gp_seek.h>
 #include <loaders/gp_types.h>
@@ -79,7 +80,7 @@ struct gp_container {
 	 */
 	const struct gp_container_ops *ops;
 
-	char priv[];
+	char priv[] GP_ALIGNED;
 };
 
 #define GP_CONTAINER_PRIV(c) ((void*)(c)->priv)

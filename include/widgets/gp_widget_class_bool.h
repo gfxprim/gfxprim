@@ -16,11 +16,13 @@
 #ifndef GP_WIDGET_CLASS_BOOL_H
 #define GP_WIDGET_CLASS_BOOL_H
 
+#include <core/gp_compiler.h>
+
 typedef struct gp_widget_bool {
 	/** @brief A boolean value of the widget. */
 	bool val;
 	/** @brief Points to the widget private data. */
-	char payload[];
+	char payload[] GP_ALIGNED;
 } gp_widget_class_bool;
 
 /**

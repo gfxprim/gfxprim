@@ -26,8 +26,6 @@
 %ignore gp_grabber::exit;
 %ignore gp_grabber::poll;
 
-%include "gp_grabber.h"
-
 /*
  * Particular grabbers.
  */

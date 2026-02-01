@@ -19,6 +19,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <core/gp_debug.h>
+#include <core/gp_compiler.h>
 #include <utils/gp_types.h>
 #include <widgets/gp_common.h>
 #include <widgets/gp_widget_types.h>
@@ -158,7 +159,7 @@ struct gp_widget {
 	 *
          * @warning This is internal API do not use in applications!
 	 */
-	char payload_data[];
+	char payload_data[] GP_ALIGNED;
 };
 
 /**

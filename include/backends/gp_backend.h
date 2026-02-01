@@ -26,6 +26,7 @@
 #define BACKENDS_GP_BACKEND_H
 
 #include <core/gp_types.h>
+#include <core/gp_compiler.h>
 #include <core/gp_pixmap.h>
 
 #include <utils/gp_timer.h>
@@ -339,7 +340,7 @@ struct gp_backend {
 	unsigned int dpi;
 
 	/* Backed private data */
-	char priv[];
+	char priv[] GP_ALIGNED;
 };
 
 #define GP_BACKEND_PRIV(backend) ((void*)(backend)->priv)

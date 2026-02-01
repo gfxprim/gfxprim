@@ -13,6 +13,8 @@
 #ifndef GP_WIDGET_CLASS_CHOICE_H
 #define GP_WIDGET_CLASS_CHOICE_H
 
+#include <core/gp_compiler.h>
+
 /**
  * @brief A choice op for the get callback.
  */
@@ -111,7 +113,7 @@ struct gp_widget_choice {
 		struct gp_widget_choice_arr *arr;
 	};
 
-	char payload[];
+	char payload[] GP_ALIGNED;
 };
 
 /**

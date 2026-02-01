@@ -17,6 +17,8 @@
 #ifndef GP_WIDGET_CLASS_INT_H
 #define GP_WIDGET_CLASS_INT_H
 
+#include <core/gp_compiler.h>
+
 /**
  * @brief A widget int direction.
  */
@@ -35,7 +37,7 @@ typedef struct gp_widget_int {
 	int alert:1;
 	int dir:2;
 
-	char payload[];
+	char payload[] GP_ALIGNED;
 } gp_widget_class_int;
 
 /**

@@ -11,6 +11,7 @@
 #define GP_GRABBERS_GRABBER_H
 
 #include <core/gp_types.h>
+#include <core/gp_compiler.h>
 
 typedef struct gp_grabber gp_grabber;
 
@@ -59,7 +60,7 @@ struct gp_grabber {
 	 */
 	void (*exit)(gp_grabber *self);
 
-	char priv[];
+	char priv[] GP_ALIGNED;
 };
 
 #define GP_GRABBER_PRIV(grabber) ((void*)(grabber)->priv)

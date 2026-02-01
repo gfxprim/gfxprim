@@ -43,6 +43,8 @@
 #ifndef GP_WIDGET_TABLE_H
 #define GP_WIDGET_TABLE_H
 
+#include <core/gp_compiler.h>
+
 /** @brief Table row operation. */
 enum gp_widget_table_row_op {
 	/** @brief Sets current row to 0, i.e. the first row in the table. */
@@ -235,7 +237,7 @@ typedef struct gp_widget_table {
 
 	void *free;
 
-	char buf[];
+	char buf[] GP_ALIGNED;
 } gp_widget_table;
 
 /** @brief A gp_widget_event::sub_type for a table widget. */

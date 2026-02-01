@@ -14,6 +14,7 @@
 #ifndef GP_DIALOG_H
 #define GP_DIALOG_H
 
+#include <core/gp_compiler.h>
 #include <input/gp_types.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_types.h>
@@ -30,7 +31,8 @@ struct gp_dialog {
 	int (*input_event)(gp_dialog *self, gp_event *ev);
 	/** Set to non-zero to exit the dialog */
 	long retval;
-	char payload[];
+
+	char payload[] GP_ALIGNED;
 };
 
 /**

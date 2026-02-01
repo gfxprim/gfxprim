@@ -11,6 +11,12 @@
 #ifndef CORE_GP_COMPILER_H
 #define CORE_GP_COMPILER_H
 
+#if __DOXYGEN__
+# define GP_ALIGNED
+#else
+# define GP_ALIGNED __attribute__((aligned (sizeof(void*))))
+#endif /* __DOXYGEN__ */
+
 #if __GNUC__
 # define GP_IS_CONSTANT(x) __builtin_constant_p(x)
 # define GP_WUR __attribute__((warn_unused_result))

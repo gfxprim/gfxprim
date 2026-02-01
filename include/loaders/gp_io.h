@@ -66,7 +66,7 @@ struct gp_io {
 	 */
 	off_t mark;
 
-	char priv[];
+	char priv[] GP_ALIGNED;
 };
 
 #define GP_IO_PRIV(io) ((void *)(io)->priv)
