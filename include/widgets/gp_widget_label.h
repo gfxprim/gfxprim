@@ -74,15 +74,39 @@ const char *gp_widget_label_get(gp_widget *self);
 /**
  * @brief Sets the label text format.
  *
- * The text format may include a variable that can be then set.
+ * The text format may include a single variable.
+ *
+ * Variables are enclosed with curly braces {} and the initial size of the
+ * label widget is computed from the characters inside the braces that gets
+ * replaced with with a call to gp_widget_label_fmt_var_set().
  *
  * @param self A label widget.
  * @param text_fmt A text format.
  */
-void gp_widget_labe_fmt_set(gp_widget *self, const char *text_fmt);
+void gp_widget_label_fmt_set(gp_widget *self, const char *text_fmt);
 
 /**
- * @brief Sets label accordingly to text format string.
+ * @brief Sets label accordingly to label fmt string.
+ *
+ * The label widget fmt string must be set first. The format can be set either
+ * by JSON 'fmt' attribute or by gp_widget_label_fmt_set(). The fmt string must
+ * contain a single variable enclosed in curly braces which is then repatedly
+ * replaced. The characters between curly braces are used for initial widget
+ * size computation. Curly braces are escaped with '\'.
+ *
+ * @code
+ *
+ * void init(...)
+ * {
+ *         gp_widget_label_fmt_set(label, "Temperature {??.?}\u00b0C");
+ * }
+ *
+ * void update_temp(...)
+ * {
+ *         gp_widget_label_fmt_var_set(label, "%.1f", temp);
+ * }
+ *
+ * @endcode
  *
  * @param self A label widget.
  * @param fmt Printf-like format
@@ -153,7 +177,7 @@ void gp_widget_label_width_set(gp_widget *self, unsigned int width);
 unsigned int gp_widget_label_width_get(gp_widget *self);
 
 /**
- * @brief Sets frame flags.
+ * @brief Sets label flags.
  *
  * @param self A label widget.
  * @param flags A new label flags.
@@ -161,7 +185,7 @@ unsigned int gp_widget_label_width_get(gp_widget *self);
 void gp_widget_label_flags_set(gp_widget *self, enum gp_widget_label_flags flags);
 
 /**
- * @brief Gets frame flags.
+ * @brief Gets label flags.
  *
  * @param self A label widget.
  * @return A label flags.

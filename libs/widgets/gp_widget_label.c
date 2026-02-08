@@ -271,6 +271,9 @@ void gp_widget_label_fmt_set(gp_widget *self, const char *text_fmt)
 
 	free(label->text_fmt);
 	label->text_fmt = strdup(text_fmt);
+
+	if (!label->width)
+		gp_widget_resize(self);
 }
 
 void gp_widget_label_fmt_var_set(gp_widget *self, const char *fmt, ...)
