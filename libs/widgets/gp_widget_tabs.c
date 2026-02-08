@@ -160,6 +160,9 @@ static void render_child_widget(gp_widget *self, gp_widget *child,
 		.y = py,
 	};
 
+	if (!child)
+		return;
+
 	gp_widget_ops_render(child, &widget_offset, ctx, flags);
 }
 
