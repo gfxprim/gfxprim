@@ -348,7 +348,6 @@ static int grid_border_check_set(void)
 
 	grid = gp_widget_grid_new(2, 2, 0);
 	if (!grid) {
-		free(grid);
 		tst_msg("Allocation failure");
 		return TST_FAILED;
 	}
@@ -396,6 +395,76 @@ static int grid_border_check_set(void)
 	return TST_PASSED;
 }
 
+static int grid_cpad_set(void)
+{
+	gp_widget *grid;
+	const gp_widget_grid_gap *g;
+
+	grid = gp_widget_grid_new(2, 2, 0);
+	if (!grid) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_grid_cpad_set(grid, GP_WIDGET_GRID_IPADD_ALL, 7, 5);
+
+	g = gp_widget_grid_cols_gaps_get(grid);
+	if (g[1].padd != 7 || g[1].fill != 5) {
+		tst_msg("Invalid inner padd/fill");
+		return TST_FAILED;
+	}
+
+	gp_widget_grid_cpad_set(grid, 1, 5, 7);
+
+	g = gp_widget_grid_cols_gaps_get(grid);
+	if (g[1].padd != 5 || g[1].fill != 7) {
+		tst_msg("Invalid inner padd/fill");
+		return TST_FAILED;
+	}
+
+	if (check_border(grid, 1, 0)) {
+		tst_msg("Border changed");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+static int grid_rpad_set(void)
+{
+	gp_widget *grid;
+	const gp_widget_grid_gap *g;
+
+	grid = gp_widget_grid_new(2, 2, 0);
+	if (!grid) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_grid_rpad_set(grid, GP_WIDGET_GRID_IPADD_ALL, 7, 5);
+
+	g = gp_widget_grid_rows_gaps_get(grid);
+	if (g[1].padd != 7 || g[1].fill != 5) {
+		tst_msg("Invalid inner padd/fill");
+		return TST_FAILED;
+	}
+
+	gp_widget_grid_rpad_set(grid, 1, 5, 7);
+
+	g = gp_widget_grid_rows_gaps_get(grid);
+	if (g[1].padd != 5 || g[1].fill != 7) {
+		tst_msg("Invalid inner padd/fill");
+		return TST_FAILED;
+	}
+
+	if (check_border(grid, 1, 0)) {
+		tst_msg("Border changed");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "grid testsuite",
 	.tests = {
@@ -421,6 +490,12 @@ const struct tst_suite tst_suite = {
 
 		{.name = "border check set",
 		 .tst_fn = grid_border_check_set},
+
+		{.name = "cpad set",
+		 .tst_fn = grid_cpad_set},
+
+		{.name = "rpad set",
+		 .tst_fn = grid_rpad_set},
 
 		{.name = NULL},
 	}

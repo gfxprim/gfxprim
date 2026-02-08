@@ -434,6 +434,43 @@ void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
                                int padd, int fill);
 
 /**
+ * @brief Sets all inner paddings.
+ *
+ * If this value is passed as a column or row to the gp_widget_grid_cpad_set()
+ * or gp_widget_grid_rpad_set() all inner paddings values are set, e.g. for
+ * column paddings values at indexes between 1 and col - 1 are set.
+ */
+#define GP_WIDGET_GRID_IPADD_ALL UINT_MAX
+
+/**
+ * @brief Sets column padding.
+ *
+ * There are cols + 1 paddings and paddings at index 0 and cols are border paddings.
+ *
+ * @param self A grid widget.
+ * @param col A column border index to set. Values 0 and cols are border
+ *            paddings. Value GP_WIDGET_GRID_IPADD_ALL sets all inner paddings, i.e. all
+ *            indexes but 0 and cols.
+ * @param padd Padding coeficient no change on -1 clamped to 255.
+ * @param fill A filling coeficient no change on -1 clamped to 255.
+ */
+void gp_widget_grid_cpad_set(gp_widget *self, unsigned int col, int padd, int fill);
+
+/**
+ * @brief Sets rows padding.
+ *
+ * There are rows + 1 paddings and paddings at index 0 and rows are border paddings.
+ *
+ * @param self A grid widget.
+ * @param col A row border index to set. Values 0 and rows are border
+ *            paddings. Value GP_WIDGET_GRID_IPADD_ALL sets all inner paddings, i.e. all
+ *            indexes but 0 and rows.
+ * @param padd Padding coeficient no change on -1 clamped to 255.
+ * @param fill A filling coeficient no change on -1 clamped to 255.
+ */
+void gp_widget_grid_rpad_set(gp_widget *self, unsigned int row, int padd, int fill);
+
+/**
  * @brief Disables grid padd and fill.
  *
  * Shortcut for gp_widget_grid_border_set(self, GP_WIDGET_BORDER_ALL, 0, 0).

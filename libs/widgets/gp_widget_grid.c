@@ -1655,6 +1655,74 @@ void gp_widget_grid_border_set(gp_widget *self, enum gp_widget_border border,
 		set_border_fill(self, border, fill);
 }
 
+void gp_widget_grid_cpad_set(gp_widget *self, unsigned int col, int padd, int fill)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	padd = GP_MIN(padd, (int)UINT8_MAX);
+	fill = GP_MIN(fill, (int)UINT8_MAX);
+
+	if (col == GP_WIDGET_GRID_IPADD_ALL) {
+		unsigned int c;
+
+		for (c = 1; c < grid->cols; c++) {
+			if (padd >= 0)
+				grid->col_b[c].padd = padd;
+			if (fill >= 0)
+				grid->col_b[c].fill = fill;
+		}
+		gp_widget_resize(self);
+		return;
+	}
+
+	if (col > grid->cols) {
+		GP_WARN("Invalid col padding index %u > cols=%u", col, grid->cols);
+		return;
+	}
+
+	if (padd >= 0)
+		grid->col_b[col].padd = padd;
+	if (fill >= 0)
+		grid->col_b[col].fill = fill;
+
+	gp_widget_resize(self);
+}
+
+void gp_widget_grid_rpad_set(gp_widget *self, unsigned int row, int padd, int fill)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	padd = GP_MIN(padd, (int)UINT8_MAX);
+	fill = GP_MIN(fill, (int)UINT8_MAX);
+
+	if (row == GP_WIDGET_GRID_IPADD_ALL) {
+		unsigned int r;
+
+		for (r = 1; r < grid->rows; r++) {
+			if (padd >= 0)
+				grid->row_b[r].padd = padd;
+			if (fill >= 0)
+				grid->row_b[r].fill = fill;
+		}
+		gp_widget_resize(self);
+		return;
+	}
+
+	if (row > grid->rows) {
+		GP_WARN("Invalid row padding index %u > rows=%u", row, grid->rows);
+		return;
+	}
+
+	if (padd >= 0)
+		grid->row_b[row].padd = padd;
+	if (fill >= 0)
+		grid->row_b[row].fill = fill;
+
+	gp_widget_resize(self);
+}
+
 void gp_widget_grid_col_fill_set(gp_widget *self, unsigned int col, uint8_t fill)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRID, );
