@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -18,11 +18,24 @@
 
 struct gp_widget_tab {
 	char *label;
+
+	/* Tab label width. */
+	unsigned int tab_w;
+
 	gp_widget *widget;
 };
 
 struct gp_widget_tabs {
+	/* Tab whose content is shown. */
 	unsigned int active_tab;
+
+	/* First tab shown in the tab header. */
+	unsigned int first_shown_tab;
+	/* Last tab shown in the tab header. */
+	unsigned int last_shown_tab;
+
+	/* Width of all the tab labels added together. */
+	unsigned int tabs_w;
 
 	int title_focused:1;
 	int widget_focused:1;
@@ -38,22 +51,50 @@ static gp_size tab_w(gp_widget *self, const gp_widget_render_ctx *ctx,
 	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	const char *label = tabs->tabs[tab].label;
 
-	return gp_text_wbbox(ctx->font_bold, label) + 2 * ctx->padd;
+	tabs->tabs[tab].tab_w = gp_text_wbbox(ctx->font_bold, label) + 2 * ctx->padd;
+
+	return tabs->tabs[tab].tab_w;
+}
+
+/* Buttons to move focused tab. */
+static unsigned int button_w(const gp_widget_render_ctx *ctx)
+{
+	unsigned int text_a = gp_text_ascent(ctx->font);
+
+	return text_a + 2 * ctx->padd;
 }
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
-	unsigned int i, max_min_w = 0, tabs_width = 0;
+	unsigned int i, child_max_w = 0, tabs_max_w = 0, tabs_w = 0;
 
 	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
-		unsigned int min_w = gp_widget_min_w(tabs->tabs[i].widget, ctx);
-		max_min_w = GP_MAX(max_min_w, min_w);
+		unsigned int child_min_w, tab_min_w;
 
-		tabs_width += tab_w(self, ctx, i);
+		child_min_w = gp_widget_min_w(tabs->tabs[i].widget, ctx);
+		child_min_w += 2 * ctx->padd;
+		child_max_w = GP_MAX(child_max_w, child_min_w);
+
+		tab_min_w = tab_w(self, ctx, i);
+		tabs_max_w = GP_MAX(tabs_max_w, tab_min_w);
+
+		tabs_w += tab_min_w;
 	}
 
-	return GP_MAX(max_min_w + 2 * ctx->padd, tabs_width);
+	tabs->tabs_w = tabs_w;
+
+	/*
+	 * If the body is bigger than sum of the labels, we do not need scrolling tabs.
+	 */
+	if (child_max_w >= tabs_w)
+		return child_max_w;
+
+	/*
+	 * Otherwise we need either the biggest child or biggest label + 2 *
+	 * scroll button width.
+	 */
+	return GP_MAX(child_max_w, tabs_max_w + 2 * button_w(ctx));
 }
 
 static gp_size title_h(gp_widget *self, const gp_widget_render_ctx *ctx)
@@ -138,6 +179,19 @@ static int active_first(gp_widget *self)
 	return tabs->active_tab == 0;
 }
 
+static int active_last(gp_widget *self)
+{
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	return tabs->active_tab == gp_vec_len(tabs->tabs)-1;
+}
+
+static int all_tabs_shown(struct gp_widget_tabs *tabs)
+{
+	return tabs->first_shown_tab == 0 &&
+	       tabs->last_shown_tab == gp_vec_len(tabs->tabs)-1;
+}
+
 static gp_widget *active_tab_widget(gp_widget *self)
 {
 	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
@@ -146,6 +200,130 @@ static gp_widget *active_tab_widget(gp_widget *self)
 		return NULL;
 
 	return tabs->tabs[tabs->active_tab].widget;
+}
+
+static void render_tabs_range(gp_widget *self, const gp_offset *offset,
+                              const gp_widget_render_ctx *ctx,
+                              gp_pixel text_color)
+{
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	unsigned int i;
+	unsigned int x = self->x + offset->x;
+	unsigned int y = self->y + offset->y;
+	unsigned int act_x = 0, act_w = 0;
+	unsigned int cur_x = x;
+	unsigned int tab_h = title_h(self, ctx);
+
+	if (!all_tabs_shown(tabs)) {
+		unsigned int bw = button_w(ctx);
+		unsigned int sr = bw/2 - ctx->padd;
+
+		gp_symbol(ctx->buf,
+		          x + bw/2, y + tab_h/2,
+		          sr, sr, GP_TRIANGLE_LEFT,
+		          active_first(self) ? ctx->col_disabled : text_color);
+
+		cur_x += bw;
+
+		gp_fill_rect_xywh(ctx->buf, cur_x-(ctx->fr_thick+1)/2, y+1, ctx->fr_thick, tab_h-1, text_color);
+
+		gp_symbol(ctx->buf,
+		          x + self->w - bw/2, y + tab_h/2,
+		          sr, sr, GP_TRIANGLE_RIGHT,
+		          active_last(self) ? ctx->col_disabled : text_color);
+	}
+
+	for (i = tabs->first_shown_tab; i <= tabs->last_shown_tab; i++) {
+		const char *label = tabs->tabs[i].label;
+		int is_active = tabs->active_tab == i;
+		gp_text_style *font = is_active ? ctx->font_bold : ctx->font;
+
+		unsigned int w = tabs->tabs[i].tab_w;
+
+		if (is_active) {
+			act_x = cur_x;
+			act_w = w;
+		}
+
+		if (is_active && tabs->title_focused) {
+			gp_fill_rect_xywh(ctx->buf,
+				    cur_x + ctx->padd/2,
+				    y + tab_h - ctx->padd + 1,
+				    w - ctx->padd, ctx->fr_thick+1,
+			            ctx->sel_color);
+		}
+
+		gp_text(ctx->buf, font, cur_x + w/2, y + ctx->padd,
+			GP_ALIGN_CENTER|GP_VALIGN_BELOW,
+			text_color, ctx->bg_color, label);
+
+		cur_x += w;
+
+		if (cur_x < x + self->w)
+			gp_fill_rect_xywh(ctx->buf, cur_x-(ctx->fr_thick+1)/2, y+1, ctx->fr_thick, tab_h-1, text_color);
+	}
+
+	gp_size fr_th_20 = ctx->fr_thick/2;
+	gp_size fr_th_21 = (ctx->fr_thick+1)/2;
+
+//	if (!active_first(self))
+		gp_fill_rect_xyxy(ctx->buf, x, y + tab_h, act_x+fr_th_20-1, y + tab_h + ctx->fr_thick-1, text_color);
+
+	gp_fill_rect_xyxy(ctx->buf, act_x + act_w - fr_th_21, y + tab_h, x + self->w-1, y + tab_h + ctx->fr_thick-1, text_color);
+}
+
+static void render_tabs(gp_widget *self, const gp_offset *offset,
+                        const gp_widget_render_ctx *ctx, gp_pixel text_color)
+{
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	unsigned int first = tabs->active_tab;
+	unsigned int last = tabs->active_tab;
+	unsigned int width = tabs->tabs[first].tab_w;
+	unsigned int last_width = width;
+	unsigned int tab_w;
+
+	/* We can fit all tab labels. */
+	if (tabs->tabs_w <= self->w) {
+		tabs->first_shown_tab = 0;
+		tabs->last_shown_tab = gp_vec_len(tabs->tabs)-1;
+		render_tabs_range(self, offset, ctx, text_color);
+		return;
+	}
+
+	unsigned int w = self->w - 2 * button_w(ctx);
+
+	/* We try to append tabs from both sides until we are out of space. */
+	for (;;) {
+		if (first > 0) {
+			tab_w = tabs->tabs[first-1].tab_w;
+
+			if (width + tab_w <= w) {
+				width += tab_w;
+				first--;
+			}
+		}
+
+		if (last + 1 < gp_vec_len(tabs->tabs)) {
+			tab_w = tabs->tabs[last+1].tab_w;
+
+			if (width + tab_w <= w) {
+				width += tab_w;
+				last++;
+			}
+		}
+
+		if (last_width == width)
+			break;
+
+		last_width = width;
+	}
+
+	tabs->first_shown_tab = first;
+	tabs->last_shown_tab = last;
+
+	render_tabs_range(self, offset, ctx, text_color);
 }
 
 static void render_child_widget(gp_widget *self, gp_widget *child,
@@ -174,8 +352,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int tab_h = title_h(self, ctx);
-	unsigned int act_x = 0, act_w = 0;
-	unsigned int i;
 	gp_pixel text_color = ctx->text_color;
 	gp_widget *widget = active_tab_widget(self);
 
@@ -183,9 +359,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 		render_child_widget(self, widget, offset, ctx, flags);
 		return;
 	}
-
-	if (gp_widget_is_disabled(self, flags))
-		text_color = ctx->col_disabled;
 
 	gp_widget_ops_blit(ctx, x, y, self->w, self->h);
 
@@ -195,6 +368,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 		return;
 	}
 
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	if (!widget) {
 		gp_fill_rect_xywh(ctx->buf, x, y,
@@ -204,46 +379,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_fill_rect_xywh(ctx->buf, x, y,
 		                  self->w, tab_h + ctx->padd + widget->y, ctx->bg_color);
 	}
-
-	unsigned int cur_x = x;
-
-	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
-		const char *label = tabs->tabs[i].label;
-		int is_active = tabs->active_tab == i;
-		gp_text_style *font = is_active ? ctx->font_bold : ctx->font;
-
-		unsigned int w = gp_text_wbbox(ctx->font_bold, label) + 2 * ctx->padd;
-
-		if (is_active) {
-			act_x = cur_x;
-			act_w = w;
-		}
-
-		if (is_active && tabs->title_focused) {
-			gp_fill_rect_xywh(ctx->buf,
-				    cur_x + ctx->padd/2,
-				    y + tab_h - ctx->padd + 1,
-				    w - ctx->padd, ctx->fr_thick+1,
-			            ctx->sel_color);
-		}
-
-		gp_text(ctx->buf, font, cur_x + w/2, y + ctx->padd,
-			GP_ALIGN_CENTER|GP_VALIGN_BELOW,
-			text_color, ctx->bg_color, label);
-
-		cur_x += w;
-
-		if (cur_x < x + self->w)
-			gp_fill_rect_xywh(ctx->buf, cur_x-(ctx->fr_thick+1)/2, y+1, ctx->fr_thick, tab_h-1, text_color);
-	}
-
-	gp_size fr_th_20 = ctx->fr_thick/2;
-	gp_size fr_th_21 = (ctx->fr_thick+1)/2;
-
-	if (!active_first(self))
-		gp_fill_rect_xyxy(ctx->buf, x, y + tab_h, act_x+fr_th_20-1, y + tab_h + ctx->fr_thick-1, text_color);
-
-	gp_fill_rect_xyxy(ctx->buf, act_x + act_w - fr_th_21, y + tab_h, x + self->w-1, y + tab_h + ctx->fr_thick-1, text_color);
 
 	if (widget) {
 		gp_coord spy = y + tab_h + ctx->padd;
@@ -257,6 +392,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_fill_rect_xywh(ctx->buf, x + 1, spy + widget->y,
 		                  widget->x + ctx->padd - 1, widget->h, ctx->bg_color);
 	}
+
+	render_tabs(self, offset, ctx, text_color);
 
 	gp_rrect_xywh(ctx->buf, x, y, self->w, self->h, text_color);
 
@@ -438,25 +575,38 @@ static int focus(gp_widget *self, int sel)
 }
 
 static void focus_tab(gp_widget *self, const gp_widget_render_ctx *ctx,
-                       unsigned int x)
+                      unsigned int x)
 {
 	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
 	unsigned int i, cx = 0;
+	unsigned int all_shown = all_tabs_shown(tabs);
+	unsigned int bw = button_w(ctx);
 
-	for (i = 0; i < gp_vec_len(tabs->tabs); i++) {
-		unsigned int w = tab_w(self, ctx, i);
+	if (!all_shown) {
+		if (x <= bw) {
+			if (tabs->active_tab > 0)
+				set_tab(self, tabs->active_tab-1);
+			return;
+		}
+		cx += bw;
+	}
 
-		if (x <= cx + w)
+	for (i = tabs->first_shown_tab; i <= tabs->last_shown_tab; i++) {
+		unsigned int w = tabs->tabs[i].tab_w;
+
+		if (x <= cx + w) {
+			set_tab(self, i);
 			break;
+		}
 
 		cx += w;
 	}
 
-	if (i == gp_vec_len(tabs->tabs))
-		return;
-
-	set_tab(self, i);
+	if (x >= self->w - bw) {
+		if (tabs->active_tab+1 < gp_vec_len(tabs->tabs))
+			set_tab(self, tabs->active_tab+1);
+	}
 }
 
 
@@ -871,6 +1021,7 @@ static gp_widget *tab_rem(gp_widget *self, unsigned int tab)
 	if (was_active)
 		gp_widget_send_widget_event(self, GP_WIDGET_TABS_ACTIVATED);
 
+	gp_widget_resize(self);
 	gp_widget_redraw(self);
 
 	return ret;
