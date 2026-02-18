@@ -383,6 +383,9 @@ void gp_widgets_redraw(struct gp_widget *layout)
 	if (!layout->redraw && !layout->redraw_child)
 		return;
 
+	if (!backend->pixmap)
+		return;
+
 	if (back_from_dialog) {
 		back_from_dialog = 0;
 		gp_widget_calc_size(layout, &ctx, 0, 0, 1);
@@ -665,7 +668,7 @@ int gp_widgets_process_events(gp_widget *layout)
 	gp_event *ev;
 
 	while ((ev = gp_backend_ev_poll(backend))) {
-		gp_ev_dump(ev);
+		//gp_ev_dump(ev);
 		//fflush(stdout);
 		if (gp_widgets_event(ev, layout))
 			gp_widgets_exit(0);
