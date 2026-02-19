@@ -11,9 +11,9 @@
 #include <utils/gp_timer.h>
 #include <utils/gp_heap.h>
 
-static void dump_level(gp_heap_head *heap, unsigned int level, unsigned int cur)
+static void dump_level(const gp_heap_head *heap, unsigned int level, unsigned int cur)
 {
-	gp_timer *timer = GP_HEAP_ENTRY(heap, struct gp_timer, heap);
+	const gp_timer *timer = GP_HEAP_ENTRY(heap, struct gp_timer, heap);
 
 	if (level == cur) {
 		if (heap)
@@ -27,7 +27,7 @@ static void dump_level(gp_heap_head *heap, unsigned int level, unsigned int cur)
 	dump_level(heap ? heap->right : NULL , level, cur+1);
 }
 
-void gp_timer_queue_dump(gp_timer *heap)
+void gp_timer_queue_dump(const gp_timer *heap)
 {
 	unsigned int i, j = 0;
 

@@ -87,7 +87,7 @@ struct gp_timer {
  * @param timer A timer.
  * @return Non-zero if timer is running, zero otherwise.
  */
-static inline int gp_timer_is_running(gp_timer *timer)
+static inline int gp_timer_is_running(const gp_timer *timer)
 {
 	return timer->running;
 }
@@ -97,7 +97,7 @@ static inline int gp_timer_is_running(gp_timer *timer)
  *
  * @param queue A timer queue.
  */
-void gp_timer_queue_dump(gp_timer *queue);
+void gp_timer_queue_dump(const gp_timer *queue);
 
 /**
  * @brief Inserts timer into the timer priority queue.
@@ -148,7 +148,7 @@ int gp_timer_queue_process(gp_timer **queue, uint64_t now);
  * @param queue A timer queue.
  * @return A Number of timers in the queue.
  */
-static inline unsigned int gp_timer_queue_size(gp_timer *queue)
+static inline unsigned int gp_timer_queue_size(const gp_timer *queue)
 {
 	return queue ? queue->heap.children + 1 : 0;
 }
