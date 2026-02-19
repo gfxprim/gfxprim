@@ -357,6 +357,7 @@ my $punctuation = $ENV{'PUNCTUATION'};
 my $katakana = $ENV{'KATAKANA'};
 my $hiragana = $ENV{'HIRAGANA'};
 my $box = $ENV{'BOX'};
+my $subsuper = $ENV{'SUBSUPER'};
 
 sub add_block
 {
@@ -422,6 +423,11 @@ sub convert_font
 		$ucode_blocks .= " | GP_UCODE_PUNCTUATION";
 	}
 
+	if ($enc eq "ISO10646-1" && $subsuper) {
+		gen_glyph_table($glyphs, 0x2070, 0x208e, $max_width, $font_id . "_subsuper", $bold, \&utf_to_utf);
+		$ucode_blocks .= " | GP_UCODE_SUB_SUPER";
+	}
+
 	if ($enc eq "ISO10646-1" && $box) {
 		gen_glyph_table($glyphs, 0x2500, 0x257f, $max_width, $font_id . "_box", $bold, \&utf_to_utf);
 		$ucode_blocks .= " | GP_UCODE_BOX";
@@ -452,6 +458,7 @@ sub convert_font
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $greek);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $cyrilic);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $punctuation);
+	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $subsuper);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $box);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $katakana);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $hiragana);
@@ -479,6 +486,9 @@ sub convert_font
 	}
 	if ($enc eq "ISO10646-1" && $punctuation) {
 		add_block("0x2018", "0x2037", $font_id, "punctuation");
+	}
+	if ($enc eq "ISO10646-1" && $subsuper) {
+		add_block("0x2070", "0x208e", $font_id, "subsuper");
 	}
 	if ($enc eq "ISO10646-1" && $box) {
 		add_block("0x2500", "0x257f", $font_id, "box");
