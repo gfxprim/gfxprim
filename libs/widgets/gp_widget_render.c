@@ -401,10 +401,6 @@ void gp_widgets_redraw(struct gp_widget *layout)
 		return;
 	}
 
-	if (gp_pixmap_w(backend->pixmap) == 0 ||
-	    gp_pixmap_h(backend->pixmap) == 0)
-		return;
-
 	render_and_flip(layout, 0);
 }
 
