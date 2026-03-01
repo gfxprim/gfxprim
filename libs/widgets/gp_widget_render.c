@@ -97,7 +97,6 @@ static gp_font_face *render_font_mono_bold;
 
 static const char *str_font_size;
 static const char *font_family;
-static const char *input_str;
 
 static void update_ctx_sizes(void)
 {
@@ -692,7 +691,6 @@ static void print_options(int exit_val)
 	GP_FONT_FAMILY_FOREACH(&i, f)
 		printf("\t\t - %s\n", f->family_name);
 
-	printf("\t-I input_string\n");
 	printf("\t-s color_scheme\n\t\tlight or dark\n");
 	printf("\t-i print app info\n");
 	exit(exit_val);
@@ -704,7 +702,7 @@ void gp_widgets_getopt(int *argc, char **argv[])
 
 	getopt_called = 1;
 
-	while ((opt = getopt(*argc, *argv, "b:d:f:F:hiI:s:")) != -1) {
+	while ((opt = getopt(*argc, *argv, "b:d:f:F:his:")) != -1) {
 		switch (opt) {
 		case 'i':
 			gp_app_info_print();
@@ -739,9 +737,6 @@ void gp_widgets_getopt(int *argc, char **argv[])
 				printf("Invalid color scheme '%s'!\n\n", optarg);
 				print_options(1);
 			}
-		break;
-		case 'I':
-			input_str = optarg;
 		break;
 		default:
 			print_options(1);
@@ -824,9 +819,6 @@ void gp_widgets_main_loop(gp_widget *layout,
 	gp_widgets_layout_init(layout, gp_app_info_name());
 
 	win_layout = layout;
-
-	if (input_str)
-		//gp_input_linux *input = gp_input_linux_by_devstr(input_str);
 
 	if (init)
 		init(argc, argv);
