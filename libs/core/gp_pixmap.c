@@ -176,14 +176,20 @@ gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
 int gp_pixmap_resize(gp_pixmap *pixmap, gp_size w, gp_size h)
 {
 	uint32_t bpp = gp_pixel_size(pixmap->pixel_type);
-	uint32_t bpr = get_bpr(bpp, w);
 	void *pixels;
 
 	if (!pixmap->pixels_allocated)
 		return EINVAL;
 
-	pixels = realloc(pixmap->pixels, bpr * h);
+	uint32_t bpr = get_bpr(bpp, w);
+	size_t size = bpr * h;
 
+	if (!bpr || size / h != bpr) {
+		GP_WARN("Pixmap too big %u x %u (owerflow detected)", w, h);
+		return EOVERFLOW;
+	}
+
+	pixels = realloc(pixmap->pixels, size);
 	if (!pixels)
 		return ENOMEM;
 
