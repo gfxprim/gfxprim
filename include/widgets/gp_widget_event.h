@@ -256,6 +256,9 @@ static inline int gp_widget_send_widget_event(gp_widget *self,
 	if (!self->on_event)
 		return 0;
 
+	if (!(self->event_mask & GP_WIDGET_EVENT_WIDGET))
+		return 0;
+
 	va_list va;
 	va_start(va, sub_type);
 	long val = va_arg(va, long);
