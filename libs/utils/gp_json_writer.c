@@ -516,8 +516,10 @@ gp_json_writer *gp_json_writer_file_open(const char *path)
 	writer_file = (void*)ret + sizeof(gp_json_writer);
 
 	writer_file->fd = open(path, O_CREAT | O_WRONLY | O_TRUNC, 0664);
-	if (!writer_file->fd) {
+	if (writer_file->fd < 0) {
+		int err = errno;
 		free(ret);
+		errno = err;
 		return NULL;
 	}
 
