@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -73,5 +73,6 @@ const char *gp_str_time_diff(char *buf, size_t buf_len, time_t time, time_t now)
 	else if (mon != t->tm_mon)
 		return months[mon];
 
+	snprintf(buf, buf_len, "%li Days", (diff + 3600 * 12)/(3600 * 24));
 	return buf;
 }
