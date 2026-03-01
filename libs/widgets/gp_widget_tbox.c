@@ -37,7 +37,9 @@ struct tbox_payload {
 	 *
 	 * This is set automatically by a certain tbox types.
 	 */
-	const char *delim;
+	char *delim;
+	/* buffer to store short enough delim into. */
+	char delim_buf[8];
 
 	/* enum gp_widget_tbox_type */
 	uint16_t type;
@@ -1017,12 +1019,11 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 
 	ret = gp_widget_tbox_new(text, attr, len, max_len, NULL, type);
 
-	//TODO: leak on tbox free
 	if (sel_delim) {
 		if (ret)
 			gp_widget_tbox_sel_delim_set(ret, sel_delim);
-		else
-			free(sel_delim);
+
+		free(sel_delim);
 	}
 
 	if (ret) {
@@ -1035,6 +1036,14 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 	return ret;
 }
 
+static void free_delim(struct tbox_payload *tbox)
+{
+	if (tbox->delim != tbox->delim_buf)
+		free(tbox->delim);
+
+	tbox->delim = NULL;
+}
+
 static void free_(gp_widget *self)
 {
 	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
@@ -1044,6 +1053,8 @@ static void free_(gp_widget *self)
 	free(tbox->help);
 
 	gp_vec_free(tbox->buf);
+
+	free_delim(tbox);
 }
 
 struct gp_widget_ops gp_widget_tbox_ops = {
@@ -1083,14 +1094,14 @@ static void set_type(gp_widget *self, enum gp_widget_tbox_type type)
 	switch (type) {
 	case GP_WIDGET_TBOX_HIDDEN:
 	case GP_WIDGET_TBOX_NONE:
-		tbox->delim = NULL;
+		gp_widget_tbox_sel_delim_set(self, NULL);
 	break;
 	case GP_WIDGET_TBOX_PATH:
 	case GP_WIDGET_TBOX_URL:
-		tbox->delim = "/";
+		gp_widget_tbox_sel_delim_set(self, "/");
 	break;
 	case GP_WIDGET_TBOX_FILENAME:
-		tbox->delim = ".";
+		gp_widget_tbox_sel_delim_set(self, ".");
 	break;
 	default:
 		GP_WARN("Invalid textbox type %i!", type);
@@ -1423,7 +1434,19 @@ void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim)
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
 	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
-	tbox->delim = delim;
+	free_delim(tbox);
+
+	if (!delim)
+		return;
+
+	if (strlen(delim) < sizeof(tbox->delim_buf)) {
+		strcpy(tbox->delim_buf, delim);
+		tbox->delim = tbox->delim_buf;
+	} else {
+		tbox->delim = strdup(delim);
+		if (!tbox->delim)
+			GP_WARN("Failed to strdup(delim)");
+	}
 }
 
 void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type)
