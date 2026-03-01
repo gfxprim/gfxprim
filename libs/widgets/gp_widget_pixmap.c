@@ -132,9 +132,9 @@ static inline void redraw_buffered(gp_widget *self,
 	box = gp_bbox_intersection(box, gp_bbox_pack(x, y, w, h));
 
 redraw:
-	gp_blit_xywh(pixmap->pixmap, box.x - x, box.y - y,
-	             box.w, box.h,
-	             ctx->buf, box.x, box.y);
+	gp_blit_xywh_clipped(pixmap->pixmap, box.x - x, box.y - y,
+	                     box.w, box.h,
+	                     ctx->buf, box.x, box.y);
 
 	gp_widget_ops_blit(ctx, box.x, box.y, box.w, box.h);
 }
