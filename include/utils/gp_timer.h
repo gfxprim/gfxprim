@@ -29,21 +29,34 @@ struct gp_timer {
 		gp_timer *next;
 	};
 
-	/** Expiration time, set by user, modified by the queue */
+	/** @brief Initial xpiration time, set by user, modified by the queue */
 	uint64_t expires;
 
-	/** Timer name showed in debug messages */
+	/** @brief Timer name showed in debug messages */
 	const char *id;
 
-	/** User variable may be used to store the timer period */
+	/**
+	 * @brief User variable may be used to store the timer period.
+	 *
+	 * This field is not used by the timer code and is usually returned
+	 * from the callback to reschedule periodic timers.
+	 */
 	uint32_t period;
 
-	/** Set if timer is inserted into a queue */
+	/** @brief Set if timer is inserted into a queue */
 	uint32_t running:1;
-	/** Set during the run of the timer callback */
+	/** @brief Set during the run of the timer callback */
 	uint32_t in_callback:1;
-	/** Set if timer was rescheduled from callback */
+	/** @brief Set if timer was rescheduled from callback */
 	uint32_t res_in_callback:1;
+	/**
+	 * @brief Set if gp_timer_free() was called when timer was running.
+	 *
+	 * This defferes freeing the timer memory afte the timer is stopped.
+	 */
+	uint32_t free_on_stop:1;
+
+
 
 	/** @brief Library private pointer. Do not touch! */
 	void *_priv;
@@ -56,7 +69,7 @@ struct gp_timer {
 	 */
 	uint32_t (*callback)(struct gp_timer *self);
 
-	/** A user private pointer */
+	/** @brief A user private pointer */
 	void *priv;
 
 	/**
@@ -69,6 +82,8 @@ struct gp_timer {
 	 * It is safe to free dynamically alocated timers from this callback.
 	 */
 	void (*stopped)(gp_timer *self);
+
+	char data[];
 };
 
 #define GP_TIMER_DECLARE(name, texpires, tperiod, tid, tcallback, tpriv) \
@@ -152,5 +167,31 @@ static inline unsigned int gp_timer_queue_size(const gp_timer *queue)
 {
 	return queue ? queue->heap.children + 1 : 0;
 }
+
+/**
+ * @brief Allocates a new timer.
+ *
+ * Allocates and intializes new timer.
+ *
+ * @param expires_ms Initial expiration for the timer. The timer starts
+ *                   counting once it's inserted into a timer queue.
+ * @param period_ms Sets the timer period field.
+ * @param id A timer id string, the string is copied during the allocation.
+ * @param callback A timer callback.
+ * @param priv A user private pointer.
+ */
+gp_timer *gp_timer_alloc(uint32_t expires_ms, uint32_t period_ms, const char *id,
+                         uint32_t (*callback)(gp_timer *), void *priv);
+
+/**
+ * @brief Frees timer allocated by gp_timer_alloc().
+ *
+ * When timer is inserted into a queue the free is deffered until the timer is
+ * stopped. Calling gp_timer_free() on a timer that has been inserted into a
+ * queue hence transfers the ownership to the queue itself.
+ *
+ * @param self A timer allocated by gp_timer_alloc().
+ */
+void gp_timer_free(gp_timer *self);
 
 #endif /* UTILS_GP_TIMER_H */

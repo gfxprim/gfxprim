@@ -134,8 +134,12 @@ static gp_timer *process_top(gp_timer *queue, gp_timer **reschedule, uint64_t no
 	if (ret == GP_TIMER_STOP) {
 		timer->running = 0;
 		timer->expires = 0;
+
 		if (timer->stopped)
 			timer->stopped(timer);
+
+		if (timer->free_on_stop)
+			gp_timer_free(timer);
 	} else {
 		timer->expires = ret + now;
 		GP_DEBUG(3, "Rescheduling timer '%s' after %"PRIu32" expires at %"PRIu64,
@@ -174,6 +178,47 @@ ret:
 	}
 
 	*queue = GP_HEAP_ENTRY(heap, struct gp_timer, heap);
+
+	return ret;
+}
+
+void gp_timer_free(gp_timer *self)
+{
+	if (!self)
+		return;
+
+	if (self->running) {
+		self->free_on_stop = 1;
+		return;
+	}
+
+	GP_DEBUG(1, "Freeing timer '%s'", self->id);
+
+	free(self);
+}
+
+gp_timer *gp_timer_alloc(uint32_t expires_ms, uint32_t period_ms, const char *id,
+                         uint32_t (*callback)(gp_timer *), void *priv)
+{
+	size_t size = sizeof(gp_timer) + strlen(id) + 1;
+
+	GP_DEBUG(1, "Allocating timer %s", id);
+
+	gp_timer *ret = malloc(size);
+	if (!ret) {
+		GP_WARN("Malloc failed :(");
+		return NULL;
+	}
+
+	memset(ret, 0, size);
+
+	strcpy(ret->data, id);
+
+	ret->id = ret->data;
+	ret->expires = expires_ms;
+	ret->period = period_ms;
+	ret->callback = callback;
+	ret->priv = priv;
 
 	return ret;
 }
