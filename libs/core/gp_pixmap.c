@@ -98,7 +98,6 @@ gp_pixmap *gp_pixmap_alloc_ex(gp_size w, gp_size h, gp_pixel_type type, uint32_t
 	pixels = malloc(size);
 	if (!pixels) {
 		GP_WARN("Malloc failed :(");
-		free(pixels);
 		free(pixmap);
 		errno = ENOMEM;
 		return NULL;
