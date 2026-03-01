@@ -315,9 +315,9 @@ static void timer_event(gp_event *ev)
 {
 	struct gp_widget *widget = ev->tmr->priv;
 
-	gp_widget_ops_event(widget, &ctx, ev);
-
 	ev->tmr->priv = NULL;
+
+	gp_widget_ops_event(widget, &ctx, ev);
 }
 
 static struct gp_timer timers[10];

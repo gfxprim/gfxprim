@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -28,7 +28,7 @@
 #include <widgets/gp_widget_slider.h>
 #include <widgets/gp_widget_spinner.h>
 #include <widgets/gp_widget_tbox.h>
-#include <widgets/gp_widget_tbox.h>
+#include <widgets/gp_widget_activity.h>
 
 /* Bool widget and subclasses */
 #include <widgets/gp_widget_class_bool.h>

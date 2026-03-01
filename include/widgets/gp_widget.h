@@ -217,6 +217,8 @@ enum gp_widget_type {
 	GP_WIDGET_SWITCH,
 	/** @brief A stock switch widget. */
 	GP_WIDGET_STOCK_SWITCH,
+	/** @brief An activity widget. */
+	GP_WIDGET_ACTIVITY,
 	/** @brief A numeber of widgets. */
 	GP_WIDGET_MAX,
 };
