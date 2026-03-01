@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2019-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2019-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -28,14 +28,19 @@ int gp_proxy_server_init(const char *path)
 	if (!path)
 		path = CONN_PATH;
 
+	if (strlen(path) + 1 >= sizeof(addr.sun_path)) {
+		GP_FATAL("Unix path '%s' too long", path);
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
 	memset(&addr, 0, sizeof(addr));
 	addr.sun_family = AF_UNIX;
-	//TODO: bounds check
-	memcpy(addr.sun_path, path, sizeof(CONN_PATH));
-	unlink(CONN_PATH);
+	strcpy(addr.sun_path, path);
+	unlink(path);
 
 	if (bind(fd, (struct sockaddr*)&addr, sizeof(addr))) {
-		GP_WARN("Failed to bind '" CONN_PATH "': %s", strerror(errno));
+		GP_WARN("Failed to bind '%s': %s", path, strerror(errno));
 		goto fail;
 	}
 
