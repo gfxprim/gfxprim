@@ -43,7 +43,7 @@ static int set_get_leds(gp_ev_feedback *self, gp_ev_feedback_op *op)
 		value = 1;
 	break;
 	case GP_EV_LEDS_OFF:
-		input->leds ^= ~(op->val);
+		input->leds &= ~(op->val);
 		value = 0;
 	break;
 	case GP_EV_LEDS_GET:
