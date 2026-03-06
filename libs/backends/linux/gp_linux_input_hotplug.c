@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2008-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2008-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
@@ -29,28 +29,32 @@ static int input_walk(gp_backend *backend)
 	DIR *dir = opendir(DEV_PATH);
 	struct dirent *dir_ent;
 	char dev[BUF_LEN];
+	int err = 1;
 
 	if (!dir) {
 		GP_WARN("Failed to open '" DEV_PATH "': %s", strerror(errno));
-		return 1;
+		goto ret;
 	}
 
-	while ((dir_ent = readdir(dir)) != NULL) {
+	while ((dir_ent = readdir(dir))) {
 		if (!strncmp(dir_ent->d_name, "event", 5)) {
 			snprintf(dev, BUF_LEN, "%s%s", DEV_PATH,
 			         dir_ent->d_name);
 			if (gp_linux_input_new(dev, backend))
-				return 1;
+				goto ret;
 		}
 		errno = 0;
 	}
 
 	if (errno) {
 		GP_WARN("readdir() failed with '%s'", strerror(errno));
-		return 1;
+		goto ret;
 	}
 
-	return 0;
+	err = 0;
+ret:
+	closedir(dir);
+	return err;
 }
 
 struct dev_path_timer {
