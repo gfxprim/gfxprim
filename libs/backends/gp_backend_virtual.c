@@ -58,7 +58,7 @@ static enum gp_backend_ret virt_set_attr(struct gp_backend *self,
 	return GP_BACKEND_NOTSUPP;
 }
 
-static void handle_events(gp_backend *self, gp_event *ev)
+static void handle_render_events(gp_backend *self, gp_event *ev)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
@@ -70,8 +70,7 @@ static void handle_events(gp_backend *self, gp_event *ev)
 		self->pixmap = virt->pixmap;
 	break;
 	case GP_EV_SYS_RENDER_RESIZE:
-		gp_pixmap_resize(virt->pixmap, virt->backend->pixmap->w,
-		                 virt->backend->pixmap->h);
+		gp_pixmap_resize(virt->pixmap, ev->resize.w, ev->resize.h);
 	break;
 	case GP_EV_SYS_RENDER_PIXEL_TYPE:
 		ev->pixel_type = virt->pixmap->pixel_type;
@@ -87,10 +86,8 @@ static void virt_poll(gp_backend *self)
 
 	gp_event *ev;
 
-	while ((ev = gp_backend_ev_get(virt->backend))) {
-		handle_events(self, ev);
+	while ((ev = gp_backend_ev_get(virt->backend)))
 		gp_ev_queue_put(self->event_queue, ev);
-	}
 }
 
 static void virt_wait(gp_backend *self, int timeout_ms)
@@ -101,10 +98,8 @@ static void virt_wait(gp_backend *self, int timeout_ms)
 
 	gp_event *ev;
 
-	while ((ev = gp_backend_ev_get(virt->backend))) {
-		handle_events(self, ev);
+	while ((ev = gp_backend_ev_get(virt->backend)))
 		gp_ev_queue_put(self->event_queue, ev);
-	}
 }
 
 static void virt_exit(gp_backend *self)
@@ -165,6 +160,7 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	self->update = virt_update;
 	self->poll = backend->poll ? virt_poll : NULL;
 	self->wait = backend->wait ? virt_wait : NULL;
+	self->on_ev_ret = handle_render_events;
 	self->exit = virt_exit;
 	self->fds = backend->fds;
 	self->dpi = backend->dpi;

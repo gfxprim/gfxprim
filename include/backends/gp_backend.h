@@ -312,6 +312,14 @@ struct gp_backend {
 	/** @brief Queue to store input events. */
 	gp_ev_queue *event_queue;
 
+	/**
+	 * @brief Called on events to be returned.
+	 *
+	 * This callback is called whenever event is going to be returned from
+	 * gp_backend_ev_ret() with the event to be returned.
+	 */
+	void (*on_ev_ret)(gp_backend *self, gp_event *ev);
+
 	/** @brief Priority queue for timers. */
 	gp_timer *timers;
 

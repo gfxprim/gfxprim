@@ -252,6 +252,9 @@ gp_event *gp_backend_ev_get(gp_backend *self)
 			}
 		break;
 		}
+
+		if (self->on_ev_ret)
+			self->on_ev_ret(self, ev);
 	}
 
 	return ev;
