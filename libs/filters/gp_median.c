@@ -160,7 +160,7 @@ static int gp_filter_median_raw(const gp_pixmap *src,
 	int i, x, y;
 	unsigned int trigger = ((2*xmed+1)*(2*ymed+1))/2;
 
-	if (src->pixel_type != GP_PIXEL_RGB888) {
+	if (src->pixel_type != GP_PIXEL_RGB888 && src->pixel_type != GP_PIXEL_BGR888) {
 		errno = ENOSYS;
 		return -1;
 	}

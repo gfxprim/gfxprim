@@ -22,6 +22,14 @@ int gp_filter_dither(gp_dither_type type,
 		return gp_filter_sierra_lite(src, dst, callback);
 	case GP_DITHER_HILBERT_PEANO:
 		return gp_filter_hilbert_peano(src, dst, callback);
+	case GP_DITHER_BAYER_4:
+		return gp_filter_bayer_4(src, dst, callback);
+	case GP_DITHER_SHARPENED_BAYER_4:
+		return gp_filter_sharpened_bayer_4(src, dst, callback);
+	case GP_DITHER_BAYER_8:
+		return gp_filter_bayer_8(src, dst, callback);
+	case GP_DITHER_SHARPENED_BAYER_8:
+		return gp_filter_sharpened_bayer_8(src, dst, callback);
 	default:
 		errno = EINVAL;
 		return 1;
@@ -55,6 +63,10 @@ static const struct dither_names {
 	[GP_DITHER_SIERRA] = {"Sierra", "si"},
 	[GP_DITHER_SIERRA_LITE] = {"Sierra Lite", "sl"},
 	[GP_DITHER_HILBERT_PEANO] = {"Hilbert Peano", "hp"},
+	[GP_DITHER_BAYER_4] = {"Ordered bayer 4x4", "b4"},
+	[GP_DITHER_SHARPENED_BAYER_4] = {"Sharpened bayer 4x4", "s4"},
+	[GP_DITHER_BAYER_8] = {"Ordered bayer 8x8", "b8"},
+	[GP_DITHER_SHARPENED_BAYER_8] = {"Sharpened bayer 8x8", "s8"},
 };
 
 const char *gp_dither_type_name(gp_dither_type dither_type)

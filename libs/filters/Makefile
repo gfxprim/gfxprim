@@ -19,7 +19,7 @@ RESAMPLING_FILTERS=gp_resize_nn.gen.c gp_cubic.gen.c gp_resize_cubic.gen.c\
 
 GENSOURCES=gp_mirror_h.gen.c gp_rotate.gen.c gp_dither.gen.c gp_hilbert_peano.gen.c\
            $(POINT_FILTERS) $(ARITHMETIC_FILTERS) $(STATS_FILTERS) $(RESAMPLING_FILTERS)\
-	   gp_linear_convolution.gen.c
+	   gp_linear_convolution.gen.c gp_dither_bayer.gen.c
 
 CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 LIBNAME=filters

@@ -1,0 +1,20 @@
+.Original Image; Ordered Bayer 4x4: RGB332, G8, G4, G2, G1
+image:images/orig/lenna_small.png[
+	"Original Image",
+	link="images/orig/lenna.png"]
+image:images/bayer_4/ordered_bayer_4x4_lenna_small_10.png[
+	"RGB332",
+	link="images/bayer_4/ordered_bayer_4x4_lenna_10.png"]
+image:images/bayer_4/ordered_bayer_4x4_lenna_small_21.png[
+	"G8",
+	link="images/bayer_4/ordered_bayer_4x4_lenna_21.png"]
+image:images/bayer_4/ordered_bayer_4x4_lenna_small_20.png[
+	"G4",
+	link="images/bayer_4/ordered_bayer_4x4_lenna_20.png"]
+image:images/bayer_4/ordered_bayer_4x4_lenna_small_19.png[
+	"G2",
+	link="images/bayer_4/ordered_bayer_4x4_lenna_19.png"]
+image:images/bayer_4/ordered_bayer_4x4_lenna_small_18.png[
+	"G1",
+	link="images/bayer_4/ordered_bayer_4x4_lenna_18.png"]
+

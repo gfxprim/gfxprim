@@ -284,6 +284,53 @@ def main():
                'Hilbert Peano Dithering',
                ['RGB332', 'G8', 'G4', 'G2', 'G1'])
 
+    imggen.gen(filters.bayer_4_alloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/bayer_4/',
+               'Ordered Bayer 4x4',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
+    imggen.gen(filters.bayer_8_alloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/bayer_8/',
+               'Ordered Bayer 8x8',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
+    imggen.gen(filters.sharpened_bayer_4_alloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/sharpened_bayer_4/',
+               'Ordered Sharpened Bayer 4x4',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
+    imggen.gen(filters.sharpened_bayer_8_alloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/sharpened_bayer_8/',
+               'Ordered Sharpened Bayer 8x8',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
 
 if __name__ == '__main__':
     main()

@@ -100,6 +100,10 @@ FILTER_FUNC(floyd_steinberg);
 FILTER_FUNC(sierra);
 FILTER_FUNC(sierra_lite);
 FILTER_FUNC(hilbert_peano);
+FILTER_FUNC(bayer_4);
+FILTER_FUNC(sharpened_bayer_4);
+FILTER_FUNC(bayer_8);
+FILTER_FUNC(sharpened_bayer_8);
 %include "gp_dither.gen.h"
 
 /* Laplace and Laplace Edge Sharpening */

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
-@ ditherings = ['floyd_steinberg', 'atkinson', 'sierra', 'sierra_lite', 'hilbert_peano']
+@ ditherings = ['floyd_steinberg', 'atkinson', 'sierra', 'sierra_lite', 'hilbert_peano', 'bayer_4', 'sharpened_bayer_4', 'bayer_8', 'sharpened_bayer_8']
 
 /**
  * @file gp_dither.gen.h
@@ -90,9 +90,29 @@ typedef enum gp_dither_type {
 	 * Distributes error along Hilbert curve, produces no patterns on
 	 * photos, but the end result is less sharp. Does not work well when
 	 * large areas filed with the same color, since the hilbert curve
-	 * end up being visible in the result.
+	 * may end up leaking into the resulting picture.
 	 */
 	GP_DITHER_HILBERT_PEANO,
+	/**
+	 * @brief Ordered dithering with 4x4 bayer matrix.
+	 */
+	GP_DITHER_BAYER_4,
+	/**
+	 * @brief Ordered dithering with 4x4 bayer matrix.
+         *
+	 * Bayer dithering with in-place sharpening.
+	 */
+	GP_DITHER_SHARPENED_BAYER_4,
+	/**
+	 * @brief Ordered dithering with 8x8 bayer matrix.
+	 */
+	GP_DITHER_BAYER_8,
+	/**
+	 * @brief Ordered dithering with 8x8 bayer matrix.
+         *
+	 * Bayer dithering with in-place sharpening.
+	 */
+	GP_DITHER_SHARPENED_BAYER_8,
 	/**
 	 * @brief Number of dithering types.
 	 *
@@ -108,13 +128,17 @@ typedef enum gp_dither_type {
  * the ditherings. The indended usage for two letter acronyms are shorter
  * command line options, e.g. '-d at'.
  *
- * |  Canonical name  | Acronym |
- * |------------------|---------|
- * |  Floyd Steinberg |   fs    |
- * |  Atkinson        |   at    |
- * |  Sierra          |   si    |
- * |  Sierra Lite     |   sl    |
- * |  Hilbert Peano   |   hp    |
+ * |    Canonical name    | Acronym |
+ * |----------------------|---------|
+ * |  Floyd Steinberg     |   fs    |
+ * |  Atkinson            |   at    |
+ * |  Sierra              |   si    |
+ * |  Sierra Lite         |   sl    |
+ * |  Hilbert Peano       |   hp    |
+ * |  Bayer 4x4           |   b4    |
+ * |  Sharpened Bayer 4x4 |   s4    |
+ * |  Bayer 8x8           |   b8    |
+ * |  Sharpened Bayer 8x8 |   s8    |
  *
  * @param dither_name A dithering name.
  *
