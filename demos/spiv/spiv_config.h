@@ -46,6 +46,7 @@ struct spiv_config {
 	int timers:1;
 	int full_screen:1;
 	int exif_autorotate:1;
+	int fit_autorotate:1;
 	char backend_init[128];
 	gp_pixel_type emul_type;
 	gp_dither_type dither_type;

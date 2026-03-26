@@ -505,6 +505,27 @@ static void exif_autorotate(void)
 		config.combined_orientation -= ROTATE_360;
 }
 
+static void fit_autorotate(uint32_t img_w, uint32_t img_h,
+                           uint32_t win_w, uint32_t win_h)
+{
+	if (!config.fit_autorotate)
+		return;
+
+	if (config.win_strategy == ZOOM_WIN_RESIZABLE)
+		return;
+
+	float img_rat = 1.00 * img_w/img_h;
+	float win_rat = 1.00 * win_w/win_h;
+
+	if ((img_rat < 1 && win_rat > 1) ||
+	    (img_rat > 1 && win_rat < 1)) {
+		config.combined_orientation += ROTATE_90;
+	}
+
+	if (config.combined_orientation > ROTATE_270)
+		config.combined_orientation -= ROTATE_360;
+}
+
 static float calc_img_size(struct loader_params *params,
                            uint32_t img_w, uint32_t img_h,
                            uint32_t win_w, uint32_t win_h)
@@ -514,6 +535,8 @@ static float calc_img_size(struct loader_params *params,
 	unsigned int max_win_h = config.max_win_h;
 
 	exif_autorotate();
+
+	fit_autorotate(img_w, img_h, win_w, win_h);
 
 	switch (config.combined_orientation) {
 	case ROTATE_90:
@@ -914,6 +937,10 @@ int main(int argc, char *argv[])
 					continue;
 
 				switch (ev->key.key) {
+				case GP_KEY_A:
+					config.fit_autorotate = !config.fit_autorotate;
+					show_image(&params);
+				break;
 				case GP_KEY_H:
 					draw_help(backend);
 					show_image(&params);

@@ -348,6 +348,14 @@ struct cfg_opt spiv_opts[] = {
 	 .help = "Disables automatic rotation by EXIF",
 	},
 	{.name_space = "Gui",
+	 .key = "FitAutorotate",
+	 .opt = 'a',
+	 .opt_long = "fit_autorotate",
+	 .opt_has_value = 0,
+	 .set = set_opt,
+	 .help = "Autorotates the image to fit it to the display",
+	},
+	{.name_space = "Gui",
 	 .key = "FullScreen",
 	 .opt = 'f',
 	 .opt_long = "full-screen",
@@ -389,7 +397,6 @@ struct cfg_opt spiv_opts[] = {
 	 .set = set_win_max_size,
 	 .help = "Window maximal size, 800x600 for example",
 	},
-
 
 	{.name_space = "Actions",
 	 .key = "1",
