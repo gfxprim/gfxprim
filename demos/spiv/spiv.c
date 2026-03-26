@@ -10,6 +10,7 @@
   */
 
 #include <errno.h>
+#include <math.h>
 #include <signal.h>
 #include <string.h>
 #include <pthread.h>
@@ -428,11 +429,13 @@ gp_pixmap *load_resized_image(struct loader_params *params, gp_size w, gp_size h
 
 	/* Do low pass filter */
 	if (params->use_low_pass && params->zoom_rat < 1) {
+		float f = 1.00/params->zoom_rat;
+		float sigma = sqrtf((f * f - 1))/2.5;
+
 		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
 
-		res = gp_filter_gaussian_blur_alloc(img, 0.4/params->zoom_rat,
-		                                 0.4/params->zoom_rat, &callback);
+		res = gp_filter_gaussian_blur_alloc(img, sigma, sigma, &callback);
 
 		if (res == NULL)
 			return NULL;
