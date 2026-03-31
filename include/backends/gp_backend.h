@@ -842,12 +842,12 @@ static inline enum gp_backend_ret gp_backend_set_caption(gp_backend *backend,
  *
  * When the backend size matches the requested width and height no action is done.
  *
- * If a resize request is granted the backend sends #GP_EV_SYS event type with
- * #GP_EV_SYS_RENDER_RESIZE code and the new width and height in the struct gp_ev_sys.
- * Upon receiving this event the application must stop any access to the
- * gp_backend::pixmap and call gp_backend_resize_ack() to signal to the backend
- * that it's safe to resize the buffers. Once that is done the application can
- * start drawing to the new and resized gp_backend::pixmap.
+ * If a resize request is granted the backend sends #GP_EV_SYS events. Before
+ * the buffer is resized the #GP_EV_SYS with #GP_EV_SYS_RENDER_STOP is send
+ * that needs to be acknowledged by the calling the gp_backend_render_stopped()
+ * callback. After that the #GP_EV_SYS_RENDER_RESIZE event is send new width
+ * and height in the struct gp_ev_sys. And finally the rendering is restarted
+ * with #GP_EV_SYS_RENDER_START.
  *
  * @return When resizing is not possible or not implemented non zero is returned.
  */
