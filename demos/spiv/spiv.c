@@ -66,14 +66,15 @@ static int image_loader_callback(gp_progress_cb *self)
 {
 	static gp_size size = 0;
 	gp_pixmap *pixmap = backend->pixmap;
-	gp_size w = gp_backend_w(backend);
-	gp_size h = gp_backend_h(backend);
+
+	if (!pixmap || !show_progress)
+		return 0;
 
 	if (abort_flag)
 		return 1;
 
-	if (!show_progress)
-		return 0;
+	gp_size w = gp_backend_w(backend);
+	gp_size h = gp_backend_h(backend);
 
 	char buf[100];
 
