@@ -17,13 +17,15 @@ struct key_help {
 #define KEYS_MAX "13"
 
 static struct key_help help_keys[] = {
-	{"Esc, Enter, Q", "Quit spiv"},
+	{"Esc, Q", "Quit spiv"},
 	{"Space", "Move to the next image"},
 	{"BackSpace", "Move to the prev image"},
 	{"PgDown", "Move to the start of directory"},
 	{"PgUp", "Move to the end of directory"},
 	{"Home", "Move to the first image"},
 	{"End", "Move to the last image"},
+	{"A", "Toggle autorotate to fit"},
+	{"F", "Togggle full screen"},
 	{"R", "Rotate by 90 degrees clockwise"},
 	{"E", "Rotate by 90 degrees counterclockwise"},
 	{"W", "Toggle fixed, resizable window"},
@@ -54,10 +56,11 @@ static struct key_help help_keys[] = {
         {"", ""},
 	{"]", "Change to next resampling method"},
 	{"[", "Change to prev resampling method"},
+	{"C", "Drop image cache"},
 	{"L", "Toggle low pass filter"},
 	{"\\", "Enable/disable dithering"},
-	{"'", "Cycle dithering altorithms"},
-	{"C", "Drop image cache"},
+	{"'", "Cycle dithering altorithms forward"},
+	{";", "Cycle dithering altorithms back"},
 };
 
 static const int help_keys_len = sizeof(help_keys) / sizeof(*help_keys);

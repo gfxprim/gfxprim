@@ -27,7 +27,7 @@ See
 below for further information.
 
 .SH KEYBOARD CONTROL
-.IP "Esc, Enter, Q"
+.IP "Esc, Q"
 Quit spiv
 .IP "Space"
 Move to the next image
@@ -41,6 +41,10 @@ Move to the end of directory
 Move to the first image
 .IP "End"
 Move to the last image
+.IP "A"
+Toggle autorotate to fit
+.IP "F"
+Togggle full screen
 .IP "R"
 Rotate by 90 degrees clockwise
 .IP "E"
@@ -91,10 +95,16 @@ Move image by 10px right (by 1 with Shift)
 Change to next resampling method
 .IP "["
 Change to prev resampling method
-.IP "L"
-Toggle low pass filter
 .IP "C"
 Drop image cache
+.IP "L"
+Toggle low pass filter
+.IP "\"
+Enable/disable dithering
+.IP "'"
+Cycle dithering altorithms forward
+.IP ";"
+Cycle dithering altorithms back
 .SH OPTIONS
 .TP
 .B  \-h, \-\-help
@@ -117,11 +127,17 @@ Show progress bar when loading/resampling/... images
 .B  \-s=value, \-\-slideshow\-delay=value
 Delay between images in seconds (float) for slideshow
 .TP
-.B  \-d, \-\-dithering
-Turn on Floyd\-Steinberg dithering
+.B  \-d=value, \-\-dithering=value
+Turn on dithering floyd\-steinberg/sierra lite/sierra two row/hilbert peano
 .TP
 .B  \-o=value, \-\-orientation=value
 Orientation, one of 0, 90, 180, 270
+.TP
+.B  \-r, \-\-disable_exif_autorotate
+Disables automatic rotation by EXIF
+.TP
+.B  \-a, \-\-fit_autorotate
+Autorotates the image to fit it to the display
 .TP
 .B  \-f, \-\-full\-screen
 Start fullscreen.
@@ -196,11 +212,17 @@ Show progress bar when loading/resampling/... images
 .B SlideshowDelay=value
 Delay between images in seconds (float) for slideshow
 .TP
-.B Dithering
-Turn on Floyd-Steinberg dithering
+.B Dithering=value
+Turn on dithering floyd-steinberg/sierra lite/sierra two row/hilbert peano
 .TP
 .B Orientation=value
 Orientation, one of 0, 90, 180, 270
+.TP
+.B DisableExifAutorotate
+Disables automatic rotation by EXIF
+.TP
+.B FitAutorotate
+Autorotates the image to fit it to the display
 .TP
 .B FullScreen
 Start fullscreen.
@@ -305,7 +327,7 @@ spiv -1 'cp %F sorted' images/
 .PP
 .B Emulates 1-bit Grayscale display and turns on Floyd-Steinberg dithering
 .nf
-spiv -e G1 -d images/
+spiv -e G1 -d fs images/
 
 .PP
 .B Runs slideshow using X root window as backend window

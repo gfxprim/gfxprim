@@ -101,6 +101,9 @@ static int set_opt(struct cfg_opt *self, unsigned int lineno)
 	(void) lineno;
 
 	switch (self->opt) {
+	case 'a':
+		config.fit_autorotate = 1;
+	break;
 	case 'f':
 		config.full_screen = 1;
 	break;
