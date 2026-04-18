@@ -320,6 +320,9 @@ uint32_t gp_utf_fallback(uint32_t ch)
 		return ret;
 
 	switch (ch) {
+	/* NBSP */
+	case 0xa0:
+		return ' ';
 	/* Latin 1 supplement block */
 	case 0xa9: /* copyright */
 		return 'C';
