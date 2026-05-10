@@ -401,9 +401,6 @@ static inline gp_pixel_type gp_backend_pixel_type(gp_backend *self)
  * combined with gp_backend_timer_timeout() and the gp_backend_ev_poll() must
  * be called on timeout as well.
  *
- * Example:
- * @include{c} demos/c_simple/backend_custom_poll.c
- *
  * @param self A backend.
  * @return A file descriptor or -1 if not available.
  */

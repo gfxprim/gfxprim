@@ -3,11 +3,10 @@
  * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
- /*
-
-   Simple backend task example.
-
-  */
+/**
+ * @brief Example how to use backend tasks callbacks.
+ * @example backend_tasks.c
+ */
 
 #include <stdio.h>
 #include <gfxprim.h>

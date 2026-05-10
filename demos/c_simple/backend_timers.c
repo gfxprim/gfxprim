@@ -3,11 +3,10 @@
  * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
- /*
-
-   Simple backend timers example.
-
-  */
+/**
+ * @brief Example how to manage backend timers.
+ * @example backend_timers.c
+ */
 
 #include <unistd.h>
 #include <gfxprim.h>

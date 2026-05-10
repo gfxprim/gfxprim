@@ -23,11 +23,11 @@ LDLIBS+=-lrt -lgfxprim
 
 APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      meta_data showimage v4l2_show v4l2_grab convolution weighted_median\
-     shapetest koch input_example fileview linetest randomshapetest\
+     shapetest koch backend_input fileview linetest randomshapetest\
      fonttest loaders_register blittest textaligntest x11_windows\
      debug_handler gaussian_noise version pretty_print timers\
-     zip_container backend_timers_example memory_io data_storage\
-     vector matrix proxy_backend bbox backend_tasks_example json_writer\
+     zip_container backend_timers memory_io data_storage\
+     vector matrix proxy_backend bbox backend_tasks json_writer\
      draw_glyph dpi_check unicodetest backend_cursor json_writer_file\
      elf_note update_rect_test backend_custom_poll
 
@@ -42,13 +42,13 @@ SDL2_glue: LDLIBS+=$(shell sdl2-config --libs)
 endif
 
 update_rect_test: LDLIBS+=-lgfxprim-backends
-backend_tasks_example: LDLIBS+=-lgfxprim-backends
+backend_tasks: LDLIBS+=-lgfxprim-backends
 proxy_backend: LDLIBS+=-lgfxprim-backends
 showimage: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
 backend_example: LDLIBS+=-lgfxprim-backends
 backend_cursor: LDLIBS+=-lgfxprim-backends
 backend_sw_cursor: LDLIBS+=-lgfxprim-backends
-backend_timers_example: LDLIBS+=-lgfxprim-backends
+backend_timers: LDLIBS+=-lgfxprim-backends
 loaders_example: LDLIBS+=-lgfxprim-loaders
 loaders: LDLIBS+=-lgfxprim-loaders
 filters_symmetry: LDLIBS+=-lgfxprim-loaders
@@ -60,7 +60,7 @@ convolution: LDLIBS+=-lgfxprim-loaders
 weighted_median: LDLIBS+=-lgfxprim-loaders
 shapetest: LDLIBS+=-lgfxprim-backends
 koch: LDLIBS+=-lgfxprim-backends -lm
-input_example: LDLIBS+=-lgfxprim-backends
+backend_input: LDLIBS+=-lgfxprim-backends
 fileview: LDLIBS+=-lgfxprim-backends
 linetest: LDLIBS+=-lgfxprim-backends -lm
 randomshapetest: LDLIBS+=-lgfxprim-backends

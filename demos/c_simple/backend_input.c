@@ -6,6 +6,11 @@
  * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
  */
 
+/**
+ * @brief Example how to process backend events.
+ * @example backend_input.c
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -6,10 +6,9 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
- /*
-
-   This example shows how to mix SDL with GFXprim.
-
+ /**
+  * @brief Example how to mix SDL with GFXprim.
+  * @example SDL_glue.c
   */
 
 #include <stdio.h>

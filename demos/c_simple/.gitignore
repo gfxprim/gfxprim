@@ -1,7 +1,7 @@
 SDL_glue
 SDL2_glue
 /backend_example
-/backend_timers_example
+backend_timers
 /blittest
 /convolution
 /data_storage
@@ -11,7 +11,7 @@ SDL2_glue
 /fonttest
 /gaussian_noise
 /gfx_koch
-/input_example
+backend_input
 /koch
 /linetest
 /loaders
@@ -37,7 +37,7 @@ SDL2_glue
 /proxy_backend
 /matrix
 bbox
-backend_tasks_example
+backend_tasks
 json_writer
 json_writer_file
 drm_test

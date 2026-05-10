@@ -8,13 +8,14 @@ TOC_INCLUDE_HEADINGS   = 0
 DISTRIBUTE_GROUP_DOC   = YES
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = NO
+EXTRACT_ALL            = NO
 HIDE_UNDOC_MEMBERS     = YES
 HIDE_UNDOC_CLASSES     = YES
+HIDE_UNDOC_RELATIONS   = YES
 CASE_SENSE_NAMES       = YES
 WARN_NO_PARAMDOC       = YES
-INPUT                  = ../include/
-FILE_PATTERNS          = *.h \
-                         *.c
+INPUT                  = ../include/ ../demos/c_simple/
+FILE_PATTERNS          = *.h *.c *.dox
 RECURSIVE              = YES
 EXCLUDE                = README.md
 SOURCE_BROWSER         = YES

@@ -3,10 +3,9 @@
  * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
- /*
-
-   Backend with a custom poll function.
-
+ /**
+  * @brief Example how to use backends with custom poll function.
+  * @example backend_custom_poll.c
   */
 
 #include <stdio.h>

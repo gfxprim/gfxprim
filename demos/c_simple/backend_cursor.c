@@ -3,11 +3,10 @@
  * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
- /*
-
-   Simple backend cursor example.
-
-  */
+/**
+ * @brief Example how hide and show cursor and how to change its shape.
+ * @example backend_cursor.c
+ */
 
 #include <stdio.h>
 #include <gfxprim.h>
