@@ -166,9 +166,9 @@ static uint32_t backend_task_dispatch(gp_timer *self)
 {
 	gp_backend *backend = self->priv;
 
-	gp_task_queue_process(backend->task_queue);
+	gp_task_queue_process(backend->tasks);
 
-	if (gp_task_queue_tasks(backend->task_queue))
+	if (gp_task_queue_tasks(backend->tasks))
 		return 0;
 
 	return GP_TIMER_STOP;
@@ -190,7 +190,7 @@ void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue)
 {
 	size_t task_cnt = gp_task_queue_tasks(task_queue);
 
-	self->task_queue = task_queue;
+	self->tasks = task_queue;
 
 	if (!task_cnt)
 		return;
@@ -200,9 +200,9 @@ void gp_backend_task_queue_set(gp_backend *self, gp_task_queue *task_queue)
 
 void gp_backend_task_ins(gp_backend *self, gp_task *task)
 {
-	size_t task_cnt = gp_task_queue_tasks(self->task_queue);
+	size_t task_cnt = gp_task_queue_tasks(self->tasks);
 
-	gp_task_queue_ins(self->task_queue, task);
+	gp_task_queue_ins(self->tasks, task);
 
 	if (task_cnt)
 		return;
@@ -212,9 +212,9 @@ void gp_backend_task_ins(gp_backend *self, gp_task *task)
 
 void gp_backend_task_rem(gp_backend *self, gp_task *task)
 {
-	gp_task_queue_rem(self->task_queue, task);
+	gp_task_queue_rem(self->tasks, task);
 
-	if (!gp_task_queue_tasks(self->task_queue))
+	if (!gp_task_queue_tasks(self->tasks))
 		gp_backend_timer_stop(self, &backend_task_timer);
 }
 
@@ -231,6 +231,17 @@ static void backend_backlight_keys(gp_backend *self, int up)
 		return;
 
 	gp_ev_queue_push(self->event_queue, GP_EV_SYS, GP_EV_SYS_BACKLIGHT, brightness, 0);
+}
+
+int gp_backend_fd(gp_backend *self)
+{
+	if (self->wait)
+		return -1;
+
+	if (self->fds.ep_fd <= 0)
+		return -1;
+
+	return self->fds.ep_fd;
 }
 
 gp_event *gp_backend_ev_get(gp_backend *self)

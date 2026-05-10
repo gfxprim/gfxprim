@@ -29,7 +29,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      zip_container backend_timers_example memory_io data_storage\
      vector matrix proxy_backend bbox backend_tasks_example json_writer\
      draw_glyph dpi_check unicodetest backend_cursor json_writer_file\
-     elf_note update_rect_test
+     elf_note update_rect_test backend_custom_poll
 
 ifneq ($(SDL_CONFIG),)
 APPS+=SDL_glue
@@ -76,6 +76,7 @@ memory_io: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
 data_storage: LDLIBS+=-lgfxprim-loaders
 draw_glyph: LDLIBS+=-lgfxprim-backends
 dpi_check: LDLIBS+=-lgfxprim-backends
+backend_custom_poll: LDLIBS+=-lgfxprim-backends
 
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk

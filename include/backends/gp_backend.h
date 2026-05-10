@@ -324,7 +324,7 @@ struct gp_backend {
 	gp_timer *timers;
 
 	/** @brief Task queue */
-	gp_task_queue *task_queue;
+	gp_task_queue *tasks;
 
 	/**
 	 * @brief List of input drivers feeding the ev_queue
@@ -385,6 +385,29 @@ static inline gp_pixel_type gp_backend_pixel_type(gp_backend *self)
 {
 	return self->pixmap->pixel_type;
 }
+
+/**
+ * @brief Returns a fd to wait on for backend events.
+ *
+ * Returns a file descriptor that can be used to wait on for backend events. In
+ * most cases this is a epoll file descriptor. When poll() or select() returns
+ * events to be read on this fd the application must call gp_backend_ev_poll()
+ * in a loop until all events are consumed.
+ *
+ * If a particular library the backend uses does not expose file descriptor
+ * this function returns -1.
+ *
+ * In order for gp_backend::timers and gp_backend::tasks to work this must be
+ * combined with gp_backend_timer_timeout() and the gp_backend_ev_poll() must
+ * be called on timeout as well.
+ *
+ * Example:
+ * @include{c} demos/c_simple/backend_custom_poll.c
+ *
+ * @param self A backend.
+ * @return A file descriptor or -1 if not available.
+ */
+int gp_backend_fd(gp_backend *self);
 
 /**
  * @brief Copies a rectangle from backend pixmap to a display.
@@ -923,7 +946,7 @@ void gp_backend_task_ins(gp_backend *self, gp_task *task);
 void gp_backend_task_rem(gp_backend *self, gp_task *task);
 
 /**
- * @brief Sets the backend task_queue and starts task processing.
+ * @brief Sets the gp_backend::tasks queue and starts task processing.
  *
  * By default backends does not have a task queue populated. Applications that
  * require a task queue have to allocate and initialize the queue then pass it
