@@ -77,7 +77,7 @@ toolcheck:
 doxygen:
 	$(MAKE) -C ../include/
 	doxygen
-
+	$(MAKE) -C man/
 
 #
 # Create page for each part of API description
@@ -104,6 +104,7 @@ CLEAN+=examples.txt
 CLEAN+=$(PAGES)
 
 clean:
+	$(MAKE) -C man/ clean
 	rm -f $(CLEAN)
 	rm -rf ./api-docs
 
