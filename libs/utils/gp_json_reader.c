@@ -617,14 +617,14 @@ static inline const char *list_elem(const void *arr, size_t memb_size, size_t id
 	return *(const char**)(arr + idx * memb_size);
 }
 
-size_t gp_json_lookup(const void *arr, size_t memb_size, size_t list_len,
+size_t gp_json_lookup(const void *arr, size_t memb_size, size_t arr_len,
                       const char *key)
 {
 	size_t l = 0;
-	size_t r = list_len-1;
+	size_t r = arr_len-1;
 	size_t mid = -1;
 
-	if (!list_len)
+	if (!arr_len)
 		return (size_t)-1;
 
 	while (r - l > 1) {

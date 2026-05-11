@@ -171,7 +171,7 @@ extern const struct gp_backend_display_model gp_backend_display_models[];
  *
  * The backend uses Linux input devices for keyboard and mouse support.
  *
- * @param comm A connection mapping name pass "help" for a list.
+ * @param conn A connection mapping name pass "help" for a list.
  * @param model A display model.
  *
  * @return An initialized backend.

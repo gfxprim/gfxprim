@@ -169,7 +169,7 @@ enum gp_backend_backlight_req {
 };
 
 /**
- * @brief A backend.
+ * @brief An abstraction for a output screen and input devices.
  *
  * This is the main structure that describes a backend API.
  */

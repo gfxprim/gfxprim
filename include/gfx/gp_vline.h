@@ -52,7 +52,7 @@ void gp_vline_xyh_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
  * @brief Horizontal line drawing algorithm.
  * @ingroup gfx
  *
- * An alias for gp_hline_xyy().
+ * An alias for gp_vline_xyy().
  */
 static inline void gp_vline(gp_pixmap *pixmap, gp_coord x,
                             gp_coord y0, gp_coord y1, gp_pixel pixel)

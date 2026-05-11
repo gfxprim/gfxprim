@@ -97,7 +97,7 @@ void gp_vec_free(void *self);
  * realloc() has failed.
  *
  * @param self A vector.
- * @param length A new vector lenght.
+ * @param len A new vector lenght.
  * @return A (new) pointer to the vector.
  */
 GP_WUR void *gp_vec_resize(void *self, size_t len);
@@ -152,7 +152,7 @@ static inline size_t gp_vec_unit(const void *self)
  *
  * @param self A vector.
  * @param off An offset in the vector.
- * @param length A number of elements to instert.
+ * @param len A number of elements to instert.
  *
  * @return A (new) pointer to the vector.
  */
@@ -161,13 +161,12 @@ GP_WUR void *gp_vec_ins(void *self, size_t off, size_t len);
 /**
  * @brief Expands vector by length elements at the end of the vector.
  *
- * @param self A vector.
- * @param length A number of elements to append.
- *
  * Returns a pointer to the vector, possibly a different from the
  * previous one. May return NULL if underlying call to realloc() has
  * failed.
  *
+ * @param self A vector.
+ * @param len A number of elements to append.
  * @return A (new) pointer to the vector.
  */
 GP_WUR void *gp_vec_expand(void *self, size_t len);
@@ -175,13 +174,12 @@ GP_WUR void *gp_vec_expand(void *self, size_t len);
 /**
  * @brief Deletes a range from the vector.
  *
- * @param self A vector.
- * @param off An offset in the vector.
- * @param length A number of elements to delete.
- *
  * Returns a pointer to the vector, possibly a different from the
  * previous one. May return NULL if block is outside of the vector.
  *
+ * @param self A vector.
+ * @param off An offset in the vector.
+ * @param len A number of elements to delete.
  * @return A (new) pointer to the vector.
  */
 GP_WUR void *gp_vec_del(void *self, size_t off, size_t len);
@@ -192,7 +190,7 @@ GP_WUR void *gp_vec_del(void *self, size_t off, size_t len);
  * Returns a pointer to the vector, possibly a different from the previous one.
  *
  * @param self A vector.
- * @param length A number of elemements to remove.
+ * @param len A number of elemements to remove.
  * @return A (new) pointer to the vector.
  */
 GP_WUR void *gp_vec_shrink(void *self, size_t len);
@@ -203,7 +201,7 @@ GP_WUR void *gp_vec_shrink(void *self, size_t len);
  * This is fast operation to remove an object from the middle of the vector by
  * replacing it by last element in vector and then shrinking it.
  *
- * @param vec A vector.
+ * @param self A vector.
  * @param idx An index into the vector to be removed.
  *
  * @return A (new) pointer to the vector or NULL in a case of a failure.

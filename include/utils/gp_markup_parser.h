@@ -86,7 +86,7 @@ gp_markup *gp_markup_html_parse(const char *markup,
 /**
  * @brief Frees a markup.
  *
- * @param markup A parsed markup.
+ * @param self A markup to be freed.
  */
 void gp_markup_free(gp_markup *self);
 

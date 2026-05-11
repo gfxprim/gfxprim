@@ -45,7 +45,7 @@ void gp_widget_overlay_show(gp_widget *self, unsigned int stack_pos);
  * @brief Returns the widget overlay stack size.
  *
  * @param self An overlay widget.
- * @param return Stack size.
+ * @return Stack size.
  */
 unsigned int gp_widget_overlay_stack_size(gp_widget *self);
 

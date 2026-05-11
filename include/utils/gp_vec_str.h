@@ -117,8 +117,8 @@ GP_WUR static inline char *gp_vec_str_append(char *self, const char *str)
  * @brief Inserts a string into a string vector at a given offset.
  *
  * @param self A string vector.
- * @param off  An offset in the string vector.
- * @param src  A string to copy.
+ * @param off An offset in the string vector.
+ * @param ch A character to insert.
  *
  * @return A string vector or a NULL in a case of allocation failure.
  */

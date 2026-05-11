@@ -389,7 +389,7 @@ static int proxy_render_stopped(gp_backend *self)
 	return 0;
 }
 
-gp_backend *gp_proxy_init(const char *path, const char *title)
+gp_backend *gp_proxy_init(const char *path, const char *name)
 {
 	int fd;
 	gp_backend *ret;
@@ -449,7 +449,7 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	ret->pixmap = &priv->dummy;
 	ret->pixmap->pixel_type = 0;
 
-	gp_proxy_send(fd, GP_PROXY_NAME, title);
+	gp_proxy_send(fd, GP_PROXY_NAME, name);
 
 	/* Wait for the pixel type */
 	while (!priv->dummy.pixel_type)

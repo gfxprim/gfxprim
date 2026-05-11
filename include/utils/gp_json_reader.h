@@ -242,12 +242,33 @@ int gp_json_obj_next(gp_json_reader *self, struct gp_json_val *res);
 /**
  * @brief Utility function for log(n) lookup in a sorted array.
  *
- * @param list Analphabetically sorted array.
- * @param list_len Array length.
+ * The keys we are comparing must be first record in the array elements, i.e.
+ * the offset to the key in the array members must be zero.
+ *
+ * @code
+ *         struct keyval {
+ *                 char *key;
+ *                 int val;
+ *         } keyvals[] = {
+ *                 {"first", 10},
+ *                 {"second", 20},
+ *         };
+ *
+ *         size_t idx = gp_json_lookup(keyvals, sizeof(struct keyval),
+ *                                     GP_ARRAY_SIZE(keyvals), "second");
+ *
+ *         // Prints 20
+ *         printf("%i\n", keyvals[idx]);
+ * @endcode
+ *
+ * @param arr A pointer to the array.
+ * @param memb_size An array member size.
+ * @param arr_len Array length.
+ * @param key A string key to lookup for.
  *
  * @return An array index or (size_t)-1 if key wasn't found.
  */
-size_t gp_json_lookup(const void *arr, size_t memb_size, size_t list_len,
+size_t gp_json_lookup(const void *arr, size_t memb_size, size_t arr_len,
                       const char *key);
 
 /** @brief A JSON object attribute description i.e. key and type */

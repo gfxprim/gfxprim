@@ -179,7 +179,7 @@ int gp_io_read_b2(gp_io *self, uint16_t *val);
  * @brief Reads unicode string stored in big endian utf16 format.
  *
  * @param io A readable I/O.
- * @param nbytes Number of characters, the number of bytes is twice the number
+ * @param nchars Number of characters, the number of bytes is twice the number
  *               of the characters for utf16.
  *
  * @return A newly allocated null terminated utf8 string or NULL in a case of a

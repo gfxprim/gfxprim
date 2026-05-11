@@ -462,7 +462,7 @@ void gp_widget_grid_cpad_set(gp_widget *self, unsigned int col, int padd, int fi
  * There are rows + 1 paddings and paddings at index 0 and rows are border paddings.
  *
  * @param self A grid widget.
- * @param col A row border index to set. Values 0 and rows are border
+ * @param row A row border index to set. Values 0 and rows are border
  *            paddings. Value GP_WIDGET_GRID_IPADD_ALL sets all inner paddings, i.e. all
  *            indexes but 0 and rows.
  * @param padd Padding coeficient no change on -1 clamped to 255.

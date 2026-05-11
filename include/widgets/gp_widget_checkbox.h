@@ -33,7 +33,7 @@
  * @brief Allocate and initialize new checkbox widget.
  *
  * @param label A checkbox label.
- * @param val Initial checkbox value.
+ * @param set Initial checkbox value.
  *
  * @return A checkbox widget.
  */
@@ -43,7 +43,7 @@ gp_widget *gp_widget_checkbox_new(const char *label, bool set);
  * @brief Allocate and initialize new checkbox widget.
  *
  * @param label A checkbox label.
- * @param val Initial checkbox value.
+ * @param set Initial checkbox value.
  * @param on_event An widget event handler.
  * @param priv User private data.
  *

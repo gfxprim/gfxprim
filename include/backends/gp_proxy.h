@@ -30,6 +30,6 @@
  * @param path Path to an UNIX socket, pass NULL for default.
  * @param name An application name.
  */
-gp_backend *gp_proxy_init(const char *path, const char *title);
+gp_backend *gp_proxy_init(const char *path, const char *name);
 
 #endif /* GP_PROXY_H */

@@ -58,6 +58,7 @@ typedef struct gp_data_node {
 	union gp_data_value value;
 	/** @brief A data id. */
 	const char *id;
+	/** @brief Next node in the current dict. */
 	struct gp_data_node *next;
 } gp_data_node;
 
@@ -86,8 +87,13 @@ void gp_storage_destroy(gp_storage *self);
  */
 gp_data_node *gp_storage_root(gp_storage *self);
 
-/*
- * Returns first node in a dict node list.
+/**
+ * @brief Returns first node in a dict node list.
+ *
+ * The rest of the nodes are linked via the gp_data_node::next pointer.
+ *
+ * @param node A dict type node.
+ * @return A first node in the dict node, may be NULL if empty.
  */
 gp_data_node *gp_data_dict_first(gp_data_node *node);
 
@@ -135,25 +141,38 @@ const char *gp_data_type_name(enum gp_data_type type);
 gp_data_node *gp_storage_get(gp_storage *self,
 		             gp_data_node *node, const char *id);
 
-/*
- * Returns data node by a path in the data storage.
+/**
+ * @brief Returns data node by a path in the data storage.
  *
  * Example path: "/Exif/Orientation"
  *
  * The path works like filesystem path. The equivalent to working
  * directory is the node pointer.
+ *
+ * @param self A storage for the lookup.
+ * @param node A node in the storage to start the lookup at, if NULL root node
+ *             is used.
+ * @param path A path to lookup, e.g. "/Exif/Orientation".
+ *
+ * @return A node we were looking for or NULL if not found.
  */
 gp_data_node *gp_storage_get_by_path(gp_storage *self, gp_data_node *node,
                                      const char *path);
 
-/*
- * Adds data into a dict.
+/**
+ * @brief Adds data into a dict.
  *
- * If node is NULL, data storage root is used.
+ * The data holds information to be used for the node addition and the data are
+ * copied into a newly created node.
  *
- * The data holds information to be used for the node addition.
+ * The call may if the node to add the data into has wrong type i.e. is not a
+ * GP_DATA_DICT, if the key supplied in the data::id already exists in the
+ * node, or if allocation has failed.
  *
- * Returns newly created node or NULL in case of failure.
+ * @param self A storage to add the data into.
+ * @param node A node to add the data into, if NULL root is used.
+ * @param data A data to be added.
+ * @return Newly created node or NULL in case of failure.
  */
 gp_data_node *gp_storage_add(gp_storage *self,
 		             gp_data_node *node, gp_data_node *data);
@@ -161,7 +180,9 @@ gp_data_node *gp_storage_add(gp_storage *self,
 /**
  * @brief Adds a long integer to a storage.
  *
- * @param storage A storage to add the data to.
+ * Calls gp_storage_add() internally.
+ *
+ * @param self A storage to add the data to.
  * @param node A dict node to add the data to, if NULL data are added to root
  *             node.
  * @param id A name for the newly added node.
@@ -175,7 +196,9 @@ gp_data_node *gp_storage_add_int(gp_storage *self, gp_data_node *node,
 /**
  * @brief Adds a string to a storage.
  *
- * @param storage A storage to add the data to.
+ * Calls gp_storage_add() internally.
+ *
+ * @param self A storage to add the data to.
  * @param node A dict node to add the data to, if NULL data are added to root
  *             node.
  * @param id A name for the newly added node.
@@ -189,7 +212,9 @@ gp_data_node *gp_storage_add_string(gp_storage *self, gp_data_node *node,
 /**
  * @brief Adds a double floating point to a storage.
  *
- * @param storage A storage to add the data to.
+ * Calls gp_storage_add() internally.
+ *
+ * @param self A storage to add the data to.
  * @param node A dict node to add the data to, if NULL data are added to root
  *             node.
  * @param id A name for the newly added node.
@@ -203,7 +228,9 @@ gp_data_node *gp_storage_add_double(gp_storage *self, gp_data_node *node,
 /**
  * @brief Adds a rational number to a storage.
  *
- * @param storage A storage to add the data to.
+ * Calls gp_storage_add() internally.
+ *
+ * @param self A storage to add the data to.
  * @param node A dict node to add the data to, if NULL data are added to root
  *             node.
  * @param id A name for the newly added node.
@@ -218,7 +245,9 @@ gp_data_node *gp_storage_add_rational(gp_storage *self, gp_data_node *node,
 /**
  * @brief Adds a dictionary to a storage.
  *
- * @param storage A storage to add the data to.
+ * Calls gp_storage_add() internally.
+ *
+ * @param self A storage to add the data to.
  * @param node A dict node to add the data to, if NULL data are added to root
  *             node.
  * @param id A name for the newly added node.
