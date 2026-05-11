@@ -10,6 +10,13 @@ def get_text(node):
     if node is None: return ""
     return "".join(node.itertext()).strip().replace('\n', ' ')
 
+def type_space(c_type):
+    """Returns a space or empty string to padd c_type."""
+    if c_type.endswith('*'):
+        return ''
+
+    return ' '
+
 def get_desc(node):
     """Extract description, formats C code, skips a list of parameters."""
     if node is None:
@@ -50,6 +57,14 @@ def get_desc(node):
             parts.append(child.tail.replace('\n', ' ').strip())
 
     return " ".join(parts).strip()
+
+def get_long_desc(node):
+    """Extracts all long description nodes and creates a text"""
+    para_nodes = node.findall('detaileddescription/para')
+    if para_nodes:
+        desc_parts = [get_desc(p) for p in para_nodes]
+        return "\n.sp\n".join(desc_parts)
+    return ""
 
 def clear_type(p_type):
     """Removes modifiers and keywords from a type e.g. 'enum gp_backend *' -> 'gp_backend'."""
@@ -114,6 +129,10 @@ def xml_to_man(xml_path, out_dir, all_enums, all_structs):
         else:
             type_node = func.find('type')
             ret_type = get_text(type_node) or "void"
+            c_ret_type = clear_type(ret_type)
+
+            if c_ret_type in all_structs:
+                see_also.append(c_ret_type)
 
             params_info = []
 
@@ -127,20 +146,13 @@ def xml_to_man(xml_path, out_dir, all_enums, all_structs):
                     par += f"\\fI{p_name}\\fR"
                     params_type[p_name] = p_type
                 params_info.append(par)
-            if ret_type.endswith('*'):
-                sp = ''
-            else:
-                sp = ' '
-            content.append(f"\\fB{ret_type}{sp}{name}(\\fR{', '.join(params_info)}\\fB);\\fR")
+            content.append(f"\\fB{ret_type}{type_space(ret_type)}{name}(\\fR{', '.join(params_info)}\\fB);\\fR")
         content.append('.fi');
 
         # DESCRIPTION
-        desc_nodes = para_nodes = func.findall('detaileddescription/para')
-        if desc_nodes:
-            desc_parts = [get_desc(p) for p in para_nodes]
-            desc = "\n.sp\n".join(desc_parts)
-            if desc:
-                content.append('.SH DESCRIPTION\n' + desc)
+        desc = get_long_desc(func)
+        if desc:
+            content.append('.SH DESCRIPTION\n' + desc)
 
         # ARGUMENTS
         param_list = func.find(".//parameterlist[@kind='param']")
@@ -154,15 +166,10 @@ def xml_to_man(xml_path, out_dir, all_enums, all_structs):
                 if p_name in params_type:
                     p_type = params_type[p_name]
                 else:
-                    if not is_macro:
+                    if not is_macro and p_name != '...':
                         print(f"ERROR: param {p_name} not in the function {name} argument list!")
 
-                if p_type.endswith('*'):
-                    sp = ''
-                else:
-                    sp = ' '
-
-                content.append(f'.TP\n\\fB{p_type}{sp}\\fI{p_name}\\fR\n{p_desc}')
+                content.append(f'.TP\n\\fB{p_type}{type_space(p_type)}\\fI{p_name}\\fR\n{p_desc}')
                 p_ctype = clear_type(p_type);
                 # If parameter is structure and we have doc for it, link it
                 if p_ctype in all_structs:
@@ -199,20 +206,45 @@ def struct_xml_to_man(struct_name, struct_data, out_dir):
 
     print(f" GEN {fname}.3")
 
+    synopsis_declaration = [
+        f'.SH SYNOPSIS',
+        f'.nf',
+        f'\\fBstruct {struct_name} {{\\fR'
+    ]
+
+    if struct_data["members"]:
+        for m_type, m_name, m_args, _, _ in struct_data["members"]:
+            synopsis_declaration.append(f'    \\fB{m_type}\\fR{type_space(m_type)}{m_name}{m_args or ""};')
+
+    synopsis_declaration.append('\\fB};\\fR')
+    synopsis_declaration.append('.fi')
+
     content = [
         f'.TH "{fname.upper()}" 3',
         f'.SH NAME',
         f'{struct_name} \\- {struct_data["description"] or "Structure definition"}',
-        f'.SH SYNOPSIS',
-        f'\\fBstruct {struct_name}\\fR',
-        f'.SH MEMBERS'
     ]
 
+    content.extend(synopsis_declaration)
+
+    if struct_data["desc_long"]:
+        content.append('.SH DESCRIPTION');
+        content.append(struct_data["desc_long"])
+
+    content.append('.SH MEMBERS')
     if struct_data["members"]:
-        for m_type, m_name, m_args, m_desc in struct_data["members"]:
+        for m_type, m_name, m_args, m_desc, m_long_desc in struct_data["members"]:
             content.append('.TP')
-            content.append(f'\\fB{m_type} {m_name}{m_args}\\fR')
-            content.append(m_desc or "No description available.")
+            content.append(f'\\fB{m_type}{type_space(m_type)}{m_name}{m_args or ""}\\fR')
+            if m_desc:
+                content.append(m_desc)
+                content.append(".sp")
+
+            if m_long_desc:
+                content.append(m_long_desc)
+
+            if not m_desc and not m_long_desc:
+                content.append("No description available.")
     else:
         content.append("No public members.")
 
@@ -240,20 +272,23 @@ def collect_types(xml_dir):
                     v_list.append((v.findtext('name'), get_text(v.find('briefdescription/para'))))
                 all_enums[name] = {
                     "description": get_text(enum.find('briefdescription/para')),
+                    "desc_long": get_long_desc(enum),
                     "items": v_list
                 }
 
-            for compound in tree.findall(".//compounddef[@kind='struct']"):
-                name = compound.findtext('compoundname')
+            for struct in tree.findall(".//compounddef[@kind='struct']"):
+                name = struct.findtext('compoundname')
                 members = []
-                for mem in compound.findall(".//memberdef[@kind='variable']"):
+                for mem in struct.findall(".//memberdef[@kind='variable']"):
                     m_type = get_text(mem.find('type'))
                     m_name = mem.findtext('name')
                     m_args = get_text(mem.find('argsstring'))
                     m_desc = get_text(mem.find('briefdescription/para'))
-                    members.append((m_type, m_name, m_args, m_desc))
+                    m_long_desc = get_long_desc(mem)
+                    members.append((m_type, m_name, m_args, m_desc, m_long_desc))
                 all_structs[name] = {
-                    "description": get_text(compound.find('briefdescription/para')),
+                    "description": get_text(struct.find('briefdescription/para')),
+                    "desc_long": get_long_desc(struct),
                     "members": members
                 }
         except:
