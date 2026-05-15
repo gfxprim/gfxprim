@@ -4,10 +4,12 @@
 
 import xml.etree.ElementTree as ET
 import sys, os, glob
+from datetime import date
 
 def get_text(node):
     """Extracts text from leaf xml element."""
-    if node is None: return ""
+    if node is None:
+        return ""
     return "".join(node.itertext()).strip().replace('\n', ' ')
 
 def type_space(c_type):
@@ -18,19 +20,28 @@ def type_space(c_type):
     return ' '
 
 def get_desc(node):
-    """Extract description, formats C code, skips a list of parameters."""
+    """Extract description, formats C code, skips a list of parameters. Returns a list of paragraphs."""
     if node is None:
-        return ""
+        return []
 
-    parts = []
+    paragraphs = []
+    current_para = ""
+
     if node.text:
-        parts.append(node.text.replace('\n', ' ').strip())
+        current_para += node.text.replace('\n', ' ')
 
     for child in node:
-        if child.tag in ['parameterlist', 'simplesect']:
+        if child.tag in ['parameterlist']:
             continue
 
-        if child.tag in ['computeroutput', 'programlisting', 'verbatim']:
+        if child.tag in ['simplesect'] and child.get('kind') in ['important', 'warning']:
+            current_para += f"\\fI{get_text(child)}\\fR"
+            if current_para.strip():
+                paragraphs.append(current_para.strip(' '))
+                current_para = ""
+            paragraphs.append(".PP")
+
+        elif child.tag in ['computeroutput', 'programlisting', 'verbatim']:
             code_parts = []
 
             def extract_code(node):
@@ -44,27 +55,48 @@ def get_desc(node):
                         code_parts.append(sub.tail)
 
             extract_code(child)
-            code_text = "".join(code_parts)
+            code_text = ''.join(code_parts)
 
-            parts.append("\n.sp\n.RS 4\n.nf\n")
-            parts.append(code_text)
-            parts.append("\n.fi\n.RE\n.sp\n")
+            if current_para.strip():
+                paragraphs.append(current_para.strip(' '))
+                current_para = ""
+
+            # Code blocks are added as structured macro arrays
+            paragraphs.extend([".sp", ".RS 4", ".nf", code_text.strip('\n'), ".fi", ".RE", ".sp"])
+
+        elif child.tag == 'para':
+            if current_para.strip():
+                paragraphs.append(current_para.strip(' '))
+                current_para = ""
+            paragraphs.append(".PP")
+            # Extend list with child list elements
+            paragraphs.extend(get_desc(child))
         else:
-            text_content = "".join(child.itertext()).replace('\n', ' ')
-            parts.append(text_content)
+            current_para += get_text(child)
 
         if child.tail:
-            parts.append(child.tail.replace('\n', ' ').strip())
+            current_para += child.tail.replace('\n', ' ')
 
-    return " ".join(parts).strip()
+    if current_para.strip():
+        paragraphs.append(current_para.strip(' '))
+
+    return [p for p in paragraphs if p]
 
 def get_long_desc(node):
-    """Extracts all long description nodes and creates a text"""
+    """Extracts all long description nodes and returns an array of paragraphs."""
     para_nodes = node.findall('detaileddescription/para')
-    if para_nodes:
-        desc_parts = [get_desc(p) for p in para_nodes]
-        return "\n.sp\n".join(desc_parts)
-    return ""
+    if not para_nodes:
+        return []
+
+    all_paragraphs = []
+    for p in para_nodes:
+        desc_list = get_desc(p)
+        if desc_list:
+            if all_paragraphs:
+                all_paragraphs.append(".PP")
+            all_paragraphs.extend(desc_list)
+
+    return all_paragraphs
 
 def clear_type(p_type):
     """Removes modifiers and keywords from a type e.g. 'enum gp_backend *' -> 'gp_backend'."""
@@ -75,6 +107,9 @@ def clear_type(p_type):
 
 def safe_name(name):
     return name.replace(':', '_').replace(' ', '_')
+
+def gen_th(name):
+    return f'.TH {name} 3 {date.today().isoformat()} "GFXprim manual pages"'
 
 def xml_to_man(xml_path, out_dir, all_enums, all_structs):
     """Iterates over all functions in a xml file and generates man page for each of them."""
@@ -92,16 +127,17 @@ def xml_to_man(xml_path, out_dir, all_enums, all_structs):
     for func in root.findall(".//memberdef[@kind='function']") + \
                 root.findall(".//memberdef[@kind='define']"):
         name = func.findtext('name')
-        header = os.path.basename(func.find('location').get('file'))
+        header_path = func.find('location').get('file')
+        header = os.path.basename(os.path.dirname(header_path)) + '/' + os.path.basename(header_path)
 
-        if not name or not (name.startswith('gp_') or name.startswith('GP_')) or name.endswith('_'):
+        if not name or not ((name.startswith('gp_') or name.startswith('GP_'))) or name.endswith('_'):
             continue
 
         print(f" GEN {name}.3")
 
         # SYNOPSIS
         content = [
-            f'.TH "{name.upper()}" 3',
+            f'{gen_th(name)}',
             f'.SH NAME',
             f'{name} \\- {get_text(func.find("briefdescription/para"))}',
             f'.SH SYNOPSIS',
@@ -152,7 +188,8 @@ def xml_to_man(xml_path, out_dir, all_enums, all_structs):
         # DESCRIPTION
         desc = get_long_desc(func)
         if desc:
-            content.append('.SH DESCRIPTION\n' + desc)
+            content.append('.SH DESCRIPTION')
+            content.extend(desc)
 
         # ARGUMENTS
         param_list = func.find(".//parameterlist[@kind='param']")
@@ -204,6 +241,9 @@ def struct_xml_to_man(struct_name, struct_data, out_dir):
     """Generates a manpage for a structure."""
     fname = safe_name(struct_name)
 
+    if not fname.startswith('gp_'):
+        return
+
     print(f" GEN {fname}.3")
 
     synopsis_declaration = [
@@ -220,7 +260,7 @@ def struct_xml_to_man(struct_name, struct_data, out_dir):
     synopsis_declaration.append('.fi')
 
     content = [
-        f'.TH "{fname.upper()}" 3',
+        f'{gen_th(fname)}',
         f'.SH NAME',
         f'{struct_name} \\- {struct_data["description"] or "Structure definition"}',
     ]
@@ -229,7 +269,7 @@ def struct_xml_to_man(struct_name, struct_data, out_dir):
 
     if struct_data["desc_long"]:
         content.append('.SH DESCRIPTION');
-        content.append(struct_data["desc_long"])
+        content.extend(struct_data['desc_long'])
 
     content.append('.SH MEMBERS')
     if struct_data["members"]:
@@ -238,10 +278,10 @@ def struct_xml_to_man(struct_name, struct_data, out_dir):
             content.append(f'\\fB{m_type}{type_space(m_type)}{m_name}{m_args or ""}\\fR')
             if m_desc:
                 content.append(m_desc)
-                content.append(".sp")
 
             if m_long_desc:
-                content.append(m_long_desc)
+                content.append('.IP')
+                content.extend([item.replace('.PP', '.IP') for item in m_long_desc])
 
             if not m_desc and not m_long_desc:
                 content.append("No description available.")
