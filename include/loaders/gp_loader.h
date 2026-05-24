@@ -1,63 +1,110 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
- /*
-
-   Core include file for loaders API.
-
+ /**
+  * @brief Core include file for loaders API.
+  * @file gp_loader.h
   */
 
 #ifndef LOADERS_GP_LOADER_H
 #define LOADERS_GP_LOADER_H
 
-#include "core/gp_pixmap.h"
+#include <core/gp_pixmap.h>
 #include <core/gp_progress_callback.h>
-
 #include <loaders/gp_io.h>
 #include <loaders/gp_data_storage.h>
 
-/*
- * Reads an image from a I/O stream.
+/**
+ * @brief Reads an image from a I/O stream.
  *
- * The image format is matched from the file signature (first few bytes of the
- * I/O stream).
+ * The image format is matched from the file signature i.e. first few bytes of the
+ * I/O stream.
+ *
+ * @param io An I/O.
+ * @param callback A progress callback.
+ * @return Newly allocated and initialized image or in a case of a failure NULL
+ *         and errno is set. The resulting errno may also be set to any
+ *         possible error from open(3), read(3), seek(3), etc.
  */
 gp_pixmap *gp_read_image(gp_io *io, gp_progress_cb *callback);
 
+/**
+ * @brief Reads an image from a I/O stream.
+ *
+ * The image format is matched from the file signature i.e. first few bytes of the
+ * I/O stream.
+ *
+ * @param io An I/O.
+ * @param img A pointer to store the loaded image to.
+ * @param meta_data An optional metadata storage, may be NULL if not needed.
+ * @param callback A progress callback.
+ * @return Zero on success, non-zero on a failure and errno is set. The resulting
+ *         errno may also be set to any possible error from open(3), read(3),
+ *         seek(3), etc.
+ */
 int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_storage *meta_data,
                      gp_progress_cb *callback);
 
-/*
- * Tries to load image accordingly to the file extension.
+/**
+ * @brief Loads an image file.
  *
- * If operation fails NULL is returned and errno is filled.
+ * Tries to load image accordingly to the file extension, but falls back to
+ * signature detection if loader for the file extension fails.
+ *
+ * @param src_path A path to an image file.
+ * @param callback A progress callback.
+ * @return Newly allocated and initialized image or in a case of a failure NULL
+ *         and errno is set. The resulting errno may also be set to any
+ *         possible error from open(3), read(3), seek(3), etc.
  */
 gp_pixmap *gp_load_image(const char *src_path, gp_progress_cb *callback);
 
+/**
+ * @brief Loads an image file.
+ *
+ * Tries to load image accordingly to the file extension, but falls back to
+ * signature detection if loader for the file extension fails.
+ *
+ * @param src_path A path to an image file.
+ * @param img A pointer to store the loaded image to.
+ * @param meta_data An optional metadata storage, may be NULL if not needed.
+ * @param callback A progress callback.
+ * @return Zero on success, non-zero on a failure and errno is set. The
+ *         resulting errno may also be set to any possible error from open(3),
+ *         read(3), seek(3), etc.
+ */
 int gp_load_image_ex(const char *src_path,
                      gp_pixmap **img, gp_storage *meta_data,
                      gp_progress_cb *callback);
 
-/*
- * Loads image Meta Data (if possible).
+/**
+ * @brief Loads image meta data.
+ *
+ * Loads only image metadata, e.g. exif. No bitmap data are loaded.
+ *
+ * @param src_path A path to a image file.
+ * @param storage A data storage for the metadata.
+ * @return Zero on success, non-zero otherwise.
  */
 int gp_load_meta_data(const char *src_path, gp_storage *storage);
 
-/*
- * Simple saving function, the image format is matched by file extension.
- *
- * Retruns zero on success.
- *
- * On failure non-zero is returned.
+/**
+ * @brief Simple saving function, the image format is guessed by the file
+ *        extension.
  *
  * When file type wasn't recognized by extension or if support for requested
  * image format wasn't compiled in non-zero is returned and errno is set to
  * ENOSYS.
  *
- * The resulting errno may also be set to any possible error from fopen(3), open(3),
- * write(3), fwrite(3), seek(3), etc..
+ * @warning Image loader can save only pixmaps with a compatible pixel types.
+ *
+ * @param src A pixmap to be saved.
+ * @param dst_path A path to a file to save the image into.
+ * @return Zero on success, non-zero otherwise and errno is set. The resulting
+ *         errno may also be set to any possible error from open(3), write(3),
+ *         seek(3), etc.
  */
 int gp_save_image(const gp_pixmap *src, const char *dst_path,
                   gp_progress_cb *callback);
@@ -107,81 +154,114 @@ struct gp_loader {
 	const char *extensions[];
 };
 
-/*
- * Takes pointer to buffer at least 32 bytes long and returns a pointer to
- * matched loader or NULL.
+/**
+ * @brief Looks up a loader by a file signature.
+ *
+ * @param buf First 32 bytes of the image.
+ * @return A pointer to loader or NULL if not found.
  */
 const gp_loader *gp_loader_by_signature(const void *buf);
 
-/*
- * Tries to match loader by filename extension. Returns NULL if no loader was
- * found.
+/**
+ * @brief Looks up a loader by a file extension.
+ *
+ * @param path A path to an image file.
+ * @return A pointer to loader or NULL if not found.
  */
 const gp_loader *gp_loader_by_filename(const char *path);
 
-/*
- * Registers additional loader.
+/**
+ * @brief Registers a loader.
  *
- * Returns zero on success, non-zero if table of loaders was is full.
+ * @param self A loader to be registered.
+ * @return Zero on success, non-zero if table of loaders was is full.
  */
 int gp_loader_register(const gp_loader *self);
 
-/*
- * Unregisters a loader.
+/**
+ * @brief Unregisters a loader.
  *
  * All library loaders are registered by default.
  *
- * You can unregister them using this function if you want.
+ * You can unregister them using this function.
+ *
+ * @param self A loader to be unregistered.
  */
 void gp_loader_unregister(const gp_loader *self);
 
-/*
- * Generic LoadImage for a given loader.
+/**
+ * @brief Loads image for a given loader.
  *
- * The function prepares the I/O from file, calls the loader Read() method,
- * closes the I/O and returns the pixmap.
+ * @param self A loader.
+ * @param src_path A path to an image file.
+ * @param callback A progress callback.
+ * @return Newly allocated and initialized image or in a case of a failure NULL
+ *         and errno is set. The resulting errno may also be set to any
+ *         possible error from open(3), read(3), seek(3), etc.
  */
 gp_pixmap *gp_loader_load_image(const gp_loader *self, const char *src_path,
                                 gp_progress_cb *callback);
 
-/*
- * Generic ReadImage for a given loader.
+/**
+ * @brief Loads image for a given loader.
  *
- * The function calls the loader Read() method for a given I/O.
+ * @param src_path A path to an image file.
+ * @param img A pointer to store the loaded image to.
+ * @param meta_data An optional metadata storage, may be NULL if not needed.
+ * @param callback A progress callback.
+ * @return Zero on success, non-zero on a failure and errno is set. The
+ *         resulting errno may also be set to any possible error from open(3),
+ *         read(3), seek(3), etc.
+ */
+int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
+                            gp_pixmap **img, gp_storage *meta_data,
+                            gp_progress_cb *callback);
+
+/**
+ * @brief Reads image for a given loader.
+ *
+ * @param self A loder.
+ * @param io An I/O.
+ * @param callback A progress callback.
+ * @return Newly allocated and initialized image or in a case of a failure NULL
+ *         and errno is set. The resulting errno may also be set to any
+ *         possible error from open(3), read(3), seek(3), etc.
  */
 gp_pixmap *gp_loader_read_image(const gp_loader *self, gp_io *io,
                                 gp_progress_cb *callback);
 
-/*
- * Generic ReadImageEx for a given loader.
+/**
+ * @brief Reads image for a given loader.
  *
- * The function calls the loader Read() method for a given I/O.
+ * @param io An I/O.
+ * @param img A pointer to store the loaded image to.
+ * @param meta_data An optional metadata storage, may be NULL if not needed.
+ * @param callback A progress callback.
+ * @return Zero on success, non-zero on failure and errno is set. The resulting
+ *         errno may also be set to any possible error from open(3), read(3),
+ *         seek(3), etc.
  */
 int gp_loader_read_image_ex(const gp_loader *self, gp_io *io,
-                            gp_pixmap **img, gp_storage *data,
+                            gp_pixmap **img, gp_storage *meta_data,
                             gp_progress_cb *callback);
 
-/*
- * Generic LoadImageEx for a given loader.
+/**
+ * @brief Saves image for a given loader.
  *
- * The function prepares the I/O from file, calls the loader ReadEx() method,
- * closes the I/O and returns the pixmap.
- */
-int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
-                            gp_pixmap **img, gp_storage *data,
-                            gp_progress_cb *callback);
-
-/*
- * Generic SaveImage for a given loader.
+ * @warning Image loader can save only pixmaps with a compatible pixel types.
  *
- * The function/ prepares the I/O from file, calls the loader Write() method
- * and closes the I/O.
+ * @param self A loder.
+ * @param src A pixmap to be saved.
+ * @param dst_path A path to a file to save the image into.
+ * @return Zero on success, non-zero otherwise and errno is set. The resulting
+ *         errno may also be set to any possible error from open(3), write(3),
+ *         seek(3), etc.
  */
 int gp_loader_save_image(const gp_loader *self, const gp_pixmap *src,
                          const char *dst_path, gp_progress_cb *callback);
 
-/*
- * List loaders into the stdout
+/**
+ * @brief Lists all registered loaders into the stdout.
  */
 void gp_loaders_list(void);
 

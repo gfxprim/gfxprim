@@ -18,6 +18,8 @@
 /**
  * @brief Reads EXIF from a readable I/O stream and stores the values into storage.
  *
+ * This function is internally called by the image loaders.
+ *
  * @param io An input I/O stream.
  * @param storage A data storage for exif metadata, may be NULL if not needed.
  * @param corr_desc A correction tables parsed from the exif.

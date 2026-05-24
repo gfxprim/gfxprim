@@ -8,7 +8,7 @@
   Converts a continuous line of pixels from buffer A to a line of pixels in
   buffer B.
 
-  Supports only trivial conversions i.e. RGB888 to BGR888 and G1_LE to G1_BE,
+  Supports only trivial conversions i.e. RGB888 to BGR888 and G1_UB to G1_DB,
   etc.
 
   The code is mainly used in image loaders when saving image from memory buffer

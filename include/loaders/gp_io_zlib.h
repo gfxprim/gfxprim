@@ -14,19 +14,24 @@
 #include <loaders/gp_io.h>
 
 /**
- * @brief Create a Zlib RAW inflate stream on the top of the existing I/O stream.
+ * @brief Creates a Zlib RAW inflate stream on the top of the existing I/O stream.
  *
- * The stream will read up to comp_size bytes from the parent I/O.
- *
- * If comp_size is 0, no limit on number bytes from the parent stream is set.
- * However if end of compressed stream is reached the last read will attempt to
- * seek back by the number of extra buffered bytes.
+ * @param io An I/O.
+ * @param comp_size The size of the compressed data in the I/O. The library
+ *                  will not attempt to read more bytes than this. Setting
+ *                  comp_bytes to 0 means unlimited.
+ * @return A newly allocated and initialize zlib I/O or NULL in a case of a
+ *         failure and errno is set.
  */
 gp_io *gp_io_zlib(gp_io *io, size_t comp_size);
 
 /**
- * @brief Repurposes existing Zlib stream for new decompression.
+ * @brief Repurposes existing Zlib stream for a new decompression.
  *
+ * @param io An I/O.
+ * @param sub_io A zlib I/O previously allocated by gp_io_zlib().
+ * @param comp_size The size of compressed data. See gp_io_zlib() for complete
+ *                  description.
  * @return Zero on success. Returns non-zero on failure and errno is set.
  */
 int gp_io_zlib_reset(gp_io *io, gp_io *sub_io, size_t comp_size);
