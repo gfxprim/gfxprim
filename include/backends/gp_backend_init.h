@@ -20,25 +20,25 @@
  *
  * Example usage:
  * @code
- *	const char *backend_opts = NULL;
- *	gp_backend *backend;
+ *        const char *backend_opts = NULL;
+ *        gp_backend *backend;
  *
- *	...
+ *        ...
  *
- *	while ((opt = getopt(argc, argv, "b:")) {
- *		switch (opt) {
- *		case 'b':
- *			backend_opts = optarg;
- *		break;
- *		...
- *		}
- *	}
+ *        while ((opt = getopt(argc, argv, "b:")) {
+ *                switch (opt) {
+ *                case 'b':
+ *                        backend_opts = optarg;
+ *                break;
+ *                ...
+ *                }
+ *        }
  *
- *	backend = gp_backend_init(backend_opts, 0, 0, "Backend init example");
- *	if (!backend)
- *		exit(1);
+ *        backend = gp_backend_init(backend_opts, 0, 0, "Backend init example");
+ *        if (!backend)
+ *                exit(1);
  *
- *	...
+ *        ...
  * @endcode
  *
  * @param params A backend init string, in most cases passed down by an user,

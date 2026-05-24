@@ -117,8 +117,8 @@ struct gp_pixmap {
  *
  * Determines the address of a pixel within the pixmap's buffer.
  *
- * Rows and columns are specified in the image origiinal orientation i.e. this
- * macro ignores the rotation flags.
+ * Rows and columns are specified in the image original orientation i.e. this
+ * macro ignores the pixmap rotation flags.
  */
 #define GP_PIXEL_ADDR(pixmap, x, y) ((pixmap)->pixels \
 	+ (y) * (pixmap)->bytes_per_row \

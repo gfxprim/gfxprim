@@ -795,6 +795,25 @@ static inline gp_event *gp_backend_ev_wait(gp_backend *self)
  * If timer callback is NULL a gp_event with #GP_EV_TMR type is pushed into the
  * backend event queue once timer expires.
  *
+ * You can use the GP_TIMER_DECLARE() macro to create and initialize a gp_timer structure.
+ * @code
+ *         uint32_t my_callback(gp_timer *self)
+ *         {
+ *                 printf("Timer expired my_data=%p\n", self->priv);
+ *                 return self->period;
+ *         }
+ *
+ *         int main(void)
+ *         {
+ *                 ...
+ *                 GP_TIMER_DECLARE(my_timer, 100, 100, my_callback, my_data);
+ *                 gp_backend_timer_start(backed, &my_timer);
+ *                 ...
+ *         }
+ * @endcode
+ *
+ * Or you can allocate the timer with gp_timer_alloc().
+ *
  * @param self A backend.
  * @param timer A timer.
  */
@@ -824,6 +843,7 @@ void gp_backend_timer_stop(gp_backend *self, gp_timer *timer);
  * @brief Returns number of timers scheduled in backend.
  *
  * @param self A backend.
+ * @return A number of timers queued.
  */
 static inline unsigned int gp_backend_timers_queued(gp_backend *self)
 {

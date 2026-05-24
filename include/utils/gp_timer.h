@@ -86,6 +86,16 @@ struct gp_timer {
 	char data[];
 };
 
+/**
+ * @brief A helper macro to declare a timer.
+ *
+ * @param name A variable name.
+ * @param texpires An initial timer expirantion.
+ * @param tperiod A value to store in the timer::period variable.
+ * @param tid A string with a timer name, used for debugging.
+ * @param tcallback A timer callback.
+ * @param tpriv A value to store in the timer::priv variable.
+ */
 #define GP_TIMER_DECLARE(name, texpires, tperiod, tid, tcallback, tpriv) \
 	gp_timer name = { \
 		.expires = texpires, \

@@ -22,17 +22,19 @@
  * @brief Flags to change how to deal with the hash table string keys.
  */
 enum gp_htable_flags {
-	/** The key is copied on insert. */
+	/** @brief The key is copied on insert. */
 	GP_HTABLE_COPY_KEY = 0x01,
-	/** The key is freed on removal. */
+	/** @brief The key is freed on removal. */
 	GP_HTABLE_FREE_KEY = 0x02,
-	/** The gp_htable is freed at the end of gp_htable_free() */
+	/** @brief The gp_htable is freed at the end of gp_htable_free() */
 	GP_HTABLE_FREE_SELF = 0x04,
 };
 
 /** @brief A hash table record. */
 struct gp_htable_rec {
+	/** @brief A pointer to a key. */
 	void *key;
+	/** @brief A pointer to a value. */
 	void *val;
 };
 
@@ -48,7 +50,23 @@ struct gp_htable {
 	enum gp_htable_flags flags;
 };
 
-/** Hash table iterator. */
+/**
+ * @Brief Hash table iterator.
+ *
+ * @code
+ *         gp_htable *htable = gp_htable_new(0, 0);
+ *
+ *         ...
+ *
+ *         GP_HTABLE_FOREACH(htable, rec) {
+ *                 cons char *str = rec->key;
+ *                 printf("Key %s\n", str);
+ *         }
+ * @endcode
+ *
+ * @param table A hash table pointer.
+ * @param var A variable name.
+ */
 #define GP_HTABLE_FOREACH(table, var) \
 	for (struct gp_htable_rec *var = (table)->recs; var < &((table)->recs[(table)->size]); var++) \
 		if (var->key)
@@ -99,6 +117,8 @@ void gp_htable_free(gp_htable *self);
 /**
  * @brief A string hashing function.
  *
+ * A default string hashing function.
+ *
  * @param key A string.
  * @param htable_size A hash table size.
  */
@@ -129,6 +149,8 @@ static inline int gp_htable_strcmp(const void *key1, const void *key2)
 /**
  * @brief Adds a pointer to a hash table.
  *
+ * This function uses the deafult string hashing function.
+ *
  * @param self Hash table.
  * @param val A value.
  * @param key A string key.
@@ -138,6 +160,8 @@ void gp_htable_put(gp_htable *self, void *val, char *key);
 /**
  * @brief Search for an element given a string key.
  *
+ * This function uses the deafult string hashing function.
+ *
  * @param self A hash table.
  * @param key A string key.
  *
@@ -146,7 +170,9 @@ void gp_htable_put(gp_htable *self, void *val, char *key);
 void *gp_htable_get(gp_htable *self, const char *key);
 
 /**
- * @brief Removes an entry from a hash table.
+ * @brief Removes a record from a hash table.
+ *
+ * This function uses the deafult string hashing function.
  *
  * @param self A Hash table.
  * @param key A string key.

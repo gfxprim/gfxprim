@@ -69,20 +69,20 @@ struct gp_widget {
 	 */
 	void *priv;
 
-	/**
-	 * @brief A relative offset to the parent widget in pixels.
-	 */
-	unsigned int x, y;
+	/** @brief A relative x offset to the parent widget in pixels. */
+	unsigned int x;
+	/** @brief A relative y offset to the parent widget in pixels. */
+	unsigned int y;
 
-	/**
-	 * @brief Current widget size in pixels.
-	 */
-	unsigned int w, h;
+	/** @brief Current widget width in pixels. */
+	unsigned int w;
+	/** @brief Current widget height in pixels. */
+	unsigned int h;
 
-	/**
-	 * @brief Cached widget minimal size in pixel.
-	 */
-	unsigned int min_w, min_h;
+	/** @brief Cached widget minimal width in pixels. */
+	unsigned int min_w;
+	/** @brief Cached widget minimal height in pixels. */
+	unsigned int min_h;
 
 	/** @brief Widget alignment in parent container, enum #gp_widget_alignment. */
 	unsigned int align:16;

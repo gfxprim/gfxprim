@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
-
 /*
+ * Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+ */
 
-   Simple hash table implementation - generic part.
-
-   These functions are basic building blocks for a hash table.
-
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
-
+/**
+ * @brief Simple hash table implementation - generic part.
+ * @file gp_htable2.h
+ *
+ * These functions are basic building blocks for a hash table.
  */
 
 #ifndef GP_HTABLE2_H
@@ -18,7 +18,9 @@
 #include <core/gp_debug.h>
 #include <utils/gp_htable.h>
 
-/* Returns new size for table based on number of used records. */
+/**
+ * @brief Returns a new hash table size based on number of used records.
+ */
 size_t gp_htable_tsize(size_t used);
 
 static inline void gp_htable_put_(struct gp_htable_rec *recs,
@@ -35,6 +37,13 @@ static inline void gp_htable_put_(struct gp_htable_rec *recs,
 	recs[h].key = key;
 }
 
+/**
+ * @brief Resizes a hash table and rehashes records.
+ *
+ * @param self Hash table.
+ * @param new_size A new hash table size.
+ * @param hash A hash function.
+ */
 static inline void gp_htable_rehash(gp_htable *self, size_t new_size,
                                     size_t (*hash)(const void *key, size_t htable_size))
 {
@@ -63,6 +72,14 @@ static inline void gp_htable_rehash(gp_htable *self, size_t new_size,
 	self->size = new_size;
 }
 
+/**
+ * @brief Adds a record to a hash table given a hash function.
+ *
+ * @param self Hash table.
+ * @param hash A hash function.
+ * @param val A value.
+ * @param key A key.
+ */
 static inline void gp_htable_put2(gp_htable *self,
                                   size_t (*hash)(const void *key, size_t htable_size),
                                   void *val, void *key)
@@ -73,6 +90,16 @@ static inline void gp_htable_put2(gp_htable *self,
 	gp_htable_put_(self->recs, hash, self->size, val, key);
 }
 
+/**
+ * @brief Search for an element given a hash and compare functions.
+ *
+ * @param self A hash table.
+ * @param hash A hash function.
+ * @param cmp A compare function.
+ * @param key A key to look for.
+ *
+ * @return A value if found or NULL.
+ */
 static inline void *gp_htable_get2(gp_htable *self,
                                    size_t (*hash)(const void *key, size_t htable_size),
                                    int (*cmp)(const void *key1, const void *key2),
@@ -144,6 +171,16 @@ static inline void *gp_htable_rem2_(gp_htable *self,
 	return ret;
 }
 
+/**
+ * @brief Removes a record from a hash table given a hash and compare functions.
+ *
+ * @param self A Hash table.
+ * @param hash A hash function.
+ * @param cmp A compare function.
+ * @param key A string key.
+ *
+ * @return A value for removed key or NULL if not found.
+ */
 static inline void *gp_htable_rem2(gp_htable *self,
                                    size_t (*hash)(const void *key, size_t htable_size),
                                    int (*cmp)(const void *key1, const void *key2),
@@ -161,7 +198,9 @@ static inline void *gp_htable_rem2(gp_htable *self,
 	return NULL;
 }
 
-/*
+/**
+ * @brief Removes entries from a hash table based on a trim callback.
+ *
  * Iterates over all hash table records, calls trim() on each once. If trim()
  * returns non-zero record is removed from the table.
  *
@@ -169,6 +208,13 @@ static inline void *gp_htable_rem2(gp_htable *self,
  * removal shuffles them around the table. Instead we build a list of to be
  * deleted elements reusing the val pointer in record and do the removal once
  * we evaluated all records.
+ *
+ * @param self A Hash table.
+ * @param hash A hash function.
+ * @param cmp A compare function.
+ * @param trim A trim function, elements are removed based on the return value
+ *        of this function.
+ * @param free_val A function that is called for removed records.
  */
 static inline void gp_htable_trim2(gp_htable *self,
                                    size_t (*hash)(const void *key, size_t htable_size),
