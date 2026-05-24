@@ -62,15 +62,14 @@ static ssize_t zlib_read(gp_io *io, void *buf, size_t size)
 		if (priv->strm.avail_in == 0) {
 			size_t to_read = BUFS;
 
-			if (priv->comp_avail)
+			if (priv->comp_size)
 				to_read = GP_MIN(BUFS, priv->comp_avail);
 
 			ret = gp_io_read(priv->io, priv->inbuf, to_read);
-
 			if (ret <= 0)
 				return ret;
 
-			if (priv->comp_avail)
+			if (priv->comp_size)
 				priv->comp_avail -= ret;
 
 			priv->strm.avail_in = ret;
