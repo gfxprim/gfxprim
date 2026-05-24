@@ -16,7 +16,7 @@ ifneq ($(MAKECMDGOALS),gen)
 SUBDIRS+=build
 endif
 else
-SUBDIRS=pylib demos build
+SUBDIRS=pylib demos build doc/man
 endif
 
 libs: include

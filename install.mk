@@ -2,11 +2,11 @@ include $(TOPDIR)/libver.mk
 
 ifdef DESTDIR
 BIN_DIR=$(DESTDIR)/$(bindir)
-MAN_DIR=$(DESTDIR)/$(mandir)/man1
+MAN_DIR=$(DESTDIR)/$(mandir)
 DOC_DIR=$(DESTDIR)/$(docdir)/libgfxprim-$(LIB_VERSION)
 PKGCONFIG_DIR=$(DESTDIR)/$(libdir)/pkgconfig/
 else
-MAN_DIR=$(mandir)/man1
+MAN_DIR=$(mandir)
 BIN_DIR=$(bindir)
 DOC_DIR=$(docdir)/libgfxprim-$(LIB_MAJOR)-$(LIB_MINOR)
 PKGCONFIG_DIR=$(libdir)/pkgconfig/
@@ -24,14 +24,25 @@ else
 endif
 endif
 
-ifdef INSTALL_MAN
+ifdef INSTALL_MAN1
 ifdef VERBOSE
-	install -d "$(MAN_DIR)"
-	for i in $(INSTALL_MAN); do install -m 644 "$$i" "$(MAN_DIR)"; done
+	install -d "$(MAN_DIR)/man1"
+	for i in $(INSTALL_MAN1); do install -m 644 "$$i" "$(MAN_DIR)/man1"; done
 else
-	@install -d "$(MAN_DIR)"
-	@echo "MKDIR $(MAN_DIR)"
-	@for i in $(INSTALL_MAN); do echo "CP    $$i $(MAN_DIR)"; install -m 644 "$$i" "$(MAN_DIR)"; done
+	@install -d "$(MAN_DIR)/man1"
+	@echo "MKDIR $(MAN_DIR)/man1"
+	@for i in $(INSTALL_MAN1); do echo "CP    $$i $(MAN_DIR)/man1"; install -m 644 "$$i" "$(MAN_DIR)/man1"; done
+endif
+endif
+
+ifdef INSTALL_MAN3
+ifdef VERBOSE
+	install -d "$(MAN_DIR)/man3"
+	for i in $(INSTALL_MAN3); do install -m 644 "$$i" "$(MAN_DIR)/man3"; done
+else
+	@install -d "$(MAN_DIR)/man3"
+	@echo "MKDIR $(MAN_DIR)/man3"
+	@for i in $(INSTALL_MAN3); do echo "CP    $$i $(MAN_DIR)/man3"; install -m 644 "$$i" "$(MAN_DIR)/man3"; done
 endif
 endif
 
