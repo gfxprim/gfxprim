@@ -37,8 +37,9 @@ char *gp_compose_path_(const char *dir, ...);
  */
 #define gp_compose_path(dir, ...) gp_compose_path_(dir, ##__VA_ARGS__, NULL);
 
+/** @brief Flags for the mkpath functions. */
 enum gp_mkpath_flags {
-	/** Last component in path if it does not end with slash is ignored */
+	/** @brief Last component in path if it does not end with slash is ignored */
 	GP_MKPATH_HAS_FILE = 0x01,
 };
 
@@ -50,7 +51,8 @@ enum gp_mkpath_flags {
  *
  * @param base_path A path to create the directories under, can be NULL.
  * @param path A path, one or more directories.
- * @param flags An enum gp_mkpath_flags.
+ * @param flags If GP_MKPATH_HAS_FILE is passed the last component of the path
+ *              is considered to be a file (unless it ends with /) and ignored.
  * @param mode A mode for the directories created in the path.
  * @return Zero on success, non-zero otherwise and errno is set.
  */

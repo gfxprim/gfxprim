@@ -35,6 +35,9 @@ char *gp_user_path(const char *path, const char *file_name);
  * Works exactly the same as 'mkdir -p'.
  *
  * @param path A path, one or more directories.
+ * @param flags If GP_MKPATH_HAS_FILE is passed the last component of the path
+ *              is considered to be a file (unless it ends with /) and ignored.
+ *
  * @return Zero on success, non-zero otherwise and errno is set.
  */
 int gp_user_mkpath(const char *path, enum gp_mkpath_flags flags);

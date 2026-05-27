@@ -10,8 +10,7 @@ void gp_widgets_timer_ins(gp_timer *timer);
 void gp_widgets_timer_rem(gp_timer *timer);
 -------------------------------------------------------------------------------
 
-Inserts or removes a link:timers.html[timer] to or from the widgets main
-event loop.
+Inserts or removes a timer to or from the widgets main event loop.
 
 .Example
 [source,c]

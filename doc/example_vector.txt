@@ -1,9 +1,0 @@
-Vector example
---------------
-
-See also link:vector.html[vector] documentation.
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/vector.c[]
-------------------------------------------------------------------

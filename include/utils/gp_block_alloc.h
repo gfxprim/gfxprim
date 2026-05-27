@@ -38,6 +38,25 @@ typedef struct gp_balloc_pool {
  * The pointer to the gp_balloc has to be set to NULL prior first call to this
  * function.
  *
+ * @code
+ * void func(...)
+ * {
+ *       gp_block *pool = NULL;
+ *       char *d1, d2;
+ *
+ *       d1 = gp_block_alloc(&pool, size);
+ *       d2 = gp_block_alloc(&pool, size);
+ *
+ *       if (!d1 || !d2)
+ *               goto err;
+ *       ...
+ *
+ * err:
+ *       // Free all allocated memory here
+ *       gp_block_free(&pool);
+ * }
+ * @endcode
+ *
  * @param self A pointer to a block pointer.
  * @param size A memory size to be allocated.
  *

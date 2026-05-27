@@ -1,9 +1,12 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
+ * Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+ */
 
-  Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
-
-*/
+/**
+ * @brief Example matrix usage.
+ * @example matrix.c
+ */
 
 #include <stdio.h>
 #include <utils/gp_matrix.h>

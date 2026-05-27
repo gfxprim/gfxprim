@@ -51,7 +51,7 @@ struct gp_htable {
 };
 
 /**
- * @Brief Hash table iterator.
+ * @brief Hash table iterator.
  *
  * @code
  *         gp_htable *htable = gp_htable_new(0, 0);
@@ -121,6 +121,8 @@ void gp_htable_free(gp_htable *self);
  *
  * @param key A string.
  * @param htable_size A hash table size.
+ *
+ * @return A computed hash index.
  */
 static inline size_t gp_htable_strhash(const void *key, size_t htable_size)
 {

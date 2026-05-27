@@ -590,6 +590,8 @@ typedef struct gp_json_struct {
  * @param desc An alphabetically sorted by id and NULL id terminatred array of
  *             structure member descriptions.
  * @param baseptr A pointer to the deserialized C structure.
+ *
+ * @return Zero on success, non-zero on a failure.
  */
 int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
                         const gp_json_struct *desc, void *baseptr);
@@ -603,6 +605,8 @@ int gp_json_read_struct(gp_json_reader *json, gp_json_val *val,
  * @param desc An alphabetically sorted by id and NULL id terminatred array of
  *       structure member descriptions.
  * @param baseptr A pointer to the deserialized C structure.
+ *
+ * @return Zero on success, non-zero on a failure.
  */
 int gp_json_load_struct(const char *path,
                         const gp_json_struct *desc, void *baseptr);
@@ -616,7 +620,9 @@ int gp_json_load_struct(const char *path,
  * @param desc An NULL id terminated array of structure member descriptions.
  * @param id An JSON id for the object, should be NULL if there is no id required in
  *        current context, e.g. inside of an JSON array.
- * @baseptr A pointer to the serialized C structure.
+ * @param baseptr A pointer to the serialized C structure.
+ *
+ * @return Zero on success, non-zero on a failure.
  */
 int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
                          const char *id, void *baseptr);
@@ -630,6 +636,8 @@ int gp_json_write_struct(gp_json_writer *json, const gp_json_struct *desc,
  * @param desc An alphabetically sorted by id and NULL id terminatred array of
  *       structure member descriptions.
  * @param baseptr A pointer to the serialized C structure.
+ *
+ * @return Zero on success, non-zero on a failure.
  */
 int gp_json_save_struct(const char *path,
                         const gp_json_struct *desc, void *baseptr);

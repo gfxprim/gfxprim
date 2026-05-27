@@ -9,6 +9,10 @@
 /**
  * @file gp_vec.h
  * @brief Vector a growable and shrinkable array.
+ *
+ * Vector expects a frequent resizes hence it allocates underlying memory in
+ * chunks and the memory usage is slightly bigger than actual size. This makes
+ * the vector operations faster and the memory fragmentation is smaller.
  */
 
 #include <stddef.h>
@@ -28,13 +32,13 @@
 
 /** @brief A growable vector */
 typedef struct gp_vec {
-	/** No. bytes in one element in the vec */
+	/** @brief No. bytes in one element in the vec */
 	size_t unit;
-	/** Total capacity in units */
+	/** @brief Total capacity in units */
 	size_t capacity;
-	/** No. of used elements in units */
+	/** @brief No. of used elements in units */
 	size_t length;
-	/** Start of the buffer data */
+	/** @brief Start of the buffer data */
 	char payload[];
 } gp_vec;
 
@@ -65,6 +69,30 @@ GP_WUR gp_vec *gp_vec_shrink_(gp_vec *self, size_t len);
 /**
  * @brief Allocates a new vector.
  *
+ * @code
+ * struct user_struct {
+ *       ...
+ *       int val;
+ *       ...
+ * };
+ *
+ * void func(...)
+ * {
+ *        struct user_struct *array = gp_vec_new(10, sizeof(struct user_struct));
+ *
+ *        if (!array)
+ *                return;
+ *
+ *        array[0].val = 123;
+ *        ...
+ *        array[9].val = 321;
+ *
+ *        ...
+ *
+ *        gp_vec_free(array);
+ * }
+ * @endcode
+ *
  * @param len An initial lenght of the vector.
  * @param unit A size of a vector element.
  *
@@ -78,7 +106,7 @@ GP_WUR void *gp_vec_new(size_t len, size_t unit);
  * Creates a new vector with the exact same data.
  *
  * @param self Vector to be duplicated.
- * @return Returns a pointer to a new vector.
+ * @return Returns a pointer to a new vector or NULL if allocation has failed.
  */
 GP_WUR void *gp_vec_dup(void *self);
 
@@ -119,7 +147,7 @@ static inline size_t gp_vec_len(const void *self)
 }
 
 /**
- * @brief Returns vector unit.
+ * @brief Returns vector unit size in bytes.
  *
  * Returns 0 for a NULL pointer, i.e. vector that hasn't been allocated yet.
  *
@@ -150,6 +178,23 @@ static inline size_t gp_vec_unit(const void *self)
  * previous one. May return NULL if underlying call to realloc() has
  * failed or if off is outside of the vector.
  *
+ * Adds an element at the start of the array.
+ * @code
+ * int *func(int *array, int prepend)
+ * {
+ *        int *new = gp_vec_ins(array, 0, 1);
+ *        if (!new) {
+ *                // The original array is untouched if we fail
+ *                gp_vec_free(array);
+ *                return NULL;
+ *        }
+ *
+ *        new[0] = prepend;
+ *
+ *        return new;
+ * }
+ * @endcode
+ *
  * @param self A vector.
  * @param off An offset in the vector.
  * @param len A number of elements to instert.
@@ -174,8 +219,29 @@ GP_WUR void *gp_vec_expand(void *self, size_t len);
 /**
  * @brief Deletes a range from the vector.
  *
- * Returns a pointer to the vector, possibly a different from the
- * previous one. May return NULL if block is outside of the vector.
+ * Returns a pointer to the vector, possibly a different from the previous one.
+ * May return NULL if to be removed block is outside of the vector.
+ *
+ * Example how to remove first element from the vector.
+ * @code
+ * int *func(int *array, int *pop)
+ * {
+ *        int *new;
+ *
+ *        // This may access memory that is allocated by the vector but may be
+ *        // marked unused hence contain invalid data.
+ *        *pop = array[0];
+ *        new = gp_vec_del(array, 0, 1);
+ *
+ *        // If the first element is out of the vector the vector is empty.
+ *        if (!new) {
+ *		*pop = NULL;
+ *		return array;
+ *        }
+ *
+ *        return new;
+ * }
+ * @endcode
  *
  * @param self A vector.
  * @param off An offset in the vector.

@@ -15,7 +15,7 @@
 
 /**
  * @brief Clips a line.
- 
+ *
  * Clips a line so that the start and end points are within (0, xmax) and
  * (0, ymax). This is used by the line drawing algorithms to make sure that
  * the we only draw the part of line within pixmap.

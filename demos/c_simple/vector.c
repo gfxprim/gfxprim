@@ -1,10 +1,13 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
+ * Copyright (C) 2020 Richard Palethorpe <richiejp@f-m.fm>
+ * Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+ */
 
-  Copyright (C) 2020 Richard Palethorpe <richiejp@f-m.fm>
-  Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
-
-*/
+/**
+ * @brief Example vector usage.
+ * @example vector.c
+ */
 
 #include <stdio.h>
 #include <utils/gp_vec.h>

@@ -50,7 +50,7 @@
  *
  * Reads a byte from a buffer.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param src A pointer to a starting byte of the buffer.
  */
 #define GP_GET_BYTES1(src) (*((uint8_t *)(src)))
 
@@ -59,7 +59,7 @@
  *
  * Writes a byte into a buffer buffer.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param dst A pointer to a starting byte of the buffer.
  * @param byte A value to be written.
  */
 #define GP_SET_BYTES1(dst, byte) *((uint8_t *)(dst)) = (byte)
@@ -69,7 +69,7 @@
  *
  * Reads two bytes from a buffer in a little endian order.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param src A pointer to a starting byte of the buffer.
  */
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 # define GP_GET_BYTES2_LE(src) (*((uint16_t *)(src)))
@@ -82,7 +82,8 @@
  *
  * Writes two bytes from to a buffer in a little endian order.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param dst A pointer to a starting byte of the buffer.
+ * @param bytes A value to be written.
  */
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 # define GP_SET_BYTES2_LE(dst, bytes) *((uint16_t *)(dst)) = (bytes)
@@ -95,7 +96,7 @@
  *
  * Reads two bytes from a buffer in a big endian order.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param src A pointer to a starting byte of the buffer.
  */
 #if __BYTE_ORDER == __BIG_ENDIAN
 # define GP_GET_BYTES2_BE(src) (*((uint16_t *)(src)))
@@ -108,7 +109,8 @@
  *
  * Writes two bytes from to a buffer in a big endian order.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param dst A pointer to a starting byte of the buffer.
+ * @param bytes A value to be written.
  */
 #if __BYTE_ORDER == __BIG_ENDIAN
 # define GP_SET_BYTES2_BE(dst, bytes) *((uint16_t *)(dst)) = (bytes)
@@ -121,7 +123,7 @@
  *
  * Reads two bytes from a buffer in a big endian order.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param src A pointer to a starting byte of the buffer.
  */
 #if __BYTE_ORDER == __BIG_ENDIAN
 # define GP_GET_BYTES4_BE(src) *((uint32_t *)src)
@@ -134,7 +136,8 @@
  *
  * Writes four bytes from to a buffer in a big endian order.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param dst A pointer to a starting byte of the buffer.
+ * @param bytes A value to be written.
  */
 #if __BYTE_ORDER == __BIG_ENDIAN
 # define GP_SET_BYTES4_BE(dst, bytes) *((uint32_t *)(dst)) = (bytes)
@@ -147,7 +150,7 @@
  *
  * Reads two bytes from a buffer in a little endian order.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param src A pointer to a starting byte of the buffer.
  */
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 # define GP_GET_BYTES4_LE(src) *((uint32_t *)src)
@@ -160,7 +163,8 @@
  *
  * Writes four bytes from to a buffer in a little endian order.
  *
- * @param buf A pointer to a starting byte of the buffer.
+ * @param dst A pointer to a starting byte of the buffer.
+ * @param bytes A value to be written.
  */
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 # define GP_SET_BYTES4_LE(dst, bytes) *((uint32_t *)(dst)) = (bytes)

@@ -60,6 +60,12 @@ static inline void gp_hline_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
  * @ingroup gfx
  *
  * An alias for gp_hline_xxy().
+ *
+ * @param pixmap A pixmap to draw into.
+ * @param x0 A starting point x coordinate.
+ * @param x1 An ending point x coordinate.
+ * @param y A y coordinate.
+ * @param pixel A pixel value to be used for the drawing.
  */
 static inline void gp_hline(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
                             gp_coord y, gp_pixel p)

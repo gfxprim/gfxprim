@@ -20,6 +20,9 @@
 
 /**
  * @brief Returns a new hash table size based on number of used records.
+ *
+ * @param used A number of records in the hash table.
+ * @return A (new) hash table size based on the number of records.
  */
 size_t gp_htable_tsize(size_t used);
 

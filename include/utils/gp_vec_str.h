@@ -139,7 +139,7 @@ GP_WUR static inline char *gp_vec_chins(char *self, size_t off, char ch)
  *
  * @param self A string vector.
  * @param off An offset in the string.
- * @unicode An unicode character.
+ * @param unicode An unicode character.
  *
  * @return A string vector or a NULL in a case of allocation failure.
  */

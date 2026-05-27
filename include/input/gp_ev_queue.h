@@ -282,7 +282,7 @@ void gp_ev_queue_push_abs(gp_ev_queue *self,
  * Pushes a #GP_EV_KEY event to the event queue.
  *
  * If backend uses a keymap key events are processed by the keymap state
- * machine and #GP_EV_UTF events are generated accordingly.
+ * machine and ev::key::utf is set accordingly.
  *
  * @param self An input queue.
  * @param key Physical key pressed on keyboard.

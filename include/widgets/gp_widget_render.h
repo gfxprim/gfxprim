@@ -167,8 +167,8 @@ const gp_widget_render_ctx *gp_widgets_render_ctx(void);
 /**
  * @brief Parses options, returns positional arguments, e.g. paths.
  *
- * @argc A pointer to main() arguments count.
- * @argv A pointer to an main() arguments array.
+ * @param argc A pointer to main() arguments count.
+ * @param argv A pointer to an main() arguments array.
  */
 void gp_widgets_getopt(int *argc, char **argv[]);
 
@@ -178,7 +178,7 @@ void gp_widgets_getopt(int *argc, char **argv[]);
  * All input events that are not handled by the widget library are passed to
  * the callback registered by this function.
  *
- * @on_event An event callback.
+ * @param on_event An event callback.
  */
 void gp_widgets_register_callback(int (*on_event)(gp_event *));
 
@@ -188,22 +188,22 @@ void gp_widgets_register_callback(int (*on_event)(gp_event *));
  * Renders a widget layout on a screen or into an window, handles input events,
  * etc. This function does not return.
  *
- * @layout A widget layout to show.
- * @init An init function.
- * @argc A main() argc.
- * @argv A main() argv.
+ * @param layout A widget layout to show.
+ * @param init An init function.
+ * @param argc A main() argc.
+ * @param argv A main() argv.
  */
 void gp_widgets_main_loop(struct gp_widget *layout,
                           void (*init)(int argc, char *argv[]),
                           int argc, char *argv[])
-                          __attribute__((noreturn));
+                          GP_NORETURN;
 
 /**
  * @brief Exits the appliaction.
  *
- * @exit_value Exit value passed to exit().
+ * @param exit_value Exit value passed to exit().
  */
-void gp_widgets_exit(int exit_value) __attribute__((noreturn));
+void gp_widgets_exit(int exit_value) GP_NORETURN;
 
 /**
  * @brief Quits the widgets.
@@ -218,7 +218,7 @@ void gp_widgets_quit(void);
 /**
  * @brief Replace a application layout.
  *
- * @layout New application widget layout.
+ * @param layout New application widget layout.
  *
  * @return An old application layout.
  */
@@ -229,7 +229,7 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout);
  *
  * Temporarily replaces layout shown on the screen with a dialog.
  *
- * @dialog A dialog to be shown to the user.
+ * @param dialog A dialog to be shown to the user.
  *
  * @return A return value from a dialog.
  */
@@ -238,8 +238,8 @@ long gp_dialog_run(gp_dialog *dialog);
 /**
  * @brief Sets the clipboard data.
  *
- * @str A clipboard string.
- * @len Optional size limit, if set to 0 whole string is used.
+ * @param str A clipboard string.
+ * @param len Optional size limit, if set to 0 whole string is used.
  */
 void gp_widgets_clipboard_set(const char *str, size_t len);
 
@@ -248,7 +248,7 @@ void gp_widgets_clipboard_set(const char *str, size_t len);
  *
  * Returns valid data only after GP_EV_SYS_CLIPBOARD event has been received.
  *
- * @reuturn A clipboad data buffer allocated by malloc(), has to be freed by
+ * @return A clipboad data buffer allocated by malloc(), has to be freed by
  * the caller.
  */
 char *gp_widgets_clipboard_get(void);
@@ -258,7 +258,7 @@ char *gp_widgets_clipboard_get(void);
  *
  * When data are ready the widget gets GP_EV_SYS_CLIPBOARD event.
  *
- * @self A widget which requests clipboard data.
+ * @param self A widget which requests clipboard data.
  */
 void gp_widgets_clipboard_request(gp_widget *self);
 
@@ -268,7 +268,7 @@ void gp_widgets_clipboard_request(gp_widget *self);
  * Call this to cancel clipboard requests, this is useful when widget that may
  * have in-flight clipboard request is being destroyed.
  *
- * @self A widget which cancels the request.
+ * @param self A widget which cancels the request.
  */
 void gp_widgets_clipboard_request_cancel(gp_widget *self);
 
@@ -292,7 +292,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle);
  *
  * TODO: Broken.
  *
- * @zoom_inc A zoom increment.
+ * @param zoom_inc A zoom increment.
  */
 void gp_widget_render_zoom(int zoom_inc);
 

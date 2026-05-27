@@ -306,9 +306,6 @@ Timers
 Timers are, as the name suggets, a way to run a function callback at a
 specified time in the future.
 
-TIP: For example usage see
-     link:example_backend_timers.html[backend timers example].
-
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/gp_backend.h>
@@ -317,8 +314,6 @@ TIP: For example usage see
 
 void gp_backend_add_timer(gp_backend *self, gp_timer *timer);
 -------------------------------------------------------------------------------
-
-Adds a link:timers.html[timer] to the backend timer queue.
 
 Timers added to the backend are processed automatically while you call any of
 backend 'Poll' or 'Wait' functions.

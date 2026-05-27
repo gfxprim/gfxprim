@@ -30,8 +30,6 @@ void gp_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 void gp_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
                    gp_size r, gp_pixel pixel);
 
-/* Filled Circle */
-
 /**
  * @brief Draws a filled circle.
  * @ingroup gfx

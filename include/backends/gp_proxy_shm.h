@@ -52,7 +52,7 @@ gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, gp_pixel
  *
  * @param self A SHM pixmap.
  * @param w New width.
- * @parm h New height.
+ * @param h New height.
  *
  * @return 0 if shm buffer haven't needed to be resized, only pixmap size has been changed
  *         1 if buffer was resized

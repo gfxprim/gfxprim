@@ -127,6 +127,9 @@ void gp_timer_queue_dump(const gp_timer *queue);
 /**
  * @brief Inserts timer into the timer priority queue.
  *
+ * Inserts the timer into the queue and sets the expiration time to now +
+ * timer->expire.
+ *
  * If timer is already running nothing is done. In order to reschedule a timer
  * it has to be removed from the queue first.
  *
@@ -147,6 +150,9 @@ void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer);
  *
  * It's safe to call remove from the timer callback.
  *
+ * Runs in O(n) time. The gp_timer_queue_ins() and gp_timer_queue_process()
+ * operations run in O(n*log(n)).
+ *
  * If called from the timer callback the timer is stopped and the return value
  * from the callback is discarded.
  *
@@ -157,6 +163,10 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer);
 
 /**
  * @brief Processes queue, all timers with expires <= now are processed.
+ *
+ * Timers that return GP_TIMER_STOP from callback are stopped. In the rest of
+ * the cases the timer is reinserted into the queue with new expiration time
+ * which is now + callback return value.
  *
  * It's possible to reschedule a timer with expires set to 0, which will
  * process the timer on the next process call.
@@ -189,6 +199,9 @@ static inline unsigned int gp_timer_queue_size(const gp_timer *queue)
  * @param id A timer id string, the string is copied during the allocation.
  * @param callback A timer callback.
  * @param priv A user private pointer.
+ *
+ * @return A newly allocated and initialized timer or NULL on an allocation
+ *         failure.
  */
 gp_timer *gp_timer_alloc(uint32_t expires_ms, uint32_t period_ms, const char *id,
                          uint32_t (*callback)(gp_timer *), void *priv);

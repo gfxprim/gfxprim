@@ -45,6 +45,18 @@ static inline void *gp_matrix_new(size_t cols, size_t rows, size_t unit)
  * @param col  Column index.
  * @param row Row index.
  *
+ * @code
+ * {
+ *         int *matrix = gp_matrix_new(10, 10, sizeof(int));
+ *
+ *         ...
+ *
+ *         matrix[gp_matrix_idx(10, 5, 5)] = 42;
+ *
+ *         ...
+ * }
+ * @endcode
+ *
  * @return Returns an index into a vector.
  */
 static inline size_t gp_matrix_idx(size_t rows, size_t col, size_t row)

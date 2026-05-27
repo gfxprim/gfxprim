@@ -237,7 +237,7 @@ enum gp_pixel_pattern {
 /**
  * @brief Returns a pattern for a grayscale pixel.
  *
- * @pixel A 1bpp pixel.
+ * @param pixel A 1bpp pixel.
  * @return A pattern constant.
  */
 static inline enum gp_pixel_pattern gp_pixel_pattern_get(gp_pixel pixel)
@@ -248,7 +248,7 @@ static inline enum gp_pixel_pattern gp_pixel_pattern_get(gp_pixel pixel)
 /**
  * @brief Returns a pattern foreground for a grayscale pixel.
  *
- * @pixel A 1bpp pixel.
+ * @param pixel A 1bpp pixel.
  * @return A pixel foreground color.
  */
 static inline gp_pixel gp_pixel_pattern_fg_get(gp_pixel pixel)
@@ -259,7 +259,7 @@ static inline gp_pixel gp_pixel_pattern_fg_get(gp_pixel pixel)
 /**
  * @brief Returns a pattern background for a grayscale pixel.
  *
- * @pixel A 1bpp pixel.
+ * @param pixel A 1bpp pixel.
  * @return A pixel background color.
  */
 static inline gp_pixel gp_pixel_pattern_bg_get(gp_pixel pixel)

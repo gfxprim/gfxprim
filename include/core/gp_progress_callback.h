@@ -18,6 +18,7 @@
 #define CORE_GP_PROGRESS_CALLBACK_H
 
 #include <core/gp_types.h>
+#include <core/gp_compiler.h>
 
 /**
  * @brief Progress callback.
@@ -64,7 +65,7 @@ struct gp_progress_cb {
  */
 static inline int gp_progress_cb_report(gp_progress_cb *callback,
                                         unsigned int val, unsigned int max,
-					unsigned int mul __attribute__((unused)))
+					unsigned int GP_UNUSED(mul))
 {
 	if (!callback)
 		return 0;

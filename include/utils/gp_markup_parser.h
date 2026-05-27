@@ -17,11 +17,73 @@
  * @brief Markup format to parse.
  */
 enum gp_markup_fmt {
-	/** An UTF-8 text without any formatting */
+	/** An UTF-8 text without any formatting. */
 	GP_MARKUP_PLAINTEXT,
-	/** A GFXprim markup */
+	/**
+	 * @brief A GFXprim markup.
+	 *
+	 * Gfxprim markup is similar to markdown or asciidoc text format.
+	 * Special characters are escaped with \ as "\*".
+         *
+         * |     Markup      | Description                                      |
+	 * |-----------------|--------------------------------------------------|
+	 * | "{init_val}"    | A variable, value is set by the +get()+ function |
+	 * |    "*bold*"     | Bold text                                        |
+	 * | "`monospace`"   | Monospace text                                   |
+	 * |  "_subcript_"   | Subscript                                        |
+	 * | "^superscript^" | Superscript                                      |
+	 * | "~underline~"   | Underline                                        |
+	 * |   "#large#"     | Large text                                       |
+	 */
 	GP_MARKUP_GFXPRIM,
-	/** A small subset of HTML */
+	/**
+	 * @brief A small subset of HTML.
+	 *
+	 * |   Supported tags   | Description                              |
+	 * |--------------------|------------------------------------------|
+	 * | "<b>"              | Bold text                                |
+	 * | "<br>" or "<br />" | Line break                               |
+	 * | "<big>"            | Large text                               |
+	 * | "<hr>" or "<hr />" | Horizontal line                          |
+	 * | "<s>"              | Strike through                           |
+	 * | "<sub>"            | Subscript (only one level)               |
+	 * | "<sup>"            | Superscript (only one level)             |
+	 * | "<span>"           | See below the supported span attributes. |
+	 * | "<tt>"             | Monospace font                           |
+	 * | "<u>"              | Underline                                |
+	 *
+	 * | Supported span attributes |    Description    |
+	 * |---------------------------|-------------------|
+	 * | font_weight               | bold or normal    |
+	 * | strikethrough             | true or false     |
+	 * | color                     |                   |
+	 * | fg_color                  | See colors table. |
+	 * | foreground                |                   |
+	 *
+	 * | Supported Colors  | Supported Colors |
+	 * |-------------------|------------------|
+	 * | text (text color) |                  |
+	 * | red               | bright-red       |
+	 * | green             | bright-green     |
+	 * | yellow            | bright-yellow    |
+	 * | blue              | bright-blue      |
+	 * | magenta           | bright-magenta   |
+	 * | cyan              | bright-cyan      |
+	 * | gray              | white            |
+	 *
+	 *
+	 * | Supported escapes | Description |
+	 * |-------------------|-------------|
+	 * | \&amp;    | &                   |
+	 * | \&lt;     | <                   |
+	 * | \&gt;     | >                   |
+	 * | \&nbsp;   | Non breakable space |
+	 * | \&copy;   | &copy;              |
+	 * | \&reg;    | &reg;               |
+	 * | \&deg;    | &deg;               |
+	 * | \&plusmn; | &plusmn;            |
+	 * | \&micro;  | &micro;             |
+	 */
 	GP_MARKUP_HTML,
 };
 

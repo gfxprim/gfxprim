@@ -544,6 +544,7 @@ static inline void gp_backend_poll_rem(gp_backend *self, gp_fd *fd)
  *
  * @param self A backend.
  * @param fd A file descriptor used to look up the #gp_fd structure.
+ * @return A pointer to a gp_fd structure or NULL if not found.
  */
 static inline gp_fd *gp_backend_poll_rem_by_fd(gp_backend *self, int fd)
 {
@@ -889,6 +890,9 @@ static inline enum gp_backend_ret gp_backend_set_caption(gp_backend *backend,
  * and height in the struct gp_ev_sys. And finally the rendering is restarted
  * with #GP_EV_SYS_RENDER_START.
  *
+ * @param backend A backend.
+ * @param w A new width.
+ * @param h A new height.
  * @return When resizing is not possible or not implemented non zero is returned.
  */
 int gp_backend_resize(gp_backend *backend, uint32_t w, uint32_t h);
@@ -930,7 +934,7 @@ static inline enum gp_backend_ret gp_backend_fullscreen(gp_backend *backend,
  * called by the application. The application will receive #GP_EV_SYS_RENDER_RESIZE
  * and then #GP_EV_SYS_RENDER_START events. The gp_backend::pixmap is
  * guaranteed to be valid only during and after the
- * #GP_EV_SYS_RENDER_START_EVENT.
+ * #GP_EV_SYS_RENDER_START event.
  *
  * If the function fails the best action to take is to save application data
  * and exit as the backend may be in undefined state.

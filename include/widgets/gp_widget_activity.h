@@ -39,16 +39,22 @@ gp_widget *gp_widget_activity_new(const char *label);
 
 /**
  * @brief Starts the activity widget animation.
+ *
+ * @param self An activity widget.
  */
 void gp_widget_activity_start(gp_widget *self);
 
 /**
  * @brief Stops the activity widget animation.
+ *
+ * @param self An activity widget.
  */
 void gp_widget_activity_stop(gp_widget *self);
 
 /**
  * @brief Returns true if activity is running.
+ *
+ * @param self An activity widget.
  *
  * @return True if activity is running.
  */

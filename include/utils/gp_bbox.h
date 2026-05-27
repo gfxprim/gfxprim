@@ -34,6 +34,7 @@ typedef struct gp_bbox {
 /**
  * @brief Returns true if bounding box is empty.
  *
+ * @param box A bounding box.
  * @return Returns true on empty bounding box.
  */
 static inline int gp_bbox_empty(gp_bbox box)

@@ -22,6 +22,10 @@
 @     if needs_bit_order:
  * @param off Number of pixels to skip in the first byte
 @     end
+@     if ps.size == 1:
+ * @param y_off A (modulo 4) offset from the y=0 coordinate. This is used for
+ *              the patter fill.
+@     end
  * @param cnt A number of pixels to write
  * @param val A pixel value to be written.
  */

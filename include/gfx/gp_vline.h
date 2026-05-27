@@ -49,10 +49,16 @@ void gp_vline_xyh_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
                       gp_pixel pixel);
 
 /**
- * @brief Horizontal line drawing algorithm.
+ * @brief Vertical line drawing algorithm.
  * @ingroup gfx
  *
  * An alias for gp_vline_xyy().
+ *
+ * @param pixmap A pixmap to draw into.
+ * @param x A x coordinate.
+ * @param y0 A starting point y coordinate.
+ * @param y1 An ending point y coordinate.
+ * @param pixel A pixel value to be used for the drawing.
  */
 static inline void gp_vline(gp_pixmap *pixmap, gp_coord x,
                             gp_coord y0, gp_coord y1, gp_pixel pixel)

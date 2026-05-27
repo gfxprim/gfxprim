@@ -58,8 +58,10 @@ typedef unsigned int (*gp_markup_width_cb)(gp_markup_glyph *first, size_t len, v
  * @param width_callback A callback that computes width of a glyph group.
  * @param priv A private pointer passed down to the width_callback.
  *
+ * @return An array with justified lines.
  */
-gp_markup_lines *gp_markup_justify(gp_markup *self, unsigned int line_width, gp_markup_width_cb width_callback, void *priv);
+gp_markup_lines *gp_markup_justify(gp_markup *self, unsigned int line_width,
+                                   gp_markup_width_cb width_callback, void *priv);
 
 /**
  * @brief Frees justified lines.

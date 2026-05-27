@@ -39,7 +39,7 @@ DIRECTORY_GRAPH        = NO
 # Where to take images from
 IMAGE_PATH = .
 # The paths to examples start at root directory
-EXAMPLE_PATH = ../
+EXAMPLE_PATH = ../ ../demos/c_simple/
 
 # Main page
 INPUT += ../README.md

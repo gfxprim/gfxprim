@@ -17,9 +17,26 @@
 #include <core/gp_compiler.h>
 #include <utils/gp_types.h>
 
+/**
+ * @brief Converts heap head pointer into a user structure pointer.
+ *
+ * The heap internally works with the heap head pointers so any pointer that is
+ * passed to the functions has to be converted from the user struct to heap
+ * head and then back by the caller.
+ *
+ * @param ptr A heap head pointer.
+ * @param structure A user structure type.
+ * @param member A heap head member name in the user structure.
+ */
 #define GP_HEAP_ENTRY(ptr, structure, member) \
 	GP_CONTAINER_OF(ptr, structure, member)
 
+/**
+ * @brief Returns number of elements in heap.
+ *
+ * @param heap An heap root pointer.
+ * @return A number of elements in heap.
+ */
 static inline unsigned long gp_heap_size(gp_heap_head *heap)
 {
 	return heap ? heap->children + 1 : 0;
@@ -149,7 +166,33 @@ GP_WUR gp_heap_head *gp_heap_ins_(gp_heap_head *heap, gp_heap_head *parent, gp_h
 /**
  * @brief Inserts a node into a heap.
  *
- * @param heap An heep tree root.
+ * Example how to use the heap:
+ * @code
+ * struct foo {
+ *         gp_heap_head heap;
+ *         int prio;
+ * };
+ *
+ * static int foo_cmp(gp_heap_head *e1, gp_heap_head *e2)
+ * {
+ *         struct foo *f1 = GP_HEAP_ENTRY(e1);
+ *         struct foo *f2 = GP_HEAP_ENTRY(e2);
+ *
+ *         return f1->prio > f2->prio;
+ * }
+ *
+ * static void foo_insert(struct foo **queue, int prio, struct foo *foo)
+ * {
+ *         gp_heap_head *queue_head;
+ *
+ *         foo->prio = prio;
+ *
+ *         queue_head = gp_heap_ins(&(*queue)->heap, &foo->heap, foo_cmp);
+ *         *queue = GP_HEAP_ENTRY(queue_head, struct foo, heap);
+ * }
+ * @endcode
+ *
+ * @param heap A heap root pointer.
  * @param elem An element to be insterted.
  * @param cmp An element comparsion callback.
  * @return A new tree root.
@@ -165,7 +208,7 @@ GP_WUR gp_heap_head *gp_heap_ins(gp_heap_head *heap, gp_heap_head *elem,
  *
  * The head pointer only changes if we remove last element from heap.
  *
- * @param heap A heap pointer.
+ * @param heap A heap root pointer.
  * @param last A pointer to store the last element to.
  * @return A pointer to new head.
  */
@@ -217,8 +260,9 @@ static inline gp_heap_head *gp_heap_bubble_down(gp_heap_head *heap,
 /**
  * @brief Removes top element from the heap.
  *
- * @param heap Old heap pointer.
- * @return New heap pointer.
+ * @param heap Old heap root pointer.
+ * @param cmp A compare function.
+ * @return New heap root pointer.
  */
 GP_WUR static inline gp_heap_head *gp_heap_pop(gp_heap_head *heap,
 	int (*cmp)(gp_heap_head *e1, gp_heap_head *e2))
@@ -272,7 +316,7 @@ GP_WUR static inline gp_heap_head *gp_heap_bubble_up(gp_heap_head *heap,
  * Does a buble down on a (sub) heap starting at the removed element and fixes
  * the links afterwards.
  *
- * @param heap An heep tree root.
+ * @param heap An heap root pointer.
  * @param elem An element to be removed.
  * @param cmp An element comparsion callback.
  * @return A new tree root.

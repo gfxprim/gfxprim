@@ -7,7 +7,7 @@
  */
 
 /**
- * @file gp_widget_poll.h
+ * @file gp_app_poll.h
  * @brief Add file descriptors to the widget main loop.
  */
 

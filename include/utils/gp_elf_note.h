@@ -110,8 +110,8 @@ struct gp_elf_note_hdr {
  * This function is build on a top of a dl_iterate_phdr() and filters out
  * everything that does not have vendor set to 'gfxprim'.
  *
- * @callback A callback to be called for each note.
- * @priv A priv pointer to be passed to the callback.
+ * @param callback A callback to be called for each note.
+ * @param priv A priv pointer to be passed to the callback.
  */
 void gp_elf_notes_process(void (*callback)(uint32_t note_type, const void *note_desc, void *priv),
                           void *priv);

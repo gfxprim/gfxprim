@@ -25,7 +25,8 @@
 # define GP_LIKELY(cond) __builtin_expect(!!(cond), 1)
 # define GP_UNLIKELY(cond) __builtin_expect(!!(cond), 0)
 # define GP_UNUSED(x) (x)__attribute__ ((unused))
-# define GP_PACKED    __attribute__ ((packed))
+# define GP_PACKED __attribute__ ((packed))
+# define GP_NORETURN __attribute__ ((noreturn))
 #else
 /**
  * @brief Expands to warn_unused_result attribute when supported by the compiler.
@@ -59,6 +60,8 @@
  * @brief Expand to packed attribute if supported by the compiler.
  */
 # define GP_PACKED
+/** @brief Expands to noreturn attribute if supported by the compiler. */
+# define GP_NORETURN
 #endif
 
 /* Make sure typeof() is defined even with ISO C */

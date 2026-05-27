@@ -87,10 +87,10 @@
  * @attention Modifies the x, y, w, and h variables passed as argument.
  *
  * @param pixmap A pixmap.
- * @param x A left x coordinate of a rectangle.
- * @param y A top y coordinate of a rectangle.
- * @param w A rectangle width.
- * @param h A rectangle height.
+ * @param rx A left x coordinate of a rectangle.
+ * @param ry A top y coordinate of a rectangle.
+ * @param rw A rectangle width.
+ * @param rh A rectangle height.
  */
 #define GP_TRANSFORM_RECT(pixmap, rx, ry, rw, rh) do { \
 	GP_TRANSFORM_SWAP(pixmap, rx, ry);             \

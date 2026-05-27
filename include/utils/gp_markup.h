@@ -20,19 +20,19 @@
  * These bitflags can be combined bitwise.
  */
 enum gp_markup_flags {
-	/** Bold text */
+	/** @brief Bold text */
 	GP_MARKUP_BOLD = 0x01,
-	/** Large text */
+	/** @brief Large text */
 	GP_MARKUP_LARGE = 0x02,
-	/** Monospace text */
+	/** @brief Monospace text */
 	GP_MARKUP_MONO = 0x04,
-	/** Subscript text */
+	/** @brief Subscript text */
 	GP_MARKUP_SUB = 0x08,
-	/** Superscript text */
+	/** @brief Superscript text */
 	GP_MARKUP_SUP = 0x10,
-	/** Underlined text */
+	/** @brief Underlined text */
 	GP_MARKUP_UNDERLINE = 0x20,
-	/** Striked text */
+	/** @brief Striked text */
 	GP_MARKUP_STRIKE = 0x40,
 };
 
