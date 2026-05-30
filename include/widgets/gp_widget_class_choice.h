@@ -9,6 +9,24 @@
 /**
  * @file gp_widget_class_choice.h
  * @brief A choice class for widgets.
+ *
+ * A choice widget is a class of widgets that allows to select exactly one
+ * choice from a given set.
+ *
+ * There are two different choices application APIs, the choices can either be
+ * static initialized by an string array, or dynamic backed by an structure
+ * with callbacks.
+ *
+ * Choice class widget JSON attributes
+ * -----------------------------------
+ *
+ * |  Attribute   |     Type     | Default | Description                                                    |
+ * |--------------|--------------|---------|----------------------------------------------------------------|
+ * |  **choices** | string array |         | Array of choice descriptions.                                  |
+ * |   **ops**    |    string    |         | The ops structure id, resolved at runtime.                     |
+ * | **selected** |    uint      |    0    | Currently selected choice.                                     |
+ *
+ * Only one of **choices** and **ops** can be set.
  */
 #ifndef GP_WIDGET_CLASS_CHOICE_H
 #define GP_WIDGET_CLASS_CHOICE_H
@@ -28,7 +46,7 @@ enum gp_widget_choice_op {
 /**
  * @brief A choice widget ops.
  *
- * These are callbacks called by the widget implementation to get the choice
+ * Callbacks called by the widget implementation to get the choice
  * values, selected choice and the number of choices.
  *
  * The application needs to call gp_widget_choice_refresh() when the state
@@ -88,7 +106,14 @@ typedef struct gp_widget_choice_desc {
 	};
 } gp_widget_choice_desc;
 
+/** @brief Flags for the choice widget constructor. */
 enum gp_widget_choice_flags {
+	/**
+	 * @brief Copy the string array.
+	 *
+	 * The string array can be stored in the widget either as a pointer, or
+	 * copied when the widget is created.
+	 */
 	GP_WIDGET_CHOICE_COPY = 1,
 };
 
@@ -144,6 +169,10 @@ gp_widget *gp_widget_choice_ops_new(enum gp_widget_type widget_type,
 
 /**
  * @brief Creates a choice widget based on a static array.
+ *
+ * Creates a choice widget from a static array. The array choices can either be
+ * compied when 'GP_WIDGET_CHOICE_COPY' is passed in the flags, or the base
+ * pointer is stored and dereferenced each time widget is repainted.
  *
  * @param widget_type A widget type.
  * @param array A pointer an array.

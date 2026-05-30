@@ -5,10 +5,12 @@
 
  */
 
-/*
-
-   Minimal choice ops example.
-
+/**
+ * @brief Minimal choice ops example.
+ * @example choice.c
+ *
+ * Layout for this example:
+ * @include choice.json
  */
 
 #include <stdio.h>

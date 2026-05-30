@@ -13,11 +13,6 @@
  * The table content is not stored in the widget, instead there are callbacks
  * that are called to get the cells content when table is being rendered.
  *
- * Table example
- * -------------
- * @include{c} demos/widgets/table_example.c
- * @include{json} demos/widgets/table_example.json
- *
  * Table JSON attributes
  * ---------------------
  *

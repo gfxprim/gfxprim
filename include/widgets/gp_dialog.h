@@ -56,7 +56,7 @@ void gp_dialog_free(gp_dialog *self);
  * @brief Loads a dialog layout given a dialog name.
  *
  * Looks for the layout in $HOME/.config/ and /etc/ if not found attempts to
- * parse layout from fallback JSON string.
+ * parse layout from compiled-in fallback JSON string.
  *
  * @param dialog_name Dialog name.
  * @param callbacks Structure with NULL terminated array of dialog callbacks.

@@ -5,10 +5,12 @@
 
  */
 
-/*
-
-   Minimal choice JSON array example.
-
+/**
+ * @brief Minimal choice JSON array example.
+ * @example choice_json_arr.c
+ *
+ * Layout for this example:
+ * @include choice_json_arr.json
  */
 
 #include <stdio.h>

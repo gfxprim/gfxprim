@@ -10,6 +10,8 @@
  * @file gp_widget_tbox.h
  * @brief A textbox widget.
  *
+ * @image html tbox.png
+ *
  * Tbox widget JSON attributes
  * ---------------------------
  *
@@ -131,11 +133,14 @@ enum gp_widget_tbox_event_type {
  *
  * @param text Initial tbox text, pass NULL for empty text box.
  * @param tattr A text attribute e.g. monospace font.
- * @param len Expected text length, used for widget size computation.
- * @param max_len Maximal number of characters, can be used as a hard limit.
- * @param filter If set only characters from the string can be typed into the tbox.
+ * @param len The textbox width is computed so that it can hold len average
+ *            font characters. It could be set to zero if non-NULL text is
+ *            passed, then len is computed from the text length.
+ * @param max_len Maximal number of characters, can be used as a hard limit on
+ *                how many characters can be typed in.
+ * @param filter If set only characters from the string can be typed into the tbox. There
+ *               are two pre-defined filters GP_TBOX_FILTER_INT and GP_TBOX_FILTER_HEX.
  * @param type Text box type.
- *
  * @return A newly allocate and initialized tbox widget.
  */
 gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,

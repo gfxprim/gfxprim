@@ -149,6 +149,17 @@ enum gp_widget_button_event_type {
 /**
  * @brief Allocates and initializes a new button widget.
  *
+ * Creates a button widget, at least one of the label or type has to be set.
+ *
+ * If button type is set the button will be rendered with a small picture that
+ * describes the action, e.g. floppy for 'GP_BUTTON_SAVE'. If label is also set
+ * the button will have both icon and label. The type picture will be
+ * positioned either on the left or on the right side of the label and the
+ * default position could be overriden by bit-or of GP_BUTTON_TEXT_LEFT or
+ * GP_BUTTON_TEXT_RIGHT with the button type.
+ *
+ * Buttons with just a label are created with type set to GP_BUTTON_LABEL.
+ *
  * @param label A button label.
  * @param type A button type.
  *
@@ -160,6 +171,9 @@ gp_widget *gp_widget_button_new(const char *label,
 
 /**
  * @brief Allocates a initialize new button widget.
+ *
+ * This is shortcut for calling gp_widget_button_new() and
+ * gp_widget_on_event_set().
  *
  * @param label A button label. Optional for buttons with type other than
  *              GP_BUTTON_LABEL.
@@ -187,7 +201,7 @@ static inline gp_widget *gp_widget_button_new2(const char *label,
  * The aligment is masked out of the return value.
  *
  * @param self A button widget.
- * @return A button type.
+ * @return A button type, the alignment bits are masked out.
  */
 enum gp_widget_button_type gp_widget_button_type_get(gp_widget *self);
 

@@ -10,6 +10,8 @@
  * @file gp_widget_tabs.h
  * @brief A tabs widget.
  *
+ * @image html tabs.png
+ *
  * Tabs widget JSON attributes
  * ----------------------------
  *
@@ -25,9 +27,19 @@
 
 /** @brief A gp_widget_event::sub_type for a tabs widget. */
 enum gp_widget_tabs_event_type {
-	/** @brief A tab is deactivated */
+	/**
+	 * @brief A tab is deactivated.
+	 *
+	 * The deactivation event is send before the action is done, i.e. while
+	 * the old active tab is still active.
+	 */
 	GP_WIDGET_TABS_DEACTIVATED,
-	/** @brief A tab activated */
+	/**
+	 * @brief A tab activated.
+	 *
+	 * The activation event is send after the action
+	 * was done, i.e. after the active tab has changed.
+	 */
 	GP_WIDGET_TABS_ACTIVATED,
 };
 
@@ -88,6 +100,12 @@ static inline gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int tab)
  */
 gp_widget *gp_widget_tabs_child_get(gp_widget *self, unsigned int tab);
 
+/**
+ * @brief Removes and frees a tab child.
+ *
+ * @param self A tabs widget.
+ * @param tab A tab offset.
+ */
 static inline void gp_widget_tabs_del(gp_widget *self, unsigned int tab)
 {
 	gp_widget *ret = gp_widget_tabs_rem(self, tab);
@@ -99,7 +117,7 @@ static inline void gp_widget_tabs_del(gp_widget *self, unsigned int tab)
  * @brief Adds a tab at an offset.
  *
  * @param self A tabs widget.
- * @param tab An offset.
+ * @param tab A tab offset.
  * @param label Tabs label.
  * @param child A tab child, may be NULL.
  */

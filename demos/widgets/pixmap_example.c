@@ -6,6 +6,14 @@
 
  */
 
+/**
+ * @brief Pixmap example.
+ * @example pixmap_example.c
+ *
+ * Layout for this example:
+ * @include pixmap_example.json
+ */
+
 #include <gfxprim.h>
 
 static gp_htable *uids;

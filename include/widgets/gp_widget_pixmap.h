@@ -35,8 +35,7 @@
  * @attention The `GP_WIDGET_EVENT_RESIZE` has to be unmasked by
  *            gp_widget_events_unmask() before the application starts.
  *
- * @include{c} demos/widgets/pixmap_example.c
- * @include{json} demos/widgets/pixmap_example.json
+ * Example @ref pixmap_example.c
  *
  * Unbuffered mode
  * ---------------
@@ -61,7 +60,7 @@
  * notified when the pixmap is resized, but it's not strictly required in this
  * mode.
  *
- * @include{c} demos/widgets/clock.c
+ * Example @ref clock.c
  *
  * Pixmap widget JSON attributes
  * -----------------------------

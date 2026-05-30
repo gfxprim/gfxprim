@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @brief A simple pixmap widget example.
+ * @example clock.c
+ */
+
 #include <math.h>
 #include <time.h>
 #include <widgets/gp_widgets.h>

@@ -6,6 +6,11 @@
 
  */
 
+/**
+ * @brief Disabled widget example.
+ * @example disable.c
+ */
+
 #include <gfxprim.h>
 
 static int disable(gp_widget_event *ev)

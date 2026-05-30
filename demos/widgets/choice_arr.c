@@ -5,10 +5,9 @@
 
  */
 
-/*
-
-   Minimal choice array example.
-
+/**
+ * @brief Minimal choice array example.
+ * @example choice_arr.c
  */
 
 #include <stdio.h>

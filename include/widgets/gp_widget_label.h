@@ -20,6 +20,13 @@
  * without any limitations, which is only useful for cases where the label
  * text is under your control and all possible values are known in advance.
  *
+ * If widget was created with variable width, it does not shrink, by default,
+ * when its text is changed. If this wasn't the case layout size that
+ * periodically changes a label value would jump up and down, since it would be
+ * resized regulary. This can be disabled either by clearing the
+ * widget::no_shrink attribute or by calling gp_widget_resize() after label
+ * text has been changed.
+ *
  * If you have a label whose text is outside of your control, e.g. the value is
  * a result of some system call, RPC call, etc, it's important to set the label
  * size so that the label will not grow undefinitelly. The most useful

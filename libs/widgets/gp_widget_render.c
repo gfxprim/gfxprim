@@ -161,7 +161,7 @@ static void init_fonts(gp_backend *backend)
 		size = atoi(str_font_size);
 
 		if (size <= 0 || size > 100) {
-			GP_WARN("Inavlid font size '%s'!", str_font_size);
+			GP_WARN("Invalid font size '%s'!", str_font_size);
 			return;
 		}
 

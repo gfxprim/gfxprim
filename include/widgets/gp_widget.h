@@ -226,7 +226,13 @@ enum gp_widget_type {
 /**
  * @brief Widget classes.
  *
- * Class widgets are operated on by a class functions rather than widget specific functions.
+ * A widget class implements a common interface for widgets that share a certain
+ * type of value, e.g. boolean value. The advantage of widget classes is that
+ * the application code does not need to know how exactly the widget on the
+ * screen looks like as long as it matches the expected class.
+ *
+ * Class widgets are operated on by a class functions rather than widget
+ * specific functions.
  */
 enum gp_widget_class {
 	/** @brief Widget has no class, most common case. */

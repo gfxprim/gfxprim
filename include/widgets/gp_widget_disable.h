@@ -10,15 +10,11 @@
  * @file gp_widget_disable.h
  * @brief Functions to disable and enable widgets.
  *
+ * @image html widgets_disable.png
+ *
  * Disabled widgets are widgets that does not react to user input and are
  * "grayed out" in the GUI. Once widget is disabled all its subwidgets are disabled as
  * well.
- *
- * Disabled widget example
- * -----------------------
- *
- * @include{c} demos/widgets/disable.c
- * @image html widgets_disable.png
  */
 
 #ifndef GP_WIDGET_DISABLE_H

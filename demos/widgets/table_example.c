@@ -6,6 +6,13 @@
 
  */
 
+/**
+ * @brief Table widget example.
+ * @example table_example.c
+ *
+ * Layout for this example:
+ * @include table_example.json
+ */
 #include <widgets/gp_widgets.h>
 
 #define TABLE_ROWS 4

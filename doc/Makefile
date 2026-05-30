@@ -8,7 +8,7 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	get_put_pixel.txt blits.txt progress_callback.txt text.txt \
 	event_queue.txt compilation.txt filters_resize.txt tasks.txt\
 	filters_dithering.txt filters_python.txt spiv.txt core_common.txt \
-	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt widgets.txt \
+	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt\
 	packages.txt bbox.txt backends_api.txt \
 	backends_init.txt backends_display.txt
 
@@ -16,14 +16,6 @@ SOURCES+=backends_gpio.txt backends_display_waveshare_7_5_v2.txt backends_displa
 	 backends_display_weact.txt
 
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt backends_python.txt
-
-SOURCES+=widget_grid.txt widget_table.txt widget_button.txt widget_label.txt widgets_tattr.txt\
-	 widget_checkbox.txt widget_choice.txt widgets_events.txt widget_tbox.txt widgets_json.txt\
-	 widgets_alignment.txt widget_tabs.txt widget_frame.txt widget_pixmap.txt \
-	 widgets_render_context.txt widgets_free.txt widget_pbar.txt widgets_dialog.txt \
-	 dialog_msg.txt widget_classes.txt widgets_color_scheme.txt widgets_colors.txt \
-	 widgets_disable.txt widget_markup.txt widget_hbox_vbox.txt widgets_timer.txt \
-	 widgets_app_info.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 

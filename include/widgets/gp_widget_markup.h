@@ -9,6 +9,8 @@
  * @file gp_widget_markup.h
  * @brief A text markup widget.
  *
+ * @image html widget_markup.png
+ *
  * Markup widget JSON attributes
  * ------------------------------
  *

@@ -214,7 +214,8 @@ enum gp_widgets_color_scheme gp_widgets_color_scheme_get(void);
 /**
  * @brief Creates a color scheme switch widget.
  *
- * @return TODO!
+ * @return A pointer to a singleton widget that can be added to GUI to switch
+ *         the color scheme.
  */
 gp_widget *gp_widget_color_scheme_switch(void);
 
