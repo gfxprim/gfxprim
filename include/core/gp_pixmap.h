@@ -416,7 +416,7 @@ gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, enum gp_pixmap_copy_flags flags)
 /**
  * @brief Initializes a subpixmap.
  *
- * The subpixmap has to fit into the source pixmap!
+ * If subpixmap does not fit into the original pixmap it's clipped.
  *
  * The original image must not be freed including its gamma tables until the
  * resulting subpixmap is being in use.
@@ -436,7 +436,7 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *src, gp_pixmap *subpixmap,
 /**
  * @brief Allocate and initalize a subpixmap.
  *
- * The subpixmap has to fit into the source pixmap!
+ * If subpixmap does not fit into the original pixmap it's clipped.
  *
  * The original image must not be freed including its gamma tables until the
  * resulting subpixmap is being in use.

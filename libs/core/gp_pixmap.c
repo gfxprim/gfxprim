@@ -314,8 +314,15 @@ gp_pixmap *gp_sub_pixmap(const gp_pixmap *src, gp_pixmap *subpixmap,
 
 	GP_TRANSFORM_RECT(src, x, y, w, h);
 
-	GP_CHECK(src->w >= x + w, "Subpixmap w out of original pixmap.");
-	GP_CHECK(src->h >= y + h, "Subpixmap h out of original pixmap.");
+	if (src->w <= (gp_size)x)
+		w = 0;
+	else if (src->w - x < w)
+		w = src->w - x;
+
+	if (src->h <= (gp_size)y)
+		h = 0;
+	else if (src->h - y < h)
+		h = src->h - y;
 
 	subpixmap->bytes_per_row = src->bytes_per_row;
 	subpixmap->offset = gp_pixel_addr_offset(src, x);

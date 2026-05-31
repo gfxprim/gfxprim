@@ -111,7 +111,7 @@ static int sub_pixmap_create(void)
 
 	c = gp_pixmap_alloc(300, 300, GP_PIXEL_RGB888);
 
-	if (c == NULL) {
+	if (!c) {
 		tst_msg("gp_pixmap_alloc() failed");
 		return TST_UNTESTED;
 	}
@@ -119,7 +119,29 @@ static int sub_pixmap_create(void)
 	gp_sub_pixmap(c, &sc, 100, 100, 100, 100);
 
 	ret = subpixmap_assert(c, &sc, 100, 100);
+	if (ret)
+		return ret;
 
+	gp_pixmap_free(c);
+
+	return TST_PASSED;
+}
+
+static int sub_pixmap_clip(void)
+{
+	gp_pixmap *c, sc;
+	int ret;
+
+	c = gp_pixmap_alloc(100, 100, GP_PIXEL_RGB888);
+
+	if (!c) {
+		tst_msg("gp_pixmap_alloc() failed");
+		return TST_UNTESTED;
+	}
+
+	gp_sub_pixmap(c, &sc, 50, 50, 100, 100);
+
+	ret = subpixmap_assert(c, &sc, 50, 50);
 	if (ret)
 		return ret;
 
@@ -473,6 +495,9 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_CHECK_MALLOC},
 		{.name = "Sub pixmap create",
 		 .tst_fn = sub_pixmap_create},
+		{.name = "Sub pixmap clip",
+		 .tst_fn = sub_pixmap_clip,
+		 .flags = TST_CHECK_MALLOC},
 		{.name = "Sub pixmap 1bpp off=1",
 		 .tst_fn = sub_pixmap_off,
 		 .data = &sub_pixmap_1bpp_off1},
