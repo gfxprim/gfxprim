@@ -42,7 +42,7 @@ for (x = 0; x < dst->w; x++) {
 	                        ({{ c.name }}[xmap[x+1]] * xoff[x+1] +
 	                         {{ c.name }}_first) / DIV) * {{ mult }} / DIV;
 @     end
-			}
+}
 @ end
 
 @ for pt in pixeltypes:
