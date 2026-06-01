@@ -328,15 +328,20 @@ uint32_t gp_utf_fallback(uint32_t ch)
 		return 'C';
 	case 0xae: /* registered */
 		return 'R';
+	case 0xb7: /* middle dot */
+		return '*';
 
 	/* General punctuation */
 	case 0x2018: /* Left single quotation mark. */
-		return '\'';
 	case 0x2019: /* Right single quotation mark. */
+	case 0x201a: /* Single low quotation mark. */
+	case 0x201b: /* Single high reversed quotation mark. */
 		return '\'';
+
 	case 0x201c: /* Left double quotation mark. */
-		return '"';
 	case 0x201d: /* Right double quotation mark. */
+	case 0x201e: /* Double low quotation mark. */
+	case 0x201f: /* Double high reversed quotation mark. */
 		return '"';
 	case 0x2022: /* Bullet point. */
 		return '*';
@@ -350,6 +355,25 @@ uint32_t gp_utf_fallback(uint32_t ch)
 	case 0x2593: /* block element 75% shade */
 		return '#';
 
+	/* Arrows */
+	case 0x2190: /* leftward arrow */
+	case 0x21d0: /* double leftward arrow */
+		return '<';
+	case 0x2191: /* upward arrow */
+	case 0x21d1: /* double upward arrow */
+		return '^';
+	case 0x2192: /* rightward arrow */
+	case 0x21d2: /* double rightward arrow */
+		return '>';
+	case 0x2193: /* downward arrow */
+	case 0x21d3: /* double downward arrow */
+		return 'v';
+	case 0x2194: /* left right arrow */
+	case 0x21d4: /* double left right arrow */
+		return '-';
+	case 0x2195: /* up down arrow */
+	case 0x21d5: /* double up down arrow */
+		return '|';
 
 	/* right arrow */
 	case 0x2792:
