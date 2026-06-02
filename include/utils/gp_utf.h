@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 /** Returns true if unicode byte is ASCII */
 #define GP_UTF8_IS_ASCII(ch) (!((ch) & 0x80))
@@ -270,5 +271,53 @@ static inline void gp_utf32_to_utf8(uint32_t *chars, size_t chars_len,
  *         character if mapping was not found.
  */
 uint32_t gp_utf_fallback(uint32_t ch);
+
+/**
+ * @brief Returns the uppercase of a Unicode codepoint.
+ *
+ * Implements simple (1:1) uppercase case mapping per UnicodeData.txt.
+ * Complex mappings that expand into multiple codepoints (German ß → SS,
+ * Greek final sigma, etc.) are NOT handled — the codepoint is returned
+ * unchanged.
+ *
+ * @param ch A Unicode codepoint.
+ * @return The uppercase codepoint, or `ch` if there is no mapping.
+ */
+uint32_t gp_utf_toupper(uint32_t ch);
+
+/**
+ * @brief Returns the lowercase of a Unicode codepoint.
+ *
+ * Implements simple (1:1) lowercase case mapping per UnicodeData.txt.
+ *
+ * @param ch A Unicode codepoint.
+ * @return The lowercase codepoint, or `ch` if there is no mapping.
+ */
+uint32_t gp_utf_tolower(uint32_t ch);
+
+/**
+ * @brief Returns the titlecase of a Unicode codepoint.
+ *
+ * For most codepoints titlecase is identical to uppercase; a handful
+ * of digraphs (e.g. U+01C5 Dž, U+01C8 Lj) have a distinct titlecase
+ * form.  Falls back to gp_utf_toupper() when there is no explicit
+ * titlecase mapping.
+ *
+ * @param ch A Unicode codepoint.
+ * @return The titlecase codepoint, or `ch` if there is no mapping.
+ */
+uint32_t gp_utf_totitle(uint32_t ch);
+
+/**
+ * @brief Returns 1 if the codepoint is a Unicode letter.
+ *
+ * Tests membership in general category L (Lu/Ll/Lt/Lm/Lo) per
+ * UnicodeData.txt. Useful for finding word boundaries when
+ * implementing text-transform: capitalize and similar.
+ *
+ * @param ch A Unicode codepoint.
+ * @return 1 if `ch` is a letter, 0 otherwise.
+ */
+bool gp_utf_is_letter(uint32_t ch);
 
 #endif /* UTILS_GP_UTF_H */
