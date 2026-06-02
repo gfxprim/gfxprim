@@ -332,6 +332,12 @@ uint32_t gp_utf_fallback(uint32_t ch)
 		return '*';
 
 	/* General punctuation */
+	case 0x2000-0x200a: /* Various spaces */
+		return ' ';
+
+	case 0x2010-0x2015: /* Various dashes */
+		return '-';
+
 	case 0x2018: /* Left single quotation mark. */
 	case 0x2019: /* Right single quotation mark. */
 	case 0x201a: /* Single low quotation mark. */
@@ -381,6 +387,9 @@ uint32_t gp_utf_fallback(uint32_t ch)
 	/* utf dingbat right arrow used by mpv osd info */
 	case 0x279c:
 		return 0x2792;
+
+	case 0xfeff: /* byte-order mark (BOM) */
+		return ' ';
 	}
 
 	return ch;
