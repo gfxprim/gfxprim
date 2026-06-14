@@ -326,6 +326,10 @@ uint32_t gp_utf_fallback(uint32_t ch)
 	/* Latin 1 supplement block */
 	case 0xa9: /* copyright */
 		return 'C';
+	case 0xab: /* left-pointing double quotation mark */
+		return '<';
+	case 0xbb: /* right-pointing double quotation mark */
+		return '>';
 	case 0xae: /* registered */
 		return 'R';
 	case 0xb7: /* middle dot */
@@ -387,6 +391,16 @@ uint32_t gp_utf_fallback(uint32_t ch)
 	/* utf dingbat right arrow used by mpv osd info */
 	case 0x279c:
 		return 0x2792;
+
+	/* Misc math symbols */
+	case 0x27e8: /* Left angle bracket */
+		return '<';
+	case 0x27e9: /* Right angle bracket */
+		return '>';
+	case 0x27ea: /* Left double angle bracket */
+		return 0x00ab; /* Left double angle quotation mark */
+	case 0x27eb: /* Right double angle bracket */
+		return 0x00bb; /* Right double angle quotation mark */
 
 	case 0xfeff: /* byte-order mark (BOM) */
 		return ' ';
