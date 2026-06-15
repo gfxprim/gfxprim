@@ -44,6 +44,7 @@ static int test_load_PNG(const char *path)
 struct check_color_test {
 	const char *path;
 	gp_pixel pixel;
+	gp_pixel_type ptype;
 };
 
 static int test_load_PNG_check_color(struct check_color_test *test)
@@ -54,7 +55,7 @@ static int test_load_PNG_check_color(struct check_color_test *test)
 
 	img = gp_load_png(test->path, NULL);
 
-	if (img == NULL) {
+	if (!img) {
 		switch (errno) {
 		case ENOSYS:
 			tst_msg("Not Implemented");
@@ -66,6 +67,13 @@ static int test_load_PNG_check_color(struct check_color_test *test)
 	}
 
 	unsigned int x, y, fail = 0;
+
+	if (img->pixel_type != test->ptype) {
+		tst_msg("Expected %s got %s",
+			gp_pixel_type_name(test->ptype),
+			gp_pixel_type_name(img->pixel_type));
+		fail = 1;
+	}
 
 	for (x = 0; x < img->w; x++) {
 		for (y = 0; y < img->w; y++) {
@@ -94,16 +102,37 @@ static int test_load_PNG_check_color(struct check_color_test *test)
 static struct check_color_test white_adam7 = {
 	.path = "100x100-white-adam7.png",
 	.pixel = 0xffffff,
+	.ptype = GP_PIXEL_BGR888,
 };
 
 static struct check_color_test black_grayscale = {
 	.path = "100x100-black-grayscale.png",
 	.pixel = 0x000000,
+	.ptype = GP_PIXEL_G8,
 };
 
 static struct check_color_test red = {
 	.path = "100x100-red.png",
 	.pixel = 0x0000ff,
+	.ptype = GP_PIXEL_BGR888,
+};
+
+static struct check_color_test trans_indexed = {
+	.path = "100x100-trans-indexed.png",
+	.pixel = 0x00000000,
+	.ptype = GP_PIXEL_RGBA8888,
+};
+
+static struct check_color_test trans_trns = {
+	.path = "100x100-trans-trns.png",
+	.pixel = 0xff000000,
+	.ptype = GP_PIXEL_RGBA8888,
+};
+
+static struct check_color_test trans_gray_trns = {
+	.path = "100x100-trans-gray-trns.png",
+	.pixel = 0x0000,
+	.ptype = GP_PIXEL_GA88,
 };
 
 static int test_save_PNG(gp_pixel_type pixel_type)
@@ -184,6 +213,24 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_load_PNG_check_color,
 		 .res_path = "data/png/valid/100x100-white-adam7.png",
 		 .data = &white_adam7,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PNG Load 100x100 Transparent indexed",
+		 .tst_fn = test_load_PNG_check_color,
+		 .res_path = "data/png/valid/100x100-trans-indexed.png",
+		 .data = &trans_indexed,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PNG Load 100x100 Transparent RGB tRNS",
+		 .tst_fn = test_load_PNG_check_color,
+		 .res_path = "data/png/valid/100x100-trans-trns.png",
+		 .data = &trans_trns,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PNG Load 100x100 Transparent G8 tRNS",
+		 .tst_fn = test_load_PNG_check_color,
+		 .res_path = "data/png/valid/100x100-trans-gray-trns.png",
+		 .data = &trans_gray_trns,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = "PNG Save 100x100 G1",

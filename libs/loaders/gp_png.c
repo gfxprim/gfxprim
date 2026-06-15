@@ -265,7 +265,7 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	int err, passes = 1;
 	double gamma;
 	int srgb_intent;
-	int has_srgb, has_gamma;
+	int has_srgb, has_gamma, has_alpha = 0;
 	int convert_16_to_8 = 0;
 
 	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -307,11 +307,19 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	has_gamma = png_get_gAMA(png, png_info, &gamma);
 	has_srgb = png_get_sRGB(png, png_info, &srgb_intent);
 
+	if (png_get_valid(png, png_info, PNG_INFO_tRNS)) {
+		has_alpha = 1;
+		png_set_tRNS_to_alpha(png);
+	}
+
+	if (color_type & PNG_COLOR_MASK_ALPHA)
+		has_alpha = 1;
+
 	GP_DEBUG(2, "Interlace=%s%s %s PNG%s size %ux%u depth %i gamma %.2lf",
 	         interlace_type_name(interlace_type),
 	         color_type & PNG_COLOR_MASK_PALETTE ? " pallete" : "",
 	         color_type & PNG_COLOR_MASK_COLOR ? "color" : "gray",
-		 color_type & PNG_COLOR_MASK_ALPHA ? " with alpha channel" : "",
+		 has_alpha ? " with alpha channel" : "",
 		 (unsigned int)w, (unsigned int)h, depth, gamma);
 
 	if (interlace_type == PNG_INTERLACE_ADAM7)
@@ -330,7 +338,7 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 			pixel_type = GP_PIXEL_G4;
 		break;
 		case 8:
-			pixel_type = GP_PIXEL_G8;
+			pixel_type = has_alpha ? GP_PIXEL_GA88 : GP_PIXEL_G8;
 		break;
 #ifdef GP_PIXEL_G16
 		case 16:
@@ -340,17 +348,22 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 		}
 	break;
 	case PNG_COLOR_TYPE_GRAY | PNG_COLOR_MASK_ALPHA:
-		switch (depth) {
-		case 8:
-			pixel_type = GP_PIXEL_GA88;
+	switch (depth) {
+	case 8:
+		pixel_type = GP_PIXEL_GA88;
 		break;
-		}
+	}
 	break;
 	case PNG_COLOR_TYPE_RGB:
-
 		switch (depth) {
 		case 8:
-			pixel_type = GP_PIXEL_BGR888;
+			if (has_alpha) {
+				png_set_bgr(png);
+				png_set_swap_alpha(png);
+				pixel_type = GP_PIXEL_RGBA8888;
+			} else {
+				pixel_type = GP_PIXEL_BGR888;
+			}
 		break;
 		case 16:
 			pixel_type = GP_PIXEL_BGR888;
