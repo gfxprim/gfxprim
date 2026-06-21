@@ -66,6 +66,7 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 	{@ fetch_gamma_enc(pt, "dst") @}
 
 	/* Pre-compute mapping for interpolation */
+
 	for (i = 0; i <= dst->w; i++) {
 		xmap[i] = ((uint64_t)i * src->w) / dst->w;
 		xoff[i] = ((uint64_t)MULT * (i * src->w))/dst->w - MULT * xmap[i];
@@ -108,7 +109,7 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 
 		for (x = 0; x < dst->w; x++) {
 @         for c in pt.chanslist:
-			uint32_t {{ c.name }}_p = ({{ c.name }}_res[x]) / div;
+			uint32_t {{ c.name }}_p = {{ c.name }}_res[x] / div;
 @         end
                         gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y,
 				GP_PIXEL_CREATE_{{ pt.name }}_ENC({{ arr_to_params(pt.chan_names, '', '_p') }},
@@ -127,13 +128,13 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 @
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
+static int resize_lin_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
                                    gp_progress_cb *callback)
 {
 	uint32_t xmap[dst->w + 1];
 	uint32_t ymap[dst->h + 1];
-	uint8_t  xoff[dst->w + 1];
-	uint8_t  yoff[dst->h + 1];
+	uint8_t xoff[dst->w + 1];
+	uint8_t yoff[dst->h + 1];
 	uint32_t x, y, i;
 
 	{@ fetch_gamma_lin(pt, "src") @}
@@ -144,20 +145,20 @@ static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
 	/* Pre-compute mapping for interpolation */
-	uint32_t xstep = ((src->w - 1) << 16) / (dst->w - 1);
+	uint32_t xstep = ((src->w - 1) << 16) / GP_MAX(dst->w - 1, 1u);
 
 	for (i = 0; i < dst->w + 1; i++) {
 		uint32_t val = i * xstep;
 		xmap[i] = val >> 16;
-		xoff[i] = (val >> 8) & 0xff;
+		xoff[i] = ((val + 0xef) >> 8) & 0xff;
 	}
 
-	uint32_t ystep = ((src->h - 1) << 16) / (dst->h - 1);
+	uint32_t ystep = ((src->h - 1) << 16) / GP_MAX(dst->h - 1, 1u);
 
 	for (i = 0; i < dst->h + 1; i++) {
 		uint32_t val = i * ystep;
 		ymap[i] = val >> 16;
-		yoff[i] = (val >> 8) & 0xff;
+		yoff[i] = ((val+0xef) >> 8) & 0xff;
 	}
 
 	/* Interpolate */
@@ -203,7 +204,7 @@ static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }} = ({{ c.name }}1 * yoff[y] + {{ c.name }}0 * (255 - yoff[y]) + (1<<15)) >> 16;
+			{{ c.name }} = ({{ c.name }}1 * yoff[y] + {{ c.name }}0 * (255 - yoff[y])) / (255 * 255);
 @         end
 
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y,
@@ -227,7 +228,7 @@ static int resize_lin(const gp_pixmap *src, gp_pixmap *dst,
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
-		return resize_lin{{ pt.name }}(src, dst, callback);
+		return resize_lin_{{ pt.name }}(src, dst, callback);
 	break;
 @ end
 	default:
