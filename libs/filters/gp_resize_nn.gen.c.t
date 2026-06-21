@@ -28,10 +28,10 @@ static int resize_nn_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 
 	/* Pre-compute mapping for interpolation */
 	for (i = 0; i < dst->w; i++)
-		xmap[i] = ((((i * (src->w - 1))<<8)) / (dst->w - 1) + (1<<7))>>8;
+		xmap[i] = ((i<<8) + (1<<7)) * src->w / (dst->w<<8);
 
 	for (i = 0; i < dst->h; i++)
-		ymap[i] = ((((i * (src->h - 1))<<8) + (dst->h - 1)/2) / (dst->h - 1) + (1<<7))>>8;
+		ymap[i] = ((i<<8) + (1<<7)) * src->h / (dst->h<<8);
 
 	/* Interpolate */
 	for (y = 0; y < (gp_coord)dst->h; y++) {
