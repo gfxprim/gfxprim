@@ -75,7 +75,7 @@ int gp_filter_resize_cubic(const gp_pixmap *src, gp_pixmap *dst,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
 	for (i = 0; i < dst->w; i++) {
-		float x = (1.00 * i / (dst->w - 1)) * (src->w - 1);
+		float x = (1.00 * i / GP_MAX(dst->w - 1, 1u)) * (src->w - 1);
 		v4f cvx;
 		int xi[4];
 
@@ -134,7 +134,7 @@ int gp_filter_resize_cubic(const gp_pixmap *src, gp_pixmap *dst,
 
 		/* now interpolate column for new image */
 		for (j = 0; j < dst->h; j++) {
-			float y = (1.00 * j / (dst->h - 1)) * (src->h - 1);
+			float y = (1.00 * j / GP_MAX(dst->h - 1, 1u)) * (src->h - 1);
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
 			int yi[4];

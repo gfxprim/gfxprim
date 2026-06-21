@@ -51,7 +51,7 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 	int32_t xmap_c[dst->w][4];
 
 	for (i = 0; i < dst->w; i++) {
-		float x = (1.00 * i / (dst->w - 1)) * (src->w - 1);
+		float x = (1.00 * i / GP_MAX(dst->w - 1, 1u)) * (src->w - 1);
 
 		xmap[i][0] = floor(x - 1);
 		xmap[i][1] = x;
@@ -70,7 +70,7 @@ static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
 
 	/* cubic resampling */
 	for (i = 0; i < dst->h; i++) {
-		float y = (1.00 * i / (dst->h - 1)) * (src->h - 1);
+		float y = (1.00 * i / GP_MAX(dst->h - 1, 1u)) * (src->h - 1);
 		int32_t cvy[4];
 		int yi[4];
 
