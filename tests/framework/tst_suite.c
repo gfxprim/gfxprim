@@ -16,7 +16,7 @@
 #include "tst_preload.h"
 #include "tst_timespec.h"
 
-#define NAME_PADD 35
+#define NAME_PADD 50
 
 int tst_suite_verbose = 0;
 const char *tst_log_dir = NULL;
@@ -96,7 +96,7 @@ static void test_job_report(const struct tst_job *job)
 	tst_msg_print(&job->store);
 
 	fprintf(stderr, "------------------------------------------------------"
-                        "------------------------- \n");
+                        "-----------------------------------------\n");
 }
 
 static int run_test(const struct tst_test *test, FILE *json)
