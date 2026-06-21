@@ -26,7 +26,7 @@ static int resample_1x1(enum gp_interpolation_type interp_type)
 			gp_pixel pix = gp_getpixel(dst, x, y);
 
 			if (pix != 0xff0000) {
-				tst_msg("Invalid pixel value at %i %i 0x%6x", x, y, pix);
+				tst_msg("Invalid pixel value at %i %i 0x%06x", x, y, pix);
 				return TST_FAILED;
 			}
 		}
@@ -116,34 +116,44 @@ const struct tst_suite tst_suite = {
 	.suite_name = "Resampling testsuite",
 	.tests = {
 		{.name = "Resize 1x1 -> 10x10 Nearest neighbour",
-		 .tst_fn = resample_1x1_nn},
+		 .tst_fn = resample_1x1_nn,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 1x1 -> 10x10 Linear int",
-		 .tst_fn = resample_1x1_lin_int},
+		 .tst_fn = resample_1x1_lin_int,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 1x1 -> 10x10 Linear LF int",
-		 .tst_fn = resample_1x1_lin_lf_int},
+		 .tst_fn = resample_1x1_lin_lf_int,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 1x1 -> 10x10 Cubic",
-		 .tst_fn = resample_1x1_cubic},
+		 .tst_fn = resample_1x1_cubic,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 1x1 -> 10x10 Cubic int",
-		 .tst_fn = resample_1x1_cubic_int},
+		 .tst_fn = resample_1x1_cubic_int,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 10x10 -> 1x1 Nearest neighbour",
-		 .tst_fn = resample_10x10_nn},
+		 .tst_fn = resample_10x10_nn,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 10x10 -> 1x1 Linear int",
-		 .tst_fn = resample_10x10_lin_int},
+		 .tst_fn = resample_10x10_lin_int,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 10x10 -> 1x1 Linear LF int",
-		 .tst_fn = resample_10x10_lin_lf_int},
+		 .tst_fn = resample_10x10_lin_lf_int,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 10x10 -> 1x1 Cubic",
-		 .tst_fn = resample_10x10_cubic},
+		 .tst_fn = resample_10x10_cubic,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "Resize 10x10 -> 1x1 Cubic int",
-		 .tst_fn = resample_10x10_cubic_int},
+		 .tst_fn = resample_10x10_cubic_int,
+		 .flags = TST_CHECK_MALLOC},
 		{},
 	}
 };

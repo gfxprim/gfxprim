@@ -13,6 +13,8 @@
 #include <core/gp_gamma_correction.h>
 #include <core/gp_debug.h>
 #include <filters/gp_resize.h>
+
+#include "gp_resample_map.h"
 @
 @ def fetch_rows(pt, y):
 for (x = 0; x < src->w; x++) {
@@ -131,11 +133,11 @@ static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 static int resize_lin_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
                                    gp_progress_cb *callback)
 {
-	uint32_t xmap[dst->w + 1];
-	uint32_t ymap[dst->h + 1];
-	uint8_t xoff[dst->w + 1];
-	uint8_t yoff[dst->h + 1];
-	uint32_t x, y, i;
+	uint32_t xmap[dst->w];
+	uint32_t ymap[dst->h];
+	uint16_t xoff[dst->w];
+	uint16_t yoff[dst->h];
+	uint32_t x, y;
 
 	{@ fetch_gamma_lin(pt, "src") @}
 	{@ fetch_gamma_enc(pt, "dst") @}
@@ -145,66 +147,46 @@ static int resize_lin_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
 	/* Pre-compute mapping for interpolation */
-	uint32_t xstep = ((src->w - 1) << 16) / GP_MAX(dst->w - 1, 1u);
-
-	for (i = 0; i < dst->w + 1; i++) {
-		uint32_t val = i * xstep;
-		xmap[i] = val >> 16;
-		xoff[i] = ((val + 0xef) >> 8) & 0xff;
-	}
-
-	uint32_t ystep = ((src->h - 1) << 16) / GP_MAX(dst->h - 1, 1u);
-
-	for (i = 0; i < dst->h + 1; i++) {
-		uint32_t val = i * ystep;
-		ymap[i] = val >> 16;
-		yoff[i] = ((val+0xef) >> 8) & 0xff;
-	}
+	mapping_precompute(xmap, xoff, src->w, dst->w);
+	mapping_precompute(ymap, yoff, src->h, dst->h);
 
 	/* Interpolate */
 	for (y = 0; y < dst->h; y++) {
+		gp_coord y0, y1;
+
+		y0 = ymap[y];
+		y1 = GP_MIN(ymap[y]+1, src->h-1);
+
 		for (x = 0; x < dst->w; x++) {
 			gp_pixel pix00, pix01, pix10, pix11;
-			gp_coord x0, x1, y0, y1;
+			gp_coord x0, x1;
 @         for c in pt.chanslist:
-			uint32_t {{ c[0] }}, {{ c[0] }}0, {{ c[0] }}1;
+			int64_t {{ c[0] }}, {{ c[0] }}00, {{ c[0] }}11, {{ c[0] }}01, {{ c[0] }}10;
 @         end
 
 			x0 = xmap[x];
-			x1 = xmap[x] + 1;
+			x1 = GP_MIN(xmap[x]+1, src->w-1);
 
-			if (x1 >= (gp_coord)src->w)
-				x1 = src->w - 1;
-
-			y0 = ymap[y];
-			y1 = ymap[y] + 1;
-
-			if (y1 >= (gp_coord)src->h)
-				y1 = src->h - 1;
+			int64_t w_x = xoff[x];
+			int64_t w_y = yoff[y];
 
 			pix00 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x0, y0);
-			pix10 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x1, y0);
 			pix01 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x0, y1);
+			pix10 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x1, y0);
 			pix11 = gp_getpixel_raw_{{ pt.pixelpack.suffix }}(src, x1, y1);
 
 @         for c in pt.chanslist:
-			{{ c.name }}0 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix00, {{ c.name }}_gamma_lin) * (255 - xoff[x]);
+			{{ c.name }}00 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix00, {{ c.name }}_gamma_lin);
+			{{ c.name }}01 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix01, {{ c.name }}_gamma_lin);
+			{{ c.name }}10 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix10, {{ c.name }}_gamma_lin);
+			{{ c.name }}11 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix11, {{ c.name }}_gamma_lin);
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }}0 += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix10, {{ c.name }}_gamma_lin) * xoff[x];
-@         end
+			{{ c.name }}00 = {{ c.name }}00 + ((w_x * ({{ c.name }}10 - {{ c.name }}00)) >> MAPPING_FP_BITS);
+			{{ c.name }}11 = {{ c.name }}01 + ((w_x * ({{ c.name }}11 - {{ c.name }}01)) >> MAPPING_FP_BITS);
 
-@         for c in pt.chanslist:
-			{{ c.name }}1 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix01, {{ c.name }}_gamma_lin) * (255 - xoff[x]);
-@         end
-
-@         for c in pt.chanslist:
-			{{ c.name }}1 += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}_LIN(pix11, {{ c.name }}_gamma_lin) * xoff[x];
-@         end
-
-@         for c in pt.chanslist:
-			{{ c.name }} = ({{ c.name }}1 * yoff[y] + {{ c.name }}0 * (255 - yoff[y])) / (255 * 255);
+			{{ c.name }} = {{ c.name }}00 + ((w_y * ({{ c.name }}11 - {{ c.name }}00) + MAPPING_FP_HALF) >> MAPPING_FP_BITS);
 @         end
 
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y,

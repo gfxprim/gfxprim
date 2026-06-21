@@ -4,3 +4,4 @@ filters_compare.gen
 linear_convolution
 dither_bench
 resample
+resample_bench
