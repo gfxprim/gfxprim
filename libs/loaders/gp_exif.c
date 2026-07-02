@@ -168,8 +168,7 @@ add:
 	return gp_storage_add_string(storage, node, id, buf) != NULL;
 }
 
-static int load_rat(gp_io *io, gp_storage *storage, gp_data_node *node,
-		    const char *id, uint32_t num_comp, uint32_t val)
+static int read_rat(gp_io *io, uint32_t num_comp, uint32_t val, uint32_t rat[2])
 {
 	size_t max_comps = GP_MIN(num_comp, 32u);
 	uint32_t buf[2 * max_comps];
@@ -177,8 +176,10 @@ static int load_rat(gp_io *io, gp_storage *storage, gp_data_node *node,
 	if (get_buf(io, val + 6, (void*)buf, num_comp * 8))
 		return 1;
 
-	//TODO: Data Storage needs array
-	return gp_storage_add_rational(storage, node, id, buf[0], buf[1]) != NULL;
+	rat[0] = buf[0];
+	rat[1] = buf[1];
+
+	return 0;
 }
 
 static int load_tag(gp_io *io, gp_storage *storage,
@@ -188,6 +189,7 @@ static int load_tag(gp_io *io, gp_storage *storage,
                     uint32_t num_comp, uint32_t val)
 {
 	const struct IFD_tag *res = IFD_tag_get(taglist, tag);
+	uint32_t rat[2] = {};
 	int used = 0;
 
 	if (res == NULL) {
@@ -245,8 +247,10 @@ static int load_tag(gp_io *io, gp_storage *storage,
 
 	case IFD_UNSIGNED_RATIONAL:
 	case IFD_SIGNED_RATIONAL:
-		if (load_rat(io, storage, node, res->name, num_comp, val))
+		if (!read_rat(io, num_comp, val, rat)) {
+			gp_storage_add_rational(storage, node, res->name, rat[0], rat[1]);
 			used = 1;
+		}
 	break;
 	case IFD_UNDEFINED:
 		switch (res->tag) {
@@ -283,11 +287,9 @@ static int load_tag(gp_io *io, gp_storage *storage,
 	break;
 	case IFD_IMAGE_GAMMA:
 		if (correction->corr_type != GP_CORRECTION_TYPE_SRGB) {
-			gp_data_node *gamma = gp_storage_get(storage, node, res->name);
-
-			if (gamma && gamma->type == GP_DATA_RATIONAL) {
+			if (used && format == IFD_UNSIGNED_RATIONAL && rat[1] != 0) {
 				correction->corr_type = GP_CORRECTION_TYPE_GAMMA;
-				correction->gamma = 1.00 * gamma->value.rat.num / gamma->value.rat.den;
+				correction->gamma = 1.00 * rat[0] / rat[1];
 			}
 		}
 	break;
