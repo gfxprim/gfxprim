@@ -34,7 +34,7 @@ static int create_get_destroy(void)
 		return TST_FAILED;
 
 	if (gp_storage_get(storage, NULL, "nonexistent")) {
-		tst_msg("DataStorageGet() returned nonexistent record");
+		tst_msg("gp_storage_get() returned nonexistent record");
 		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
@@ -90,9 +90,8 @@ static int create_add_get_destroy(void)
 	};
 
 	ret = gp_storage_add(storage, NULL, &data);
-
 	if (!ret) {
-		tst_msg("DataStorageAdd() failed");
+		tst_msg("gp_storage_add() failed");
 		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
@@ -104,7 +103,7 @@ static int create_add_get_destroy(void)
 
 	ret = gp_storage_get(storage, NULL, "string");
 	if (!ret) {
-		tst_msg("DataStorageGet() failed for newly added data");
+		tst_msg("gp_storage_get() failed for newly added data");
 		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
@@ -136,16 +135,15 @@ static int duplicit_id_add(void)
 	};
 
 	ret = gp_storage_add(storage, NULL, &data);
-
 	if (!ret) {
-		tst_msg("DataStorageAdd() failed");
+		tst_msg("gp_storage_add() failed");
 		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
 	ret = gp_storage_add(storage, NULL, &data);
 	if (ret) {
-		tst_msg("DataStorageAdd() added data with duplicit id");
+		tst_msg("gp_storage_add() added data with duplicit id");
 		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
@@ -165,16 +163,15 @@ static int wrong_type_add(void)
 		return TST_FAILED;
 
 	ret = gp_storage_add_int(storage, NULL, "not-a-dict", 0);
-
 	if (!ret) {
-		tst_msg("DataStorageAdd() failed");
+		tst_msg("gp_storage_add_int() failed");
 		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
 	ret = gp_storage_add_int(storage, ret, "int", 0);
 	if (ret) {
-		tst_msg("DataStorageAdd() added data into Integer Node");
+		tst_msg("gp_storage_add_int() added data into Integer Node");
 		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
@@ -201,9 +198,8 @@ static int get_by_path(void)
 	};
 
 	ret = gp_storage_add(storage, NULL, &data);
-
 	if (!ret) {
-		tst_msg("DataStorageAdd() failed");
+		tst_msg("gp_storage_add() failed");
 		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
@@ -264,6 +260,17 @@ static int get_by_path(void)
 	return TST_PASSED;
 }
 
+static int storage_get_null(void)
+{
+	gp_data_node *ret = gp_storage_get(NULL, NULL, "string");
+	if (ret) {
+		tst_msg("gp_storage_get() returned non-NULL for empty storage");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Data Storage",
 	.tests = {
@@ -290,6 +297,9 @@ const struct tst_suite tst_suite = {
 		{.name = "gp_storage_get_by_path()",
 		 .tst_fn = get_by_path,
 		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "gp_storage_get(NULL, NULL, ...)",
+		 .tst_fn = storage_get_null},
 
 		{.name = NULL},
 	}

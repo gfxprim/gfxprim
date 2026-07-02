@@ -191,8 +191,12 @@ gp_data_node *gp_storage_get(gp_storage *self,
 {
 	struct gp_data_node *i;
 
-	if (!node)
+	if (!node) {
+		if (!self)
+			return NULL;
+
 		node = gp_storage_root(self);
+	}
 
 	for (i = gp_data_dict_first(node); i; i = i->next) {
 		if (!strcmp(i->id, id))
