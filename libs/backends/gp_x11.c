@@ -75,6 +75,16 @@ static void x11_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 	XUnlockDisplay(win->dpy);
 }
 
+static void x11_set_pixmap(gp_backend *self)
+{
+	struct x11_win *win = GP_BACKEND_PRIV(self);
+
+	if (win->shm_flag)
+		self->pixmap = &win->pixmap;
+	else
+		self->pixmap = win->x_pixmap;
+}
+
 static void x11_update(gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
@@ -224,7 +234,7 @@ static void process_events(struct x11_win *win, gp_backend *backend)
 			gp_ev_queue_push_render_stop(backend->event_queue, 0);
 
 		if (win->rendering)
-			backend->pixmap = &win->pixmap;
+			x11_set_pixmap(backend);
 	}
 }
 
@@ -533,12 +543,13 @@ static int create_ximage(gp_backend *self, gp_size w, gp_size h)
 		goto err1;
 	}
 
-	self->pixmap = gp_pixmap_alloc(w, h, pixel_type);
-
-	if (self->pixmap == NULL) {
+	win->x_pixmap = gp_pixmap_alloc(w, h, pixel_type);
+	if (!win->x_pixmap) {
 		GP_DEBUG(1, "Malloc failed :(");
 		goto err1;
 	}
+
+	self->pixmap = win->x_pixmap;
 
 	win->shm_flag = 0;
 	win->img->data = (char*)self->pixmap->pixels;

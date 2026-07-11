@@ -30,6 +30,7 @@ struct x11_win {
 #endif /* HAVE_X_SHM */
 
 	gp_pixmap pixmap;
+	gp_pixmap *x_pixmap;
 	gp_ev_queue ev_queue;
 
 	/* Window list pointers */
