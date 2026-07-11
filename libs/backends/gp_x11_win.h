@@ -36,12 +36,16 @@ struct x11_win {
 	struct x11_win *prev;
 	struct x11_win *next;
 
-	/* Flags */
+	/* Set if resize was requested */
 	int resized_flag:1;
 	int shm_flag:1;
 	int fullscreen_flag:1;
-	int rendering:1;
+	/* Set if window is focused */
 	int focused:1;
+	/* Set if window is visible */
+	int rendering:1;
+	/* New status after all events were processed */
+	int new_rendering:1;
 
 	/* poll fd structure */
 	gp_fd fd;

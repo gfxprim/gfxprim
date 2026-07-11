@@ -101,7 +101,7 @@ static void x11_update(gp_backend *self)
 
 static struct x11_win *last_win = NULL;
 
-static void x11_ev(XEvent *ev)
+static int x11_ev(XEvent *ev)
 {
 	struct x11_win *win;
 
@@ -111,7 +111,7 @@ static void x11_ev(XEvent *ev)
 
 		if (last_win == NULL) {
 			GP_WARN("Event for unknown window, ignoring.");
-			return;
+			return 0;
 		}
 	}
 
@@ -164,10 +164,34 @@ static void x11_ev(XEvent *ev)
 
 		GP_DEBUG(4, "Configure Notify %ux%u", win->new_w, win->new_h);
 
-		/*  Window has been resized, set flag. */
 		win->resized_flag = 1;
 
 		gp_ev_queue_push_render_stop(self->event_queue, 0);
+
+		return 1;
+	case MapNotify:
+		GP_DEBUG(1, "MapNotify event received");
+		win->new_rendering = 1;
+	break;
+	case UnmapNotify:
+		GP_DEBUG(1, "UnmapNotify event received");
+		win->new_rendering = 0;
+	break;
+	case VisibilityNotify:
+		switch (ev->xvisibility.state) {
+		case VisibilityFullyObscured:
+			GP_DEBUG(1, "VisibilityFullyObscured received");
+			win->new_rendering = 0;
+		break;
+		case VisibilityPartiallyObscured:
+			GP_DEBUG(1, "VisibilityPartiallyObscured received");
+			win->new_rendering = 1;
+		break;
+		case VisibilityUnobscured:
+			GP_DEBUG(1, "VisibilityUnobscured received");
+			win->new_rendering = 1;
+		break;
+		}
 	break;
 	default:
 		//TODO: More accurate window w and h?
@@ -175,15 +199,32 @@ static void x11_ev(XEvent *ev)
 		                    win->new_w, win->new_h);
 	break;
 	}
+
+	return 0;
 }
 
 static void process_events(struct x11_win *win, gp_backend *backend)
 {
 	XEvent ev;
 
+	win->new_rendering = win->rendering;
+
 	while (XPending(win->dpy) && !gp_ev_queue_full(backend->event_queue)) {
 		XNextEvent(win->dpy, &ev);
-		x11_ev(&ev);
+		if (x11_ev(&ev))
+			return;
+	}
+
+	if (win->new_rendering != win->rendering) {
+		win->rendering = win->new_rendering;
+
+		if (win->rendering)
+			gp_ev_queue_push_render_start(backend->event_queue, 0);
+		else
+			gp_ev_queue_push_render_stop(backend->event_queue, 0);
+
+		if (win->rendering)
+			backend->pixmap = &win->pixmap;
 	}
 }
 

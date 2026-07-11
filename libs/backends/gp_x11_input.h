@@ -154,29 +154,6 @@ static unsigned int get_key(unsigned int xkey)
 	return key;
 }
 
-static void handle_render(gp_backend *self, struct x11_win *win, int val)
-{
-	gp_ev_queue *event_queue = self->event_queue;
-
-	if (val == GP_EV_SYS_RENDER_START) {
-		if (win->rendering)
-			return;
-		self->pixmap = &win->pixmap;
-		win->rendering = 1;
-	}
-
-	if (val == GP_EV_SYS_RENDER_STOP) {
-		if (!win->rendering)
-			return;
-		win->rendering = 0;
-	}
-
-	if (win->rendering)
-		gp_ev_queue_push_render_start(event_queue, 0);
-	else
-		gp_ev_queue_push_render_stop(event_queue, 0);
-}
-
 static void handle_focus(gp_ev_queue *event_queue, struct x11_win *win, int val)
 {
 	if (val == GP_EV_SYS_FOCUS_IN) {
@@ -290,19 +267,11 @@ static void x11_input_event_put(gp_backend *self,
 		}
 		GP_WARN("Unknown X Client Message");
 	break;
-	case MapNotify:
-		GP_DEBUG(1, "MapNotify event received");
-		handle_render(self, win, GP_EV_SYS_RENDER_START);
-	break;
 	case ReparentNotify:
 		GP_DEBUG(1, "ReparentNotify event received");
 	break;
 	case GravityNotify:
 		GP_DEBUG(1, "GravityNotify event received");
-	break;
-	case UnmapNotify:
-		GP_DEBUG(1, "UnmapNotify event received");
-		handle_render(self, win, GP_EV_SYS_RENDER_STOP);
 	break;
 	case FocusOut:
 		GP_DEBUG(1, "FocusOut event releasing all keys in events_state");
@@ -312,22 +281,6 @@ static void x11_input_event_put(gp_backend *self,
 	case FocusIn:
 		GP_DEBUG(1, "FocusIn event received");
 		handle_focus(event_queue, win, GP_EV_SYS_FOCUS_IN);
-	break;
-	case VisibilityNotify:
-		switch (ev->xvisibility.state) {
-		case VisibilityFullyObscured:
-			GP_DEBUG(1, "VisibilityFullyObscured received");
-			handle_render(self, win, GP_EV_SYS_RENDER_STOP);
-		break;
-		case VisibilityPartiallyObscured:
-			GP_DEBUG(1, "VisibilityPartiallyObscured received");
-			handle_render(self, win, GP_EV_SYS_RENDER_START);
-		break;
-		case VisibilityUnobscured:
-			GP_DEBUG(1, "VisibilityUnobscured received");
-			handle_render(self, win, GP_EV_SYS_RENDER_START);
-		break;
-		}
 	break;
 	default:
 		GP_WARN("Unhandled X11 event type %u", ev->type);
