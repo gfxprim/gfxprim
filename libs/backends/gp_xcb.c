@@ -38,6 +38,7 @@ struct win {
 	int resized:1;
 	int fullscreen:1;
 	int rendering:1;
+	int new_rendering:1;
 	int focused:1;
 };
 
@@ -277,7 +278,7 @@ static int x_render_stopped(struct gp_backend *self)
 	return 0;
 }
 
-static void x_ev(gp_backend *self, xcb_generic_event_t *ev)
+static int x_ev(gp_backend *self, xcb_generic_event_t *ev)
 {
 	struct win *win = GP_BACKEND_PRIV(self);
 
@@ -324,21 +325,69 @@ static void x_ev(gp_backend *self, xcb_generic_event_t *ev)
 		win->resized = 1;
 
 		gp_ev_queue_push_render_stop(self->event_queue, 0);
+
+		return 1;
+	}
+	break;
+	case XCB_MAP_NOTIFY:
+		GP_DEBUG(1, "MapNotify event received");
+		win->new_rendering = 1;
+	break;
+	case XCB_UNMAP_NOTIFY:
+		GP_DEBUG(1, "UnmapNotify event received");
+		win->new_rendering = 0;
+	break;
+	case XCB_VISIBILITY_NOTIFY: {
+		xcb_visibility_notify_event_t *cev = (xcb_visibility_notify_event_t*)ev;
+		switch (cev->state) {
+		case XCB_VISIBILITY_FULLY_OBSCURED:
+			GP_DEBUG(1, "VisibilityFullyObscured received");
+			win->new_rendering = 0;
+		break;
+		case XCB_VISIBILITY_PARTIALLY_OBSCURED:
+			GP_DEBUG(1, "VisibilityPartiallyObscured received");
+			win->new_rendering = 1;
+		break;
+		case XCB_VISIBILITY_UNOBSCURED:
+			GP_DEBUG(1, "VisibilityUnobscured received");
+			win->new_rendering = 1;
+		break;
+		}
 	}
 	break;
 	default:
-		xcb_input_event_put(self, win, self->event_queue, ev,
+		xcb_input_event_put(win, self->event_queue, ev,
 		                    self->pixmap->w, self->pixmap->h);
 	}
+
+	return 0;
 }
 
 static void x_poll_events(gp_backend *backend)
 {
+	struct win *win = GP_BACKEND_PRIV(backend);
 	xcb_generic_event_t *ev;
 
 	while ((ev = xcb_poll_for_event(x_con.c)) && !gp_ev_queue_full(backend->event_queue)) {
-		x_ev(backend, ev);
+		int ret;
+
+		win->new_rendering = win->rendering;
+
+		ret = x_ev(backend, ev);
 		free(ev);
+		if (ret)
+			return;
+
+	}
+
+	if (win->new_rendering != win->rendering) {
+		if (win->rendering)
+			gp_ev_queue_push_render_start(backend->event_queue, 0);
+		else
+			gp_ev_queue_push_render_stop(backend->event_queue, 0);
+
+		if (win->rendering)
+			backend->pixmap = win->pix;
 	}
 }
 
@@ -390,17 +439,23 @@ static int create_shm_backing_pixmap(struct gp_backend *self, xcb_connection_t *
 	struct win *win = GP_BACKEND_PRIV(self);
 	void *shm_addr;
 
-	self->pixmap = malloc(sizeof(gp_pixmap));
+	win->pix = malloc(sizeof(gp_pixmap));
+	if (!win->pix) {
+		GP_WARN("Malloc failed :(");
+		return 1;
+	}
 
 	win->shmseg = xcb_generate_id(c);
 
 	shm_addr = attach_shm_pixmap(self, c, pixel_type, w, h);
 	if (!shm_addr) {
-		free(self->pixmap);
+		free(win->pix);
 		return 1;
 	}
 
-	gp_pixmap_init(self->pixmap, w, h, pixel_type, shm_addr, 0);
+	gp_pixmap_init(win->pix, w, h, pixel_type, shm_addr, 0);
+
+	self->pixmap = win->pix;
 
 	return 0;
 }

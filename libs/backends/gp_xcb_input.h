@@ -117,24 +117,6 @@ static unsigned int get_key(unsigned int xkey)
 	return key;
 }
 
-static void handle_render(gp_backend *self, struct win *win, gp_ev_queue *event_queue, int val)
-{
-	if (val == GP_EV_SYS_RENDER_START) {
-		if (win->rendering)
-			return;
-		win->rendering = 1;
-		self->pixmap = win->pix;
-	}
-
-	if (val == GP_EV_SYS_RENDER_STOP) {
-		if (!win->rendering)
-			return;
-		win->rendering = 0;
-	}
-
-	gp_ev_queue_push(event_queue, GP_EV_SYS, val, 0, 0);
-}
-
 static void handle_focus(gp_ev_queue *event_queue, struct win *win, int val)
 {
 	if (val == GP_EV_SYS_FOCUS_IN) {
@@ -156,7 +138,7 @@ static void handle_focus(gp_ev_queue *event_queue, struct win *win, int val)
 # include <xcb/xcb_errors.h>
 #endif
 
-static void xcb_input_event_put(gp_backend *self, struct win *win,
+static void xcb_input_event_put(struct win *win,
                                 gp_ev_queue *event_queue,
                                 xcb_generic_event_t *ev, int w, int h)
 {
@@ -256,19 +238,11 @@ static void xcb_input_event_put(gp_backend *self, struct win *win,
 		}
 		GP_WARN("Unknown X Client Message");
 	} break;
-	case XCB_MAP_NOTIFY:
-		GP_DEBUG(1, "MapNotify event received");
-		handle_render(self, win, event_queue, GP_EV_SYS_RENDER_START);
-	break;
 	case XCB_REPARENT_NOTIFY:
 		GP_DEBUG(1, "ReparentNotify event received");
 	break;
 	case XCB_GRAVITY_NOTIFY:
 		GP_DEBUG(1, "GravityNotify event received");
-	break;
-	case XCB_UNMAP_NOTIFY:
-		GP_DEBUG(1, "UnmapNotify event received");
-		handle_render(self, win, event_queue, GP_EV_SYS_RENDER_STOP);
 	break;
 	case XCB_GRAPHICS_EXPOSURE:
 		GP_DEBUG(1, "GraphicsExposure event received");
@@ -284,24 +258,6 @@ static void xcb_input_event_put(gp_backend *self, struct win *win,
 	case XCB_FOCUS_IN:
 		GP_DEBUG(1, "FocusIn event received");
 		handle_focus(event_queue, win, GP_EV_SYS_FOCUS_IN);
-	break;
-	case XCB_VISIBILITY_NOTIFY: {
-		xcb_visibility_notify_event_t *cev = (xcb_visibility_notify_event_t*)ev;
-		switch (cev->state) {
-		case XCB_VISIBILITY_FULLY_OBSCURED:
-			GP_DEBUG(1, "VisibilityFullyObscured received");
-			handle_render(self, win, event_queue, GP_EV_SYS_RENDER_STOP);
-		break;
-		case XCB_VISIBILITY_PARTIALLY_OBSCURED:
-			GP_DEBUG(1, "VisibilityPartiallyObscured received");
-			handle_render(self, win, event_queue, GP_EV_SYS_RENDER_START);
-		break;
-		case XCB_VISIBILITY_UNOBSCURED:
-			GP_DEBUG(1, "VisibilityUnobscured received");
-			handle_render(self, win, event_queue, GP_EV_SYS_RENDER_START);
-		break;
-		}
-	}
 	break;
 	default:
 		if (ev_type == x_con.shm_completion_ev) {
