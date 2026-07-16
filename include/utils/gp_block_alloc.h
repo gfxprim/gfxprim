@@ -30,6 +30,8 @@ typedef struct gp_balloc_pool {
 	struct gp_balloc_pool *next;
 	/** @brief Free space in bytes in the block. */
 	size_t free;
+	/** @brief Total size of this block in bytes. */
+	size_t size;
 } gp_balloc_pool;
 
 /**
