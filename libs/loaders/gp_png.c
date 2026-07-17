@@ -85,8 +85,9 @@ static const char *srgb_intent_name(int srgb_intent)
 }
 
 static void load_meta_data(png_structp png, png_infop png_info,
-                           gp_storage *storage)
+                           gp_image_info *image_info)
 {
+	gp_storage *storage = gp_image_info_meta_data(image_info);
 	double gamma;
 	png_uint_32 res_x, res_y, w, h;
 	int unit, depth, color_type, interlace_type, compr_method;
@@ -100,8 +101,6 @@ static void load_meta_data(png_structp png, png_infop png_info,
 	                      interlace_type_name(interlace_type));
 
 
-	gp_storage_add_int(storage, NULL, "Width", w);
-	gp_storage_add_int(storage, NULL, "Height", h);
 	gp_storage_add_int(storage, NULL, "Bit Depth", depth);
 
 	if (color_type & PNG_COLOR_MASK_PALETTE) {
@@ -254,7 +253,7 @@ static int read_convert_bitmap(gp_pixmap *res, gp_progress_cb *callback,
 }
 
 int gp_read_png_ex(gp_io *io, gp_pixmap **img,
-                 gp_storage *storage, gp_progress_cb *callback)
+                 gp_image_info *image_info, gp_progress_cb *callback)
 {
 	png_structp png;
 	png_infop png_info = NULL;
@@ -267,6 +266,8 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	int srgb_intent;
 	int has_srgb, has_gamma, has_alpha = 0;
 	int convert_16_to_8 = 0;
+
+	gp_image_info_clear(image_info);
 
 	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
@@ -295,11 +296,7 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 	png_set_sig_bytes(png, 0);
 	png_read_info(png, png_info);
 
-	if (storage)
-		load_meta_data(png, png_info,  storage);
-
-	if (!img)
-		goto exit;
+	load_meta_data(png, png_info, image_info);
 
 	png_get_IHDR(png, png_info, &w, &h, &depth,
 	             &color_type, &interlace_type, NULL, NULL);
@@ -411,6 +408,11 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 		}
 	break;
 	}
+
+	gp_image_info_fill(image_info, w, h, pixel_type);
+
+	if (!img)
+		goto exit;
 
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unimplemented png format");
@@ -991,7 +993,7 @@ ret:
 }
 
 int gp_read_png_ex(gp_io *io, gp_pixmap **img,
-                   gp_storage GP_UNUSED(*storage),
+                   gp_image_info GP_UNUSED(*image_info),
                    gp_progress_cb *callback)
 {
 	struct IHDR_chunk IHDR;

@@ -611,11 +611,27 @@ static int psd_load_rle_cmyk(gp_io *rle_io, gp_pixmap *res,
 	return 0;
 }
 
+static gp_pixel_type psd_header_ptype(struct psd_header *header)
+{
+	if (header->color_mode == PSD_RGB && header->depth == 8) {
+		switch (header->channels) {
+		case 3:
+			return GP_PIXEL_RGB888;
+		case 4:
+			return GP_PIXEL_RGBA8888;
+		}
+	}
+
+	if (header->color_mode == PSD_CMYK && header->channels == 4)
+		return GP_PIXEL_CMYK8888;
+
+	return GP_PIXEL_UNKNOWN;
+}
+
 static int psd_combined_image(gp_io *io, struct psd_header *header,
                               gp_pixmap **res, gp_progress_cb *callback)
 {
 	uint16_t compress;
-	gp_pixel_type pixel_type = GP_PIXEL_UNKNOWN;
 	int ret;
 
 	if (gp_io_read_b2(io, &compress)) {
@@ -631,32 +647,7 @@ static int psd_combined_image(gp_io *io, struct psd_header *header,
 		return ENOSYS;
 	}
 
-	if (header->color_mode == PSD_RGB) {
-		switch (header->channels) {
-		case 3:
-			switch (header->depth) {
-			case 8:
-				pixel_type = GP_PIXEL_RGB888;
-			break;
-			}
-		break;
-		case 4:
-			switch (header->depth) {
-			case 8:
-				pixel_type = GP_PIXEL_RGBA8888;
-			break;
-			}
-		break;
-		}
-	}
-
-	if (header->color_mode == PSD_CMYK && header->channels == 4) {
-		switch (header->channels) {
-		case 4:
-			pixel_type = GP_PIXEL_CMYK8888;
-		break;
-		}
-	}
+	gp_pixel_type pixel_type = psd_header_ptype(header);
 
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unsupported color_mode/channels/bpp combination");
@@ -694,17 +685,17 @@ static int psd_combined_image(gp_io *io, struct psd_header *header,
 	return ret;
 }
 
-static void fill_metadata(struct psd_header *header, gp_storage *storage)
+static void fill_metadata(struct psd_header *header, gp_image_info *image_info)
 {
-	gp_storage_add_int(storage, NULL, "Width", header->w);
-	gp_storage_add_int(storage, NULL, "Height", header->h);
+	gp_storage *storage = gp_image_info_meta_data(image_info);
+
 	gp_storage_add_int(storage, NULL, "Samples per Pixel", header->channels);
 	gp_storage_add_int(storage, NULL, "Bits per Sample", header->depth);
 	gp_storage_add_string(storage, NULL, "Color Mode",
 	                        psd_color_mode_name(header->color_mode));
 }
 
-int gp_read_psd_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_psd_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                    gp_progress_cb *callback)
 {
 	int err;
@@ -725,6 +716,8 @@ int gp_read_psd_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		GP_IO_END
 	};
 
+	gp_image_info_clear(image_info);
+
 	if (gp_io_readf(io, psd_header, &header.channels, &header.h, &header.w,
 	               &header.depth, &header.color_mode, &len) != 13) {
 		GP_DEBUG(1, "Failed to read file header");
@@ -738,8 +731,8 @@ int gp_read_psd_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	         header.channels, header.depth,
 	         psd_color_mode_name(header.color_mode), header.color_mode, len);
 
-	if (storage)
-		fill_metadata(&header, storage);
+	gp_image_info_fill(image_info, header.w, header.h, psd_header_ptype(&header));
+	fill_metadata(&header, image_info);
 
 	if (!img)
 		return 0;

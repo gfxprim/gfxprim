@@ -19,7 +19,7 @@
 #include <utils/gp_seek.h>
 #include <loaders/gp_types.h>
 
-#include <loaders/gp_data_storage.h>
+#include <loaders/gp_loader.h>
 
 struct gp_container_ops {
 	/*
@@ -32,7 +32,7 @@ struct gp_container_ops {
 	 * Just loads current image, does not advance to the next image.
 	 */
 	int (*load_ex)(gp_container *self, gp_pixmap **img,
-	               gp_storage *storage, gp_progress_cb *callback);
+	               gp_image_info *image_info, gp_progress_cb *callback);
 
 	/*
 	 * Close callback, use the inline function defined below.
@@ -98,7 +98,7 @@ static inline gp_pixmap *gp_container_load_next(gp_container *self,
  * Just loads current image, does not advance to the next one.
  */
 int gp_container_load_ex(gp_container *self, gp_pixmap **img,
-                         gp_storage *storage, gp_progress_cb *callback);
+                         gp_image_info *image_info, gp_progress_cb *callback);
 
 static inline gp_pixmap *gp_container_load(gp_container *self,
                                            gp_progress_cb *callback)

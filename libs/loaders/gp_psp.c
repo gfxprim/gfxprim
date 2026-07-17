@@ -162,8 +162,6 @@ struct psp_img_attrs {
 
 static void fill_metadata(struct psp_img_attrs *attrs)
 {
-	gp_storage_add_int(attrs->storage, NULL, "Width", attrs->w);
-	gp_storage_add_int(attrs->storage, NULL, "Height", attrs->h);
 	gp_storage_add_string(attrs->storage, NULL, "Compression",
 	                        psp_comp_type_name(attrs->comp_type));
 	gp_storage_add_int(attrs->storage, NULL, "Bit Depth",
@@ -442,12 +440,13 @@ static int psp_next_block(gp_io *io, struct psp_img_attrs *attrs,
 	return 0;
 }
 
-int gp_read_psp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_psp_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                    gp_progress_cb *callback)
 {
 	int err = 0;
 	struct psp_img_attrs attrs = {.is_loaded = 0, .subblock = 0,
-	                              .priv = NULL, .img = NULL, .storage = storage};
+	                              .priv = NULL, .img = NULL,
+				      .storage = gp_image_info_meta_data(image_info)};
 	struct psp_version version;
 
 	uint16_t psp_header[] = {
@@ -462,6 +461,8 @@ int gp_read_psp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		GP_IO_END
 	};
 
+	gp_image_info_clear(image_info);
+
 	if (gp_io_readf(io, psp_header, &version.major, &version.minor) != 34) {
 		GP_DEBUG(1, "Failed to read file header");
 		err = EIO;
@@ -471,19 +472,22 @@ int gp_read_psp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	GP_DEBUG(1, "Have PSP image version %u.%u",
 	         version.major, version.minor);
 
-	if (storage) {
-		gp_storage_add_int(storage, NULL, "Version Major", version.major);
-		gp_storage_add_int(storage, NULL, "Version Minor", version.minor);
-	}
+	gp_storage *storage = gp_image_info_meta_data(image_info);
 
-	if (!img)
-		return 0;
+	gp_storage_add_int(storage, NULL, "Version Major", version.major);
+	gp_storage_add_int(storage, NULL, "Version Minor", version.minor);
 
 	while (!err) {
 		err = psp_next_block(io, &attrs, callback);
 
 		if (err)
 			goto err0;
+
+		if (attrs.is_loaded)
+			gp_image_info_fill(image_info, attrs.w, attrs.h, GP_PIXEL_UNKNOWN);
+
+		if (!img && attrs.is_loaded)
+			return 0;
 
 		if (attrs.img != NULL) {
 			*img = attrs.img;

@@ -156,6 +156,9 @@ gp_data_node *gp_storage_add(gp_storage *self,
 	struct record *rec;
 	struct gp_data_node *dup;
 
+	if (!self)
+		return NULL;
+
 	GP_DEBUG(2, "Adding '%s' to storage (%p)", data->id, self);
 
 	if (node && node->type != GP_DATA_DICT) {

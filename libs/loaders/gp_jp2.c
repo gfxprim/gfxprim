@@ -102,7 +102,7 @@ static void fill_metadata(opj_image_t *img, gp_storage *storage)
 	}
 }
 
-int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_storage *storage,
+int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_image_info *image_info,
                    gp_progress_cb *callback)
 {
 	opj_dparameters_t params;
@@ -114,6 +114,8 @@ int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_storage *storage,
 	gp_pixmap *res = NULL;
 	unsigned int i, x, y;
 	int err = 0, ret = 1;
+
+	gp_image_info_clear(meta_data);
 
 	opj_set_default_decoder_parameters(&params);
 
@@ -153,8 +155,9 @@ int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_storage *storage,
 		goto err2;
 	}
 
-	if (storage)
-		fill_metadata(img, storage);
+	gp_image_info_fill(meta_data, img->x1 - img->x0, img->y1 - img->y0, GP_PIXEL_RGB888);
+
+	fill_metadata(img, gp_image_info_storage(meta_data));
 
 	GP_DEBUG(1, "Have image %ux%u-%ux%u colorspace=%s numcomps=%u",
 	         img->x0, img->y0, img->x1, img->y1,
@@ -252,7 +255,7 @@ err0:
 #else
 
 int gp_read_jp2_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
-                   gp_storage GP_UNUSED(*storage),
+                   gp_image_info GP_UNUSED(*image_info),
                    gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;

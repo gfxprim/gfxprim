@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2025 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -680,23 +680,49 @@ err0:
 	return 1;
 }
 
-static void fill_meta_data(struct pnm_header *header, gp_storage *storage)
+static void fill_meta_data(struct pnm_header *header, gp_image_info *image_info)
 {
-	if (!storage)
-		return;
+	gp_storage *storage = gp_image_info_meta_data(image_info);
 
-	gp_storage_add_int(storage, NULL, "Width", header->w);
-	gp_storage_add_int(storage, NULL, "Height", header->h);
 	gp_storage_add_int(storage, NULL, "Depth", header->depth);
 	gp_storage_add_string(storage, NULL, "Format", pnm_magic_name(header->magic));
 }
 
-int gp_read_pbm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+static gp_pixel depth_to_pixel(int depth)
+{
+	switch (depth) {
+	case 1:
+		return GP_PIXEL_G1;
+	case 3:
+		return GP_PIXEL_G2;
+	case 15:
+		return GP_PIXEL_G4;
+	case 255:
+		return GP_PIXEL_G8;
+	default:
+		return GP_PIXEL_UNKNOWN;
+	}
+}
+
+static gp_pixel_type pnm_header_ptype(struct pnm_header *header)
+{
+	if (is_bitmap(header->magic))
+		return GP_PIXEL_G1;
+	if (is_graymap(header->magic))
+		return depth_to_pixel(header->depth);
+	if (is_pixmap(header->magic))
+		return GP_PIXEL_RGB888;
+	return GP_PIXEL_UNKNOWN;
+}
+
+int gp_read_pbm_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                  gp_progress_cb *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
 	int err;
+
+	gp_image_info_clear(image_info);
 
 	err = load_header(&buf, &header);
 	if (err) {
@@ -704,7 +730,8 @@ int gp_read_pbm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		return 1;
 	}
 
-	fill_meta_data(&header, storage);
+	gp_image_info_fill(image_info, header.w, header.h, pnm_header_ptype(&header));
+	fill_meta_data(&header, image_info);
 
 	if (!img)
 		return 0;
@@ -751,22 +778,6 @@ err:
 	gp_io_close(bio);
 	errno = err;
 	return 1;
-}
-
-static gp_pixel depth_to_pixel(int depth)
-{
-	switch (depth) {
-	case 1:
-		return GP_PIXEL_G1;
-	case 3:
-		return GP_PIXEL_G2;
-	case 15:
-		return GP_PIXEL_G4;
-	case 255:
-		return GP_PIXEL_G8;
-	default:
-		return GP_PIXEL_UNKNOWN;
-	}
 }
 
 static int load_ascii_graymap(struct buf *buf, struct pnm_header *header,
@@ -852,12 +863,14 @@ err0:
 	return 1;
 }
 
-int gp_read_pgm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_pgm_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                  gp_progress_cb *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
 	int err;
+
+	gp_image_info_clear(image_info);
 
 	err = load_header(&buf, &header);
 	if (err) {
@@ -865,7 +878,8 @@ int gp_read_pgm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		return 1;
 	}
 
-	fill_meta_data(&header, storage);
+	gp_image_info_fill(image_info, header.w, header.h, pnm_header_ptype(&header));
+	fill_meta_data(&header, image_info);
 
 	if (!img)
 		return 0;
@@ -985,12 +999,14 @@ err0:
 	return 1;
 }
 
-int gp_read_ppm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_ppm_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                  gp_progress_cb *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
 	int err;
+
+	gp_image_info_clear(image_info);
 
 	err = load_header(&buf, &header);
 	if (err) {
@@ -998,7 +1014,8 @@ int gp_read_ppm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		return 1;
 	}
 
-	fill_meta_data(&header, storage);
+	gp_image_info_fill(image_info, header.w, header.h, pnm_header_ptype(&header));
+	fill_meta_data(&header, image_info);
 
 	if (!img)
 		return 0;
@@ -1110,12 +1127,14 @@ err:
 	return 1;
 }
 
-int gp_read_pnm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_pnm_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                  gp_progress_cb *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
 	int err, ret = 1;
+
+	gp_image_info_clear(image_info);
 
 	err = load_header(&buf, &header);
 	if (err) {
@@ -1123,7 +1142,8 @@ int gp_read_pnm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		return 1;
 	}
 
-	fill_meta_data(&header, storage);
+	gp_image_info_fill(image_info, header.w, header.h, pnm_header_ptype(&header));
+	fill_meta_data(&header, image_info);
 
 	if (!img)
 		return 0;

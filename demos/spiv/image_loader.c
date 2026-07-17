@@ -45,14 +45,18 @@ gp_pixmap *image_loader_get_image(gp_progress_cb *callback, int elevate)
 	const char *path;
 	gp_pixmap *img = NULL;
 	int err, ret;
+	gp_image_info image_info = {};
 
 	if (cur_img)
 		return cur_img;
 
 	if (cur_cont) {
 		cpu_timer_start(&timer, "Loading");
+
 		cur_meta_data = gp_storage_create();
-		gp_container_load_ex(cur_cont, &cur_img, cur_meta_data, callback);
+		image_info.meta_data = cur_meta_data;
+
+		gp_container_load_ex(cur_cont, &cur_img, &image_info, callback);
 		cpu_timer_stop(&timer);
 		return cur_img;
 	}
@@ -65,8 +69,9 @@ gp_pixmap *image_loader_get_image(gp_progress_cb *callback, int elevate)
 	cpu_timer_start(&timer, "Loading");
 
 	cur_meta_data = gp_storage_create();
+	image_info.meta_data = cur_meta_data;
 
-	ret = gp_load_image_ex(path, &img, cur_meta_data, callback);
+	ret = gp_load_image_ex(path, &img, &image_info, callback);
 
 	if (ret) {
 		err = errno;
@@ -79,7 +84,7 @@ gp_pixmap *image_loader_get_image(gp_progress_cb *callback, int elevate)
 		cur_cont = gp_container_open(path);
 
 		if (cur_cont) {
-			gp_container_load_ex(cur_cont, &img, cur_meta_data, callback);
+			gp_container_load_ex(cur_cont, &img, &image_info, callback);
 
 			if (img) {
 				cur_img = img;

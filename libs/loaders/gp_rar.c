@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <errno.h>
@@ -244,7 +244,7 @@ static off_t entry_seek(gp_io *self, off_t off, enum gp_seek_whence whence)
 }
 
 static int load_next(gp_container *self, gp_pixmap **img,
-                     gp_storage *storage, gp_progress_cb *callback)
+                     gp_image_info *image_info, gp_progress_cb *callback)
 {
 	struct rar_priv *priv = GP_CONTAINER_PRIV(self);
 	struct archive_entry *a_entry;
@@ -268,7 +268,7 @@ static int load_next(gp_container *self, gp_pixmap **img,
 	priv->pos++;
 	self->cur_img = priv->pos;
 
-	return gp_read_image_ex(&eio.io, img, storage, callback);
+	return gp_read_image_ex(&eio.io, img, image_info, callback);
 }
 
 static int rar_seek_to(gp_container *self, size_t where)
@@ -325,9 +325,9 @@ static int rar_seek(gp_container *self, ssize_t offset,
 }
 
 static int rar_load_ex(gp_container *self, gp_pixmap **img,
-                       gp_storage *storage, gp_progress_cb *callback)
+                       gp_image_info *image_info, gp_progress_cb *callback)
 {
-	if (load_next(self, img, storage, callback))
+	if (load_next(self, img, image_info, callback))
 		return 1;
 
 	rar_seek(self, -1, GP_SEEK_CUR);

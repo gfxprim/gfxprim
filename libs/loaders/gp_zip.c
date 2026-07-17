@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
@@ -211,7 +211,7 @@ static int zip_read_data_desc(gp_io *io, struct zip_local_header *header)
 }
 
 static int zip_next_file(struct zip_priv *priv, gp_pixmap **img,
-                         gp_storage *storage,
+                         gp_image_info *image_info,
                          gp_progress_cb *callback)
 {
 	struct zip_local_header header = {.file_name = NULL};
@@ -272,7 +272,7 @@ static int zip_next_file(struct zip_priv *priv, gp_pixmap **img,
 
 		gp_io_mark(priv->io, GP_IO_MARK);
 
-		res = gp_read_image_ex(priv->io, &ret, storage, callback);
+		res = gp_read_image_ex(priv->io, &ret, image_info, callback);
 		if (res && errno == ECANCELED)
 			err = errno;
 
@@ -288,7 +288,7 @@ static int zip_next_file(struct zip_priv *priv, gp_pixmap **img,
 		}
 
 		GP_DEBUG(1, "Reading image");
-		res = gp_read_image_ex(io, &ret, storage, callback);
+		res = gp_read_image_ex(io, &ret, image_info, callback);
 		if (res && errno == ECANCELED)
 			err = errno;
 
@@ -350,7 +350,7 @@ static void record_offset(struct zip_priv *priv, size_t pos, long offset)
 }
 
 static int zip_load_next(gp_container *self, gp_pixmap **img,
-                         gp_storage *storage,
+                         gp_image_info *image_info,
                          gp_progress_cb *callback)
 {
 	struct zip_priv *priv = GP_CONTAINER_PRIV(self);
@@ -361,7 +361,7 @@ static int zip_load_next(gp_container *self, gp_pixmap **img,
 	*img = NULL;
 
 	do {
-		err = zip_next_file(priv, img, storage, callback);
+		err = zip_next_file(priv, img, image_info, callback);
 	} while (!*img && err == 0);
 
 	if (err == ENOENT)
@@ -498,9 +498,9 @@ static int zip_seek(gp_container *self, ssize_t offset,
 }
 
 static int zip_load(gp_container *self, gp_pixmap **img,
-                    gp_storage *storage, gp_progress_cb *callback)
+                    gp_image_info *image_info, gp_progress_cb *callback)
 {
-	if (zip_load_next(self, img, storage, callback))
+	if (zip_load_next(self, img, image_info, callback))
 		return 1;
 
 	zip_seek(self, -1, GP_SEEK_CUR);

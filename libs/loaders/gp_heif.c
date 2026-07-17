@@ -42,12 +42,6 @@ int gp_match_heif(const void *buf)
 
 #include <libheif/heif.h>
 
-static void fill_metadata(gp_storage *storage, int w, int h)
-{
-	gp_storage_add_int(storage, NULL, "Width", w);
-	gp_storage_add_int(storage, NULL, "Height", h);
-}
-
 static int64_t get_position_heif_reader(void *userdata)
 {
 	gp_io *io = userdata;
@@ -128,8 +122,9 @@ static int cancel_decoding_heif(void *progress_user_data)
 #endif /* 1.19.0 */
 
 static void parse_exif_heif(struct heif_image_handle *image_handle,
-                            gp_storage *storage, gp_correction_desc *corr_desc)
+                            gp_image_info *image_info, gp_correction_desc *corr_desc)
 {
+	gp_storage *storage = gp_image_info_meta_data(image_info);
 	struct heif_error err;
 	heif_item_id item_id;
 	uint8_t *exif;
@@ -169,8 +164,10 @@ static void parse_exif_heif(struct heif_image_handle *image_handle,
 
 #if LIBHEIF_HAVE_VERSION(1, 4, 0)
 static void parse_color_profile_heif(struct heif_image_handle *image_handle,
-                                     gp_storage *storage)
+                                     gp_image_info *image_info)
 {
+	gp_storage *storage = gp_image_info_meta_data(image_info);
+
 	switch (heif_image_handle_get_color_profile_type(image_handle)) {
 	case heif_color_profile_type_not_present:
 		GP_DEBUG(1, "No color profile");
@@ -236,7 +233,7 @@ static inline int err_heif_to_errno(struct heif_error err)
 	}
 }
 
-int gp_read_heif_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_heif_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                     gp_progress_cb *callback)
 {
 	struct heif_context *ctx;
@@ -244,6 +241,8 @@ int gp_read_heif_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	struct heif_image_handle *image_handle;
 	int w, h, has_alpha;
 	gp_correction_desc corr_desc = {.corr_type = -1};
+
+	gp_image_info_clear(image_info);
 
 	ctx = heif_context_alloc();
 
@@ -267,10 +266,11 @@ int gp_read_heif_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 
 	GP_DEBUG(1, "Have HEIF image %ix%i has_alpha=%i", w, h, has_alpha);
 
-	fill_metadata(storage, w, h);
-	parse_exif_heif(image_handle, storage, &corr_desc);
+	gp_image_info_fill(image_info, w, h, GP_PIXEL_BGR888);
+
+	parse_exif_heif(image_handle, image_info, &corr_desc);
 #if LIBHEIF_HAVE_VERSION(1, 4, 0)
-	parse_color_profile_heif(image_handle, storage);
+	parse_color_profile_heif(image_handle, image_info);
 #endif /* 1.4.0 */
 
 	if (img) {
@@ -329,7 +329,7 @@ err0:
 #else
 
 int gp_read_heif_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
-                    gp_storage GP_UNUSED(*storage),
+                    gp_image_info GP_UNUSED(*image_info),
                     gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;

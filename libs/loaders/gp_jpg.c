@@ -207,12 +207,11 @@ static inline void init_source_mgr(struct my_source_mgr *src, gp_io *io,
 #define JPEG_COM_MAX 128
 
 static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
-                              gp_storage *storage, gp_correction_desc *corr_desc)
+                              gp_image_info *image_info, gp_correction_desc *corr_desc)
 {
 	jpeg_saved_marker_ptr marker;
+	gp_storage *storage = gp_image_info_meta_data(image_info);
 
-	gp_storage_add_int(storage, NULL, "Width", cinfo->image_width);
-	gp_storage_add_int(storage, NULL, "Height", cinfo->image_height);
 	gp_storage_add_int(storage, NULL, "Channels", cinfo->num_components);
 	gp_storage_add_string(storage, NULL, "Color Space",
 	                     get_colorspace(cinfo->out_color_space));
@@ -290,7 +289,7 @@ static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
 }
 
 int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
-		 gp_storage *storage, gp_progress_cb *callback)
+		 gp_image_info *image_info, gp_progress_cb *callback)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_source_mgr src;
@@ -299,6 +298,8 @@ int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
 	gp_correction_desc corr_desc = {.corr_type = -1};
 	uint8_t buf[1024];
 	int err;
+
+	gp_image_info_clear(image_info);
 
 	cinfo.err = jpeg_std_error(&my_err.error_mgr);
 	my_err.error_mgr.error_exit = my_error_exit;
@@ -321,10 +322,7 @@ int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
 	            cinfo.image_width, cinfo.image_height,
 		    cinfo.num_components);
 
-	read_jpg_metadata(&cinfo, storage, &corr_desc);
-
-	if (!img)
-		goto exit;
+	read_jpg_metadata(&cinfo, image_info, &corr_desc);
 
 	gp_pixel pixel_type;
 
@@ -341,6 +339,11 @@ int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
 	default:
 		pixel_type = GP_PIXEL_UNKNOWN;
 	}
+
+	gp_image_info_fill(image_info, cinfo.image_width, cinfo.image_height, pixel_type);
+
+	if (!img)
+		goto exit;
 
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Can't handle %s JPEG output format",
@@ -588,7 +591,7 @@ int gp_write_jpg(const gp_pixmap *src, gp_io *io,
 #else
 
 int gp_read_jpg_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
-                 gp_storage GP_UNUSED(*storage),
+                 gp_image_info GP_UNUSED(*image_info),
                  gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;

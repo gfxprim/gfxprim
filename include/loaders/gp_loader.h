@@ -17,6 +17,95 @@
 #include <loaders/gp_data_storage.h>
 
 /**
+ * @brief An image info and meta data.
+ *
+ * Filled in by the image loaders if passed.
+ *
+ * The dimensions and the pixel type are filled in as soon as the image header
+ * is parsed — even when the bitmap itself cannot be decoded.
+ */
+typedef struct gp_image_info {
+	/** @brief An image width in pixels. */
+	gp_size w;
+
+	/** @brief An image height in pixels. */
+	gp_size h;
+
+	/**
+	 * @brief A pixel type the decoded pixmap would have.
+	 *
+	 * GP_PIXEL_UNKNOWN when the image cannot be decoded or the pixel type
+	 * mapping is not known yet.
+	 */
+	gp_pixel_type ptype;
+
+	/**
+	 * @brief An optional metadata storage, may be NULL.
+	 *
+	 * If needed the pointer should be initialized with
+	 * gp_storage_create().
+	 */
+	gp_storage *meta_data;
+} gp_image_info;
+
+/**
+ * @brief Returns pointer meta data in image info if both exist.
+ *
+ * @param image_info An image info.
+ * @return A pointer to a storage if both image info and meta data storage exists.
+ */
+static inline gp_storage *gp_image_info_meta_data(gp_image_info *image_info)
+{
+	return image_info ? image_info->meta_data : NULL;
+}
+
+/**
+ * @brief Clears image info.
+ *
+ * Sets the w and h to 0 and ptype to GP_PIXEL_UNKNOWN.
+ *
+ * This is called at the start of an image loading to clear the image info.
+ *
+ * @param image_info An image info to be cleared.
+ */
+static inline void gp_image_info_clear(gp_image_info *image_info)
+{
+	if (!image_info)
+		return;
+
+	image_info->w = 0;
+	image_info->h = 0;
+	image_info->ptype = GP_PIXEL_UNKNOWN;
+}
+
+/**
+ * @brief Sets the image info and basic meta data.
+ *
+ * This is called by image loaders once image header was read.
+ *
+ * @param image_info An image info to be filled in.
+ * @param w Image width after loading.
+ * @param h Image height after loading.
+ * @param ptype Image pixel type after loading.
+ */
+static inline void gp_image_info_fill(gp_image_info *image_info,
+                                      gp_size w, gp_size h, gp_pixel_type ptype)
+{
+	if (!image_info)
+		return;
+
+	image_info->w = w;
+	image_info->h = h;
+	image_info->ptype = ptype;
+
+	if (!image_info->meta_data)
+		return;
+
+	gp_storage_add_int(image_info->meta_data, NULL, "Width", w);
+	gp_storage_add_int(image_info->meta_data, NULL, "Height", h);
+}
+
+/**
  * @brief Reads an image from a I/O stream.
  *
  * The image format is matched from the file signature i.e. first few bytes of the
@@ -38,13 +127,13 @@ gp_pixmap *gp_read_image(gp_io *io, gp_progress_cb *callback);
  *
  * @param io An I/O.
  * @param img A pointer to store the loaded image to.
- * @param meta_data An optional metadata storage, may be NULL if not needed.
+ * @param image_info An image info to be filled in may be NULL if not needed.
  * @param callback A progress callback.
  * @return Zero on success, non-zero on a failure and errno is set. The resulting
  *         errno may also be set to any possible error from open(3), read(3),
  *         seek(3), etc.
  */
-int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_storage *meta_data,
+int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                      gp_progress_cb *callback);
 
 /**
@@ -69,14 +158,14 @@ gp_pixmap *gp_load_image(const char *src_path, gp_progress_cb *callback);
  *
  * @param src_path A path to an image file.
  * @param img A pointer to store the loaded image to.
- * @param meta_data An optional metadata storage, may be NULL if not needed.
+ * @param image_info Image info to be filled in, may be NULL if not needed.
  * @param callback A progress callback.
  * @return Zero on success, non-zero on a failure and errno is set. The
  *         resulting errno may also be set to any possible error from open(3),
  *         read(3), seek(3), etc.
  */
 int gp_load_image_ex(const char *src_path,
-                     gp_pixmap **img, gp_storage *meta_data,
+                     gp_pixmap **img, gp_image_info *image_info,
                      gp_progress_cb *callback);
 
 /**
@@ -85,10 +174,10 @@ int gp_load_image_ex(const char *src_path,
  * Loads only image metadata, e.g. exif. No bitmap data are loaded.
  *
  * @param src_path A path to a image file.
- * @param storage A data storage for the metadata.
+ * @param meta_data A data storage for the metadata.
  * @return Zero on success, non-zero otherwise.
  */
-int gp_load_meta_data(const char *src_path, gp_storage *storage);
+int gp_load_meta_data(const char *src_path, gp_storage *meta_data);
 
 /**
  * @brief Simple saving function, the image format is guessed by the file
@@ -118,7 +207,7 @@ struct gp_loader {
 	/*
 	 * Reads image and/or metadata from an I/O stream.
 	 */
-	int (*read)(gp_io *io, gp_pixmap **img, gp_storage *storage,
+	int (*read)(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                     gp_progress_cb *callback);
 
 	/*
@@ -207,14 +296,14 @@ gp_pixmap *gp_loader_load_image(const gp_loader *self, const char *src_path,
  *
  * @param src_path A path to an image file.
  * @param img A pointer to store the loaded image to.
- * @param meta_data An optional metadata storage, may be NULL if not needed.
+ * @param image_info Image info to be filled in, may be NULL if not needed.
  * @param callback A progress callback.
  * @return Zero on success, non-zero on a failure and errno is set. The
  *         resulting errno may also be set to any possible error from open(3),
  *         read(3), seek(3), etc.
  */
 int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
-                            gp_pixmap **img, gp_storage *meta_data,
+                            gp_pixmap **img, gp_image_info *image_info,
                             gp_progress_cb *callback);
 
 /**
@@ -235,14 +324,14 @@ gp_pixmap *gp_loader_read_image(const gp_loader *self, gp_io *io,
  *
  * @param io An I/O.
  * @param img A pointer to store the loaded image to.
- * @param meta_data An optional metadata storage, may be NULL if not needed.
+ * @param image_info Image info to be filled in, may be NULL if not needed.
  * @param callback A progress callback.
  * @return Zero on success, non-zero on failure and errno is set. The resulting
  *         errno may also be set to any possible error from open(3), read(3),
  *         seek(3), etc.
  */
 int gp_loader_read_image_ex(const gp_loader *self, gp_io *io,
-                            gp_pixmap **img, gp_storage *meta_data,
+                            gp_pixmap **img, gp_image_info *image_info,
                             gp_progress_cb *callback);
 
 /**

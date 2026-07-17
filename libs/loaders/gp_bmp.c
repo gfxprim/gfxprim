@@ -635,8 +635,6 @@ int gp_bmp_read_pixels(gp_io *io, struct gp_bmp_info_header *header,
 static void fill_metadata(struct gp_bmp_info_header *header,
                           gp_storage *storage)
 {
-	gp_storage_add_int(storage, NULL, "Width", header->w);
-	gp_storage_add_int(storage, NULL, "Height", header->h);
 	gp_storage_add_string(storage, NULL, "Compression",
 	                      bmp_compress_name(header->compress_type));
 	gp_storage_add_string(storage, NULL, "Header Type",
@@ -651,13 +649,15 @@ int gp_match_bmp(const void *buf)
 	return !memcmp(buf, "BM", 2);
 }
 
-int gp_read_bmp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_bmp_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                    gp_progress_cb *callback)
 {
 	struct gp_bmp_info_header header;
 	gp_pixel_type pixel_type;
 	gp_pixmap *pixmap;
 	int err;
+
+	gp_image_info_clear(image_info);
 
 	if ((err = read_bitmap_header(io, &header)))
 		goto err1;
@@ -668,8 +668,9 @@ int gp_read_bmp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		goto err1;
 	}
 
-	if (storage)
-		fill_metadata(&header, storage);
+	gp_image_info_fill(image_info, header.w, GP_ABS(header.h), GP_PIXEL_UNKNOWN);
+
+	fill_metadata(&header, gp_image_info_meta_data(image_info));
 
 	switch (header.compress_type) {
 	case COMPRESS_RGB:
@@ -688,6 +689,9 @@ int gp_read_bmp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		err = ENOSYS;
 		goto err1;
 	}
+
+	if (image_info)
+		image_info->ptype = pixel_type;
 
 	if (!img)
 		return 0;

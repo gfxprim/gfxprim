@@ -224,7 +224,7 @@ gp_pixmap *gp_read_image(gp_io *io, gp_progress_cb *callback)
 	return ret;
 }
 
-int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_storage *meta_data,
+int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                      gp_progress_cb *callback)
 {
 	char buf[32];
@@ -268,11 +268,11 @@ int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_storage *meta_data,
 		return 1;
 	}
 
-	return loader->read(io, img, meta_data, callback);
+	return loader->read(io, img, image_info, callback);
 }
 
 int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
-                            gp_pixmap **img, gp_storage *storage,
+                            gp_pixmap **img, gp_image_info *storage,
                             gp_progress_cb *callback)
 {
 	gp_io *io;
@@ -320,7 +320,7 @@ gp_pixmap *gp_loader_read_image(const gp_loader *self, gp_io *io,
 }
 
 int gp_loader_read_image_ex(const gp_loader *self, gp_io *io,
-                         gp_pixmap **img, gp_storage *data,
+                         gp_pixmap **img, gp_image_info *data,
                          gp_progress_cb *callback)
 {
 	GP_DEBUG(1, "Reading image (I/O %p)", io);
@@ -343,7 +343,7 @@ gp_pixmap *gp_load_image(const char *src_path, gp_progress_cb *callback)
 }
 
 int gp_load_image_ex(const char *src_path,
-                     gp_pixmap **img, gp_storage *meta_data,
+                     gp_pixmap **img, gp_image_info *image_info,
                      gp_progress_cb *callback)
 {
 	int err;
@@ -372,7 +372,7 @@ int gp_load_image_ex(const char *src_path,
 
 	if (ext_load) {
 		if (!gp_loader_load_image_ex(ext_load, src_path,
-		                             img, meta_data, callback))
+		                             img, image_info, callback))
 			return 0;
 	}
 
@@ -402,7 +402,7 @@ int gp_load_image_ex(const char *src_path,
 
 	if (sig_load) {
 		if (!gp_loader_load_image_ex(sig_load, src_path,
-		                          img, meta_data, callback))
+		                             img, image_info, callback))
 			return 0;
 	}
 
@@ -410,7 +410,7 @@ int gp_load_image_ex(const char *src_path,
 	return 1;
 }
 
-int gp_load_meta_data(const char *src_path, gp_storage *storage)
+int gp_load_meta_data(const char *src_path, gp_storage *meta_data)
 {
 	const gp_loader *loader;
 	struct stat st;
@@ -439,7 +439,9 @@ int gp_load_meta_data(const char *src_path, gp_storage *storage)
 	if (loader == NULL)
 		goto out;
 
-	return gp_loader_load_image_ex(loader, src_path, NULL, storage, NULL);
+	gp_image_info image_info = {.meta_data = meta_data};
+
+	return gp_loader_load_image_ex(loader, src_path, NULL, &image_info, NULL);
 
 out:
 	errno = ENOSYS;

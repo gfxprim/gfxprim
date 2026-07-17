@@ -28,13 +28,14 @@ int gp_match_{{fmt}}(const void *buf);
  *
  * @param io A readable I/O channel.
  * @param img A pointer to store the newly allocated image into.
- * @param storage An optional pointer to a data storage to load the metadata
- *                into. Can be NULL if metadata are not required.
+ * @param image_info If not NULL this structure is filled in before the
+ *                   image data are loaded. The meta data storage,
+ *                   if not NULL, is filled with metadata, e.g. exif.
  * @param callback A progress callback. The operation can be aborted by a
  *                 non-zero callback return value.
  * @return Zero on success, non-zero on a failure and errno is set.
  */
-int gp_read_{{fmt}}_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_{{fmt}}_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                    gp_progress_cb *callback);
 
 /**

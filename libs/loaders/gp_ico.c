@@ -46,10 +46,12 @@ struct icondir_entry {
 };
 
 int gp_read_ico_ex(gp_io *io, gp_pixmap **img,
-                   gp_storage *storage, gp_progress_cb *callback)
+                   gp_image_info *image_info, gp_progress_cb *callback)
 {
 	gp_pixmap *res = NULL;
 	uint16_t image_cnt;
+
+	gp_image_info_clear(image_info);
 
 	uint16_t icondir[] = {
 		0x00, 0x00, 0x01, 0x00,
@@ -106,7 +108,7 @@ int gp_read_ico_ex(gp_io *io, gp_pixmap **img,
 	gp_io_peek(io, buf, sizeof(buf));
 
 	if (gp_match_png(buf))
-		return gp_read_png_ex(io, img, storage, callback);
+		return gp_read_png_ex(io, img, image_info, callback);
 
 	struct gp_bmp_info_header header;
 
@@ -118,6 +120,11 @@ int gp_read_ico_ex(gp_io *io, gp_pixmap **img,
 
 	/* Looks like a bug to bug compatibility with some windows */
 	header.h /= 2;
+
+	gp_image_info_fill(image_info, header.w, header.h, ptype);
+
+	if (!img)
+		return 0;
 
 	if (ie.bits_per_pixel)
 		header.bpp = ie.bits_per_pixel;

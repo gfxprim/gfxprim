@@ -41,7 +41,7 @@ int gp_container_seek(gp_container *self, ssize_t offset,
 }
 
 int gp_container_load_ex(gp_container *self, gp_pixmap **img,
-                         gp_storage *storage, gp_progress_cb *callback)
+                         gp_image_info *image_info, gp_progress_cb *callback)
 {
 	if (!self->ops->load_ex) {
 		GP_DEBUG(1, "Load not implemented in %s container",
@@ -50,7 +50,7 @@ int gp_container_load_ex(gp_container *self, gp_pixmap **img,
 		return ENOSYS;
 	}
 
-	return self->ops->load_ex(self, img, storage, callback);
+	return self->ops->load_ex(self, img, image_info, callback);
 }
 
 const gp_container_ops *gp_container_ops_by_signature(const void *buf)

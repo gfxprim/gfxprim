@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -200,7 +200,7 @@ static struct tag tags[] = {
 };
 
 static void fill_metadata(TIFF *tiff, struct tiff_header *header,
-                          gp_storage *storage)
+                          gp_image_info *image_info)
 {
 	unsigned int i;
 	int flag;
@@ -209,9 +209,8 @@ static void fill_metadata(TIFF *tiff, struct tiff_header *header,
 	void *data;
 	uint32_t data_len;
 	gp_data_node val;
+	gp_storage *storage = gp_image_info_meta_data(image_info);
 
-	gp_storage_add_int(storage, NULL, "Width", header->w);
-	gp_storage_add_int(storage, NULL, "Height", header->h);
 	gp_storage_add_string(storage, NULL, "Compression",
 	                        compression_name(header->compress));
 	gp_storage_add_int(storage, NULL, "Bits per Sample",
@@ -561,14 +560,16 @@ static void tiff_io_unmap(thandle_t io, void *base, toff_t size)
 }
 */
 
-int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                   gp_progress_cb *callback)
 {
 	TIFF *tiff;
 	struct tiff_header header;
-	gp_pixmap *res;
+	gp_pixmap *res = NULL;
 	gp_pixel_type pixel_type;
 	int err;
+
+	gp_image_info_clear(image_info);
 
 	tiff = TIFFClientOpen("GFXprim IO", "r", io, tiff_io_read,
 	                      tiff_io_write, tiff_io_seek, tiff_io_close,
@@ -583,13 +584,15 @@ int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	if ((err = read_header(tiff, &header)))
 		goto err1;
 
-	if (storage)
-		fill_metadata(tiff, &header, storage);
-
-	if (!img)
-		return 0;
-
 	pixel_type = match_pixel_type(tiff, &header);
+
+	gp_image_info_fill(image_info, header.w, header.h, pixel_type);
+	fill_metadata(tiff, &header, image_info);
+
+	if (!img) {
+		TIFFClose(tiff);
+		return 0;
+	}
 
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		err = ENOSYS;
@@ -604,7 +607,9 @@ int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		goto err1;
 	}
 
-	if (res->pixel_type != GP_PIXEL_G1 && res->pixel_type != GP_PIXEL_CMYK8888)
+	if (res->pixel_type != GP_PIXEL_G1 &&
+	    res->pixel_type != GP_PIXEL_G16 &&
+	    res->pixel_type != GP_PIXEL_CMYK8888)
 		gp_pixmap_srgb_set(res);
 
 	if (TIFFScanlineSize(tiff) > res->bytes_per_row) {
@@ -847,7 +852,7 @@ int gp_write_tiff(const gp_pixmap *src, gp_io *io,
 #else
 
 int gp_read_tiff_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
-                  gp_storage GP_UNUSED(*storage),
+                  gp_image_info GP_UNUSED(*image_info),
                   gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;

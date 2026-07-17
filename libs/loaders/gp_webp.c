@@ -41,19 +41,15 @@ static gp_pixel_type out_pixel_types[] = {
 #include <webp/decode.h>
 #include <webp/encode.h>
 
-static void fill_metadata(gp_storage *storage, int w, int h)
-{
-	gp_storage_add_int(storage, NULL, "Width", w);
-	gp_storage_add_int(storage, NULL, "Height", h);
-}
-
-int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                     gp_progress_cb *callback)
 {
 	unsigned char buf[1024];
 	WebPBitstreamFeatures features;
 	gp_pixel_type ptype;
 	int err;
+
+	gp_image_info_clear(image_info);
 
 	ssize_t ret = gp_io_read(io, buf, sizeof(buf));
 
@@ -79,12 +75,6 @@ int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		return 1;
 	}
 
-	if (storage)
-		fill_metadata(storage, features.width, features.height);
-
-	if (!img)
-		return 0;
-
 	if (features.has_alpha) {
 		config.output.colorspace = MODE_BGRA;
 		ptype = GP_PIXEL_RGBA8888;
@@ -92,6 +82,12 @@ int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		config.output.colorspace = MODE_BGR;
 		ptype = GP_PIXEL_RGB888;
 	}
+
+	gp_image_info_fill(image_info, features.width, features.height, ptype);
+
+	if (!img)
+		return 0;
+
 
 	gp_pixmap *out = gp_pixmap_alloc(features.width, features.height, ptype);
 	if (!out) {
@@ -282,7 +278,7 @@ int gp_write_webp(const gp_pixmap *src, gp_io *io, gp_progress_cb *callback)
 #else
 
 int gp_read_webp_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
-                   gp_storage GP_UNUSED(*storage),
+                   gp_image_info GP_UNUSED(*image_info),
                    gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;

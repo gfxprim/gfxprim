@@ -432,16 +432,16 @@ static int read_image(gp_io *io, struct pcx_header *header,
 	return ENOSYS;
 }
 
-static void fill_metadata(struct pcx_header *header, gp_storage *storage)
+static void fill_metadata(struct pcx_header *header, gp_image_info *info)
 {
-	gp_storage_add_int(storage, NULL, "Width", header->xe - header->xs + 1);
-	gp_storage_add_int(storage, NULL, "Height", header->ye - header->ys + 1);
+	gp_storage *storage = gp_image_info_meta_data(info);
+
 	gp_storage_add_int(storage, NULL, "Version", header->ver);
 	gp_storage_add_int(storage, NULL, "Bits per Sample", header->bpp);
 	gp_storage_add_int(storage, NULL, "Samples per Pixel", header->nplanes);
 }
 
-int gp_read_pcx_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_pcx_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
                  gp_progress_cb *callback)
 {
 	gp_pixmap *res = NULL;
@@ -469,6 +469,8 @@ int gp_read_pcx_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		GP_IO_IGN | 58,   /* filler to 128 bytes */
 		GP_IO_END,
 	};
+
+	gp_image_info_clear(image_info);
 
 	if (gp_io_readf(io, pcx_header, &header.ver, &header.bpp,
 	                &header.xs, &header.ys, &header.xe, &header.ye,
@@ -499,19 +501,7 @@ int gp_read_pcx_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	         header.bytes_per_line, header.nplanes,
 	         header.hres, header.vres);
 
-	if (storage)
-		fill_metadata(&header, storage);
-
-	if (!img)
-		return 0;
-
 	pixel_type = match_pixel_type(&header);
-
-	if (pixel_type == GP_PIXEL_UNKNOWN) {
-		GP_DEBUG(1, "Failed to match pixel type");
-		err = ENOSYS;
-		goto err0;
-	}
 
 	if (header.xs > header.xe || header.ys > header.ye) {
 		GP_WARN("Invalid size %"PRIu16"-%"PRIu16"x%"PRIu16"-%"PRIu16,
@@ -522,6 +512,18 @@ int gp_read_pcx_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 
 	w = header.xe - header.xs + 1;
 	h = header.ye - header.ys + 1;
+
+	gp_image_info_fill(image_info, w, h, pixel_type);
+	fill_metadata(&header, image_info);
+
+	if (!img)
+		return 0;
+
+	if (pixel_type == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Failed to match pixel type");
+		err = ENOSYS;
+		goto err0;
+	}
 
 	uint32_t max_w = ((uint32_t)header.bytes_per_line * 8) / header.bpp;
 

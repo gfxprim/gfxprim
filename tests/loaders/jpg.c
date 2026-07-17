@@ -72,7 +72,9 @@ static int test_load_jpg_correction(struct corr_testcase *test)
 		return TST_UNTESTED;
 	}
 
-	err = gp_read_jpg_ex(io, &img, storage, NULL);
+	gp_image_info image_info = {.meta_data = storage};
+
+	err = gp_read_jpg_ex(io, &img, &image_info, NULL);
 	if (err) {
 		switch (errno) {
 		case ENOSYS:

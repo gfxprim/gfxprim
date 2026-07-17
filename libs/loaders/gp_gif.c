@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -217,13 +217,11 @@ static inline unsigned int interlace_real_y(GifFileType *gf, unsigned int y)
 
 static void fill_metadata(GifFileType *gf, gp_storage *storage)
 {
-	gp_storage_add_int(storage, NULL, "Width", gf->SWidth);
-	gp_storage_add_int(storage, NULL, "Height", gf->SHeight);
 	gp_storage_add_int(storage, NULL, "Interlace", gf->Image.Interlace);
 }
 
 int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
-                   gp_storage *storage, gp_progress_cb *callback)
+                   gp_image_info *image_info, gp_progress_cb *callback)
 {
 	GifFileType *gf;
 	GifRecordType rec_type;
@@ -231,6 +229,8 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 	gp_pixel bg;
 	int32_t x, y;
 	int err;
+
+	gp_image_info_clear(image_info);
 
 	errno = 0;
 #if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
@@ -256,6 +256,8 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 	GP_DEBUG(1, "Have GIF image %ix%i, %i colors, %i bpp",
 	         gf->SWidth, gf->SHeight, gf->SColorResolution,
 		 gf->SColorMap ? gf->SColorMap->BitsPerPixel : -1);
+
+	gp_image_info_fill(image_info, gf->SWidth, gf->SHeight, GP_PIXEL_RGB888);
 
 	do {
 		if (DGifGetRecordType(gf, &rec_type) != GIF_OK) {
@@ -288,8 +290,7 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 			goto err1;
 		}
 
-		if (storage)
-			fill_metadata(gf, storage);
+		fill_metadata(gf, gp_image_info_meta_data(image_info));
 
 		GP_DEBUG(1, "Have GIF Image left-top %ix%i, width-height %ix%i,"
 		         " interlace %i, bpp %i", gf->Image.Left, gf->Image.Top,
@@ -359,7 +360,8 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 		return 1;
 	}
 
-	gp_pixmap_srgb_set(res);
+	if (res)
+		gp_pixmap_srgb_set(res);
 
 	if (img)
 		*img = res;
@@ -386,7 +388,7 @@ int gp_match_gif(const void GP_UNUSED(*buf))
 }
 
 int gp_read_gif_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
-                   gp_storage GP_UNUSED(*storage), gp_progress_cb GP_UNUSED(*callback))
+                   gp_image_info GP_UNUSED(*image_info), gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return -1;
