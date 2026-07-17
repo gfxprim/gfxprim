@@ -1,5 +1,6 @@
 use gfxprim::*;
 use gfxprim::backends::*;
+use gfxprim::timer::Timer;
 use std::env;
 use std::process;
 
@@ -29,6 +30,7 @@ fn main()
 {
     let args: Vec<String> = env::args().collect();
     let mut colors: Colors = Colors {fg: 0, bg: 0};
+    let mut timer = Timer::new(0, 1000, "Rust timer").expect("Failed to initialize timer");
 
     if args.len() > 2 {
         println!("usage: ./{} backend_pararams (pass 'help' for help)\n", args[0]);
@@ -38,6 +40,8 @@ fn main()
     let init_str = if args.len() == 2 { &args[1] } else { "" };
 
     let mut backend = Backend::init(init_str, 100, 100, "Rust backend example").expect("Backend init failed");
+
+    backend.timer_start(&mut timer);
 
     loop {
         let ev = backend.wait_ev();
@@ -52,7 +56,26 @@ fn main()
                 EV_SYS_RENDER_START => repaint(&mut backend, &colors),
                 EV_SYS_RENDER_PIXEL_TYPE => init_colors(&mut colors, &backend),
                 _ => {},
-            }
+            },
+            EV_KEY => if ev.ev_code() == EV_KEY_DOWN {
+                match ev.ev_key() {
+                    KEY_T => {
+                        if timer.is_running() {
+                            backend.timer_stop(&mut timer)
+                        } else {
+                            backend.timer_start(&mut timer)
+                        }
+                    },
+                    KEY_ESC => {
+                        process::exit(0)
+                    },
+                    _ => {},
+                }
+            },
+            EV_TMR => {
+               backend.pixmap.text(0, 0, VALIGN_CENTER | ALIGN_CENTER, colors.fg, colors.bg, "aaa");
+               backend.flip();
+            },
             _ => {},
         }
     }

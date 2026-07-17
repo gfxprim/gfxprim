@@ -1,5 +1,6 @@
 #include <core/gp_core.h>
 #include <gfx/gp_gfx.h>
+#include <text/gp_text.h>
 #include <loaders/gp_loaders.h>
 #include <backends/gp_backends.h>
 #include <input/gp_input.h>
@@ -27,4 +28,14 @@ static inline uint32_t gp_ev_new_w(const gp_event *ev)
 static inline uint32_t gp_ev_new_h(const gp_event *ev)
 {
 	return ev->resize.h;
+}
+
+static inline int32_t gp_ev_get_val(const gp_event *ev)
+{
+	return ev->val;
+}
+
+static inline uint32_t gp_ev_get_key(const gp_event *ev)
+{
+	return ev->val;
 }

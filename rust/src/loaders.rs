@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::io;
 use super::gfxprim_ffi::*;
 use super::Pixmap;
 
@@ -6,7 +7,7 @@ use super::Pixmap;
 use std::os::raw::{c_int, c_void};
 
 pub fn progress_trampoline<F, R>(progress_cb: F, op: impl FnOnce(*mut gp_progress_cb) -> R) -> R
-where F: FnMut(f32) -> bool + 'static,
+where F: FnMut(f32) -> bool,
 {
     let callback_ptr = Box::into_raw(Box::new(progress_cb)) as *mut c_void;
 
@@ -31,7 +32,7 @@ where F: FnMut(f32) -> bool + 'static,
 /// Image loaders and savers
 impl Pixmap {
     /// Loads image from a file.
-    pub fn load(s: &str, on_progress: impl Fn(f32) -> bool + 'static) -> Option<Pixmap> {
+    pub fn load(s: &str, on_progress: impl Fn(f32) -> bool) -> io::Result<Pixmap> {
         progress_trampoline(on_progress, |cb_ptr| {
                 let path = CString::new(s).expect("Invalid string");
 
@@ -39,20 +40,25 @@ impl Pixmap {
                     let img_ptr = gp_load_image(path.as_ptr(), cb_ptr);
 
                     if img_ptr.is_null() {
-                        None
+                        Err(io::Error::last_os_error())
                     } else {
-                        Some(Pixmap::from_ptr(img_ptr))
+                        Ok(Pixmap::from_ptr(img_ptr))
                     }
                 }
             }
         )
     }
 
-    pub fn save(self, s: String, on_progress: impl Fn(f32) -> bool + 'static) {
+    /// Saves image into a file
+    pub fn save(self, s: &str, on_progress: impl Fn(f32) -> bool) -> io::Result<()> {
         progress_trampoline(on_progress, |cb_ptr| {
                 let path = CString::new(s).expect("Invalid string");
                 unsafe {
-                    gp_save_image(self.ptr, path.as_ptr(), cb_ptr);
+                    if gp_save_image(self.ptr, path.as_ptr(), cb_ptr) != 0 {
+                        Err(io::Error::last_os_error())
+                    } else {
+                        Ok(())
+                    }
                 }
             }
         )
@@ -69,6 +75,6 @@ mod tests {
 
         p.fill(0);
 
-        p.save("test.png".to_string(), | progress | { println!("progress {:.1}%", progress); false });
+        let _ = p.save("test.png", | progress | { println!("progress {:.1}%", progress); false });
     }
 }

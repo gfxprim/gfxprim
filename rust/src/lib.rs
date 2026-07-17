@@ -4,8 +4,10 @@
 
 mod gfxprim_ffi;
 pub mod gfx;
+pub mod text;
 pub mod loaders;
 pub mod backends;
+pub mod timer;
 
 pub use gfxprim_ffi::*;
 use std::rc::Rc;
