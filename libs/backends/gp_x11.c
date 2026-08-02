@@ -139,7 +139,7 @@ static int x11_ev(XEvent *ev)
 		if (win->resized_flag)
 			break;
 
-		if (!win->pixmap)
+		if (!self->pixmap)
 			break;
 
 		/* Safety measure */

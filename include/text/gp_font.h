@@ -252,12 +252,14 @@ typedef enum gp_font_ucode_block {
 	GP_UCODE_PUNCTUATION = 0x0020,
 	/** @brief Subscript and superscript 0x2070 - 0x208e */
 	GP_UCODE_SUB_SUPER = 0x0040,
+	/** @brief Arrows 0x2190 - 0x21ff */
+	GP_UCODE_ARROWS = 0x0080,
 	/** @brief Box drawing 0x25xx */
-	GP_UCODE_BOX = 0x0080,
+	GP_UCODE_BOX = 0x0100,
 	/** @brief Hiragan 0x3041 - 0x3096 */
-	GP_UCODE_HIRAGANA= 0x0100,
+	GP_UCODE_HIRAGANA= 0x0200,
 	/** @brief Katakana 0x30a0 - 0x30aff */
-	GP_UCODE_KATAKANA = 0x0200,
+	GP_UCODE_KATAKANA = 0x0400,
 } gp_font_ucode_block;
 
 /**

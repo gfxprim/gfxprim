@@ -117,6 +117,8 @@ const char *gp_font_ucode_block_name(enum gp_font_ucode_block block)
 		return "Cyrilic";
 	case GP_UCODE_PUNCTUATION:
 		return "Punctuation";
+	case GP_UCODE_ARROWS:
+		return "Arrows";
 	case GP_UCODE_BOX:
 		return "Box";
 	case GP_UCODE_SUB_SUPER:

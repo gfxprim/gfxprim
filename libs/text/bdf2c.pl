@@ -221,7 +221,7 @@ sub gen_glyph_table
 	print("\n};\n\n");
 
 	# offsets[len] == glyphs array size
-	push(@offsets, $offset);
+	#	push(@offsets, $offset);
 
 	print("static gp_glyph_offset ${font_id}_offsets[] = {");
 	for (my $i = 0; defined $offsets[$i]; $i++) {
@@ -358,6 +358,7 @@ my $katakana = $ENV{'KATAKANA'};
 my $hiragana = $ENV{'HIRAGANA'};
 my $box = $ENV{'BOX'};
 my $subsuper = $ENV{'SUBSUPER'};
+my $arrows = $ENV{'ARROWS'};
 
 sub add_block
 {
@@ -428,6 +429,11 @@ sub convert_font
 		$ucode_blocks .= " | GP_UCODE_SUB_SUPER";
 	}
 
+	if ($enc eq "ISO10646-1" && $arrows) {
+		gen_glyph_table($glyphs, 0x2190, 0x21ff, $max_width, $font_id . "_arrows", $bold, \&utf_to_utf);
+		$ucode_blocks .= " | GP_UCODE_ARROWS";
+	}
+
 	if ($enc eq "ISO10646-1" && $box) {
 		gen_glyph_table($glyphs, 0x2500, 0x257f, $max_width, $font_id . "_box", $bold, \&utf_to_utf);
 		$ucode_blocks .= " | GP_UCODE_BOX";
@@ -459,6 +465,7 @@ sub convert_font
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $cyrilic);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $punctuation);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $subsuper);
+	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $arrows);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $box);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $katakana);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $hiragana);
@@ -489,6 +496,9 @@ sub convert_font
 	}
 	if ($enc eq "ISO10646-1" && $subsuper) {
 		add_block("0x2070", "0x208e", $font_id, "subsuper");
+	}
+	if ($enc eq "ISO10646-1" && $arrows) {
+		add_block("0x2190", "0x21ff", $font_id, "arrows");
 	}
 	if ($enc eq "ISO10646-1" && $box) {
 		add_block("0x2500", "0x257f", $font_id, "box");

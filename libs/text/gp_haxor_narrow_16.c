@@ -209,7 +209,7 @@ static gp_glyph_offset font_offsets[] = {
 	    0x0484,     0x048c,     0x049c,     0x04b0,     0x04c0,     0x04d4,     0x04e4,     0x04f8,
 	    0x050c,     0x0520,     0x0534,     0x0548,     0x055c,     0x0570,     0x0580,     0x0590,
 	    0x05a0,     0x05b4,     0x05c8,     0x05d8,     0x05e8,     0x05fc,     0x060c,     0x061c,
-	    0x062c,     0x063c,     0x0650,     0x0660,     0x0674,     0x0688,     0x069c,     0x06a4,
+	    0x062c,     0x063c,     0x0650,     0x0660,     0x0674,     0x0688,     0x069c, 
 };
 
 static uint8_t font_latin_ext_glyphs[] = {
@@ -686,7 +686,7 @@ static gp_glyph_offset font_latin_ext_offsets[] = {
 	    0x0dd8,     0x0dec,     0x0e00,     0x0e14,     0x0e28,     0x0e3c,     0x0e50,     0x0e64,
 	    0x0e78,     0x0e88,     0x0e9c,     0x0eac,     0x0ec0,     0x0ed0,     0x0ee4,     0x0ef8,
 	    0x0f0c,     0x0f20,     0x0f34,     0x0f44,     0x0f58,     0x0f68,     0x0f7c,     0x0f90,
-	    0x0fa4,     0x0fb8,     0x0fcc,     0x0fdc,     0x0fec,     0x1000,     0x1014, 
+	    0x0fa4,     0x0fb8,     0x0fcc,     0x0fdc,     0x0fec,     0x1000, 
 };
 
 static uint8_t font_greek_glyphs[] = {
@@ -847,7 +847,7 @@ static gp_glyph_offset font_greek_offsets[] = {
 	    0x035c,     0x0370,     0x0380,     0x0394,     0x03a4,     0x03b8,     0x03c8,     0x03d8,
 	    0x03ec,     0x03fc,     0x040c,     0x0420,     0x0430,     0x0440,     0x0454,     0x0468,
 	    0x0478,     0x0488,     0x0498,     0x04a8,     0x04b8,     0x04c8,     0x04d8,     0x04ec,
-	    0x0500,     0x0514,     0x0528,     0x053c, 
+	    0x0500,     0x0514,     0x0528, 
 };
 
 static uint8_t font_cyrilic_glyphs[] = {
@@ -1059,7 +1059,6 @@ static gp_glyph_offset font_cyrilic_offsets[] = {
 	    0x0548,     0x0558,     0x0568,     0x0578,     0x0588,     0x0598,     0x05a8,     0x05b8,
 	    0x05c8,     0x05dc,     0x05ec,     0x0600,     0x0614,     0x0624,     0x0634,     0x0648,
 	    0x065c,     0x0670,     0x0680,     0x0690,     0x06a4,     0x06b8,     0x06cc,     0x06e0,
-	    0x06f0, 
 };
 
 static uint8_t font_punctuation_glyphs[] = {
@@ -1117,7 +1116,6 @@ static gp_glyph_offset font_punctuation_offsets[] = {
 	    0x0060, GP_NOGLYPH,     0x0068,     0x0074,     0x0080,     0x0088,     0x0090,     0x0098,
 	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
 	    0x00a0,     0x00b4,     0x00c8,     0x00d4,     0x00e0,     0x00ec,     0x00f8,     0x0104,
-	    0x0110, 
 };
 
 static uint8_t font_subsuper_glyphs[] = {
@@ -1186,7 +1184,58 @@ static gp_glyph_offset font_subsuper_offsets[] = {
 	    0x0000,     0x000c, GP_NOGLYPH, GP_NOGLYPH,     0x001c,     0x0028,     0x0034,     0x0040,
 	    0x004c,     0x0058,     0x0064,     0x006c,     0x0074,     0x007c,     0x0088,     0x0094,
 	    0x00a0,     0x00ac,     0x00b8,     0x00c4,     0x00d0,     0x00dc,     0x00e8,     0x00f4,
-	    0x0100,     0x010c,     0x0118,     0x0120,     0x0128,     0x0130,     0x013c,     0x0148,
+	    0x0100,     0x010c,     0x0118,     0x0120,     0x0128,     0x0130,     0x013c, 
+};
+
+static uint8_t font_arrows_glyphs[] = {
+	/* 0x2190 'Ɛ' */	  7,  5,  0,  8,  9,
+			  0x20, 0x60, 0xfe, 0x60, 0x20, 0x00, 0x00,
+	/* 0x2191 'Ƒ' */	  5,  7,  1,  9,  9,
+			  0x20, 0x70, 0xf8, 0x20, 0x20, 0x20, 0x20,
+	/* 0x2192 'ƒ' */	  7,  5,  0,  8,  9,
+			  0x08, 0x0c, 0xfe, 0x0c, 0x08, 0x00, 0x00,
+	/* 0x2193 'Ɠ' */	  5,  7,  1,  9,  9,
+			  0x20, 0x20, 0x20, 0x20, 0xf8, 0x70, 0x20,
+	/* 0x2194 'Ɣ' */	  7,  5,  0,  8,  9,
+			  0x28, 0x6c, 0xfe, 0x6c, 0x28, 0x00, 0x00,
+	/* 0x2195 'ƕ' */	  5,  7,  1,  9,  9,
+			  0x20, 0x70, 0xf8, 0x20, 0xf8, 0x70, 0x20,
+	/* 0x2196 'Ɩ' */	  7,  7,  0,  8,  9,
+			  0xe0, 0xc0, 0xa0, 0x10, 0x08, 0x04, 0x02,
+	/* 0x2197 'Ɨ' */	  7,  7,  0,  8,  9,
+			  0x0e, 0x06, 0x0a, 0x10, 0x20, 0x40, 0x80,
+	/* 0x2198 'Ƙ' */	  7,  7,  0,  8,  9,
+			  0x80, 0x40, 0x20, 0x10, 0x0a, 0x06, 0x0e,
+	/* 0x2199 'ƙ' */	  7,  7,  0,  8,  9,
+			  0x02, 0x04, 0x08, 0x10, 0xa0, 0xc0, 0xe0,
+	/* 0x21d0 'ǐ' */	  7,  5,  0,  8,  9,
+			  0x20, 0x7e, 0x80, 0x7e, 0x20, 0x00, 0x00,
+	/* 0x21d1 'Ǒ' */	  5,  7,  1,  9,  9,
+			  0x20, 0x50, 0xd8, 0x50, 0x50, 0x50, 0x50,
+	/* 0x21d2 'ǒ' */	  7,  5,  0,  8,  9,
+			  0x08, 0xfc, 0x02, 0xfc, 0x08, 0x00, 0x00,
+	/* 0x21d3 'Ǔ' */	  5,  7,  1,  9,  9,
+			  0x50, 0x50, 0x50, 0x50, 0xd8, 0x50, 0x20,
+	/* 0x21d4 'ǔ' */	  7,  5,  0,  8,  9,
+			  0x28, 0x7c, 0x82, 0x7c, 0x28, 0x00, 0x00,
+
+};
+
+static gp_glyph_offset font_arrows_offsets[] = {
+	    0x0000,     0x000c,     0x0018,     0x0024,     0x0030,     0x003c,     0x0048,     0x0054,
+	    0x0060,     0x006c, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	    0x0078,     0x0084,     0x0090,     0x009c,     0x00a8, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
 };
 
 static uint8_t font_box_glyphs[] = {
@@ -1466,7 +1515,6 @@ static gp_glyph_offset font_box_offsets[] = {
 	    0x0b2c,     0x0b48,     0x0b68,     0x0b98,     0x0bc8,     0x0bf8,     0x0c08,     0x0c18,
 	    0x0c28,     0x0c38,     0x0c68,     0x0c98,     0x0cc8,     0x0cd0,     0x0ce0,     0x0ce8,
 	    0x0cf8,     0x0d00,     0x0d10,     0x0d18,     0x0d28,     0x0d34,     0x0d50,     0x0d5c,
-	    0x0d78, 
 };
 
 static struct gp_font_face font = {
@@ -1476,7 +1524,7 @@ static struct gp_font_face font = {
 	.descent = 3,
 	.max_glyph_width = 8,
 	.max_glyph_advance = 9,
-	.glyph_tables = 7,
+	.glyph_tables = 8,
 	.glyphs = {
 		{
 			.glyphs = font_glyphs,
@@ -1513,6 +1561,12 @@ static struct gp_font_face font = {
 			.offsets = font_subsuper_offsets,
 			.min_glyph = 0x2070,
 			.max_glyph = 0x208e,
+		},
+		{
+			.glyphs = font_arrows_glyphs,
+			.offsets = font_arrows_offsets,
+			.min_glyph = 0x2190,
+			.max_glyph = 0x21ff,
 		},
 		{
 			.glyphs = font_box_glyphs,
@@ -1731,7 +1785,7 @@ static gp_glyph_offset font_bold_offsets[] = {
 	    0x0484,     0x048c,     0x049c,     0x04b0,     0x04c0,     0x04d4,     0x04e4,     0x04f8,
 	    0x050c,     0x0520,     0x0534,     0x0548,     0x055c,     0x0570,     0x0580,     0x0590,
 	    0x05a0,     0x05b4,     0x05c8,     0x05d8,     0x05e8,     0x05fc,     0x060c,     0x061c,
-	    0x062c,     0x063c,     0x0650,     0x0660,     0x0674,     0x0688,     0x069c,     0x06a4,
+	    0x062c,     0x063c,     0x0650,     0x0660,     0x0674,     0x0688,     0x069c, 
 };
 
 static uint8_t font_bold_latin_ext_glyphs[] = {
@@ -2208,7 +2262,7 @@ static gp_glyph_offset font_bold_latin_ext_offsets[] = {
 	    0x0dd8,     0x0dec,     0x0e00,     0x0e14,     0x0e28,     0x0e3c,     0x0e50,     0x0e64,
 	    0x0e78,     0x0e88,     0x0e9c,     0x0eac,     0x0ec0,     0x0ed0,     0x0ee4,     0x0ef8,
 	    0x0f0c,     0x0f20,     0x0f34,     0x0f44,     0x0f58,     0x0f68,     0x0f7c,     0x0f90,
-	    0x0fa4,     0x0fb8,     0x0fcc,     0x0fdc,     0x0fec,     0x1000,     0x1014, 
+	    0x0fa4,     0x0fb8,     0x0fcc,     0x0fdc,     0x0fec,     0x1000, 
 };
 
 static uint8_t font_bold_greek_glyphs[] = {
@@ -2369,7 +2423,7 @@ static gp_glyph_offset font_bold_greek_offsets[] = {
 	    0x035c,     0x0370,     0x0380,     0x0394,     0x03a4,     0x03b8,     0x03c8,     0x03d8,
 	    0x03ec,     0x03fc,     0x040c,     0x0420,     0x0430,     0x0440,     0x0454,     0x0468,
 	    0x0478,     0x0488,     0x0498,     0x04a8,     0x04b8,     0x04c8,     0x04d8,     0x04ec,
-	    0x0500,     0x0514,     0x0528,     0x053c, 
+	    0x0500,     0x0514,     0x0528, 
 };
 
 static uint8_t font_bold_cyrilic_glyphs[] = {
@@ -2581,7 +2635,6 @@ static gp_glyph_offset font_bold_cyrilic_offsets[] = {
 	    0x0548,     0x0558,     0x0568,     0x0578,     0x0588,     0x0598,     0x05a8,     0x05b8,
 	    0x05c8,     0x05dc,     0x05ec,     0x0600,     0x0614,     0x0624,     0x0634,     0x0648,
 	    0x065c,     0x0670,     0x0680,     0x0690,     0x06a4,     0x06b8,     0x06cc,     0x06e0,
-	    0x06f0, 
 };
 
 static uint8_t font_bold_punctuation_glyphs[] = {
@@ -2639,7 +2692,6 @@ static gp_glyph_offset font_bold_punctuation_offsets[] = {
 	    0x0060, GP_NOGLYPH,     0x0068,     0x0074,     0x0080,     0x0088,     0x0090,     0x0098,
 	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
 	    0x00a0,     0x00b4,     0x00c8,     0x00d4,     0x00e0,     0x00ec,     0x00f8,     0x0104,
-	    0x0110, 
 };
 
 static uint8_t font_bold_subsuper_glyphs[] = {
@@ -2708,7 +2760,58 @@ static gp_glyph_offset font_bold_subsuper_offsets[] = {
 	    0x0000,     0x000c, GP_NOGLYPH, GP_NOGLYPH,     0x001c,     0x0028,     0x0034,     0x0040,
 	    0x004c,     0x0058,     0x0064,     0x006c,     0x0074,     0x007c,     0x0088,     0x0094,
 	    0x00a0,     0x00ac,     0x00b8,     0x00c4,     0x00d0,     0x00dc,     0x00e8,     0x00f4,
-	    0x0100,     0x010c,     0x0118,     0x0120,     0x0128,     0x0130,     0x013c,     0x0148,
+	    0x0100,     0x010c,     0x0118,     0x0120,     0x0128,     0x0130,     0x013c, 
+};
+
+static uint8_t font_bold_arrows_glyphs[] = {
+	/* 0x2190 'Ɛ' */	  8,  5,  0,  8,  9,
+			  0x30, 0x70, 0xff, 0x70, 0x30, 0x00, 0x00,
+	/* 0x2191 'Ƒ' */	  6,  7,  1,  9,  9,
+			  0x30, 0x78, 0xfc, 0x30, 0x30, 0x30, 0x30,
+	/* 0x2192 'ƒ' */	  8,  5,  0,  8,  9,
+			  0x0c, 0x0e, 0xff, 0x0e, 0x0c, 0x00, 0x00,
+	/* 0x2193 'Ɠ' */	  6,  7,  1,  9,  9,
+			  0x30, 0x30, 0x30, 0x30, 0xfc, 0x78, 0x30,
+	/* 0x2194 'Ɣ' */	  8,  5,  0,  8,  9,
+			  0x3c, 0x7e, 0xff, 0x7e, 0x3c, 0x00, 0x00,
+	/* 0x2195 'ƕ' */	  6,  7,  1,  9,  9,
+			  0x30, 0x78, 0xfc, 0x30, 0xfc, 0x78, 0x30,
+	/* 0x2196 'Ɩ' */	  8,  7,  0,  8,  9,
+			  0xf0, 0xe0, 0xf0, 0x18, 0x0c, 0x06, 0x03,
+	/* 0x2197 'Ɨ' */	  8,  7,  0,  8,  9,
+			  0x0f, 0x07, 0x0f, 0x18, 0x30, 0x60, 0xc0,
+	/* 0x2198 'Ƙ' */	  8,  7,  0,  8,  9,
+			  0xc0, 0x60, 0x30, 0x18, 0x0f, 0x07, 0x0f,
+	/* 0x2199 'ƙ' */	  8,  7,  0,  8,  9,
+			  0x03, 0x06, 0x0c, 0x18, 0xf0, 0xe0, 0xf0,
+	/* 0x21d0 'ǐ' */	  8,  5,  0,  8,  9,
+			  0x30, 0x7f, 0xc0, 0x7f, 0x30, 0x00, 0x00,
+	/* 0x21d1 'Ǒ' */	  6,  7,  1,  9,  9,
+			  0x30, 0x78, 0xfc, 0x78, 0x78, 0x78, 0x78,
+	/* 0x21d2 'ǒ' */	  8,  5,  0,  8,  9,
+			  0x0c, 0xfe, 0x03, 0xfe, 0x0c, 0x00, 0x00,
+	/* 0x21d3 'Ǔ' */	  6,  7,  1,  9,  9,
+			  0x78, 0x78, 0x78, 0x78, 0xfc, 0x78, 0x30,
+	/* 0x21d4 'ǔ' */	  8,  5,  0,  8,  9,
+			  0x3c, 0x7e, 0xc3, 0x7e, 0x3c, 0x00, 0x00,
+
+};
+
+static gp_glyph_offset font_bold_arrows_offsets[] = {
+	    0x0000,     0x000c,     0x0018,     0x0024,     0x0030,     0x003c,     0x0048,     0x0054,
+	    0x0060,     0x006c, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	    0x0078,     0x0084,     0x0090,     0x009c,     0x00a8, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
+	GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH, GP_NOGLYPH,
 };
 
 static uint8_t font_bold_box_glyphs[] = {
@@ -2988,7 +3091,6 @@ static gp_glyph_offset font_bold_box_offsets[] = {
 	    0x0b2c,     0x0b48,     0x0b68,     0x0b98,     0x0bc8,     0x0bf8,     0x0c08,     0x0c18,
 	    0x0c28,     0x0c38,     0x0c68,     0x0c98,     0x0cc8,     0x0cd0,     0x0ce0,     0x0ce8,
 	    0x0cf8,     0x0d00,     0x0d10,     0x0d18,     0x0d28,     0x0d34,     0x0d50,     0x0d5c,
-	    0x0d78, 
 };
 
 static struct gp_font_face font_bold = {
@@ -2998,7 +3100,7 @@ static struct gp_font_face font_bold = {
 	.descent = 3,
 	.max_glyph_width = 8,
 	.max_glyph_advance = 9,
-	.glyph_tables = 7,
+	.glyph_tables = 8,
 	.glyphs = {
 		{
 			.glyphs = font_bold_glyphs,
@@ -3037,6 +3139,12 @@ static struct gp_font_face font_bold = {
 			.max_glyph = 0x208e,
 		},
 		{
+			.glyphs = font_bold_arrows_glyphs,
+			.offsets = font_bold_arrows_offsets,
+			.min_glyph = 0x2190,
+			.max_glyph = 0x21ff,
+		},
+		{
 			.glyphs = font_bold_box_glyphs,
 			.offsets = font_bold_box_offsets,
 			.min_glyph = 0x2500,
@@ -3048,7 +3156,7 @@ static struct gp_font_face font_bold = {
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_haxor_narrow_16 = {
 	.family_name = "haxor-narrow-16",
-	.ucode_blocks = GP_UCODE_LATIN_BASIC | GP_UCODE_LATIN_SUP | GP_UCODE_LATIN_EXT_A | GP_UCODE_GREEK | GP_UCODE_CYRILIC | GP_UCODE_PUNCTUATION | GP_UCODE_SUB_SUPER | GP_UCODE_BOX,
+	.ucode_blocks = GP_UCODE_LATIN_BASIC | GP_UCODE_LATIN_SUP | GP_UCODE_LATIN_EXT_A | GP_UCODE_GREEK | GP_UCODE_CYRILIC | GP_UCODE_PUNCTUATION | GP_UCODE_SUB_SUPER | GP_UCODE_ARROWS | GP_UCODE_BOX,
 	.fonts = {
 		&font,
 		&font_bold,
