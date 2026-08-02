@@ -139,6 +139,9 @@ static int x11_ev(XEvent *ev)
 		if (win->resized_flag)
 			break;
 
+		if (!win->pixmap)
+			break;
+
 		/* Safety measure */
 		if (ev->xexpose.x + ev->xexpose.width > (int)self->pixmap->w) {
 			GP_WARN("Expose x + w > pixmap->w");
