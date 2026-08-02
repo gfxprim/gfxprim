@@ -3,7 +3,7 @@
  * Access pixel bytes, get and put pixel
  * Do not include directly, use gp_pixel.h
  *
- * Copyright (C) 2011-2025 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2011-2026 Cyril Hrubis <metan@ucw.cz>
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
  */
 
@@ -107,6 +107,9 @@
 
 /**
  * @brief A macro to get pixel offset in pixels.
+ *
+ * @param pixmap A pixmap.
+ * @param x An x coordinate in the pixmap.
  */
 #define GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(pixmap, x) \
 @     if not ps.needs_bit_order():

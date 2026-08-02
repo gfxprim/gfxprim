@@ -28,5 +28,6 @@
 #include <core/gp_fill.h>
 #include <core/gp_progress_callback.h>
 #include <core/gp_mix_pixels.h>
+#include <core/gp_pixel_alpha.gen.h>
 
 #endif /* CORE_GP_CORE_H */

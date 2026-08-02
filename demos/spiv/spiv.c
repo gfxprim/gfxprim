@@ -303,6 +303,7 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
                            gp_pixmap *orig_img)
 {
 	gp_pixmap *pixmap = backend->pixmap;
+	gp_pixmap *dither = NULL;
 	struct cpu_timer timer;
 	gp_progress_cb callback = {.callback = image_loader_callback};
 	gp_size w = gp_backend_w(backend);
@@ -354,8 +355,6 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 		cy = params->zoom_y_offset;
 	}
 
-	gp_pixmap sub_display;
-
 	if (abort_flag)
 		return;
 
@@ -363,14 +362,19 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 
 	if (config.enable_dithering) {
 		callback.priv = "Dithering";
-		gp_sub_pixmap(pixmap, &sub_display, cx, cy, img->w, img->h);
-		gp_filter_dither(config.dither_type, img, &sub_display, NULL);
-	} else {
-		if (gp_pixel_has_flags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
-			pattern_fill(pixmap, cx, cy, img->w, img->h);
-		gp_blit_clipped(img, 0, 0, img->w, img->h, pixmap, cx, cy);
+		gp_pixel_type dither_pixel = gp_filter_dither_pixel_type(img->pixel_type, pixmap->pixel_type);
 
+		if (dither_pixel) {
+			dither = gp_filter_dither_alloc(config.dither_type, img, dither_pixel, &callback);
+
+			if (dither)
+				img = dither;
+		}
 	}
+
+	if (gp_pixel_has_flags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
+		pattern_fill(pixmap, cx, cy, img->w, img->h);
+	gp_blit_clipped(img, 0, 0, img->w, img->h, pixmap, cx, cy);
 
 	cpu_timer_stop(&timer);
 
@@ -389,6 +393,8 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 		gp_fill_rect_xywh(pixmap, 0, img->h + cy, w, h, black_pixel);
 
 	show_info(params, img, orig_img);
+
+	gp_pixmap_free(dither);
 
 	if (config.combined_orientation)
 		gp_pixmap_free(img);

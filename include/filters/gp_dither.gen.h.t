@@ -174,6 +174,22 @@ gp_pixmap *gp_filter_dither_alloc(gp_dither_type type,
                                   gp_pixel_type pixel_type,
                                   gp_progress_cb *callback);
 
+
+/**
+ * @brief Maps a pixel type for dithering.
+ *
+ * The pixel type mapping for dithering is not obvious. The more obvious part
+ * is that we need to check if the input pixel has channels with more bits than
+ * the output pixel. The less obvious part is an alpha channel. If the input
+ * image has an alpha channel and the output pixel type doesn't have it the
+ * alpha channel needs to be preserved.
+ *
+ * @param pixel_type_in
+ * @param pixel_type_out
+ * @return A mapped pixel type or GP_PIXEL_UNKNOWN if there is no mapping.
+ */
+gp_pixel gp_filter_dither_pixel_type(gp_pixel pixel_type_in, gp_pixel pixel_type_out);
+
 @ for name in ditherings:
 /**
  * @brief Runs {{ name }} dithering from src::pixel_type to dst::pixel_type.

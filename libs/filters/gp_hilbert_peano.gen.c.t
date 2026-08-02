@@ -59,30 +59,26 @@ static int hilbert_peano_to_{{ pt.name }}_raw(const gp_pixmap *src,
 
 	while (gp_hilbert_curve_continues(&state)) {
 		if (state.x < src->w && state.y < src->h) {
-			gp_pixel pix;
-
-			pix = gp_getpixel_raw(src, state.x, state.y);
+			gp_pixel pix = gp_getpixel_raw(src, state.x, state.y);
+@         if not pt.is_gray():
 			pix = gp_pixel_to_RGB888(pix, src->pixel_type);
-
 @         for c in pt.chanslist:
+
 @             if pt.is_gray():
-			int pix_{{ c[0] }} = GP_PIXEL_GET_R_RGB888(pix) +
-			                     GP_PIXEL_GET_G_RGB888(pix) +
-			                     GP_PIXEL_GET_B_RGB888(pix);
+@                 if c.is_alpha:
+			int pix_{{ c[0] }} = gp_get_pixel_norm_alpha(pix, src->pixel_type);
+@                 else:
+			int pix_{{ c[0] }} = gp_pixel_to_G8(pix, src->pixel_type);
 @             else:
 			int pix_{{ c[0] }} = GP_PIXEL_GET_{{ c[0] }}_RGB888(pix);
 @             end
 			pix_{{ c[0] }} += err_{{ c[0] }};
 
-@             if pt.is_gray():
-			int res_{{ c[0] }} = ({{ 2 ** c[2] - 1}} * pix_{{ c[0] }} + 382) / {{ 3 * 255 }};
-			err_{{ c[0] }} = pix_{{ c[0] }} - {{ 3 * 255 }} * res_{{ c[0] }} / {{ 2 ** c[2] - 1 }};
-@             else:
 			int res_{{ c[0] }} = ({{ 2 ** c[2] - 1}} * pix_{{ c[0] }} + 127) / 255;
 			err_{{ c[0] }} = pix_{{ c[0] }} - 255 * res_{{ c[0] }} / {{ 2 ** c[2] - 1 }};
 @         end
 
-@         if pt.is_gray():
+@         if pt.is_gray() and not pt.is_alpha():
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, state.x, state.y, res_V);
 @         else:
 			gp_pixel res = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, 'res_') }});

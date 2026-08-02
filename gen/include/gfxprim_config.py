@@ -4,7 +4,7 @@
 #
 #
 # 2011      Tomas Gavenciak <gavento@ucw.cz>
-# 2011-2024 Cyril Hrubis <metan@ucw.cz>
+# 2011-2026 Cyril Hrubis <metan@ucw.cz>
 #
 # This file is sourced by all the generating scripts.
 # Moreover, the generated files are sourced by almost all Gfxprim sources,
@@ -144,11 +144,23 @@ config = GfxPrimConfig(
       PixelType(name='G1_UB', pixelpack=PS_1BPP_UB, chanslist=[
 	  ('V', 0, 1, 0)]),
 
+      PixelType(name='GA11_UB', pixelpack=PS_2BPP_UB, chanslist=[
+      ('V', 0, 1, 0),
+      ('A', 1, 1, 0)]),
+
       PixelType(name='G2_UB', pixelpack=PS_2BPP_UB, chanslist=[
 	  ('V', 0, 2, 2)]),
 
+      PixelType(name='GA22_UB', pixelpack=PS_4BPP_UB, chanslist=[
+      ('V', 0, 2, 0),
+      ('A', 2, 2, 0)]),
+
       PixelType(name='G4_UB', pixelpack=PS_4BPP_UB, chanslist=[
 	  ('V', 0, 4, 2)]),
+
+      PixelType(name='GA44', pixelpack=PS_8BPP, chanslist=[
+      ('V', 0, 4, 0),
+      ('A', 4, 4, 0)]),
 
       PixelType(name='G8', pixelpack=PS_8BPP, chanslist=[
 	  ('V', 0, 8, 2)]),

@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
  */
@@ -31,26 +31,28 @@
 
 /**
  * @brief Description of one pixel channel.
- *
- * Assumes all the channel names to be at most 7 chars long
- *
- * The common channel names are:
- *
- *  R, G, B     - RGB as usual
- *  C, M, Y, K  - CMYK
- *  V           - value, for grayscale
- *  A           - opacity (0=transparent)
- *  P           - palette (index)
  */
 typedef struct gp_pixel_channel {
-	/** Pixel channel name */
-	char name[8];
-	/** Channel offset in bits */
+	/**
+	 * @brief Pixel channel name.
+	 *
+	 * Pixel channel name is single letter long.
+	 *
+	 * The common channel names are:
+	 *
+	 *  R, G, B     - RGB as usual
+	 *  C, M, Y, K  - CMYK
+	 *  V           - value, for grayscale
+	 *  A           - opacity (0=transparent)
+	 *  P           - palette (index)
+	 */
+	char name[2];
+	/** @brief Channel offset in pixel in bits. */
 	uint8_t offset;
-	/** Channel size in bits */
+	/** @brief Channel size in pixel in bits */
 	uint8_t size;
 	/**
-	 * Channel size after linearized with a gamma lookup table.
+	 * @brief Channel size after linearized with a gamma lookup table.
 	 *
 	 * If size == lin_size the channel is always linear.
 	 */
@@ -62,15 +64,19 @@ typedef struct gp_pixel_channel {
  */
 typedef enum gp_pixel_flags {
 	/** @brief Pixel has an alpha channel */
-	GP_PIXEL_HAS_ALPHA = 0x01,
+	GP_PIXEL_HAS_ALPHA = 0x10,
 	/** @brief Pixel has RGB channels */
-	GP_PIXEL_IS_RGB = 0x02,
+	GP_PIXEL_IS_RGB = 0x01,
+	/** @brief Pixel is RGB with alpha channel. */
+	GP_PIXEL_IS_RGB_ALPHA = GP_PIXEL_IS_RGB | GP_PIXEL_HAS_ALPHA,
 	/** @brief Pixel is palette */
-	GP_PIXEL_IS_PALETTE = 0x04,
+	GP_PIXEL_IS_PALETTE = 0x02,
 	/** @brief Pixel has CMYK channels */
-	GP_PIXEL_IS_CMYK = 0x08,
+	GP_PIXEL_IS_CMYK = 0x03,
 	/** @brief Pixel is grayscale */
-	GP_PIXEL_IS_GRAYSCALE = 0x10,
+	GP_PIXEL_IS_GRAY = 0x04,
+	/** @brief Pixel is grayscale with alpha channel. */
+	GP_PIXEL_IS_GRAY_ALPHA = GP_PIXEL_IS_GRAY | GP_PIXEL_HAS_ALPHA,
 } gp_pixel_flags;
 
 /**
@@ -104,7 +110,70 @@ extern const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX];
 #define GP_VALID_PIXELTYPE(type) (((type) > 0) && ((type) < GP_PIXEL_MAX))
 
 #define GP_CHECK_VALID_PIXELTYPE(type) \
-	GP_CHECK(GP_VALID_PIXELTYPE(type), "Invalid PixelType %d", (type))
+	GP_CHECK(GP_VALID_PIXELTYPE(type), "Invalid pixel type %d", (type))
+
+/**
+ * @brief Looks up a channel by a name.
+ *
+ * @param pixel_desc A pixel description.
+ * @param chan_name A channel name.
+ * @return A pixel channel or NULL when not present.
+ */
+static inline const gp_pixel_channel *
+gp_pixel_desc_channel_by_name(const gp_pixel_type_desc *pixel_desc, char chan_name)
+{
+	for (uint8_t i = 0; i < pixel_desc->numchannels; i++) {
+		if (pixel_desc->channels[i].name[0] == chan_name)
+			return &pixel_desc->channels[i];
+	}
+
+	return NULL;
+}
+
+/**
+ * @brief Looks up a channel in pixel by a name and returns its size.
+ *
+ * @param pixel_desc A pixel description.
+ * @param chan_name A channel name, e.g. 'R' for red.
+ * @return A pixel channel size or 0 if channel is not present.
+ */
+static inline uint8_t
+gp_pixel_desc_channel_size(const gp_pixel_type_desc *pixel_desc, char chan_name)
+{
+	const gp_pixel_channel *chan = gp_pixel_desc_channel_by_name(pixel_desc, chan_name);
+
+	if (chan)
+		return chan->size;
+
+	return 0;
+}
+
+/**
+ * @brief Checks if pixel description has alpha channel.
+ *
+ * @param pixel_desc A pixel description.
+ * @return True if description has alpha chanel, false otherwise.
+ */
+static inline bool
+gp_pixel_desc_has_alpha(const gp_pixel_type_desc *pixel_desc)
+{
+	if (pixel_desc->flags & GP_PIXEL_HAS_ALPHA)
+		return true;
+
+	return false;
+}
+
+/**
+ * @brief Returns pixel type from pixel description.
+ *
+ * @param pixel_desc A pixel description.
+ * @return A pixel_type.
+ */
+static inline gp_pixel_type
+gp_pixel_desc_pixel_type(const gp_pixel_type_desc *pixel_desc)
+{
+	return pixel_desc->type;
+}
 
 /*
  * Convert pixel type to name.

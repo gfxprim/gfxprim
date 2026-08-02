@@ -4,7 +4,7 @@ include $(TOPDIR)/config.mk
 SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	basic_types.txt gfx.txt backends.txt gamma.txt grabbers.txt \
 	environment_variables.txt debug.txt core.txt input.txt \
-	gen.txt pixels.txt coordinate_system.txt coding_style.txt \
+	gen.txt coordinate_system.txt coding_style.txt \
 	get_put_pixel.txt blits.txt progress_callback.txt text.txt \
 	event_queue.txt compilation.txt filters_resize.txt tasks.txt\
 	filters_dithering.txt filters_python.txt spiv.txt core_common.txt \

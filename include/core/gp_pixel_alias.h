@@ -31,20 +31,33 @@
  *
  * Defines the more common grayscal pixel packings as default.
  */
-enum gp_pixel_type_alias {
+//enum gp_pixel_type_alias {
+//};
+
 #ifdef GP_PIXEL_G1_UB
-	/** @brief Default packing for G1 pixel is UB */
-	GP_PIXEL_G1 = GP_PIXEL_G1_UB,
+/** @brief Default packing for G1 pixel is UB */
+# define GP_PIXEL_G1 GP_PIXEL_G1_UB
+#endif
+#ifdef GP_PIXEL_GA11_UB
+/** @brief Default packing for GA11 pixel is UB */
+# define GP_PIXEL_GA11 GP_PIXEL_GA11_UB
 #endif
 #ifdef GP_PIXEL_G2_UB
-	/** @brief Default packing for G2 pixel is UB */
-	GP_PIXEL_G2 = GP_PIXEL_G2_UB,
+/** @brief Default packing for G2 pixel is UB */
+# define GP_PIXEL_G2 GP_PIXEL_G2_UB
+#endif
+#ifdef GP_PIXEL_GA22_UB
+/** @brief Default packing for GA22 pixel is UB */
+# define GP_PIXEL_GA22 GP_PIXEL_GA22_UB
 #endif
 #ifdef GP_PIXEL_G4_UB
-	/** @brief Default packing for G4 pixel is UB */
-	GP_PIXEL_G4 = GP_PIXEL_G4_UB,
+/** @brief Default packing for G4 pixel is UB */
+# define GP_PIXEL_G4 GP_PIXEL_G4_UB
 #endif
-};
+#ifdef GP_PIXEL_GA44_UB
+/** @brief Default packing for GA44 pixel is UB */
+# define GP_PIXEL_GA44 GP_PIXEL_GA44_UB
+#endif
 
 #ifdef GP_PIXEL_G1_UB
 # define GP_PIXEL_G1 GP_PIXEL_G1_UB

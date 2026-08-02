@@ -25,8 +25,6 @@ or the link:progress_callback.html[Progress callback].
 | link:basic_types.html[Basic types] | Types for size, lenght, pixel and
                                        color
 
-| link:pixels.html[Pixel types] | Pixel types handling and interface
-
 | link:get_put_pixel.html[GetPixel and PutPixel] | Macros and functions to
                                                    get and put pixels
 

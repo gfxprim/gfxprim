@@ -3,7 +3,7 @@
  * Pixel channel operations.
  *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
- * Copyright (C) 2013-2025 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2013-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**

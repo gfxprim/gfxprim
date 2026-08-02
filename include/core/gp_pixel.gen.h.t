@@ -90,17 +90,12 @@ typedef enum gp_pixel_type {
  * @brief A macro to get address of a pixel {{ pt.name }} at x, y in a pixmap.
  *
  * @param pixmap A pixmap.
- * @param x A x coordiate.
- * @param y A y coordiate.
+ * @param x A x coordinate inside of the pixmap.
+ * @param y A y coordinate inside of the pixmap.
  *
  * @return A pointer to the first byte of the pixel.
  */
 #define GP_PIXEL_ADDR_{{ pt.name }}(pixmap, x, y) GP_PIXEL_ADDR_{{ pt.pixelpack.suffix }}(pixmap, x, y)
-#define GP_PIXEL_ADDR_OFFSET_{{ pt.name }}(x) GP_PIXEL_ADDR_OFFSET_{{ pt.pixelpack.suffix }}(x)
-
-/*
- * macros for branching on pixel_type
- */
 
 @ for r in [('', ''), ('return ', 'RET_')]:
 #define GP_FN_{{ r[1] }}PER_PIXELTYPE(FN_NAME, type, ...)\

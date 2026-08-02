@@ -49,9 +49,9 @@ lines). Each line is 'bytes_per_row' bytes long (which equals to 'w * bpp /
 'offset' bit in the first byte in each line (but only for some
 <<Sub_Pixmap,subpixmaps>> for pixel types that are not byte aligned).
 
-The link:pixels.html[pixel_type enumeration] defines in which format and how
-are pixel data stored in the 'pixels' buffer, i.e. organization and function
-of the pixel channels.
+The pixel_type enumeration defines in which format and how are pixel data
+stored in the 'pixels' buffer, i.e. organization and function of the pixel
+channels.
 
 The optional pointer to link:gamma.html[gamma tables] describes per-channel
 gamma correction. Unfortunatelly very few parts of the library use it at the

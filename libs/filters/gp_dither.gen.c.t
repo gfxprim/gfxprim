@@ -137,6 +137,9 @@ static int {{ fname }}_to_{{ pt.name }}_raw(const gp_pixmap *src,
 
 @             for c in pt.chanslist:
 @                 if pt.is_gray():
+@                     if c.is_alpha:
+			uint32_t val_{{ c.name }} = gp_get_pixel_norm_alpha(pix, src->pixel_type);
+@                     else:
 			uint32_t val_{{ c.name }} = gp_pixel_to_G8(pix, src->pixel_type);
 @                 else:
 			uint32_t val_{{ c.name }} = GP_PIXEL_GET_{{ c.name }}_RGB888(pix);
@@ -153,7 +156,7 @@ static int {{ fname }}_to_{{ pt.name }}_raw(const gp_pixmap *src,
 			GP_CLAMP_DOWN({{ 'res_' + c.name }}, {{ c.max }});
 @             end
 
-@             if pt.is_gray():
+@             if pt.is_gray() and not pt.is_alpha():
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y, res_V);
 @             else:
 			gp_pixel res = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, 'res_') }});

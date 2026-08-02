@@ -15,6 +15,7 @@
 #include <core/gp_pixel.h>
 #include <core/gp_pixel_pack.gen.h>
 #include <core/gp_get_put_pixel.gen.h>
+#include <core/gp_pixel_alpha.gen.h>
 
 /**
  * @brief Gets a pixel value.

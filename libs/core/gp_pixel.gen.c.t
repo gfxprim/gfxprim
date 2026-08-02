@@ -12,16 +12,19 @@
 @
 @ def getflags(pt):
 @     flags = []
-@     if pt.is_alpha():
-@         flags.append('GP_PIXEL_HAS_ALPHA')
+@
 @     if pt.is_rgb():
 @         flags.append('GP_PIXEL_IS_RGB')
-@     if pt.is_palette():
+@     elif pt.is_palette():
 @         flags.append('GP_PIXEL_IS_PALETTE')
-@     if pt.is_gray():
-@         flags.append('GP_PIXEL_IS_GRAYSCALE')
-@     if pt.is_cmyk():
+@     elif pt.is_gray():
+@         flags.append('GP_PIXEL_IS_GRAY')
+@     elif pt.is_cmyk():
 @         flags.append('GP_PIXEL_IS_CMYK')
+@
+@     if pt.is_alpha():
+@         flags.append('GP_PIXEL_HAS_ALPHA')
+@
 @     if flags:
 @         return ' | '.join(flags)
 @     else:

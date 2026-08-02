@@ -38,11 +38,19 @@ static const uint32_t bayer_8x8[8][8] = {
     { 64764, 31868, 56540, 23644, 62708, 29812, 54484, 21588 }
 };
 
+@ def fetch_gray_channel(src, c, x, y):
+@     if c.is_alpha:
+gp_get_pixel_norm_alpha(gp_getpixel_raw({{ src }}, {{ x }}, {{ y }}), {{ src }}->pixel_type)
+@     else:
+gp_pixel_to_G8(gp_getpixel_raw({{ src }}, {{ x }}, {{ y }}), {{ src }}->pixel_type)
+@     end
+
 @ def fetch_row(src, row, pt, y):
 for (x = 0; x < (gp_coord){{ src }}->w; x++) {
 @     if pt.is_gray():
 @         for c in pt.chanslist:
-	{{ row }}_{{ c.name }}[x+1] = gp_pixel_to_G8(gp_getpixel_raw({{ src }}, x, {{ y }}), {{ src }}->pixel_type);
+	{{ row }}_{{ c.name }}[x+1] =
+	{@ fetch_gray_channel(src, c, 'x', y) @};
 @	  end
 @     else:
 	gp_pixel tmp_pix = gp_pixel_to_RGB888(gp_getpixel_raw({{ src }}, x, {{ y }}), {{ src }}->pixel_type);
@@ -129,7 +137,8 @@ static int {{ fname }}_to_{{ pt.name }}_raw(const gp_pixmap *src,
 			pix_{{ c.name }} = GP_CLAMP(pix_{{ c.name }}, 0, UINT16_MAX);
 @                 else:
 @                     if pt.is_gray():
-			uint32_t pix_{{ c.name }} = gp_pixel_to_G8(gp_getpixel_raw(src, x, y), src->pixel_type);
+			uint32_t pix_{{ c.name }} =
+			{@ fetch_gray_channel('src', c, 'x', 'y') @};
 @                     else:
 			uint32_t pix_{{ c.name }} = GP_PIXEL_GET_{{ c.name }}_RGB888(pix);
 @                     end
@@ -149,7 +158,7 @@ static int {{ fname }}_to_{{ pt.name }}_raw(const gp_pixmap *src,
 				res_{{ c.name }}++;
 @             end
 
-@             if pt.is_gray():
+@             if pt.is_gray() and not pt.is_alpha():
 			gp_putpixel_raw_{{ pt.pixelpack.suffix }}(dst, x, y, res_{{ c.name }});
 @             else:
 			gp_pixel res = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, 'res_') }});
