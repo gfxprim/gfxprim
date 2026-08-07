@@ -364,6 +364,100 @@ static uint32_t callback_stop(gp_timer *self)
 	return GP_TIMER_STOP;
 }
 
+/*
+ * A callback that inserts a DIFFERENT timer.
+ *
+ * The queue pointer used to be written back only after the callback
+ * returned, so an insert made from inside one went into a heap still rooted
+ * at the timer being processed — the insert was then dropped by the
+ * writeback, and the running timer stayed reachable through the new node.
+ * With a stopped() hook that frees the timer, as gpsurf's script timers do,
+ * it fired again after being freed.
+ *
+ * The existing "call rem ins from cb" case does not catch this: it
+ * re-inserts the *running* timer, which takes gp_timer_queue_ins()'s
+ * in_callback path and never touches the heap.
+ */
+static gp_timer ins_other_second;
+static int ins_other_first_fires, ins_other_second_fires;
+
+static uint32_t ins_other_second_cb(gp_timer *self)
+{
+	(void)self;
+	ins_other_second_fires++;
+
+	return GP_TIMER_STOP;
+}
+
+static uint32_t ins_other_first_cb(gp_timer *self)
+{
+	gp_timer **head = self->priv;
+
+	ins_other_first_fires++;
+
+	ins_other_second.expires = 100;
+	ins_other_second.period = 0;
+	ins_other_second.id = "Second";
+	ins_other_second.callback = ins_other_second_cb;
+	gp_timer_queue_ins(head, 0, &ins_other_second);
+
+	return GP_TIMER_STOP;
+}
+
+static int ins_other_from_cb(void)
+{
+	gp_timer *head = NULL;
+
+	GP_TIMER_DECLARE(first, 0, 0, "First", ins_other_first_cb, &head);
+
+	ins_other_first_fires = 0;
+	ins_other_second_fires = 0;
+
+	gp_timer_queue_ins(&head, 0, &first);
+
+	if (gp_timer_queue_process(&head, 10) != 1) {
+		tst_msg("Wrong number of timers processed");
+		return TST_FAILED;
+	}
+
+	if (gp_timer_queue_size(head) != 1) {
+		tst_msg("Timer inserted from a callback was lost, queue size %u",
+		        gp_timer_queue_size(head));
+		return TST_FAILED;
+	}
+
+	if (head != &ins_other_second) {
+		tst_msg("Wrong timer left in the queue");
+		return TST_FAILED;
+	}
+
+	/* The stopped timer must not still be reachable and fire again. */
+	if (gp_timer_queue_process(&head, 200) != 1) {
+		tst_msg("Wrong number of timers processed in the second run");
+		return TST_FAILED;
+	}
+
+	if (ins_other_first_fires != 1) {
+		tst_msg("First timer fired %i times, expected once",
+		        ins_other_first_fires);
+		return TST_FAILED;
+	}
+
+	if (ins_other_second_fires != 1) {
+		tst_msg("Second timer fired %i times, expected once",
+		        ins_other_second_fires);
+		return TST_FAILED;
+	}
+
+	if (gp_timer_queue_size(head) != 0) {
+		tst_msg("Queue not empty at the end, size %u",
+		        gp_timer_queue_size(head));
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 static int rem_clears_expires(void)
 {
 	gp_timer *head = NULL;
@@ -420,6 +514,8 @@ const struct tst_suite tst_suite = {
 		{.name = "Call rem ins rem from cb",
 		 .tst_fn = call_rem_from_cb,
 		 .data = callback_call_rem_ins_rem},
+		{.name = "Ins another timer from cb",
+		 .tst_fn = ins_other_from_cb},
 		{.name = NULL},
 	}
 };

@@ -109,15 +109,17 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
 	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
 }
 
-static gp_timer *process_top(gp_timer *queue, gp_timer **reschedule, uint64_t now)
+static void process_top(gp_timer **queue, gp_timer **reschedule, uint64_t now)
 {
-	gp_timer *timer = queue;
+	gp_timer *timer = *queue;
 	uint32_t ret;
 
 	GP_DEBUG(3, "Timer %s expired at %"PRIu64" now is %"PRIu64,
 	         timer->id, timer->expires, now);
 
-	gp_heap_head *head = gp_heap_pop(&queue->heap, timer_cmp);
+	gp_heap_head *head = gp_heap_pop(&(*queue)->heap, timer_cmp);
+
+	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
 
 	timer->in_callback = 1;
 
@@ -147,8 +149,6 @@ static gp_timer *process_top(gp_timer *queue, gp_timer **reschedule, uint64_t no
 		timer->next = *reschedule;
 		*reschedule = timer;
 	}
-
-	return GP_HEAP_ENTRY(head, struct gp_timer, heap);
 }
 
 int gp_timer_queue_process(gp_timer **queue, uint64_t now)
@@ -162,7 +162,7 @@ int gp_timer_queue_process(gp_timer **queue, uint64_t now)
 			goto ret;
 
 		if ((*queue)->expires <= now) {
-			*queue = process_top(*queue, &reschedule, now);
+			process_top(queue, &reschedule, now);
 			ret++;
 		} else {
 			goto ret;
