@@ -319,6 +319,47 @@ static int test_utf_is_letter(void)
 	return fails ? TST_FAILED : TST_PASSED;
 }
 
+static int test_utf_punct_type(void)
+{
+	static const struct {
+		uint32_t cp;
+		enum gp_utf_punct expected;
+		const char *desc;
+	} cases[] = {
+		{'a',    GP_UTF_PUNCT_NONE,        "ASCII letter"},
+		{'0',    GP_UTF_PUNCT_NONE,        "ASCII digit"},
+		{' ',    GP_UTF_PUNCT_NONE,        "space"},
+		{'+',    GP_UTF_PUNCT_NONE,        "math symbol is not punctuation"},
+		{'!',    GP_UTF_PUNCT_OTHER,       "exclamation mark"},
+		{'(',    GP_UTF_PUNCT_OPEN,        "left parenthesis"},
+		{')',    GP_UTF_PUNCT_CLOSE,       "right parenthesis"},
+		{'[',    GP_UTF_PUNCT_OPEN,        "left bracket"},
+		{']',    GP_UTF_PUNCT_CLOSE,       "right bracket"},
+		{'-',    GP_UTF_PUNCT_DASH,        "hyphen-minus"},
+		{'_',    GP_UTF_PUNCT_CONNECTOR,   "low line"},
+		{0x00ab, GP_UTF_PUNCT_INIT_QUOTE,  "left guillemet"},
+		{0x00bb, GP_UTF_PUNCT_FINAL_QUOTE, "right guillemet"},
+		{0x2018, GP_UTF_PUNCT_INIT_QUOTE,  "left single quote"},
+		{0x2019, GP_UTF_PUNCT_FINAL_QUOTE, "right single quote"},
+		{0x2014, GP_UTF_PUNCT_DASH,        "em dash"},
+		{0x2603, GP_UTF_PUNCT_NONE,        "Snowman"},
+		{0x10100, GP_UTF_PUNCT_OTHER,      "Aegean word separator"},
+	};
+	int fails = 0;
+
+	for (size_t i = 0; i < GP_ARRAY_SIZE(cases); i++) {
+		enum gp_utf_punct got = gp_utf_punct_type(cases[i].cp);
+
+		if (got != cases[i].expected) {
+			tst_msg("gp_utf_punct_type(0x%04x) returned %d, expected %d [%s]",
+			        cases[i].cp, got, cases[i].expected, cases[i].desc);
+			fails++;
+		}
+	}
+
+	return fails ? TST_FAILED : TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "utf",
 	.tests = {
@@ -360,6 +401,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "gp_utf_is_letter()",
 		 .tst_fn = test_utf_is_letter},
+
+		{.name = "gp_utf_punct_type()",
+		 .tst_fn = test_utf_punct_type},
 
 		{}
 	}

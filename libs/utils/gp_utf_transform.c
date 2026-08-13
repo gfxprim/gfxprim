@@ -2,8 +2,8 @@
 /*
  * Copyright (C) 2026 Cyril Hrubis <metan@ucw.cz>
  *
- * Simple Unicode case folding (toupper/tolower/totitle) and letter
- * classification.  Tables are generated from UnicodeData.txt by
+ * Simple Unicode case folding (toupper/tolower/totitle) and letter /
+ * punctuation classification.  Tables are generated from UnicodeData.txt by
  * gen_utf_case.py; only 1:1 simple mappings are covered — context-
  * sensitive and length-changing mappings (e.g. German "sharp s" → "SS",
  * Turkish dotted I) live in SpecialCasing.txt and are not implemented.
@@ -73,13 +73,10 @@ uint32_t gp_utf_totitle(uint32_t ch)
 
 bool gp_utf_is_letter(uint32_t ch)
 {
-	size_t lo, hi;
-
 	if (ch < 0x80)
 		return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
 
-	lo = 0;
-	hi = GP_UTF_LETTER_RANGES_LEN;
+	size_t lo = 0, hi = GP_UTF_LETTER_RANGES_LEN;
 
 	while (lo < hi) {
 		size_t mid = (lo + hi)/2;
@@ -93,4 +90,22 @@ bool gp_utf_is_letter(uint32_t ch)
 	}
 
 	return false;
+}
+
+enum gp_utf_punct gp_utf_punct_type(uint32_t ch)
+{
+	size_t lo = 0, hi = GP_UTF_PUNCT_RANGES_LEN;
+
+	while (lo < hi) {
+		size_t mid = (lo + hi)/2;
+
+		if (ch < gp_utf_punct_ranges[mid].start)
+			hi = mid;
+		else if (ch > gp_utf_punct_ranges[mid].end)
+			lo = mid + 1;
+		else
+			return gp_utf_punct_ranges[mid].type;
+	}
+
+	return GP_UTF_PUNCT_NONE;
 }

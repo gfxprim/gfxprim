@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 #
 # Generate simple case-folding lookup tables (uppercase, lowercase, titlecase)
-# and the "is letter" range table from UnicodeData.txt.
+# and the "is letter" / punctuation class range tables from UnicodeData.txt.
 #
 # The format is described in:
 #   https://www.unicode.org/reports/tr44/#UnicodeData.txt
@@ -25,6 +25,21 @@ def parse_unicode_data(path):
     lower = []         # (cp, lower_cp)
     title = []         # (cp, title_cp) where title != upper
     letter_ranges = [] # list of (start, end) inclusive
+    punct_ranges = []  # list of (start, end, punct class) inclusive
+
+    # Every general category that starts with a P, mapped to the enum
+    # gp_utf_punct member it is emitted as.  Which of them a caller wants is
+    # its own business -- CSS 2.1 5.12.2 ::first-letter for example names
+    # Ps, Pe, Pi, Pf and Po but neither dashes nor connectors.
+    punct_cats = {
+        "Pc": "GP_UTF_PUNCT_CONNECTOR",
+        "Pd": "GP_UTF_PUNCT_DASH",
+        "Ps": "GP_UTF_PUNCT_OPEN",
+        "Pe": "GP_UTF_PUNCT_CLOSE",
+        "Pi": "GP_UTF_PUNCT_INIT_QUOTE",
+        "Pf": "GP_UTF_PUNCT_FINAL_QUOTE",
+        "Po": "GP_UTF_PUNCT_OTHER",
+    }
 
     # Large contiguous blocks (CJK ideographs, Hangul syllables, etc.) are
     # encoded as a pair of marker lines: <..., First> at the range start and
@@ -51,14 +66,21 @@ def parse_unicode_data(path):
             range_category = category
             continue
         if name.endswith(", Last>"):
-            if range_start is not None and range_category and range_category.startswith("L"):
-                letter_ranges.append((range_start, cp))
+            if range_start is not None and range_category:
+                if range_category.startswith("L"):
+                    letter_ranges.append((range_start, cp))
+                if range_category in punct_cats:
+                    punct_ranges.append((range_start, cp,
+                                         punct_cats[range_category]))
             range_start = None
             range_category = None
             continue
 
         if category.startswith("L"):
             letter_ranges.append((cp, cp))
+
+        if category in punct_cats:
+            punct_ranges.append((cp, cp, punct_cats[category]))
 
         if upper_s:
             upper.append((cp, int(upper_s, 16)))
@@ -73,21 +95,23 @@ def parse_unicode_data(path):
             else:
                 title.append((cp, t))
 
-    return upper, lower, title, letter_ranges
+    return upper, lower, title, letter_ranges, punct_ranges
 
 
 def collapse_ranges(ranges):
-    """Merge a list of (start, end) inclusive ranges into a sorted, coalesced list."""
+    """Merge a list of (start, end[, class]) inclusive ranges into a sorted,
+    coalesced list.  A range that carries a class merges only into a
+    neighbour of the very same class, so the class survives the collapse."""
     if not ranges:
         return []
     ranges = sorted(ranges)
     out = [ranges[0]]
-    for start, end in ranges[1:]:
-        last_start, last_end = out[-1]
-        if start <= last_end + 1:
-            out[-1] = (last_start, max(last_end, end))
+    for r in ranges[1:]:
+        last = out[-1]
+        if r[0] <= last[1] + 1 and r[2:] == last[2:]:
+            out[-1] = (last[0], max(last[1], r[1])) + last[2:]
         else:
-            out.append((start, end))
+            out.append(r)
     return out
 
 
@@ -110,12 +134,21 @@ def emit_ranges(name, ranges):
     print()
 
 
+def emit_punct_ranges(name, ranges):
+    print("static const struct gp_utf_punct_range {} [] = {{".format(name))
+    for start, end, cls in ranges:
+        print("\t{{0x{:04x}, 0x{:04x}, {}}},".format(start, end, cls))
+    print("};")
+    print("#define {}_LEN GP_ARRAY_SIZE({})".format(name.upper(), name))
+    print()
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: gen_utf_case.py UnicodeData.txt", file=sys.stderr)
         sys.exit(1)
 
-    upper, lower, title, letter_ranges = parse_unicode_data(sys.argv[1])
+    upper, lower, title, letter_ranges, punct_ranges = parse_unicode_data(sys.argv[1])
 
     print("// SPDX-License-Identifier: LGPL-2.1-or-later")
     print("/*")
@@ -129,6 +162,7 @@ def main():
     print()
     print("#include <stdint.h>")
     print("#include <core/gp_common.h>")
+    print("#include <utils/gp_utf.h>")
     print()
     print("struct gp_utf_case_entry {")
     print("\tuint32_t cp;")
@@ -140,11 +174,18 @@ def main():
     print("\tuint32_t end;")
     print("};")
     print()
+    print("struct gp_utf_punct_range {")
+    print("\tuint32_t start;")
+    print("\tuint32_t end;")
+    print("\tenum gp_utf_punct type;")
+    print("};")
+    print()
 
     emit_map("gp_utf_upper_map", upper)
     emit_map("gp_utf_lower_map", lower)
     emit_map("gp_utf_title_map", title)
     emit_ranges("gp_utf_letter_ranges", collapse_ranges(letter_ranges))
+    emit_punct_ranges("gp_utf_punct_ranges", collapse_ranges(punct_ranges))
 
     print("#endif /* GP_UTF_CASE_H */")
 

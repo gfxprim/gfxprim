@@ -281,7 +281,7 @@ uint32_t gp_utf_fallback(uint32_t ch);
  * unchanged.
  *
  * @param ch A Unicode codepoint.
- * @return The uppercase codepoint, or `ch` if there is no mapping.
+ * @return The uppercase codepoint, or ch if there is no mapping.
  */
 uint32_t gp_utf_toupper(uint32_t ch);
 
@@ -291,7 +291,7 @@ uint32_t gp_utf_toupper(uint32_t ch);
  * Implements simple (1:1) lowercase case mapping per UnicodeData.txt.
  *
  * @param ch A Unicode codepoint.
- * @return The lowercase codepoint, or `ch` if there is no mapping.
+ * @return The lowercase codepoint, or ch if there is no mapping.
  */
 uint32_t gp_utf_tolower(uint32_t ch);
 
@@ -300,24 +300,56 @@ uint32_t gp_utf_tolower(uint32_t ch);
  *
  * For most codepoints titlecase is identical to uppercase; a handful
  * of digraphs (e.g. U+01C5 Dž, U+01C8 Lj) have a distinct titlecase
- * form.  Falls back to gp_utf_toupper() when there is no explicit
+ * form. Falls back to gp_utf_toupper() when there is no explicit
  * titlecase mapping.
  *
  * @param ch A Unicode codepoint.
- * @return The titlecase codepoint, or `ch` if there is no mapping.
+ * @return The titlecase codepoint, or ch if there is no mapping.
  */
 uint32_t gp_utf_totitle(uint32_t ch);
 
 /**
- * @brief Returns 1 if the codepoint is a Unicode letter.
+ * @brief Returns true if the codepoint is a Unicode letter.
  *
  * Tests membership in general category L (Lu/Ll/Lt/Lm/Lo) per
- * UnicodeData.txt. Useful for finding word boundaries when
- * implementing text-transform: capitalize and similar.
+ * UnicodeData.txt.
  *
  * @param ch A Unicode codepoint.
- * @return 1 if `ch` is a letter, 0 otherwise.
+ * @return True if ch is a letter, false otherwise.
  */
 bool gp_utf_is_letter(uint32_t ch);
+
+/**
+ * @brief A Unicode punctuation class.
+ *
+ * The seven general categories starting with a P in UnicodeData.txt.
+ */
+enum gp_utf_punct {
+	/** @brief Not a punctuation. */
+	GP_UTF_PUNCT_NONE = 0,
+	/** @brief Connector, category Pc, e.g. '_'. */
+	GP_UTF_PUNCT_CONNECTOR,
+	/** @brief Dash, category Pd, e.g. '-'. */
+	GP_UTF_PUNCT_DASH,
+	/** @brief Open, category Ps, e.g. '('. */
+	GP_UTF_PUNCT_OPEN,
+	/** @brief Close, category Pe, e.g. ')'. */
+	GP_UTF_PUNCT_CLOSE,
+	/** @brief Initial quote, category Pi, e.g. '«'. */
+	GP_UTF_PUNCT_INIT_QUOTE,
+	/** @brief Final quote, category Pf, e.g. '»'. */
+	GP_UTF_PUNCT_FINAL_QUOTE,
+	/** @brief Other, category Po, e.g. '!'. */
+	GP_UTF_PUNCT_OTHER,
+};
+
+/**
+ * @brief Returns the punctuation class of a codepoint.
+ *
+ * @param ch An unicode codepoint.
+ * @return The punctuation class of ch, or GP_UTF_PUNCT_NONE if it is not
+ *         punctuation.
+ */
+enum gp_utf_punct gp_utf_punct_type(uint32_t ch);
 
 #endif /* UTILS_GP_UTF_H */
