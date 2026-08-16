@@ -57,6 +57,26 @@ static int test_utf8_next_03(void)
 	return TST_PASSED;
 }
 
+static int test_utf8_next_04(void)
+{
+	uint32_t ch;
+	const char *str = "\xf0\x9f\x9a\x80 text after rocket emoji";
+	const char *str_end = str + 4;
+
+	ch = gp_utf8_next(&str);
+	if (ch != 0x1f680) {
+		tst_msg("Rocket emoji character not parsed");
+		return TST_FAILED;
+	}
+
+	if (str != str_end) {
+		tst_msg("Wrong offset in string");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 static int test_utf8_next_02(void)
 {
 	uint32_t ch;
@@ -310,6 +330,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "gp_utf8_next() 03",
 		 .tst_fn = test_utf8_next_03},
+
+		{.name = "gp_utf8_next() 04",
+		 .tst_fn = test_utf8_next_04},
 
 		{.name = "gp_utf8_strlen() 01",
 		 .tst_fn = test_utf8_strlen_01},
