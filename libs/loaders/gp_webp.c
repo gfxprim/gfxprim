@@ -104,16 +104,20 @@ int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
 	WebPIDecoder* idec = WebPINewDecoder(&config.output);
 	if (!idec) {
 		GP_DEBUG(1, "failed to allocate decoder");
+		err = ENOMEM;
 		goto err1;
 	}
 
 	int ly=0;
+	VP8StatusCode status;
 
 	do {
-		VP8StatusCode status = WebPIAppend(idec, buf, ret);
+		status = WebPIAppend(idec, buf, ret);
 
-		if (status != VP8_STATUS_OK && status != VP8_STATUS_SUSPENDED)
-		    break;
+		if (status != VP8_STATUS_OK && status != VP8_STATUS_SUSPENDED) {
+			GP_DEBUG(1, "WebPIAppend() failed with %i", status);
+			break;
+		}
 
 		int sy = ly;
 
@@ -139,6 +143,12 @@ int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
 			}
 		}
 	} while ((ret = gp_io_read(io, buf, sizeof(buf))));
+
+	if (status != VP8_STATUS_OK) {
+		GP_DEBUG(1, "Incomplete webp image, decoder status %i", status);
+		err = status == VP8_STATUS_UNSUPPORTED_FEATURE ? ENOSYS : EINVAL;
+		goto err2;
+	}
 
 	WebPIDelete(idec);
 	WebPFreeDecBuffer(&config.output);
