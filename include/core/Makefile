@@ -7,7 +7,7 @@ GENHEADERS=gp_convert_scale.gen.h gp_pixel.gen.h \
            gp_mix_pixels.gen.h gp_gamma_correction.gen.h\
 	   gp_write_pixels.gen.h gp_mix_pixels2.gen.h gp_pixel_pack.gen.h \
 	   gp_pixel_channel.gen.h gp_pixel_alpha.gen.h \
-	   gp_pattern_fill.gen.h
+	   gp_pattern_fill.gen.h gp_blend_pixel.gen.h
 
 include $(TOPDIR)/gen.mk
 include $(TOPDIR)/post.mk

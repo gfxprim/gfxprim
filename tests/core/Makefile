@@ -6,11 +6,12 @@ CSOURCES=pixmap.c pixel.c blit_clipped.c debug.c sub_pixmap_put_pixel.c \
 	 blit_rotated.c write_pixels_pattern.c
 
 GENSOURCES+=write_pixel.gen.c get_put_pixel.gen.c convert.gen.c blit_conv.gen.c \
-            convert_scale.gen.c get_set_bits.gen.c write_pixels2.gen.c
+            convert_scale.gen.c get_set_bits.gen.c write_pixels2.gen.c \
+	    blend_pixel.gen.c
 
 APPS=write_pixel.gen pixel pixmap get_put_pixel.gen convert.gen blit_conv.gen \
      convert_scale.gen get_set_bits.gen blit_clipped debug write_pixels2.gen \
-     sub_pixmap_put_pixel blit_rotated write_pixels_pattern
+     sub_pixmap_put_pixel blit_rotated write_pixels_pattern blend_pixel.gen
 
 include ../tests.mk
 
