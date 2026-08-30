@@ -13,6 +13,9 @@
  */
 #include <stddef.h>
 #include <stdint.h>
+#include <core/gp_types.h>
+#include <core/gp_pixel.gen.h>
+#include <core/gp_pattern_fill.h>
 
 @ def gen_func(suffix, needs_bit_order):
 /**
@@ -22,18 +25,11 @@
 @     if needs_bit_order:
  * @param off Number of pixels to skip in the first byte
 @     end
-@     if ps.size == 1:
- * @param y_off A (modulo 4) offset from the y=0 coordinate. This is used for
- *              the patter fill.
-@     end
  * @param cnt A number of pixels to write
  * @param val A pixel value to be written.
  */
 @     if needs_bit_order:
 void gp_write_pixels_{{ suffix }}(void *start, uint8_t off,
-@         if ps.size == 1:
-                             uint8_t y_off,
-@         end
                              size_t cnt, unsigned int val);
 
 @     else:
@@ -48,4 +44,24 @@ void gp_write_pixels_{{ suffix }}(void *start, size_t cnt, unsigned int val);
 @ end
 @ for suffix in optimized_writepixels:
 @     gen_func(suffix, False)
+@ end
+
+@ for suffix in ['1BPP_DB', '1BPP_UB', '2BPP_DB', '2BPP_UB', '4BPP_DB', '4BPP_UB']:
+
+/**
+ * @brief Fills a run of {{ suffix }} pixels with a pattern.
+ *
+ * The middle of the run is written byte by byte, each of the two ends, where
+ * the run does not start or stop on a byte boundary, with a single
+ * read-modify-write under the bits that end covers.
+ *
+ * @param start A pointer to the starting byte in the buffer.
+ * @param off A number of pixels to skip in the first byte.
+ * @param cnt A number of pixels to write.
+ * @param row A row of the pattern, as built by
+ *            gp_pixel_pattern_row_init_{{ suffix }}().
+ */
+void gp_write_pixels_pattern_{{ suffix }}(void *start, uint8_t off, size_t cnt,
+                                          const gp_pixel_pattern_row *row);
+
 @ end

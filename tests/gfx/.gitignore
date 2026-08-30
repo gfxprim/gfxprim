@@ -4,6 +4,7 @@ circle_seg
 ellipse
 fill_circle
 fill_ellipse
+pattern
 fill_rect
 hline
 line

@@ -10,280 +10,217 @@
 #include <core/gp_get_set_bits.h>
 #include <core/gp_get_set_bytes.h>
 #include <core/gp_write_pixels.gen.h>
-#include <core/gp_pattern_fill.h>
 
-#define BIT(byte, offset) (((byte)>>(offset)) & 0x01)
 
-static uint8_t pattern_byte_1bpp_UB(gp_pixel pixel, uint8_t y_off)
+
+/*
+ * The bits of a byte that pixels @first to @last of it occupy.
+ *
+ * A pixel is bpp bits wide, and it is the bit order that says which end of the
+ * byte pixel zero sits at, so a span of pixels is a span of bits either way.
+ */
+static uint8_t pixel_span_mask(uint8_t bpp, int up_bit,
+                               uint8_t first, uint8_t last)
 {
-	uint8_t bytes_25_DSC[] = {0x88, 0x44, 0x22, 0x11};
-	uint8_t bytes_25_ASC[] = {0x11, 0x22, 0x44, 0x88};
-	uint8_t bytes_50[] = {0xaa, 0x55};
+	unsigned int lo = bpp * first;
+	unsigned int hi = bpp * (last + 1);
 
-	uint8_t color = gp_pixel_pattern_fg_get(pixel);
+	if (up_bit) {
+		unsigned int tmp = 8 - hi;
 
-	switch (gp_pixel_pattern_get(pixel)) {
-	case GP_PIXEL_PATTERN_50:
-		return color ? ~bytes_50[y_off%2] : bytes_50[y_off%2];
-	case GP_PIXEL_PATTERN_ASC_75:
-		return color ? ~bytes_25_ASC[y_off%4] : bytes_25_ASC[y_off%4];
-	case GP_PIXEL_PATTERN_ASC_25:
-		return color ? bytes_25_ASC[y_off%4] : ~bytes_25_ASC[y_off%4];
-	case GP_PIXEL_PATTERN_DSC_75:
-		return color ? ~bytes_25_DSC[y_off%4] : bytes_25_DSC[y_off%4];
-	case GP_PIXEL_PATTERN_DSC_25:
-		return color ? bytes_25_DSC[y_off%4] : ~bytes_25_DSC[y_off%4];
-	case GP_PIXEL_PATTERN_DOTS_75:
-		color = !color;
-	/* fallthrough */
-	case GP_PIXEL_PATTERN_DOTS_25:
-		if (y_off % 2 == 0)
-			return color ? 0xaa : ~0xaa;
-		return color ? 0x00 : 0xff;
-	case GP_PIXEL_PATTERN_DOTS_87_5:
-		color = !color;
-	/* fallthrough */
-	case GP_PIXEL_PATTERN_DOTS_12_5:
-		if (y_off % 4 == 0)
-			return color ? 0x88 : ~0x88;
-		return color ? 0x00 : 0xff;
-	/* will not happen */
-	case GP_PIXEL_PATTERN_NONE:
-	break;
+		hi = 8 - lo;
+		lo = tmp;
 	}
 
-	return 0;
+	return ((1u << hi) - 1) & ~((1u << lo) - 1);
 }
 
-static uint8_t pattern_byte_1bpp_DB(gp_pixel pixel, uint8_t y_off)
+/*
+ * A row of a pattern is two bytes over and over, the pattern tile is four
+ * pixels wide, so that is a whole number of tiles for every pixel size a
+ * pattern fits into. Up to two bits per pixel a single byte is, so the row is
+ * a single byte repeated there.
+ *
+ * So the two ends, where the run does not start or stop on a byte boundary,
+ * are a single read-modify-write each rather than a walk of the pixels in
+ * them: the byte the row has for that place, under the bits that end covers.
+ *
+ * The row itself is built by gp_pixel_pattern_row_init_*(), which is where the
+ * pattern tiles and the channel layout are known.
+ */
+static void write_partial_byte(uint8_t *dst, uint8_t byte, uint8_t mask,
+                               uint8_t bpp, int up_bit,
+                               uint8_t first, uint8_t last)
 {
-	uint8_t bytes_25_ASC[] = {0x88, 0x44, 0x22, 0x11};
-	uint8_t bytes_25_DSC[] = {0x11, 0x22, 0x44, 0x88};
-	uint8_t bytes_50[] = {0x55, 0xaa};
+	uint8_t m = mask & pixel_span_mask(bpp, up_bit, first, last);
 
-	uint8_t color = gp_pixel_pattern_fg_get(pixel);
-
-	switch (gp_pixel_pattern_get(pixel)) {
-	case GP_PIXEL_PATTERN_50:
-		return color ? ~bytes_50[y_off%2] : bytes_50[y_off%2];
-	case GP_PIXEL_PATTERN_ASC_75:
-		return color ? ~bytes_25_ASC[y_off%4] : bytes_25_ASC[y_off%4];
-	case GP_PIXEL_PATTERN_ASC_25:
-		return color ? bytes_25_ASC[y_off%4] : ~bytes_25_ASC[y_off%4];
-	case GP_PIXEL_PATTERN_DSC_75:
-		return color ? ~bytes_25_DSC[y_off%4] : bytes_25_DSC[y_off%4];
-	case GP_PIXEL_PATTERN_DSC_25:
-		return color ? bytes_25_DSC[y_off%4] : ~bytes_25_DSC[y_off%4];
-	case GP_PIXEL_PATTERN_DOTS_75:
-		color = !color;
-	/* fallthrough */
-	case GP_PIXEL_PATTERN_DOTS_25:
-		if (y_off % 2 == 0)
-			return color ? 0x55 : ~0x55;
-		return color ? 0x00 : 0xff;
-	case GP_PIXEL_PATTERN_DOTS_87_5:
-		color = !color;
-	/* fallthrough */
-	case GP_PIXEL_PATTERN_DOTS_12_5:
-		if (y_off % 4 == 0)
-			return color ? 0x11 : ~0x11;
-		return color ? 0x00 : 0xff;
-	/* will not happen */
-	case GP_PIXEL_PATTERN_NONE:
-	break;
-	}
-
-	return 0;
+	*dst = (*dst & ~m) | (byte & m);
 }
 
-static void gp_write_pixels_pattern_1BPP_DB(void *start, uint8_t off,
-                                            size_t cnt, uint8_t byte)
+static inline void write_pattern_byte(void *start, uint8_t off, size_t cnt,
+                                      const gp_pixel_pattern_row *row,
+                                      uint8_t bpp, int up_bit)
 {
-	int len = cnt;
+	/* Both bytes are the same up to two bits per pixel */
+	uint8_t byte = row->pixels, mask = row->mask;
+	uint8_t ppb = 8 / bpp;
+	uint8_t *dst = start;
+	size_t len = cnt;
 
-	/* Write start of the line */
-	switch (off) {
-	case 0:
-	break;
-	case 1:
-		GP_SET_BITS1(1, 1, start, BIT(byte, 1));
+	if (!len)
+		return;
 
-		if (--len == 0)
+	/* The first byte, if the run starts in the middle of one */
+	if (off) {
+		uint8_t last = ppb - 1;
+
+		if (len < (size_t)(ppb - off))
+			last = off + len - 1;
+
+		write_partial_byte(dst, byte, mask, bpp, up_bit, off, last);
+
+		len -= last - off + 1;
+		dst++;
+
+		if (!len)
 			return;
-		/* fallthrough */
-	case 2:
-		GP_SET_BITS1(2, 1, start, BIT(byte, 2));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 3:
-		GP_SET_BITS1(3, 1, start, BIT(byte, 3));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 4:
-		GP_SET_BITS1(4, 1, start, BIT(byte, 4));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 5:
-		GP_SET_BITS1(5, 1, start, BIT(byte, 5));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 6:
-		GP_SET_BITS1(6, 1, start, BIT(byte, 6));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 7:
-		GP_SET_BITS1(7, 1, start, BIT(byte, 7));
-
-		if (--len == 0)
-			return;
-
-		start++;
-	break;
 	}
 
-	/* Write as many bytes as possible */
-	memset(start, byte, len/8);
+	/*
+	 * A row with nothing transparent in it is a plain fill, which is the
+	 * common case and the fast one. Otherwise the pixels the pattern
+	 * leaves alone have to survive, so the byte is merged in rather than
+	 * stored.
+	 */
+	if (mask == 0xff) {
+		memset(dst, byte, len / ppb);
+		dst += len / ppb;
+	} else {
+		size_t i;
 
-	start+=len/8;
-
-	/* And the rest */
-	switch (len%8) {
-	case 7:
-		GP_SET_BITS1(6, 1, start, BIT(byte, 6));
-		/* fallthrough */
-	case 6:
-		GP_SET_BITS1(5, 1, start, BIT(byte, 5));
-		/* fallthrough */
-	case 5:
-		GP_SET_BITS1(4, 1, start, BIT(byte, 4));
-		/* fallthrough */
-	case 4:
-		GP_SET_BITS1(3, 1, start, BIT(byte, 3));
-		/* fallthrough */
-	case 3:
-		GP_SET_BITS1(2, 1, start, BIT(byte, 2));
-		/* fallthrough */
-	case 2:
-		GP_SET_BITS1(1, 1, start, BIT(byte, 1));
-		/* fallthrough */
-	case 1:
-		GP_SET_BITS1(0, 1, start, BIT(byte, 0));
-	break;
-	case 0:
-	break;
+		for (i = 0; i < len / ppb; i++, dst++)
+			*dst = (*dst & ~mask) | (byte & mask);
 	}
+
+	/* And the last byte, if the run does not end on a boundary */
+	len %= ppb;
+
+	if (len)
+		write_partial_byte(dst, byte, mask, bpp, up_bit, 0, len - 1);
 }
 
-static void gp_write_pixels_pattern_1BPP_UB(void *start, uint8_t off,
-                                            size_t cnt, uint8_t byte)
+/*
+ * Four bits per pixel, the row is two bytes and the upper one goes into the
+ * byte the run starts in, the run alternates between them from there.
+ */
+static inline void write_pattern_2bytes(void *start, uint8_t off, size_t cnt,
+                                        const gp_pixel_pattern_row *row,
+                                        int up_bit)
 {
-	int len = cnt;
+	const uint8_t bytes[2] = {row->pixels >> 8, row->pixels};
+	const uint8_t mask[2] = {row->mask >> 8, row->mask};
+	uint8_t *dst = start;
+	unsigned int i = 0;
 
-	/* Write start of the line */
-	switch (off) {
-	case 0:
-	break;
-	case 1:
-		GP_SET_BITS1(6, 1, start, BIT(byte, 6));
+	if (!cnt)
+		return;
 
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 2:
-		GP_SET_BITS1(5, 1, start, BIT(byte, 5));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 3:
-		GP_SET_BITS1(4, 1, start, BIT(byte, 4));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 4:
-		GP_SET_BITS1(3, 1, start, BIT(byte, 3));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 5:
-		GP_SET_BITS1(2, 1, start, BIT(byte, 2));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 6:
-		GP_SET_BITS1(1, 1, start, BIT(byte, 1));
-
-		if (--len == 0)
-			return;
-		/* fallthrough */
-	case 7:
-		GP_SET_BITS1(0, 1, start, BIT(byte, 0));
-
-		if (--len == 0)
-			return;
-
-		start++;
-	break;
+	/* The first byte, if the run starts with its second pixel */
+	if (off) {
+		write_partial_byte(dst, bytes[0], mask[0], 4, up_bit, 1, 1);
+		cnt--;
+		dst++;
+		i = 1;
 	}
 
-	/* Write as many bytes as possible */
-	memset(start, byte, len/8);
+	/*
+	 * With nothing transparent in the row the middle is the two bytes
+	 * repeated, i.e. a run of 16 bit pixels in big endian.  That writer
+	 * stores whole uint16_t, so it is started on an even address, a byte
+	 * before that and whatever is left after it are written here.
+	 */
+	if (row->mask == 0xffff) {
+		size_t words;
 
-	start+=len/8;
+		if (cnt >= 2 && ((uintptr_t)dst & 1)) {
+			*dst++ = bytes[i];
+			cnt -= 2;
+			i ^= 1;
+		}
 
-	/* And the rest */
-	switch (len%8) {
-	case 7:
-		GP_SET_BITS1(1, 1, start, BIT(byte, 1));
-		/* fallthrough */
-	case 6:
-		GP_SET_BITS1(2, 1, start, BIT(byte, 2));
-		/* fallthrough */
-	case 5:
-		GP_SET_BITS1(3, 1, start, BIT(byte, 3));
-		/* fallthrough */
-	case 4:
-		GP_SET_BITS1(4, 1, start, BIT(byte, 4));
-		/* fallthrough */
-	case 3:
-		GP_SET_BITS1(5, 1, start, BIT(byte, 5));
-		/* fallthrough */
-	case 2:
-		GP_SET_BITS1(6, 1, start, BIT(byte, 6));
-		/* fallthrough */
-	case 1:
-		GP_SET_BITS1(7, 1, start, BIT(byte, 7));
-	break;
+		words = cnt / 4;
+
+		if (words) {
+			gp_write_pixels_16BPP_BE(dst, words, bytes[i] << 8 | bytes[i ^ 1]);
+			dst += 2 * words;
+			cnt -= 4 * words;
+		}
+
+		if (cnt >= 2) {
+			*dst++ = bytes[i];
+			cnt -= 2;
+			i ^= 1;
+		}
+	} else {
+		for (; cnt >= 2; cnt -= 2, dst++, i ^= 1)
+			*dst = (*dst & ~mask[i]) | (bytes[i] & mask[i]);
 	}
+
+	/* And the last byte, if the run ends with its first pixel */
+	if (cnt)
+		write_partial_byte(dst, bytes[i], mask[i], 4, up_bit, 0, 0);
+}
+
+/*
+ * The pixel size and the bit order are known in each of these, so the shifts,
+ * the masks of the two ends and the pixels to a byte all fold into constants,
+ * and what is left is a memset between two read-modify-writes.
+ */
+void gp_write_pixels_pattern_1BPP_DB(void *start, uint8_t off, size_t cnt,
+                                     const gp_pixel_pattern_row *row)
+{
+	write_pattern_byte(start, off, cnt, row, 1, 0);
+}
+
+void gp_write_pixels_pattern_1BPP_UB(void *start, uint8_t off, size_t cnt,
+                                     const gp_pixel_pattern_row *row)
+{
+	write_pattern_byte(start, off, cnt, row, 1, 1);
+}
+
+void gp_write_pixels_pattern_2BPP_DB(void *start, uint8_t off, size_t cnt,
+                                     const gp_pixel_pattern_row *row)
+{
+	write_pattern_byte(start, off, cnt, row, 2, 0);
+}
+
+void gp_write_pixels_pattern_2BPP_UB(void *start, uint8_t off, size_t cnt,
+                                     const gp_pixel_pattern_row *row)
+{
+	write_pattern_byte(start, off, cnt, row, 2, 1);
+}
+
+void gp_write_pixels_pattern_4BPP_DB(void *start, uint8_t off, size_t cnt,
+                                     const gp_pixel_pattern_row *row)
+{
+	write_pattern_2bytes(start, off, cnt, row, 0);
+}
+
+void gp_write_pixels_pattern_4BPP_UB(void *start, uint8_t off, size_t cnt,
+                                     const gp_pixel_pattern_row *row)
+{
+	write_pattern_2bytes(start, off, cnt, row, 1);
 }
 
 static const uint8_t bytes_1BPP[] = {0x00, 0xff};
 
-void gp_write_pixels_1BPP_DB(void *start, uint8_t off, uint8_t y_off,
+void gp_write_pixels_1BPP_DB(void *start, uint8_t off,
                              size_t cnt, unsigned int val)
 {
 	int len = cnt;
 
 	if (!len)
 		return;
-
-	if (gp_pixel_pattern_get(val)) {
-		gp_write_pixels_pattern_1BPP_DB(start, off, cnt, pattern_byte_1bpp_DB(val, y_off));
-		return;
-	}
 
 	/* Write start of the line */
 	switch (off) {
@@ -366,18 +303,13 @@ void gp_write_pixels_1BPP_DB(void *start, uint8_t off, uint8_t y_off,
 	}
 }
 
-void gp_write_pixels_1BPP_UB(void *start, uint8_t off, uint8_t y_off,
+void gp_write_pixels_1BPP_UB(void *start, uint8_t off,
                              size_t cnt, unsigned int val)
 {
 	int len = cnt;
 
 	if (!len)
 		return;
-
-	if (gp_pixel_pattern_get(val)) {
-		gp_write_pixels_pattern_1BPP_UB(start, off, cnt, pattern_byte_1bpp_UB(val, y_off));
-		return;
-	}
 
 	/* Write start of the line */
 	switch (off) {

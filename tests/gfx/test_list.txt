@@ -13,6 +13,7 @@ ellipse
 fill_ellipse
 circle_seg
 polygon
+pattern
 fill_rect
 
 fill_triangle

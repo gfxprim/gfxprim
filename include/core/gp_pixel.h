@@ -17,6 +17,7 @@
 #define CORE_GP_PIXEL_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <core/gp_types.h>
 #include <core/gp_common.h>
@@ -27,7 +28,6 @@
 #include <core/gp_pixel_channel.gen.h>
 #include <core/gp_pixel_alias.h>
 #include <core/gp_get_set_bits.h>
-#include <core/gp_pattern_fill.h>
 
 /**
  * @brief Description of one pixel channel.
@@ -106,6 +106,14 @@ struct gp_pixel_type_desc {
  * @brief Array with description for all pixel types.
  */
 extern const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX];
+
+/**
+ * @brief An alpha channel mask for each pixel type.
+ *
+ * Zero for a pixel type that has no alpha channel, bitmask for pixels with
+ * alpha.
+ */
+extern const gp_pixel gp_pixel_alpha_masks[GP_PIXEL_MAX];
 
 #define GP_VALID_PIXELTYPE(type) (((type) > 0) && ((type) < GP_PIXEL_MAX))
 
@@ -203,6 +211,19 @@ static inline const gp_pixel_type_desc *gp_pixel_desc(gp_pixel_type type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
 	return &gp_pixel_types[type];
+}
+
+/**
+ * @brief Returns an alpha channel mask for a pixel type.
+ *
+ * @param type A pixel type.
+ * @return A mask of the alpha channel bits, zero for a pixel type that has no
+ *         alpha channel.
+ */
+static inline gp_pixel gp_pixel_alpha_mask(gp_pixel_type type)
+{
+	GP_CHECK_VALID_PIXELTYPE(type);
+	return gp_pixel_alpha_masks[type];
 }
 
 /**
@@ -326,6 +347,7 @@ gp_pixel_type gp_pixel_rgb_match(gp_pixel rmask, gp_pixel gmask,
  *
  * @return Either valid #gp_pixel_type or GP_PIXEL_UNKNOWN.
  */
+
 gp_pixel_type gp_pixel_rgb_lookup(uint32_t rsize, uint32_t roff,
                                   uint32_t gsize, uint32_t goff,
 			          uint32_t bsize, uint32_t boff,

@@ -31,6 +31,14 @@
 @         return 0
 @ end
 
+@ def alpha_mask(pt):
+@     for c in pt.chanslist:
+@         if c.name == 'A':
+@             return hex(((1 << c.size) - 1) << c.off)
+@     end
+@     return 0
+@ end
+
 /*
  * Description of all known pixel types
  */
@@ -50,6 +58,18 @@ const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX] = {
 @     end
 		}
 	},
+@ end
+};
+
+/*
+ * An alpha channel mask for each pixel type, zero for a type that has none.
+ *
+ * This is a walk of the channel list folded into a table; the pattern fill
+ * asks for it for every pixel it draws.
+ */
+const gp_pixel gp_pixel_alpha_masks[GP_PIXEL_MAX] = {
+@ for pt in pixeltypes:
+	[GP_PIXEL_{{ pt.name }}] = {{ alpha_mask(pt) }},
 @ end
 };
 

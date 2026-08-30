@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #ifndef GFX_GP_HLINE_GEN_H
@@ -13,6 +13,7 @@
 
 #include <core/gp_get_put_pixel.gen.h>
 #include <core/gp_write_pixels.gen.h>
+#include <core/gp_pattern_fill.gen.h>
 
 @ for ps in pixelpacks:
 static inline void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int x1, int y,
@@ -36,11 +37,19 @@ static inline void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int x
 
 @         if ps.needs_bit_order():
 	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(pixmap, x0);
-@             if ps.size == 1:
-	gp_write_pixels_{{ ps.suffix }}(start, offset, y, length, pixel);
-@             else:
-	gp_write_pixels_{{ ps.suffix }}(start, offset, length, pixel);
+@             if ps.size <= 4:
+
+	if (gp_pixel_is_pattern(pixel)) {
+		gp_pixel_pattern_row row;
+
+		gp_pixel_pattern_row_init_{{ ps.suffix }}(&row, pixmap, pixel, x0, y);
+		gp_write_pixels_pattern_{{ ps.suffix }}(start, offset, length, &row);
+
+		return;
+	}
+
 @             end
+	gp_write_pixels_{{ ps.suffix }}(start, offset, length, pixel);
 @         else:
 	gp_write_pixels_{{ ps.suffix }}(start, length, pixel);
 @     else:

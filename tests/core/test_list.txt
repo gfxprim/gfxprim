@@ -12,3 +12,4 @@ blit_clipped
 debug
 sub_pixmap_put_pixel
 blit_rotated
+write_pixels_pattern
