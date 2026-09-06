@@ -70,12 +70,12 @@ impl Backend {
         if raw_ptr.is_null() {
             None
         } else {
-            Some( Self { ptr: raw_ptr, pixmap: Pixmap::from_ptr(unsafe {(*raw_ptr).pixmap}) } )
+            Some(Self { ptr: raw_ptr, pixmap: Pixmap::from_ptr(unsafe {(*raw_ptr).pixmap}) } )
         }
     }
 
-    pub fn is_rendering(&self) {
-        return unsafe { self.pixmap.
+    pub fn is_rendering(&self) -> bool {
+        return unsafe { self.pixmap.ptr != std::ptr::null_mut() };
     }
 
     /// Updates screen so that it matches the pixmap backend buffer.
@@ -119,7 +119,7 @@ impl Backend {
     pub fn render_stopped(&mut self) {
         unsafe {
             gp_backend_render_stopped(self.ptr);
-            self.pixmap = Pixmap::from_ptr(unsafe {(*self.ptr).pixmap});
+            self.pixmap = Pixmap::from_ptr((*self.ptr).pixmap);
         };
     }
 
