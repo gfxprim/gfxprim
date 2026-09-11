@@ -50,13 +50,19 @@ struct gp_timer {
 	/** @brief Set if timer was rescheduled from callback */
 	uint32_t res_in_callback:1;
 	/**
-	 * @brief Set if gp_timer_free() was called when timer was running.
+	 * @brief Timer was processed and is waiting for rescheduling.
 	 *
-	 * This defferes freeing the timer memory afte the timer is stopped.
+	 * This is set when timer was processed and is queued for a rescheduling.
+	 */
+	uint32_t reschedule:1;
+
+	/**
+	 * @brief Frees timer when it's stopped.
+	 *
+	 * This is set automatically if gp_timer_free() was called when timer
+	 * was running.
 	 */
 	uint32_t free_on_stop:1;
-
-
 
 	/** @brief Library private pointer. Do not touch! */
 	void *_priv;
@@ -157,7 +163,7 @@ void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer);
  * from the callback is discarded.
  *
  * @param queue A timer queue.
- * @param timer A timer to insert.
+ * @param timer A timer to remove.
  */
 void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer);
 

@@ -485,6 +485,102 @@ static int rem_clears_expires(void)
 	return TST_PASSED;
 }
 
+/*
+ * Two timers expire in the same batch; the second one's callback stops the
+ * first, which by then has asked to be rescheduled and is parked off the
+ * heap waiting for the batch to end.
+ *
+ * Removing it used to go through gp_heap_rem() on an element that was not in
+ * the heap, which rebuilt the heap around it and left a cycle behind: the
+ * next gp_heap_bubble_down() then recursed until the stack ran out.
+ */
+struct rem_res_data {
+	gp_timer **head;
+	gp_timer *rem_parked_victim;
+	int rem_parked_stopped;
+};
+
+static uint32_t callback_reschedule_10(gp_timer *self)
+{
+	(void) self;
+
+	return 10;
+}
+
+static void rem_parked_stopped_cb(gp_timer *self)
+{
+	struct rem_res_data *data = self->priv;
+
+	data->rem_parked_stopped++;
+}
+
+static uint32_t callback_rem_parked(gp_timer *self)
+{
+	struct rem_res_data *data = self->priv;
+
+	gp_timer_queue_rem(data->head, data->rem_parked_victim);
+
+	data->rem_parked_victim->expires = 10;
+
+	gp_timer_queue_ins(data->head, 10, data->rem_parked_victim);
+
+	gp_timer_queue_rem(data->head, data->rem_parked_victim);
+
+	return GP_TIMER_STOP;
+}
+
+static int rem_rescheduled_from_cb(void)
+{
+	gp_timer *head = NULL;
+
+	GP_TIMER_DECLARE(first, 5, 10, "First", callback_reschedule_10, NULL);
+	GP_TIMER_DECLARE(second, 10, 0, "Second", callback_rem_parked, NULL);
+
+	struct rem_res_data data = {
+		.head = &head,
+		.rem_parked_victim = &first,
+	};
+
+	first.stopped = rem_parked_stopped_cb;
+
+	first.priv = &data;
+	second.priv = &data;
+
+	gp_timer_queue_ins(&head, 0, &first);
+	gp_timer_queue_ins(&head, 0, &second);
+
+	if (gp_timer_queue_process(&head, 10) != 2) {
+		tst_msg("Wrong number of timers processed");
+		return TST_FAILED;
+	}
+
+	if (gp_timer_queue_size(head)) {
+		tst_msg("Removed timer was re-inserted anyway");
+		return TST_FAILED;
+	}
+
+	if (data.rem_parked_stopped != 1) {
+		tst_msg("stopped() was not called for the removed timer");
+		return TST_FAILED;
+	}
+
+	if (gp_timer_is_running(&first)) {
+		tst_msg("Removed timer still claims to be running");
+		return TST_FAILED;
+	}
+
+	/* The heap must still be usable — a corrupted one loops forever. */
+	GP_TIMER_DECLARE(fill, 100, 0, "Fill", callback_reschedule_10, NULL);
+	gp_timer_queue_ins(&head, 0, &fill);
+
+	if (gp_timer_queue_size(head) != 1) {
+		tst_msg("Queue is not usable after the removal");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Timer Testsuite",
 	.tests = {
@@ -516,6 +612,8 @@ const struct tst_suite tst_suite = {
 		 .data = callback_call_rem_ins_rem},
 		{.name = "Ins another timer from cb",
 		 .tst_fn = ins_other_from_cb},
+		{.name = "Rem a rescheduled timer from another cb",
+		 .tst_fn = rem_rescheduled_from_cb},
 		{.name = NULL},
 	}
 };

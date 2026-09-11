@@ -71,9 +71,28 @@ void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer)
 	timer->expires = expires;
 	timer->running = 1;
 
+	if (timer->reschedule) {
+		GP_DEBUG(3, "Timer %s re-inserted while waiting for reschedule", timer->id);
+		return;
+	}
+
 	gp_heap_head *head = gp_heap_ins(&(*queue)->heap, &timer->heap, timer_cmp);
 
 	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
+}
+
+static void stop_timer(gp_timer *self)
+{
+	int free_on_stop = self->free_on_stop;
+
+	self->running = 0;
+	self->expires = 0;
+
+	if (self->stopped)
+		self->stopped(self);
+
+	if (free_on_stop)
+		gp_timer_free(self);
 }
 
 void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
@@ -93,7 +112,12 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
 	}
 
 	timer->running = 0;
-	timer->expires = 0;
+
+	if (timer->reschedule) {
+		GP_DEBUG(3, "Timer %s removed while waiting to be rescheduled", timer->id);
+		timer->expires = GP_TIMER_STOP;
+		return;
+	}
 
 	if (!*queue) {
 		GP_WARN("Attempt to remove timer %s from empty queue",
@@ -102,11 +126,9 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
 	}
 
 	gp_heap_head *head = gp_heap_rem(&(*queue)->heap, &timer->heap, timer_cmp);
-
-	if (timer->stopped)
-		timer->stopped(timer);
-
 	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
+
+	stop_timer(timer);
 }
 
 static void process_top(gp_timer **queue, gp_timer **reschedule, uint64_t now)
@@ -134,21 +156,13 @@ static void process_top(gp_timer **queue, gp_timer **reschedule, uint64_t now)
 	timer->in_callback = 0;
 
 	if (ret == GP_TIMER_STOP) {
-		int free_on_stop = timer->free_on_stop;
-
-		timer->running = 0;
-		timer->expires = 0;
-
-		if (timer->stopped)
-			timer->stopped(timer);
-
-		if (free_on_stop)
-			gp_timer_free(timer);
+		stop_timer(timer);
 	} else {
 		timer->expires = ret + now;
 		GP_DEBUG(3, "Rescheduling timer '%s' after %"PRIu32" expires at %"PRIu64,
 		         timer->id, ret, timer->expires);
 		timer->next = *reschedule;
+		timer->reschedule = 1;
 		*reschedule = timer;
 	}
 }
@@ -175,7 +189,14 @@ ret:
 
 	while (reschedule) {
 		tmp = reschedule->next;
-		heap = gp_heap_ins(heap, &reschedule->heap, timer_cmp);
+		reschedule->reschedule = 0;
+
+		if (reschedule->expires == GP_TIMER_STOP) {
+			stop_timer(reschedule);
+		} else {
+			heap = gp_heap_ins(heap, &reschedule->heap, timer_cmp);
+		}
+
 		reschedule = tmp;
 	}
 
