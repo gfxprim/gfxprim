@@ -15,11 +15,11 @@
 #include <core/gp_debug.h>
 #include <utils/gp_block_alloc.h>
 
+#define ALIGN_MASK 7
+
 static size_t align(size_t size)
 {
-	size_t mask = 3;
-
-	return (size + mask) & ~mask;
+	return (size + ALIGN_MASK) & ~(ALIGN_MASK);
 }
 
 static void *alloc_block(size_t size)
