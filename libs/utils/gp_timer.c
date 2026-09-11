@@ -134,13 +134,15 @@ static void process_top(gp_timer **queue, gp_timer **reschedule, uint64_t now)
 	timer->in_callback = 0;
 
 	if (ret == GP_TIMER_STOP) {
+		int free_on_stop = timer->free_on_stop;
+
 		timer->running = 0;
 		timer->expires = 0;
 
 		if (timer->stopped)
 			timer->stopped(timer);
 
-		if (timer->free_on_stop)
+		if (free_on_stop)
 			gp_timer_free(timer);
 	} else {
 		timer->expires = ret + now;
