@@ -55,7 +55,7 @@ static int shape = SHAPE_FIRST;
 /* Variants in coordinates, if applicable */
 static int variant = 1;
 
-/* center of drabackend->pixmapg */
+/* center of drawing */
 static int center_x;
 static int center_y;
 
@@ -539,7 +539,7 @@ void event_loop(void)
 
 void print_instructions(void)
 {
-	printf("Use the follobackend->pixmapg keys to control the test:\n");
+	printf("Use the following keys to control the test:\n");
 	printf("    Esc ................. exit\n");
 	printf("    Space ............... change shapes\n");
 	printf("    O ................... draw outlines (none/before/after fill)\n");
