@@ -94,6 +94,9 @@ static void x11_detect_wm_features(void)
 
 	at = XInternAtom(x11_conn.dpy, "_NET_SUPPORTED", True);
 
+	if (at == None)
+		return;
+
 	if (x11_get_property(at, &args, &count)) {
 		GP_DEBUG(1, "Window manager supports NetWM");
 
