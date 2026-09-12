@@ -67,21 +67,75 @@ static int file_close(gp_io *self)
 	return close(fd);
 }
 
-gp_io *gp_io_file(const char *path, enum gp_io_file_mode mode)
+static gp_io *io_fd_init(int fd, enum gp_io_file_mode mode)
 {
-	int err, flags = 0;
-	gp_io *io;
 	struct file_io *file_io;
-
-	GP_DEBUG(1, "Creating IOFile '%s'", path);
+	gp_io *io;
 
 	io = malloc(sizeof(gp_io) + sizeof(struct file_io));
-
 	if (!io) {
 		GP_DEBUG(1, "Malloc failed :(");
-		err = ENOMEM;
-		goto err0;
+		errno = ENOMEM;
+		return NULL;
 	}
+
+	file_io = GP_IO_PRIV(io);
+	file_io->fd = fd;
+
+	io->mark = 0;
+
+	io->seek = file_seek;
+	io->read = mode == GP_IO_WRONLY ? NULL : file_read;
+	io->write = mode == GP_IO_RDONLY ? NULL : file_write;
+	io->close = file_close;
+
+	return io;
+}
+
+static int accmode_allows(int accmode, enum gp_io_file_mode mode)
+{
+	switch (mode) {
+	case GP_IO_RDONLY:
+		return accmode == O_RDONLY || accmode == O_RDWR;
+	case GP_IO_WRONLY:
+		return accmode == O_WRONLY || accmode == O_RDWR;
+	case GP_IO_RDWR:
+		return accmode == O_RDWR;
+	}
+
+	return 0;
+}
+
+gp_io *gp_io_fd(int fd, enum gp_io_file_mode mode)
+{
+	int flags;
+
+	GP_DEBUG(1, "Creating IOFile from fd %i", fd);
+
+	/* Doubles as a check that the fd is valid at all. */
+	flags = fcntl(fd, F_GETFL);
+
+	if (flags < 0) {
+		GP_DEBUG(1, "Failed to get fd %i flags: %s",
+		         fd, strerror(errno));
+		return NULL;
+	}
+
+	if (!accmode_allows(flags & O_ACCMODE, mode)) {
+		GP_DEBUG(1, "fd %i is not open for the requested mode", fd);
+		errno = EACCES;
+		return NULL;
+	}
+
+	return io_fd_init(fd, mode);
+}
+
+gp_io *gp_io_file(const char *path, enum gp_io_file_mode mode)
+{
+	int err, fd, flags = 0;
+	gp_io *io;
+
+	GP_DEBUG(1, "Creating IOFile '%s'", path);
 
 	switch (mode) {
 	case GP_IO_WRONLY:
@@ -95,35 +149,21 @@ gp_io *gp_io_file(const char *path, enum gp_io_file_mode mode)
 	break;
 	}
 
-	file_io = GP_IO_PRIV(io);
-	file_io->fd = open(path, flags, 0666);
-
-	if (file_io->fd < 0) {
-		err = errno;
+	fd = open(path, flags, 0666);
+	if (fd < 0) {
 		GP_DEBUG(1, "Failed to open '%s': %s", path, strerror(errno));
-		goto err1;
+		return NULL;
 	}
 
-	io->mark = 0;
-
-	io->seek = file_seek;
-	io->read = file_read;
-	io->write = file_write;
-
-	if (mode == GP_IO_RDONLY)
-		io->write = NULL;
-
-	if (mode == GP_IO_WRONLY)
-		io->read = NULL;
-
-	io->close = file_close;
+	io = io_fd_init(fd, mode);
+	if (!io) {
+		err = errno;
+		close(fd);
+		errno = err;
+		return NULL;
+	}
 
 	return io;
-err1:
-	free(io);
-err0:
-	errno = err;
-	return NULL;
 }
 
 struct mem_io {

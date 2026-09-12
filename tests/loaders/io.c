@@ -5,6 +5,8 @@
 
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include <core/gp_common.h>
 #include <loaders/gp_io.h>
@@ -151,7 +153,7 @@ static int do_test(gp_io *io, off_t io_size, int is_file)
 	uint16_t val;
 
 	if (gp_io_readf(io, header, &byte, &val) != 5) {
-		tst_msg("Failed to ReadF from I/O");
+		tst_msg("Failed to gp_io_readf() from I/O");
 		return TST_FAILED;
 	}
 
@@ -211,7 +213,7 @@ static int do_test(gp_io *io, off_t io_size, int is_file)
 	return TST_PASSED;
 }
 
-static int test_IOMem(void)
+static int test_io_mem(void)
 {
 	uint8_t buffer[128];
 	unsigned int i;
@@ -244,7 +246,7 @@ static int test_IOMem(void)
 
 #define TFILE "test.io"
 
-static int test_IOFile(void)
+static int test_io_file(void)
 {
 	uint8_t buffer[128];
 	unsigned int i;
@@ -296,7 +298,165 @@ static int test_IOFile(void)
 	return TST_PASSED;
 }
 
-static int test_IOSubIO(void)
+static int test_io_fd(void)
+{
+	uint8_t buffer[128];
+	unsigned int i;
+	int ret, fd;
+	gp_io *io;
+
+	for (i = 0; i < sizeof(buffer); i++)
+		buffer[i] = i;
+
+	io = gp_io_file(TFILE, GP_IO_WRONLY);
+	if (!io) {
+		tst_msg("Failed to open file I/O for writing: %s",
+		        strerror(errno));
+		return TST_FAILED;
+	}
+
+	ret = gp_io_write(io, buffer, sizeof(buffer));
+	if (ret != sizeof(buffer)) {
+		tst_msg("Failed to write: %s", strerror(errno));
+		return TST_FAILED;
+	}
+
+	if (gp_io_close(io)) {
+		tst_msg("Failed to close file I/O: %s", strerror(errno));
+		return TST_FAILED;
+	}
+
+	/* An invalid descriptor must be refused rather than wrapped. */
+	if (gp_io_fd(-1, GP_IO_RDONLY)) {
+		tst_msg("gp_io_fd(-1) succeeded unexpectedly");
+		return TST_FAILED;
+	}
+
+	if (errno != EBADF) {
+		tst_msg("gp_io_fd(-1) set errno %i expected EBADF", errno);
+		return TST_FAILED;
+	}
+
+	fd = open(TFILE, O_RDONLY);
+	if (fd < 0) {
+		tst_msg("Failed to open '%s': %s", TFILE, strerror(errno));
+		return TST_FAILED;
+	}
+
+	/* Asking for more than the descriptor has must fail, not downgrade. */
+	if (gp_io_fd(fd, GP_IO_WRONLY) || errno != EACCES) {
+		tst_msg("write-only I/O over a read-only fd was not refused");
+		close(fd);
+		return TST_FAILED;
+	}
+
+	if (gp_io_fd(fd, GP_IO_RDWR) || errno != EACCES) {
+		tst_msg("read-write I/O over a read-only fd was not refused");
+		close(fd);
+		return TST_FAILED;
+	}
+
+	io = gp_io_fd(fd, GP_IO_RDONLY);
+	if (!io) {
+		tst_msg("Failed to create I/O from fd: %s", strerror(errno));
+		close(fd);
+		return TST_FAILED;
+	}
+
+	if (io->write) {
+		tst_msg("Read-only fd produced a writeable I/O");
+		gp_io_close(io);
+		return TST_FAILED;
+	}
+
+	ret = do_test(io, sizeof(buffer), 1);
+	if (ret) {
+		gp_io_close(io);
+		return ret;
+	}
+
+	if (gp_io_close(io)) {
+		tst_msg("Failed to close fd I/O: %s", strerror(errno));
+		return TST_FAILED;
+	}
+
+	/* The I/O owns the fd, so closing it closed the descriptor too. */
+	if (fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
+		tst_msg("gp_io_close() left fd %i open", fd);
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+static int test_io_fd_narrow(void)
+{
+	uint8_t buffer[128];
+	unsigned int i;
+	int ret, fd;
+	gp_io *io;
+
+	for (i = 0; i < sizeof(buffer); i++)
+		buffer[i] = i;
+
+	fd = open(TFILE, O_CREAT | O_RDWR | O_TRUNC, 0666);
+	if (fd < 0) {
+		tst_msg("Failed to open '%s': %s", TFILE, strerror(errno));
+		return TST_FAILED;
+	}
+
+	if (write(fd, buffer, sizeof(buffer)) != sizeof(buffer)) {
+		tst_msg("Failed to write: %s", strerror(errno));
+		close(fd);
+		return TST_FAILED;
+	}
+
+	if (lseek(fd, 0, SEEK_SET)) {
+		tst_msg("Failed to rewind: %s", strerror(errno));
+		close(fd);
+		return TST_FAILED;
+	}
+
+	/*
+	 * The descriptor is read-write but the I/O was asked for read-only,
+	 * so it must come out readable and NOT writeable -- that narrowing is
+	 * the point of the mode parameter.
+	 */
+	io = gp_io_fd(fd, GP_IO_RDONLY);
+	if (!io) {
+		tst_msg("Failed to narrow a RDWR fd to RDONLY: %s",
+		        strerror(errno));
+		close(fd);
+		return TST_FAILED;
+	}
+
+	if (io->write) {
+		tst_msg("RDONLY I/O over a RDWR fd stayed writeable");
+		gp_io_close(io);
+		return TST_FAILED;
+	}
+
+	if (!io->read) {
+		tst_msg("RDONLY I/O over a RDWR fd is not readable");
+		gp_io_close(io);
+		return TST_FAILED;
+	}
+
+	ret = do_test(io, sizeof(buffer), 1);
+	if (ret) {
+		gp_io_close(io);
+		return ret;
+	}
+
+	if (gp_io_close(io)) {
+		tst_msg("Failed to close fd I/O: %s", strerror(errno));
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+static int test_io_sub_io(void)
 {
 	uint8_t buffer[128];
 	unsigned int i;
@@ -367,7 +527,7 @@ failed:
 	return TST_FAILED;
 }
 
-static ssize_t test_IOFill_read(gp_io GP_UNUSED(*io), void *buf, size_t size)
+static ssize_t test_io_fill_read(gp_io GP_UNUSED(*io), void *buf, size_t size)
 {
 	ssize_t ret = GP_MIN(7u, size);
 
@@ -376,7 +536,7 @@ static ssize_t test_IOFill_read(gp_io GP_UNUSED(*io), void *buf, size_t size)
 	return ret;
 }
 
-static int try_IOFill_and_check(gp_io *io, unsigned int size)
+static int try_io_fill_and_check(gp_io *io, unsigned int size)
 {
 	uint8_t buf[125];
 	unsigned int i, fail = 0;
@@ -409,15 +569,15 @@ static int try_IOFill_and_check(gp_io *io, unsigned int size)
 	return TST_PASSED;
 }
 
-static int test_IOFill(void)
+static int test_io_fill(void)
 {
-	gp_io io = {.read = test_IOFill_read};
+	gp_io io = {.read = test_io_fill_read};
 	int ret = 0;
 
-	ret += try_IOFill_and_check(&io, 7);
-	ret += try_IOFill_and_check(&io, 10);
-	ret += try_IOFill_and_check(&io, 43);
-	ret += try_IOFill_and_check(&io, 69);
+	ret += try_io_fill_and_check(&io, 7);
+	ret += try_io_fill_and_check(&io, 10);
+	ret += try_io_fill_and_check(&io, 43);
+	ret += try_io_fill_and_check(&io, 69);
 
 	if (ret)
 		return TST_FAILED;
@@ -439,7 +599,7 @@ static ssize_t flush_write(gp_io GP_UNUSED(*io), const void *buf, size_t size)
 	return to_write;
 }
 
-static int test_IOFlush(void)
+static int test_io_flush(void)
 {
 	gp_io io = {.write = flush_write};
 	unsigned int i;
@@ -491,7 +651,7 @@ static int wbuf_close(gp_io GP_UNUSED(*io))
 	return 0;
 }
 
-static int test_IOWBuffer(void)
+static int test_io_wbuffer(void)
 {
 	gp_io *bio;
 	size_t cnt = 0;
@@ -535,26 +695,34 @@ static int test_IOWBuffer(void)
 const struct tst_suite tst_suite = {
 	.suite_name = "IO",
 	.tests = {
-		{.name = "IOMem",
-		 .tst_fn = test_IOMem,
+		{.name = "io_mem",
+		 .tst_fn = test_io_mem,
 		 .flags = TST_CHECK_MALLOC},
 
-		{.name = "IOSubIO",
-		 .tst_fn = test_IOSubIO,
+		{.name = "io_sub_io",
+		 .tst_fn = test_io_sub_io,
 		 .flags = TST_CHECK_MALLOC},
 
-		{.name = "IOFile",
-		 .tst_fn = test_IOFile,
+		{.name = "io_file",
+		 .tst_fn = test_io_file,
 		 .flags = TST_CHECK_MALLOC | TST_TMPDIR},
 
-		{.name = "IOFill",
-		 .tst_fn = test_IOFill},
+		{.name = "io_fd",
+		 .tst_fn = test_io_fd,
+		 .flags = TST_CHECK_MALLOC | TST_TMPDIR},
 
-		{.name = "IOFlush",
-		 .tst_fn = test_IOFlush},
+		{.name = "io_fd_narrow",
+		 .tst_fn = test_io_fd_narrow,
+		 .flags = TST_CHECK_MALLOC | TST_TMPDIR},
 
-		{.name = "IOWBuffer",
-		 .tst_fn = test_IOWBuffer,
+		{.name = "io_fill",
+		 .tst_fn = test_io_fill},
+
+		{.name = "io_flush",
+		 .tst_fn = test_io_flush},
+
+		{.name = "io_wbuffer",
+		 .tst_fn = test_io_wbuffer,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},

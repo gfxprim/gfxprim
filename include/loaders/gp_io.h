@@ -303,6 +303,21 @@ enum gp_io_file_mode {
 gp_io *gp_io_file(const char *path, enum gp_io_file_mode mode);
 
 /**
+ * @brief Creates I/O from an open file descriptor.
+ *
+ * The I/O takes ownership of @p fd and gp_io_close() closes it, pass a dup()
+ * to keep it. Unlike gp_io_file() a write-only I/O does not truncate.
+ *
+ * @param fd An open file descriptor.
+ * @param mode Open the I/O read-only, write-only or read-write. Can only
+ *             narrow what @p fd is already open for, asking for more fails
+ *             with EACCES.
+ *
+ * @return A newly allocated I/O or NULL on error and errno is set.
+ */
+gp_io *gp_io_fd(int fd, enum gp_io_file_mode mode);
+
+/**
  * @brief Creates a readable I/O from a memory buffer.
  *
  * @param buf A buffer with data.
