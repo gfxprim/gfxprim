@@ -149,17 +149,18 @@ void gp_backend_timer_stop(gp_backend *self, gp_timer *timer)
 
 int gp_backend_timer_timeout(gp_backend *self)
 {
+	gp_timer *first = gp_timer_queue_first(&self->timers);
 	uint64_t now;
 
-	if (!self->timers)
+	if (!first)
 		return -1;
 
 	now = gp_time_stamp();
 
-	if (now > self->timers->expires)
+	if (now > first->expires)
 		return 0;
 
-	return self->timers->expires - now;
+	return first->expires - now;
 }
 
 static uint32_t backend_task_dispatch(gp_timer *self)
@@ -273,7 +274,7 @@ gp_event *gp_backend_ev_get(gp_backend *self)
 
 void gp_backend_poll(gp_backend *self)
 {
-	if (self->timers) {
+	if (gp_timer_queue_size(&self->timers)) {
 		if (gp_timer_queue_process(&self->timers, gp_time_stamp()))
 			return;
 	}
@@ -287,7 +288,7 @@ void gp_backend_poll(gp_backend *self)
 
 static void wait_timers_fds(gp_backend *self, uint64_t now, int timeout_ms)
 {
-	int timeout = self->timers->expires - now;
+	int timeout = gp_timer_queue_first(&self->timers)->expires - now;
 
 	if (timeout_ms >= 0)
 		timeout = GP_MIN(timeout, timeout_ms);
@@ -340,7 +341,7 @@ void gp_backend_wait_timeout(gp_backend *self, int timeout_ms)
 	 * If timers or file descriptors are registered we need to poll
 	 * backends that does not expose file descriptor(s).
 	 */
-	if (self->timers || gp_poll_fds(&self->fds)) {
+	if (gp_timer_queue_size(&self->timers) || gp_poll_fds(&self->fds)) {
 		if (self->poll) {
 			wait_timers_poll(self, timeout_ms);
 			return;
@@ -351,7 +352,7 @@ void gp_backend_wait_timeout(gp_backend *self, int timeout_ms)
 	 * If timers are registered and we have file descriptors we need to
 	 * calculate the timeout until either timeout or closest timer.
 	 */
-	if (self->timers) {
+	if (gp_timer_queue_size(&self->timers)) {
 		wait_timers_fds(self, now, timeout_ms);
 		return;
 	}

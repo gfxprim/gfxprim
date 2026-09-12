@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <inttypes.h>
@@ -9,46 +9,135 @@
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
 #include <utils/gp_timer.h>
-#include <utils/gp_heap.h>
+#include <utils/gp_avl_tree.h>
+#include <utils/gp_list.h>
 
-static void dump_level(const gp_heap_head *heap, unsigned int level, unsigned int cur)
+#define TIMER_NODE(node) GP_CONTAINER_OF(node, gp_timer, avl)
+#define TIMER_ENTRY(entry) GP_LIST_ENTRY(entry, gp_timer, lh)
+
+static int expires_cmp(uint64_t e1, uint64_t e2)
 {
-	const gp_timer *timer = GP_HEAP_ENTRY(heap, struct gp_timer, heap);
+	if (e1 == e2)
+		return 0;
 
-	if (level == cur) {
-		if (heap)
-			printf("[%9s %8"PRIu64"] ", timer->id, timer->expires);
-		else
-			printf("                    ");
+	return e1 < e2 ? -1 : 1;
+}
+
+static int bucket_cmp(gp_avl_node *n1, gp_avl_node *n2)
+{
+	return expires_cmp(TIMER_NODE(n1)->expires, TIMER_NODE(n2)->expires);
+}
+
+static int bucket_cmp_key(gp_avl_node *node, const void *key)
+{
+	return expires_cmp(TIMER_NODE(node)->expires, *(const uint64_t *)key);
+}
+
+static gp_timer *bucket_lookup(gp_timer_queue *self, uint64_t expires)
+{
+	gp_avl_node *node = gp_avl_tree_lookup(self->root, &expires, bucket_cmp_key);
+
+	if (!node)
+		return NULL;
+
+	return TIMER_NODE(node);
+}
+
+static void dump_buckets(gp_avl_node *node)
+{
+	gp_dlist_head *i;
+	gp_timer *head;
+
+	if (!node)
+		return;
+
+	dump_buckets(node->right);
+
+	head = TIMER_NODE(node);
+
+	printf("%9"PRIu64":", head->expires);
+
+	GP_CLIST_FOREACH(&head->lh, i)
+		printf(" %s", TIMER_ENTRY(i)->id);
+
+	printf("\n");
+
+	dump_buckets(node->left);
+}
+
+void gp_timer_queue_dump(const gp_timer_queue *self)
+{
+	dump_buckets(self->root);
+}
+
+gp_timer *gp_timer_queue_first(const gp_timer_queue *self)
+{
+	const gp_avl_node *node = self->root;
+
+	if (!node)
+		return NULL;
+
+	node = gp_avl_tree_min(node);
+
+	return GP_CONTAINER_OF(node, gp_timer, avl);
+}
+
+static void queue_ins(gp_timer_queue *self, gp_timer *timer)
+{
+	gp_timer *head = bucket_lookup(self, timer->expires);
+
+	self->size++;
+
+	if (head) {
+		timer->bucket_head = 0;
+		gp_clist_push_tail(&head->lh, &timer->lh);
 		return;
 	}
 
-	dump_level(heap ? heap->left : NULL, level, cur+1);
-	dump_level(heap ? heap->right : NULL , level, cur+1);
+	timer->bucket_head = 1;
+	gp_clist_init(&timer->lh);
+	self->root = gp_avl_tree_ins(self->root, &timer->avl, bucket_cmp);
 }
 
-void gp_timer_queue_dump(const gp_timer *heap)
+static void queue_rem(gp_timer_queue *self, gp_timer *timer)
 {
-	unsigned int i, j = 0;
+	gp_timer *next = TIMER_ENTRY(timer->lh.next);
 
-	if (!heap)
+	self->size--;
+
+	gp_clist_rem(&timer->lh);
+
+	if (!timer->bucket_head)
 		return;
 
-	for (i = 1; heap->heap.children + 1 >= i; i = i*2) {
-		dump_level(&heap->heap, j++, 0);
-		printf("\n");
-	}
+	timer->bucket_head = 0;
+
+	self->root = gp_avl_tree_del(self->root, &timer->expires, NULL, bucket_cmp_key);
+
+	/* It was the only timer in the bucket, the bucket goes with it. */
+	if (next == timer)
+		return;
+
+	next->bucket_head = 1;
+
+	self->root = gp_avl_tree_ins(self->root, &next->avl, bucket_cmp);
 }
 
-static int timer_cmp(gp_heap_head *h1, gp_heap_head *h2)
+static void stop_timer(gp_timer *self)
 {
-	gp_timer *t1 = GP_HEAP_ENTRY(h1, struct gp_timer, heap);
-	gp_timer *t2 = GP_HEAP_ENTRY(h2, struct gp_timer, heap);
+	int free_on_stop = self->free_on_stop;
 
-	return t1->expires >= t2->expires;
+	self->running = 0;
+	self->expires = 0;
+
+	if (self->stopped)
+		self->stopped(self);
+
+	if (free_on_stop)
+		gp_timer_free(self);
 }
 
-void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer)
+void gp_timer_queue_ins(gp_timer_queue *self, uint64_t now, gp_timer *timer)
 {
 	uint32_t after = timer->expires;
 	uint64_t expires = now + after;
@@ -76,26 +165,10 @@ void gp_timer_queue_ins(gp_timer **queue, uint64_t now, gp_timer *timer)
 		return;
 	}
 
-	gp_heap_head *head = gp_heap_ins(&(*queue)->heap, &timer->heap, timer_cmp);
-
-	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
+	queue_ins(self, timer);
 }
 
-static void stop_timer(gp_timer *self)
-{
-	int free_on_stop = self->free_on_stop;
-
-	self->running = 0;
-	self->expires = 0;
-
-	if (self->stopped)
-		self->stopped(self);
-
-	if (free_on_stop)
-		gp_timer_free(self);
-}
-
-void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
+void gp_timer_queue_rem(gp_timer_queue *self, gp_timer *timer)
 {
 	GP_DEBUG(3, "Removing timer %s from queue in_callback=%i",
 	         timer->id, timer->in_callback);
@@ -114,34 +187,30 @@ void gp_timer_queue_rem(gp_timer **queue, gp_timer *timer)
 	timer->running = 0;
 
 	if (timer->reschedule) {
-		GP_DEBUG(3, "Timer %s removed while waiting to be rescheduled", timer->id);
+		GP_DEBUG(3, "Timer %s removed while waiting to be rescheduled",
+		         timer->id);
 		timer->expires = GP_TIMER_STOP;
 		return;
 	}
 
-	if (!*queue) {
+	if (!self->root) {
 		GP_WARN("Attempt to remove timer %s from empty queue",
 		        timer->id);
 		return;
 	}
 
-	gp_heap_head *head = gp_heap_rem(&(*queue)->heap, &timer->heap, timer_cmp);
-	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
-
+	queue_rem(self, timer);
 	stop_timer(timer);
 }
 
-static void process_top(gp_timer **queue, gp_timer **reschedule, uint64_t now)
+static void process_top(gp_timer_queue *self, gp_timer *timer, gp_dlist *reschedule, uint64_t now)
 {
-	gp_timer *timer = *queue;
 	uint32_t ret;
 
 	GP_DEBUG(3, "Timer %s expired at %"PRIu64" now is %"PRIu64,
 	         timer->id, timer->expires, now);
 
-	gp_heap_head *head = gp_heap_pop(&(*queue)->heap, timer_cmp);
-
-	*queue = GP_HEAP_ENTRY(head, struct gp_timer, heap);
+	queue_rem(self, timer);
 
 	timer->in_callback = 1;
 
@@ -157,50 +226,50 @@ static void process_top(gp_timer **queue, gp_timer **reschedule, uint64_t now)
 
 	if (ret == GP_TIMER_STOP) {
 		stop_timer(timer);
-	} else {
-		timer->expires = ret + now;
-		GP_DEBUG(3, "Rescheduling timer '%s' after %"PRIu32" expires at %"PRIu64,
-		         timer->id, ret, timer->expires);
-		timer->next = *reschedule;
-		timer->reschedule = 1;
-		*reschedule = timer;
+		return;
 	}
+
+	timer->expires = ret + now;
+
+	GP_DEBUG(3, "Rescheduling timer '%s' after %"PRIu32" expires at %"PRIu64,
+	         timer->id, ret, timer->expires);
+
+	/* Timer that is will not expire second time can be inserted right back. */
+	if (timer->expires > now) {
+		queue_ins(self, timer);
+		return;
+        }
+
+	timer->reschedule = 1;
+	gp_dlist_push_tail(reschedule, &timer->lh);
 }
 
-int gp_timer_queue_process(gp_timer **queue, uint64_t now)
+int gp_timer_queue_process(gp_timer_queue *self, uint64_t now)
 {
+	gp_dlist reschedule = {};
+	gp_dlist_head *entry;
 	int ret = 0;
-	gp_timer *reschedule = NULL, *tmp;
-	gp_heap_head *heap;
 
 	for (;;) {
-		if (!*queue)
-			goto ret;
+		gp_timer *first = gp_timer_queue_first(self);
 
-		if ((*queue)->expires <= now) {
-			process_top(queue, &reschedule, now);
-			ret++;
-		} else {
-			goto ret;
-		}
-	}
-ret:
-	heap = &(*queue)->heap;
+		if (!first || first->expires > now)
+			break;
 
-	while (reschedule) {
-		tmp = reschedule->next;
-		reschedule->reschedule = 0;
-
-		if (reschedule->expires == GP_TIMER_STOP) {
-			stop_timer(reschedule);
-		} else {
-			heap = gp_heap_ins(heap, &reschedule->heap, timer_cmp);
-		}
-
-		reschedule = tmp;
+		process_top(self, first, &reschedule, now);
+		ret++;
 	}
 
-	*queue = GP_HEAP_ENTRY(heap, struct gp_timer, heap);
+	while ((entry = gp_dlist_pop_head(&reschedule))) {
+		gp_timer *timer = TIMER_ENTRY(entry);
+
+		timer->reschedule = 0;
+
+		if (timer->expires == GP_TIMER_STOP)
+			stop_timer(timer);
+		else
+			queue_ins(self, timer);
+	}
 
 	return ret;
 }

@@ -345,7 +345,7 @@ void gp_widget_render_timer(gp_widget *self, int flags, unsigned int timeout_ms)
 
 	if (i >= GP_ARRAY_SIZE(timers)) {
 		GP_WARN("All %zu timers used!", GP_ARRAY_SIZE(timers));
-		gp_timer_queue_dump(backend->timers);
+		gp_timer_queue_dump(&backend->timers);
 	}
 
 	timers[i].expires = timeout_ms;
@@ -406,7 +406,7 @@ void gp_widgets_redraw(struct gp_widget *layout)
 
 static char *backend_init_str = NULL;
 
-void gp_app_timer_queue_switch(gp_timer **);
+void gp_app_timer_queue_switch(gp_timer_queue *);
 
 static gp_task_queue task_queue = {};
 

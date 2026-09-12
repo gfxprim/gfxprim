@@ -320,8 +320,8 @@ struct gp_backend {
 	 */
 	void (*on_ev_ret)(gp_backend *self, gp_event *ev);
 
-	/** @brief Priority queue for timers. */
-	gp_timer *timers;
+	/** @brief Queue for timers. */
+	gp_timer_queue timers;
 
 	/** @brief Task queue */
 	gp_task_queue *tasks;
@@ -848,7 +848,7 @@ void gp_backend_timer_stop(gp_backend *self, gp_timer *timer);
  */
 static inline unsigned int gp_backend_timers_queued(gp_backend *self)
 {
-	return gp_timer_queue_size(self->timers);
+	return gp_timer_queue_size(&self->timers);
 }
 
 /**

@@ -12,8 +12,8 @@
 #include <input/gp_time_stamp.h>
 #include <widgets/gp_app_timer.h>
 
-static gp_timer *temp_queue;
-static gp_timer **queue = &temp_queue;
+static gp_timer_queue temp_queue;
+static gp_timer_queue *queue = &temp_queue;
 
 void gp_app_timer_start(gp_timer *timer)
 {
@@ -35,7 +35,7 @@ void gp_app_timer_reschedule(gp_timer *timer, uint32_t expires_ms)
         gp_timer_queue_ins(queue, gp_time_stamp(), timer);
 }
 
-void gp_app_timer_queue_switch(gp_timer **new_queue)
+void gp_app_timer_queue_switch(gp_timer_queue *new_queue)
 {
 	queue = new_queue;
 	*queue = temp_queue;
