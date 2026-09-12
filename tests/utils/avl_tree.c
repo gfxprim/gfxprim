@@ -182,7 +182,7 @@ static int avl_tree_del_max(void)
 
 static gp_avl_node *del_entry(gp_avl_node *root, unsigned int key)
 {
-	gp_avl_node *ret;
+	gp_avl_node *ret = NULL;
 	struct avl_tree_entry *entry;
 
 	root = gp_avl_tree_del(root, &key, &ret, cmp_key);
@@ -253,6 +253,88 @@ static int avl_tree_del(void)
 	return TST_PASSED;
 }
 
+static unsigned int check_subtree(gp_avl_node *root, int *fail)
+{
+	unsigned int left, right, depth;
+
+	if (!root)
+		return 0;
+
+	left = check_subtree(root->left, fail);
+	right = check_subtree(root->right, fail);
+	depth = GP_MAX(left, right) + 1;
+
+	if (GP_ABS_DIFF(left, right) > 1) {
+		tst_msg("Unbalanced node, subtree depths %u and %u", left, right);
+		(*fail)++;
+	}
+
+	if (root->depth != depth) {
+		tst_msg("Node depth %lu, subtrees %u and %u", root->depth, left, right);
+		(*fail)++;
+	}
+
+	return depth;
+}
+
+static int avl_tree_del_two_subtrees(void)
+{
+	unsigned int i, key, two_subtrees = 0;
+	int fail = 0;
+
+	for (key = 1; key <= GP_ARRAY_SIZE(entries); key++) {
+		gp_avl_node *root = NULL, *ret = NULL, *node;
+		struct avl_tree_entry *entry;
+
+		for (i = 0; i < GP_ARRAY_SIZE(entries); i++)
+			root = gp_avl_tree_ins(root, &(entries[i].node), cmp_nodes);
+
+		node = gp_avl_tree_lookup(root, &key, cmp_key);
+		if (node && node->left && node->right)
+			two_subtrees++;
+
+		root = gp_avl_tree_del(root, &key, &ret, cmp_key);
+		if (!ret) {
+			tst_msg("Failed to remove key %u", key);
+			fail++;
+			continue;
+		}
+
+		entry = GP_CONTAINER_OF(ret, struct avl_tree_entry, node);
+		if (entry->key != key) {
+			tst_msg("Removed key %u expected %u", entry->key, key);
+			fail++;
+		}
+
+		if (gp_avl_tree_lookup(root, &key, cmp_key)) {
+			tst_msg("Removed key %u still in the tree", key);
+			fail++;
+		}
+
+		for (i = 1; i <= GP_ARRAY_SIZE(entries); i++) {
+			if (i == key)
+				continue;
+
+			if (!gp_avl_tree_lookup(root, &i, cmp_key)) {
+				tst_msg("Key %u lost when %u was removed", i, key);
+				fail++;
+			}
+		}
+
+		check_subtree(root, &fail);
+	}
+
+	if (!two_subtrees) {
+		tst_msg("No key removed had two subtrees");
+		fail++;
+	}
+
+	if (fail)
+		return TST_FAILED;
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "avl tree testsuite",
 	.tests = {
@@ -270,6 +352,10 @@ const struct tst_suite tst_suite = {
 
 		{.name = "avl tree del",
 		 .tst_fn = avl_tree_del,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "avl tree del node with two subtrees",
+		 .tst_fn = avl_tree_del_two_subtrees,
 		 .flags = TST_CHECK_MALLOC},
 
 		{}

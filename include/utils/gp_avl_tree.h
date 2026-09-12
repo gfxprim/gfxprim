@@ -261,7 +261,7 @@ GP_WUR static inline gp_avl_node *gp_avl_tree_del(gp_avl_node *root, const void 
 		min->left = left;
 		min->right = right;
 
-		return gp_avl_tree_balance_(root);
+		return gp_avl_tree_balance_(min);
 	}
 
 	return gp_avl_tree_balance_(root);
