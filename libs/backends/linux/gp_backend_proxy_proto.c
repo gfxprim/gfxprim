@@ -11,6 +11,7 @@
 #include <sys/uio.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <unistd.h>
 #include <backends/gp_proxy_proto.h>
 
 static int validate_msg(const union gp_proxy_msg *msg, unsigned int size)
@@ -31,13 +32,44 @@ static int validate_msg(const union gp_proxy_msg *msg, unsigned int size)
 
 int gp_proxy_buf_recv(int fd, struct gp_proxy_buf *buf, int block)
 {
-	ssize_t ret;
+	union {
+		struct cmsghdr align;
+		char buf[CMSG_SPACE(sizeof(int))];
+	} cmsgbuf;
 	char *bufp = buf->buf + buf->pos + buf->size;
 	size_t len = GP_PROXY_BUF_SIZE - buf->pos - buf->size;
+	struct iovec iov = {.iov_base = bufp, .iov_len = len};
+	struct msghdr hdr = {
+		.msg_iov = &iov,
+		.msg_iovlen = 1,
+		.msg_control = cmsgbuf.buf,
+		.msg_controllen = sizeof(cmsgbuf.buf),
+	};
+	struct cmsghdr *cmsg;
+	ssize_t ret;
 
-	ret = recv(fd, bufp, len, block ? 0 : MSG_DONTWAIT);
+	ret = recvmsg(fd, &hdr, (block ? 0 : MSG_DONTWAIT) | MSG_CMSG_CLOEXEC);
 	if (ret > 0)
 		buf->size += ret;
+
+	for (cmsg = CMSG_FIRSTHDR(&hdr); cmsg; cmsg = CMSG_NXTHDR(&hdr, cmsg)) {
+		int got;
+
+		if (cmsg->cmsg_level != SOL_SOCKET ||
+		    cmsg->cmsg_type != SCM_RIGHTS ||
+		    cmsg->cmsg_len != CMSG_LEN(sizeof(int)))
+			continue;
+
+		memcpy(&got, CMSG_DATA(cmsg), sizeof(got));
+
+		/* One already waiting to be taken: do not leak this one. */
+		if (buf->fd >= 0) {
+			GP_WARN("Dropping unclaimed passed fd %i", buf->fd);
+			close(buf->fd);
+		}
+
+		buf->fd = got;
+	}
 
 	return ret;
 }
@@ -105,6 +137,12 @@ const char *gp_proxy_msg_type_name(enum gp_proxy_msg_types type)
 
 int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 {
+	return gp_proxy_send_fd(fd, type, payload, -1);
+}
+
+int gp_proxy_send_fd(int fd, enum gp_proxy_msg_types type, void *payload,
+                     int pass_fd)
+{
 	union gp_proxy_msg msg;
 	size_t payload_size = 0;
 
@@ -157,10 +195,28 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 		{.iov_base = padd, .iov_len = padd_size},
 	};
 
+	union {
+		struct cmsghdr align;
+		char buf[CMSG_SPACE(sizeof(int))];
+	} cmsgbuf;
+
 	struct msghdr hdr = {
 		.msg_iov = vec,
 		.msg_iovlen = 3,
 	};
+
+	if (pass_fd >= 0) {
+		struct cmsghdr *cmsg;
+
+		hdr.msg_control = cmsgbuf.buf;
+		hdr.msg_controllen = CMSG_SPACE(sizeof(int));
+
+		cmsg = CMSG_FIRSTHDR(&hdr);
+		cmsg->cmsg_level = SOL_SOCKET;
+		cmsg->cmsg_type = SCM_RIGHTS;
+		cmsg->cmsg_len = CMSG_LEN(sizeof(int));
+		memcpy(CMSG_DATA(cmsg), &pass_fd, sizeof(pass_fd));
+	}
 
 	ssize_t ret = sendmsg(fd, &hdr, 0);
 

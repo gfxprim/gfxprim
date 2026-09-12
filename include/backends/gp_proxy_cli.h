@@ -57,6 +57,23 @@ static inline int gp_proxy_cli_send(gp_proxy_cli *self,
 }
 
 /**
+ * @brief gp_proxy_cli_send() passing an open file descriptor along with it.
+ *
+ * @param self A client.
+ * @param type A message type.
+ * @param payload An optional payload.
+ * @param pass_fd A descriptor to pass, or -1 to pass none.
+ *
+ * @return Zero on success, non-zero on a failure.
+ */
+static inline int gp_proxy_cli_send_fd(gp_proxy_cli *self,
+                                       enum gp_proxy_msg_types type,
+                                       void *payload, int pass_fd)
+{
+	return gp_proxy_send_fd(self->fd.fd, type, payload, pass_fd);
+}
+
+/**
  * @brief Starts an application rendering into a SHM buffer.
  *
  * This is a shorthand to:
@@ -76,7 +93,7 @@ static inline void gp_proxy_cli_show(gp_proxy_cli *self, gp_proxy_shm *shm, gp_p
 		return;
 
 	/* Map SHM and create pixmap */
-	gp_proxy_cli_send(self, GP_PROXY_MAP, &shm->path);
+	gp_proxy_cli_send_fd(self, GP_PROXY_MAP, &shm->path, shm->fd);
 	gp_proxy_cli_send(self, GP_PROXY_PIXMAP, &shm->pixmap);
 	/* Set the current cursor position */
 	gp_proxy_cli_send(self, GP_PROXY_CURSOR_POS, cur_pos);

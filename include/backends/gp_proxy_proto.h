@@ -315,6 +315,14 @@ typedef struct gp_proxy_buf {
 	size_t pos;
 	/** @brief A current buffer size. */
 	size_t size;
+	/**
+	 * @brief A file descriptor the peer passed, or -1.
+	 *
+	 * A #GP_PROXY_MAP carries the shared buffer itself rather than a path
+	 * to it, as SCM_RIGHTS on the message. The receiver owns what lands
+	 * here and clears it back to -1 once it has taken it.
+	 */
+	int fd;
 	/** @brief The buffer. */
 	char buf[GP_PROXY_BUF_SIZE];
 } gp_proxy_buf;
@@ -328,6 +336,7 @@ static inline void gp_proxy_buf_init(gp_proxy_buf *buf)
 {
 	buf->pos = 0;
 	buf->size = 0;
+	buf->fd = -1;
 }
 
 /**
@@ -374,5 +383,25 @@ int gp_proxy_buf_recv(int fd, gp_proxy_buf *buf, int block);
  * @return Zero on success, non-zero on failure.
  */
 int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload);
+
+/**
+ * @brief gp_proxy_send() passing an open file descriptor along with it.
+ *
+ * The descriptor is attached to the message as SCM_RIGHTS, which duplicates
+ * it into the peer; @p pass_fd stays the caller's to close.
+ *
+ * This is how a shared buffer is handed over: naming a path instead would
+ * require the peer to be able to open it, which a sandboxed client cannot
+ * and should not be able to do.
+ *
+ * @param fd A proxy connection.
+ * @param type A message type.
+ * @param payload A message payload, may be NULL.
+ * @param pass_fd A descriptor to pass, or -1 to pass none.
+ *
+ * @return Zero on success, non-zero otherwise.
+ */
+int gp_proxy_send_fd(int fd, enum gp_proxy_msg_types type, void *payload,
+                     int pass_fd);
 
 #endif /* GP_PROXY_PROTO_H */

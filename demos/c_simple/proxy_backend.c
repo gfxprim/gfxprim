@@ -98,7 +98,8 @@ static void on_unmap(gp_proxy_cli *self)
 		if (gp_proxy_shm_resize(shm, backend->pixmap->w, backend->pixmap->h) < 0)
 			do_exit();
 
-		gp_proxy_cli_send(cli_shown, GP_PROXY_MAP, &shm->path);
+		gp_proxy_cli_send_fd(cli_shown, GP_PROXY_MAP, &shm->path,
+		                     shm->fd);
 		gp_proxy_cli_send(cli_shown, GP_PROXY_PIXMAP, &shm->pixmap);
 		gp_proxy_cli_send(cli_shown, GP_PROXY_SHOW, NULL);
 	}

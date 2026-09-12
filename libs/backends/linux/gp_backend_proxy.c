@@ -87,9 +87,12 @@ static void map_buffer(gp_backend *self, union gp_proxy_msg *msg)
 	GP_DEBUG(1, "Mapping buffer '%s' size %zu",
 	         msg->map.map.path, msg->map.map.size);
 
-	fd = open(msg->map.map.path, O_RDWR);
-	if (!fd) {
-		GP_WARN("Invalid path for map event");
+	/* We get a fd pointing to the shm buffer from the server */
+	fd = priv->buf.fd;
+	priv->buf.fd = -1;
+
+	if (fd < 0) {
+		GP_WARN("No buffer passed with the map event");
 		return;
 	}
 
