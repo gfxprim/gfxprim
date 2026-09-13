@@ -191,6 +191,40 @@ GP_WUR static inline gp_avl_node *gp_avl_tree_del_min(gp_avl_node *root, gp_avl_
 }
 
 /**
+ * @brief Returns a minimal node in the tree.
+ *
+ * @param root An AVL tree root.
+ * @return A minimal node in the tree or NULL on empty tree.
+ */
+GP_WUR static inline const gp_avl_node *gp_avl_tree_min(const gp_avl_node *root)
+{
+	if (!root)
+		return NULL;
+
+	while (root->right)
+		root = root->right;
+
+	return root;
+}
+
+/**
+ * @brief Returns a maximal node in the tree.
+ *
+ * @param root An AVL tree root.
+ * @return A maximal node in the tree or NULL on empty tree.
+ */
+GP_WUR static inline const gp_avl_node *gp_avl_tree_max(const gp_avl_node *root)
+{
+	if (!root)
+		return NULL;
+
+	while (root->left)
+		root = root->left;
+
+	return root;
+}
+
+/**
  * @brief Removes a maximal node from an AVL tree.
  *
  * @param root An AVL tree root.
