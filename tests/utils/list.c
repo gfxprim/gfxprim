@@ -365,14 +365,70 @@ int dlist_test(void)
 	return TST_PASSED;
 }
 
+static int clist_test(void)
+{
+	struct dlist_item items[10] = {};
+	struct gp_dlist_head *head = &items[0].head, *h;
+	int i, cnt = 0, rev_cnt = 0;
+
+	gp_clist_init(head);
+
+	for (i = 1; i < 10; i++) {
+		items[i].i = i;
+		gp_clist_push_tail(head, &items[i].head);
+	}
+
+	GP_CLIST_FOREACH(head, h) {
+		struct dlist_item *it = GP_LIST_ENTRY(h, struct dlist_item, head);
+
+		if (it->i != cnt) {
+			tst_msg("Wrong element at %i val %i\n", cnt, it->i);
+			return TST_FAILED;
+		}
+
+		cnt++;
+	}
+
+	head = head->prev;
+
+	GP_CLIST_REV_FOREACH(head, h) {
+		struct dlist_item *it = GP_LIST_ENTRY(h, struct dlist_item, head);
+
+		if (it->i != 9 - rev_cnt) {
+			tst_msg("Wrong element at %i val %i\n", rev_cnt, it->i);
+			return TST_FAILED;
+		}
+
+		rev_cnt++;
+	}
+
+	if (cnt != 10 || rev_cnt != 10) {
+		tst_msg("Wrong number of elements cnt=%i rev_cnt=%i\n", cnt, rev_cnt);
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < 9; i++)
+		gp_clist_rem(&items[i].head);
+
+	if (head->next != head || head->prev != head) {
+		tst_msg("After removal of all items list is not empty");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "list testsuite",
 	.tests = {
-		{.name = "list test",
+		{.name = "list",
 		 .tst_fn = list_test},
 
-		{.name = "double linked list test",
+		{.name = "double linked list",
 		 .tst_fn = dlist_test},
+
+		{.name = "circular double linked list",
+		 .tst_fn = clist_test},
 
 		{}
 	}

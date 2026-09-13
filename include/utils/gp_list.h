@@ -2,7 +2,7 @@
 
 /*
 
-    Copyright (C) 2007-2021 Cyril Hrubis <metan@ucw.cz>
+    Copyright (C) 2007-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -458,5 +458,102 @@ static inline void gp_dlist_sort(gp_dlist *list,
 
 	list->tail = i;
 }
+
+/**
+ * @brief Initialize double linked circular list.
+ *
+ * Initializes the entry so that both prev and next point to the entry.
+ *
+ * @param entry An entry to be initialized.
+ */
+static inline void gp_clist_init(gp_dlist_head *entry)
+{
+	entry->next = entry;
+	entry->prev = entry;
+}
+
+/**
+ * @brief Inserts into a tail of a double linked circular list.
+ *
+ * @param head A list to insert the entry into.
+ * @param entry An entry to be inserted.
+ */
+static inline void gp_clist_push_tail(gp_dlist_head *head, gp_dlist_head *entry)
+{
+        entry->next = head;
+        entry->prev = head->prev;
+
+        head->prev->next = entry;
+        head->prev = entry;
+}
+
+/**
+ * @brief Removes an entry from a double linked circular list.
+ *
+ * @param entry An entry to be removed.
+ */
+static inline void gp_clist_rem(gp_dlist_head *entry)
+{
+        entry->prev->next = entry->next;
+        entry->next->prev = entry->prev;
+}
+
+/**
+ * @brief A for loop over all circular list entries.
+ *
+ * Example:
+ * @code
+ * struct foo {
+ *	gp_list_head lh;
+ * };
+ *
+ * static struct foo foo;
+ *
+ * ...
+ *	gp_dlist_head *i;
+ *
+ *	GP_CLIST_FOREACH(&foo, i) {
+ *		struct foo *f = GP_LIST_ENTRY(i, struct foo, lh);
+ *		...
+ *	}
+ * ...
+ *
+ * @endcode
+ *
+ * @param list A #gp_dlist_head pointing into the circular list.
+ * @param entry An iterator entry a pointer to #gp_dlist_head.
+ */
+#define GP_CLIST_FOREACH(list, entry) \
+	entry = list; \
+	for (gp_dlist_head *gp_head__ = NULL; gp_head__ != list; entry = entry->next, gp_head__ = entry)
+
+/**
+ * @brief A reverse for loop over all list entries.
+ *
+ * Example:
+ * @code
+ * struct foo {
+ *	gp_list_head lh;
+ * };
+ *
+ * static struct foo foo;
+ *
+ * ...
+ *	gp_dlist_head *i;
+ *
+ *	GP_CLIST_REV_FOREACH(&foo, i) {
+ *		struct foo *f = GP_LIST_ENTRY(i, struct foo, lh);
+ *		...
+ *	}
+ * ...
+ *
+ * @endcode
+ *
+ * @param list A #gp_dlist_head pointing into the circular list.
+ * @param entry An iterator entry a pointer to #gp_dlist_head.
+ */
+#define GP_CLIST_REV_FOREACH(list, entry) \
+	entry = list; \
+	for (gp_dlist_head *gp_head__ = NULL; gp_head__ != list; entry = entry->prev, gp_head__ = entry)
 
 #endif /* GP_LIST_H */
