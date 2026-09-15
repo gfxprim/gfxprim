@@ -134,6 +134,12 @@ typedef enum gp_widget_stock_type {
 	/** @brief Switch OFF stock. */
 	GP_WIDGET_STOCK_OFF,
 
+
+	/** @brief Mirror horizontally. */
+	GP_WIDGET_STOCK_MIRROR_H,
+	/** @brief Mirror vertically. */
+	GP_WIDGET_STOCK_MIRROR_V,
+
 	GP_WIDGET_STOCK_TYPE_MAX,
 	/** @brief Invalid stock type, used by a gp_widget_stock_by_name(). */
 	GP_WIDGET_STOCK_TYPE_INVALID = GP_WIDGET_STOCK_TYPE_MAX,

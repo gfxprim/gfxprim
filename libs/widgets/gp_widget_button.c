@@ -327,6 +327,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ROTATE_CCW,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
+	case GP_BUTTON_MIRROR_H:
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_MIRROR_H,
+		                       sx, sy, sw, sh, bg_color, ctx);
+	break;
+	case GP_BUTTON_MIRROR_V:
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_MIRROR_V,
+		                       sx, sy, sw, sh, bg_color, ctx);
+	break;
 	case GP_BUTTON_SETTINGS:
 		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_SETTINGS,
 		                       sx-1, sy, sw+2, sh+2, bg_color, ctx);
@@ -444,6 +452,8 @@ static struct btn_type_names {
 	{"zoom_normal", GP_BUTTON_ZOOM_NORMAL | GP_BUTTON_TEXT_RIGHT},
 	{"rotate_cw", GP_BUTTON_ROTATE_CW | GP_BUTTON_TEXT_RIGHT},
 	{"rotate_ccw", GP_BUTTON_ROTATE_CCW | GP_BUTTON_TEXT_RIGHT},
+	{"mirror_h", GP_BUTTON_MIRROR_H | GP_BUTTON_TEXT_RIGHT},
+	{"mirror_v", GP_BUTTON_MIRROR_V | GP_BUTTON_TEXT_RIGHT},
 	{"settings", GP_BUTTON_SETTINGS | GP_BUTTON_TEXT_RIGHT},
 	{"home", GP_BUTTON_HOME | GP_BUTTON_TEXT_RIGHT},
 	{"download", GP_BUTTON_DOWNLOAD | GP_BUTTON_TEXT_RIGHT},

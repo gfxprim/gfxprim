@@ -12,8 +12,8 @@
    {"type": "stock", "stock": "zoom_in"},
    {"type": "stock", "stock": "zoom_out"},
    {"type": "stock", "stock": "zoom_fit"},
-   null,
-   null,
+   {"type": "stock", "stock": "mirror_h"},
+   {"type": "stock", "stock": "mirror_v"},
 
    {"type": "label", "text": "STOCK_ERR", "halign": "left"},
    {"type": "label", "text": "STOCK_WARN", "halign": "left"},

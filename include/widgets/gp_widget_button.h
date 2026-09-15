@@ -127,6 +127,9 @@ enum gp_widget_button_type {
 	/** @brief A rotate counter clockwise button. */
 	GP_BUTTON_ROTATE_CCW,
 
+	GP_BUTTON_MIRROR_H,
+	GP_BUTTON_MIRROR_V,
+
 	/** @brief A settings button. */
 	GP_BUTTON_SETTINGS,
 	/** @brief A home (directory) button. */

@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -14,6 +14,11 @@ struct gp_widget_stock {
 	enum gp_widget_stock_type type;
 	gp_widget_size min_size;
 };
+
+static inline gp_size stock_line_thickness(gp_size w, gp_size h)
+{
+	return GP_MIN(3*w/8, 3*h/8)/8;
+}
 
 static unsigned int stock_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
@@ -1154,6 +1159,78 @@ static void render_stock_off(gp_pixmap *pix,
 	gp_fill_ring_seg(pix, x + w/2, y + h - r - 1, r, r-th, GP_CIRCLE_SEG3 | GP_CIRCLE_SEG4,  ctx->text_color);
 }
 
+static void render_stock_mirror_h(gp_pixmap *pix,
+                                  gp_coord x, gp_coord y,
+                                  gp_size w, gp_size h, gp_pixel bg_col,
+                                  const gp_widget_render_ctx *ctx)
+{
+	gp_size th = stock_line_thickness(w, h);
+	gp_size w_2 = w/2;
+	gp_size h_2 = h/2;
+	gp_size r = w_2/3;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_fill_rect_xyxy(pix, x+w_2-th/2, y, x+(w-w_2)+th/2, y+h-1, ctx->text_color);
+
+	gp_coord x_c = x + w_2/2;
+	gp_coord y_c = y + h_2;
+
+	gp_coord poly[] = {
+		x_c+r, y_c-2*r,
+		x_c+r, y_c+2*r,
+		x_c-r, y_c+2*r,
+	};
+
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+
+	x_c = x + (w - w_2/2);
+
+	gp_coord poly2[] = {
+		x_c-r, y_c-2*r,
+		x_c-r, y_c+2*r,
+		x_c+r, y_c+2*r,
+	};
+
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly2)/2, poly2, ctx->col_disabled);
+}
+
+static void render_stock_mirror_v(gp_pixmap *pix,
+                                  gp_coord x, gp_coord y,
+                                  gp_size w, gp_size h, gp_pixel bg_col,
+                                  const gp_widget_render_ctx *ctx)
+{
+	gp_size th = stock_line_thickness(w, h);
+	gp_size w_2 = w/2;
+	gp_size h_2 = h/2;
+	gp_size r = w_2/3;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_fill_rect_xyxy(pix, x, y+h_2-th/2, x+w-1, y+(h-h_2)+th/2, ctx->text_color);
+
+	gp_coord x_c = x + w_2;
+	gp_coord y_c = y + h_2/2;
+
+	gp_coord poly1[] = {
+		x_c+2*r, y_c-r,
+		x_c+2*r, y_c+r,
+		x_c-2*r, y_c+r,
+	};
+
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly1)/2, poly1, ctx->text_color);
+
+	y_c = y + (h - h_2/2);
+
+	gp_coord poly2[] = {
+		x_c+2*r, y_c+r,
+		x_c+2*r, y_c-r,
+		x_c-2*r, y_c-r,
+	};
+
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly2)/2, poly2, ctx->col_disabled);
+}
+
 static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
                                 gp_coord x, gp_coord y, gp_size w, gp_size h,
                                 gp_pixel bg_col, const gp_widget_render_ctx *ctx)
@@ -1256,6 +1333,12 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	break;
 	case GP_WIDGET_STOCK_OFF:
 		render_stock_off(pix, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_MIRROR_H:
+		render_stock_mirror_h(pix, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_MIRROR_V:
+		render_stock_mirror_v(pix, x, y, w, h, bg_col, ctx);
 	break;
 	}
 
@@ -1365,6 +1448,9 @@ static struct stock_types {
 
 	{"on", GP_WIDGET_STOCK_ON},
 	{"off", GP_WIDGET_STOCK_OFF},
+
+	{"mirror_h", GP_WIDGET_STOCK_MIRROR_H},
+	{"mirror_v", GP_WIDGET_STOCK_MIRROR_V},
 };
 
 gp_widget_stock_type gp_widget_stock_type_by_name(const char *name)

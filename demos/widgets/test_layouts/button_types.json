@@ -1,7 +1,7 @@
 {
  "info": {"version": 1, "license": "GPL-2.0-or-later"},
  "layout": {
-  "cols": 12,
+  "cols": 14,
   "rows": 6,
   "align": "fill",
   "widgets": [
@@ -79,7 +79,21 @@
    {"type": "button", "btype": "open", "align": "fill"},
    {"type": "button", "btype": "save", "align": "fill"},
    {"type": "button", "btype": "randomize", "align": "fill"},
-   {"type": "button", "btype": "home", "align": "fill"}
+   {"type": "button", "btype": "home", "align": "fill"},
+
+   {"type": "label", "text": "MIRROR_H"},
+   {"type": "label", "text": "MIRROR_V"},
+   null,
+   null,
+   null,
+   null,
+
+   {"type": "button","btype": "mirror_h", "align": "fill"},
+   {"type": "button", "btype": "mirror_v", "align": "fill"},
+   null,
+   null,
+   null,
+   null
   ]
  }
 }
