@@ -86,6 +86,16 @@ void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val);
  */
 void gp_widget_int_val_set(gp_widget *self, int64_t val);
 
+
+/**
+ * @brief Saturated addition to the widget value.
+ *
+ * @param self An integer class widget.
+ * @param val Value to be added to the current value. The addition is saturated
+ *        with the respect to the min and max values.
+ */
+void gp_widget_int_val_add(gp_widget *self, int64_t val);
+
 /**
  * @brief Sets an integer class widget maximum.
  *

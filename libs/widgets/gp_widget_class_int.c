@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -79,6 +79,14 @@ void gp_widget_int_set(gp_widget *self, int64_t min, int64_t max, int64_t val)
 	gp_widget_redraw(self);
 }
 
+static void int_val_set(gp_widget *self, gp_widget_class_int *i, int64_t val)
+{
+	i->val = val;
+	gp_widget_redraw(self);
+
+	//TODO: On event?
+}
+
 void gp_widget_int_val_set(gp_widget *self, int64_t val)
 {
 	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
@@ -90,10 +98,33 @@ void gp_widget_int_val_set(gp_widget *self, int64_t val)
 	if (CHECK_VAL(self, self->type, i->min, i->max, val))
 		return;
 
-	i->val = val;
-	gp_widget_redraw(self);
+	int_val_set(self, i, val);
+}
 
-	//TODO: On event?
+static int64_t sat_add(gp_widget_class_int *i, int64_t add)
+{
+	if (add > 0) {
+		if (i->val > i->max - add)
+			return i->max;
+	} else {
+		if (i->val < i->min - add)
+			return i->min;
+	}
+
+	return i->val + add;
+}
+
+void gp_widget_int_val_add(gp_widget *self, int64_t add)
+{
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
+	gp_widget_class_int *i = GP_WIDGET_CLASS_INT(self);
+
+	int64_t new_val = sat_add(i, add);
+
+	if (i->val == new_val)
+		return;
+
+	int_val_set(self, i, new_val);
 }
 
 int64_t gp_widget_int_val_get(gp_widget *self)
