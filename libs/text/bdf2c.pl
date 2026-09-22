@@ -94,6 +94,9 @@ sub load_font
 			$glyphs[$glyph->{"code"}] = $glyph;
 		}
 
+		$font{"size"} = $1 if ($line =~ /^SIZE\s(\d*)/);
+		$font{"res_y"} = $2 if ($line =~ /^SIZE\s(\d*)\s(\d*)\s(\d*)/);
+		$font{"pixel_size"} = $1 if ($line =~ /PIXEL_SIZE\s(\d*)/);
 		$font{"ascent"} = $1 if ($line =~ /FONT_ASCENT\s(\d*)/);
 		$font{"descent"} = $1 if ($line =~ /FONT_DESCENT\s(\d*)/);
 		$font{"registry"} = $1 if ($line =~ /CHARSET_REGISTRY\s"(.*)"/);
@@ -359,6 +362,7 @@ my $hiragana = $ENV{'HIRAGANA'};
 my $box = $ENV{'BOX'};
 my $subsuper = $ENV{'SUBSUPER'};
 my $arrows = $ENV{'ARROWS'};
+my $em_env = $ENV{'EM'};
 
 sub add_block
 {
@@ -370,6 +374,39 @@ sub add_block
 	print("\t\t\t.min_glyph = $min_glyph,\n");
 	print("\t\t\t.max_glyph = $max_glyph,\n");
 	print("\t\t},\n");
+}
+
+sub glyph_top
+{
+	my ($glyphs, $code) = @_;
+	my $glyph = $glyphs->[$code];
+
+	return 0 if !$glyph;
+
+	my $w = $glyph->{'w'};
+	my $h = $glyph->{'h'};
+	my $bytes = ($w + 7) >> 3;
+	my $bitmap = $glyph->{'bitmap'};
+
+	for (my $y = 0; $y < $h; $y++) {
+		for (my $b = 0; $b < $bytes; $b++) {
+			next if !$bitmap->[$y * $bytes + $b];
+
+			return $h + $glyph->{'y_off'} - $y;
+		}
+	}
+
+	return 0;
+}
+
+sub glyph_advance
+{
+	my ($glyphs, $code) = @_;
+	my $glyph = $glyphs->[$code];
+
+	return 0 if !$glyph;
+
+	return $glyph->{'x_advance'};
 }
 
 my $ucode_blocks;
@@ -474,6 +511,37 @@ sub convert_font
 	printf("\t.descent = %i,\n", $font->{'descent'});
 	print("\t.max_glyph_width = $max_width,\n");
 	print("\t.max_glyph_advance = $max_advance,\n");
+
+	my $x_height = glyph_top($glyphs, 0x78);
+	my $cap_height = glyph_top($glyphs, 0x48);
+	my $ch_width = glyph_advance($glyphs, 0x30);
+	my $underline_pos = $font->{'descent'} > 2 ? -2 : -1;
+	my $font_box = $font->{'ascent'} + $font->{'descent'};
+	my $size = 0;
+	my $em = $em_env;
+
+	if ($font->{'size'} && $font->{'res_y'}) {
+		$size = int(($font->{'size'} * $font->{'res_y'} + 36) / 72);
+	}
+
+	for my $val ($font->{'pixel_size'}, $size) {
+		last if $em;
+		next if !$val || $val < $font->{'ascent'} || $val > $font_box;
+
+		$em = $val;
+		last;
+	}
+
+	$em = $font_box if !$em;
+
+	print("\t.em = $em,\n");
+	print("\t.x_height = $x_height,\n") if $x_height;
+	print("\t.cap_height = $cap_height,\n") if $cap_height;
+	print("\t.ch_width = $ch_width,\n") if $ch_width;
+	print("\t.underline_pos = $underline_pos,\n");
+	print("\t.underline_thickness = 1,\n");
+	printf("\t.strike_pos = %i,\n", int($x_height / 2)) if $x_height;
+	print("\t.strike_thickness = 1,\n");
 	print("\t.glyph_tables = $glyph_tables,\n");
 	print("\t.glyphs = {\n");
 	print("\t\t{\n");

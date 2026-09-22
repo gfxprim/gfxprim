@@ -211,7 +211,13 @@ gp_size gp_text_max_width_chars(const gp_text_style *style, const char *chars,
 
 /* Ascend, Descend, Height -- far easier */
 
-static unsigned int multiply_height(const gp_text_style *style, unsigned int h)
+/*
+ * A distance of rows font pixel rows, as rendered: every row is multiplied and
+ * the spacing goes between them.  Signed, since a position can be below the
+ * baseline, and the same expression measures a distance from the baseline to
+ * the top of a row as measures the height of that many rows.
+ */
+static gp_coord multiply_height(const gp_text_style *style, int h)
 {
 	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
 }
@@ -237,6 +243,40 @@ gp_size gp_text_descent(const gp_text_style *style)
 	style = assert_style(style);
 
 	return multiply_height(style, gp_font_descent(style->font));
+}
+
+gp_coord gp_text_decor_pos(const gp_text_style *style,
+                           enum gp_text_decor_type text_decor)
+{
+	style = assert_style(style);
+
+	switch (text_decor) {
+	case GP_TEXT_DECOR_UNDERLINE:
+		return multiply_height(style, gp_font_underline_pos(style->font));
+	case GP_TEXT_DECOR_STRIKETHROUGH:
+		return multiply_height(style, gp_font_strike_pos(style->font));
+	case GP_TEXT_DECOR_OVERLINE:
+		return multiply_height(style, gp_font_overline_pos(style->font));
+	}
+
+	return 0;
+}
+
+gp_size gp_text_decor_thickness(const gp_text_style *style,
+                                enum gp_text_decor_type text_decor)
+{
+	style = assert_style(style);
+
+	switch (text_decor) {
+	case GP_TEXT_DECOR_UNDERLINE:
+		return multiply_height(style, gp_font_underline_thickness(style->font));
+	case GP_TEXT_DECOR_STRIKETHROUGH:
+		return multiply_height(style, gp_font_strike_thickness(style->font));
+	case GP_TEXT_DECOR_OVERLINE:
+		return multiply_height(style, gp_font_overline_thickness(style->font));
+	}
+
+	return 0;
 }
 
 size_t gp_text_fit_width(const gp_text_style *style, const char *str,

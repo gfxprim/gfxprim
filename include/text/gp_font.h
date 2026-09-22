@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -212,6 +212,86 @@ struct gp_font_face {
 	uint16_t avg_glyph_advance;
 
 	/**
+	 * @brief The em size, in pixels.
+	 *
+	 * Zero if the font does not say.
+	 */
+	uint16_t em;
+
+	/**
+	 * @brief The height of lowercase 'x' above baseline.
+	 *
+	 * Zero if the font does not say.
+	 */
+	uint16_t x_height;
+
+	/**
+	 * @brief Height of an uppercase 'H' letter above the baseline.
+	 *
+	 * Zero if the font does not say.
+	 */
+	uint16_t cap_height;
+
+	/**
+	 * @brief Advance of a '0' digit.
+	 *
+	 * Digits width are usually the same width in a font, which means we
+	 * can compute a rendered number width by multiplying this by number of
+	 * digits.
+	 *
+	 * Zero if the font does not say.
+	 */
+	uint16_t ch_width;
+
+	/**
+	 * @brief Extra space between lines, on top of ascent + descent.
+	 *
+	 * Zero for most fonts.
+	 */
+	uint16_t line_gap;
+
+	/**
+	 * @brief Underline position, in pixels above the baseline.
+	 *
+	 * Negative, since an underline goes below the baseline.
+	 *
+	 * Zero if the font does not say.
+	 */
+	int16_t underline_pos;
+
+	/** @brief Underline thickness in pixels, zero if the font does not say. */
+	uint16_t underline_thickness;
+
+	/**
+	 * @brief Strikethrough position, in pixels above the baseline.
+	 *
+	 * Positive, a strikethrough crosses the lowercase letters.
+	 *
+	 * Zero if the font does not say.
+	 */
+	int16_t strike_pos;
+
+	/** @brief Strikethrough thickness in pixels, zero if the font does not say. */
+	uint16_t strike_thickness;
+
+	/**
+	 * @brief Overline position, in pixels above the baseline.
+	 *
+	 * Positive and above the ascent, since an overline goes over the
+	 * letters and the accents reach the ascent.
+	 *
+	 * Zero if the font does not say.
+	 */
+	int16_t overline_pos;
+
+	/**
+	 * @brief Overline thickness in pixels.
+	 *
+	 * Zero if the font does not say.
+	 */
+	uint16_t overline_thickness;
+
+	/**
 	 * @brief Bitmap format for all glyphs.
 	 */
 	gp_font_bitmap_format glyph_bitmap_format;
@@ -371,6 +451,177 @@ static inline unsigned int gp_font_avg_advance_x(const gp_font_face *font)
 
 	/* For monospace bitmap fonts the avg == max */
 	return font->max_glyph_advance;
+}
+
+/**
+ * @brief Returns the em size, i.e. the font size this face stands for.
+ *
+ * Falls back to font height if not defined.
+ *
+ * @param font A font face.
+ * @return An em size in pixels.
+ */
+static inline unsigned int gp_font_em(const gp_font_face *font)
+{
+	if (font->em)
+		return font->em;
+
+	return gp_font_height(font);
+}
+
+/**
+ * @brief Returns the height of a lowercase letter with no ascender.
+ *
+ * Falls back to two thirds of the ascent if not defined.
+ *
+ * @param font A font face.
+ * @return An x-height in pixels, above the baseline.
+ */
+static inline unsigned int gp_font_x_height(const gp_font_face *font)
+{
+	if (font->x_height)
+		return font->x_height;
+
+	return (2 * font->ascent) / 3;
+}
+
+/**
+ * @brief Returns the height of an uppercase 'H' letter.
+ *
+ * Falls back to ascent if not defined.
+ *
+ * @param font A font face.
+ * @return A cap height in pixels, above the baseline.
+ */
+static inline unsigned int gp_font_cap_height(const gp_font_face *font)
+{
+	if (font->cap_height)
+		return font->cap_height;
+
+	return font->ascent;
+}
+
+/**
+ * @brief Returns the advance of a '0' digit.
+ *
+ * Falls back to average advance if not set.
+ *
+ * @param font A font face.
+ * @return A digit advance in pixels.
+ */
+static inline unsigned int gp_font_ch_width(const gp_font_face *font)
+{
+	if (font->ch_width)
+		return font->ch_width;
+
+	return gp_font_avg_advance_x(font);
+}
+
+/**
+ * @brief Returns extra space between lines, on top of the font height.
+ *
+ * @param font A font face.
+ * @return A line gap in pixels, usually zero.
+ */
+static inline unsigned int gp_font_line_gap(const gp_font_face *font)
+{
+	return font->line_gap;
+}
+
+/**
+ * @brief Returns where an underline goes.
+ *
+ * Falls back to half of the descent rounded up if not set.
+ *
+ * @param font A font face.
+ * @return An underline position in pixels above the baseline, i.e. negative.
+ */
+static inline int gp_font_underline_pos(const gp_font_face *font)
+{
+	if (font->underline_pos)
+		return font->underline_pos;
+
+	return - (int)(font->descent + 1)/2;
+}
+
+/**
+ * @brief Returns how thick an underline is.
+ *
+ * Falls back to 1px if not set.
+ *
+ * @param font A font face.
+ * @return An underline thickness in pixels, at least one.
+ */
+static inline unsigned int gp_font_underline_thickness(const gp_font_face *font)
+{
+	if (font->underline_thickness)
+		return font->underline_thickness;
+
+	return 1;
+}
+
+/**
+ * @brief Returns where a strikethrough goes.
+ *
+ * Falls back to half of the lowercase letter 'x' height if not set.
+ *
+ * @param font A font face.
+ * @return A strikethrough position in pixels above the baseline.
+ */
+static inline int gp_font_strike_pos(const gp_font_face *font)
+{
+	if (font->strike_pos)
+		return font->strike_pos;
+
+	return gp_font_x_height(font) / 2;
+}
+
+/**
+ * @brief Returns how thick a strikethrough is.
+ *
+ * Falls back to 1px if not set.
+ *
+ * @param font A font face.
+ * @return A strikethrough thickness in pixels, at least one.
+ */
+static inline unsigned int gp_font_strike_thickness(const gp_font_face *font)
+{
+	if (font->strike_thickness)
+		return font->strike_thickness;
+
+	return 1;
+}
+
+/**
+ * @brief Returns where an overline goes.
+ *
+ * Falls back to ascent + 1 if not set.
+ *
+ * @param font A font face.
+ * @return An overline position in pixels above the baseline, i.e. positive.
+ */
+static inline int gp_font_overline_pos(const gp_font_face *font)
+{
+	if (font->overline_pos)
+		return font->overline_pos;
+
+	return font->ascent + 1;
+}
+
+/**
+ * @brief Returns how thick an overline is.
+ *
+ * Falls back to 1px if not set.
+ *
+ * @param font A font face.
+ * @return An overline thickness in pixels, at least one.
+ */
+static inline unsigned int gp_font_overline_thickness(const gp_font_face *font)
+{
+	if (font->overline_thickness)
+		return font->overline_thickness;
+
+	return 1;
 }
 
 /**

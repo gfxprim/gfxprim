@@ -205,6 +205,15 @@ static struct gp_font_face c64 = {
 	.descent = 2,
 	.max_glyph_width = 8,
 	.max_glyph_advance = 9,
+	/* eight by eight, but meant to be read at twice that */
+	.em = 16,
+	.x_height = 5,
+	.cap_height = 7,
+	.ch_width = 8,
+	.underline_pos = -1,
+	.underline_thickness = 1,
+	.strike_pos = 2,
+	.strike_thickness = 1,
 	.glyph_bitmap_format = GP_FONT_BITMAP_1BPP,
 	.glyphs = {
 		{

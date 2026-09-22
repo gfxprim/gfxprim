@@ -178,6 +178,36 @@ gp_size gp_text_ascent(const gp_text_style *style);
 gp_size gp_text_descent(const gp_text_style *style);
 
 /**
+ * @brief A text decoration type.
+ */
+enum gp_text_decor_type {
+	/** @brief Underlined text. */
+	GP_TEXT_DECOR_UNDERLINE,
+	/** @brief Strikethrough the text. */
+	GP_TEXT_DECOR_STRIKETHROUGH,
+	/** @brief Line over the text. */
+	GP_TEXT_DECOR_OVERLINE,
+};
+
+/**
+ * @brief Returns where a text decoration goes for a text style.
+ *
+ * @param style A text style + font formatting.
+ * @return A text decoration position in pixels above the baseline.
+ */
+gp_coord gp_text_decor_pos(const gp_text_style *style,
+                           enum gp_text_decor_type decor_type);
+
+/**
+ * @brief Returns how thick a text decoration is for a text style.
+ *
+ * @param style A text style + font formatting.
+ * @return A text decoration thickness in pixels, at least one.
+ */
+gp_size gp_text_decor_thickness(const gp_text_style *style,
+                                enum gp_text_decor_type decor_type);
+
+/**
  * @brief Counts how many characters will fit into a width pixels.
  *
  * @param style A text style.

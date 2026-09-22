@@ -11,6 +11,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_TRUETYPE_TABLES_H
 
 #define GLYPH_CACHE_SIZE 10
 
@@ -70,6 +71,67 @@ static void copy_glyph(FT_Face face, gp_glyph *glyph)
 			glyph->bitmap[addr] = face->glyph->bitmap.buffer[y * face->glyph->bitmap.pitch + x];
 		}
 	}
+}
+
+/*
+ * Font units to pixels, rounded to the nearest, which is what the rest of the
+ * loader does with the 26.6 values as well.
+ */
+static int scale_y(FT_Face face, int val)
+{
+	FT_Pos px = FT_MulFix(val, face->size->metrics.y_scale);
+
+	if (px < 0)
+		return -((-px + 32) >> 6);
+
+	return (px + 32) >> 6;
+}
+
+/*
+ * The typographic metrics.  The heights are taken off the rendered glyphs
+ * rather than out of the OS/2 table, because everything else here is pixels
+ * and the table disagrees with them by a pixel once hinting has had its say.
+ * The table is the fallback, for a font that has no latin letters to measure,
+ * and its x-height and cap height only arrived in OS/2 version 2.
+ */
+static void copy_metrics(gp_font_face *font, FT_Face face)
+{
+	TT_OS2 *os2 = FT_Get_Sfnt_Table(face, FT_SFNT_OS2);
+	gp_glyph *glyph;
+
+	font->em = face->size->metrics.y_ppem;
+
+	glyph = gp_glyph_get(font, 'x');
+	if (glyph)
+		font->x_height = glyph->bearing_y;
+
+	glyph = gp_glyph_get(font, 'H');
+	if (glyph)
+		font->cap_height = glyph->bearing_y;
+
+	if (!font->x_height && os2 && os2->version >= 2 && os2->sxHeight > 0)
+		font->x_height = scale_y(face, os2->sxHeight);
+
+	if (!font->cap_height && os2 && os2->version >= 2 && os2->sCapHeight > 0)
+		font->cap_height = scale_y(face, os2->sCapHeight);
+
+	glyph = gp_glyph_get(font, '0');
+	if (glyph)
+		font->ch_width = glyph->advance_x;
+
+	if (FT_IS_SCALABLE(face)) {
+		font->underline_pos = scale_y(face, face->underline_position);
+		font->underline_thickness = scale_y(face, face->underline_thickness);
+	}
+
+	if (os2 && os2->yStrikeoutPosition) {
+		font->strike_pos = scale_y(face, os2->yStrikeoutPosition);
+		font->strike_thickness = scale_y(face, os2->yStrikeoutSize);
+	}
+
+	font->overline_thickness = font->underline_thickness;
+
+	font->line_gap = 0;
 }
 
 static gp_glyph *create_glyph_bitmap(FT_Face face)
@@ -330,6 +392,8 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 	avg_advance = (((avg_advance + 32)>>6) + 47) / 95;
 	font->avg_glyph_advance = (avg_advance + (avg_advance+5)/10);
+
+	copy_metrics(font, priv->face);
 
 	return font;
 err5:
