@@ -8,8 +8,6 @@
 #include <core/gp_debug.h>
 #include <text/gp_fonts.h>
 
-extern const gp_font_face gp_default_font;
-
 extern const gp_font_family font_family_gfxprim;
 extern const gp_font_family font_family_haxor_medium_10;
 extern const gp_font_family font_family_haxor_medium_11;
@@ -37,6 +35,8 @@ static const gp_font_family *const font_families[] = {
 	&font_family_haxor_tiny,
 	&font_family_square,
 };
+
+const gp_font_family *gp_font_family_default = &font_family_gfxprim;
 
 #define FONT_FAMILIES_LAST_IDX (GP_ARRAY_SIZE(font_families) - 1)
 
@@ -110,7 +110,7 @@ const gp_font_face *gp_font_face_lookup(const char *family_name, uint8_t style)
 
 	if (style & GP_FONT_FALLBACK) {
 		GP_DEBUG(3, "Font family '%s' not found; using default font", family_name);
-		return &gp_default_font;
+		return font_family_gfxprim.fonts[0];
 	}
 
 	GP_DEBUG(3, "Font family not found!");

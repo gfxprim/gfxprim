@@ -29,3 +29,4 @@ fonts:
 	ARROWS=1 BOX=1 SUBSUPER=1 PUNCTUATION=1 GREEK=1 CYRILIC=1 EM=20 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-17-utf.bdf haxor_narrow_17 haxor-narrow-17 16 > gp_haxor_narrow_17.c && \
 	ARROWS=1 BOX=1 SUBSUPER=1 PUNCTUATION=1 HIRAGANA=1 KATAKANA=1 GREEK=1 CYRILIC=1 EM=22 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-18-utf.bdf haxor_narrow_18 haxor-narrow-18 18 > gp_font_haxor_narrow_18.c && \
 	ARROWS=1 BOX=1 SUBSUPER=1 PUNCTUATION=1 CYRILIC=1 EM=16 ./bdf2c.pl $(FONTS_DIR)/HaxorSquare-8x8-utf.bdf square square > gp_haxor_square_8x8.c
+	gpforge-cli c $(FONTS_DIR)/gfxprim-11/ gfxprim gfxprim > gp_font_gfxprim.c
