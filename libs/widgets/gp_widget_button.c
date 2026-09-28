@@ -347,6 +347,18 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_DOWN,
 		                       sx, sy+sh/8, sw, sh, bg_color, ctx);
 	break;
+	case GP_BUTTON_CUT:
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_CUT,
+		                       sx, sy, sw, sh, bg_color, ctx);
+	break;
+	case GP_BUTTON_COPY:
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_COPY,
+		                       sx, sy, sw, sh, bg_color, ctx);
+	break;
+	case GP_BUTTON_PASTE:
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_PASTE,
+		                       sx, sy, sw, sh, bg_color, ctx);
+	break;
 	}
 
 	if (b->set)
@@ -457,6 +469,9 @@ static struct btn_type_names {
 	{"settings", GP_BUTTON_SETTINGS | GP_BUTTON_TEXT_RIGHT},
 	{"home", GP_BUTTON_HOME | GP_BUTTON_TEXT_RIGHT},
 	{"download", GP_BUTTON_DOWNLOAD | GP_BUTTON_TEXT_RIGHT},
+	{"cut", GP_BUTTON_CUT | GP_BUTTON_TEXT_RIGHT},
+	{"copy", GP_BUTTON_COPY | GP_BUTTON_TEXT_RIGHT},
+	{"paste", GP_BUTTON_PASTE | GP_BUTTON_TEXT_RIGHT},
 };
 
 static enum gp_widget_button_type type_from_str(const char *string)

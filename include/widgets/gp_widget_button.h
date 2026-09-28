@@ -127,7 +127,9 @@ enum gp_widget_button_type {
 	/** @brief A rotate counter clockwise button. */
 	GP_BUTTON_ROTATE_CCW,
 
+	/** @brief Mirrors horizontally. */
 	GP_BUTTON_MIRROR_H,
+	/** @brief Mirrors vertically. */
 	GP_BUTTON_MIRROR_V,
 
 	/** @brief A settings button. */
@@ -136,6 +138,13 @@ enum gp_widget_button_type {
 	GP_BUTTON_HOME,
 	/** @brief A download button. */
 	GP_BUTTON_DOWNLOAD,
+
+	/** @brief Cut operation. */
+	GP_BUTTON_CUT,
+	/** @brief Copy operation. */
+	GP_BUTTON_COPY,
+	/** @brief Paste operation. */
+	GP_BUTTON_PASTE,
 
 	GP_BUTTON_TYPE_MASK = 0x7fff,
 	GP_BUTTON_ALIGN_MASK = 0x8000,

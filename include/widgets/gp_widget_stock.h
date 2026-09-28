@@ -140,6 +140,13 @@ typedef enum gp_widget_stock_type {
 	/** @brief Mirror vertically. */
 	GP_WIDGET_STOCK_MIRROR_V,
 
+	/** @brief Cut. */
+	GP_WIDGET_STOCK_CUT,
+	/** @brief Copy. */
+	GP_WIDGET_STOCK_COPY,
+	/** @brief Paste. */
+	GP_WIDGET_STOCK_PASTE,
+
 	GP_WIDGET_STOCK_TYPE_MAX,
 	/** @brief Invalid stock type, used by a gp_widget_stock_by_name(). */
 	GP_WIDGET_STOCK_TYPE_INVALID = GP_WIDGET_STOCK_TYPE_MAX,

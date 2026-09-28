@@ -1231,11 +1231,44 @@ static void render_stock_mirror_v(gp_pixmap *pix,
 	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly2)/2, poly2, ctx->col_disabled);
 }
 
+static void render_stock_cut_copy_paste(gp_pixmap *pix,
+                                        gp_coord x, gp_coord y,
+                                        gp_size w, gp_size h, gp_pixel bg_col,
+                                        const gp_widget_render_ctx *ctx,
+					enum gp_widget_stock_type type)
+{
+	gp_size th = 2*stock_line_thickness(w, h) + 1;
+	gp_size w23 = 2 * w / 3;
+	gp_size h23 = 2 * h / 3;
+	gp_size xe = x + w - 1;
+	gp_size ye = y + h - 1;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_fill_rect_xyxy(pix, x, y, x+w23, y+h23, ctx->text_color);
+	gp_fill_rect_xyxy(pix, x+th,  y+th, x+w23-th, y+h23-th, ctx->fg_color);
+
+	gp_fill_rect_xyxy(pix, xe, ye, xe - w23, ye - h23, ctx->text_color);
+
+	if (type == GP_WIDGET_STOCK_PASTE)
+		return;
+
+	gp_fill_rect_xyxy(pix, xe-th, ye-th, xe - w23 + th, ye - h23 + th, ctx->fg_color);
+
+	if (type == GP_WIDGET_STOCK_COPY)
+		return;
+
+	gp_fill_rect_xyxy(pix, xe-w23/3, ye, xe - w23 + w23/3, ye - h23, ctx->fg_color);
+	gp_fill_rect_xyxy(pix, xe, ye-h23/3, xe - w23, ye - h23 + h23/3, ctx->fg_color);
+}
+
 static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
                                 gp_coord x, gp_coord y, gp_size w, gp_size h,
                                 gp_pixel bg_col, const gp_widget_render_ctx *ctx)
 {
-	switch (GP_WIDGET_STOCK_TYPE(type)) {
+	enum gp_widget_stock_type t = GP_WIDGET_STOCK_TYPE(type);
+
+	switch (t) {
 	case GP_WIDGET_STOCK_SPEAKER_MIN:
 	case GP_WIDGET_STOCK_SPEAKER_MAX:
 	case GP_WIDGET_STOCK_SPEAKER_MID:
@@ -1339,6 +1372,13 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	break;
 	case GP_WIDGET_STOCK_MIRROR_V:
 		render_stock_mirror_v(pix, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_CUT:
+	case GP_WIDGET_STOCK_COPY:
+	case GP_WIDGET_STOCK_PASTE:
+		render_stock_cut_copy_paste(pix, x, y, w, h, bg_col, ctx, t);
+	break;
+	default:
 	break;
 	}
 
@@ -1451,6 +1491,10 @@ static struct stock_types {
 
 	{"mirror_h", GP_WIDGET_STOCK_MIRROR_H},
 	{"mirror_v", GP_WIDGET_STOCK_MIRROR_V},
+
+	{"cut", GP_WIDGET_STOCK_CUT},
+	{"copy", GP_WIDGET_STOCK_COPY},
+	{"paste", GP_WIDGET_STOCK_PASTE},
 };
 
 gp_widget_stock_type gp_widget_stock_type_by_name(const char *name)

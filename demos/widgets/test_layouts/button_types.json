@@ -83,16 +83,16 @@
 
    {"type": "label", "text": "MIRROR_H"},
    {"type": "label", "text": "MIRROR_V"},
-   null,
-   null,
-   null,
+   {"type": "label", "text": "CUT"},
+   {"type": "label", "text": "COPY"},
+   {"type": "label", "text": "PASTE"},
    null,
 
    {"type": "button","btype": "mirror_h", "align": "fill"},
    {"type": "button", "btype": "mirror_v", "align": "fill"},
-   null,
-   null,
-   null,
+   {"type": "button", "btype": "cut", "align": "fill"},
+   {"type": "button", "btype": "copy", "align": "fill"},
+   {"type": "button", "btype": "paste", "align": "fill"},
    null
   ]
  }
