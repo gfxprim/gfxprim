@@ -73,7 +73,7 @@ void gp_widget_free(gp_widget *self)
 	if (!self)
 		return;
 
-	gp_widget_send_event(self, GP_WIDGET_EVENT_FREE);
+	gp_widget_send_event(self, GP_WIDGET_EVENT_FREE, 0);
 
 	gp_widget_ops_for_each_child(self, gp_widget_free);
 

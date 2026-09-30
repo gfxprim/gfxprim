@@ -83,11 +83,29 @@ enum gp_widget_event_type {
 	 */
 	GP_WIDGET_EVENT_COLOR_SCHEME = 0x40,
 	/**
+	 * @brief A widget has gained or lost focus.
+	 *
+	 * Send after the gp_widget::focused flag has been changed and before
+	 * the widget is redrawn. The gp_widget_event::sub_type is set to one of
+	 * #gp_widget_focus_event_type.
+	 */
+	GP_WIDGET_EVENT_FOCUS = 0x80,
+	/**
 	 * @brief Default widget event mask.
 	 *
 	 * This is the default mask for newly created widgets.
 	 */
 	GP_WIDGET_EVENT_DEFAULT_MASK = GP_WIDGET_EVENT_NEW | GP_WIDGET_EVENT_FREE | GP_WIDGET_EVENT_WIDGET,
+};
+
+/**
+ * @brief A #GP_WIDGET_EVENT_FOCUS sub type.
+ */
+enum gp_widget_focus_event_type {
+	/** @brief A widget has been focused in. */
+	GP_WIDGET_EVENT_FOCUS_IN,
+	/** @brief A widget has been focused out. */
+	GP_WIDGET_EVENT_FOCUS_OUT,
 };
 
 /**
@@ -204,6 +222,7 @@ void gp_widget_event_dump(gp_widget_event *ev);
  */
 static inline int gp_widget_send_event(gp_widget *self,
 				       enum gp_widget_event_type type,
+				       unsigned int sub_type,
 				       ...)
 {
 	if (!self->on_event)
@@ -215,7 +234,7 @@ static inline int gp_widget_send_event(gp_widget *self,
 	const struct gp_widget_render_ctx *ctx = NULL;
 
 	va_list va;
-	va_start(va, type);
+	va_start(va, sub_type);
 	if (type == GP_WIDGET_EVENT_INPUT ||
 	    type == GP_WIDGET_EVENT_RESIZE ||
 	    type == GP_WIDGET_EVENT_REDRAW ||
@@ -227,6 +246,7 @@ static inline int gp_widget_send_event(gp_widget *self,
 	gp_widget_event ev = {
 		.self = self,
 		.type = type,
+		.sub_type = sub_type,
 		.ctx = ctx,
 		.val = val,
 	};

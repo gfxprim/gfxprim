@@ -52,6 +52,8 @@ const char *gp_widget_event_type_name(enum gp_widget_event_type ev_type)
 		return "resize";
 	case GP_WIDGET_EVENT_COLOR_SCHEME:
 		return "color_scheme";
+	case GP_WIDGET_EVENT_FOCUS:
+		return "focus";
 	default:
 		return "invalid";
 	}

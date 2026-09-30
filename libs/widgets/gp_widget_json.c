@@ -384,7 +384,7 @@ ret:
 	if (shrink != -1)
 		wid->no_shrink = !shrink;
 
-	gp_widget_send_event(wid, GP_WIDGET_EVENT_NEW);
+	gp_widget_send_event(wid, GP_WIDGET_EVENT_NEW, 0);
 
 	wid->disabled = disabled;
 

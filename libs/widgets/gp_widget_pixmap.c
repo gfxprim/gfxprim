@@ -60,7 +60,7 @@ static inline void redraw_passthrough(gp_widget *self,
 	gp_sub_pixmap(ctx->buf, &sub_pix, x, y, w, h);
 
 	pixmap->pixmap = &sub_pix;
-	int ret = gp_widget_send_event(self, GP_WIDGET_EVENT_REDRAW, ctx, &sub_box);
+	int ret = gp_widget_send_event(self, GP_WIDGET_EVENT_REDRAW, 0, ctx, &sub_box);
 	pixmap->pixmap = NULL;
 
 	/*
@@ -150,7 +150,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_size h = self->h;
 
 	if (flags & GP_WIDGET_COLOR_SCHEME)
-		gp_widget_send_event(self, GP_WIDGET_EVENT_COLOR_SCHEME, ctx);
+		gp_widget_send_event(self, GP_WIDGET_EVENT_COLOR_SCHEME, 0, ctx);
 
 	if (!pixmap->pixmap)
 		redraw_passthrough(self, ctx, x, y, w, h);

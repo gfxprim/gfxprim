@@ -321,7 +321,7 @@ void gp_widget_ops_distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx
 		ops->distribute_h(self, ctx, 1);
 
 	if (self->resized) {
-		gp_widget_send_event(self, GP_WIDGET_EVENT_RESIZE, ctx);
+		gp_widget_send_event(self, GP_WIDGET_EVENT_RESIZE, 0, ctx);
 		self->resized = 0;
 	}
 }
@@ -436,6 +436,14 @@ static void focus_widget(gp_widget *self, int sel)
 		return;
 
 	self->focused = sel;
+
+	if (sel) {
+		gp_widget_send_event(self, GP_WIDGET_EVENT_FOCUS,
+		                           GP_WIDGET_EVENT_FOCUS_IN);
+	} else {
+		gp_widget_send_event(self, GP_WIDGET_EVENT_FOCUS,
+		                           GP_WIDGET_EVENT_FOCUS_OUT);
+	}
 
 	gp_widget_redraw(self);
 }
@@ -692,7 +700,7 @@ int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	ev->st->cursor_y += self->y;
 
 	if (!handled)
-		handled = gp_widget_send_event(self, GP_WIDGET_EVENT_INPUT, ctx, ev);
+		handled = gp_widget_send_event(self, GP_WIDGET_EVENT_INPUT, 0, ctx, ev);
 
 	return handled;
 }
