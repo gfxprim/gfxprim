@@ -486,3 +486,30 @@ enum gp_widget_label_flags gp_widget_label_flags_get(gp_widget *self)
 
 	return label->flags;
 }
+
+void gp_widget_label_colors_set(gp_widget *self,
+                                enum gp_widgets_color text_color,
+                                enum gp_widgets_color bg_color)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LABEL, );
+	struct label_payload *label = GP_WIDGET_PAYLOAD(self);
+
+	label->bg_color = bg_color;
+	label->text_color = text_color;
+
+	gp_widget_redraw(self);
+}
+
+void gp_widget_label_colors_get(gp_widget *self,
+                                enum gp_widgets_color *text_color,
+                                enum gp_widgets_color *bg_color)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_LABEL, );
+	struct label_payload *label = GP_WIDGET_PAYLOAD(self);
+
+	if (bg_color)
+		*bg_color = label->bg_color;
+
+	if (text_color)
+		*text_color = label->text_color;
+}

@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-   Copyright (c) 2014-2024 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -237,5 +237,27 @@ gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned
  */
 gp_widget *gp_widget_label_printf_new(gp_widget_tattr tattr, const char *fmt, ...)
                                       __attribute__((format (printf, 2, 3)));
+
+/**
+ * @brief Sets label background and text color.
+ *
+ * @param self A label widget.
+ * @param text_color A text color.
+ * @param bg_color A background color.
+ */
+void gp_widget_label_colors_set(gp_widget *self,
+                                enum gp_widgets_color text_color,
+				enum gp_widgets_color bg_color);
+
+/**
+ * @brief Returns label background and text color.
+ *
+ * @param self A label widget.
+ * @param text_color Where to store the text color, no-op if NULL.
+ * @param bg_color Where to store the background color, no-op if NULL.
+ */
+void gp_widget_label_colors_get(gp_widget *self,
+                                enum gp_widgets_color *text_color,
+                                enum gp_widgets_color *bg_color);
 
 #endif /* GP_WIDGET_LABEL_H */
