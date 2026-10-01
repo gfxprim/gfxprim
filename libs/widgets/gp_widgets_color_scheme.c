@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -25,7 +25,7 @@ struct color_scheme {
 	struct color text_color;
 	struct color bg_color;
 	struct color fg_color;
-	struct color fg2_color;
+	struct color hl_color;
 	struct color sel_color;
 	struct color alert_color;
 	struct color warn_color;
@@ -36,22 +36,22 @@ struct color_scheme {
 
 static struct color_scheme dark_scheme = {
 	.text_color   = {0xd0, 0xd3, 0xd6},
-	.fg_color     = {0x00, 0x00, 0x00},
-	.bg_color     = {0x1a, 0x1a, 0x20},
-	.fg2_color    = {0x10, 0x2a, 0x40},
-	.sel_color    = {0x40, 0x60, 0x88},
-	.alert_color  = {0xbb, 0x30, 0x00},
-	.accept_color = {0x00, 0xbb, 0x00},
-	.warn_color   = {0x90, 0x80, 0x00},
+	.bg_color     = {0x00, 0x00, 0x00},
+	.fg_color     = {0x12, 0x12, 0x12},
+	.hl_color     = {0x15, 0x20, 0x2e},
+	.sel_color    = {0x19, 0x2f, 0x51},
+	.alert_color  = {0xa8, 0x28, 0x30},
+	.accept_color = {0x30, 0x90, 0x53},
+	.warn_color   = {0xb2, 0x84, 0x00},
 	.fill_color   = {0x00, 0x00, 0x00},
-	.disabled_color = {0xaa, 0xaa, 0xaa},
+	.disabled_color = {0x60, 0x60, 0x60},
 };
 
 static struct color_scheme light_scheme = {
 	.text_color   = {0x00, 0x00, 0x00},
 	.bg_color     = {0xdd, 0xdd, 0xdd},
 	.fg_color     = {0xee, 0xee, 0xee},
-	.fg2_color    = {0x66, 0xaa, 0xee},
+	.hl_color     = {0x66, 0xaa, 0xee},
 	.sel_color    = {0x11, 0x99, 0xff},
 	.alert_color  = {0xff, 0x22, 0x00},
 	.accept_color = {0x00, 0xbb, 0x00},
@@ -155,7 +155,7 @@ static void widgets_color_scheme_load_rgb(struct color_scheme *scheme)
 	RGB_TO_PIXEL(ctx, scheme, text_color, GP_WIDGETS_COL_TEXT);
 	RGB_TO_PIXEL(ctx, scheme, bg_color, GP_WIDGETS_COL_BG);
 	RGB_TO_PIXEL(ctx, scheme, fg_color, GP_WIDGETS_COL_FG);
-	RGB_TO_PIXEL(ctx, scheme, fg2_color, GP_WIDGETS_COL_HIGHLIGHT);
+	RGB_TO_PIXEL(ctx, scheme, hl_color, GP_WIDGETS_COL_HIGHLIGHT);
 	RGB_TO_PIXEL(ctx, scheme, sel_color, GP_WIDGETS_COL_SELECT);
 	RGB_TO_PIXEL(ctx, scheme, alert_color, GP_WIDGETS_COL_ALERT);
 	RGB_TO_PIXEL(ctx, scheme, warn_color, GP_WIDGETS_COL_WARN);
