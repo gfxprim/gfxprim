@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -259,6 +259,7 @@ static gp_widget *app_layout;
 static gp_dialog *cur_dialog;
 
 static int back_from_dialog;
+static gp_size restore_w, restore_h;
 static int getopt_called;
 
 static void gp_widget_render_ctx_init(void)
@@ -386,17 +387,31 @@ void gp_widgets_redraw(struct gp_widget *layout)
 		return;
 
 	if (back_from_dialog) {
+		gp_size w, h;
+
 		back_from_dialog = 0;
 		gp_widget_calc_size(layout, &ctx, 0, 0, 1);
-		if (gp_pixmap_w(backend->pixmap) != layout->w ||
-		    gp_pixmap_h(backend->pixmap) != layout->h) {
-			gp_backend_resize(backend, layout->w, layout->h);
+
+		w = GP_MAX(restore_w, layout->w);
+		h = GP_MAX(restore_h, layout->h);
+
+		if (gp_backend_w(backend) != w || gp_backend_h(backend) != h) {
+			gp_backend_resize(backend, w, h);
+			GP_DEBUG(1, "Resizing after return from dialog to %ux%u", w, h);
 			return;
 		}
+
+		gp_fill(backend->pixmap, ctx.fill_color);
+		gp_widget_render(layout, &ctx, GP_WIDGET_RESIZE);
+		gp_backend_update(backend);
+		return;
 	}
 
-	if (gp_pixmap_w(backend->pixmap) < layout->w ||
-	    gp_pixmap_h(backend->pixmap) < layout->h) {
+	if (gp_backend_w(backend) < layout->w ||
+	    gp_backend_h(backend) < layout->h) {
+		GP_DEBUG(1, "Layout %ux%u > pixmap %u, %u resizing",
+		         layout->w, layout->h,
+		         gp_backend_w(backend), gp_backend_h(backend));
 		gp_backend_resize(backend, layout->w, layout->h);
 		return;
 	}
@@ -766,9 +781,16 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout)
 long gp_dialog_run(gp_dialog *dialog)
 {
 	gp_widget *saved = NULL;
+	gp_size saved_w = 0, saved_h = 0;
 
-	if (backend)
+	if (backend) {
 		saved = gp_widget_layout_replace(dialog->layout);
+
+		if (backend->pixmap) {
+			saved_w = gp_backend_w(backend);
+			saved_h = gp_backend_h(backend);
+		}
+	}
 
 	gp_widgets_layout_init(dialog->layout, gp_app_info_name());
 
@@ -785,7 +807,11 @@ long gp_dialog_run(gp_dialog *dialog)
 			if (saved)
 				gp_widget_layout_replace(saved);
 
+			restore_w = saved_w;
+			restore_h = saved_h;
 			back_from_dialog = 1;
+
+			GP_DEBUG(1, "Returning from dialog %p", dialog);
 
 			return dialog->retval;
 		}
