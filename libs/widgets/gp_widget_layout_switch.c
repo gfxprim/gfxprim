@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -169,7 +169,9 @@ static void free_(gp_widget *self)
 	gp_vec_free(s->layouts);
 }
 
-static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+static void for_each_child(gp_widget *self,
+                           void (*func)(gp_widget *child, void *priv),
+                           void *priv)
 {
 	struct layout_switch_payload *s = GP_WIDGET_PAYLOAD(self);
 	unsigned int i;
@@ -178,7 +180,7 @@ static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
 		gp_widget *child = s->layouts[i];
 
 		if (child)
-			func(child);
+			func(child, priv);
 	}
 }
 

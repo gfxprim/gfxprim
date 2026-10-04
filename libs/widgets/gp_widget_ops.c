@@ -326,7 +326,9 @@ void gp_widget_ops_distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx
 	}
 }
 
-void gp_widget_ops_for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+void gp_widget_ops_for_each_child_priv(gp_widget *self,
+                                       void (*func)(gp_widget *child, void *priv),
+                                       void *priv)
 {
 	const struct gp_widget_ops *ops;
 
@@ -338,7 +340,29 @@ void gp_widget_ops_for_each_child(gp_widget *self, void (*func)(gp_widget *child
 	if (!ops->for_each_child)
 		return;
 
-	ops->for_each_child(self, func);
+	ops->for_each_child(self, func, priv);
+}
+
+static void widget_ops_trampoline(gp_widget *child, void *priv)
+{
+	void (*func)(gp_widget *child) = priv;
+
+	func(child);
+}
+
+void gp_widget_ops_for_each_child(gp_widget *self,
+                                  void (*func)(gp_widget *child))
+{
+	const struct gp_widget_ops *ops;
+
+	if (!self)
+		return;
+
+	ops = gp_widget_ops(self);
+	if (!ops->for_each_child)
+		return;
+
+	ops->for_each_child(self, widget_ops_trampoline, func);
 }
 
 void gp_widget_calc_size(gp_widget *self, const gp_widget_render_ctx *ctx,

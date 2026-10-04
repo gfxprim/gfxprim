@@ -197,8 +197,11 @@ struct gp_widget_ops {
 	 *
 	 * @param self A widget.
 	 * @param func A function to be called on each child widget.
+	 * @param priv A private pointer to pass down a state.
 	 */
-	void (*for_each_child)(gp_widget *self, void (*func)(gp_widget *child));
+	void (*for_each_child)(gp_widget *self,
+	                       void (*func)(gp_widget *child, void *priv),
+	                       void *priv);
 
 	/**
 	 * @brief A JSON to widget parser.
@@ -307,12 +310,29 @@ void gp_widget_ops_distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx
  * All non-leaf widgets must implement for_each_child() callback in its ops
  * which is then called by this function.
  *
- * This function is no-op for NULL self and non-leaf widgets.
+ * This function is no-op for NULL self and leaf widgets.
  *
  * @param self A widget.
- * @param func A function callback
+ * @param func A function callback.
  */
-void gp_widget_ops_for_each_child(gp_widget *self, void (*func)(gp_widget *child));
+void gp_widget_ops_for_each_child(gp_widget *self,
+                                  void (*func)(gp_widget *child));
+
+/**
+ * @brief Calls a callback on each child widget.
+ *
+ * All non-leaf widgets must implement for_each_child() callback in its ops
+ * which is then called by this function.
+ *
+ * This function is no-op for NULL self and leaf widgets.
+ *
+ * @param self A widget.
+ * @param func A function callback.
+ * @param priv A private pointer to pass down a state.
+ */
+void gp_widget_ops_for_each_child_priv(gp_widget *self,
+                                       void (*func)(gp_widget *child, void *priv),
+                                       void *priv);
 
 /**
  * @brief Marks an area to be blit on the screen from a buffer.

@@ -503,6 +503,26 @@ void gp_widget_free(gp_widget *self);
 void gp_widget_set_parent(gp_widget *self, gp_widget *parent);
 
 /**
+ * @brief Looks up a widget layout root.
+ *
+ * Walks the gp_widget::parent until it hits NULL, the widget with NULL parent
+ * is the root.
+ *
+ * @param self A widget.
+ * @return A widget root or NULL if self was NULL.
+ */
+gp_widget *gp_widget_layout_root(gp_widget *self);
+
+/**
+ * @brief Dumps a widget tree into stdout.
+ *
+ * @param root A root of a widget (sub)tree.
+ * @param filter A filter function, if not NULL only widgets for which it
+ *        returns true are printed.
+ */
+void gp_widget_layout_dump(gp_widget *root, bool (*filter)(gp_widget *self));
+
+/**
  * @brief Sets focus to a particular widget.
  *
  * Traverses the widget layout tree to the top and sets the focus accordingly.

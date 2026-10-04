@@ -1271,7 +1271,9 @@ static void free_(gp_widget *self)
 	gp_vec_free(grid->row_s);
 }
 
-static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+static void for_each_child(gp_widget *self,
+                           void (*func)(gp_widget *child, void *priv),
+                           void *priv)
 {
 	unsigned int x, y;
 	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
@@ -1281,7 +1283,7 @@ static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
 			gp_widget *child = widget_grid_get(self, x, y);
 
 			if (child)
-				func(child);
+				func(child, priv);
 		}
 	}
 }

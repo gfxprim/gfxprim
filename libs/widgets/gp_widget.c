@@ -66,6 +66,61 @@ void gp_widget_set_parent(gp_widget *self, gp_widget *parent)
 	self->parent = parent;
 }
 
+gp_widget *gp_widget_layout_root(gp_widget *self)
+{
+	gp_widget *root = self;
+
+	if (!self)
+		return NULL;
+
+	while (root->parent)
+		root = root->parent;
+
+	GP_DEBUG(3, "Looked up %p root %p", self, root);
+
+	return root;
+}
+
+struct widget_dump {
+	int level;
+	bool (*filter)(gp_widget *self);
+};
+
+static void widget_dump(gp_widget *self, struct widget_dump *dump)
+{
+	int i;
+
+	for (i = 0; i < dump->level; i++)
+		printf(" ");
+
+	printf("%p (%12s) redraw=%i redraw_child=%i resized=%i focused=%i disabled=%i %ix%i\n",
+	       self, gp_widget_type_name(self->type),
+	       self->redraw, self->redraw_child, self->resized,
+	       self->focused, self->disabled, self->w, self->h);
+}
+
+static void widget_tree_dump(gp_widget *self, void *priv)
+{
+	struct widget_dump *dump = priv;
+
+	if (dump->filter(self))
+		widget_dump(self, dump);
+
+	dump->level++;
+	gp_widget_ops_for_each_child_priv(self, widget_tree_dump, priv);
+	dump->level--;
+}
+
+void gp_widget_layout_dump(gp_widget *self, bool (*filter)(gp_widget *self))
+{
+	struct widget_dump dump = {.filter = filter};
+
+	if (!self)
+		return;
+
+	widget_tree_dump(self, &dump);
+}
+
 void gp_widget_free(gp_widget *self)
 {
 	const struct gp_widget_ops *ops;

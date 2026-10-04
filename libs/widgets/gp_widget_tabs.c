@@ -829,7 +829,9 @@ free:
 	return NULL;
 }
 
-static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+static void for_each_child(gp_widget *self,
+                           void (*func)(gp_widget *child, void *priv),
+                           void *priv)
 {
 	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 	size_t i;
@@ -838,7 +840,7 @@ static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
 		gp_widget *child = tabs->tabs[i].widget;
 
 		if (child)
-			func(child);
+			func(child, priv);
 	}
 }
 
