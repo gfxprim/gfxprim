@@ -12,6 +12,7 @@
 #include <utils/gp_json.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_ops_focus.h>
 
 const char *gp_widget_class_name(enum gp_widget_class widget_class)
 {
@@ -147,6 +148,14 @@ void gp_widget_disable(gp_widget *self)
 		return;
 
 	self->disabled = 1;
+
+	/* Disabled widget cannot be focused, move the focus away */
+	if (self->focused) {
+		if (self->parent)
+			gp_widget_ops_focus_child_changed(self->parent, self);
+		else
+			gp_widget_ops_focus_out(self);
+	}
 
 	gp_widget_redraw(self);
 	gp_widget_redraw_children(self);

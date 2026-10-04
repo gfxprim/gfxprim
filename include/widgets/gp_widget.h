@@ -117,6 +117,11 @@ struct gp_widget {
 
 	/**
 	 * @brief Set if widget is focused.
+	 *
+	 * This bit is set for all widgets from the layout root to the focused
+	 * widget. Usually the focused widget is a leaf in the tree, e.g.
+	 * button widget, but some of the container widgets can get focus as
+	 * well, i.e. tabs widget can have focus on the tabs themselves.
 	 */
 	unsigned int focused:1;
 
@@ -132,13 +137,17 @@ struct gp_widget {
 	 *
 	 * If set the widget cannot get focused and will not process input
 	 * events even if ops->event is implemented.
+	 *
+	 * See the gp_widget_accepts_input_events() helper.
 	 */
 	unsigned int no_events:1;
 
 	/**
 	 * @brief Internal disabled flag.
 	 *
-	 * If set widget is 'grayed out' and no events are processed.
+	 * If set widget is 'grayed out' and no input events are processed.
+	 *
+	 * See also the gp_widget_accepts_input_events() helper.
 	 */
 	unsigned int disabled:1;
 

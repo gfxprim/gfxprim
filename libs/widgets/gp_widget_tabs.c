@@ -25,6 +25,12 @@ struct gp_widget_tab {
 	gp_widget *widget;
 };
 
+enum tabs_focus {
+	TABS_FOCUS_NONE,
+	TABS_FOCUS_TITLE,
+	TABS_FOCUS_WIDGET,
+};
+
 struct gp_widget_tabs {
 	/* Tab whose content is shown. */
 	unsigned int active_tab;
@@ -37,13 +43,20 @@ struct gp_widget_tabs {
 	/* Width of all the tab labels added together. */
 	unsigned int tabs_w;
 
-	int title_focused:1;
-	int widget_focused:1;
+	/* enum tabs_focus, what is focused when the tabs widget is focused */
+	uint8_t focus;
 
 	struct gp_widget_tab *tabs;
 
 	char payload[];
 };
+
+static int is_title_focused(gp_widget *self)
+{
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
+
+	return self->focused && tabs->focus == TABS_FOCUS_TITLE;
+}
 
 static gp_size tab_w(gp_widget *self, const gp_widget_render_ctx *ctx,
                      unsigned int tab)
@@ -246,7 +259,7 @@ static void render_tabs_range(gp_widget *self, const gp_offset *offset,
 			act_w = w;
 		}
 
-		if (is_active && tabs->title_focused) {
+		if (is_active && is_title_focused(self)) {
 			gp_fill_rect_xywh(ctx->buf,
 				    cur_x + ctx->padd/2,
 				    y + tab_h - ctx->padd + 1,
@@ -407,8 +420,11 @@ static void set_tab(gp_widget *self, unsigned int tab)
 	if (tab == tabs->active_tab)
 		return;
 
+	gp_widget *old = active_tab_widget(self);
+
 	gp_widget_send_widget_event(self, GP_WIDGET_TABS_DEACTIVATED);
 	tabs->active_tab = tab;
+	gp_widget_ops_focus_child_changed(self, old);
 	gp_widget_send_widget_event(self, GP_WIDGET_TABS_ACTIVATED);
 
 	gp_widget_redraw(self);
@@ -441,137 +457,6 @@ static void tab_right(gp_widget *self)
 		tab = 0;
 
 	set_tab(self, tab);
-}
-
-static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
-{
-	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
-
-	if (tabs->widget_focused) {
-		unsigned int px = payload_x(self, ctx) - self->x;
-		unsigned int py = payload_y(self, ctx) - self->y;
-
-		return gp_widget_ops_event_offset(active_tab_widget(self), ctx, ev, px, py);
-	}
-
-	if (!tabs->title_focused)
-		return 0;
-
-	switch (ev->type) {
-	case GP_EV_KEY:
-		if (ev->code == GP_EV_KEY_UP)
-			return 0;
-
-		if (gp_widget_key_mod_pressed(ev))
-			return 0;
-
-		switch (ev->val) {
-		case GP_KEY_LEFT:
-			tab_left(self);
-			return 1;
-		break;
-		case GP_KEY_RIGHT:
-			tab_right(self);
-			return 1;
-		break;
-		}
-	break;
-	}
-
-	return 0;
-}
-
-static int focus_out(gp_widget *self)
-{
-	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
-
-	if (tabs->widget_focused)
-		return gp_widget_ops_render_focus(active_tab_widget(self), GP_FOCUS_OUT);
-
-	if (tabs->title_focused) {
-		tabs->title_focused = 0;
-		gp_widget_redraw(self);
-	}
-
-	return 0;
-}
-
-static int focus_prev(gp_widget *self)
-{
-	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
-
-	gp_widget *w = active_tab_widget(self);
-
-	if (tabs->title_focused)
-		return 0;
-
-	if (tabs->widget_focused) {
-		gp_widget_ops_render_focus(w, GP_FOCUS_OUT);
-		tabs->widget_focused = 0;
-		tabs->title_focused = 1;
-		gp_widget_redraw(self);
-		return 1;
-	}
-
-	if (gp_widget_ops_render_focus(w, GP_FOCUS_IN))
-		return 1;
-
-	tabs->title_focused = 1;
-	gp_widget_redraw(self);
-	return 1;
-}
-
-static int focus_next(gp_widget *self)
-{
-	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
-
-	gp_widget *w = active_tab_widget(self);
-
-	if (tabs->title_focused) {
-		if (!gp_widget_ops_render_focus(w, GP_FOCUS_IN))
-			return 0;
-		tabs->title_focused = 0;
-		tabs->widget_focused = 1;
-		gp_widget_redraw(self);
-		return 1;
-	}
-
-	if (tabs->widget_focused)
-		return 0;
-
-	tabs->title_focused = 1;
-	gp_widget_redraw(self);
-	return 1;
-}
-
-static int focus(gp_widget *self, int sel)
-{
-	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
-
-	gp_widget *w = active_tab_widget(self);
-
-	if (tabs->widget_focused) {
-		if (gp_widget_ops_render_focus(w, sel))
-			return 1;
-	}
-
-	switch (sel) {
-	case GP_FOCUS_OUT:
-		return focus_out(self);
-	case GP_FOCUS_LEFT:
-		return 0;
-	case GP_FOCUS_RIGHT:
-		return 0;
-	case GP_FOCUS_IN:
-	case GP_FOCUS_UP:
-	case GP_FOCUS_PREV:
-		return focus_prev(self);
-	case GP_FOCUS_DOWN:
-	case GP_FOCUS_NEXT:
-		return focus_next(self);
-	}
-
-	return 0;
 }
 
 static void focus_tab(gp_widget *self, const gp_widget_render_ctx *ctx,
@@ -609,70 +494,117 @@ static void focus_tab(gp_widget *self, const gp_widget_render_ctx *ctx,
 	}
 }
 
-
-static int focus_title(gp_widget *self, const gp_widget_render_ctx *ctx,
-                        unsigned int x)
+static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	tabs->title_focused = 1;
+	if (tabs->focus == TABS_FOCUS_WIDGET) {
+		unsigned int px = payload_x(self, ctx) - self->x;
+		unsigned int py = payload_y(self, ctx) - self->y;
 
-	if (tabs->widget_focused) {
-		gp_widget_ops_render_focus(active_tab_widget(self), GP_FOCUS_OUT);
-		tabs->widget_focused = 0;
+		return gp_widget_ops_event_offset(active_tab_widget(self), ctx, ev, px, py);
 	}
 
-	focus_tab(self, ctx, x);
-
-	return 1;
-}
-
-static void unfocus_title(gp_widget *self)
-{
-	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
-
-	if (!tabs->title_focused)
-		return;
-
-	tabs->title_focused = 0;
-	gp_widget_redraw(self);
-}
-
-static int focus_widget(gp_widget *self, const gp_widget_render_ctx *ctx,
-                         unsigned int x, unsigned int y)
-{
-	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
-
-	if (!gp_widget_ops_render_focus_xy(active_tab_widget(self), ctx, x, y))
+	if (!is_title_focused(self))
 		return 0;
 
-	unfocus_title(self);
-	tabs->widget_focused = 1;
+	switch (ev->type) {
+	case GP_EV_KEY:
+		if (ev->code == GP_EV_KEY_UP)
+			return 0;
 
-	return 1;
+		if (gp_widget_key_mod_pressed(ev))
+			return 0;
+
+		switch (ev->val) {
+		case GP_BTN_LEFT:
+		case GP_BTN_TOUCH:
+			if (ev->st->cursor_y > title_h(self, ctx))
+				return 0;
+			focus_tab(self, ctx, ev->st->cursor_x);
+			return 1;
+		case GP_KEY_LEFT:
+			tab_left(self);
+			return 1;
+		break;
+		case GP_KEY_RIGHT:
+			tab_right(self);
+			return 1;
+		break;
+		}
+	break;
+	}
+
+	return 0;
 }
 
-static int focus_child(gp_widget *self, gp_widget *child)
+static gp_widget *focus_child_get(gp_widget *self)
 {
 	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	gp_widget *active = active_tab_widget(self);
+	switch (tabs->focus) {
+	case TABS_FOCUS_TITLE:
+		return self;
+	case TABS_FOCUS_WIDGET:
+		return active_tab_widget(self);
+	}
 
-	if (child != active)
-		return 0;
-
-	unfocus_title(self);
-	tabs->widget_focused = 1;
-	return 1;
+	return NULL;
 }
 
-static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
-                    unsigned int x, unsigned int y)
+static bool focus_child_set(gp_widget *self, gp_widget *child)
 {
-	if (y > title_h(self, ctx))
-		return focus_widget(self, ctx, x - payload_x(self, ctx) + self->x, y - payload_y(self, ctx) + self->y);
+	struct gp_widget_tabs *tabs = GP_WIDGET_PAYLOAD(self);
 
-	return focus_title(self, ctx, x);
+	if (child == self) {
+		tabs->focus = TABS_FOCUS_TITLE;
+		return true;
+	}
+
+	if (!child || child != active_tab_widget(self))
+		return false;
+
+	tabs->focus = TABS_FOCUS_WIDGET;
+	return true;
+}
+
+/*
+ * The tabs title is before the active tab widget in the focus order.
+ */
+static gp_widget *focus_child_next(gp_widget *self, gp_widget *from, int focus_dir)
+{
+	gp_widget *widget = active_tab_widget(self);
+
+	switch (focus_dir) {
+	case GP_FOCUS_DOWN:
+	case GP_FOCUS_NEXT:
+		if (!from)
+			return self;
+		if (from == self)
+			return widget;
+	break;
+	case GP_FOCUS_UP:
+	case GP_FOCUS_PREV:
+		if (!from)
+			return widget ? widget : self;
+		if (from == widget)
+			return self;
+	break;
+	}
+
+	return NULL;
+}
+
+static gp_widget *focus_child_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                 unsigned int *x, unsigned int *y)
+{
+	if (*y <= title_h(self, ctx))
+		return self;
+
+	*x = *x - payload_x(self, ctx) + self->x;
+	*y = *y - payload_y(self, ctx) + self->y;
+
+	return active_tab_widget(self);
 }
 
 static void tabs_free(struct gp_widget_tab *tabs)
@@ -860,9 +792,10 @@ struct gp_widget_ops gp_widget_tabs_ops = {
 	.min_h = min_h,
 	.render = render,
 	.event = event,
-	.focus = focus,
-	.focus_xy = focus_xy,
-	.focus_child = focus_child,
+	.focus_child_get = focus_child_get,
+	.focus_child_set = focus_child_set,
+	.focus_child_next = focus_child_next,
+	.focus_child_xy = focus_child_xy,
 	.distribute_w = distribute_w,
 	.distribute_h = distribute_h,
 	.for_each_child = for_each_child,
@@ -930,6 +863,8 @@ gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
 	tabs->tabs[tab].widget = child;
 
 	gp_widget_set_parent(child, self);
+
+	gp_widget_ops_focus_child_changed(self, ret);
 
 	gp_widget_resize(self);
 	//TODO: Redraw as well?
@@ -1019,6 +954,8 @@ static gp_widget *tab_rem(gp_widget *self, unsigned int tab)
 	    tabs->active_tab >= tab) {
 		tabs->active_tab--;
 	}
+
+	gp_widget_ops_focus_child_changed(self, ret);
 
 	if (was_active)
 		gp_widget_send_widget_event(self, GP_WIDGET_TABS_ACTIVATED);

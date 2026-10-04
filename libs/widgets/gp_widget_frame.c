@@ -152,22 +152,24 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return gp_widget_ops_event_offset(frame->child, ctx, ev, px, py);
 }
 
-static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
-                     unsigned int x, unsigned int y)
+static gp_widget *focus_child_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                 unsigned int *x, unsigned int *y)
 {
 	struct gp_widget_frame *frame = GP_WIDGET_PAYLOAD(self);
 
-	return gp_widget_ops_render_focus_xy(frame->child, ctx,
-	                                     x - payload_off_x(ctx),
-	                                     y - payload_off_y(self, ctx));
+	*x -= payload_off_x(ctx);
+	*y -= payload_off_y(self, ctx);
+
+	return frame->child;
 }
 
-static int focus(gp_widget *self, int sel)
+static gp_widget *focus_child_get(gp_widget *self)
 {
 	struct gp_widget_frame *frame = GP_WIDGET_PAYLOAD(self);
 
-	return gp_widget_ops_render_focus(frame->child, sel);
+	return frame->child;
 }
+
 
 enum keys {
 	BG,
@@ -239,7 +241,7 @@ static void frame_free(gp_widget *self)
 	free(frame->title);
 }
 
-static int focus_child(gp_widget *self, gp_widget *child)
+static bool focus_child_set(gp_widget *self, gp_widget *child)
 {
 	struct gp_widget_frame *frame = GP_WIDGET_PAYLOAD(self);
 
@@ -264,9 +266,9 @@ struct gp_widget_ops gp_widget_frame_ops = {
 	.render = render,
 	.event = event,
 	.free = frame_free,
-	.focus_xy = focus_xy,
-	.focus = focus,
-	.focus_child = focus_child,
+	.focus_child_get = focus_child_get,
+	.focus_child_set = focus_child_set,
+	.focus_child_xy = focus_child_xy,
 	.for_each_child = for_each_child,
 	.distribute_w = distribute_w,
 	.distribute_h = distribute_h,
@@ -307,6 +309,8 @@ gp_widget *gp_widget_frame_put(gp_widget *self, gp_widget *child)
 	frame->child = child;
 
 	gp_widget_set_parent(child, self);
+
+	gp_widget_ops_focus_child_changed(self, ret);
 
 	gp_widget_resize(self);
 

@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -12,6 +12,7 @@
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_event.h>
 #include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_ops_focus.h>
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_app_event.h>
 #include <widgets/gp_widget_keys.h>
@@ -453,185 +454,6 @@ void gp_widget_ops_render(gp_widget *self, const gp_offset *offset,
 	//gp_rect_xywh(render->buf, x, y, self->w, self->h, 0x00ff00);
 }
 
-static void focus_widget(gp_widget *self, int sel)
-{
-	if (!self)
-		return;
-
-	if (self->focused == sel)
-		return;
-
-	self->focused = sel;
-
-	if (sel) {
-		gp_widget_send_event(self, GP_WIDGET_EVENT_FOCUS,
-		                           GP_WIDGET_EVENT_FOCUS_IN);
-	} else {
-		gp_widget_send_event(self, GP_WIDGET_EVENT_FOCUS,
-		                           GP_WIDGET_EVENT_FOCUS_OUT);
-	}
-
-	gp_widget_redraw(self);
-}
-
-static const char *focus_to_str(int flag)
-{
-	switch (flag) {
-	case GP_FOCUS_OUT:
-		return "focus_out";
-	case GP_FOCUS_IN:
-		return "focus_in";
-	case GP_FOCUS_NEXT:
-		return "focus_next";
-	case GP_FOCUS_PREV:
-		return "focus_prev";
-	case GP_FOCUS_LEFT:
-		return "focus_left";
-	case GP_FOCUS_RIGHT:
-		return "focus_right";
-	case GP_FOCUS_UP:
-		return "focus_up";
-	case GP_FOCUS_DOWN:
-		return "focus_down";
-	}
-
-	return "???";
-}
-
-static int no_events(gp_widget *self)
-{
-	return self->no_events | self->disabled;
-}
-
-int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
-                                  unsigned int x, unsigned int y)
-{
-	const struct gp_widget_ops *ops;
-
-	GP_DEBUG(3, "focus event %p (%s) %ux%u",
-		 self, gp_widget_type_id(self), x, y);
-
-	if (!self)
-		return 0;
-
-	if (no_events(self))
-		return 0;
-
-	ops = gp_widget_ops(self);
-	if (!ops->event)
-		return 0;
-
-	if (ops->focus_xy) {
-		x -= self->x;
-		y -= self->y;
-		return ops->focus_xy(self, ctx, x, y);
-	}
-
-	if (self->focused)
-		return 0;
-
-	focus_widget(self, 1);
-	return 1;
-}
-
-static int widget_focusable(gp_widget *self)
-{
-	const struct gp_widget_ops *ops;
-
-	if (!self)
-		return 0;
-
-	if (no_events(self))
-		return 0;
-
-	ops = gp_widget_ops(self);
-	if (!ops->event)
-		return 0;
-
-	return 1;
-}
-
-static int focus_parent_widget(gp_widget *self)
-{
-	const struct gp_widget_ops *ops;
-	gp_widget *parent = self->parent;
-
-	if (!parent)
-		return 1;
-
-	GP_DEBUG(4, "Focusing parent %p (%s)",
-	         parent, gp_widget_type_id(parent));
-
-	ops = gp_widget_ops(parent);
-	if (!ops->focus_child) {
-		GP_WARN("Unimplemented focus_child()!");
-		return 0;
-	}
-
-	if (!ops->focus_child(parent, self))
-		return 0;
-
-	if (parent->focused)
-		return 1;
-
-	focus_widget(parent, 1);
-
-	return focus_parent_widget(parent);
-}
-
-int gp_widget_ops_focus_widget(gp_widget *self)
-{
-	if (!self)
-		return 1;
-
-	if (!widget_focusable(self)) {
-		GP_WARN("Widget %p (%s) not fucusable",
-			self, gp_widget_type_id(self));
-		return 0;
-	}
-
-	focus_widget(self, 1);
-	return focus_parent_widget(self);
-}
-
-int gp_widget_focus_set(gp_widget *self)
-{
-	GP_DEBUG(3, "Focusing widget %p (%s)", self, gp_widget_type_id(self));
-
-	if (!self) {
-		GP_WARN("Attempting to focus NULL widget!");
-		return 0;
-	}
-
-	return gp_widget_ops_focus_widget(self);
-}
-
-int gp_widget_ops_render_focus(gp_widget *self, int focus_dir)
-{
-	const struct gp_widget_ops *ops;
-
-	GP_DEBUG(3, "Focus event %p (%s) %s",
-		 self, gp_widget_type_id(self), focus_to_str(focus_dir));
-
-	if (!widget_focusable(self))
-		return 0;
-
-	ops = gp_widget_ops(self);
-	if (ops->focus)
-		return ops->focus(self, focus_dir);
-
-	if (focus_dir) {
-		if (self->focused)
-			return 0;
-
-		focus_widget(self, 1);
-		return 1;
-	}
-
-	focus_widget(self, 0);
-	return 1;
-}
-
 static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	switch (ev->type) {
@@ -701,18 +523,15 @@ int gp_widget_input_event(gp_widget *self, const gp_widget_render_ctx *ctx,
 
 int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	const struct gp_widget_ops *ops;
 	int handled;
 
 	if (!self)
 		return 0;
 
-	if (no_events(self))
+	if (!gp_widget_accepts_input_events(self))
 		return 0;
 
-	ops = gp_widget_ops(self);
-	if (!ops->event)
-		return 0;
+	const struct gp_widget_ops *ops = gp_widget_ops(self);
 
 	GP_DEBUG(3, "Event widget %p (%s) (cursor %ux%u)",
 	         self, ops->id, ev->st->cursor_x, ev->st->cursor_y);

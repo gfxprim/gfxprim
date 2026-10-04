@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -22,26 +22,6 @@
 #include <utils/gp_json.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_render.h>
-
-/** @brief Flags to move focus around. */
-enum gp_widget_focus_flag {
-	/** @brief Defocus any focused widget in the layout. */
-	GP_FOCUS_OUT,
-	/** @brief Focus first widget in the layout. */
-	GP_FOCUS_IN,
-	/** @brief Moves focus left. */
-	GP_FOCUS_LEFT,
-	/** @brief Moves focus right. */
-	GP_FOCUS_RIGHT,
-	/** @brief Moves focus up. */
-	GP_FOCUS_UP,
-	/** @brief Moves focus down. */
-	GP_FOCUS_DOWN,
-	/** @brief Focus next widget. */
-	GP_FOCUS_NEXT,
-	/** @brief Focus previous widget. */
-	GP_FOCUS_PREV,
-};
 
 struct json_object;
 
@@ -126,31 +106,78 @@ struct gp_widget_ops {
 	               const gp_widget_render_ctx *ctx, int flags);
 
 	/**
-	 * @brief Moves focus.
+	 * @brief Returns a focused child of a container.
 	 *
-	 * Focused widget is a widget that recieves keyboard input.
+	 * Containers implement the focus_child_* callbacks, all the focus
+	 * logic is implemented in the widget ops code. The callbacks only
+	 * store and look up the child that is on the focus path. Focus is a
+	 * path from the layout root to a leaf widget and the widget::focused
+	 * flag is set on all widgets on that path, containers included. The
+	 * flag is maintained by the widget ops code and must not be modified
+	 * by the widget implementations.
 	 *
-	 * @param self A widget.
-	 * @param focus_dir An enum gp_widget_focus_flag, a direction to move
-	 *                  the focus to.
-	 */
-	int (*focus)(gp_widget *self, int focus_dir);
-
-	/*
-	 * Moves focus to widget on x, y coordinates.
-	 */
-	int (*focus_xy)(gp_widget *self, const gp_widget_render_ctx *ctx,
-	                 unsigned int x, unsigned int y);
-
-	/**
-	 * @brief Sets/moves focus to a child specific child widget.
+	 * Containers that can be focused themselves, e.g. tabs with a focused
+	 * title, use the self pointer in place of a child to describe that.
+	 *
+	 * The focused child is remembered even after the container lost the
+	 * focus, which is used when the focus moves back into the container.
 	 *
 	 * @param self A container widget.
-	 * @param child A child widget to be focused.
 	 *
-	 * @return Non-zero if widget was focused successfuly.
+	 * @return A focused child, self if the container itself is focused or
+	 *         NULL if there is none.
 	 */
-	int (*focus_child)(gp_widget *self, gp_widget *child);
+	gp_widget *(*focus_child_get)(gp_widget *self);
+
+	/**
+	 * @brief Sets a focused child of a container.
+	 *
+	 * This only stores the child, no focus events have to be sent and the
+	 * widget::focused flags must not be modified.
+	 *
+	 * @param self A container widget.
+	 * @param child A child or self to be focused.
+	 *
+	 * @return True on success, false if the child cannot be focused,
+	 *         e.g. it's not in an active tab.
+	 */
+	bool (*focus_child_set)(gp_widget *self, gp_widget *child);
+
+	/**
+	 * @brief Returns a next child in a direction.
+	 *
+	 * The widget ops code calls this repeatedly until it finds a child that
+	 * can be focused or NULL is returned.
+	 *
+	 * Optional, containers with a single child, which is returned by the
+	 * focus_child_get(), do not have to implement it.
+	 *
+	 * @param self A container widget.
+	 * @param from A child to start from, NULL when the focus moves into the
+	 *             container, i.e. returns first child in the direction.
+	 * @param focus_dir An enum gp_widget_focus_flag.
+	 *
+	 * @return A child, self or NULL if there is no next child.
+	 */
+	gp_widget *(*focus_child_next)(gp_widget *self, gp_widget *from,
+	                               int focus_dir);
+
+	/**
+	 * @brief Returns a child on x, y coordinates.
+	 *
+	 * @param self A container widget.
+	 * @param ctx A render context.
+	 * @param x A pointer to x coordinate.
+	 * @param y A pointer to y coordinate.
+	 *
+	 * The x and y coordinates passed to the call are relative to the
+	 * container widget and are normalized to be relative to the returned
+	 * focused widget upon return with a succesful lookup.
+	 *
+	 * @return A child, self or NULL if there is nothing focusable on x, y.
+	 */
+	gp_widget *(*focus_child_xy)(gp_widget *self, const gp_widget_render_ctx *ctx,
+	                             unsigned int *x, unsigned int *y);
 
 	/**
 	 * @brief Calculates a minimal widget width.
@@ -220,6 +247,13 @@ struct gp_widget_ops {
 	const char *id;
 };
 
+/**
+ * @brief Returns widget ops structure.
+ *
+ * @param self A widget.
+ *
+ * @return A pointer to widgets ops structure.
+ */
 const struct gp_widget_ops *gp_widget_ops(gp_widget *self);
 
 const struct gp_widget_ops *gp_widget_ops_by_id(const char *id);
@@ -233,6 +267,31 @@ unsigned int gp_widget_min_w(gp_widget *self, const gp_widget_render_ctx *ctx);
 unsigned int gp_widget_min_h(gp_widget *self, const gp_widget_render_ctx *ctx);
 
 unsigned int gp_widget_align(gp_widget *self);
+
+/**
+ * @brief Returns true if widget accepts input events.
+ *
+ * A widget handles input events if all are true:
+ *
+ * - the widget is not disabled
+ * - it has an input event handler
+ * - the handler is enabled, i.e. 'no_events' flag is not set
+ *
+ * Note that this will return true for widgets that have a disabled parent and
+ * are rendered disabled.
+ *
+ * @param self A widget.
+ * @return True if widget accepts input events.
+ */
+static inline bool gp_widget_accepts_input_events(gp_widget *self)
+{
+	const struct gp_widget_ops *ops = gp_widget_ops(self);
+
+	if (self->no_events || self->disabled)
+		return false;
+
+	return ops->event != NULL;
+}
 
 int gp_widget_input_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev);
 
@@ -250,8 +309,8 @@ void gp_widget_ops_render(gp_widget *self, const gp_offset *offset,
  */
 int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev);
 
-/*
- * Send event to a widget with a cursor offset.
+/**
+ * @brief Send event to a widget with a cursor offset.
  *
  * Same as gp_widget_ops_event() but with offset to the absolute coordinates is
  * applied so that the event is relative to the cursor coordinates.
@@ -266,40 +325,6 @@ int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
  */
 int gp_widget_ops_event_offset(gp_widget *self, const gp_widget_render_ctx *ctx,
                                gp_event *ev, gp_size off_x, gp_size off_y);
-
-/**
- * @brief Moves focus, if possible, in the direction requested by the focus_dir.
- *
- * @param self A widget layout.
- * @param focus_dir Direction to move the focus to.
- *
- * @return Zero if focus couldn't be moved, non-zero otherwise.
- */
-int gp_widget_ops_render_focus(gp_widget *self, int focus_dir);
-
-/**
- * @brief Tries to focus a widget on a given coordinates in a layout.
- *
- * @param self A widget layout.
- * @param ctx A render context.
- * @param x X coordinate.
- * @param y Y coordinate.
- *
- * @return Zero if focus wasn't changed, non-zero otherwise.
- */
-int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
-                                  unsigned int x, unsigned int y);
-
-/**
- * @brief Moves focus to a particular widget.
- *
- * Traverses the widget layout tree to the top and sets the focus accordingly.
- *
- * @param self A widget to be focused.
- *
- * @return Zero if focus couldn't be changed, non-zero otherwise.
- */
-int gp_widget_ops_focus_widget(gp_widget *self);
 
 void gp_widget_ops_distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int w, int new_wh);
 void gp_widget_ops_distribute_h(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int h, int new_wh);

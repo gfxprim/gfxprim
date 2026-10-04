@@ -202,26 +202,24 @@ static gp_widget *json_to_overlay(gp_json_reader *json, gp_json_val *val,
 	return ret;
 }
 
-static gp_widget *focus_widget_by_xy(gp_widget *self, unsigned int x, unsigned int y)
+static int stack_pos_by_xy(gp_widget *self, unsigned int x, unsigned int y)
 {
 	struct overlay_payload *overlay = GP_WIDGET_PAYLOAD(self);
 	int i;
 
-	for (i = gp_widget_overlay_stack_size(self) - 1; i > 0; i--) {
+	for (i = gp_widget_overlay_stack_size(self) - 1; i >= 0; i--) {
 		gp_widget *widget = overlay->stack[i].widget;
 
-		if (!widget)
+		if (!widget || overlay->stack[i].hidden)
 			continue;
 
 		if (x >= widget->x && y >= widget->y &&
 		    x < widget->x + widget->w &&
-		    y < widget->y + widget->w) {
-			overlay->focused = i;
-			return widget;
-		}
+		    y < widget->y + widget->h)
+			return i;
 	}
 
-	return NULL;
+	return -1;
 }
 
 static void free_(gp_widget *self)
@@ -246,67 +244,73 @@ static void for_each_child(gp_widget *self,
 	}
 }
 
-static int focus(gp_widget *self, int sel)
+static gp_widget *focus_child_get(gp_widget *self)
 {
-	struct overlay_payload *overlay = GP_WIDGET_PAYLOAD(self);
-	int i;
-
-	if (overlay->focused < 0) {
-		for (i = gp_widget_overlay_stack_size(self) - 1; i > 0; i--) {
-			gp_widget *widget = overlay->stack[i].widget;
-
-			if (overlay->stack[i].hidden)
-				continue;
-
-			if (gp_widget_ops_render_focus(widget, sel)) {
-				overlay->focused = i;
-				return 1;
-			}
-
-		}
-
-		return 0;
-	}
-
-	return gp_widget_ops_render_focus(get_focused_widget(self), sel);
+	return get_focused_widget(self);
 }
 
-static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
-                    unsigned int x, unsigned int y)
-{
-	gp_widget *widget = focus_widget_by_xy(self, x, y);
-
-	if (!widget)
-		return 0;
-
-	return gp_widget_ops_render_focus_xy(widget, ctx, x, y);
-}
-
-static int focus_child(gp_widget *self, gp_widget *child)
+static bool focus_child_set(gp_widget *self, gp_widget *child)
 {
 	struct overlay_payload *overlay = GP_WIDGET_PAYLOAD(self);
-	int i;
+	unsigned int i;
 
-	for (i = gp_widget_overlay_stack_size(self) - 1; i > 0; i--) {
-		gp_widget *focused, *widget = overlay->stack[i].widget;
+	if (gp_widget_overlay_stack_pos_by_child(self, child, &i))
+		return false;
 
-		if (widget != child)
-			continue;
-
-		if (overlay->stack[i].hidden) {
-			GP_WARN("Attempt to focus hidden widget?!");
-			return 0;
-		}
-
-		focused = get_focused_widget(self);
-		if (focused)
-			gp_widget_ops_render_focus(focused, GP_FOCUS_OUT);
-
-		overlay->focused = i;
-		return 1;
+	if (overlay->stack[i].hidden) {
+		GP_WARN("Attempt to focus hidden widget?!");
+		return false;
 	}
 
-	return 0;
+	overlay->focused = i;
+	return true;
+}
+
+/*
+ * Focus does not move between layers while the overlay is focused. When the
+ * focus moves into the overlay we start at the topmost visible layer and
+ * continue downwards until we find a layer that can be focused.
+ */
+static gp_widget *focus_child_next(gp_widget *self, gp_widget *from, int focus_dir)
+{
+	struct overlay_payload *overlay = GP_WIDGET_PAYLOAD(self);
+	unsigned int pos;
+	int i;
+
+	(void) focus_dir;
+
+	if (from) {
+		if (self->focused && from == get_focused_widget(self))
+			return NULL;
+
+		if (gp_widget_overlay_stack_pos_by_child(self, from, &pos))
+			return NULL;
+
+		i = (int)pos - 1;
+	} else {
+		i = gp_widget_overlay_stack_size(self) - 1;
+	}
+
+	for (; i >= 0; i--) {
+		if (overlay->stack[i].widget && !overlay->stack[i].hidden)
+			return overlay->stack[i].widget;
+	}
+
+	return NULL;
+}
+
+static gp_widget *focus_child_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                 unsigned int *x, unsigned int *y)
+{
+	struct overlay_payload *overlay = GP_WIDGET_PAYLOAD(self);
+	int i = stack_pos_by_xy(self, *x, *y);
+
+	(void) ctx;
+
+	if (i < 0)
+		return NULL;
+
+	return overlay->stack[i].widget;
 }
 
 struct gp_widget_ops gp_widget_overlay_ops = {
@@ -316,9 +320,10 @@ struct gp_widget_ops gp_widget_overlay_ops = {
 	.distribute_h = distribute_h,
 	.for_each_child = for_each_child,
 	.event = event,
-	.focus = focus,
-	.focus_xy = focus_xy,
-	.focus_child = focus_child,
+	.focus_child_get = focus_child_get,
+	.focus_child_set = focus_child_set,
+	.focus_child_next = focus_child_next,
+	.focus_child_xy = focus_child_xy,
 	.free = free_,
 	.render = render,
 	.from_json = json_to_overlay,
@@ -396,6 +401,11 @@ void gp_widget_overlay_hide(gp_widget *self, unsigned int stack_pos)
 
 	overlay->stack[stack_pos].hidden = 1;
 
+	if (overlay->focused == (int)stack_pos) {
+		overlay->focused = -1;
+		gp_widget_ops_focus_child_changed(self, overlay->stack[stack_pos].widget);
+	}
+
 	gp_widget_redraw_children(self);
 }
 
@@ -429,6 +439,8 @@ gp_widget *gp_widget_overlay_put(gp_widget *self, unsigned int stack_pos,
 	overlay->stack[stack_pos].widget = child;
 
 	gp_widget_set_parent(child, self);
+
+	gp_widget_ops_focus_child_changed(self, ret);
 
 	gp_widget_resize(self);
 

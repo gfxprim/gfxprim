@@ -184,20 +184,24 @@ static void for_each_child(gp_widget *self,
 	}
 }
 
-static int focus(gp_widget *self, int sel)
+static gp_widget *focus_child_get(gp_widget *self)
 {
-	return gp_widget_ops_render_focus(gp_widget_layout_switch_active(self), sel);
+	return gp_widget_layout_switch_active(self);
 }
 
-static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
-                     unsigned int x, unsigned int y)
-{
-	return gp_widget_ops_render_focus_xy(gp_widget_layout_switch_active(self), ctx, x, y);
-}
-
-static int focus_child(gp_widget *self, gp_widget *child)
+static bool focus_child_set(gp_widget *self, gp_widget *child)
 {
 	return child == gp_widget_layout_switch_active(self);
+}
+
+static gp_widget *focus_child_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                 unsigned int *x, unsigned int *y)
+{
+	(void) ctx;
+	(void) x;
+	(void) y;
+
+	return gp_widget_layout_switch_active(self);
 }
 
 struct gp_widget_ops gp_widget_layout_switch_ops = {
@@ -207,9 +211,9 @@ struct gp_widget_ops gp_widget_layout_switch_ops = {
 	.distribute_h = distribute_h,
 	.for_each_child = for_each_child,
 	.event = event,
-	.focus = focus,
-	.focus_xy = focus_xy,
-	.focus_child = focus_child,
+	.focus_child_get = focus_child_get,
+	.focus_child_set = focus_child_set,
+	.focus_child_xy = focus_child_xy,
 	.free = free_,
 	.render = render,
 	.from_json = json_to_switch,
@@ -282,6 +286,8 @@ gp_widget *gp_widget_layout_switch_put(gp_widget *self, unsigned int layout_nr,
 
 	gp_widget_set_parent(child, self);
 
+	gp_widget_ops_focus_child_changed(self, ret);
+
 	gp_widget_resize(self);
 
 	return ret;
@@ -297,7 +303,11 @@ void gp_widget_layout_switch_layout(gp_widget *self, unsigned int layout_nr)
 		return;
 	}
 
+	gp_widget *old = gp_widget_layout_switch_active(self);
+
 	s->active_layout = layout_nr;
+
+	gp_widget_ops_focus_child_changed(self, old);
 
 	gp_widget_redraw_children(self);
 }

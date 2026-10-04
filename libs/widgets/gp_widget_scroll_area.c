@@ -27,11 +27,18 @@ struct scroll_area_payload {
 
 	int scrollbar_x:1;
 	int scrollbar_y:1;
+	/* Set if the scroll area itself rather than the child is focused */
 	int area_focused:1;
-	int child_focused:1;
 
 	gp_widget *child;
 };
+
+static int is_area_focused(gp_widget *self)
+{
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	return self->focused && scroll->area_focused;
+}
 
 static gp_size scroll_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
@@ -183,7 +190,7 @@ static void draw_vert_scroll_bar(gp_widget *self, const gp_widget_render_ctx *ct
 	gp_size max_off = max_y_off(self);
 	gp_coord pos = ((sh - asc) * scroll->y_off + max_off/2) / max_off;
 
-	gp_pixel col = scroll->area_focused ? ctx->sel_color : color;
+	gp_pixel col = is_area_focused(self) ? ctx->sel_color : color;
 
 	gp_fill_rrect_xywh(ctx->buf, x + ctx->padd, y + pos, asc, asc, ctx->bg_color, ctx->fg_color, col);
 }
@@ -203,7 +210,7 @@ static void draw_horiz_scroll_bar(gp_widget *self, const gp_widget_render_ctx *c
 	gp_size max_off = max_x_off(self);
 	gp_coord pos = ((sw - asc) * scroll->x_off + max_off/2) / max_off;
 
-	gp_pixel col = scroll->area_focused ? ctx->sel_color : color;
+	gp_pixel col = is_area_focused(self) ? ctx->sel_color : color;
 
 	gp_fill_rrect_xywh(ctx->buf, x + pos, y + ctx->padd, asc, asc, ctx->bg_color, ctx->fg_color, col);
 }
@@ -377,7 +384,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		}
 	}
 
-	if (scroll->area_focused) {
+	if (is_area_focused(self)) {
 		if (ev->type != GP_EV_KEY)
 			return 0;
 
@@ -405,83 +412,57 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return gp_widget_ops_event_offset(scroll->child, ctx, ev, scroll->x_off, scroll->y_off);
 }
 
-static int focus_scrollbar(gp_widget *self)
+static gp_widget *focus_child_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                 unsigned int *x, unsigned int *y)
+{
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	if (is_in_scrollbar_x(self, ctx, *x) ||
+	    is_in_scrollbar_y(self, ctx, *y))
+		return self;
+
+	*x += scroll->x_off;
+	*y += scroll->y_off;
+
+	return scroll->child;
+}
+
+static gp_widget *focus_child_get(gp_widget *self)
 {
 	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
 	if (scroll->area_focused)
-		return 1;
+		return self;
 
-	scroll->area_focused = 1;
-        gp_widget_ops_render_focus(scroll->child, GP_FOCUS_OUT);
-	scroll->child_focused = 0;
-
-	gp_widget_redraw(self);
-
-	return 1;
+	return scroll->child;
 }
 
-static void focus_out(gp_widget *self)
+static bool focus_child_set(gp_widget *self, gp_widget *child)
 {
 	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (scroll->area_focused) {
-		scroll->area_focused = 0;
-		gp_widget_redraw(self);
-	}
-}
-
-static int focus_widget(gp_widget *self, const gp_widget_render_ctx *ctx,
-                         unsigned int x, unsigned int y)
-{
-	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
-
-	if (!gp_widget_ops_render_focus_xy(scroll->child, ctx, x + scroll->x_off, y + scroll->y_off))
-		return 0;
-
-	focus_out(self);
-
-	scroll->child_focused = 1;
-	return 1;
-}
-
-static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
-                     unsigned int x, unsigned int y)
-{
-	if (is_in_scrollbar_x(self, ctx, x) ||
-	    is_in_scrollbar_y(self, ctx, y))
-		return focus_scrollbar(self);
-
-	return focus_widget(self, ctx, x, y);
-}
-
-static int focus(gp_widget *self, int sel)
-{
-	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
-
-	if (scroll->child_focused) {
-		if (gp_widget_ops_render_focus(scroll->child, sel))
-			return 1;
+	if (child == self) {
+		scroll->area_focused = 1;
+		return true;
 	}
 
-	switch (sel) {
-	case GP_FOCUS_OUT:
-		focus_out(self);
-	break;
-	}
+	if (child != scroll->child)
+		return false;
 
-	return 0;
+	scroll->area_focused = 0;
+	return true;
 }
 
-static int focus_child(gp_widget *self, gp_widget *child)
+static gp_widget *focus_child_next(gp_widget *self, gp_widget *from, int focus_dir)
 {
 	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
 
-	if (scroll->child != child)
-		return 0;
+	(void) focus_dir;
 
-	focus_out(self);
-	return 1;
+	if (!from || from == self)
+		return scroll->child;
+
+	return NULL;
 }
 
 static void distribute_w(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
@@ -593,14 +574,26 @@ static gp_widget *json_to_scroll(gp_json_reader *json, gp_json_val *val, gp_widg
 	return ret;
 }
 
+static void for_each_child(gp_widget *self,
+                           void (*func)(gp_widget *child, void *priv),
+                           void *priv)
+{
+	struct scroll_area_payload *scroll = GP_WIDGET_PAYLOAD(self);
+
+	if (scroll->child)
+		func(scroll->child, priv);
+}
+
 struct gp_widget_ops gp_widget_scroll_area_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.render = render,
 	.event = event,
-	.focus_xy = focus_xy,
-	.focus = focus,
-	.focus_child = focus_child,
+	.focus_child_get = focus_child_get,
+	.focus_child_set = focus_child_set,
+	.focus_child_next = focus_child_next,
+	.focus_child_xy = focus_child_xy,
+	.for_each_child = for_each_child,
 	.distribute_w = distribute_w,
 	.distribute_h = distribute_h,
 	.from_json = json_to_scroll,
@@ -701,6 +694,8 @@ gp_widget *gp_widget_scroll_area_put(gp_widget *self, gp_widget *child)
 
 	scroll->child = child;
 	gp_widget_set_parent(child, self);
+
+	gp_widget_ops_focus_child_changed(self, ret);
 
 	gp_widget_resize(self);
 

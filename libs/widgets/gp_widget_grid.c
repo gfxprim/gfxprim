@@ -56,6 +56,13 @@ static int widget_grid_child_lookup(gp_widget *self, gp_widget *child,
 {
 	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
+	if (child->parent != self) {
+		GP_WARN("Lookup for child %p (%s) parent %p != %p grid.",
+		        child, gp_widget_type_name(child->type),
+		        child->parent, self);
+		return 0;
+	}
+
 	for (*col = 0; *col < grid->cols; (*col)++) {
 		for (*row = 0; *row < grid->rows; (*row)++) {
 			if (child == widget_grid_get(self, *col, *row))
@@ -546,171 +553,96 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return gp_widget_ops_event_offset(w, ctx, ev, offset.x, offset.y);
 }
 
-static int try_focus(gp_widget *self, unsigned int col, unsigned int row, int sel)
+static int focus_step(struct gp_widget_grid *grid, unsigned int *col,
+                      unsigned int *row, int focus_dir)
 {
-	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
-	gp_widget *w = widget_grid_get(self, col, row);
-
-	(void) sel;
-
-	GP_DEBUG(4, "Trying to focus widget %p (%s) %ux%u",
-		 w, gp_widget_type_id(w), col, row);
-
-	if (!gp_widget_ops_render_focus(w, GP_FOCUS_IN))
-		return 0;
-
-	gp_widget_ops_render_focus(widget_grid_focused(self), GP_FOCUS_OUT);
-
-	grid->focused_col = col;
-	grid->focused_row = row;
-
-	return 1;
-}
-
-static int focus_left(gp_widget *self, int sel)
-{
-	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
-
-	unsigned int col = grid->focused_col;
-	unsigned int row = grid->focused_row;
-
-	for (;;) {
-		if (col == 0)
-			return 0;
-
-		if (try_focus(self, --col, row, sel))
-			return 1;
-	}
-}
-
-static int focus_right(gp_widget *self, int sel)
-{
-	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
-
-	unsigned int col = grid->focused_col;
-	unsigned int row = grid->focused_row;
-
-	for (;;) {
-		if (++col >= grid->cols)
-			return 0;
-
-		if (try_focus(self, col, row, sel))
-			return 1;
-	}
-}
-
-static int focus_up(gp_widget *self, int sel)
-{
-	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
-
-	unsigned int col = grid->focused_col;
-	unsigned int row = grid->focused_row;
-
-	for (;;) {
-		if (row == 0)
-			return 0;
-
-		if (try_focus(self, col, --row, sel))
-			return 1;
-	}
-}
-
-static int focus_down(gp_widget *self, int sel)
-{
-	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
-
-	unsigned int col = grid->focused_col;
-	unsigned int row = grid->focused_row;
-
-	for (;;) {
-		if (++row >= grid->rows)
-			return 0;
-
-		if (try_focus(self, col, row, sel))
-			return 1;
-	}
-}
-
-static int focus_prev(gp_widget *self, int sel)
-{
-	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
-
-	unsigned int col = grid->focused_col;
-	unsigned int row = grid->focused_row;
-
-	for (;;) {
-		if (col > 0) {
-			col--;
-		} else if (row > 0) {
-			row--;
-			col = grid->cols - 1;
-		} else {
-			return 0;
-		}
-
-		if (try_focus(self, col, row, sel))
-			return 1;
-	}
-}
-
-static int focus_next(gp_widget *self, int sel)
-{
-	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
-
-	unsigned int col = grid->focused_col;
-	unsigned int row = grid->focused_row;
-
-	for (;;) {
-		if (col + 1 < grid->cols) {
-			col++;
-		} else if (row + 1 < grid->rows) {
-			col = 0;
-			row++;
-		} else {
-			return 0;
-		}
-
-		if (try_focus(self, col, row, sel))
-			return 1;
-	}
-}
-
-static int focus_in(gp_widget *self, int sel)
-{
-	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
-
-	if (!grid->focused)
-		return grid->focused = focus_next(self, sel);
-
-	return try_focus(self, grid->focused_col, grid->focused_row, sel);
-}
-
-static int focus(gp_widget *self, int sel)
-{
-	gp_widget *w = widget_grid_focused(self);
-
-	if (gp_widget_ops_render_focus(w, sel))
-		return 1;
-
-	switch (sel) {
-	case GP_FOCUS_IN:
-		return focus_in(self, sel);
-	case GP_FOCUS_NEXT:
-		return focus_next(self, sel);
-	case GP_FOCUS_PREV:
-		return focus_prev(self, sel);
-	case GP_FOCUS_UP:
-		return focus_up(self, sel);
-	case GP_FOCUS_DOWN:
-		return focus_down(self, sel);
+	switch (focus_dir) {
 	case GP_FOCUS_LEFT:
-		return focus_left(self, sel);
+		if (*col == 0)
+			return 0;
+		(*col)--;
+		return 1;
 	case GP_FOCUS_RIGHT:
-		return focus_right(self, sel);
+		if (*col + 1 >= grid->cols)
+			return 0;
+		(*col)++;
+		return 1;
+	case GP_FOCUS_UP:
+		if (*row == 0)
+			return 0;
+		(*row)--;
+		return 1;
+	case GP_FOCUS_DOWN:
+		if (*row + 1 >= grid->rows)
+			return 0;
+		(*row)++;
+		return 1;
+	case GP_FOCUS_PREV:
+		if (*col > 0) {
+			(*col)--;
+		} else if (*row > 0) {
+			(*row)--;
+			*col = grid->cols - 1;
+		} else {
+			return 0;
+		}
+		return 1;
+	case GP_FOCUS_NEXT:
+		if (*col + 1 < grid->cols) {
+			(*col)++;
+		} else if (*row + 1 < grid->rows) {
+			*col = 0;
+			(*row)++;
+		} else {
+			return 0;
+		}
+		return 1;
 	}
 
 	return 0;
 }
+
+static gp_widget *focus_child_next(gp_widget *self, gp_widget *from, int focus_dir)
+{
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+	unsigned int col = 0, row = 0;
+	gp_widget *ret;
+
+	if (!grid->cols || !grid->rows)
+		return NULL;
+
+	if (from) {
+		if (!widget_grid_child_lookup(self, from, &col, &row))
+			return NULL;
+	} else {
+		/* Moving into the grid, start at the first cell in focus_dir */
+		switch (focus_dir) {
+		case GP_FOCUS_LEFT:
+			col = grid->cols - 1;
+		break;
+		case GP_FOCUS_UP:
+			row = grid->rows - 1;
+		break;
+		case GP_FOCUS_PREV:
+			col = grid->cols - 1;
+			row = grid->rows - 1;
+		break;
+		}
+
+		ret = widget_grid_get(self, col, row);
+		if (ret)
+			return ret;
+	}
+
+	while (focus_step(grid, &col, &row, focus_dir)) {
+		ret = widget_grid_get(self, col, row);
+		if (ret)
+			return ret;
+	}
+
+	return NULL;
+}
+
 
 static int coord_search(unsigned int coord,
                         struct gp_widget_grid_cell *cells,
@@ -730,50 +662,49 @@ static int coord_search(unsigned int coord,
 	return -1;
 }
 
-static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
-                    unsigned int x, unsigned int y)
+static gp_widget *focus_child_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                 unsigned int *x, unsigned int *y)
 {
 	int col, row;
 	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 
-	col = coord_search(x + self->x, grid->col_s, grid->cols);
-	row = coord_search(y + self->y, grid->row_s, grid->rows);
+	(void) ctx;
+
+	col = coord_search(*x + self->x, grid->col_s, grid->cols);
+	row = coord_search(*y + self->y, grid->row_s, grid->rows);
 
 	if (col < 0 || row < 0)
-		return 0;
+		return NULL;
 
-	x -= grid->col_s[col].off - self->x;
-	y -= grid->row_s[row].off - self->y;
+	*x -= grid->col_s[col].off - self->x;
+	*y -= grid->row_s[row].off - self->y;
 
-	if (!gp_widget_ops_render_focus_xy(widget_grid_get(self, col, row), ctx, x, y))
-		return 0;
-
-	if (grid->focused_col != (unsigned int)col || grid->focused_row != (unsigned int)row)
-		gp_widget_ops_render_focus(widget_grid_focused(self), GP_FOCUS_OUT);
-
-	grid->focused_col = col;
-	grid->focused_row = row;
-
-	return 1;
+	return widget_grid_get(self, col, row);
 }
 
-static int focus_child(gp_widget *self, gp_widget *child)
+static gp_widget *focus_child_get(gp_widget *self)
+{
+	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
+
+	if (!grid->focused)
+		return NULL;
+
+	return widget_grid_focused(self);
+}
+
+static bool focus_child_set(gp_widget *self, gp_widget *child)
 {
 	struct gp_widget_grid *grid = GP_WIDGET_PAYLOAD(self);
 	unsigned int col, row;
 
 	if (!widget_grid_child_lookup(self, child, &col, &row))
-		return 0;
-
-	if (grid->focused_col == col && grid->focused_row == row)
-		return 1;
-
-	gp_widget_ops_render_focus(widget_grid_focused(self), GP_FOCUS_OUT);
+		return false;
 
 	grid->focused_col = col;
 	grid->focused_row = row;
+	grid->focused = 1;
 
-	return 1;
+	return true;
 }
 
 static void set_border_padd(gp_widget *self, enum gp_widget_border border, uint8_t padd)
@@ -1294,9 +1225,10 @@ struct gp_widget_ops gp_widget_grid_ops = {
 	.render = render,
 	.event = event,
 	.free = free_,
-	.focus = focus,
-	.focus_xy = focus_xy,
-	.focus_child = focus_child,
+	.focus_child_get = focus_child_get,
+	.focus_child_set = focus_child_set,
+	.focus_child_next = focus_child_next,
+	.focus_child_xy = focus_child_xy,
 	.distribute_w = distribute_w,
 	.distribute_h = distribute_h,
 	.for_each_child = for_each_child,
@@ -1453,6 +1385,8 @@ gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int ro
 	if (ret)
 		ret->parent = NULL;
 
+	gp_widget_ops_focus_child_changed(self, ret);
+
 	gp_widget_resize(self);
 	gp_widget_redraw(child);
 
@@ -1477,6 +1411,9 @@ void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int row
 	init_rows(grid, row, rows, 0);
 
 	grid->rows += rows;
+
+	if (grid->focused_row >= row)
+		grid->focused_row += rows;
 
 	gp_widget_resize(self);
 }
@@ -1517,9 +1454,19 @@ void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int row
 		return;
 	}
 
+	gp_widget *focused = NULL;
+
+	if (grid->focused_row >= row && grid->focused_row < row + rows)
+		focused = widget_grid_focused(self);
+
+	/* The focused widget is freed once the focus has been moved */
 	for (r = 0; r < rows; r++) {
-		for (c = 0; c < grid->cols; c++)
-			gp_widget_free(grid->widgets[gp_matrix_idx(grid->rows, c, r + row)]);
+		for (c = 0; c < grid->cols; c++) {
+			gp_widget *w = grid->widgets[gp_matrix_idx(grid->rows, c, r + row)];
+
+			if (w != focused)
+				gp_widget_free(w);
+		}
 	}
 
 	grid->widgets = gp_matrix_rows_del(grid->widgets, grid->cols, grid->rows, row, rows);
@@ -1528,6 +1475,17 @@ void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int row
 	grid->row_b = gp_vec_del(grid->row_b, row, rows);
 
 	grid->rows -= rows;
+
+	if (grid->focused_row >= row + rows) {
+		grid->focused_row -= rows;
+	} else if (grid->focused_row >= row) {
+		grid->focused_col = 0;
+		grid->focused_row = 0;
+		grid->focused = 0;
+	}
+
+	gp_widget_ops_focus_child_changed(self, focused);
+	gp_widget_free(focused);
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);
@@ -1551,6 +1509,9 @@ void gp_widget_grid_cols_ins(gp_widget *self, unsigned int col, unsigned int col
 	init_cols(grid, col, cols, 0);
 
 	grid->cols += cols;
+
+	if (grid->focused_col >= col)
+		grid->focused_col += cols;
 
 	gp_widget_resize(self);
 }
@@ -1591,9 +1552,19 @@ void gp_widget_grid_cols_del(gp_widget *self, unsigned int col, unsigned int col
 		return;
 	}
 
+	gp_widget *focused = NULL;
+
+	if (grid->focused_col >= col && grid->focused_col < col + cols)
+		focused = widget_grid_focused(self);
+
+	/* The focused widget is freed once the focus has been moved */
 	for (c = 0; c < cols; c++) {
-		for (r = 0; r < grid->rows; r++)
-			gp_widget_free(grid->widgets[gp_matrix_idx(grid->rows, c + col, r)]);
+		for (r = 0; r < grid->rows; r++) {
+			gp_widget *w = grid->widgets[gp_matrix_idx(grid->rows, c + col, r)];
+
+			if (w != focused)
+				gp_widget_free(w);
+		}
 	}
 
 	grid->widgets = gp_matrix_cols_del(grid->widgets, grid->rows, col, cols);
@@ -1602,6 +1573,17 @@ void gp_widget_grid_cols_del(gp_widget *self, unsigned int col, unsigned int col
 	grid->col_b = gp_vec_del(grid->col_b, col, cols);
 
 	grid->cols -= cols;
+
+	if (grid->focused_col >= col + cols) {
+		grid->focused_col -= cols;
+	} else if (grid->focused_col >= col) {
+		grid->focused_col = 0;
+		grid->focused_row = 0;
+		grid->focused = 0;
+	}
+
+	gp_widget_ops_focus_child_changed(self, focused);
+	gp_widget_free(focused);
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);
@@ -1625,6 +1607,8 @@ gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int ro
 		grid->focused_row = 0;
 		grid->focused = 0;
 	}
+
+	gp_widget_ops_focus_child_changed(self, ret);
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);
