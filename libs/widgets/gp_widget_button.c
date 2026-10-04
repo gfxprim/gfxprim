@@ -129,6 +129,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_size sx = cx - sw/2;
 	gp_coord sy = cy - (sh+1)/2;
 
+	enum gp_widget_stock_type type = self->disabled ? GP_WIDGET_STOCK_DISABLED : 0;
+
 	switch (b->type & GP_BUTTON_TYPE_MASK) {
 	case GP_BUTTON_LABEL:
 	break;
@@ -148,22 +150,22 @@ static void render(gp_widget *self, const gp_offset *offset,
 	break;
 	case GP_BUTTON_NO:
 	case GP_BUTTON_CANCEL:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_CLOSE,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_CLOSE | type,
 		                       sx, sy, sw, sh,
 		                       bg_color, ctx);
 	break;
 	case GP_BUTTON_OPEN:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_DIR,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_DIR | type,
 		                       sx, sy, sw, sh,
 		                       bg_color, ctx);
 	break;
 	case GP_BUTTON_NEW_DIR:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_NEW_DIR,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_NEW_DIR | type,
 		                       sx, sy, sw, sh,
 		                       bg_color, ctx);
 	break;
 	case GP_BUTTON_SAVE:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_SAVE,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_SAVE | type,
 		                       sx, sy, sw, sh,
 				       bg_color, ctx);
 	break;
@@ -272,19 +274,19 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_fill_circle(ctx->buf, cx+i, cy-i, sym_r/5, ctx->text_color);
 	break;
 	case GP_BUTTON_UP:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_UP,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_UP | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_DOWN:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_DOWN,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_DOWN | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_LEFT:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_LEFT,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_LEFT | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_RIGHT:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_RIGHT,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_RIGHT | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ADD:
@@ -304,47 +306,47 @@ static void render(gp_widget *self, const gp_offset *offset,
 		backspace(ctx->buf, cx-sym_r/5, cy, sym_r+sym_r/2, ctx->text_color, ctx->bg_color);
 	break;
 	case GP_BUTTON_ZOOM_IN:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_IN,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_IN | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ZOOM_OUT:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_OUT,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_OUT | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ZOOM_FIT:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_FIT,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM_FIT | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ZOOM_NORMAL:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ZOOM | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ROTATE_CW:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ROTATE_CW,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ROTATE_CW | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ROTATE_CCW:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ROTATE_CCW,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ROTATE_CCW | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_MIRROR_H:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_MIRROR_H,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_MIRROR_H | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_MIRROR_V:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_MIRROR_V,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_MIRROR_V | type,
 		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_SETTINGS:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_SETTINGS,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_SETTINGS | type,
 		                       sx-1, sy, sw+2, sh+2, bg_color, ctx);
 	break;
 	case GP_BUTTON_HOME:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_HOME,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_HOME | type,
 				       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_DOWNLOAD:
-		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_DOWN,
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_DOWN | type,
 		                       sx, sy+sh/8, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_CUT:

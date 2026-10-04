@@ -134,7 +134,6 @@ typedef enum gp_widget_stock_type {
 	/** @brief Switch OFF stock. */
 	GP_WIDGET_STOCK_OFF,
 
-
 	/** @brief Mirror horizontally. */
 	GP_WIDGET_STOCK_MIRROR_H,
 	/** @brief Mirror vertically. */
@@ -153,8 +152,10 @@ typedef enum gp_widget_stock_type {
 
 	/** @brief A stock focused flag, combined bitwise with type. */
 	GP_WIDGET_STOCK_FOCUSED = 0x8000,
+	/** @brief A stock disabled flag, combined bitwise with type. */
+	GP_WIDGET_STOCK_DISABLED = 0x4000,
 	/** @brief A type mask. */
-	GP_WIDGET_STOCK_TYPE_MASK = (~(GP_WIDGET_STOCK_FOCUSED)),
+	GP_WIDGET_STOCK_TYPE_MASK = (~(GP_WIDGET_STOCK_FOCUSED | GP_WIDGET_STOCK_DISABLED)),
 } gp_widget_stock_type;
 
 /**

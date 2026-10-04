@@ -20,6 +20,18 @@ static inline gp_size stock_line_thickness(gp_size w, gp_size h)
 	return GP_MIN(3*w/8, 3*h/8)/8;
 }
 
+static inline gp_pixel stock_line_color(enum gp_widget_stock_type type,
+                                        const gp_widget_render_ctx *ctx)
+{
+	if (type & GP_WIDGET_STOCK_DISABLED)
+		return ctx->col_disabled;
+
+	if (type & GP_WIDGET_STOCK_FOCUSED)
+		return ctx->sel_color;
+
+	return ctx->text_color;
+}
+
 static unsigned int stock_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	struct gp_widget_stock *stock = GP_WIDGET_PAYLOAD(self);
@@ -82,7 +94,7 @@ static void render_stock_info(gp_pixmap *pix,
 static void render_stock_question(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
                                   gp_size w, gp_size h, gp_pixel bg_col,
-				  const gp_widget_render_ctx *ctx)
+                                  const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
@@ -108,9 +120,9 @@ static void render_stock_speaker(gp_pixmap *pix,
                                  enum gp_widget_stock_type type,
                                  const gp_widget_render_ctx *ctx)
 {
-	gp_pixel col = type & GP_WIDGET_STOCK_FOCUSED ? ctx->sel_color : ctx->text_color;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
+	gp_pixel col = stock_line_color(type, ctx);
 
 	gp_size rx = w/4;
 	gp_size ry = h/2 - rx - h/10;
@@ -203,6 +215,7 @@ static void render_text_lines(gp_pixmap *pix,
 static void render_stock_hardware(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
                                   gp_size w, gp_size h, gp_pixel bg_col,
+                                  enum gp_widget_stock_type type,
                                   const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -218,9 +231,11 @@ static void render_stock_hardware(gp_pixmap *pix,
 	gp_coord legs = (2*c - 2*c_sp_size + sp_size)/(l_size + sp_size);
 	gp_coord i;
 
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
-	gp_fill_rect_xyxy(pix, cx-c, cy-c, cx+c, cy+c, ctx->text_color);
+	gp_fill_rect_xyxy(pix, cx-c, cy-c, cx+c, cy+c, line_color);
 	gp_fill_rect_xyxy(pix, cx-c/3, cy-c/3, cx+c/3, cy+c/3, ctx->fg_color);
 	gp_putpixel(pix, cx-c/3, cy-c/3, ctx->text_color);
 
@@ -231,17 +246,18 @@ static void render_stock_hardware(gp_pixmap *pix,
 	for (i = 0; i < legs; i++) {
 		gp_coord off = -c + c_sp_size + i * (l_size + sp_size);
 
-		gp_fill_rect_xyxy(pix, cx+off, cy-c-l_start, cx+off+l_size-1, cy-c-l_end, ctx->text_color);
-		gp_fill_rect_xyxy(pix, cx+off, cy+c+l_start, cx+off+l_size-1, cy+c+l_end, ctx->text_color);
+		gp_fill_rect_xyxy(pix, cx+off, cy-c-l_start, cx+off+l_size-1, cy-c-l_end, line_color);
+		gp_fill_rect_xyxy(pix, cx+off, cy+c+l_start, cx+off+l_size-1, cy+c+l_end, line_color);
 
-		gp_fill_rect_xyxy(pix, cx-c-l_start, cy+off, cx-c-l_end, cy+off+l_size-1, ctx->text_color);
-		gp_fill_rect_xyxy(pix, cx+c+l_start, cy+off, cx+c+l_end, cy+off+l_size-1, ctx->text_color);
+		gp_fill_rect_xyxy(pix, cx-c-l_start, cy+off, cx-c-l_end, cy+off+l_size-1, line_color);
+		gp_fill_rect_xyxy(pix, cx+c+l_start, cy+off, cx+c+l_end, cy+off+l_size-1, line_color);
 	}
 }
 
 static void render_stock_software(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
                                   gp_size w, gp_size h, gp_pixel bg_col,
+                                  enum gp_widget_stock_type type,
                                   const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -254,9 +270,11 @@ static void render_stock_software(gp_pixmap *pix,
 
 	gp_size header = GP_ODD_UP(ih/2);
 
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
-	gp_fill_rect_xyxy(pix, cx-iw, cy-ih, cx+iw, cy+ih, ctx->text_color);
+	gp_fill_rect_xyxy(pix, cx-iw, cy-ih, cx+iw, cy+ih, line_color);
 	gp_fill_rect_xyxy(pix, cx-iw+th+1, cy-ih+header, cx+iw-th-1, cy+ih-th-1, ctx->fg_color);
 
 	gp_size r = header/8;
@@ -279,6 +297,7 @@ static void render_stock_software(gp_pixmap *pix,
 static void render_stock_settings(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
                                   gp_size w, gp_size h, gp_pixel bg_col,
+                                  enum gp_widget_stock_type type,
                                   const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -288,6 +307,8 @@ static void render_stock_settings(gp_pixmap *pix,
 	gp_coord ci = co - co/4-2;
 	gp_coord cc = GP_MIN(w/6, h/6);
 	gp_coord tw = co/11;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -326,7 +347,7 @@ static void render_stock_settings(gp_pixmap *pix,
 		ROT_3_PI_8(cx, -tw, cy, ci),
 	};
 
-	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, line_color);
 
 	gp_fill_circle(pix, cx, cy, cc, ctx->fg_color);
 }
@@ -334,6 +355,7 @@ static void render_stock_settings(gp_pixmap *pix,
 static void render_stock_home(gp_pixmap *pix,
                               gp_coord x, gp_coord y,
                               gp_size w, gp_size h, gp_pixel bg_col,
+                              enum gp_widget_stock_type type,
                               const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -342,6 +364,8 @@ static void render_stock_home(gp_pixmap *pix,
 	gp_coord hw = h/2;
 	gp_coord tw = w/3;
 	gp_coord th = h/3;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -359,13 +383,14 @@ static void render_stock_home(gp_pixmap *pix,
 		tw, th,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, line_color);
 }
 
 static void render_stock_save(gp_pixmap *pix,
                               gp_coord x, gp_coord y,
                               gp_size w, gp_size h, gp_pixel bg_col,
-                              const gp_widget_render_ctx *ctx)
+                              enum gp_widget_stock_type type,
+			      const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
@@ -374,6 +399,7 @@ static void render_stock_save(gp_pixmap *pix,
 	gp_size cs = sh/3;
 	gp_size cvr_s = (2 * sh - 2 * th) / 4;
 	gp_size cvr_d = 3 * cvr_s / 2+1;
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -412,10 +438,10 @@ static void render_stock_save(gp_pixmap *pix,
 
 	gp_fill_rect_xyxy(pix, lx0, ly0, lx1, cy+sh, ctx->fg_color);
 
-	render_text_lines(pix, lx0, ly0, lx1, ly1, ctx->text_color);
+	render_text_lines(pix, lx0, ly0, lx1, ly1, line_color);
 
 	/* draws border and cover */
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, line_color);
 	/* window in the cover */
 	gp_fill_rect_xyxy(pix, cx+cvr_s-1-cvr_s/4, cy - sh + th+1 + cvr_d/5,
 			       cx+cvr_s-1-2*(cvr_s/4), cy - sh + th+cvr_d-1 - cvr_d/5,
@@ -425,6 +451,7 @@ static void render_stock_save(gp_pixmap *pix,
 static void render_stock_file(gp_pixmap *pix,
                               gp_coord x, gp_coord y,
                               gp_size w, gp_size h, gp_pixel bg_col,
+                              enum gp_widget_stock_type type,
                               const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -433,6 +460,8 @@ static void render_stock_file(gp_pixmap *pix,
 	gp_size cs = sh/2;
 	gp_size sw = GP_MIN(5*h/16, 3*w/4);
 	gp_size th = GP_MIN(3*w/8, 3*h/8)/8;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -469,8 +498,8 @@ static void render_stock_file(gp_pixmap *pix,
 		-sw + th, -sh + th,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(in_poly)/2, in_poly, ctx->fg_color);
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(in_poly)/2, in_poly, line_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, line_color);
 
 	/* text */
 	gp_coord lx0 = cx - sw + th + sh/3;
@@ -484,6 +513,7 @@ static void render_stock_file(gp_pixmap *pix,
 static void render_stock_dir(gp_pixmap *pix, int new,
                              gp_coord x, gp_coord y,
                              gp_size w, gp_size h, gp_pixel bg_col,
+                             enum gp_widget_stock_type type,
                              const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -496,6 +526,8 @@ static void render_stock_dir(gp_pixmap *pix, int new,
 	/* corner "roundess" */
 	gp_size r = w2/10;
 	gp_size fw = th+2;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -567,12 +599,12 @@ static void render_stock_dir(gp_pixmap *pix, int new,
 		};
 
 		gp_fill_polygon(pix, px, py, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, ctx->accept_color);
-		gp_polygon(pix, px, py, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, ctx->text_color);
+		gp_polygon(pix, px, py, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, line_color);
 	}
 
 	/* draw the lines */
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
-	gp_hline_xxy(pix, cx-w2+th+1, cx+w2-th-1, cy-h2+cs+fw+th, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly)/2, poly, line_color);
+	gp_hline_xxy(pix, cx-w2+th+1, cx+w2-th-1, cy-h2+cs+fw+th, line_color);
 
 	/* final touch for low res */
 	gp_putpixel(pix, cx + w2, cy - h2 + cs, bg_col);
@@ -583,6 +615,7 @@ static void render_stock_dir(gp_pixmap *pix, int new,
 static void render_stock_close(gp_pixmap *pix,
                                gp_coord x, gp_coord y,
                                gp_size w, gp_size h, gp_pixel bg_col,
+                               enum gp_widget_stock_type type,
                                const gp_widget_render_ctx *ctx)
 {
 	gp_size a = GP_MAX((gp_size)1, GP_MIN(w/6, h/6));
@@ -617,15 +650,19 @@ static void render_stock_close(gp_pixmap *pix,
 		0, a,
 	};
 
-	gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(poly)/2, poly, ctx->alert_color);
+	gp_pixel color = type & GP_WIDGET_STOCK_DISABLED ? ctx->col_disabled : ctx->alert_color;
+
+	gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(poly)/2, poly, color);
 }
 
 static void render_stock_arrow(gp_pixmap *pix,
-                               int type,
                                gp_coord x, gp_coord y,
                                gp_size w, gp_size h, gp_pixel bg_col,
+                               enum gp_widget_stock_type type,
                                const gp_widget_render_ctx *ctx)
 {
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	h--;
@@ -685,16 +722,16 @@ static void render_stock_arrow(gp_pixmap *pix,
 
 	switch (GP_WIDGET_STOCK_TYPE(type)) {
 	case GP_WIDGET_STOCK_ARROW_UP:
-		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(up_poly)/2, up_poly, ctx->text_color);
+		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(up_poly)/2, up_poly, line_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_DOWN:
-		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(down_poly)/2, down_poly, ctx->text_color);
+		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(down_poly)/2, down_poly, line_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_LEFT:
-		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(left_poly)/2, left_poly, ctx->text_color);
+		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(left_poly)/2, left_poly, line_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_RIGHT:
-		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(right_poly)/2, right_poly, ctx->text_color);
+		gp_fill_polygon(pix, x, y, GP_ARRAY_SIZE(right_poly)/2, right_poly, line_color);
 	break;
 	}
 }
@@ -702,6 +739,7 @@ static void render_stock_arrow(gp_pixmap *pix,
 static void render_stock_rotate_cw(gp_pixmap *pix,
                                    gp_coord x, gp_coord y,
                                    gp_size w, gp_size h, gp_pixel bg_col,
+                                   enum gp_widget_stock_type type,
                                    const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -710,6 +748,8 @@ static void render_stock_rotate_cw(gp_pixmap *pix,
 	gp_size th = GP_MIN(w, h)/4;
 	gp_size s = GP_MAX((GP_MIN(w, h)+1)/4, 1u);
 	gp_size r = GP_MIN(w, h)/2-s;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -735,12 +775,13 @@ static void render_stock_rotate_cw(gp_pixmap *pix,
 		 th-sr, -r-lr,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, line_color);
 }
 
 static void render_stock_rotate_ccw(gp_pixmap *pix,
                                     gp_coord x, gp_coord y,
                                     gp_size w, gp_size h, gp_pixel bg_col,
+                                    enum gp_widget_stock_type type,
                                     const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -749,6 +790,8 @@ static void render_stock_rotate_ccw(gp_pixmap *pix,
 	gp_size th = GP_MIN(w, h)/4;
 	gp_size s = GP_MAX((GP_MIN(w, h)+1)/4, 1u);
 	gp_size r = GP_MIN(w, h)/2-s;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -774,13 +817,14 @@ static void render_stock_rotate_ccw(gp_pixmap *pix,
 		-th+sr, -r-lr,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, line_color);
 }
 
 
 static void render_stock_refresh(gp_pixmap *pix,
                                  gp_coord x, gp_coord y,
                                  gp_size w, gp_size h, gp_pixel bg_col,
+                                 enum gp_widget_stock_type type,
                                  const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -789,6 +833,8 @@ static void render_stock_refresh(gp_pixmap *pix,
 	gp_size th = GP_MIN(w, h)/16;
 	gp_size s = GP_MAX(GP_MIN(w, h)/5, 1u);
 	gp_size r = GP_MIN(w, h)/2-s;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -806,12 +852,13 @@ static void render_stock_refresh(gp_pixmap *pix,
 		th-sr, -r+s,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, line_color);
 }
 
 static void render_stock_shuffle_off(gp_pixmap *pix,
                                      gp_coord x, gp_coord y,
                                      gp_size w, gp_size h, gp_pixel bg_col,
+                                     enum gp_widget_stock_type type,
                                      const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -820,10 +867,11 @@ static void render_stock_shuffle_off(gp_pixmap *pix,
 	gp_size wh = w/3;
 
 	gp_size th = GP_MIN(w, h)/16;
+	gp_size yd = h/4;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
-
-	gp_size yd = h/4;
 
 	gp_coord poly_1[] = {
 		-wh-3*th, yd+th,
@@ -837,7 +885,7 @@ static void render_stock_shuffle_off(gp_pixmap *pix,
 		 wh-th, yd+th,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, line_color);
 
 	gp_coord poly_2[] = {
 		-wh-3*th, -yd+th,
@@ -851,12 +899,13 @@ static void render_stock_shuffle_off(gp_pixmap *pix,
 		 wh-th, -yd+th,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, line_color);
 }
 
 static void render_stock_shuffle_on(gp_pixmap *pix,
                                     gp_coord x, gp_coord y,
                                     gp_size w, gp_size h, gp_pixel bg_col,
+                                    enum gp_widget_stock_type type,
                                     const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
@@ -872,6 +921,8 @@ static void render_stock_shuffle_on(gp_pixmap *pix,
 
 	cx -= 2*th;
 	gp_size xs = yd/2;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_coord poly_1[] = {
 		-wh-th, -yd-th,
@@ -891,7 +942,7 @@ static void render_stock_shuffle_on(gp_pixmap *pix,
 		-wh+xs+th, -yd-th,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, line_color);
 
 	gp_coord poly_2[] = {
 		-wh-th,  yd+th,
@@ -911,12 +962,13 @@ static void render_stock_shuffle_on(gp_pixmap *pix,
 		-wh+xs+th,  yd+th,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, line_color);
 }
 
 static void render_stock_repeat(gp_pixmap *pix,
                                 gp_coord x, gp_coord y,
                                 gp_size w, gp_size h, gp_pixel bg_col,
+                                enum gp_widget_stock_type type,
                                 const gp_widget_render_ctx *ctx, int on)
 {
 	gp_coord cx = x + w/2;
@@ -926,9 +978,11 @@ static void render_stock_repeat(gp_pixmap *pix,
 
 	gp_size th = GP_MIN(w, h)/16;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
-
 	gp_size yd = h/4;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_coord poly_1[] = {
 		-wh-3*th, yd+th,
@@ -945,7 +999,7 @@ static void render_stock_repeat(gp_pixmap *pix,
 		 wh-th, yd+th,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_1)/2, poly_1, line_color);
 
 	gp_coord poly_2[] = {
 		 wh+3*th-2*th, -yd+th,
@@ -962,7 +1016,7 @@ static void render_stock_repeat(gp_pixmap *pix,
 		 -wh+th, -yd+th,
 	};
 
-	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
+	gp_fill_polygon(pix, cx, cy, GP_ARRAY_SIZE(poly_2)/2, poly_2, line_color);
 
 	if (on)
 		return;
@@ -976,10 +1030,13 @@ static void render_stock_repeat(gp_pixmap *pix,
 static void render_stock_filter(gp_pixmap *pix,
                                 gp_coord x, gp_coord y,
                                 gp_size w, gp_size h, gp_pixel bg_col,
+                                enum gp_widget_stock_type type,
                                 const gp_widget_render_ctx *ctx)
 {
 	gp_coord cx = x + w/2;
 	gp_size pp = GP_MIN(w, h)/8;
+
+	gp_pixel line_color = stock_line_color(type, ctx);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
@@ -992,7 +1049,7 @@ static void render_stock_filter(gp_pixmap *pix,
 		cx - pp, y + h/2,
 	};
 
-	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, line_color);
 }
 
 static void render_stock_day(gp_pixmap *pix,
@@ -1001,7 +1058,7 @@ static void render_stock_day(gp_pixmap *pix,
                              enum gp_widget_stock_type type,
                              const gp_widget_render_ctx *ctx)
 {
-	gp_pixel col = type & GP_WIDGET_STOCK_FOCUSED ? ctx->sel_color : ctx->text_color;
+	gp_pixel col = stock_line_color(type, ctx);
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 	gp_size sp = GP_MAX(4u, GP_MIN(w, h)/8);
@@ -1050,7 +1107,7 @@ static void render_stock_night(gp_pixmap *pix,
                                enum gp_widget_stock_type type,
                                const gp_widget_render_ctx *ctx)
 {
-	gp_pixel col = type & GP_WIDGET_STOCK_FOCUSED ? ctx->sel_color : ctx->text_color;
+	gp_pixel col = stock_line_color(type, ctx);
 
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
@@ -1093,9 +1150,10 @@ static void render_stock_star(gp_pixmap *pix,
 	gp_polygon_th(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, 1, gp_pixel_chans_add(ctx->pixel_type, ctx->warn_color, -5));
 }
 
-static void render_stock_zoom(gp_pixmap *pix, enum gp_widget_stock_type type,
+static void render_stock_zoom(gp_pixmap *pix,
                               gp_coord x, gp_coord y,
                               gp_size w, gp_size h, gp_pixel bg_col,
+                              enum gp_widget_stock_type type,
                               const gp_widget_render_ctx *ctx)
 {
 	gp_size th = 2*(GP_MIN(3*w/8, 3*h/8)+1)/8;
@@ -1108,60 +1166,69 @@ static void render_stock_zoom(gp_pixmap *pix, enum gp_widget_stock_type type,
 	gp_coord cx = x + w/2 - th;
 	gp_coord cy = y + h/2 - th;
 
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	switch (GP_WIDGET_STOCK_TYPE(type)) {
 	case GP_WIDGET_STOCK_ZOOM:
 	break;
 	case GP_WIDGET_STOCK_ZOOM_IN:
-		gp_fill_rect_xyxy(pix, cx-sym_line_w, cy-sym_len, cx+sym_line_w, cy+sym_len, ctx->text_color);
+		gp_fill_rect_xyxy(pix, cx-sym_line_w, cy-sym_len, cx+sym_line_w, cy+sym_len, line_color);
 	/* fallthrough */
 	case GP_WIDGET_STOCK_ZOOM_OUT:
-		gp_fill_rect_xyxy(pix, cx-sym_len, cy-sym_line_w, cx+sym_len, cy+sym_line_w, ctx->text_color);
+		gp_fill_rect_xyxy(pix, cx-sym_len, cy-sym_line_w, cx+sym_len, cy+sym_line_w, line_color);
 	break;
 	case GP_WIDGET_STOCK_ZOOM_FIT:
-		gp_fill_rect_xyxy(pix, cx-sym_len+1, cy-sym_len+1, cx+sym_len-1, cy+sym_len-1, ctx->text_color);
+		gp_fill_rect_xyxy(pix, cx-sym_len+1, cy-sym_len+1, cx+sym_len-1, cy+sym_len-1, line_color);
 		gp_fill_rect_xyxy(pix, cx-sym_len+2*sym_line_w+1, cy-sym_len+2*sym_line_w+1,
 		                       cx+sym_len-2*sym_line_w-1, cy+sym_len-2*sym_line_w-1, bg_col);
 	break;
 	}
 
-	gp_fill_ring(pix, cx, cy, co, co - th, ctx->text_color);
+	gp_fill_ring(pix, cx, cy, co, co - th, line_color);
 
-	gp_line_th(pix, cx+co/1.44, cy+co/1.44, cx+ch, cy+ch, th, ctx->text_color);
-	gp_fill_circle(pix, cx+ch, cy+ch, th, ctx->text_color);
+	gp_line_th(pix, cx+co/1.44, cy+co/1.44, cx+ch, cy+ch, th, line_color);
+	gp_fill_circle(pix, cx+ch, cy+ch, th, line_color);
 }
 
 static void render_stock_on(gp_pixmap *pix,
                             gp_coord x, gp_coord y,
                             gp_size w, gp_size h, gp_pixel bg_col,
+                            enum gp_widget_stock_type type,
                             const gp_widget_render_ctx *ctx)
 {
 	gp_size th = GP_MIN(w, h)/12;
 	gp_size sh = (h-2)/2;
 
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
-	gp_fill_rect_xyxy(pix, x + w/2 + (th-th/2), y + h/2-sh, x + w/2 - th/2, y + h/2+sh, ctx->text_color);
+	gp_fill_rect_xyxy(pix, x + w/2 + (th-th/2), y + h/2-sh, x + w/2 - th/2, y + h/2+sh, line_color);
 }
 
 static void render_stock_off(gp_pixmap *pix,
                              gp_coord x, gp_coord y,
                              gp_size w, gp_size h, gp_pixel bg_col,
+                             enum gp_widget_stock_type type,
                              const gp_widget_render_ctx *ctx)
 {
 	gp_size th = GP_MIN(w, h)/12;
 	gp_size r = w/3;
 
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
-	gp_fill_ring_seg(pix, x + w/2, y + r, r, r-th, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG2,  ctx->text_color);
-	gp_fill_rect_xyxy(pix, x + w/2+r-th, y + r, x+w/2+r, y + h - r - 1, ctx->text_color);
-	gp_fill_rect_xyxy(pix, x + w/2-r+th, y + r, x+w/2-r, y + h - r - 1, ctx->text_color);
-	gp_fill_ring_seg(pix, x + w/2, y + h - r - 1, r, r-th, GP_CIRCLE_SEG3 | GP_CIRCLE_SEG4,  ctx->text_color);
+	gp_fill_ring_seg(pix, x + w/2, y + r, r, r-th, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG2,  line_color);
+	gp_fill_rect_xyxy(pix, x + w/2+r-th, y + r, x+w/2+r, y + h - r - 1, line_color);
+	gp_fill_rect_xyxy(pix, x + w/2-r+th, y + r, x+w/2-r, y + h - r - 1, line_color);
+	gp_fill_ring_seg(pix, x + w/2, y + h - r - 1, r, r-th, GP_CIRCLE_SEG3 | GP_CIRCLE_SEG4, line_color);
 }
 
 static void render_stock_mirror_h(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
                                   gp_size w, gp_size h, gp_pixel bg_col,
+                                  enum gp_widget_stock_type type,
                                   const gp_widget_render_ctx *ctx)
 {
 	gp_size th = stock_line_thickness(w, h);
@@ -1169,9 +1236,11 @@ static void render_stock_mirror_h(gp_pixmap *pix,
 	gp_size h_2 = h/2;
 	gp_size r = w_2/3;
 
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
-	gp_fill_rect_xyxy(pix, x+w_2-th/2, y, x+(w-w_2)+th/2, y+h-1, ctx->text_color);
+	gp_fill_rect_xyxy(pix, x+w_2-th/2, y, x+(w-w_2)+th/2, y+h-1, line_color);
 
 	gp_coord x_c = x + w_2/2;
 	gp_coord y_c = y + h_2;
@@ -1182,7 +1251,7 @@ static void render_stock_mirror_h(gp_pixmap *pix,
 		x_c-r, y_c+2*r,
 	};
 
-	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly)/2, poly, line_color);
 
 	x_c = x + (w - w_2/2);
 
@@ -1198,6 +1267,7 @@ static void render_stock_mirror_h(gp_pixmap *pix,
 static void render_stock_mirror_v(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
                                   gp_size w, gp_size h, gp_pixel bg_col,
+                                  enum gp_widget_stock_type type,
                                   const gp_widget_render_ctx *ctx)
 {
 	gp_size th = stock_line_thickness(w, h);
@@ -1205,9 +1275,11 @@ static void render_stock_mirror_v(gp_pixmap *pix,
 	gp_size h_2 = h/2;
 	gp_size r = w_2/3;
 
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
-	gp_fill_rect_xyxy(pix, x, y+h_2-th/2, x+w-1, y+(h-h_2)+th/2, ctx->text_color);
+	gp_fill_rect_xyxy(pix, x, y+h_2-th/2, x+w-1, y+(h-h_2)+th/2, line_color);
 
 	gp_coord x_c = x + w_2;
 	gp_coord y_c = y + h_2/2;
@@ -1218,7 +1290,7 @@ static void render_stock_mirror_v(gp_pixmap *pix,
 		x_c-2*r, y_c+r,
 	};
 
-	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly1)/2, poly1, ctx->text_color);
+	gp_fill_polygon(pix, 0, 0, GP_ARRAY_SIZE(poly1)/2, poly1, line_color);
 
 	y_c = y + (h - h_2/2);
 
@@ -1234,8 +1306,8 @@ static void render_stock_mirror_v(gp_pixmap *pix,
 static void render_stock_cut_copy_paste(gp_pixmap *pix,
                                         gp_coord x, gp_coord y,
                                         gp_size w, gp_size h, gp_pixel bg_col,
-                                        const gp_widget_render_ctx *ctx,
-					enum gp_widget_stock_type type)
+					enum gp_widget_stock_type type,
+                                        const gp_widget_render_ctx *ctx)
 {
 	gp_size th = 2*stock_line_thickness(w, h) + 1;
 	gp_size w23 = 2 * w / 3;
@@ -1243,19 +1315,21 @@ static void render_stock_cut_copy_paste(gp_pixmap *pix,
 	gp_size xe = x + w - 1;
 	gp_size ye = y + h - 1;
 
+	gp_pixel line_color = stock_line_color(type, ctx);
+
 	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
-	gp_fill_rect_xyxy(pix, x, y, x+w23, y+h23, ctx->text_color);
+	gp_fill_rect_xyxy(pix, x, y, x+w23, y+h23, line_color);
 	gp_fill_rect_xyxy(pix, x+th,  y+th, x+w23-th, y+h23-th, ctx->fg_color);
 
-	gp_fill_rect_xyxy(pix, xe, ye, xe - w23, ye - h23, ctx->text_color);
+	gp_fill_rect_xyxy(pix, xe, ye, xe - w23, ye - h23, line_color);
 
-	if (type == GP_WIDGET_STOCK_PASTE)
+	if (GP_WIDGET_STOCK_TYPE(type)  == GP_WIDGET_STOCK_PASTE)
 		return;
 
 	gp_fill_rect_xyxy(pix, xe-th, ye-th, xe - w23 + th, ye - h23 + th, ctx->fg_color);
 
-	if (type == GP_WIDGET_STOCK_COPY)
+	if (GP_WIDGET_STOCK_TYPE(type) == GP_WIDGET_STOCK_COPY)
 		return;
 
 	gp_fill_rect_xyxy(pix, xe-w23/3, ye, xe - w23 + w23/3, ye - h23, ctx->fg_color);
@@ -1266,9 +1340,7 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
                                 gp_coord x, gp_coord y, gp_size w, gp_size h,
                                 gp_pixel bg_col, const gp_widget_render_ctx *ctx)
 {
-	enum gp_widget_stock_type t = GP_WIDGET_STOCK_TYPE(type);
-
-	switch (t) {
+	switch (GP_WIDGET_STOCK_TYPE(type)) {
 	case GP_WIDGET_STOCK_SPEAKER_MIN:
 	case GP_WIDGET_STOCK_SPEAKER_MAX:
 	case GP_WIDGET_STOCK_SPEAKER_MID:
@@ -1290,61 +1362,61 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 		render_stock_question(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_HARDWARE:
-		render_stock_hardware(pix, x, y, w, h, bg_col, ctx);
+		render_stock_hardware(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_SOFTWARE:
-		render_stock_software(pix, x, y, w, h, bg_col, ctx);
+		render_stock_software(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_SETTINGS:
-		render_stock_settings(pix, x, y, w, h, bg_col, ctx);
+		render_stock_settings(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_HOME:
-		render_stock_home(pix, x, y, w, h, bg_col, ctx);
+		render_stock_home(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_SAVE:
-		render_stock_save(pix, x, y, w, h, bg_col, ctx);
+		render_stock_save(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_FILE:
-		render_stock_file(pix, x, y, w, h, bg_col, ctx);
+		render_stock_file(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_DIR:
-		render_stock_dir(pix, 0, x, y, w, h, bg_col, ctx);
+		render_stock_dir(pix, 0, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_NEW_DIR:
-		render_stock_dir(pix, 1, x, y, w, h, bg_col, ctx);
+		render_stock_dir(pix, 1, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_CLOSE:
-		render_stock_close(pix, x, y, w, h, bg_col, ctx);
+		render_stock_close(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_REFRESH:
-		render_stock_refresh(pix, x, y, w, h, bg_col, ctx);
+		render_stock_refresh(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_ARROW_UP:
 	case GP_WIDGET_STOCK_ARROW_DOWN:
 	case GP_WIDGET_STOCK_ARROW_LEFT:
 	case GP_WIDGET_STOCK_ARROW_RIGHT:
-		render_stock_arrow(pix, type, x, y, w, h, bg_col, ctx);
+		render_stock_arrow(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_ROTATE_CW:
-		render_stock_rotate_cw(pix, x, y, w, h, bg_col, ctx);
+		render_stock_rotate_cw(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_ROTATE_CCW:
-		render_stock_rotate_ccw(pix, x, y, w, h, bg_col, ctx);
+		render_stock_rotate_ccw(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_SHUFFLE_ON:
-		render_stock_shuffle_on(pix, x, y, w, h, bg_col, ctx);
+		render_stock_shuffle_on(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_SHUFFLE_OFF:
-		render_stock_shuffle_off(pix, x, y, w, h, bg_col, ctx);
+		render_stock_shuffle_off(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_REPEAT_ON:
-		render_stock_repeat(pix, x, y, w, h, bg_col, ctx, 1);
+		render_stock_repeat(pix, x, y, w, h, bg_col, type, ctx, 1);
 	break;
 	case GP_WIDGET_STOCK_REPEAT_OFF:
-		render_stock_repeat(pix, x, y, w, h, bg_col, ctx, 0);
+		render_stock_repeat(pix, x, y, w, h, bg_col, type, ctx, 0);
 	break;
 	case GP_WIDGET_STOCK_FILTER:
-		render_stock_filter(pix, x, y, w, h, bg_col, ctx);
+		render_stock_filter(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_DAY:
 		render_stock_day(pix, x, y, w, h, bg_col, type, ctx);
@@ -1359,24 +1431,24 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	case GP_WIDGET_STOCK_ZOOM_IN:
 	case GP_WIDGET_STOCK_ZOOM_OUT:
 	case GP_WIDGET_STOCK_ZOOM_FIT:
-		render_stock_zoom(pix, type, x, y, w, h, bg_col, ctx);
+		render_stock_zoom(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_ON:
-		render_stock_on(pix, x, y, w, h, bg_col, ctx);
+		render_stock_on(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_OFF:
-		render_stock_off(pix, x, y, w, h, bg_col, ctx);
+		render_stock_off(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_MIRROR_H:
-		render_stock_mirror_h(pix, x, y, w, h, bg_col, ctx);
+		render_stock_mirror_h(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_MIRROR_V:
-		render_stock_mirror_v(pix, x, y, w, h, bg_col, ctx);
+		render_stock_mirror_v(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_CUT:
 	case GP_WIDGET_STOCK_COPY:
 	case GP_WIDGET_STOCK_PASTE:
-		render_stock_cut_copy_paste(pix, x, y, w, h, bg_col, ctx, t);
+		render_stock_cut_copy_paste(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	default:
 	break;
