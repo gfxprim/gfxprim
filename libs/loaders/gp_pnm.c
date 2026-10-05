@@ -147,6 +147,8 @@ struct buf {
 	unsigned int buf_end;
 	unsigned int buf_pos;
 	gp_io *io;
+	unsigned int skipped;
+	unsigned int clamped;
 };
 
 #define DECLARE_BUFFER(name, bio) \
@@ -192,6 +194,27 @@ static int fillb(struct buf *buf, void *ptr, size_t size)
 	}
 
 	return 0;
+}
+
+static void skip_invalid(struct buf *buf, int c)
+{
+	if (buf->skipped++ < 10) {
+		GP_WARN("Ignoring unexpected character 0x%02x (%c)",
+		        c, isprint(c) ? c : ' ');
+	}
+}
+
+static int clamp_value(struct buf *buf, int val, int max, const char *what)
+{
+	if (val <= max)
+		return val;
+
+	if (buf->clamped++ < 10) {
+		GP_WARN("%s value %i too large, clamping it and any further ones to %i",
+		        what, val, max);
+	}
+
+	return max;
 }
 
 static int load_header(struct buf *buf, struct pnm_header *header)
@@ -241,8 +264,7 @@ static int load_header(struct buf *buf, struct pnm_header *header)
 			case '\r':
 			break;
 			default:
-				GP_WARN("Ignoring character 0x%02x (%c)",
-				        c, isprint(c) ? c : ' ');
+				skip_invalid(buf, c);
 			}
 		break;
 		case S_COMMENT:
@@ -322,8 +344,7 @@ static int get_ascii_int(struct buf *buf, int *val)
 			if (in_number)
 				return 0;
 			else
-				GP_WARN("Ignoring unexpected character 0x%02x %c",
-				        c, isprint(c) ? c : ' ');
+				skip_invalid(buf, c);
 		}
 	}
 }
@@ -411,10 +432,7 @@ static int load_ascii_g1(struct buf *buf, gp_pixmap *pixmap,
 			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
-			if (val > 1) {
-				GP_WARN("Value too large for 1BPP (%i)", val);
-				val = 1;
-			}
+			val = clamp_value(buf, val, 1, "1BPP");
 
 			gp_putpixel_raw_1BPP(pixmap, x, y, val);
 		}
@@ -441,10 +459,7 @@ static int load_ascii_g2(struct buf *buf, gp_pixmap *pixmap,
 			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
-			if (val > 3) {
-				GP_WARN("Value too large for 2BPP (%i)", val);
-				val = 3;
-			}
+			val = clamp_value(buf, val, 3, "2BPP");
 
 			gp_putpixel_raw_2BPP(pixmap, x, y, val);
 		}
@@ -471,10 +486,7 @@ static int load_ascii_g4(struct buf *buf, gp_pixmap *pixmap,
 			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
-			if (val > 15) {
-				GP_WARN("Value too large for 4BPP (%i)", val);
-				val = 15;
-			}
+			val = clamp_value(buf, val, 15, "4BPP");
 
 			gp_putpixel_raw_4BPP(pixmap, x, y, val);
 		}
@@ -501,10 +513,7 @@ static int load_ascii_g8(struct buf *buf, gp_pixmap *pixmap,
 			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
-			if (val > 255) {
-				GP_WARN("Value too large for 8BPP (%i)", val);
-				val = 255;
-			}
+			val = clamp_value(buf, val, 255, "8BPP");
 
 			gp_putpixel_raw_8BPP(pixmap, x, y, val);
 		}
@@ -552,26 +561,17 @@ static int load_ascii_rgb888(struct buf *buf, gp_pixmap *pixmap,
 			if ((err = get_ascii_int(buf, &r)))
 				return err;
 
-			if (r > 255) {
-				GP_WARN("R value too large (%i)", r);
-				r = 255;
-			}
+			r = clamp_value(buf, r, 255, "R");
 
 			if ((err = get_ascii_int(buf, &g)))
 				return err;
 
-			if (g > 255) {
-				GP_WARN("G value too large (%i)", r);
-				g = 255;
-			}
+			g = clamp_value(buf, g, 255, "G");
 
 			if ((err = get_ascii_int(buf, &b)))
 				return err;
 
-			if (b > 255) {
-				GP_WARN("G value too large (%i)", r);
-				b = 255;
-			}
+			b = clamp_value(buf, b, 255, "B");
 
 			gp_putpixel_raw_24BPP(pixmap, x, y,
 			                      GP_PIXEL_CREATE_RGB888(r, g, b));
