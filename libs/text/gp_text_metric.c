@@ -245,6 +245,14 @@ gp_size gp_text_descent(const gp_text_style *style)
 	return multiply_height(style, gp_font_descent(style->font));
 }
 
+gp_size gp_text_line_gap(const gp_text_style *style)
+{
+	style = assert_style(style);
+
+	return gp_font_line_gap(style->font) *
+	       (style->pixel_ymul + style->pixel_yspace);
+}
+
 gp_coord gp_text_decor_pos(const gp_text_style *style,
                            enum gp_text_decor_type text_decor)
 {

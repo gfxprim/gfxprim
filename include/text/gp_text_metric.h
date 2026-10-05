@@ -178,6 +178,19 @@ gp_size gp_text_ascent(const gp_text_style *style);
 gp_size gp_text_descent(const gp_text_style *style);
 
 /**
+ * @brief Returns a line gap.
+ *
+ * Returns the extra space the font puts between lines on top of the
+ * gp_text_height(), for the given text style. The distance between baselines
+ * of two consecutive lines is gp_text_height() + gp_text_line_gap().
+ *
+ * @param style A text style + font formatting.
+ *
+ * @return A line gap in pixels, may be zero.
+ */
+gp_size gp_text_line_gap(const gp_text_style *style);
+
+/**
  * @brief A text decoration type.
  */
 enum gp_text_decor_type {
