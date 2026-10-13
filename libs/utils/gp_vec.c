@@ -160,6 +160,27 @@ ret:
 	return vec;
 }
 
+void gp_vec_truncate(void *self, size_t length)
+{
+	gp_vec *vec;
+
+	if (!self)
+		return;
+
+	vec = GP_VEC(self);
+
+	if (length > vec->length) {
+		GP_WARN("Vector too short %zu truncate to %zu",
+			vec->length, length);
+		return;
+	}
+
+	memset(vec->payload + length * vec->unit, 0xff,
+	       (vec->length - length) * vec->unit);
+
+	vec->length = length;
+}
+
 void *gp_vec_shrink(void *self, size_t length)
 {
 	gp_vec *vec = GP_VEC(self);

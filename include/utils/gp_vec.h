@@ -163,6 +163,23 @@ static inline size_t gp_vec_unit(const void *self)
 }
 
 /**
+ * @brief Returns vector capacity in units.
+ *
+ * Returns 0 for a NULL pointer, i.e. vector that hasn't been allocated yet.
+ *
+ * @param self A vector.
+ * @return A vector capacity, i.e. how many units it can fit without
+ *         reallocating the buffer.
+ */
+static inline size_t gp_vec_capacity(const void *self)
+{
+	if (!self)
+		return 0;
+
+	return GP_VEC(self)->capacity;
+}
+
+/**
  * @brief Insert a gap into the vec of new elements, reallocating the
  *        underlying memory if more capacity is needed.
  *
@@ -262,6 +279,17 @@ GP_WUR void *gp_vec_del(void *self, size_t off, size_t len);
 GP_WUR void *gp_vec_shrink(void *self, size_t len);
 
 /**
+ * @brief Truncates a vector, keeps its capacity.
+ *
+ * Unlike gp_vec_shrink() and gp_vec_resize() this does not reallocate the
+ * vector buffer, which is useful for buffers that are reused several times.
+ *
+ * @param self A vector, may be NULL.
+ * @param len A new length, less or equal to the current one.
+ */
+void gp_vec_truncate(void *self, size_t len);
+
+/**
  * @brief Moves last object in vector to idx and shrinks the vector by one.
  *
  * This is fast operation to remove an object from the middle of the vector by
@@ -301,12 +329,16 @@ GP_WUR void *gp_vec_move_shrink(void *self, size_t idx);
 /**
  * @brief Appends single element to a vector.
  *
+ * A NULL vector, i.e. one that hasn't been allocated yet, is allocated with
+ * the size of the element @p vec points to as the unit.
+ *
  * @param vec A vector.
  * @param val A value to be appended.
- * @return NULL on a failure.
+ * @return NULL on a failure, the vector is left as it was then.
  */
 #define GP_VEC_APPEND(vec, val) ({ \
-	typeof(vec) gp_ret_tmp = gp_vec_expand(vec, 1); \
+	typeof(vec) gp_ret_tmp = (vec) ? gp_vec_expand(vec, 1) : \
+	                         gp_vec_new(1, sizeof(*(vec))); \
 	if (gp_ret_tmp) { \
 		gp_ret_tmp[gp_vec_len(gp_ret_tmp)-1] = val; \
 		vec = gp_ret_tmp; \

@@ -213,6 +213,90 @@ static int test_vec_shrink(void)
 	return TST_PASSED;
 }
 
+static int test_vec_append_null(void)
+{
+	struct pair {
+		int a;
+		long b;
+	} *vec = NULL;
+	int i;
+
+	for (i = 0; i < 100; i++) {
+		if (!GP_VEC_APPEND(vec, ((struct pair){i, -i}))) {
+			tst_msg("Append failed at %i", i);
+			return TST_FAILED;
+		}
+	}
+
+	if (gp_vec_len(vec) != 100 || gp_vec_unit(vec) != sizeof(*vec)) {
+		tst_msg("Got len %zu unit %zu", gp_vec_len(vec),
+		        gp_vec_unit(vec));
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < 100; i++) {
+		if (vec[i].a != i || vec[i].b != -i) {
+			tst_msg("Got wrong value %i %li at %i",
+			        vec[i].a, vec[i].b, i);
+			return TST_FAILED;
+		}
+	}
+
+	gp_vec_free(vec);
+
+	return TST_PASSED;
+}
+
+static int test_vec_truncate(void)
+{
+	int *vec = NULL;
+	int *orig;
+	size_t cap;
+	int i, round;
+
+	gp_vec_truncate(vec, 0);
+
+	for (i = 0; i < 100; i++)
+		GP_VEC_APPEND(vec, i);
+
+	orig = vec;
+	cap = gp_vec_capacity(vec);
+
+	for (round = 0; round < 3; round++) {
+		gp_vec_truncate(vec, 0);
+
+		if (gp_vec_len(vec) != 0) {
+			tst_msg("Got len %zu after truncate", gp_vec_len(vec));
+			return TST_FAILED;
+		}
+
+		for (i = 0; i < 100; i++)
+			GP_VEC_APPEND(vec, i * round);
+
+		if (vec != orig || gp_vec_capacity(vec) != cap) {
+			tst_msg("Vector reallocated on refill %i", round);
+			return TST_FAILED;
+		}
+
+		for (i = 0; i < 100; i++) {
+			if (vec[i] != i * round) {
+				tst_msg("Got wrong value %i at %i", vec[i], i);
+				return TST_FAILED;
+			}
+		}
+	}
+
+	gp_vec_truncate(vec, 10);
+	if (gp_vec_len(vec) != 10 || vec[9] != 9 * 2) {
+		tst_msg("Truncate to 10 got len %zu", gp_vec_len(vec));
+		return TST_FAILED;
+	}
+
+	gp_vec_free(vec);
+
+	return TST_PASSED;
+}
+
 static int test_vec_dup(void)
 {
 	int *vec = gp_vec_new(10, sizeof(int));
@@ -311,6 +395,14 @@ const struct tst_suite tst_suite = {
 
 		{.name = "vector free on NULL",
 		 .tst_fn = test_vec_free,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "vector append to NULL",
+		 .tst_fn = test_vec_append_null,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "vector truncate",
+		 .tst_fn = test_vec_truncate,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "vector dup",
