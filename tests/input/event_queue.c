@@ -176,6 +176,40 @@ static int cursor_state_test(void)
 	return TST_PASSED;
 }
 
+static int cursor_dropped_motion_test(void)
+{
+	gp_ev_queue queue;
+	gp_event *ev = NULL;
+	unsigned int i;
+
+	gp_ev_queue_init(&queue, 100, 100, 0, NULL, NULL, 0);
+
+	/* Fill the queue, then move the pointer: the motion is dropped */
+	for (i = 0; i < GP_EVENT_QUEUE_SIZE - 1; i++)
+		gp_ev_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, 0, 0);
+
+	gp_ev_queue_push_rel_to(&queue, 60, 40, 0);
+
+	while (gp_ev_queue_get(&queue))
+		;
+
+	gp_ev_queue_push_rel_to(&queue, 70, 30, 0);
+
+	ev = gp_ev_queue_get(&queue);
+	if (!ev) {
+		tst_msg("No event returned");
+		return TST_FAILED;
+	}
+
+	if (ev->st->cursor_x != 70 || ev->st->cursor_y != 30) {
+		tst_msg("Cursor %ux%u after a dropped motion, expected 70x30",
+			(unsigned)ev->st->cursor_x, (unsigned)ev->st->cursor_y);
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
 static int queue_init_test(void)
 {
 	unsigned int i;
@@ -259,6 +293,8 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = key_state_test},
 		{.name = "Cursor state",
 		 .tst_fn = cursor_state_test},
+		{.name = "Cursor after a dropped motion",
+		 .tst_fn = cursor_dropped_motion_test},
 		{.name = "Pointer from get is preserved",
 		 .tst_fn = get_pointer_preserved},
 		{.name = "Queue events",

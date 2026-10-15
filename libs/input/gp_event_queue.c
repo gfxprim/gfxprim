@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2024 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <string.h>
@@ -196,18 +196,22 @@ gp_event *gp_ev_queue_peek(gp_ev_queue *self)
 /*
  * We avoid overriding an position before the queue_first since that may have
  * been returned by gp_event_get() previously.
+ *
+ * Returns 0 on success, 1 if the queue was full and the event was dropped.
  */
-static void event_put(gp_ev_queue *self, gp_event *ev)
+static int event_put(gp_ev_queue *self, gp_event *ev)
 {
 	unsigned int next = (self->queue_last + 1) % self->queue_size;
 
 	if (next == self->queue_first) {
 		GP_WARN("Event queue full, dropping event.");
-		return;
+		return 1;
 	}
 
 	self->events[self->queue_last] = *ev;
 	self->queue_last = next;
+
+	return 0;
 }
 
 static void event_put_back(gp_ev_queue *self, gp_event *ev)
@@ -255,12 +259,13 @@ void gp_ev_queue_push_rel(gp_ev_queue *self,
 		.rel = {.rx = rx, ry = ry},
 	};
 
-	self->cursor_x = clip_rel(self->cursor_x, self->screen_w, rx);
-	self->cursor_y = clip_rel(self->cursor_y, self->screen_h, ry);
-
 	set_time(&ev, time);
 
-	event_put(self, &ev);
+	if (event_put(self, &ev))
+		return;
+
+	self->cursor_x = clip_rel(self->cursor_x, self->screen_w, rx);
+	self->cursor_y = clip_rel(self->cursor_y, self->screen_h, ry);
 }
 
 void gp_ev_queue_push_rel_to(gp_ev_queue *self,
@@ -299,15 +304,16 @@ void gp_ev_queue_push_abs(gp_ev_queue *self,
 		}
 	};
 
+	set_time(&ev, time);
+
+	if (event_put(self, &ev))
+		return;
+
 	if (x_max != 0)
 		self->cursor_x = x * (self->screen_w - 1) / x_max;
 
 	if (y_max != 0)
 		self->cursor_y = y * (self->screen_h - 1) / y_max;
-
-	set_time(&ev, time);
-
-	event_put(self, &ev);
 }
 
 void gp_ev_queue_push_key(gp_ev_queue *self,
