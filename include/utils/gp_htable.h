@@ -121,18 +121,22 @@ void gp_htable_free(gp_htable *self);
  *
  * @param key A string.
  * @param htable_size A hash table size.
+ * @param priv Unused.
  *
  * @return A computed hash index.
  */
-static inline size_t gp_htable_strhash(const void *key, size_t htable_size)
+static inline size_t gp_htable_strhash(const void *key, size_t htable_size,
+                                       void *priv)
 {
-        unsigned int h = 0;
+	unsigned int h = 0;
 	const char *str = key;
 
-        while (*str)
-                h = (h * 151 + *str++) % htable_size;
+	(void) priv;
 
-        return h;
+	while (*str)
+		h = (h * 151 + *str++) % htable_size;
+
+	return h;
 }
 
 /**
@@ -140,11 +144,15 @@ static inline size_t gp_htable_strhash(const void *key, size_t htable_size)
  *
  * @param key1 A string.
  * @param key2 A string.
+ * @param priv Unused.
  *
  * @return Non-zero if keys are equal.
  */
-static inline int gp_htable_strcmp(const void *key1, const void *key2)
+static inline int gp_htable_strcmp(const void *key1, const void *key2,
+                                   void *priv)
 {
+	(void) priv;
+
 	return !strcmp(key1, key2);
 }
 

@@ -67,9 +67,11 @@ static int htable_test(void)
 }
 
 /* Stupid hash function to ensure collisions */
-static size_t stupid_hash(const void *key, size_t size)
+static size_t stupid_hash(const void *key, size_t size, void *priv)
 {
 	const char *str = key;
+
+	(void) priv;
 
 	return str[0] % size;
 }
@@ -291,6 +293,87 @@ static int foreach_test(void)
 	return TST_PASSED;
 }
 
+/*
+ * Keys are indexes + 1 into an array of strings passed as priv, so the hash
+ * and compare functions cannot do anything without it.
+ */
+static size_t idx_hash(const void *key, size_t size, void *priv)
+{
+	const char **strs = priv;
+
+	return gp_htable_strhash(strs[(uintptr_t)key - 1], size, NULL);
+}
+
+static int idx_cmp(const void *key1, const void *key2, void *priv)
+{
+	const char **strs = priv;
+
+	return !strcmp(strs[(uintptr_t)key1 - 1], strs[(uintptr_t)key2 - 1]);
+}
+
+static int priv_test(void)
+{
+	gp_htable *table = gp_htable_new(0, 0);
+	const char *strs[] = {"aa", "ab", "ac", "ad", "ae", "af", "ag", "ah",
+	                      "ai", "aj", "ak", "al", "am", "an", "ao", "ap",
+	                      NULL};
+	uintptr_t i, n = 16;
+	size_t size;
+
+	if (!table) {
+		tst_msg("Malloc failed :-(");
+		return TST_FAILED;
+	}
+
+	/* inserts rehash the table several times */
+	for (i = 0; i < n; i++) {
+		void *key = (void *)(i + 1);
+
+		gp_htable_put2_priv(table, idx_hash, key, key, strs);
+	}
+
+	size = table->size;
+
+	/* removals repack the probe sequences and finally shrink the table */
+	for (i = 0; i < n; i++) {
+		void *key = (void *)(i + 1);
+
+		if (i % 8 == 7)
+			continue;
+
+		if (gp_htable_rem2_priv(table, idx_hash, idx_cmp, key, strs) != key) {
+			tst_msg("Wrong value removing '%s'", strs[i]);
+			return TST_FAILED;
+		}
+	}
+
+	/* look up by a key that is not in the table but names an equal string */
+	for (i = 0; i < n; i++) {
+		uintptr_t val;
+
+		strs[n] = strs[i];
+		val = (uintptr_t)gp_htable_get2_priv(table, idx_hash, idx_cmp,
+		                                     (void *)(n + 1), strs);
+
+		if (val != (i % 8 == 7 ? i + 1 : 0)) {
+			tst_msg("Wrong value %zu for '%s'", (size_t)val, strs[i]);
+			return TST_FAILED;
+		}
+	}
+
+	if (table->size >= size) {
+		tst_msg("Table did not shrink, size %zu", table->size);
+		return TST_FAILED;
+	}
+
+	tst_msg("Table size %zu -> %zu records %zu",
+	        size, table->size, table->used);
+
+	gp_htable_free(table);
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "htable testsuite",
 	.tests = {
@@ -312,6 +395,10 @@ const struct tst_suite tst_suite = {
 
 		{.name = "htable foreach test",
 		 .tst_fn = foreach_test},
+
+		{.name = "htable priv test",
+		 .tst_fn = priv_test,
+		 .flags = TST_CHECK_MALLOC},
 
 		{}
 	}

@@ -27,11 +27,11 @@
 size_t gp_htable_tsize(size_t used);
 
 static inline void gp_htable_put_(struct gp_htable_rec *recs,
-                                  size_t (*hash)(const void *key, size_t htable_size),
+                                  size_t (*hash)(const void *key, size_t htable_size, void *priv),
                                   size_t htable_size,
-                                  void *val, char *key)
+                                  void *val, char *key, void *priv)
 {
-	unsigned int h = hash(key, htable_size);
+	unsigned int h = hash(key, htable_size, priv);
 
 	while (recs[h].key)
 		h = (h+1) % htable_size;
@@ -46,9 +46,11 @@ static inline void gp_htable_put_(struct gp_htable_rec *recs,
  * @param self Hash table.
  * @param new_size A new hash table size.
  * @param hash A hash function.
+ * @param priv A pointer passed to the hash and compare functions.
  */
-static inline void gp_htable_rehash(gp_htable *self, size_t new_size,
-                                    size_t (*hash)(const void *key, size_t htable_size))
+static inline void gp_htable_rehash_priv(gp_htable *self, size_t new_size,
+                                    size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                    void *priv)
 {
 	size_t i;
 
@@ -67,7 +69,8 @@ static inline void gp_htable_rehash(gp_htable *self, size_t new_size,
 		if (!self->recs[i].key)
 			continue;
 
-		gp_htable_put_(recs, hash, new_size, self->recs[i].val, self->recs[i].key);
+		gp_htable_put_(recs, hash, new_size, self->recs[i].val,
+		               self->recs[i].key, priv);
 	}
 
 	free(self->recs);
@@ -82,15 +85,17 @@ static inline void gp_htable_rehash(gp_htable *self, size_t new_size,
  * @param hash A hash function.
  * @param val A value.
  * @param key A key.
+ * @param priv A pointer passed to the hash and compare functions.
  */
-static inline void gp_htable_put2(gp_htable *self,
-                                  size_t (*hash)(const void *key, size_t htable_size),
-                                  void *val, void *key)
+static inline void gp_htable_put2_priv(gp_htable *self,
+                                  size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                  void *val, void *key, void *priv)
 {
 	if (++self->used > self->size/2)
-		gp_htable_rehash(self, gp_htable_tsize(self->used), hash);
+		gp_htable_rehash_priv(self, gp_htable_tsize(self->used), hash,
+		                      priv);
 
-	gp_htable_put_(self->recs, hash, self->size, val, key);
+	gp_htable_put_(self->recs, hash, self->size, val, key, priv);
 }
 
 /**
@@ -102,19 +107,20 @@ static inline void gp_htable_put2(gp_htable *self,
  * @param key A key to look for.
  *
  * @return A value if found or NULL.
+ * @param priv A pointer passed to the hash and compare functions.
  */
-static inline void *gp_htable_get2(gp_htable *self,
-                                   size_t (*hash)(const void *key, size_t htable_size),
-                                   int (*cmp)(const void *key1, const void *key2),
-                                   const void *key)
+static inline void *gp_htable_get2_priv(gp_htable *self,
+                                   size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                   int (*cmp)(const void *key1, const void *key2, void *priv),
+                                   const void *key, void *priv)
 {
 	if (!self)
 		return NULL;
 
-	size_t h = hash(key, self->size);
+	size_t h = hash(key, self->size, priv);
 
 	while (self->recs[h].key) {
-		if (cmp(self->recs[h].key, key))
+		if (cmp(self->recs[h].key, key, priv))
 			return self->recs[h].val;
 		h = (h+1) % self->size;
 	}
@@ -123,8 +129,8 @@ static inline void *gp_htable_get2(gp_htable *self,
 }
 
 static inline void *gp_htable_rem2_(gp_htable *self,
-                                    size_t (*hash)(const void *key, size_t htable_size),
-                                    size_t h)
+                                    size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                    size_t h, void *priv)
 {
 	void *ret;
 
@@ -137,7 +143,8 @@ static inline void *gp_htable_rem2_(gp_htable *self,
 	self->recs[h].val = NULL;
 
 	if (--self->used < self->size/8) {
-		gp_htable_rehash(self, gp_htable_tsize(self->used), hash);
+		gp_htable_rehash_priv(self, gp_htable_tsize(self->used), hash,
+		                      priv);
 		return ret;
 	}
 
@@ -150,7 +157,7 @@ static inline void *gp_htable_rem2_(gp_htable *self,
 		if (!self->recs[i].key)
 			break;
 
-		h = hash(self->recs[i].key, self->size);
+		h = hash(self->recs[i].key, self->size, priv);
 
 		/* record at i can't be moved to the empty slot j */
 		if (i >= h && h > j)
@@ -183,17 +190,18 @@ static inline void *gp_htable_rem2_(gp_htable *self,
  * @param key A string key.
  *
  * @return A value for removed key or NULL if not found.
+ * @param priv A pointer passed to the hash and compare functions.
  */
-static inline void *gp_htable_rem2(gp_htable *self,
-                                   size_t (*hash)(const void *key, size_t htable_size),
-                                   int (*cmp)(const void *key1, const void *key2),
-                                   const void *key)
+static inline void *gp_htable_rem2_priv(gp_htable *self,
+                                   size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                   int (*cmp)(const void *key1, const void *key2, void *priv),
+                                   const void *key, void *priv)
 {
-	size_t h = hash(key, self->size);
+	size_t h = hash(key, self->size, priv);
 
 	while (self->recs[h].key) {
-		if (cmp(self->recs[h].key, key))
-			return gp_htable_rem2_(self, hash, h);
+		if (cmp(self->recs[h].key, key, priv))
+			return gp_htable_rem2_(self, hash, h, priv);
 
 		h = (h+1) % self->size;
 	}
@@ -218,12 +226,13 @@ static inline void *gp_htable_rem2(gp_htable *self,
  * @param trim A trim function, elements are removed based on the return value
  *        of this function.
  * @param free_val A function that is called for removed records.
+ * @param priv A pointer passed to the hash and compare functions.
  */
-static inline void gp_htable_trim2(gp_htable *self,
-                                   size_t (*hash)(const void *key, size_t htable_size),
-                                   int (*cmp)(const void *key1, const void *key2),
+static inline void gp_htable_trim2_priv(gp_htable *self,
+                                   size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                   int (*cmp)(const void *key1, const void *key2, void *priv),
 				   int (*trim)(void *val),
-				   void (*free_val)(void *val))
+				   void (*free_val)(void *val), void *priv)
 {
 	size_t i = 0;
 	void *key = NULL;
@@ -243,7 +252,83 @@ static inline void gp_htable_trim2(gp_htable *self,
 	}
 
 	while (key)
-		key = gp_htable_rem2(self, hash, cmp, key);
+		key = gp_htable_rem2_priv(self, hash, cmp, key, priv);
+}
+
+/**
+ * @brief Resizes a hash table and rehashes records.
+ * @param self Hash table.
+ * @param new_size A new hash table size.
+ * @param hash A hash function.
+ */
+static inline void gp_htable_rehash(gp_htable *self, size_t new_size,
+                                    size_t (*hash)(const void *key, size_t htable_size, void *priv))
+{
+	gp_htable_rehash_priv(self, new_size, hash, NULL);
+}
+
+/**
+ * @brief Adds a record to a hash table given a hash function.
+ * @param self Hash table.
+ * @param hash A hash function.
+ * @param val A value.
+ * @param key A key.
+ */
+static inline void gp_htable_put2(gp_htable *self,
+                                  size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                  void *val, void *key)
+{
+	gp_htable_put2_priv(self, hash, val, key, NULL);
+}
+
+/**
+ * @brief Search for an element given a hash and compare functions.
+ * @param self A hash table.
+ * @param hash A hash function.
+ * @param cmp A compare function.
+ * @param key A key to look for.
+ * @return A value if found or NULL.
+ */
+static inline void *gp_htable_get2(gp_htable *self,
+                                   size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                   int (*cmp)(const void *key1, const void *key2, void *priv),
+                                   const void *key)
+{
+	return gp_htable_get2_priv(self, hash, cmp, key, NULL);
+}
+
+/**
+ * @brief Removes a record from a hash table given a hash and compare functions.
+ * @param self A Hash table.
+ * @param hash A hash function.
+ * @param cmp A compare function.
+ * @param key A key.
+ * @return A value for removed key or NULL if not found.
+ */
+static inline void *gp_htable_rem2(gp_htable *self,
+                                   size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                   int (*cmp)(const void *key1, const void *key2, void *priv),
+                                   const void *key)
+{
+	return gp_htable_rem2_priv(self, hash, cmp, key, NULL);
+}
+
+/**
+ * @brief Removes entries from a hash table based on a trim callback.
+ * @param self A Hash table.
+ * @param hash A hash function.
+ * @param cmp A compare function.
+ * @param trim A trim function, elements are removed based on the return value
+ *        of this function.
+ * @param free_val A function that is called for removed records.
+ */
+static inline void gp_htable_trim2(gp_htable *self,
+                                   size_t (*hash)(const void *key, size_t htable_size, void *priv),
+                                   int (*cmp)(const void *key1, const void *key2, void *priv),
+                                   int (*trim)(void *val),
+                                   void (*free_val)(void *val))
+{
+	gp_htable_trim2_priv(self, hash, cmp, trim, free_val, NULL);
 }
 
 #endif /* GP_HTABLE2_H */
