@@ -4,6 +4,7 @@
  */
 
 #include <stddef.h>
+#include <string.h>
 #include <utils/gp_utf.h>
 
 int8_t gp_utf8_next_chsz(const char *str, size_t off)
@@ -92,6 +93,78 @@ int8_t gp_utf8_prev_chsz(const char *str, size_t off)
 		return 4;
 
 	return -1;
+}
+
+int8_t gp_utf8_valid_chsz(const char *buf, size_t avail)
+{
+	const uint8_t *s = (const uint8_t *)buf;
+	uint8_t lo = 0x80, hi = 0xbf;
+	size_t trail, i;
+
+	if (!avail)
+		return 0;
+
+	if (s[0] <= 0x7f)
+		return 1;
+
+	if (s[0] >= 0xc2 && s[0] <= 0xdf) {
+		trail = 1;
+	} else if (s[0] >= 0xe0 && s[0] <= 0xef) {
+		trail = 2;
+		if (s[0] == 0xe0)
+			lo = 0xa0; /* no overlong form */
+		else if (s[0] == 0xed)
+			hi = 0x9f; /* no UTF-16 surrogate */
+	} else if (s[0] >= 0xf0 && s[0] <= 0xf4) {
+		trail = 3;
+		if (s[0] == 0xf0)
+			lo = 0x90; /* no overlong form */
+		else if (s[0] == 0xf4)
+			hi = 0x8f; /* nothing past U+10FFFF */
+	} else {
+		/* 0xC0, 0xC1, >= 0xF5, or a stray continuation */
+		return -1;
+	}
+
+	if (avail <= trail)
+		return -1;
+
+	if (s[1] < lo || s[1] > hi)
+		return -1;
+
+	for (i = 2; i <= trail; i++) {
+		if (s[i] < 0x80 || s[i] > 0xbf)
+			return -1;
+	}
+
+	return trail + 1;
+}
+
+bool gp_utf8_valid(const char *buf, size_t len)
+{
+	while (len) {
+		uint64_t w;
+		int8_t n;
+
+		if (len >= 8) {
+			memcpy(&w, buf, 8);
+			if (!(w & 0x8080808080808080ULL)) {
+				buf += 8;
+				len -= 8;
+				continue;
+			}
+		}
+
+		n = gp_utf8_valid_chsz(buf, len);
+
+		if (n < 0)
+			return false;
+
+		buf += n;
+		len -= n;
+	}
+
+	return true;
 }
 
 size_t gp_utf8_strlen(const char *str)

@@ -143,6 +143,144 @@ static int test_utf8_strlen_02(void)
 	return TST_PASSED;
 }
 
+static struct valid_chsz_case {
+	const char *buf;
+	size_t avail;
+	int8_t ret;
+} valid_chsz_cases[] = {
+	/* The edges of every row of Unicode 15.0 Table 3-7 */
+	{"a", 1, 1},
+	{"\0", 1, 1},
+	{"\x7f", 1, 1},
+	{"\xc2\x80", 2, 2},
+	{"\xdf\xbf", 2, 2},
+	{"\xe0\xa0\x80", 3, 3},
+	{"\xe1\x80\x80", 3, 3},
+	{"\xec\xbf\xbf", 3, 3},
+	{"\xed\x80\x80", 3, 3},
+	{"\xed\x9f\xbf", 3, 3},
+	{"\xee\x80\x80", 3, 3},
+	{"\xef\xbf\xbf", 3, 3},
+	{"\xf0\x90\x80\x80", 4, 4},
+	{"\xf1\x80\x80\x80", 4, 4},
+	{"\xf3\xbf\xbf\xbf", 4, 4},
+	{"\xf4\x80\x80\x80", 4, 4},
+	{"\xf4\x8f\xbf\xbf", 4, 4},
+	/* Only the first sequence counts */
+	{"\xc2\x80zzz", 5, 2},
+	/* Nothing to look at */
+	{"a", 0, 0},
+	/* A stray continuation byte */
+	{"\x80", 1, -1},
+	{"\xbf", 1, -1},
+	/* Overlong forms */
+	{"\xc0\xaf", 2, -1},
+	{"\xc1\xbf", 2, -1},
+	{"\xe0\x80\xaf", 3, -1},
+	{"\xe0\x9f\xbf", 3, -1},
+	{"\xf0\x80\x80\xaf", 4, -1},
+	{"\xf0\x8f\xbf\xbf", 4, -1},
+	/* UTF-16 surrogates */
+	{"\xed\xa0\x80", 3, -1},
+	{"\xed\xbf\xbf", 3, -1},
+	/* Past U+10FFFF */
+	{"\xf4\x90\x80\x80", 4, -1},
+	{"\xf5\x80\x80\x80", 4, -1},
+	{"\xff", 1, -1},
+	/* A bad continuation byte */
+	{"\xc2\x41", 2, -1},
+	{"\xe1\x80\x41", 3, -1},
+	{"\xf1\x80\x80\xc0", 4, -1},
+	/* Truncated by avail, even though the bytes are there */
+	{"\xc2\x80", 1, -1},
+	{"\xe1\x80\x80", 2, -1},
+	{"\xf1\x80\x80\x80", 3, -1},
+};
+
+static int test_utf8_valid_chsz(void)
+{
+	size_t i;
+	int fail = 0;
+
+	for (i = 0; i < GP_ARRAY_SIZE(valid_chsz_cases); i++) {
+		struct valid_chsz_case *c = &valid_chsz_cases[i];
+		int8_t ret = gp_utf8_valid_chsz(c->buf, c->avail);
+
+		if (ret != c->ret) {
+			tst_msg("case %zu: got %i expected %i", i, ret, c->ret);
+			fail = 1;
+		}
+	}
+
+	return fail ? TST_FAILED : TST_PASSED;
+}
+
+static int test_utf8_valid(void)
+{
+	static const char text[] = "Test \u016f \xf0\x9f\x9a\x80";
+	static const char nul[] = "a\0b";
+
+	if (!gp_utf8_valid("", 0)) {
+		tst_msg("Empty buffer is not valid");
+		return TST_FAILED;
+	}
+
+	if (!gp_utf8_valid(text, sizeof(text) - 1)) {
+		tst_msg("Valid buffer rejected");
+		return TST_FAILED;
+	}
+
+	if (!gp_utf8_valid(nul, sizeof(nul) - 1)) {
+		tst_msg("A NUL byte inside the buffer rejected");
+		return TST_FAILED;
+	}
+
+	if (gp_utf8_valid("ab\xc0\xaf" "c", 5)) {
+		tst_msg("Overlong form accepted");
+		return TST_FAILED;
+	}
+
+	if (gp_utf8_valid("abc\xe2\x82\xac", 5)) {
+		tst_msg("Sequence truncated by the length accepted");
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+static int test_utf8_valid_long(void)
+{
+	char buf[40];
+	size_t i;
+
+	memset(buf, 'a', sizeof(buf));
+
+	if (!gp_utf8_valid(buf, sizeof(buf))) {
+		tst_msg("Long ASCII buffer rejected");
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < sizeof(buf); i++) {
+		buf[i] = '\xff';
+		if (gp_utf8_valid(buf, sizeof(buf))) {
+			tst_msg("Bad byte at %zu accepted", i);
+			return TST_FAILED;
+		}
+		buf[i] = 'a';
+	}
+
+	for (i = 0; i < sizeof(buf) - 2; i++) {
+		memcpy(buf + i, "\xe2\x82\xac", 3);
+		if (!gp_utf8_valid(buf, sizeof(buf))) {
+			tst_msg("Euro sign at %zu rejected", i);
+			return TST_FAILED;
+		}
+		memset(buf + i, 'a', 3);
+	}
+
+	return TST_PASSED;
+}
+
 static int test_utf16_to_utf8(void)
 {
 	char *utf8 = "test\u00a9";
@@ -380,6 +518,15 @@ const struct tst_suite tst_suite = {
 
 		{.name = "gp_utf8_strlen() 02",
 		 .tst_fn = test_utf8_strlen_02},
+
+		{.name = "gp_utf8_valid_chsz()",
+		 .tst_fn = test_utf8_valid_chsz},
+
+		{.name = "gp_utf8_valid()",
+		 .tst_fn = test_utf8_valid},
+
+		{.name = "gp_utf8_valid() long",
+		 .tst_fn = test_utf8_valid_long},
 
 		{.name = "gp_utf_fallback()",
 		 .tst_fn = test_utf_fallback},

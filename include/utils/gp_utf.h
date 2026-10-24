@@ -100,6 +100,32 @@ int8_t gp_utf8_next_chsz(const char *str, size_t off);
 int8_t gp_utf8_prev_chsz(const char *str, size_t off);
 
 /**
+ * @brief Returns the size of a well-formed UTF-8 sequence.
+ *
+ * Unlike gp_utf8_next_chsz(), which only checks the bit pattern of each byte,
+ * this checks the sequence against the Unicode definition of well-formed
+ * UTF-8. Overlong forms, UTF-16 surrogates and anything past U+10FFFF are
+ * ill-formed.
+ *
+ * @param buf A pointer to the sequence.
+ * @param avail Number of bytes available at @p buf.
+ * @return Size of the sequence 1 to 4 if valid. Zero if avail is zero and -1 if
+ *         the sequence is ill-formed or truncated.
+ */
+int8_t gp_utf8_valid_chsz(const char *buf, size_t avail);
+
+/**
+ * @brief Checks that a buffer is well-formed UTF-8.
+ *
+ * Each sequence is checked as gp_utf8_valid_chsz() does.
+ *
+ * @param buf A buffer.
+ * @param len The buffer length in bytes.
+ * @return True if the whole buffer is well-formed UTF-8.
+ */
+bool gp_utf8_valid(const char *buf, size_t len);
+
+/**
  * @brief Returns a number of characters in UTF-8 string.
  *
  * Returns number of characters in an UTF-8 string, which may be less or equal
