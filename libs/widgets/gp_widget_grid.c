@@ -1807,6 +1807,9 @@ static gp_widget *get_widgets(gp_json_reader *json, gp_json_val *val, gp_widget_
 		case GP_JSON_ARR:
 			gp_json_arr_skip(json);
 		break;
+		case GP_JSON_NULL:
+			cnt++;
+		break;
 		default:
 			gp_json_warn(json, "Invalid hbox element");
 		}
