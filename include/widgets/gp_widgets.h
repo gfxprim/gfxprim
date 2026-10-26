@@ -35,6 +35,7 @@
 #include <widgets/gp_widget_checkbox.h>
 #include <widgets/gp_widget_switch.h>
 #include <widgets/gp_widget_stock_switch.h>
+#include <widgets/gp_widget_push_button.h>
 
 /* Choice widget and subclasses */
 #include <widgets/gp_widget_class_choice.h>

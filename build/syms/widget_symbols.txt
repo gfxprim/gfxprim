@@ -202,6 +202,10 @@ gp_widget_pixmap_set
 gp_widget_poll_add
 gp_widget_poll_rem
 gp_widget_poll_rem_by_fd
+gp_widget_push_button_label_get
+gp_widget_push_button_label_set
+gp_widget_push_button_new
+gp_widget_push_button_ops
 gp_widget_radiobutton_ops
 gp_widget_redraw
 gp_widget_redraw_child

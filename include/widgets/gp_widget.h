@@ -219,6 +219,8 @@ enum gp_widget_type {
 	GP_WIDGET_STOCK_SWITCH,
 	/** @brief An activity widget. */
 	GP_WIDGET_ACTIVITY,
+	/** @brief A push button widget. */
+	GP_WIDGET_PUSH_BUTTON,
 	/** @brief A numeber of widgets. */
 	GP_WIDGET_MAX,
 };

@@ -1,0 +1,15 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout":
+ {"type": "vbox",
+  "widgets": [
+   {"type": "push_button", "label": "Push button"},
+   {"type": "push_button", "label": "Push button set", "set": true},
+   {"type": "push_button", "label": "With stock", "on_stock": "shuffle_on", "off_stock": "shuffle_off"},
+   {"type": "push_button", "on_stock": "speaker_max", "off_stock": "speaker_mute", "set": true},
+   {"type": "push_button", "label": "Fill", "align": "fill"},
+   {"type": "push_button", "label": "Disabled", "disabled": true},
+   {"type": "push_button", "label": "Disabled set", "set": true, "disabled": true}
+  ]
+ }
+}
