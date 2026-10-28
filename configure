@@ -43,6 +43,18 @@ def header_exists(cfg, *filenames):
 
     return False
 
+def pkg_config_exists(cfg, *packages):
+    for package in packages:
+        sys.stderr.write("Checking for pkg-config '%s' ... " % package)
+
+        if os.system('pkg-config --exists %s 2> /dev/null' % package):
+            sys.stderr.write("No\n\n")
+            return False
+
+        sys.stderr.write("Yes\n\n")
+
+    return True
+
 def headers_exists(cfg, *filenames):
     for filename in filenames:
         if not header_exists(cfg, filename):
@@ -483,6 +495,16 @@ def freetype_cflags(cfg):
 
     die_screaming("Cannot get Freetype CFLAGS")
 
+def openjpeg_cflags(cfg):
+    flags = cmd_output(['pkg-config --cflags libopenjp2 2> /dev/null'])
+
+    return flags if flags else ''
+
+def openjpeg_libs(cfg):
+    flags = cmd_output(['pkg-config --libs libopenjp2 2> /dev/null'])
+
+    return flags if flags else '-lopenjp2'
+
 def wayland_cflags(cfg):
     cmds = [
         'pkg-config --cflags xkbcommon wayland-client 2> /dev/null'
@@ -582,7 +604,7 @@ if __name__ ==  '__main__':
                     [header_exists, "libheif/heif.h"], "", "-lheif", ["loaders"]],
                    ["openjpeg",
                     "An open-source JPEG 2000 library",
-                    [header_exists, "openjpeg-2.0/openjpeg.h"], "", "-lopenjp2", ["loaders"]],
+                    [pkg_config_exists, "libopenjp2"], openjpeg_cflags, openjpeg_libs, ["loaders"]],
                    ["giflib",
                     "Library to handle, display and manipulate GIF images",
                     [header_exists, "gif_lib.h"], "", "-lgif", ["loaders"]],

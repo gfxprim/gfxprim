@@ -29,7 +29,7 @@ int gp_match_jp2(const void *buf)
 
 #ifdef HAVE_OPENJPEG
 
-#include <openjpeg-2.0/openjpeg.h>
+#include <openjpeg.h>
 
 static void jp2_err_callback(const char *msg, void *priv)
 {
@@ -115,7 +115,7 @@ int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_image_info *image_info,
 	unsigned int i, x, y;
 	int err = 0, ret = 1;
 
-	gp_image_info_clear(meta_data);
+	gp_image_info_clear(image_info);
 
 	opj_set_default_decoder_parameters(&params);
 
@@ -147,7 +147,7 @@ int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_image_info *image_info,
 
 	//TODO: Do we need seek and skip?
 	opj_stream_set_read_function(stream, jp2_io_read);
-	opj_stream_set_user_data(stream, io);
+	opj_stream_set_user_data(stream, io, NULL);
 
 	if (!opj_read_header(stream, codec, &img)) {
 		GP_DEBUG(1, "opj_read_header failed");
@@ -155,9 +155,9 @@ int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_image_info *image_info,
 		goto err2;
 	}
 
-	gp_image_info_fill(meta_data, img->x1 - img->x0, img->y1 - img->y0, GP_PIXEL_RGB888);
+	gp_image_info_fill(image_info, img->x1 - img->x0, img->y1 - img->y0, GP_PIXEL_RGB888);
 
-	fill_metadata(img, gp_image_info_storage(meta_data));
+	fill_metadata(img, gp_image_info_meta_data(image_info));
 
 	GP_DEBUG(1, "Have image %ux%u-%ux%u colorspace=%s numcomps=%u",
 	         img->x0, img->y0, img->x1, img->y1,
@@ -223,7 +223,7 @@ int gp_read_jp2_ex(gp_io *io, gp_pixmap **rimg, gp_image_info *image_info,
 		goto err3;
 	}
 
-	gp_pixmap_gamma_set(res, GP_CORRECTION_TYPE_SRGB, 0);
+	gp_pixmap_srgb_set(res);
 
 	for (y = 0; y < res->h; y++) {
 		for (x = 0; x < res->w; x++) {
