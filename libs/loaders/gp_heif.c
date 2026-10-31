@@ -221,6 +221,10 @@ static inline int err_heif_to_errno(struct heif_error err)
 		return EINVAL;
 	case heif_error_Unsupported_filetype:
 	case heif_error_Unsupported_feature:
+#if LIBHEIF_HAVE_VERSION(1, 14, 0)
+	/* No decoder plugin for the codec, e.g. HEVC */
+	case heif_error_Plugin_loading_error:
+#endif
 		return ENOSYS;
 	case heif_error_Memory_allocation_error:
 		return ENOMEM;
