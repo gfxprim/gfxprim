@@ -243,15 +243,22 @@ void gp_blit_xyxy_fast(const gp_pixmap *src,
 	         gp_pixel_type_name(src->pixel_type),
 	         gp_pixel_type_name(dst->pixel_type));
 
-	/* Same pixel type */
-	if (src->pixel_type == dst->pixel_type) {
-		GP_FN_PER_PACK_PIXMAP(blitXYXY, src,
-		                      src, x0, y0, x1, y1, dst, x2, y2);
+	/*
+	 * Same rotation, transform the coordinates and do a raw blit,
+	 * which is memcpy() per line for the same pixel type.
+	 */
+	if (gp_pixmap_rotation_equal(src, dst)) {
+		gp_coord w = x1 - x0 + 1, h = y1 - y0 + 1;
+
+		GP_TRANSFORM_BLIT(src, x0, y0, w, h, dst, x2, y2);
+		gp_blit_xyxy_raw_fast(src, x0, y0, x0 + w - 1, y0 + h - 1, dst, x2, y2);
 		return;
 	}
 
-	if (gp_pixmap_rotation_equal(src, dst)) {
-		gp_blit_xyxy_raw_fast(src, x0, y0, x1, y1, dst, x2, y2);
+	/* Same pixel type, different rotation */
+	if (src->pixel_type == dst->pixel_type) {
+		GP_FN_PER_PACK_PIXMAP(blitXYXY, src,
+		                      src, x0, y0, x1, y1, dst, x2, y2);
 		return;
 	}
 
