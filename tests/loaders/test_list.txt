@@ -18,3 +18,4 @@ save_abort.gen
 data_storage
 ico
 container
+jp2
