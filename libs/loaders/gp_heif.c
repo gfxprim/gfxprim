@@ -254,13 +254,15 @@ int gp_read_heif_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
 
 	err = heif_context_read_from_reader(ctx, &reader_heif_reader, io, NULL);
 	if (err.code) {
-		GP_WARN("Failed to read HEIF context %i", err.code);
+		GP_WARN("Failed to read HEIF context %i:%i:%s",
+		        err.code, err.subcode, err.message);
 		goto err0;
 	}
 
 	err = heif_context_get_primary_image_handle(ctx, &image_handle);
 	if (err.code) {
-		GP_WARN("Failed to get HEIF primary image %i", err.code);
+		GP_WARN("Failed to get HEIF primary image %i:%i:%s",
+		        err.code, err.subcode, err.message);
 		goto err0;
 	}
 
@@ -297,7 +299,8 @@ int gp_read_heif_ex(gp_io *io, gp_pixmap **img, gp_image_info *image_info,
 					heif_chroma_interleaved_RGB, callback ? &dec_opts : NULL);
 
 		if (err.code) {
-			GP_WARN("Failed to decode image %i", err.code);
+			GP_WARN("Failed to decode image %i:%i:%s",
+		                err.code, err.subcode, err.message);
 			goto err1;
 		}
 
