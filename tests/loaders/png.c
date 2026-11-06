@@ -135,6 +135,30 @@ static struct check_color_test trans_gray_trns = {
 	.ptype = GP_PIXEL_GA88,
 };
 
+static struct check_color_test trans_g1_trns = {
+	.path = "100x100-trans-g1-trns.png",
+	.pixel = 0x00ff,
+	.ptype = GP_PIXEL_GA88,
+};
+
+static struct check_color_test trans_g2_trns = {
+	.path = "100x100-trans-g2-trns.png",
+	.pixel = 0x00ff,
+	.ptype = GP_PIXEL_GA88,
+};
+
+static struct check_color_test trans_g4_trns = {
+	.path = "100x100-trans-g4-trns.png",
+	.pixel = 0x00ff,
+	.ptype = GP_PIXEL_GA88,
+};
+
+static struct check_color_test trans_g16_trns = {
+	.path = "100x100-trans-g16-trns.png",
+	.pixel = 0x00ff,
+	.ptype = GP_PIXEL_GA88,
+};
+
 static int test_save_PNG(gp_pixel_type pixel_type)
 {
 	gp_pixmap *pixmap;
@@ -231,6 +255,30 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_load_PNG_check_color,
 		 .res_path = "data/png/valid/100x100-trans-gray-trns.png",
 		 .data = &trans_gray_trns,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PNG Load 100x100 Transparent G1 tRNS",
+		 .tst_fn = test_load_PNG_check_color,
+		 .res_path = "data/png/valid/100x100-trans-g1-trns.png",
+		 .data = &trans_g1_trns,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PNG Load 100x100 Transparent G2 tRNS",
+		 .tst_fn = test_load_PNG_check_color,
+		 .res_path = "data/png/valid/100x100-trans-g2-trns.png",
+		 .data = &trans_g2_trns,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PNG Load 100x100 Transparent G4 tRNS",
+		 .tst_fn = test_load_PNG_check_color,
+		 .res_path = "data/png/valid/100x100-trans-g4-trns.png",
+		 .data = &trans_g4_trns,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PNG Load 100x100 Transparent G16 tRNS",
+		 .tst_fn = test_load_PNG_check_color,
+		 .res_path = "data/png/valid/100x100-trans-g16-trns.png",
+		 .data = &trans_g16_trns,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = "PNG Save 100x100 G1",

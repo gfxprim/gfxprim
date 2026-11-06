@@ -324,24 +324,32 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 
 	switch (color_type) {
 	case PNG_COLOR_TYPE_GRAY:
-		switch (depth) {
-		case 1:
-			pixel_type = GP_PIXEL_G1;
-		break;
-		case 2:
-			pixel_type = GP_PIXEL_G2;
-		break;
-		case 4:
-			pixel_type = GP_PIXEL_G4;
-		break;
-		case 8:
-			pixel_type = has_alpha ? GP_PIXEL_GA88 : GP_PIXEL_G8;
-		break;
+		if (has_alpha) {
+			if (depth == 16) {
+				png_set_strip_16(png);
+				depth = 8;
+			}
+			pixel_type = GP_PIXEL_GA88;
+		} else {
+			switch (depth) {
+			case 1:
+				pixel_type = GP_PIXEL_G1;
+			break;
+			case 2:
+				pixel_type = GP_PIXEL_G2;
+			break;
+			case 4:
+				pixel_type = GP_PIXEL_G4;
+			break;
+			case 8:
+				pixel_type = GP_PIXEL_G8;
+			break;
 #ifdef GP_PIXEL_G16
-		case 16:
-			pixel_type = GP_PIXEL_G16;
-		break;
+			case 16:
+				pixel_type = GP_PIXEL_G16;
+			break;
 #endif
+			}
 		}
 	break;
 	case PNG_COLOR_TYPE_GRAY | PNG_COLOR_MASK_ALPHA:
