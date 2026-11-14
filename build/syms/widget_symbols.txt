@@ -94,6 +94,9 @@ gp_widget_graph_color_set
 gp_widget_graph_new
 gp_widget_graph_ops
 gp_widget_graph_point_add
+gp_widget_graph_points_copy
+gp_widget_graph_points_clear
+gp_widget_graph_points_set
 gp_widget_graph_style_names
 gp_widget_graph_style_set
 gp_widget_graph_ymax_set

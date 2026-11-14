@@ -18,8 +18,8 @@ struct gp_widget_graph {
 	gp_widget_size min_w;
 	gp_widget_size min_h;
 
-	const char *x_label;
-	const char *y_label;
+	char *x_label;
+	char *y_label;
 
 	long min_y_fixed:1;
 	long max_y_fixed:1;
@@ -61,6 +61,10 @@ static gp_coord transform_x(struct gp_widget_graph *graph, double x, gp_coord w)
 static gp_coord transform_y(struct gp_widget_graph *graph, double y, gp_coord h)
 {
 	double range = graph->max_y - graph->min_y;
+
+	/* Only a range fixed by the user to a single value can be empty */
+	if (range == 0)
+		return h/2;
 
 	return h - round(h * fabs(y - graph->min_y) / range);
 }
@@ -156,6 +160,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_fill_rect_xywh(ctx->buf, x, y, w, h, ctx->fg_color);
         gp_widget_ops_blit(ctx, x, y, w, h);
+
+	if (!gp_cbuffer_used(&graph->data_idx))
+		return;
 
 	gp_sub_pixmap(ctx->buf, &pix, x, y, w, h);
 
@@ -293,10 +300,20 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 	return ret;
 }
 
+static void free_(gp_widget *self)
+{
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	free(graph->x_label);
+	free(graph->y_label);
+	free(graph->data);
+}
+
 struct gp_widget_ops gp_widget_graph_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.render = render,
+	.free = free_,
 	.from_json = json_to_graph,
 	.id = "graph",
 };
@@ -336,6 +353,19 @@ gp_widget *gp_widget_graph_new(gp_widget_size min_w, gp_widget_size min_h,
 static void new_min_max(struct gp_widget_graph *graph)
 {
 	gp_cbuffer_iter iter;
+
+	if (!gp_cbuffer_used(&graph->data_idx)) {
+		graph->min_x = 0;
+		graph->max_x = 0;
+
+		if (!graph->min_y_fixed)
+			graph->min_y = 0;
+
+		if (!graph->max_y_fixed)
+			graph->max_y = 0;
+
+		return;
+	}
 
 	size_t first = gp_cbuffer_first(&graph->data_idx);
 
@@ -379,6 +409,17 @@ void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style
 	gp_widget_redraw(self);
 }
 
+void gp_widget_graph_points_clear(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	gp_cbuffer_reset(&graph->data_idx);
+
+	new_min_max(graph);
+	gp_widget_redraw(self);
+}
+
 void gp_widget_graph_point_add(gp_widget *self, double x, double y)
 {
 	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
@@ -392,6 +433,61 @@ void gp_widget_graph_point_add(gp_widget *self, double x, double y)
 	new_min_max(graph);
 
 	gp_widget_redraw(self);
+}
+
+static void points_changed(gp_widget *self)
+{
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	new_min_max(graph);
+
+	gp_widget_redraw(self);
+}
+
+void gp_widget_graph_points_set(gp_widget *self,
+                                struct gp_widget_graph_point *data,
+				size_t max_data_points,
+                                size_t data_points)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	if (!data || !max_data_points) {
+		GP_WARN("Invalid data=%p or max_data_points=%zu", data, max_data_points);
+		return;
+	}
+
+	free(graph->data);
+	graph->data = data;
+
+	gp_cbuffer_init2(&graph->data_idx, max_data_points, data_points);
+
+	points_changed(self);
+}
+
+void gp_widget_graph_points_copy(gp_widget *self,
+                                 const struct gp_widget_graph_point *data,
+                                 size_t data_points)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	if (data_points != gp_cbuffer_size(&graph->data_idx)) {
+		struct gp_widget_graph_point *tmp;
+
+		tmp = realloc(graph->data, sizeof(struct gp_widget_graph_point) * data_points);
+		if (!tmp) {
+			GP_WARN("Malloc failed :-(");
+			return;
+		}
+
+		graph->data = tmp;
+	}
+
+	memcpy(graph->data, data, sizeof(struct gp_widget_graph_point) * data_points);
+	gp_cbuffer_init2(&graph->data_idx, data_points, data_points);
+
+	points_changed(self);
 }
 
 void gp_widget_graph_yrange_set(gp_widget *self, double min_y, double max_y)
@@ -414,6 +510,8 @@ void gp_widget_graph_ymin_set(gp_widget *self, double min_y)
 	graph->min_y = min_y;
 
 	graph->min_y_fixed = 1;
+
+	new_min_max(graph);
 }
 
 void gp_widget_graph_ymax_set(gp_widget *self, double max_y)
@@ -424,6 +522,8 @@ void gp_widget_graph_ymax_set(gp_widget *self, double max_y)
 	graph->max_y = max_y;
 
 	graph->max_y_fixed = 1;
+
+	new_min_max(graph);
 }
 
 void gp_widget_graph_yrange_clear(gp_widget *self)

@@ -98,6 +98,49 @@ gp_widget *gp_widget_graph_new(gp_widget_size min_w, gp_widget_size min_h,
 void gp_widget_graph_point_add(gp_widget *self, double x, double y);
 
 /**
+ * @brief Replaces graph data with an array, the widget takes the ownership.
+ *
+ * The array replaces the graph data buffer, its size becomes the new maximal
+ * number of graph data points. The array is freed by the widget, either when
+ * it's replaced or when the widget is freed.
+ *
+ * @param self A graph widget.
+ * @param data An array allocated by malloc().
+ * @param max_data_points The size of the data array.
+ * @param data_points A number of points in the array, must be >= 1.
+ */
+void gp_widget_graph_points_set(gp_widget *self,
+                                struct gp_widget_graph_point *data,
+                                size_t max_data_points,
+                                size_t data_points);
+
+
+/**
+ * @brief Clears all points in graph.
+ *
+ * Resets the graph to the intial state. That means that after this call there
+ * are no points in graph, but the buffer is still allocated with the correct
+ * size.
+ *
+ * @param self A graph widget.
+ */
+void gp_widget_graph_points_clear(gp_widget *self);
+
+/**
+ * @brief Replaces graph data with a copy of an array.
+ *
+ * The graph data buffer is resized if the array does not fit. The graph is
+ * left untouched if the buffer cannot be resized.
+ *
+ * @param self A graph widget.
+ * @param data An array of points, the caller keeps the ownership.
+ * @param data_points A number of points in the array, must be >= 1.
+ */
+void gp_widget_graph_points_copy(gp_widget *self,
+                                 const struct gp_widget_graph_point *data,
+                                 size_t data_points);
+
+/**
  * @brief Sets a graph style.
  *
  * @param self A graph widget.

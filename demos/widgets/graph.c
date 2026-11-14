@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2023-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -63,6 +63,18 @@ static int play_pause_on_event(gp_widget_event *ev)
 	return 0;
 }
 
+static int clear_on_event(gp_widget_event *ev)
+{
+	gp_widget *graph = ev->self->priv;
+
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	gp_widget_graph_points_clear(graph);
+
+	return 0;
+}
+
 static int max_y_on_event(gp_widget_event *ev)
 {
 	gp_widget *graph = ev->self->priv;
@@ -107,9 +119,13 @@ int main(int argc, char *argv[])
 	                                       GP_WIDGET_SIZE(400, 0, 0),
 	                                       NULL, NULL, 50);
 	gp_widget *grid = gp_widget_grid_new(1, 2, 0);
-	gp_widget *hbox = gp_widget_grid_new(6, 1, 0);
+	gp_widget *hbox = gp_widget_grid_new(7, 1, 0);
 	gp_widget *graph_type = gp_widget_spinbutton_new(gp_widget_graph_style_names, GP_WIDGET_GRAPH_STYLE_MAX, 0);
 	gp_widget *pause_btn = gp_widget_button_new(NULL, GP_BUTTON_PAUSE);
+	gp_widget *clear_btn = gp_widget_button_new(NULL, GP_BUTTON_CLEAR);
+
+	gp_widget_grid_no_border(hbox);
+
 	gp_widget *max_y_spinner = gp_widget_spinner_new(1, 10, 5);
 	gp_widget *min_y_spinner = gp_widget_spinner_new(-5, 0, 0);
 
@@ -121,6 +137,7 @@ int main(int argc, char *argv[])
 	gp_widget_grid_put(hbox, 3, 0, min_y_spinner);
 	gp_widget_grid_put(hbox, 4, 0, graph_type);
 	gp_widget_grid_put(hbox, 5, 0, pause_btn);
+	gp_widget_grid_put(hbox, 6, 0, clear_btn);
 
 	gp_widget_grid_put(grid, 0, 0, graph);
 	gp_widget_grid_put(grid, 0, 1, hbox);
@@ -134,6 +151,7 @@ int main(int argc, char *argv[])
 	gp_widget_graph_color_set(graph, GP_WIDGETS_COL_BLUE);
 
 	gp_widget_on_event_set(pause_btn, play_pause_on_event, NULL);
+	gp_widget_on_event_set(clear_btn, clear_on_event, graph);
 	gp_widget_on_event_set(graph_type, graph_type_on_event, graph);
 	gp_widget_on_event_set(max_y_spinner, max_y_on_event, graph);
 	gp_widget_on_event_set(min_y_spinner, min_y_on_event, graph);
