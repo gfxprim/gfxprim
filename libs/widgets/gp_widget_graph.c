@@ -38,18 +38,47 @@ struct gp_widget_graph {
 	struct gp_widget_graph_point *data;
 };
 
+/* Height of the strip below the graph with the x label */
+static gp_size x_label_h(struct gp_widget_graph *graph, const gp_widget_render_ctx *ctx)
+{
+	if (!graph->x_label)
+		return 0;
+
+	return gp_text_height(ctx->font) + ctx->padd;
+}
+
+/*
+ * The y label is drawn in the top left corner of the graph, the data are drawn
+ * below it so that they are never covered by the label.
+ */
+static gp_size y_label_h(struct gp_widget_graph *graph, const gp_widget_render_ctx *ctx)
+{
+	if (!graph->y_label)
+		return 0;
+
+	return gp_text_height(ctx->font) + ctx->padd;
+}
+
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+	unsigned int ret = gp_widget_size_units_get(&graph->min_w, ctx);
 
-	return gp_widget_size_units_get(&graph->min_w, ctx);
+	if (graph->x_label)
+		ret = GP_MAX(ret, gp_text_wbbox(ctx->font, graph->x_label));
+
+	if (graph->y_label)
+		ret = GP_MAX(ret, gp_text_wbbox(ctx->font, graph->y_label) + ctx->padd);
+
+	return ret;
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+	unsigned int ret = gp_widget_size_units_get(&graph->min_h, ctx);
 
-	return gp_widget_size_units_get(&graph->min_h, ctx);
+	return ret + x_label_h(graph, ctx) + y_label_h(graph, ctx);
 }
 
 static gp_coord transform_x(struct gp_widget_graph *graph, double x, gp_coord w)
@@ -348,6 +377,33 @@ static void render_step_graph(struct gp_widget_graph *graph,
 	}
 }
 
+static void render_graph(struct gp_widget_graph *graph, gp_pixmap *pix,
+                         gp_size w, gp_size h, const gp_widget_render_ctx *ctx)
+{
+	switch (graph->graph_style) {
+	case GP_WIDGET_GRAPH_POINT:
+		render_point_graph(graph, pix, w, h, ctx);
+	break;
+	case GP_WIDGET_GRAPH_LINE:
+		render_line_graph(graph, pix, w, h, ctx);
+	break;
+	case GP_WIDGET_GRAPH_FILL:
+		render_fill_graph(graph, pix, w, h, ctx);
+	break;
+	case GP_WIDGET_GRAPH_BAR:
+		render_bar_graph(graph, pix, w, h, ctx);
+	break;
+	case GP_WIDGET_GRAPH_STEM:
+		render_stem_graph(graph, pix, w, h, ctx);
+	break;
+	case GP_WIDGET_GRAPH_STEP:
+		render_step_graph(graph, pix, w, h, ctx);
+	break;
+	default:
+		GP_WARN("Invalid graph type %i", graph->graph_style);
+	}
+}
+
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
@@ -363,33 +419,33 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_fill_rect_xywh(ctx->buf, x, y, w, h, ctx->fg_color);
         gp_widget_ops_blit(ctx, x, y, w, h);
 
+	if (graph->x_label) {
+		gp_size lh = x_label_h(graph, ctx);
+
+		h -= lh;
+
+		gp_text(ctx->buf, ctx->font, x + w/2, y + h + ctx->padd,
+		        GP_ALIGN_CENTER | GP_VALIGN_BELOW,
+		        ctx->text_color, ctx->fg_color, graph->x_label);
+	}
+
+	if (graph->y_label) {
+		gp_size lh = y_label_h(graph, ctx);
+
+		gp_text(ctx->buf, ctx->font, x + ctx->padd, y,
+		        GP_ALIGN_RIGHT | GP_VALIGN_BELOW,
+		        ctx->text_color, ctx->fg_color, graph->y_label);
+
+		y += lh;
+		h -= lh;
+	}
+
 	if (!gp_cbuffer_used(&graph->data_idx))
 		return;
 
 	gp_sub_pixmap(ctx->buf, &pix, x, y, w, h);
 
-	switch (graph->graph_style) {
-	case GP_WIDGET_GRAPH_POINT:
-		render_point_graph(graph, &pix, w, h, ctx);
-	break;
-	case GP_WIDGET_GRAPH_LINE:
-		render_line_graph(graph, &pix, w, h, ctx);
-	break;
-	case GP_WIDGET_GRAPH_FILL:
-		render_fill_graph(graph, &pix, w, h, ctx);
-	break;
-	case GP_WIDGET_GRAPH_BAR:
-		render_bar_graph(graph, &pix, w, h, ctx);
-	break;
-	case GP_WIDGET_GRAPH_STEM:
-		render_stem_graph(graph, &pix, w, h, ctx);
-	break;
-	case GP_WIDGET_GRAPH_STEP:
-		render_step_graph(graph, &pix, w, h, ctx);
-	break;
-	default:
-		GP_WARN("Invalid graph type %i", graph->graph_style);
-	}
+	render_graph(graph, &pix, w, h, ctx);
 }
 
 const char *gp_widget_graph_style_names[GP_WIDGET_GRAPH_STYLE_MAX] = {
@@ -408,6 +464,8 @@ enum keys {
 	MIN_H,
 	MIN_W,
 	STYLE,
+	X_LABEL,
+	Y_LABEL,
 };
 
 static const gp_json_obj_attr attrs[] = {
@@ -417,6 +475,8 @@ static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR_IDX(MIN_H, "min_h", GP_JSON_VOID),
 	GP_JSON_OBJ_ATTR_IDX(MIN_W, "min_w", GP_JSON_VOID),
 	GP_JSON_OBJ_ATTR_IDX(STYLE, "style", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(X_LABEL, "x_label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(Y_LABEL, "y_label", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {
@@ -444,6 +504,7 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 	enum gp_widget_graph_style style = GP_WIDGET_GRAPH_STYLE_MAX;
 	int color = GP_WIDGETS_COL_TEXT;
 	enum gp_widget_graph_flags flags = 0;
+	char *x_label = NULL, *y_label = NULL;
 
 	(void)ctx;
 
@@ -499,6 +560,14 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 			if (style == GP_WIDGET_GRAPH_STYLE_MAX)
 				gp_json_warn(json, "Invalid graph style");
 		break;
+		case X_LABEL:
+			free(x_label);
+			x_label = strdup(val->val_str);
+		break;
+		case Y_LABEL:
+			free(y_label);
+			y_label = strdup(val->val_str);
+		break;
 		case ERROR_BARS:
 			if (val->val_bool)
 				flags |= GP_WIDGET_GRAPH_ERROR_BARS;
@@ -506,7 +575,10 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 		}
 	}
 
-	gp_widget *ret = gp_widget_graph_new(w, h, NULL, NULL, data_points);
+	gp_widget *ret = gp_widget_graph_new(w, h, x_label, y_label, data_points);
+
+	free(x_label);
+	free(y_label);
 
 	if (!ret)
 		return NULL;
@@ -558,10 +630,10 @@ gp_widget *gp_widget_graph_new(gp_widget_size min_w, gp_widget_size min_h,
 		return NULL;
 	}
 
-	if (x_label)
+	if (x_label && *x_label)
 		graph->x_label = strdup(x_label);
 
-	if (y_label)
+	if (y_label && *y_label)
 		graph->y_label = strdup(y_label);
 
 	graph->min_w = min_w;
@@ -812,6 +884,57 @@ enum gp_widget_graph_flags gp_widget_graph_flags_get(gp_widget *self)
 	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 
 	return graph->flags;
+}
+
+static void label_set(gp_widget *self, char **label, const char *new_label)
+{
+	char *tmp = NULL;
+
+	if (new_label && *new_label) {
+		tmp = strdup(new_label);
+		if (!tmp) {
+			GP_WARN("Malloc failed :-(");
+			return;
+		}
+	}
+
+	free(*label);
+	*label = tmp;
+
+	gp_widget_resize(self);
+	gp_widget_redraw(self);
+}
+
+void gp_widget_graph_x_label_set(gp_widget *self, const char *x_label)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	label_set(self, &graph->x_label, x_label);
+}
+
+const char *gp_widget_graph_x_label_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, NULL);
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	return graph->x_label;
+}
+
+void gp_widget_graph_y_label_set(gp_widget *self, const char *y_label)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	label_set(self, &graph->y_label, y_label);
+}
+
+const char *gp_widget_graph_y_label_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, NULL);
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	return graph->y_label;
 }
 
 void gp_widget_graph_color_set(gp_widget *self, enum gp_widgets_color color)

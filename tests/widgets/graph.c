@@ -237,10 +237,60 @@ static int graph_style_names(void)
 	return ret;
 }
 
+static int label_check(const char *what, const char *label, const char *exp)
+{
+	if (!label && !exp)
+		return 0;
+
+	if (!label || !exp || strcmp(label, exp)) {
+		tst_msg("Wrong %s '%s' expected '%s'", what,
+		        label ? label : "NULL", exp ? exp : "NULL");
+		return 1;
+	}
+
+	return 0;
+}
+
+static int graph_labels(void)
+{
+	gp_widget *graph = graph_new();
+	int fail = 0;
+
+	if (!graph) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	fail |= label_check("x label", gp_widget_graph_x_label_get(graph), "x");
+	fail |= label_check("y label", gp_widget_graph_y_label_get(graph), "y");
+
+	gp_widget_graph_x_label_set(graph, "Days");
+	gp_widget_graph_y_label_set(graph, "Passes");
+
+	fail |= label_check("x label", gp_widget_graph_x_label_get(graph), "Days");
+	fail |= label_check("y label", gp_widget_graph_y_label_get(graph), "Passes");
+
+	gp_widget_graph_x_label_set(graph, NULL);
+	gp_widget_graph_y_label_set(graph, "");
+
+	fail |= label_check("x label", gp_widget_graph_x_label_get(graph), NULL);
+	fail |= label_check("y label", gp_widget_graph_y_label_get(graph), NULL);
+
+	gp_widget_graph_x_label_set(graph, "Weeks");
+
+	fail |= label_check("x label", gp_widget_graph_x_label_get(graph), "Weeks");
+
+	gp_widget_free(graph);
+
+	return fail ? TST_FAILED : TST_PASSED;
+}
+
 struct json_tcase {
 	const char *json;
 	enum gp_widget_graph_flags flags;
 	enum gp_widget_graph_style style;
+	const char *x_label;
+	const char *y_label;
 };
 
 static int graph_json(struct json_tcase *t)
@@ -271,6 +321,12 @@ static int graph_json(struct json_tcase *t)
 		        gp_widget_graph_flags_get(graph), t->flags);
 		ret = TST_FAILED;
 	}
+
+	if (label_check("x label", gp_widget_graph_x_label_get(graph), t->x_label))
+		ret = TST_FAILED;
+
+	if (label_check("y label", gp_widget_graph_y_label_get(graph), t->y_label))
+		ret = TST_FAILED;
 
 exit:
 	gp_widget_free(graph);
@@ -310,6 +366,18 @@ static struct json_tcase json_step = {
 	        " \"layout\": {\"type\": \"graph\", \"style\": \"step\"}}",
 	.style = GP_WIDGET_GRAPH_STEP,
 	.flags = 0,
+};
+
+static struct json_tcase json_labels = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"graph\", \"x_label\": \"Days\", \"y_label\": \"Passes\"}}",
+	.x_label = "Days",
+	.y_label = "Passes",
+};
+
+static struct json_tcase json_labels_empty = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"graph\", \"x_label\": \"\", \"y_label\": \"\"}}",
 };
 
 const struct tst_suite tst_suite = {
@@ -381,6 +449,20 @@ const struct tst_suite tst_suite = {
 		{.name = "graph JSON step",
 		 .tst_fn = graph_json,
 		 .data = &json_step,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph labels",
+		 .tst_fn = graph_labels,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph JSON labels",
+		 .tst_fn = graph_json,
+		 .data = &json_labels,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph JSON labels empty",
+		 .tst_fn = graph_json,
+		 .data = &json_labels_empty,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},

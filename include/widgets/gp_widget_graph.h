@@ -21,6 +21,8 @@
  * |     **min_h**       | string |         | Minimal height, parsed by gp_widget_size_units_parse().          |
  * |     **min_w**       | string |         | Minimal width, parsed by gp_widget_size_units_parse().           |
  * |     **style**       | string |         | A graph style name, see #gp_widget_graph_style.                  |
+ * |    **x_label**      | string |         | A label for the x axis, drawn centered below the graph.          |
+ * |    **y_label**      | string |         | A label for the y axis, drawn in the top left corner.            |
  */
 
 #ifndef GP_WIDGET_GRAPH_H
@@ -131,8 +133,10 @@ struct gp_widget_graph_point {
  *
  * @param min_w A minimal width.
  * @param min_h A minimal height.
- * @param x_label A label for the x axis.
- * @param y_label A label for the y axis.
+ * @param x_label An optional label for the x axis, drawn centered below the
+ *                graph.
+ * @param y_label An optional label for the y axis, drawn in the top left
+ *                corner of the graph above the data.
  * @param max_data_points A maximal number of graph data points.
  *
  * @return A graph widget.
@@ -267,6 +271,45 @@ void gp_widget_graph_ymax_set(gp_widget *self, double max_y);
  * @param self A graph widget.
  */
 void gp_widget_graph_yrange_clear(gp_widget *self);
+
+/**
+ * @brief Sets the x axis label.
+ *
+ * The label is drawn centered below the graph.
+ *
+ * @param self A graph widget.
+ * @param x_label A new label, NULL or empty string removes the label.
+ */
+void gp_widget_graph_x_label_set(gp_widget *self, const char *x_label);
+
+/**
+ * @brief Returns the x axis label.
+ *
+ * @param self A graph widget.
+ *
+ * @return The x axis label or NULL if not set.
+ */
+const char *gp_widget_graph_x_label_get(gp_widget *self);
+
+/**
+ * @brief Sets the y axis label.
+ *
+ * The label is drawn in the top left corner of the graph, the data are drawn
+ * below it.
+ *
+ * @param self A graph widget.
+ * @param y_label A new label, NULL or empty string removes the label.
+ */
+void gp_widget_graph_y_label_set(gp_widget *self, const char *y_label);
+
+/**
+ * @brief Returns the y axis label.
+ *
+ * @param self A graph widget.
+ *
+ * @return The y axis label or NULL if not set.
+ */
+const char *gp_widget_graph_y_label_get(gp_widget *self);
 
 /**
  * @brief Sets graph color.
