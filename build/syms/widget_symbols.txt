@@ -91,6 +91,8 @@ gp_widget_free
 gp_widget_from_json
 gp_widget_from_json_str
 gp_widget_graph_color_set
+gp_widget_graph_flags_get
+gp_widget_graph_flags_set
 gp_widget_graph_new
 gp_widget_graph_ops
 gp_widget_graph_point_add

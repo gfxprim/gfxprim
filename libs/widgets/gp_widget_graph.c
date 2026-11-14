@@ -32,6 +32,7 @@ struct gp_widget_graph {
 
 	/* Graph data */
 	enum gp_widget_graph_style graph_style;
+	enum gp_widget_graph_flags flags;
 	enum gp_widgets_color color;
 	gp_cbuffer data_idx;
 	struct gp_widget_graph_point *data;
@@ -146,6 +147,108 @@ static void render_fill_graph(struct gp_widget_graph *graph,
 	gp_fill_polygon(pix, 0, 0, pos, poly, col);
 }
 
+static double clamp_y(struct gp_widget_graph *graph, double y)
+{
+	return GP_MAX(graph->min_y, GP_MIN(graph->max_y, y));
+}
+
+/*
+ * Fills a rectangle, the part that overlaps rows by0 to by1 (inclusive) is
+ * filled with the in color, the rest with the out color.
+ */
+static void fill_rect_split(gp_pixmap *pix, gp_coord x0, gp_coord y0,
+                            gp_coord x1, gp_coord y1, gp_coord by0, gp_coord by1,
+                            gp_pixel in, gp_pixel out)
+{
+	gp_coord iy0 = GP_MAX(y0, by0);
+	gp_coord iy1 = GP_MIN(y1, by1);
+
+	if (iy0 > iy1) {
+		gp_fill_rect_xyxy(pix, x0, y0, x1, y1, out);
+		return;
+	}
+
+	if (y0 < iy0)
+		gp_fill_rect_xyxy(pix, x0, y0, x1, iy0 - 1, out);
+
+	gp_fill_rect_xyxy(pix, x0, iy0, x1, iy1, in);
+
+	if (iy1 < y1)
+		gp_fill_rect_xyxy(pix, x0, iy1 + 1, x1, y1, out);
+}
+
+/*
+ * Draws an error bar centered at cx, the parts that overlap the bar rows by0
+ * to by1 are drawn in the background color so that they stay visible.
+ */
+static void render_err_bar(gp_pixmap *pix, gp_coord cx, gp_coord y0, gp_coord y1,
+                           gp_coord cap_w, gp_size th, gp_coord by0, gp_coord by1,
+                           gp_pixel col, gp_pixel bg)
+{
+	gp_coord lx = cx - (gp_coord)th/2;
+	gp_coord rx = lx + th - 1;
+
+	/* vertical line */
+	fill_rect_split(pix, lx, y0, rx, y1, by0, by1, bg, col);
+
+	/* caps, these do not extend over the error bar ends */
+	fill_rect_split(pix, cx - cap_w, y0, cx + cap_w, GP_MIN(y0 + (gp_coord)th - 1, y1),
+	                by0, by1, bg, col);
+	fill_rect_split(pix, cx - cap_w, GP_MAX(y1 - (gp_coord)th + 1, y0), cx + cap_w, y1,
+	                by0, by1, bg, col);
+}
+
+static void render_bar_graph(struct gp_widget_graph *graph,
+                             gp_pixmap *pix, gp_size w, gp_size h,
+                             const gp_widget_render_ctx *ctx)
+{
+	size_t i = 0, cnt = gp_cbuffer_used(&graph->data_idx);
+	gp_pixel col = ctx->colors[graph->color];
+	gp_size th = (ctx->fr_thick+1)/2;
+	double base = clamp_y(graph, 0);
+	gp_coord base_y = transform_y(graph, base, h - 1);
+	gp_cbuffer_iter iter;
+
+	/* Nothing to draw, e.g. all values in autorange mode are zero */
+	if (graph->max_y == graph->min_y)
+		return;
+
+	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
+		struct gp_widget_graph_point *point = &graph->data[iter.idx];
+		gp_coord x0 = i * w / cnt;
+		gp_coord x1 = (i + 1) * w / cnt - 1;
+		gp_coord slot = x1 - x0 + 1;
+		gp_coord gap = slot > 2 ? GP_MAX(1, slot/5) : 0;
+		double val = clamp_y(graph, point->y);
+		gp_coord bar_y = transform_y(graph, val, h - 1);
+
+		i++;
+
+		x0 += gap/2;
+		x1 -= gap - gap/2;
+
+		if (val != base)
+			gp_fill_rect_xyxy(pix, x0, base_y, x1, bar_y, col);
+
+		if (!(graph->flags & GP_WIDGET_GRAPH_ERROR_BARS) || point->err == 0)
+			continue;
+
+		double err = fabs(point->err);
+		gp_coord err_y0 = transform_y(graph, clamp_y(graph, point->y + err), h - 1);
+		gp_coord err_y1 = transform_y(graph, clamp_y(graph, point->y - err), h - 1);
+		gp_coord by0 = GP_MIN(base_y, bar_y);
+		gp_coord by1 = GP_MAX(base_y, bar_y);
+
+		/* No bar, nothing to keep visible against */
+		if (val == base)
+			by0 = by1 + 1;
+
+		render_err_bar(pix, (x0 + x1)/2, err_y0, err_y1,
+		               GP_MAX((x1 - x0)/4, (gp_coord)th), th,
+		               by0, by1, col, ctx->fg_color);
+	}
+}
+
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
@@ -176,6 +279,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	case GP_WIDGET_GRAPH_FILL:
 		render_fill_graph(graph, &pix, w, h, ctx);
 	break;
+	case GP_WIDGET_GRAPH_BAR:
+		render_bar_graph(graph, &pix, w, h, ctx);
+	break;
 	default:
 		GP_WARN("Invalid graph type %i", graph->graph_style);
 	}
@@ -185,10 +291,12 @@ const char *gp_widget_graph_style_names[GP_WIDGET_GRAPH_STYLE_MAX] = {
 	"point",
 	"line",
 	"fill",
+	"bar",
 };
 
 enum keys {
 	COLOR,
+	ERROR_BARS,
 	MAX_DATA_POINTS,
 	MIN_H,
 	MIN_W,
@@ -197,6 +305,7 @@ enum keys {
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR_IDX(COLOR, "color", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(ERROR_BARS, "error_bars", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR_IDX(MAX_DATA_POINTS, "max_data_points", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR_IDX(MIN_H, "min_h", GP_JSON_VOID),
 	GP_JSON_OBJ_ATTR_IDX(MIN_W, "min_w", GP_JSON_VOID),
@@ -227,6 +336,7 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 	size_t data_points = 100;
 	enum gp_widget_graph_style style = GP_WIDGET_GRAPH_STYLE_MAX;
 	int color = GP_WIDGETS_COL_TEXT;
+	enum gp_widget_graph_flags flags = 0;
 
 	(void)ctx;
 
@@ -282,6 +392,10 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 			if (style == GP_WIDGET_GRAPH_STYLE_MAX)
 				gp_json_warn(json, "Invalid graph style");
 		break;
+		case ERROR_BARS:
+			if (val->val_bool)
+				flags |= GP_WIDGET_GRAPH_ERROR_BARS;
+		break;
 		}
 	}
 
@@ -296,6 +410,7 @@ static gp_widget *json_to_graph(gp_json_reader *json, gp_json_val *val, gp_widge
 		graph->graph_style = style;
 
 	graph->color = color;
+	graph->flags = flags;
 
 	return ret;
 }
@@ -389,6 +504,29 @@ static void new_min_max(struct gp_widget_graph *graph)
 		if (!graph->max_y_fixed)
 			graph->max_y = GP_MAX(graph->max_y, y);
 	}
+
+	if (graph->graph_style != GP_WIDGET_GRAPH_BAR)
+		return;
+
+	/* Bars start at zero and the error bars have to fit as well */
+	if (!graph->min_y_fixed)
+		graph->min_y = GP_MIN(graph->min_y, 0);
+
+	if (!graph->max_y_fixed)
+		graph->max_y = GP_MAX(graph->max_y, 0);
+
+	if (!(graph->flags & GP_WIDGET_GRAPH_ERROR_BARS))
+		return;
+
+	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
+		double err = fabs(graph->data[iter.idx].err);
+		double y = graph->data[iter.idx].y;
+
+		if (!graph->min_y_fixed)
+			graph->min_y = GP_MIN(graph->min_y, y - err);
+		if (!graph->max_y_fixed)
+			graph->max_y = GP_MAX(graph->max_y, y + err);
+	}
 }
 
 void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style)
@@ -406,7 +544,16 @@ void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style
 
 	graph->graph_style = style;
 
+	new_min_max(graph);
 	gp_widget_redraw(self);
+}
+
+enum gp_widget_graph_style gp_widget_graph_style_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, GP_WIDGET_GRAPH_STYLE_MAX);
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	return graph->graph_style;
 }
 
 void gp_widget_graph_points_clear(gp_widget *self)
@@ -535,6 +682,28 @@ void gp_widget_graph_yrange_clear(gp_widget *self)
 	graph->max_y_fixed = 0;
 
 	new_min_max(graph);
+}
+
+void gp_widget_graph_flags_set(gp_widget *self, enum gp_widget_graph_flags flags)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, );
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	if (graph->flags == flags)
+		return;
+
+	graph->flags = flags;
+
+	new_min_max(graph);
+	gp_widget_redraw(self);
+}
+
+enum gp_widget_graph_flags gp_widget_graph_flags_get(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_GRAPH, 0);
+	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
+
+	return graph->flags;
 }
 
 void gp_widget_graph_color_set(gp_widget *self, enum gp_widgets_color color)

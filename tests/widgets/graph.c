@@ -173,6 +173,101 @@ static int graph_points_copy_zero(void)
 	return TST_PASSED;
 }
 
+static int graph_flags(void)
+{
+	gp_widget *graph = graph_new();
+	int ret = TST_PASSED;
+
+	if (!graph) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	if (gp_widget_graph_flags_get(graph)) {
+		tst_msg("Flags not zero by default");
+		ret = TST_FAILED;
+	}
+
+	gp_widget_graph_flags_set(graph, GP_WIDGET_GRAPH_ERROR_BARS);
+
+	if (gp_widget_graph_flags_get(graph) != GP_WIDGET_GRAPH_ERROR_BARS) {
+		tst_msg("Failed to set GP_WIDGET_GRAPH_ERROR_BARS");
+		ret = TST_FAILED;
+	}
+
+	gp_widget_graph_flags_set(graph, 0);
+
+	if (gp_widget_graph_flags_get(graph)) {
+		tst_msg("Failed to clear flags");
+		ret = TST_FAILED;
+	}
+
+	gp_widget_free(graph);
+
+	return ret;
+}
+
+struct json_tcase {
+	const char *json;
+	enum gp_widget_graph_flags flags;
+	enum gp_widget_graph_style style;
+};
+
+static int graph_json(struct json_tcase *t)
+{
+	gp_widget *graph;
+	int ret = TST_PASSED;
+
+	graph = gp_widget_from_json_str(t->json, NULL, NULL);
+	if (!graph) {
+		tst_msg("Failed to load JSON");
+		return TST_FAILED;
+	}
+
+	if (graph->type != GP_WIDGET_GRAPH) {
+		tst_msg("Wrong widget type!");
+		ret = TST_FAILED;
+		goto exit;
+	}
+
+	if (gp_widget_graph_style_get(graph) != t->style) {
+		tst_msg("Invalid graph type %i expected %i",
+			gp_widget_graph_style_get(graph), t->style);
+		ret = TST_FAILED;
+	}
+
+	if (gp_widget_graph_flags_get(graph) != t->flags) {
+		tst_msg("Wrong flags %x expected %x",
+		        gp_widget_graph_flags_get(graph), t->flags);
+		ret = TST_FAILED;
+	}
+
+exit:
+	gp_widget_free(graph);
+	return ret;
+}
+
+static struct json_tcase json_bar = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"graph\", \"style\": \"bar\"}}",
+	.style = GP_WIDGET_GRAPH_BAR,
+	.flags = 0,
+};
+
+static struct json_tcase json_bar_error_bars = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"graph\", \"style\": \"bar\", \"error_bars\": true}}",
+	.style = GP_WIDGET_GRAPH_BAR,
+	.flags = GP_WIDGET_GRAPH_ERROR_BARS,
+};
+
+static struct json_tcase json_bar_error_bars_false = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"graph\", \"style\": \"bar\", \"error_bars\": false}}",
+	.style = GP_WIDGET_GRAPH_BAR,
+	.flags = 0,
+};
+
 const struct tst_suite tst_suite = {
 	.suite_name = "graph testsuite",
 	.tests = {
@@ -210,6 +305,25 @@ const struct tst_suite tst_suite = {
 
 		{.name = "graph points copy zero",
 		 .tst_fn = graph_points_copy_zero,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph flags",
+		 .tst_fn = graph_flags,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph JSON bar",
+		 .tst_fn = graph_json,
+		 .data = &json_bar,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph JSON bar error_bars",
+		 .tst_fn = graph_json,
+		 .data = &json_bar_error_bars,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph JSON bar error_bars false",
+		 .tst_fn = graph_json,
+		 .data = &json_bar_error_bars_false,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},

@@ -13,13 +13,14 @@
  * Graph widget JSON attributes
  * ----------------------------
  *
- * |      Attribute      |  Type  | Default | Description                                               |
- * |---------------------|--------|---------|-----------------------------------------------------------|
- * |     **color**       | string | "text"  | A graph color, parsed by gp_widgets_color_name_idx().     |
- * | **max_data_points** |  uint  |   100   | Maximal number of graph data points.                      |
- * |     **min_h**       | string |         | Minimal height, parsed by gp_widget_size_units_parse().   |
- * |     **min_w**       | string |         | Minimal width, parsed by gp_widget_size_units_parse().    |
- * |     **style**       | string |         | One of "point", "line" or "fill", #gp_widget_graph_style. |
+ * |      Attribute      |  Type  | Default | Description                                                      |
+ * |---------------------|--------|---------|------------------------------------------------------------------|
+ * |     **color**       | string | "text"  | A graph color, parsed by gp_widgets_color_name_idx().            |
+ * |   **error_bars**    |  bool  |  false  | Sets the #GP_WIDGET_GRAPH_ERROR_BARS flag.                       |
+ * | **max_data_points** |  uint  |   100   | Maximal number of graph data points.                             |
+ * |     **min_h**       | string |         | Minimal height, parsed by gp_widget_size_units_parse().          |
+ * |     **min_w**       | string |         | Minimal width, parsed by gp_widget_size_units_parse().           |
+ * |     **style**       | string |         | One of "point", "line", "fill" or "bar", #gp_widget_graph_style. |
  */
 
 #ifndef GP_WIDGET_GRAPH_H
@@ -51,7 +52,17 @@ enum gp_widget_graph_style {
 	 * The area bellow the line created by the graph points is filled.
 	 */
 	GP_WIDGET_GRAPH_FILL,
-	/** @brief Maximal number of styles */
+	/**
+	 * @brief Bar graph.
+	 *
+	 * Each point is drawn as a bar that starts at zero, or at the
+	 * nearest edge if zero is outside of the y range. The bars are drawn
+	 * evenly spaced in the order the points were added and the x
+	 * coordinate is ignored, unless #GP_WIDGET_GRAPH_ERROR_BARS is set. The y
+	 * range in the autorange mode always includes zero.
+	 */
+	GP_WIDGET_GRAPH_BAR,
+	/** @brief Maximal number of styles, also returned on error. */
 	GP_WIDGET_GRAPH_STYLE_MAX,
 };
 
@@ -61,11 +72,36 @@ enum gp_widget_graph_style {
 extern const char *gp_widget_graph_style_names[GP_WIDGET_GRAPH_STYLE_MAX];
 
 /**
+ * @brief Graph flags.
+ */
+enum gp_widget_graph_flags {
+	/**
+	 * @brief Reinterpret the x coordinate as an error.
+	 *
+	 * Applies only to the #GP_WIDGET_GRAPH_BAR style, the x coordinate,
+	 * accessible as gp_widget_graph_point::err as well, is drawn as an
+	 * error bar from y - |err| to y + |err| on top of each bar, e.g. a
+	 * standard deviation. Zero error draws no error bar. The y range in
+	 * the autorange mode includes the error bars.
+	 */
+	GP_WIDGET_GRAPH_ERROR_BARS = 0x01,
+};
+
+/**
  * @brief A graph point.
  */
 struct gp_widget_graph_point {
-	/** @brief An x value. */
-	double x;
+	union {
+		/** @brief An x value. */
+		double x;
+		/**
+		 * @brief An error value.
+		 *
+		 * Used instead of the x value if #GP_WIDGET_GRAPH_ERROR_BARS is
+		 * set, see #gp_widget_graph_flags.
+		 */
+		double err;
+	};
 	/** @brief An y value. */
 	double y;
 };
@@ -141,12 +177,36 @@ void gp_widget_graph_points_copy(gp_widget *self,
                                  size_t data_points);
 
 /**
- * @brief Sets a graph style.
+ * @brief Sets graph style.
  *
  * @param self A graph widget.
  * @param style A graph style.
  */
 void gp_widget_graph_style_set(gp_widget *self, enum gp_widget_graph_style style);
+
+/**
+ * @brief Returns graph style.
+ *
+ * @param self A graph widget.
+ */
+enum gp_widget_graph_style gp_widget_graph_style_get(gp_widget *self);
+
+/**
+ * @brief Sets graph flags.
+ *
+ * @param self A graph widget.
+ * @param flags A bitwise or of #gp_widget_graph_flags.
+ */
+void gp_widget_graph_flags_set(gp_widget *self, enum gp_widget_graph_flags flags);
+
+/**
+ * @brief Returns graph flags.
+ *
+ * @param self A graph widget.
+ *
+ * @return A bitwise or of #gp_widget_graph_flags.
+ */
+enum gp_widget_graph_flags gp_widget_graph_flags_get(gp_widget *self);
 
 /**
  * @brief Sets graph y range.
