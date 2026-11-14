@@ -198,6 +198,32 @@ static void render_err_bar(gp_pixmap *pix, gp_coord cx, gp_coord y0, gp_coord y1
 	                by0, by1, bg, col);
 }
 
+/*
+ * Bar like graphs split the width into equal slots, one for each point, the
+ * x coordinate is not used for positioning.
+ */
+static void slot_get(size_t i, size_t cnt, gp_size w, gp_coord *x0, gp_coord *x1)
+{
+	*x0 = i * w / cnt;
+	*x1 = (i + 1) * w / cnt - 1;
+}
+
+/*
+ * Transforms a y value clamped to the range into widget area with a margin on
+ * the top and bottom.
+ */
+static gp_coord transform_y_m(struct gp_widget_graph *graph, double y,
+                              gp_size h, gp_size margin)
+{
+	return transform_y(graph, clamp_y(graph, y), h - 1 - 2 * margin) + margin;
+}
+
+static int draw_err_bar(struct gp_widget_graph *graph,
+                        struct gp_widget_graph_point *point)
+{
+	return (graph->flags & GP_WIDGET_GRAPH_ERROR_BARS) && point->err != 0;
+}
+
 static void render_bar_graph(struct gp_widget_graph *graph,
                              gp_pixmap *pix, gp_size w, gp_size h,
                              const gp_widget_render_ctx *ctx)
@@ -206,7 +232,7 @@ static void render_bar_graph(struct gp_widget_graph *graph,
 	gp_pixel col = ctx->colors[graph->color];
 	gp_size th = (ctx->fr_thick+1)/2;
 	double base = clamp_y(graph, 0);
-	gp_coord base_y = transform_y(graph, base, h - 1);
+	gp_coord base_y = transform_y_m(graph, base, h, 0);
 	gp_cbuffer_iter iter;
 
 	/* Nothing to draw, e.g. all values in autorange mode are zero */
@@ -215,14 +241,14 @@ static void render_bar_graph(struct gp_widget_graph *graph,
 
 	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
 		struct gp_widget_graph_point *point = &graph->data[iter.idx];
-		gp_coord x0 = i * w / cnt;
-		gp_coord x1 = (i + 1) * w / cnt - 1;
+		gp_coord x0, x1;
+		double val = clamp_y(graph, point->y);
+		gp_coord bar_y = transform_y_m(graph, val, h, 0);
+
+		slot_get(i++, cnt, w, &x0, &x1);
+
 		gp_coord slot = x1 - x0 + 1;
 		gp_coord gap = slot > 2 ? GP_MAX(1, slot/5) : 0;
-		double val = clamp_y(graph, point->y);
-		gp_coord bar_y = transform_y(graph, val, h - 1);
-
-		i++;
 
 		x0 += gap/2;
 		x1 -= gap - gap/2;
@@ -230,12 +256,12 @@ static void render_bar_graph(struct gp_widget_graph *graph,
 		if (val != base)
 			gp_fill_rect_xyxy(pix, x0, base_y, x1, bar_y, col);
 
-		if (!(graph->flags & GP_WIDGET_GRAPH_ERROR_BARS) || point->err == 0)
+		if (!draw_err_bar(graph, point))
 			continue;
 
 		double err = fabs(point->err);
-		gp_coord err_y0 = transform_y(graph, clamp_y(graph, point->y + err), h - 1);
-		gp_coord err_y1 = transform_y(graph, clamp_y(graph, point->y - err), h - 1);
+		gp_coord err_y0 = transform_y_m(graph, point->y + err, h, 0);
+		gp_coord err_y1 = transform_y_m(graph, point->y - err, h, 0);
 		gp_coord by0 = GP_MIN(base_y, bar_y);
 		gp_coord by1 = GP_MAX(base_y, bar_y);
 
@@ -246,6 +272,79 @@ static void render_bar_graph(struct gp_widget_graph *graph,
 		render_err_bar(pix, (x0 + x1)/2, err_y0, err_y1,
 		               GP_MAX((x1 - x0)/4, (gp_coord)th), th,
 		               by0, by1, col, ctx->fg_color);
+	}
+}
+
+static void render_stem_graph(struct gp_widget_graph *graph,
+                              gp_pixmap *pix, gp_size w, gp_size h,
+                              const gp_widget_render_ctx *ctx)
+{
+	size_t i = 0, cnt = gp_cbuffer_used(&graph->data_idx);
+	gp_pixel col = ctx->colors[graph->color];
+	gp_size th = (ctx->fr_thick+1)/2;
+	gp_coord slot = w / cnt;
+	/* The dot has to fit into the slot */
+	gp_size r = GP_MIN(2 * th, (gp_size)GP_MAX(slot/2 - 1, 1));
+	gp_coord base_y = transform_y_m(graph, 0, h, r);
+	gp_cbuffer_iter iter;
+
+	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
+		struct gp_widget_graph_point *point = &graph->data[iter.idx];
+		gp_coord x0, x1;
+		gp_coord val_y = transform_y_m(graph, point->y, h, r);
+
+		slot_get(i++, cnt, w, &x0, &x1);
+
+		gp_coord cx = (x0 + x1)/2;
+		gp_coord lx = cx - (gp_coord)th/2;
+
+		gp_fill_rect_xyxy(pix, lx, base_y, lx + th - 1, val_y, col);
+
+		if (draw_err_bar(graph, point)) {
+			double err = fabs(point->err);
+			gp_coord err_y0 = transform_y_m(graph, point->y + err, h, r);
+			gp_coord err_y1 = transform_y_m(graph, point->y - err, h, r);
+			gp_coord cap_w = GP_MAX(GP_MIN(2 * (gp_coord)r, (x1 - x0)/2 - 1), (gp_coord)th);
+
+			/* No bar to keep the error bar visible against */
+			render_err_bar(pix, cx, err_y0, err_y1, cap_w, th,
+			               1, 0, col, col);
+		}
+
+		gp_fill_circle(pix, cx, val_y, r, col);
+	}
+}
+
+static void render_step_graph(struct gp_widget_graph *graph,
+                              gp_pixmap *pix, gp_size w, gp_size h,
+                              const gp_widget_render_ctx *ctx)
+{
+	size_t i = 0, cnt = gp_cbuffer_used(&graph->data_idx);
+	gp_pixel col = ctx->colors[graph->color];
+	gp_size th = (ctx->fr_thick+1)/2;
+	gp_cbuffer_iter iter;
+	gp_coord prev_y = 0;
+
+	GP_CBUFFER_FOREACH(&graph->data_idx, &iter) {
+		/* Top row of the line, the line is th pixels thick */
+		gp_coord y = transform_y(graph, clamp_y(graph, graph->data[iter.idx].y), h - th);
+		gp_coord x0, x1;
+
+		slot_get(i, cnt, w, &x0, &x1);
+
+		/* Vertical jump at the boundary from the previous value */
+		if (i) {
+			gp_coord lx = x0 - (gp_coord)th/2;
+
+			gp_fill_rect_xyxy(pix, lx, GP_MIN(prev_y, y),
+			                  lx + th - 1, GP_MAX(prev_y, y) + th - 1, col);
+		}
+
+		/* Horizontal line over the whole slot */
+		gp_fill_rect_xyxy(pix, x0, y, x1, y + th - 1, col);
+
+		prev_y = y;
+		i++;
 	}
 }
 
@@ -282,6 +381,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 	case GP_WIDGET_GRAPH_BAR:
 		render_bar_graph(graph, &pix, w, h, ctx);
 	break;
+	case GP_WIDGET_GRAPH_STEM:
+		render_stem_graph(graph, &pix, w, h, ctx);
+	break;
+	case GP_WIDGET_GRAPH_STEP:
+		render_step_graph(graph, &pix, w, h, ctx);
+	break;
 	default:
 		GP_WARN("Invalid graph type %i", graph->graph_style);
 	}
@@ -292,6 +397,8 @@ const char *gp_widget_graph_style_names[GP_WIDGET_GRAPH_STYLE_MAX] = {
 	"line",
 	"fill",
 	"bar",
+	"stem",
+	"step",
 };
 
 enum keys {
@@ -505,7 +612,8 @@ static void new_min_max(struct gp_widget_graph *graph)
 			graph->max_y = GP_MAX(graph->max_y, y);
 	}
 
-	if (graph->graph_style != GP_WIDGET_GRAPH_BAR)
+	if (graph->graph_style != GP_WIDGET_GRAPH_BAR &&
+	    graph->graph_style != GP_WIDGET_GRAPH_STEM)
 		return;
 
 	/* Bars start at zero and the error bars have to fit as well */

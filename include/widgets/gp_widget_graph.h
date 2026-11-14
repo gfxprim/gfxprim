@@ -20,7 +20,7 @@
  * | **max_data_points** |  uint  |   100   | Maximal number of graph data points.                             |
  * |     **min_h**       | string |         | Minimal height, parsed by gp_widget_size_units_parse().          |
  * |     **min_w**       | string |         | Minimal width, parsed by gp_widget_size_units_parse().           |
- * |     **style**       | string |         | One of "point", "line", "fill" or "bar", #gp_widget_graph_style. |
+ * |     **style**       | string |         | A graph style name, see #gp_widget_graph_style.                  |
  */
 
 #ifndef GP_WIDGET_GRAPH_H
@@ -62,6 +62,25 @@ enum gp_widget_graph_style {
 	 * range in the autorange mode always includes zero.
 	 */
 	GP_WIDGET_GRAPH_BAR,
+	/**
+	 * @brief Stem graph.
+	 *
+	 * Each point is drawn as a thin line from zero to the value with a
+	 * dot at the end. The points are positioned the same way as in the
+	 * #GP_WIDGET_GRAPH_BAR style and the y range in the autorange mode
+	 * includes zero as well.
+	 */
+	GP_WIDGET_GRAPH_STEM,
+	/**
+	 * @brief Step graph.
+	 *
+	 * The points are connected by a continuous line that consists only of
+	 * horizontal and vertical segments. Each value is drawn as a
+	 * horizontal line over an equal part of the graph width in the order
+	 * the points were added, the x coordinate is ignored, and neighbouring
+	 * values are connected by a vertical line.
+	 */
+	GP_WIDGET_GRAPH_STEP,
 	/** @brief Maximal number of styles, also returned on error. */
 	GP_WIDGET_GRAPH_STYLE_MAX,
 };
@@ -78,11 +97,12 @@ enum gp_widget_graph_flags {
 	/**
 	 * @brief Reinterpret the x coordinate as an error.
 	 *
-	 * Applies only to the #GP_WIDGET_GRAPH_BAR style, the x coordinate,
-	 * accessible as gp_widget_graph_point::err as well, is drawn as an
-	 * error bar from y - |err| to y + |err| on top of each bar, e.g. a
-	 * standard deviation. Zero error draws no error bar. The y range in
-	 * the autorange mode includes the error bars.
+	 * Applies only to the #GP_WIDGET_GRAPH_BAR and #GP_WIDGET_GRAPH_STEM
+	 * styles, the x coordinate, accessible as gp_widget_graph_point::err
+	 * as well, is drawn as an error bar from y - |err| to y + |err| on top
+	 * of each bar or stem, e.g. a standard deviation. Zero error draws no
+	 * error bar. The y range in the autorange mode includes the error
+	 * bars.
 	 */
 	GP_WIDGET_GRAPH_ERROR_BARS = 0x01,
 };

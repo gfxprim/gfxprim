@@ -4,6 +4,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <widgets/gp_widgets.h>
 #include "tst_test.h"
 
@@ -207,6 +208,35 @@ static int graph_flags(void)
 	return ret;
 }
 
+static int graph_style_names(void)
+{
+	static const char *const names[] = {
+		[GP_WIDGET_GRAPH_POINT] = "point",
+		[GP_WIDGET_GRAPH_LINE] = "line",
+		[GP_WIDGET_GRAPH_FILL] = "fill",
+		[GP_WIDGET_GRAPH_BAR] = "bar",
+		[GP_WIDGET_GRAPH_STEM] = "stem",
+		[GP_WIDGET_GRAPH_STEP] = "step",
+	};
+	int i, ret = TST_PASSED;
+
+	if (GP_ARRAY_SIZE(names) != GP_WIDGET_GRAPH_STYLE_MAX) {
+		tst_msg("Style added without updating the test");
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < GP_WIDGET_GRAPH_STYLE_MAX; i++) {
+		if (!gp_widget_graph_style_names[i] ||
+		    strcmp(gp_widget_graph_style_names[i], names[i])) {
+			tst_msg("Wrong style %i name '%s' expected '%s'", i,
+			        gp_widget_graph_style_names[i], names[i]);
+			ret = TST_FAILED;
+		}
+	}
+
+	return ret;
+}
+
 struct json_tcase {
 	const char *json;
 	enum gp_widget_graph_flags flags;
@@ -268,6 +298,20 @@ static struct json_tcase json_bar_error_bars_false = {
 	.flags = 0,
 };
 
+static struct json_tcase json_stem = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"graph\", \"style\": \"stem\", \"error_bars\": true}}",
+	.style = GP_WIDGET_GRAPH_STEM,
+	.flags = GP_WIDGET_GRAPH_ERROR_BARS,
+};
+
+static struct json_tcase json_step = {
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"graph\", \"style\": \"step\"}}",
+	.style = GP_WIDGET_GRAPH_STEP,
+	.flags = 0,
+};
+
 const struct tst_suite tst_suite = {
 	.suite_name = "graph testsuite",
 	.tests = {
@@ -311,6 +355,9 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = graph_flags,
 		 .flags = TST_CHECK_MALLOC},
 
+		{.name = "graph style names",
+		 .tst_fn = graph_style_names},
+
 		{.name = "graph JSON bar",
 		 .tst_fn = graph_json,
 		 .data = &json_bar,
@@ -324,6 +371,16 @@ const struct tst_suite tst_suite = {
 		{.name = "graph JSON bar error_bars false",
 		 .tst_fn = graph_json,
 		 .data = &json_bar_error_bars_false,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph JSON stem",
+		 .tst_fn = graph_json,
+		 .data = &json_stem,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "graph JSON step",
+		 .tst_fn = graph_json,
+		 .data = &json_step,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},
