@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2023-2026 Cyril Hrubis <metan@ucw.cz>
  */
 
 /**
@@ -12,6 +12,7 @@
 #define UTILS_GP_CIRCULAR_BUFFER_H
 
 #include <stddef.h>
+#include <core/gp_common.h>
 
 /**
  * @brief A circular buffer indexes.
@@ -26,7 +27,7 @@ typedef struct gp_cbuffer {
 } gp_cbuffer;
 
 /**
- * @brief Initializes circular buffer.
+ * @brief Initializes empty circular buffer.
  *
  * @param self A circular buffer to be initialized.
  * @param size Size of the buffer.
@@ -36,6 +37,34 @@ static inline void gp_cbuffer_init(gp_cbuffer *self, size_t size)
 	self->last = 0;
 	self->used = 0;
 	self->size = size;
+}
+
+/**
+ * @brief Initializes non empty circular buffer.
+ *
+ * @param self A circular buffer to be initialized.
+ * @param size Size of the buffer.
+ * @param used How many elements are already in the buffer, must be less or
+ *        equal to size and elements must start at index 0.
+ */
+static inline void gp_cbuffer_init2(gp_cbuffer *self, size_t size, size_t used)
+{
+	self->last = used % size;
+	self->used = GP_MIN(size, used);
+	self->size = size;
+}
+
+/**
+ * @brief Resets the circular buffer to the initial state.
+ *
+ * After this call the buffer is empty but keeps its size.
+ *
+ * @param self A circular buffer to be reset.
+ */
+static inline void gp_cbuffer_reset(gp_cbuffer *self)
+{
+	self->last = 0;
+	self->used = 0;
 }
 
 /**
@@ -95,6 +124,17 @@ static inline size_t gp_cbuffer_prev(gp_cbuffer *self, size_t idx)
 static inline size_t gp_cbuffer_used(gp_cbuffer *self)
 {
 	return self->used;
+}
+
+/**
+ * @brief Returns size of the circular buffer.
+ *
+ * @param self A circular buffer.
+ * @return Number of used postions in the buffer.
+ */
+static inline size_t gp_cbuffer_size(gp_cbuffer *self)
+{
+	return self->size;
 }
 
 /**

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
 
-  Copyright (C) 2023 Cyril Hrubis <metan@ucw.cz>
+  Copyright (C) 2023-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -37,6 +37,54 @@ int cbuffer_test_empty(void)
 
 	if (cnt || iter.cnt) {
 		tst_msg("FOREACH_REV() on empty list iterated over %i items cnt=%zu", cnt, iter.cnt);
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+int cbuffer_test_init2_full(void)
+{
+	gp_cbuffer cbuf;
+	gp_cbuffer_iter iter;
+
+	gp_cbuffer_init2(&cbuf, 5, 5);
+
+	size_t cnt = 0;
+	GP_CBUFFER_FOREACH(&cbuf, &iter) {
+		if (iter.idx != cnt) {
+			tst_msg("Wrong iterator idx %zu at cnt %zu", iter.idx, cnt);
+			return TST_FAILED;
+		}
+		cnt++;
+	}
+
+	if (cnt != 5) {
+		tst_msg("Wrong number of elements %zu expected 5", cnt);
+		return TST_FAILED;
+	}
+
+	return TST_PASSED;
+}
+
+int cbuffer_test_init2_part(void)
+{
+	gp_cbuffer cbuf;
+	gp_cbuffer_iter iter;
+
+	gp_cbuffer_init2(&cbuf, 6, 3);
+
+	size_t cnt = 0;
+	GP_CBUFFER_FOREACH(&cbuf, &iter) {
+		if (iter.idx != cnt) {
+			tst_msg("Wrong iterator idx %zu at cnt %zu", iter.idx, cnt);
+			return TST_FAILED;
+		}
+		cnt++;
+	}
+
+	if (cnt != 3) {
+		tst_msg("Wrong number of elements %zu expected 3", cnt);
 		return TST_FAILED;
 	}
 
@@ -204,6 +252,12 @@ const struct tst_suite tst_suite = {
 	.tests = {
 		{.name = "cbuffer test empty",
 		 .tst_fn = cbuffer_test_empty},
+
+		{.name = "cbuffer test init2 full",
+		 .tst_fn = cbuffer_test_init2_full},
+
+		{.name = "cbuffer test init2 part",
+		 .tst_fn = cbuffer_test_init2_part},
 
 		{.name = "cbuffer test append",
 		 .tst_fn = cbuffer_test_append},
