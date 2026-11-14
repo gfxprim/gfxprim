@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2023 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2026 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -38,7 +38,6 @@ struct gp_widget_graph {
 	struct gp_widget_graph_point *data;
 };
 
-/* Height of the strip below the graph with the x label */
 static gp_size x_label_h(struct gp_widget_graph *graph, const gp_widget_render_ctx *ctx)
 {
 	if (!graph->x_label)
@@ -56,7 +55,12 @@ static gp_size y_label_h(struct gp_widget_graph *graph, const gp_widget_render_c
 	if (!graph->y_label)
 		return 0;
 
-	return gp_text_height(ctx->font) + ctx->padd;
+	return gp_text_height(ctx->font);
+}
+
+static gp_size top_padd(const gp_widget_render_ctx *ctx)
+{
+	return ctx->padd;
 }
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
@@ -78,7 +82,7 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	struct gp_widget_graph *graph = GP_WIDGET_PAYLOAD(self);
 	unsigned int ret = gp_widget_size_units_get(&graph->min_h, ctx);
 
-	return ret + x_label_h(graph, ctx) + y_label_h(graph, ctx);
+	return ret + x_label_h(graph, ctx) + y_label_h(graph, ctx) + top_padd(ctx);
 }
 
 static gp_coord transform_x(struct gp_widget_graph *graph, double x, gp_coord w)
@@ -439,6 +443,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 		y += lh;
 		h -= lh;
 	}
+
+	y += top_padd(ctx);
+	h -= top_padd(ctx);
 
 	if (!gp_cbuffer_used(&graph->data_idx))
 		return;
