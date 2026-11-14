@@ -333,6 +333,17 @@ err0:
 	return 1;
 }
 
+static void heif_preload(void)
+{
+#if LIBHEIF_HAVE_VERSION(1, 13, 0)
+	struct heif_error err = heif_init(NULL);
+
+	if (err.code)
+		GP_WARN("Failed to initialize libheif %i:%i:%s",
+		        err.code, err.subcode, err.message);
+#endif /* 1.13.0 */
+}
+
 #else
 
 int gp_read_heif_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
@@ -348,9 +359,9 @@ int gp_read_heif_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
 const gp_loader gp_heif = {
 #ifdef HAVE_HEIF
 	.read = gp_read_heif_ex,
+	.preload = heif_preload,
 #endif /* HAVE_HEIF */
 	.match = gp_match_heif,
-
 	.fmt_name = "heif",
 	.extensions = {"heic", "heif", "avif", NULL},
 };

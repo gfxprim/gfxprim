@@ -232,6 +232,15 @@ struct gp_loader {
 	 */
 	int (*match)(const void *buf);
 
+	/**
+	 * @brief Preload all dynamically loaded libraries into a memory.
+	 *
+	 * Some decoders e.g. libheif load dynamic libraries from a disk at
+	 * runtime, programs that give up access to disk as a hardening (e.g.
+	 * with Landlock) need to pre-load these libraries before that happens.
+	 */
+	void (*preload)(void);
+
 	/*
 	 * Short format name.
 	 */
@@ -353,5 +362,17 @@ int gp_loader_save_image(const gp_loader *self, const gp_pixmap *src,
  * @brief Lists all registered loaders into the stdout.
  */
 void gp_loaders_list(void);
+
+/**
+ * @brief Loads what the loaders would otherwise load on first use.
+ *
+ * Some decoders e.g. libheif load dynamic libraries from a disk at
+ * runtime, programs that give up access to disk as a hardening (e.g.
+ * with Landlock) need to pre-load these libraries before that happens.
+ *
+ * This call is optional and only needed only for programs that cannot access
+ * filesystems during their execution.
+ */
+void gp_loaders_preload(void);
 
 #endif /* LOADERS_GP_LOADER_H */

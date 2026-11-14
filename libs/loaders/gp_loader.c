@@ -105,6 +105,18 @@ void gp_loader_unregister(const gp_loader *self)
 	GP_WARN("Loader '%s' (%p) wasn't registered", self->fmt_name, self);
 }
 
+void gp_loaders_preload(void)
+{
+	size_t i;
+
+	for (i = 0; loaders[i]; i++) {
+		if (loaders[i]->preload) {
+			GP_DEBUG(1, "Preloading '%s'", loaders[i]->fmt_name);
+			loaders[i]->preload();
+		}
+	}
+}
+
 void gp_loaders_list(void)
 {
 	unsigned int i, j;
