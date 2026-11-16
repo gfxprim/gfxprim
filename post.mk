@@ -105,10 +105,10 @@ endif
 #
 $(DEPFILES): %.dep: %.c
 ifdef VERBOSE
-	$(CC) -MM $(CFLAGS) $< -o $@
+	$(CC) -MM -MT $(@:.dep=.o) $(CFLAGS) $< -o $@
 else
 	@echo "DEP  -I(include $(INCLUDE)) $@"
-	@$(CC) -MM $(CFLAGS) $< -o $@
+	@$(CC) -MM -MT $(@:.dep=.o) $(CFLAGS) $< -o $@
 endif
 
 $(OBJECTS): %.o: %.c
