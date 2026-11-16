@@ -304,6 +304,7 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 {
 	gp_pixmap *pixmap = backend->pixmap;
 	gp_pixmap *dither = NULL;
+	gp_pixmap *rotated = NULL;
 	struct cpu_timer timer;
 	gp_progress_cb callback = {.callback = image_loader_callback};
 	gp_size w = gp_backend_w(backend);
@@ -317,15 +318,15 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 	break;
 	case ROTATE_90:
 		callback.priv = "Rotating image (90)";
-		img = gp_filter_rotate_90_alloc(img, &callback);
+		rotated = img = gp_filter_rotate_90_alloc(img, &callback);
 	break;
 	case ROTATE_180:
 		callback.priv = "Rotating image (180)";
-		img = gp_filter_rotate_180_alloc(img, &callback);
+		rotated = img = gp_filter_rotate_180_alloc(img, &callback);
 	break;
 	case ROTATE_270:
 		callback.priv = "Rotating image (270)";
-		img = gp_filter_rotate_270_alloc(img, &callback);
+		rotated = img = gp_filter_rotate_270_alloc(img, &callback);
 	break;
 	default:
 	break;
@@ -355,8 +356,10 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 		cy = params->zoom_y_offset;
 	}
 
-	if (abort_flag)
+	if (abort_flag) {
+		gp_pixmap_free(rotated);
 		return;
+	}
 
 	cpu_timer_start(&timer, "Blitting");
 
@@ -395,9 +398,7 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 	show_info(params, img, orig_img);
 
 	gp_pixmap_free(dither);
-
-	if (config.combined_orientation)
-		gp_pixmap_free(img);
+	gp_pixmap_free(rotated);
 
 	if (abort_flag)
 		return;
