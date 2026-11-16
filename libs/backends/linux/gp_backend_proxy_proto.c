@@ -49,8 +49,10 @@ int gp_proxy_buf_recv(int fd, struct gp_proxy_buf *buf, int block)
 	ssize_t ret;
 
 	ret = recvmsg(fd, &hdr, (block ? 0 : MSG_DONTWAIT) | MSG_CMSG_CLOEXEC);
-	if (ret > 0)
-		buf->size += ret;
+	if (ret <= 0)
+		return ret;
+
+	buf->size += ret;
 
 	for (cmsg = CMSG_FIRSTHDR(&hdr); cmsg; cmsg = CMSG_NXTHDR(&hdr, cmsg)) {
 		int got;
