@@ -67,6 +67,25 @@ GP_WUR gp_vec *gp_vec_expand_(gp_vec *self, size_t len);
 GP_WUR gp_vec *gp_vec_shrink_(gp_vec *self, size_t len);
 
 /**
+ * @brief Allocates an empty vector with a preallocated capacity.
+ *
+ * At least capacity elements can be appended before the vector has to be
+ * reallocated. This saves the first few reallocations for a vector that is
+ * known to grow.
+ *
+ * Note that if you shrink the vector before elements are appended the
+ * underlying memory will be reallocated to fit current lenght of the vector
+ * and the pre-allocated capacity may be lost.
+ *
+ * @param len An initial lenght of the vector.
+ * @param unit A size of a vector element.
+ * @param capacity A minimal number of elements to allocate the space for.
+ *
+ * @return Returns a pointer to the vector data.
+ */
+GP_WUR void *gp_vec_new2(size_t len, size_t unit, size_t capacity);
+
+/**
  * @brief Allocates a new vector.
  *
  * @code
@@ -98,7 +117,10 @@ GP_WUR gp_vec *gp_vec_shrink_(gp_vec *self, size_t len);
  *
  * @return Returns a pointer to the vector data.
  */
-GP_WUR void *gp_vec_new(size_t len, size_t unit);
+static inline GP_WUR void *gp_vec_new(size_t len, size_t unit)
+{
+	return gp_vec_new2(len, unit, 0);
+}
 
 /**
  * @brief Creates a duplicate of a vector.
@@ -327,6 +349,41 @@ GP_WUR void *gp_vec_move_shrink(void *self, size_t idx);
 	for (type *iterator = (self); iterator < (self) + gp_vec_len(self); iterator++)
 
 /**
+ * @brief Expands a vector by one element at the end.
+ *
+ * A NULL vector, i.e. one that hasn't been allocated yet, is allocated with
+ * the unit as the size of an element.
+ *
+ * The common case, where the element fits into the capacity the vector
+ * already has, is done inline and only a vector that has to grow ends up in
+ * gp_vec_expand().
+ *
+ * The new element is not initialized.
+ *
+ * @param self A vector or NULL.
+ * @param unit A size of an element, used only if self is NULL.
+ * @return A vector one element longer or NULL on a failure, the vector is
+ *         left as it was then.
+ */
+GP_WUR static inline void *gp_vec_append(void *self, size_t unit)
+{
+	gp_vec *vec;
+
+	if (!self)
+		return gp_vec_new(1, unit);
+
+	vec = GP_VEC(self);
+
+	/* The same condition gp_vec_expand_() grows the capacity on. */
+	if (vec->length + 1 >= vec->capacity)
+		return gp_vec_expand(self, 1);
+
+	vec->length++;
+
+	return self;
+}
+
+/**
  * @brief Appends single element to a vector.
  *
  * A NULL vector, i.e. one that hasn't been allocated yet, is allocated with
@@ -337,8 +394,7 @@ GP_WUR void *gp_vec_move_shrink(void *self, size_t idx);
  * @return NULL on a failure, the vector is left as it was then.
  */
 #define GP_VEC_APPEND(vec, val) ({ \
-	typeof(vec) gp_ret_tmp = (vec) ? gp_vec_expand(vec, 1) : \
-	                         gp_vec_new(1, sizeof(*(vec))); \
+	typeof(vec) gp_ret_tmp = gp_vec_append(vec, sizeof(*(vec))); \
 	if (gp_ret_tmp) { \
 		gp_ret_tmp[gp_vec_len(gp_ret_tmp)-1] = val; \
 		vec = gp_ret_tmp; \

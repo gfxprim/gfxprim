@@ -2,7 +2,7 @@
 /*
 
   Copyright (C) 2020 Richard Palethorpe <richiejp@f-m.fm>
-  Copyright (C) 2020-2021 Cyril Hrubis <metan@ucw.cz>
+  Copyright (C) 2020-2026 Cyril Hrubis <metan@ucw.cz>
 
 */
 
@@ -55,9 +55,8 @@ void *gp_vec_expand(void *self, size_t length)
 	return (void*)ret->payload;
 }
 
-void *gp_vec_new(size_t length, size_t unit)
+static void *vec_new(size_t len, size_t unit, size_t capacity)
 {
-	size_t capacity = new_capacity(length, 0);
 	gp_vec *self = malloc(sizeof(gp_vec) + capacity	* unit);
 
 	if (!self)
@@ -65,12 +64,17 @@ void *gp_vec_new(size_t length, size_t unit)
 
 	self->unit = unit;
 	self->capacity = capacity;
-	self->length = length;
+	self->length = len;
 
-	memset(self->payload, 0, length * unit);
-	memset(self->payload + length * unit, 0xff, (capacity - length) * unit);
+	memset(self->payload, 0, len * unit);
+	memset(self->payload + len * unit, 0xff, (capacity - len) * unit);
 
 	return (void *)self->payload;
+}
+
+void *gp_vec_new2(size_t len, size_t unit, size_t capacity)
+{
+	return vec_new(len, unit, new_capacity(GP_MAX(len, capacity), 0));
 }
 
 void *gp_vec_dup(void *self)

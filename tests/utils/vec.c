@@ -78,6 +78,64 @@ static int test_vec_zero_size(void)
 	return TST_PASSED;
 }
 
+static int test_vec_new2(void)
+{
+	int *vec = gp_vec_new2(0, sizeof(int), 32);
+	int *start = vec;
+	int i;
+
+	if (!vec) {
+		tst_err("Malloc failed");
+		return TST_FAILED;
+	}
+
+	if (gp_vec_len(vec) != 0) {
+		tst_err("Nonzero vector size");
+		return TST_FAILED;
+	}
+
+	if (gp_vec_capacity(vec) < 32) {
+		tst_err("Capacity %zu too small", gp_vec_capacity(vec));
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < 32; i++) {
+		if (!GP_VEC_APPEND(vec, i)) {
+			tst_err("Append failed");
+			return TST_FAILED;
+		}
+	}
+
+	if (vec != start) {
+		tst_err("Vector was reallocated");
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < 32; i++) {
+		if (vec[i] != i) {
+			tst_err("Wrong value at %i", i);
+			return TST_FAILED;
+		}
+	}
+
+	gp_vec_free(vec);
+
+	return TST_PASSED;
+}
+
+static int test_vec_new2_inv(void)
+{
+	int *vec = gp_vec_new2(32, sizeof(int), 0);
+
+	if (gp_vec_capacity(vec) < 32) {
+		tst_err("Capacity too small");
+		return TST_FAILED;
+	}
+
+	gp_vec_free(vec);
+	return TST_PASSED;
+}
+
 struct insert_test {
 	size_t len;
 
@@ -407,6 +465,14 @@ const struct tst_suite tst_suite = {
 
 		{.name = "vector dup",
 		 .tst_fn = test_vec_dup,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "vector new 2",
+		 .tst_fn = test_vec_new2,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "vector new 2 invalid cap",
+		 .tst_fn = test_vec_new2_inv,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "vector zero size",
