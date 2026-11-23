@@ -159,6 +159,19 @@ static inline size_t gp_cbuffer_first(gp_cbuffer *self)
 }
 
 /**
+ * @brief Maps a buffer index to a data offset.
+ *
+ * @param self A circular buffer.
+ * @param idx An index into the buffer, index 0 is mapped to the first element
+ *            of the buffer. Must be < gp_cbuffer_used().
+ * @return An offset into the data structure storing the elements.
+ */
+static inline size_t gp_cbuffer_off(gp_cbuffer *self, size_t idx)
+{
+	return (gp_cbuffer_first(self) + idx) % self->size;
+}
+
+/**
  * @brief Returns index to the last element in buffer.
  *
  * Returns invalid data for empty buffer, make sure buffer is not empty with

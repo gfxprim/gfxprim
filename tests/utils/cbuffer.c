@@ -247,6 +247,35 @@ static int cbuffer_test_first(void)
 	return TST_PASSED;
 }
 
+static int cbuffer_test_off(void)
+{
+	gp_cbuffer cbuf;
+	size_t i;
+
+	gp_cbuffer_init2(&cbuf, 3, 3);
+
+	for (i = 0; i < 3; i++) {
+		if (gp_cbuffer_off(&cbuf, i) != i) {
+			tst_msg("Wrong off at %zu: %zu expected %zu",
+			        i, gp_cbuffer_off(&cbuf, i), i);
+			return TST_FAILED;
+		}
+	}
+
+	gp_cbuffer_append(&cbuf);
+
+	for (i = 0; i < 3; i++) {
+		size_t off = (i + 1) % 3;
+		if (gp_cbuffer_off(&cbuf, i) != off) {
+			tst_msg("Wrong off at %zu: %zu expected %zu",
+			        i, gp_cbuffer_off(&cbuf, off), off);
+			return TST_FAILED;
+		}
+	}
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "cbuffer testsuite",
 	.tests = {
@@ -264,6 +293,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "cbuffer test first",
 		 .tst_fn = cbuffer_test_first},
+
+		{.name = "cbuffer test off",
+		 .tst_fn = cbuffer_test_off},
 
 		{}
 	}
