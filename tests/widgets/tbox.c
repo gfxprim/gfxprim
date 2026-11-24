@@ -1237,6 +1237,281 @@ static int tbox_sel_cut(void)
 	return TST_PASSED;
 }
 
+static int check_text(gp_widget *tbox, const char *exp, const char *what)
+{
+	const char *str = gp_widget_tbox_text(tbox);
+
+	if (strcmp(str, exp)) {
+		tst_msg("Wrong text '%s' after %s expected '%s'", str, what, exp);
+		return 1;
+	}
+
+	return 0;
+}
+
+static int send_key_handled(gp_widget *tbox, int key)
+{
+	gp_event ev = {
+		.type = GP_EV_KEY,
+		.code = GP_EV_KEY_DOWN,
+		.key = {.key = key},
+		.st = &events_state,
+	};
+
+	return gp_widget_ops_event(tbox, &dummy_ctx, &ev);
+}
+
+static void commit(gp_widget *tbox, const char *text)
+{
+	gp_widget_tbox_set(tbox, text);
+	gp_widget_tbox_history_commit(tbox);
+}
+
+/*
+ * Without a history commit just clears the text and up and down are not
+ * handled.
+ */
+static int tbox_history_disabled(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	commit(tbox, "hello");
+
+	if (check_text(tbox, "", "commit"))
+		return TST_FAILED;
+
+	if (send_key_handled(tbox, GP_KEY_UP) || send_key_handled(tbox, GP_KEY_DOWN)) {
+		tst_msg("Up or down handled without a history");
+		return TST_FAILED;
+	}
+
+	if (check_text(tbox, "", "up and down"))
+		return TST_FAILED;
+
+	gp_widget_free(tbox);
+
+	return TST_PASSED;
+}
+
+/*
+ * Commited texts are recalled with up and down, the oldest text is dropped
+ * when the history is full and down past the newest text restores the edited
+ * text.
+ */
+static int tbox_history(void)
+{
+	static const struct {
+		int key;
+		const char *exp;
+	} keys[] = {
+		{GP_KEY_UP, "d"},
+		{GP_KEY_UP, "c"},
+		{GP_KEY_UP, "b"},
+		/* The oldest text "a" was dropped */
+		{GP_KEY_UP, "b"},
+		{GP_KEY_DOWN, "c"},
+		{GP_KEY_DOWN, "d"},
+		{GP_KEY_DOWN, "draft"},
+		{GP_KEY_DOWN, "draft"},
+		{GP_KEY_UP, "d"},
+	};
+	gp_widget *tbox;
+	size_t i;
+
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_history_set(tbox, 3);
+
+	commit(tbox, "a");
+	commit(tbox, "b");
+	/* Empty texts are not stored */
+	commit(tbox, "");
+	commit(tbox, "c");
+	commit(tbox, "d");
+
+	gp_widget_tbox_set(tbox, "draft");
+
+	for (i = 0; i < GP_ARRAY_SIZE(keys); i++) {
+		if (!send_key_handled(tbox, keys[i].key)) {
+			tst_msg("Key %zu not handled", i);
+			return TST_FAILED;
+		}
+
+		if (check_text(tbox, keys[i].exp, "a key"))
+			return TST_FAILED;
+	}
+
+	/* The cursor is at the end of the recalled text */
+	if (gp_widget_tbox_cursor_get(tbox).chars != 1) {
+		tst_msg("Wrong cursor position %zu", gp_widget_tbox_cursor_get(tbox).chars);
+		return TST_FAILED;
+	}
+
+	/* A recalled and edited text is committed as a new text */
+	gp_widget_tbox_append(tbox, "e");
+	gp_widget_tbox_history_commit(tbox);
+
+	if (check_text(tbox, "", "commit"))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_UP);
+	if (check_text(tbox, "de", "up after commit"))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_UP);
+	if (check_text(tbox, "d", "second up after commit"))
+		return TST_FAILED;
+
+	gp_widget_free(tbox);
+
+	return TST_PASSED;
+}
+
+/*
+ * A text set by the application while the history is browsed ends the
+ * browsing, the down key must not restore the text edited before it.
+ */
+static int tbox_history_set_text(void)
+{
+	gp_widget *tbox;
+	int i;
+
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_history_set(tbox, 3);
+
+	commit(tbox, "a");
+	commit(tbox, "b");
+
+	/* Once with gp_widget_tbox_set() and once with gp_widget_tbox_printf() */
+	for (i = 0; i < 2; i++) {
+		gp_widget_tbox_set(tbox, "draft");
+
+		send_keypress(tbox, GP_KEY_UP);
+		if (check_text(tbox, "b", "up"))
+			return TST_FAILED;
+
+		if (i)
+			gp_widget_tbox_printf(tbox, "%s", "new");
+		else
+			gp_widget_tbox_set(tbox, "new");
+
+		/* Not browsing anymore, nothing newer to go to */
+		send_keypress(tbox, GP_KEY_DOWN);
+		if (check_text(tbox, "new", "down after set"))
+			return TST_FAILED;
+
+		/* The set text is the draft now */
+		send_keypress(tbox, GP_KEY_UP);
+		if (check_text(tbox, "b", "up after set"))
+			return TST_FAILED;
+
+		send_keypress(tbox, GP_KEY_DOWN);
+		if (check_text(tbox, "new", "down to the draft"))
+			return TST_FAILED;
+	}
+
+	/* Free while browsing, the draft must not leak */
+	send_keypress(tbox, GP_KEY_UP);
+	gp_widget_free(tbox);
+
+	return TST_PASSED;
+}
+
+/*
+ * Resizing the history keeps the newest texts, size 0 disables it.
+ */
+static int tbox_history_resize(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_history_set(tbox, 3);
+
+	commit(tbox, "a");
+	commit(tbox, "b");
+	commit(tbox, "c");
+
+	gp_widget_tbox_history_set(tbox, 2);
+
+	send_keypress(tbox, GP_KEY_UP);
+	send_keypress(tbox, GP_KEY_UP);
+	send_keypress(tbox, GP_KEY_UP);
+	if (check_text(tbox, "b", "shrinking"))
+		return TST_FAILED;
+
+	gp_widget_tbox_clear(tbox);
+	gp_widget_tbox_history_set(tbox, 4);
+	commit(tbox, "d");
+
+	send_keypress(tbox, GP_KEY_UP);
+	send_keypress(tbox, GP_KEY_UP);
+	send_keypress(tbox, GP_KEY_UP);
+	send_keypress(tbox, GP_KEY_UP);
+	if (check_text(tbox, "b", "growing"))
+		return TST_FAILED;
+
+	gp_widget_tbox_clear(tbox);
+	gp_widget_tbox_history_set(tbox, 0);
+
+	if (send_key_handled(tbox, GP_KEY_UP)) {
+		tst_msg("Up handled with the history disabled");
+		return TST_FAILED;
+	}
+
+	gp_widget_free(tbox);
+
+	return TST_PASSED;
+}
+
+static int tbox_history_json(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_from_json_str(
+		"{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+		" \"layout\": {\"type\": \"tbox\", \"len\": 10, \"history\": 2}}",
+		NULL, NULL);
+
+	if (!tbox) {
+		tst_msg("Failed to load JSON");
+		return TST_FAILED;
+	}
+
+	commit(tbox, "a");
+	commit(tbox, "b");
+	commit(tbox, "c");
+
+	send_keypress(tbox, GP_KEY_UP);
+	send_keypress(tbox, GP_KEY_UP);
+	send_keypress(tbox, GP_KEY_UP);
+	if (check_text(tbox, "b", "up"))
+		return TST_FAILED;
+
+	gp_widget_free(tbox);
+
+	return TST_PASSED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "tbox testsuite",
 	.tests = {
@@ -1333,6 +1608,26 @@ const struct tst_suite tst_suite = {
 
 		{.name = "tbox sel cut",
 		 .tst_fn = tbox_sel_cut},
+
+		{.name = "tbox history disabled",
+		 .tst_fn = tbox_history_disabled,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "tbox history",
+		 .tst_fn = tbox_history,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "tbox history set text",
+		 .tst_fn = tbox_history_set_text,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "tbox history resize",
+		 .tst_fn = tbox_history_resize,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "tbox history json",
+		 .tst_fn = tbox_history_json,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},
 	}

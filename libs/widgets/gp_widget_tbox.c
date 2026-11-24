@@ -10,6 +10,7 @@
 #include <ctype.h>
 
 #include <utils/gp_vec_str.h>
+#include <utils/gp_cbuffer.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -65,6 +66,14 @@ struct tbox_payload {
 	//TODO: Move to event state
 	uint64_t last_click;
 	uint32_t click_cursor_x;
+
+	/* Committed texts, NULL if the history is disabled */
+	char **history;
+	gp_cbuffer hist;
+	/* 0 when editing a new text, n when showing the n-th newest entry */
+	size_t hist_pos;
+	/* The text edited before the history was browsed */
+	char *hist_draft;
 };
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
@@ -289,6 +298,82 @@ static int sel_clr(gp_widget *self)
 	tbox->sel_right = gp_utf8_pos_first();
 
 	return 1;
+}
+
+static void hist_reset(struct tbox_payload *tbox)
+{
+	tbox->hist_pos = 0;
+	free(tbox->hist_draft);
+	tbox->hist_draft = NULL;
+}
+
+/*
+ * Moves in the history, dir is 1 for an older and -1 for a newer text.
+ */
+static int hist_move(gp_widget *self, int dir)
+{
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+	size_t used = gp_cbuffer_used(&tbox->hist);
+	size_t pos = tbox->hist_pos + dir;
+	const char *text;
+	char *buf;
+
+	if (!tbox->history)
+		return 0;
+
+	/* Nothing older or newer */
+	if ((dir < 0 && !tbox->hist_pos) || (dir > 0 && tbox->hist_pos >= used))
+		return 1;
+
+	if (!tbox->hist_pos) {
+		tbox->hist_draft = strdup(tbox->buf);
+		if (!tbox->hist_draft)
+			return 1;
+	}
+
+	if (pos)
+		text = tbox->history[gp_cbuffer_off(&tbox->hist, used - pos)];
+	else
+		text = tbox->hist_draft;
+
+	buf = gp_vec_resize(tbox->buf, strlen(text) + 1);
+	if (!buf) {
+		if (!tbox->hist_pos)
+			hist_reset(tbox);
+		return 1;
+	}
+
+	tbox->buf = buf;
+	strcpy(tbox->buf, text);
+
+	sel_clr(self);
+	tbox->cur_pos = gp_utf8_pos_last(tbox->buf);
+
+	if (pos)
+		tbox->hist_pos = pos;
+	else
+		hist_reset(tbox);
+
+	send_edit_event(self);
+	gp_widget_redraw(self);
+
+	return 1;
+}
+
+static void hist_free(struct tbox_payload *tbox)
+{
+	gp_cbuffer_iter iter;
+
+	hist_reset(tbox);
+
+	if (!tbox->history)
+		return;
+
+	GP_CBUFFER_FOREACH(&tbox->hist, &iter)
+		free(tbox->history[iter.idx]);
+
+	free(tbox->history);
+	tbox->history = NULL;
 }
 
 static int sel_clr_left(gp_widget *self)
@@ -862,6 +947,10 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		case GP_KEY_END:
 			key_end(self, shift);
 			return 1;
+		case GP_KEY_UP:
+			return hist_move(self, 1);
+		case GP_KEY_DOWN:
+			return hist_move(self, -1);
 		case GP_KEY_BACKSPACE:
 			key_backspace(self);
 			return 1;
@@ -941,6 +1030,7 @@ static enum gp_widget_tbox_type type_by_name(const char *type_name)
 
 enum keys {
 	HELP,
+	HISTORY,
 	LEN,
 	MAX_LEN,
 	SEL_DELIM,
@@ -951,6 +1041,7 @@ enum keys {
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR_IDX(HELP, "help", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR_IDX(HISTORY, "history", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR_IDX(LEN, "len", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR_IDX(MAX_LEN, "max_len", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR_IDX(SEL_DELIM, "sel_delim", GP_JSON_STR),
@@ -968,6 +1059,7 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 {
 	char *text = NULL, *sel_delim = NULL, *help = NULL;
 	int len = 0;
+	int history = 0;
 	int max_len = 0;
 	gp_widget_tattr attr = 0;
 	gp_widget *ret;
@@ -979,6 +1071,12 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 		switch (val->idx) {
 		case HELP:
 			help = strdup(val->val_str);
+		break;
+		case HISTORY:
+			if (val->val_int < 0)
+				gp_json_warn(json, "Invalid history size!");
+			else
+				history = val->val_int;
 		break;
 		case LEN:
 			if (val->val_int <= 0)
@@ -1029,6 +1127,7 @@ static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget
 	if (ret) {
 		struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(ret);
 		tbox->help = help;
+		gp_widget_tbox_history_set(ret, history);
 	}
 
 	free(text);
@@ -1053,6 +1152,8 @@ static void free_(gp_widget *self)
 	free(tbox->help);
 
 	gp_vec_free(tbox->buf);
+
+	hist_free(tbox);
 
 	free_delim(tbox);
 }
@@ -1184,6 +1285,8 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 	if (resize_buffer(self, len))
 		return -1;
 
+	hist_reset(tbox);
+
 	va_start(ap, fmt);
 	vsprintf(tbox->buf, fmt, ap);
 	va_end(ap);
@@ -1206,6 +1309,8 @@ void gp_widget_tbox_set(gp_widget *self, const char *str)
 	if (resize_buffer(self, len))
 		return;
 
+	hist_reset(tbox);
+
 	strcpy(tbox->buf, str);
 
 	tbox->cur_pos = gp_utf8_pos_last(tbox->buf);
@@ -1220,12 +1325,73 @@ void gp_widget_tbox_clear(gp_widget *self)
 	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
 
 	sel_clr(self);
+	hist_reset(tbox);
 
 	tbox->buf = gp_vec_strclr(tbox->buf);
 	tbox->cur_pos = gp_utf8_pos_first();
 
 	send_set_event(self);
 	gp_widget_redraw(self);
+}
+
+void gp_widget_tbox_history_commit(gp_widget *self)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+
+	if (tbox->history && tbox->buf[0]) {
+		char *text = strdup(tbox->buf);
+
+		if (text) {
+			size_t idx = gp_cbuffer_append(&tbox->hist);
+
+			free(tbox->history[idx]);
+			tbox->history[idx] = text;
+		}
+	}
+
+	gp_widget_tbox_clear(self);
+}
+
+void gp_widget_tbox_history_set(gp_widget *self, size_t size)
+{
+	GP_WIDGET_TYPE_ASSERT(self, GP_WIDGET_TBOX, );
+	struct tbox_payload *tbox = GP_WIDGET_PAYLOAD(self);
+	size_t i, used, keep;
+	char **history;
+
+	if (!size) {
+		hist_free(tbox);
+		return;
+	}
+
+	if (tbox->history && gp_cbuffer_size(&tbox->hist) == size)
+		return;
+
+	history = calloc(size, sizeof(*history));
+	if (!history) {
+		GP_WARN("Failed to allocate textbox history");
+		return;
+	}
+
+	used = tbox->history ? gp_cbuffer_used(&tbox->hist) : 0;
+	keep = GP_MIN(used, size);
+
+	/* Keeps the newest texts, the oldest one at the start */
+	for (i = 0; i < used; i++) {
+		size_t idx = gp_cbuffer_off(&tbox->hist, i);
+
+		if (i < used - keep)
+			free(tbox->history[idx]);
+		else
+			history[i - (used - keep)] = tbox->history[idx];
+	}
+
+	free(tbox->history);
+	hist_reset(tbox);
+
+	tbox->history = history;
+	gp_cbuffer_init2(&tbox->hist, size, keep);
 }
 
 const char *gp_widget_tbox_text(gp_widget *self)

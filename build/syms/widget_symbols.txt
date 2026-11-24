@@ -281,6 +281,8 @@ gp_widget_tbox_cursor_set
 gp_widget_tbox_del
 gp_widget_tbox_filter_set
 gp_widget_tbox_help_set
+gp_widget_tbox_history_commit
+gp_widget_tbox_history_set
 gp_widget_tbox_ins
 gp_widget_tbox_new
 gp_widget_tbox_ops

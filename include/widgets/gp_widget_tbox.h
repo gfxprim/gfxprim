@@ -19,6 +19,7 @@
  * |----------------|--------|-------------|-------------------------------------------------------------------------------|
  * |   **text**     | string |     ""      | Initial textbox text.                                                         |
  * |   **help**     | string |     ""      | Help text, shown when textbox is empty.                                       |
+ * |  **history**   |  uint  |      0      | Number of committed texts kept in history, see gp_widget_tbox_history_set(). |
  * |  **ttype**     | string |   "none"    | One of "none", "hidden", "URL", "path", "filename". See #gp_widget_tbox_type. |
  * |   **len**      |  uint  |             | Number of characters the texbox should be able to fit to display.             |
  * | **max_len**    |  uint  |             | Maximal number of unicode characters the textbox can hold.                    |
@@ -101,7 +102,8 @@ enum gp_widget_tbox_event_type {
 	/**
 	 * @brief Emitted after text is entered.
 	 *
-	 * This event is set each time a text box text is modified.
+	 * This event is set each time a text box text is modified, including
+	 * when a text is recalled from the history.
 	 */
 	GP_WIDGET_TBOX_EDIT,
 	/**
@@ -110,6 +112,7 @@ enum gp_widget_tbox_event_type {
 	 * Emitted after text is set by:
 	 *
 	 * gp_widget_tbox_set() gp_widget_tbox_printf() gp_widget_tbox_clear()
+	 * gp_widget_tbox_history_commit()
 	 *
 	 * or modified by:
 	 *
@@ -174,6 +177,37 @@ void gp_widget_tbox_set(gp_widget *self, const char *str);
  * @param self A tbox widget.
  */
 void gp_widget_tbox_clear(gp_widget *self);
+
+/**
+ * @brief Commits the tbox text into the history and clears the tbox.
+ *
+ * Same as gp_widget_tbox_clear() but also adds the cleared string into a
+ * history when history is enabled.
+ *
+ * @param self A tbox widget.
+ */
+void gp_widget_tbox_history_commit(gp_widget *self);
+
+/**
+ * @brief Sets the tbox history size.
+ *
+ * The history keeps the last size texts commited with
+ * gp_widget_tbox_history_commit(). The up and down keys then recall older and
+ * newer texts. The down key past the newest text restores the text edited
+ * before the history was browsed.
+ *
+ * Setting the text with gp_widget_tbox_set() or gp_widget_tbox_printf() ends
+ * the browsing, the set text is then the one that is restored.
+ *
+ * The default size is 0 disables the history and the up and down keys
+ * are not handled.
+ *
+ * Setting a smaller than current size drops the oldest records.
+ *
+ * @param self A tbox widget.
+ * @param size The maximal number of texts in the history, 0 to disable it.
+ */
+void gp_widget_tbox_history_set(gp_widget *self, size_t size);
 
 /**
  * @brief Returns a tbox string.
