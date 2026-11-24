@@ -457,6 +457,50 @@ static int test_utf_is_letter(void)
 	return fails ? TST_FAILED : TST_PASSED;
 }
 
+static int test_utf_is_space(void)
+{
+	static const struct {
+		uint32_t cp;
+		int expected;
+		const char *desc;
+	} cases[] = {
+		{' ',    1, "space"},
+		{'\t',   1, "tab"},
+		{'\n',   1, "new line"},
+		{'\r',   1, "carriage return"},
+		{'\v',   1, "vertical tab"},
+		{'\f',   1, "form feed"},
+		{'a',    0, "ASCII a"},
+		{'_',    0, "underscore"},
+		{0,      0, "NUL"},
+		{0x0085, 1, "next line"},
+		{0x00a0, 1, "no-break space"},
+		{0x1680, 1, "Ogham space mark"},
+		{0x2000, 1, "en quad"},
+		{0x200a, 1, "hair space"},
+		{0x200b, 0, "zero width space"},
+		{0x2028, 1, "line separator"},
+		{0x2029, 1, "paragraph separator"},
+		{0x202f, 1, "narrow no-break space"},
+		{0x205f, 1, "medium mathematical space"},
+		{0x3000, 1, "ideographic space"},
+		{0xfeff, 0, "zero width no-break space"},
+		{0x4e2d, 0, "CJK ideograph"},
+	};
+	int fails = 0;
+
+	for (size_t i = 0; i < GP_ARRAY_SIZE(cases); i++) {
+		int got = gp_utf_is_space(cases[i].cp);
+		if (got != cases[i].expected) {
+			tst_msg("gp_utf_is_space(0x%04x) returned %d, expected %d [%s]",
+			        cases[i].cp, got, cases[i].expected, cases[i].desc);
+			fails++;
+		}
+	}
+
+	return fails ? TST_FAILED : TST_PASSED;
+}
+
 static int test_utf_punct_type(void)
 {
 	static const struct {
@@ -548,6 +592,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "gp_utf_is_letter()",
 		 .tst_fn = test_utf_is_letter},
+
+		{.name = "gp_utf_is_space()",
+		 .tst_fn = test_utf_is_space},
 
 		{.name = "gp_utf_punct_type()",
 		 .tst_fn = test_utf_punct_type},

@@ -92,6 +92,24 @@ bool gp_utf_is_letter(uint32_t ch)
 	return false;
 }
 
+bool gp_utf_is_space(uint32_t ch)
+{
+	size_t lo = 0, hi = GP_UTF_SPACE_RANGES_LEN;
+
+	while (lo < hi) {
+		size_t mid = (lo + hi)/2;
+
+		if (ch < gp_utf_space_ranges[mid].start)
+			hi = mid;
+		else if (ch > gp_utf_space_ranges[mid].end)
+			lo = mid + 1;
+		else
+			return true;
+	}
+
+	return false;
+}
+
 enum gp_utf_punct gp_utf_punct_type(uint32_t ch)
 {
 	size_t lo = 0, hi = GP_UTF_PUNCT_RANGES_LEN;

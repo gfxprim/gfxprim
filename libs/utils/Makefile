@@ -13,8 +13,9 @@ CSOURCES+=$(wildcard $(os)/*.c)
 #
 gen_utf_tables:
 	curl -sS -o ./UnicodeData.txt https://unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
-	./gen_utf_tables.py ./UnicodeData.txt > gp_utf_tables.h
-	rm ./UnicodeData.txt
+	curl -sS -o ./PropList.txt https://unicode.org/Public/UCD/latest/ucd/PropList.txt
+	./gen_utf_tables.py ./UnicodeData.txt ./PropList.txt > gp_utf_tables.h
+	rm ./UnicodeData.txt ./PropList.txt
 
 include $(TOPDIR)/lib.mk
 include $(TOPDIR)/post.mk

@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 #
 # Generate simple case-folding lookup tables (uppercase, lowercase, titlecase)
-# and the "is letter" / punctuation class range tables from UnicodeData.txt.
+# and the "is letter" / punctuation class range tables from UnicodeData.txt
+# and the "is space" range table from PropList.txt.
 #
 # The format is described in:
 #   https://www.unicode.org/reports/tr44/#UnicodeData.txt
+#   https://www.unicode.org/reports/tr44/#PropList.txt
 #
 # We use fields:
 #   [0]  codepoint               (hex, no prefix)
@@ -98,6 +100,25 @@ def parse_unicode_data(path):
     return upper, lower, title, letter_ranges, punct_ranges
 
 
+def parse_prop_list(path, prop):
+    """Returns (start, end) inclusive ranges with the binary property prop."""
+    ranges = []
+
+    for line in open(path):
+        line = line.split("#")[0].strip()
+        if not line:
+            continue
+
+        cps, name = [f.strip() for f in line.split(";")]
+        if name != prop:
+            continue
+
+        start, _, end = cps.partition("..")
+        ranges.append((int(start, 16), int(end or start, 16)))
+
+    return ranges
+
+
 def collapse_ranges(ranges):
     """Merge a list of (start, end[, class]) inclusive ranges into a sorted,
     coalesced list.  A range that carries a class merges only into a
@@ -144,11 +165,12 @@ def emit_punct_ranges(name, ranges):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: gen_utf_case.py UnicodeData.txt", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print("Usage: gen_utf_tables.py UnicodeData.txt PropList.txt", file=sys.stderr)
         sys.exit(1)
 
     upper, lower, title, letter_ranges, punct_ranges = parse_unicode_data(sys.argv[1])
+    space_ranges = parse_prop_list(sys.argv[2], "White_Space")
 
     print("// SPDX-License-Identifier: LGPL-2.1-or-later")
     print("/*")
@@ -186,6 +208,7 @@ def main():
     emit_map("gp_utf_title_map", title)
     emit_ranges("gp_utf_letter_ranges", collapse_ranges(letter_ranges))
     emit_punct_ranges("gp_utf_punct_ranges", collapse_ranges(punct_ranges))
+    emit_ranges("gp_utf_space_ranges", collapse_ranges(space_ranges))
 
     print("#endif /* GP_UTF_CASE_H */")
 

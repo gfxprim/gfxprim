@@ -346,6 +346,17 @@ uint32_t gp_utf_totitle(uint32_t ch);
 bool gp_utf_is_letter(uint32_t ch);
 
 /**
+ * @brief Returns true if the codepoint is a white space.
+ *
+ * Tests the White_Space property per PropList.txt, which includes the ASCII
+ * white spaces, no-break spaces and the line and paragraph separators.
+ *
+ * @param ch A Unicode codepoint.
+ * @return True if ch is a white space, false otherwise.
+ */
+bool gp_utf_is_space(uint32_t ch);
+
+/**
  * @brief A Unicode punctuation class.
  *
  * The seven general categories starting with a P in UnicodeData.txt.

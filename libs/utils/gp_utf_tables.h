@@ -4232,4 +4232,18 @@ static const struct gp_utf_punct_range gp_utf_punct_ranges [] = {
 };
 #define GP_UTF_PUNCT_RANGES_LEN GP_ARRAY_SIZE(gp_utf_punct_ranges)
 
+static const struct gp_utf_range gp_utf_space_ranges [] = {
+	{0x0009, 0x000d},
+	{0x0020, 0x0020},
+	{0x0085, 0x0085},
+	{0x00a0, 0x00a0},
+	{0x1680, 0x1680},
+	{0x2000, 0x200a},
+	{0x2028, 0x2029},
+	{0x202f, 0x202f},
+	{0x205f, 0x205f},
+	{0x3000, 0x3000},
+};
+#define GP_UTF_SPACE_RANGES_LEN GP_ARRAY_SIZE(gp_utf_space_ranges)
+
 #endif /* GP_UTF_CASE_H */
