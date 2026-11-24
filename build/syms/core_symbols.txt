@@ -363,6 +363,8 @@ gp_user_path
 gp_utf8_next_chsz
 gp_utf8_prev_chsz
 gp_utf8_strlen
+gp_utf_break
+gp_utf_brk_combining
 gp_utf_fallback
 gp_utf_is_space
 gp_vec_del

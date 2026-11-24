@@ -501,6 +501,132 @@ static int test_utf_is_space(void)
 	return fails ? TST_FAILED : TST_PASSED;
 }
 
+static int test_utf_brk_combining(void)
+{
+	static const struct {
+		uint32_t cp;
+		bool expected;
+		const char *desc;
+	} cases[] = {
+		{'a',      false, "ASCII a"},
+		{' ',      false, "space"},
+		{0x0301,   true,  "combining acute accent"},
+		{0x0e31,   true,  "Thai mai han-akat, resolved from SA"},
+		{0x0e01,   false, "Thai ko kai"},
+		{0x200d,   false, "zero width joiner"},
+		{0x1f3fb,  false, "emoji modifier"},
+		{0xe0001,  true,  "language tag"},
+		{0xe0100,  true,  "variation selector"},
+		{0xe01f0,  false, "after variation selectors"},
+		{0x110000, false, "past the last codepoint"},
+	};
+	int fails = 0;
+
+	for (size_t i = 0; i < GP_ARRAY_SIZE(cases); i++) {
+		bool got = gp_utf_brk_combining(cases[i].cp);
+		if (got != cases[i].expected) {
+			tst_msg("gp_utf_brk_combining(0x%04x) returned %d, expected %d [%s]",
+			        cases[i].cp, got, cases[i].expected, cases[i].desc);
+			fails++;
+		}
+	}
+
+	return fails ? TST_FAILED : TST_PASSED;
+}
+
+static int test_utf_break(void)
+{
+	static const struct {
+		uint32_t prev;
+		uint32_t next;
+		enum gp_utf_brk expected;
+		const char *desc;
+	} cases[] = {
+		{'a',    'b',    0, "within a word"},
+		{'1',    '2',    0, "within a number"},
+		{' ',    'b',    1, "after a space"},
+		{'a',    ' ',    0, "before a space"},
+		{' ',    ' ',    0, "between spaces"},
+		{'\n',   'a',    2, "after a new line"},
+		{'-',    'b',    1, "after a hyphen"},
+		{'a',    '-',    0, "before a hyphen"},
+		{'-',    '5',    0, "hyphen before a number"},
+		{'/',    'b',    1, "after a slash"},
+		{'a',    ')',    0, "before a closing parenthesis"},
+		{' ',    ')',    0, "space before a closing parenthesis"},
+		{'(',    'a',    0, "after an opening parenthesis"},
+		{'a',    0x00a0, 0, "before a no-break space"},
+		{0x00a0, 'b',    0, "after a no-break space"},
+		{' ',    0x00a0, 1, "space before a no-break space"},
+		{'e',    0x0301, 0, "before a combining mark"},
+		{0x0301, ' ',    0, "combining mark before a space"},
+		{0x200b, 'b',    1, "after a zero width space"},
+		{'a',    0x200b, 0, "before a zero width space"},
+		{'a',    0x2014, 1, "before an em dash"},
+		{0x2014, 'b',    1, "after an em dash"},
+		{0x4e2d, 0x6587, 1, "between CJK ideographs"},
+		{0x4e2d, 0x3002, 0, "before an ideographic full stop"},
+		{0x3002, 0x6587, 1, "after an ideographic full stop"},
+		{0x300c, 0x6587, 0, "after a left corner bracket"},
+		{0x6587, 0x3041, 0, "before a small kana"},
+		{'a',    0x00b4, 1, "before an acute accent"},
+		{0x00b4, 'b',    0, "after an acute accent"},
+		{'\r',   '\n',   0, "within CR LF"},
+		{'\r',   'a',    2, "after a carriage return"},
+		{'a',    '(',    0, "before a parenthesis after a letter"},
+		{' ',    '(',    1, "before a parenthesis after a space"},
+		{')',    'a',    0, "after a parenthesis before a letter"},
+		{'$',    '5',    0, "after a currency prefix"},
+		{'5',    '%',    0, "before a percent sign"},
+		{'5',    ',',    0, "before a decimal comma"},
+		{',',    '5',    0, "after a decimal comma"},
+		{'g',    '.',    0, "before a full stop"},
+		{'.',    'g',    0, "after a full stop before a letter"},
+		{'a',    '"',    0, "before a quotation mark"},
+		{'"',    'a',    0, "after a quotation mark"},
+		{'a',    0x2026, 0, "before an ellipsis"},
+		{'a',    0x2010, 0, "before a hyphen"},
+		{0x2010, 'b',    1, "after a hyphen"},
+		{0x2014, 0x2014, 0, "between em dashes"},
+		{0x1100, 0x1161, 0, "between Hangul jamo"},
+		{0xac00, 0xac00, 1, "between Hangul syllables"},
+		{0x1f466, 0x1f3fb, 0, "between an emoji and a modifier"},
+		{0x1f466, 0x200d, 0, "before a zero width joiner"},
+		{0x200d, 0x1f466, 0, "after a zero width joiner"},
+		{0x1f1e8, 0x1f1ff, 0, "between regional indicators"},
+		{' ',    0x0301, 1, "before a combining mark after a space"},
+		{0x0301, 'b',    0, "after a combining mark"},
+		{0x0e01, 0x0e02, 0, "within Thai"},
+		{'\f',   'a',    2, "after a form feed"},
+		{0x85,   'a',    2, "after a next line"},
+		{'a',    0x85,   0, "before a next line"},
+		{'a',    0x2026, 0, "before an ellipsis"},
+		{0x2026, 'a',    1, "after an ellipsis"},
+		{'a',    0x3005, 0, "before an iteration mark"},
+		{0xac00, 0x1161, 0, "Hangul LV syllable before a jungseong"},
+		{0xac01, 0x1161, 1, "Hangul LVT syllable before a jungseong"},
+		{0xac1c, 0x1161, 0, "Hangul LV syllable gae before a jungseong"},
+		{0xd7a3, 0x11a8, 0, "last Hangul syllable before a jongseong"},
+		{0xd7a4, 'a',    0, "unassigned as a letter"},
+		{0x3fffd, 0x3fffd, 1, "between the last block stored ideographs"},
+		{0x3fffe, 'a',   0, "noncharacter as a letter"},
+		{0x10ffff, 'a',  0, "last codepoint as a letter"},
+		{0x110000, 'a',  0, "past the last codepoint as a letter"},
+	};
+	int fails = 0;
+
+	for (size_t i = 0; i < GP_ARRAY_SIZE(cases); i++) {
+		enum gp_utf_brk got = gp_utf_break(cases[i].prev, cases[i].next);
+		if (got != cases[i].expected) {
+			tst_msg("gp_utf_break(0x%04x, 0x%04x) returned %d, expected %d [%s]",
+			        cases[i].prev, cases[i].next, got, cases[i].expected, cases[i].desc);
+			fails++;
+		}
+	}
+
+	return fails ? TST_FAILED : TST_PASSED;
+}
+
 static int test_utf_punct_type(void)
 {
 	static const struct {
@@ -595,6 +721,12 @@ const struct tst_suite tst_suite = {
 
 		{.name = "gp_utf_is_space()",
 		 .tst_fn = test_utf_is_space},
+
+		{.name = "gp_utf_brk_combining()",
+		 .tst_fn = test_utf_brk_combining},
+
+		{.name = "gp_utf_break()",
+		 .tst_fn = test_utf_break},
 
 		{.name = "gp_utf_punct_type()",
 		 .tst_fn = test_utf_punct_type},

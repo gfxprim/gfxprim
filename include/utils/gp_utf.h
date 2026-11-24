@@ -389,4 +389,63 @@ enum gp_utf_punct {
  */
 enum gp_utf_punct gp_utf_punct_type(uint32_t ch);
 
+/**
+ * @brief A line break opportunity.
+ */
+enum gp_utf_brk {
+	/** @brief A line must not be broken. */
+	GP_UTF_BRK_NONE = 0,
+	/** @brief A line can be broken. */
+	GP_UTF_BRK_ALLOWED,
+	/** @brief A line must be broken, e.g. after a '\n'. */
+	GP_UTF_BRK_MANDATORY,
+};
+
+/**
+ * @brief Returns a line break opportunity between two codepoints.
+ *
+ * Implements the UAX #14 line breaking rules that can be decided from the
+ * two codepoints alone, the rules that need more context are approximated:
+ *
+ * - LB9 A combining mark as prev is treated as a letter. To keep combining
+ *   sequences together, pass the base character as prev, i.e. when
+ *   gp_utf_brk_combining() is true for next and there is no break before it,
+ *   keep prev for the following codepoint. A zero width joiner is not
+ *   reported as combining, but a line is never broken after it.
+ * - LB12a, LB19a, LB30 The East Asian Width exceptions are not implemented.
+ * - LB14 to LB17 Spaces between the classes are not considered, e.g. there
+ *   is no break between '(' and a letter, but there is one after "( ".
+ * - LB15a, LB15b, LB15c The context around quotation marks and the codepoint
+ *   after a space are not considered.
+ * - LB20a, LB21a The context before prev is not considered.
+ * - LB25 Numbers are matched pairwise, as in the UAX #14 pair table, e.g.
+ *   there is no break in "$(" even when no number follows.
+ * - LB28a The context before prev and after next is not considered.
+ * - LB30a Regional indicators are never broken apart.
+ * - LB30b Only emoji bases are kept with emoji modifiers, the unassigned
+ *   pictographic codepoints are not.
+ * - Complex context dependent scripts, e.g. Thai, need a dictionary and are
+ *   not broken within words.
+ *
+ * A line can be broken after a run of spaces, i.e. between a space and a
+ * non-space, the spaces at the end of the line are usually not rendered.
+ *
+ * @param prev A codepoint before the break.
+ * @param next A codepoint after the break.
+ * @return A line break opportunity between prev and next.
+ */
+enum gp_utf_brk gp_utf_break(uint32_t prev, uint32_t next);
+
+/**
+ * @brief Returns true if a codepoint is a combining mark for line breaking.
+ *
+ * Combining marks, e.g. accents, are kept with the preceding character and
+ * break as it does, which is the UAX #14 line break class CM, it includes
+ * some control characters as well.
+ *
+ * @param ch A Unicode codepoint.
+ * @return True if ch is a combining mark.
+ */
+bool gp_utf_brk_combining(uint32_t ch);
+
 #endif /* UTILS_GP_UTF_H */
