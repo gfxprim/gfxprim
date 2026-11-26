@@ -18,6 +18,8 @@ void gp_poll_clear(gp_poll *self)
 
 	if (self->ep_fd > 0)
 		close(self->ep_fd);
+
+	self->ep_fd = -1;
 }
 
 int gp_poll_add(gp_poll *self, gp_fd *fd)
@@ -61,6 +63,7 @@ int gp_poll_rem(gp_poll *self, gp_fd *fd)
 	if (!self->fds.cnt) {
 		GP_DEBUG(3, "Closing epoll instance");
 		close(self->ep_fd);
+		self->ep_fd = -1;
 	}
 
 	return 0;
