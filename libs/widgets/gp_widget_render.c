@@ -461,6 +461,16 @@ void gp_app_poll_rem(gp_fd *fd)
 	gp_backend_poll_rem(backend, fd);
 }
 
+void gp_app_poll_mod(gp_fd *fd, uint32_t events)
+{
+	if (!backend) {
+		fd->events = events;
+		return;
+	}
+
+	gp_backend_poll_mod(backend, fd, events);
+}
+
 gp_fd *gp_app_poll_rem_by_fd(int fd)
 {
 	if (!backend) {

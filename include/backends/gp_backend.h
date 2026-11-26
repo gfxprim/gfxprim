@@ -540,6 +540,20 @@ static inline void gp_backend_poll_rem(gp_backend *self, gp_fd *fd)
 }
 
 /**
+ * @brief Changes events a file descriptor is polled for.
+ *
+ * @param self A backend.
+ * @param fd A file descriptor previously added by gp_backend_poll_add().
+ * @param events New events, see enum #gp_poll_events.
+ *
+ * @return 0 on success and -1 on failure.
+ */
+static inline int gp_backend_poll_mod(gp_backend *self, gp_fd *fd, uint32_t events)
+{
+	return gp_poll_mod(&self->fds, fd, events);
+}
+
+/**
  * @brief Removes a file descriptor to the backend poll loop.
  *
  * @param self A backend.

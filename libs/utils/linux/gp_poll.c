@@ -69,6 +69,25 @@ int gp_poll_rem(gp_poll *self, gp_fd *fd)
 	return 0;
 }
 
+int gp_poll_mod(gp_poll *self, gp_fd *fd, uint32_t events)
+{
+	GP_DEBUG(2, "Modifying fd %i events %08x -> %08x", fd->fd, fd->events, events);
+
+	struct epoll_event ev = {
+		.data = {.ptr = fd},
+		.events = events,
+	};
+
+	if (epoll_ctl(self->ep_fd, EPOLL_CTL_MOD, fd->fd, &ev)) {
+		GP_WARN("epoll_ctl() failed: %s", strerror(errno));
+		return -1;
+	}
+
+	fd->events = events;
+
+	return 0;
+}
+
 gp_fd *gp_poll_rem_by_fd(gp_poll *self, int fd)
 {
 	gp_fd *ret;

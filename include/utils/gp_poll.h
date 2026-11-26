@@ -124,6 +124,19 @@ int gp_poll_add(gp_poll *self, gp_fd *fd);
 int gp_poll_rem(gp_poll *self, gp_fd *fd);
 
 /**
+ * @brief Changes events a file descriptor is polled for.
+ *
+ * Can be called from the gp_fd::event callback as well.
+ *
+ * @param self The poll struct.
+ * @param fd A file descriptor previously added by gp_poll_add().
+ * @param events New events, see enum #gp_poll_events.
+ *
+ * @return 0 on success and -1 if the underlying epoll() call failed.
+ */
+int gp_poll_mod(gp_poll *self, gp_fd *fd, uint32_t events);
+
+/**
  * @brief Looks up and removes a gp_fd by a fd.
  *
  * @param self The poll struct.

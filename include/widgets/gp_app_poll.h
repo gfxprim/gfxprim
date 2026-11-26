@@ -31,6 +31,14 @@ void gp_app_poll_add(gp_fd *fd);
 void gp_app_poll_rem(gp_fd *fd);
 
 /**
+ * @brief Changes events a file descriptor is polled for.
+ *
+ * @param fd A poll fd structure previously added by gp_app_poll_add().
+ * @param events New events, see enum #gp_poll_events.
+ */
+void gp_app_poll_mod(gp_fd *fd, uint32_t events);
+
+/**
  * @brief Looks up a fd struture by a file descriptor.
  *
  * @param fd A file descriptor.

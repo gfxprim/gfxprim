@@ -305,6 +305,7 @@ gp_pixmap_rotate_ccw
 gp_pixmap_rotate_cw
 gp_poll_add
 gp_poll_clear
+gp_poll_mod
 gp_poll_rem
 gp_poll_rem_by_fd
 gp_poll_wait
