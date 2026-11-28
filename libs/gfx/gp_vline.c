@@ -44,7 +44,7 @@ void gp_vline_xyh_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
 	if (h == 0)
 		return;
 
-	gp_vline_xyy(pixmap, x, y, y + h - 1, pixel);
+	gp_vline_xyy_raw(pixmap, x, y, y + h - 1, pixel);
 }
 
 void gp_vline_xyy(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
