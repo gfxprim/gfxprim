@@ -202,6 +202,16 @@ static inline size_t gp_vec_capacity(const void *self)
 }
 
 /**
+ * @brief Returns pointer to the last element in the vector array.
+ *
+ * @return Pointer to last element in the vector array. NULL on empty vector.
+ */
+#define GP_VEC_LAST(ptr) ({\
+	typeof(ptr) gp_ptr__ = ptr; \
+	gp_vec_len(gp_ptr__) ? gp_ptr__ + gp_vec_len(gp_ptr__) - 1 : NULL; \
+})
+
+/**
  * @brief Insert a gap into the vec of new elements, reallocating the
  *        underlying memory if more capacity is needed.
  *

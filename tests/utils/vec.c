@@ -397,6 +397,48 @@ static int test_vec_dup(void)
 	return TST_PASSED;
 }
 
+static int test_vec_last(void)
+{
+	int *arr, *last;
+
+	arr = gp_vec_new(0, sizeof(*arr));
+	if (!arr) {
+		tst_msg("Malloc failed");
+		return TST_UNTESTED;
+	}
+
+	if (GP_VEC_LAST(arr) != NULL) {
+		tst_msg("GP_VEC_LAST() didn't return NULL on empty vec");
+		return TST_FAILED;
+	}
+
+	if (!GP_VEC_APPEND(arr, 42)) {
+		tst_msg("GP_VEC_APPEND() failed");
+		return TST_FAILED;
+	}
+
+	last = GP_VEC_LAST(arr);
+	if (*last != 42) {
+		tst_msg("GP_VEC_LAST() returned %i, expected 42", *last);
+		return TST_FAILED;
+	}
+
+	if (!GP_VEC_APPEND(arr, 66)) {
+		tst_msg("GP_VEC_APPEND() failed");
+		return TST_FAILED;
+	}
+
+	last = GP_VEC_LAST(arr);
+	if (*last != 66) {
+		tst_msg("GP_VEC_LAST() returned %i, expected 66", *last);
+		return TST_FAILED;
+	}
+
+	gp_vec_free(arr);
+
+	return TST_PASSED;
+}
+
 static struct insert_test test1 = {
 	.len = 1,
 	.off = 0,
@@ -521,6 +563,10 @@ const struct tst_suite tst_suite = {
 		{.name = "resize test 100 -> 10",
 		 .tst_fn = test_vec_resize,
 		 .data = &resize3,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "GP_VEC_LAST()",
+		 .tst_fn = test_vec_last,
 		 .flags = TST_CHECK_MALLOC},
 
 		{}
